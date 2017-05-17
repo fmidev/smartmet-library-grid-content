@@ -1,0 +1,42 @@
+#include "ServiceResults.h"
+#include "grid-files/common/Exception.h"
+
+
+namespace SmartMet
+{
+namespace QueryServer
+{
+
+
+std::string getResultString(int resultCode)
+{
+  try
+  {
+    switch ((Result)resultCode)
+    {
+      case Result::OK:
+        return std::string("Service call was successful!");
+
+      case Result::NOT_IMPLEMENTED:
+        return std::string("Service not implemented!");
+
+      case Result::DATA_NOT_FOUND:
+        return std::string("Requested data not found!");
+
+      case Result::UNEXPECTED_EXCEPTION:
+        return std::string("Unexpected exception!");
+
+    }
+
+    return std::string("Unknown result code : ") + std::to_string((int)resultCode);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+}
+}

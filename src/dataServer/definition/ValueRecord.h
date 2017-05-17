@@ -1,0 +1,35 @@
+#pragma once
+
+#include "grid-files/common/Exception.h"
+#include "grid-files/common/AttributeList.h"
+#include "grid-files/grid/Typedefs.h"
+
+namespace SmartMet
+{
+namespace T
+{
+
+
+class ValueRecord
+{
+  public:
+                        ValueRecord();
+                        ValueRecord(ValueRecord& valueRecord);
+    virtual             ~ValueRecord();
+
+    virtual void        print(std::ostream& stream,uint level,uint optionFlags);
+
+    uint                mFileId;
+    uint                mMessageIndex;
+    CoordinateType      mCoordinateType;
+    InterpolationMethod mInterpolationMethod;
+    double              mX;
+    double              mY;
+    double              mValue;
+    int                 mResult;
+};
+
+
+
+}
+}  // namespace SmartMet

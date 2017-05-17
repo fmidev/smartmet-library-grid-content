@@ -1,0 +1,28 @@
+#ifndef __QUERY_SERVER_SERVICE_INTERFACE_IDL
+#define __QUERY_SERVER_SERVICE_INTERFACE_IDL
+
+#include "QueryServer_typedefs.idl"
+#include "ContentServer_typedefs.idl"
+
+
+module SmartMet
+{
+
+module QueryServer
+{
+
+module Corba
+{
+
+
+interface ServiceInterface
+{
+  long  getValuesByGridPoint(in long long sessionId,in ContentServer::Corba::CorbaContentInfoList contentInfoList,in octet coordinateType,in double x,in double y,in octet interpolationMethod,out CorbaGridPointValueList valueList);
+};  
+
+
+};
+};
+};
+
+#endif

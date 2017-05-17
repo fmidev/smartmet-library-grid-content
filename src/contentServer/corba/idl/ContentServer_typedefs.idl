@@ -1,0 +1,128 @@
+#ifndef __CONTENT_SERVER_TYPEDEFS_IDL
+#define __CONTENT_SERVER_TYPEDEFS_IDL
+
+
+module SmartMet
+{
+
+module ContentServer
+{
+
+module Corba
+{
+
+
+struct CorbaContentInfo
+{
+  unsigned long long serverFlags;
+  unsigned long      groupFlags;
+  unsigned long      producerId;
+  unsigned long      generationId;
+  octet              fileType;
+  unsigned long      fileId;
+  unsigned long      messageIndex;
+  string             startTime;
+  string             endTime;
+  string             fmiParameterId;
+  string             fmiParameterName;
+  string             gribParameterId;
+  string             cdmParameterId;
+  string             cdmParameterName;
+  string             newbaseParameterId;
+  string             newbaseParameterName;
+  octet              fmiParameterLevelId;
+  octet              grib1ParameterLevelId;
+  octet              grib2ParameterLevelId;
+  unsigned long      parameterLevel;
+  string             fmiParameterUnits;
+  string             gribParameterUnits;
+  unsigned long      flags;
+};
+
+typedef sequence<CorbaContentInfo> CorbaContentInfoList;
+
+
+
+struct CorbaServerInfo
+{
+  unsigned long      serverId;
+  string             name;
+  string             serverIor;
+  unsigned long      type;
+  unsigned long      flags;
+};
+
+typedef sequence<CorbaServerInfo> CorbaServerInfoList;
+
+
+
+
+struct CorbaProducerInfo
+{
+  unsigned long      producerId;
+  string             name;
+  string             title;
+  string             description;
+  unsigned long      flags;
+};
+
+typedef sequence<CorbaProducerInfo> CorbaProducerInfoList;
+
+
+
+
+struct CorbaFileInfo
+{
+  unsigned long      groupFlags;
+  unsigned long      producerId;
+  unsigned long      generationId;
+  unsigned long      fileId;
+  octet              fileType;
+  string             name;
+  unsigned long      flags;
+  unsigned long      pos;
+};
+
+typedef sequence<CorbaFileInfo> CorbaFileInfoList;
+
+
+
+
+struct CorbaEventInfo
+{
+  unsigned long long eventId;
+  unsigned long      eventTime;
+  unsigned long      serverTime;
+  unsigned long      type;
+  unsigned long      id1;
+  unsigned long      id2;
+  unsigned long      id3;
+  unsigned long long flags;
+  string             note;
+};
+
+typedef sequence<CorbaEventInfo> CorbaEventInfoList;
+
+
+
+
+struct CorbaGenerationInfo
+{
+  unsigned long      generationId;
+  unsigned long      generationType;
+  unsigned long      producerId;
+  string             name;
+  string             description;
+  octet              status;
+  unsigned long      flags;
+};
+
+typedef sequence<CorbaGenerationInfo> CorbaGenerationInfoList;
+
+
+};
+};
+};
+
+
+#endif

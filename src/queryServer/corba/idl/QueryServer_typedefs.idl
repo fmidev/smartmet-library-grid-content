@@ -1,0 +1,35 @@
+#ifndef __QUERY_SERVER_TYPEDEFS_IDL
+#define __QUERY_SERVER_TYPEDEFS_IDL
+
+
+module SmartMet
+{
+
+module QueryServer
+{
+
+module Corba
+{
+
+
+struct CorbaGridPointValue
+{
+  unsigned long fileId;
+  unsigned long messageIndex;
+  string        time;
+  double        value;
+  double        x;
+  double        y;
+  unsigned long level;
+};
+
+typedef sequence<CorbaGridPointValue> CorbaGridPointValueList;
+
+
+
+};
+};
+};
+
+
+#endif

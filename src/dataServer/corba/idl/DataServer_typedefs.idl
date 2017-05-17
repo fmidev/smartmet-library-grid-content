@@ -1,0 +1,117 @@
+#ifndef __DATA_SERVER_TYPEDEFS_IDL
+#define __DATA_SERVER_TYPEDEFS_IDL
+
+
+module SmartMet
+{
+
+module DataServer
+{
+
+module Corba
+{
+
+
+typedef unsigned long long CorbaParamId;
+typedef double CorbaParamValue;
+
+typedef sequence<CorbaParamValue> CorbaParamValueList;
+
+
+
+struct CorbaAttribute
+{
+  string name;
+  string value;
+};
+
+typedef sequence<CorbaAttribute> CorbaAttributeList;
+
+
+
+struct CorbaValueRecord
+{
+  unsigned long    fileId;
+  unsigned long    messageIndex;
+  octet            coordinateType;
+  octet            interpolationMethod;
+  double           x;
+  double           y;
+  double           value;
+  long             result;
+};
+
+typedef sequence<CorbaValueRecord> CorbaValueRecordList;
+
+
+
+struct CorbaCoordinate
+{
+  double x;
+  double y;
+};
+
+typedef sequence<CorbaCoordinate> CorbaCoordinateList;
+
+
+
+
+struct CorbaGridData
+{
+  unsigned long       serverId;
+  unsigned long       groupFlags;
+  unsigned long       producerId;
+  unsigned long       generationId;
+  unsigned long       fileId;
+  octet               fileType;
+  string              fileName;
+  unsigned long       messageIndex;
+  string              startTime;
+  string              endTime;
+  string              gribParameterId;
+  unsigned long       grib1ParameterLevelId;
+  unsigned long       grib2ParameterLevelId;
+  string              gribParameterName;
+  string              gribParameterDescription;  
+  string              gribParameterUnits;  
+  string              fmiParameterId;
+  unsigned long       fmiParameterLevelId;
+  string              fmiParameterName;
+  string              fmiParameterDescription;  
+  string              fmiParameterUnits;  
+  string              cdmParameterId;
+  string              cdmParameterName;
+  string              newbaseParameterId;
+  string              newbaseParameterName;
+  unsigned long       parameterLevel;
+  unsigned long       projection;
+  unsigned long       columns;
+  unsigned long       rows;  
+  CorbaAttributeList  projectionAttributes;
+  CorbaParamValueList valueList;
+};
+
+
+
+
+struct CorbaGridCoordinates
+{
+  unsigned long       projection;  
+  unsigned long       columns;
+  unsigned long       rows;  
+  CorbaAttributeList  projectionAttributes;
+  CorbaCoordinateList coordinateList;
+};
+
+
+
+
+
+
+
+};
+};
+};
+
+
+#endif
