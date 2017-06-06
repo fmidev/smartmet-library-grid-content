@@ -341,6 +341,8 @@ int GridStorage::getClosestFileIndexByIdNoLock(uint fileId)
       int mid = low + (high-low) / 2;
       //printf(" --  %d < %d < %d\n",low,mid,high);
       GRID::GridFile_sptr file = mFileList[mid];
+      if (!file)
+        return -1;
 
       uint id = file->getFileId();
       if (id == fileId)

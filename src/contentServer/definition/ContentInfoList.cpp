@@ -5,6 +5,9 @@
 #include "grid-files/common/AutoReadLock.h"
 #include "grid-files/common/AutoWriteLock.h"
 #include "RequestFlags.h"
+#include "grid-files/common/ShowFunction.h"
+
+#define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
 
 namespace SmartMet
@@ -34,6 +37,7 @@ int contentInfo_compare(const void *_val1,const void *_val2)
 
 ContentInfoList::ContentInfoList()
 {
+  FUNCTION_TRACE
   try
   {
     mReleaseObjects = true;
@@ -59,6 +63,7 @@ ContentInfoList::ContentInfoList()
 
 ContentInfoList::ContentInfoList(ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     contentInfoList.lock();
@@ -100,6 +105,7 @@ ContentInfoList::ContentInfoList(ContentInfoList& contentInfoList)
 
 ContentInfoList::~ContentInfoList()
 {
+  FUNCTION_TRACE
   try
   {
     clear();
@@ -116,6 +122,7 @@ ContentInfoList::~ContentInfoList()
 
 void ContentInfoList::operator=(ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     if (&contentInfoList == this)
@@ -164,14 +171,15 @@ void ContentInfoList::operator=(ContentInfoList& contentInfoList)
 
 void ContentInfoList::addContentInfo(ContentInfo *contentInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    AutoWriteLock lock(&mModificationLock);
+
     if (mArray == NULL  ||  mLength == mSize)
     {
       increaseSize(mSize + mSize/5 + 10);
     }
-
-    AutoWriteLock lock(&mModificationLock);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::none)
     {
@@ -212,10 +220,10 @@ void ContentInfoList::addContentInfo(ContentInfo *contentInfo)
 
 void ContentInfoList::increaseSize(uint newSize)
 {
+  FUNCTION_TRACE
   try
   {
 //    printf("SET SIZE %u => %u\n",mSize,newSize);
-    AutoWriteLock lock(&mModificationLock);
     if (mArray == NULL)
     {
       mSize = newSize;
@@ -258,6 +266,7 @@ void ContentInfoList::increaseSize(uint newSize)
 
 void ContentInfoList::clear()
 {
+  FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
@@ -290,6 +299,7 @@ void ContentInfoList::clear()
 
 uint ContentInfoList::deleteContentInfoByFileId(uint fileId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
@@ -300,7 +310,7 @@ uint ContentInfoList::deleteContentInfoByFileId(uint fileId)
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info->mFileId == fileId)
+      if (info != NULL  &&  info->mFileId == fileId)
       {
         if (mReleaseObjects)
           delete info;
@@ -328,6 +338,7 @@ uint ContentInfoList::deleteContentInfoByFileId(uint fileId)
 
 uint ContentInfoList::deleteContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex)
 {
+  FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
@@ -337,17 +348,16 @@ uint ContentInfoList::deleteContentInfoByFileIdAndMessageIndex(uint fileId,uint 
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info->mFileId == fileId  &&  info->mMessageIndex == messageIndex)
+      mArray[t] = NULL;
+      if (info != NULL  &&  info->mFileId == fileId  &&  info->mMessageIndex == messageIndex)
       {
         if (mReleaseObjects)
           delete info;
 
-        mArray[t] = NULL;
         count++;
       }
       else
       {
-        mArray[t] = NULL;
         mArray[p] = info;
         p++;
       }
@@ -366,6 +376,7 @@ uint ContentInfoList::deleteContentInfoByFileIdAndMessageIndex(uint fileId,uint 
 
 uint ContentInfoList::deleteContentInfoByGroupFlags(uint groupFlags)
 {
+  FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
@@ -375,7 +386,7 @@ uint ContentInfoList::deleteContentInfoByGroupFlags(uint groupFlags)
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if ((info->mGroupFlags & groupFlags) != 0)
+      if (info != NULL  &&  (info->mGroupFlags & groupFlags) != 0)
       {
         if (mReleaseObjects)
           delete info;
@@ -402,6 +413,7 @@ uint ContentInfoList::deleteContentInfoByGroupFlags(uint groupFlags)
 
 uint ContentInfoList::deleteContentInfoByProducerId(uint producerId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
@@ -411,7 +423,7 @@ uint ContentInfoList::deleteContentInfoByProducerId(uint producerId)
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info->mProducerId == producerId)
+      if (info != NULL &&  info->mProducerId == producerId)
       {
         if (mReleaseObjects)
           delete info;
@@ -439,6 +451,7 @@ uint ContentInfoList::deleteContentInfoByProducerId(uint producerId)
 
 uint ContentInfoList::deleteContentInfoByGenerationId(uint generationId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
@@ -448,7 +461,7 @@ uint ContentInfoList::deleteContentInfoByGenerationId(uint generationId)
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info->mGenerationId == generationId)
+      if (info != NULL  &&  info->mGenerationId == generationId)
       {
         if (mReleaseObjects)
           delete info;
@@ -476,6 +489,7 @@ uint ContentInfoList::deleteContentInfoByGenerationId(uint generationId)
 
 uint ContentInfoList::registerContentInfoByServerAndFileId(uint serverId,uint fileId)
 {
+  FUNCTION_TRACE
   try
   {
     unsigned long long sf = 0;
@@ -496,7 +510,7 @@ uint ContentInfoList::registerContentInfoByServerAndFileId(uint serverId,uint fi
     for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info->mFileId == fileId)
+      if (info != NULL  &&  info->mFileId == fileId)
       {
         info->mServerFlags = info->mServerFlags | sf;
         count++;
@@ -521,6 +535,7 @@ uint ContentInfoList::registerContentInfoByServerAndFileId(uint serverId,uint fi
 
 uint ContentInfoList::unregisterContentInfoByServerId(uint serverId)
 {
+  FUNCTION_TRACE
   try
   {
     unsigned long long sf = 0;
@@ -532,7 +547,7 @@ uint ContentInfoList::unregisterContentInfoByServerId(uint serverId)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if ((info->mServerFlags & sf) != 0)
+      if (info != NULL  &&  (info->mServerFlags & sf) != 0)
       {
         info->mServerFlags = info->mServerFlags - sf;
         count++;
@@ -552,6 +567,7 @@ uint ContentInfoList::unregisterContentInfoByServerId(uint serverId)
 
 uint ContentInfoList::unregisterContentInfoByServerAndFileId(uint serverId,uint fileId)
 {
+  FUNCTION_TRACE
   try
   {
     unsigned long long sf = 0;
@@ -572,7 +588,7 @@ uint ContentInfoList::unregisterContentInfoByServerAndFileId(uint serverId,uint 
     for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info->mFileId == fileId)
+      if (info != NULL  &&  info->mFileId == fileId)
       {
         if ((info->mServerFlags & sf) != 0)
         {
@@ -600,6 +616,7 @@ uint ContentInfoList::unregisterContentInfoByServerAndFileId(uint serverId,uint 
 
 int ContentInfoList::getClosestIndex(ContentInfo::ComparisonMethod comparisonMethod,ContentInfo& contentInfo)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -619,6 +636,7 @@ int ContentInfoList::getClosestIndexNoLock(ContentInfo::ComparisonMethod compari
 {
   try
   {
+    FUNCTION_TRACE
     if (mArray == NULL  ||  mLength == 0)
           return 0;
 
@@ -645,11 +663,15 @@ int ContentInfoList::getClosestIndexNoLock(ContentInfo::ComparisonMethod compari
     while (low <= high)
     {
       mid = (low + high) / 2;
+
+      if (mArray[mid] == NULL)
+        return 0;
+
       int res = mArray[mid]->compare(comparisonMethod,&contentInfo);
 
       if (res == 0)
       {
-        while (mid > 0  &&  mArray[mid-1]->compare(comparisonMethod,&contentInfo) == 0)
+        while (mid > 0  &&  mArray[mid-1] != NULL  &&  mArray[mid-1]->compare(comparisonMethod,&contentInfo) == 0)
           mid--;
 
         return mid;
@@ -692,6 +714,7 @@ int ContentInfoList::getClosestIndexNoLock(ContentInfo::ComparisonMethod compari
 
 ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -700,10 +723,10 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,
     contentInfo.mMessageIndex = messageIndex;
 
     int idx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
-    if (idx < 0 ||  (uint)idx >= mLength)
+    if (idx < 0  ||  (uint)idx >= mLength)
       return NULL;
 
-    if (mArray[idx]->mFileId == fileId  &&  mArray[idx]->mMessageIndex == messageIndex)
+    if (mArray[idx] != NULL &&  mArray[idx]->mFileId == fileId  &&  mArray[idx]->mMessageIndex == messageIndex)
       return mArray[idx];
 
     return NULL;
@@ -720,6 +743,7 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,
 
 bool ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex,ContentInfo& contentInfo)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -731,7 +755,7 @@ bool ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,uint mes
     if (idx < 0 ||  (uint)idx >= mLength)
       return NULL;
 
-    if (mArray[idx]->mFileId == fileId  &&  mArray[idx]->mMessageIndex == messageIndex)
+    if (mArray[idx] != NULL  &&  mArray[idx]->mFileId == fileId  &&  mArray[idx]->mMessageIndex == messageIndex)
     {
       contentInfo = *mArray[idx];
       return true;
@@ -749,6 +773,7 @@ bool ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,uint mes
 
 ContentInfo* ContentInfoList::getContentInfoByIndex(uint index)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -769,6 +794,7 @@ ContentInfo* ContentInfoList::getContentInfoByIndex(uint index)
 
 ContentInfo* ContentInfoList::getContentInfoByIndexNoCheck(uint index)
 {
+  FUNCTION_TRACE
   try
   {
     return mArray[index];
@@ -785,6 +811,7 @@ ContentInfo* ContentInfoList::getContentInfoByIndexNoCheck(uint index)
 
 void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
@@ -805,7 +832,7 @@ void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex
     for (uint t=(uint)startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex))
+      if (info != NULL  &&  (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -829,6 +856,7 @@ void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex
 
 void ContentInfoList::getContentInfoListByGroupFlags(uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
@@ -850,7 +878,7 @@ void ContentInfoList::getContentInfoListByGroupFlags(uint groupFlags,uint startF
     {
       ContentInfo *info = mArray[t];
 
-      if ((info->mGroupFlags & groupFlags) != 0 && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+      if (info != NULL  &&  ((info->mGroupFlags & groupFlags) != 0 && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex))))
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -874,6 +902,7 @@ void ContentInfoList::getContentInfoListByGroupFlags(uint groupFlags,uint startF
 
 void ContentInfoList::getContentInfoListByFileId(uint fileId,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -891,10 +920,10 @@ void ContentInfoList::getContentInfoListByFileId(uint fileId,ContentInfoList& co
       while (t < mLength)
       {
         ContentInfo *info = mArray[t];
-        if (info->mFileId > fileId)
+        if (info != NULL &&  info->mFileId > fileId)
           return;
 
-        if (info->mFileId == fileId)
+        if (info != NULL  &&  info->mFileId == fileId)
         {
           if (contentInfoList.getReleaseObjects())
             contentInfoList.addContentInfo(info->duplicate());
@@ -910,7 +939,7 @@ void ContentInfoList::getContentInfoListByFileId(uint fileId,ContentInfoList& co
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info->mFileId == fileId)
+      if (info != NULL  &&  info->mFileId == fileId)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -930,13 +959,14 @@ void ContentInfoList::getContentInfoListByFileId(uint fileId,ContentInfoList& co
 
 void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParameterId,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info->mGribParameterId == gribParameterId)
+      if (info != NULL  &&  info->mGribParameterId == gribParameterId)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -957,6 +987,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
 
 void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -970,7 +1001,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mGribParameterId.c_str(),gribParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),gribParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -985,10 +1016,10 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -996,14 +1027,14 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -1019,7 +1050,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (strcasecmp(info->mGribParameterId.c_str(),gribParameterId.c_str()) == 0)
@@ -1101,6 +1132,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
 
 void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint generationId,T::ParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -1114,7 +1146,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mGribParameterId.c_str(),gribParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),gribParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -1129,10 +1161,10 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -1140,14 +1172,14 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -1163,7 +1195,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (info->mGenerationId == generationId && strcasecmp(info->mGribParameterId.c_str(),gribParameterId.c_str()) == 0)
@@ -1245,6 +1277,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
 
 void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint producerId,T::ParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -1258,7 +1291,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mGribParameterId.c_str(),gribParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),gribParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -1273,10 +1306,10 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -1284,14 +1317,14 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -1307,7 +1340,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (info->mProducerId == producerId && strcasecmp(info->mGribParameterId.c_str(),gribParameterId.c_str()) == 0)
@@ -1389,13 +1422,14 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
 
 void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameterId,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info->mFmiParameterId == fmiParameterId)
+      if (info != NULL &&  info->mFmiParameterId == fmiParameterId)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -1416,6 +1450,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
 
 void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -1429,7 +1464,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -1444,10 +1479,10 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -1455,14 +1490,14 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -1478,7 +1513,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (strcasecmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
@@ -1560,6 +1595,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
 
 void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint generationId,T::ParamId fmiParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -1573,7 +1609,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -1588,10 +1624,10 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -1599,14 +1635,14 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -1622,7 +1658,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (info->mGenerationId == generationId && strcasecmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
@@ -1703,6 +1739,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
 
 void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint producerId,T::ParamId fmiParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -1716,7 +1753,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -1731,10 +1768,10 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -1742,14 +1779,14 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -1765,7 +1802,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (info->mProducerId == producerId  &&  strcasecmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
@@ -1846,6 +1883,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
 
 void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -1859,7 +1897,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -1876,10 +1914,10 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -1887,14 +1925,14 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -1910,7 +1948,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           //printf("-- INDEX %u %s %u\n",idx,mArray[t]->mFmiParameterName.c_str(),mArray[t]->mParameterLevel);
@@ -1992,6 +2030,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
 
 void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint generationId,std::string fmiParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -2005,7 +2044,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -2020,10 +2059,10 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -2031,14 +2070,14 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -2054,7 +2093,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (info->mGenerationId == generationId  &&  strcasecmp(info->mFmiParameterName.c_str(),fmiParameterName.c_str()) == 0)
@@ -2135,6 +2174,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
 
 void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint producerId,std::string fmiParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -2148,7 +2188,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -2163,10 +2203,10 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -2174,14 +2214,14 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -2197,7 +2237,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (info->mProducerId == producerId && strcasecmp(info->mFmiParameterName.c_str(),fmiParameterName.c_str()) == 0)
@@ -2279,6 +2319,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
 
 void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -2292,7 +2333,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -2307,10 +2348,10 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -2318,14 +2359,14 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -2341,7 +2382,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (strcasecmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
@@ -2423,6 +2464,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
 
 void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint generationId,T::ParamId newbaseParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -2436,7 +2478,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -2451,10 +2493,10 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -2462,14 +2504,14 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -2485,7 +2527,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (info->mGenerationId == generationId &&  strcasecmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
@@ -2567,6 +2609,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
 
 void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint producerId,T::ParamId newbaseParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -2580,7 +2623,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -2595,10 +2638,10 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -2606,14 +2649,14 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -2629,7 +2672,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (info->mProducerId == producerId  &&  strcasecmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
@@ -2710,6 +2753,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
 
 void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newbaseParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -2723,7 +2767,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -2738,10 +2782,10 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -2749,14 +2793,14 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -2772,7 +2816,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0)
@@ -2963,6 +3007,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
 
 void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(uint generationId,std::string newbaseParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -2976,7 +3021,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
+      if ((uint)idx < mLength &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -2991,10 +3036,10 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -3002,14 +3047,14 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -3025,7 +3070,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (info->mGenerationId == generationId  &&  strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0)
@@ -3107,6 +3152,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
 
 void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint producerId,std::string newbaseParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -3120,7 +3166,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -3135,10 +3181,10 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -3146,14 +3192,14 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -3169,7 +3215,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (info->mProducerId == producerId &&  strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0)
@@ -3251,6 +3297,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
 
 void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -3264,7 +3311,7 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -3279,10 +3326,10 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -3290,14 +3337,14 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -3313,7 +3360,7 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (strcasecmp(info->mCdmParameterId.c_str(),cdmParameterId.c_str()) == 0)
@@ -3395,6 +3442,7 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
 
 void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint generationId,T::ParamId cdmParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -3408,7 +3456,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -3423,10 +3471,10 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -3434,14 +3482,14 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -3457,7 +3505,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (info->mGenerationId == generationId && strcasecmp(info->mCdmParameterId.c_str(),cdmParameterId.c_str()) == 0)
@@ -3538,6 +3586,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
 
 void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint producerId,T::ParamId cdmParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -3551,7 +3600,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -3566,10 +3615,10 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -3577,14 +3626,14 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -3600,7 +3649,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (info->mProducerId == producerId  &&  strcasecmp(info->mCdmParameterId.c_str(),cdmParameterId.c_str()) == 0)
@@ -3681,6 +3730,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
 
 void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -3694,7 +3744,7 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -3709,10 +3759,10 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -3720,14 +3770,14 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -3743,7 +3793,7 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (strcasecmp(info->mCdmParameterName.c_str(),cdmParameterName.c_str()) == 0)
@@ -3824,6 +3874,7 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
 
 void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint generationId,std::string cdmParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -3837,7 +3888,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -3852,10 +3903,10 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -3863,14 +3914,14 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -3886,7 +3937,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (info->mGenerationId == generationId  &&  strcasecmp(info->mCdmParameterName.c_str(),cdmParameterName.c_str()) == 0)
@@ -3968,6 +4019,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
 
 void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint producerId,std::string cdmParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -3981,7 +4033,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
       info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if (strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
@@ -3996,10 +4048,10 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
 
           if (t > 0)
           {
-            if (mArray[t]->mParameterLevel == minLevel)
+            if (mArray[t] != NULL  &&  mArray[t]->mParameterLevel == minLevel)
               t--;
 
-            while (t > 0  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
+            while (t > 0  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == mArray[t-1]->mParameterLevel)
               t--;
           }
         }
@@ -4007,14 +4059,14 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
         {
           // Finding the start position of the level that is equal or bigger than the "minLevel".
 
-          while (t < mLength  &&  mArray[t]->mParameterLevel < minLevel)
+          while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel < minLevel)
             t++;
         }
       }
 
       uint levelAfterCount = 0;
 
-      while (t < mLength)
+      while (t < mLength  &&  mArray[t] != NULL)
       {
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
@@ -4030,7 +4082,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
             return;
         }
 
-        while (t < mLength  &&  mArray[t]->mParameterLevel == level)
+        while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
           if (info->mProducerId == producerId  &&  strcasecmp(info->mCdmParameterName.c_str(),cdmParameterName.c_str()) == 0)
@@ -4112,6 +4164,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
 
 void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
@@ -4133,7 +4186,7 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startF
     for (uint t=(uint)startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info->mProducerId == producerId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+      if (info != NULL  &&  info->mProducerId == producerId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -4157,6 +4210,7 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startF
 
 void ContentInfoList::getContentInfoListByGenerationId(uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
@@ -4177,7 +4231,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint generationId,uint st
     for (uint t=(uint)startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info->mGenerationId == generationId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+      if (info != NULL  &&  info->mGenerationId == generationId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -4201,6 +4255,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint generationId,uint st
 
 void ContentInfoList::getContentInfoListByGenerationId(uint generationId,std::string startTime,std::string endTime,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -4208,7 +4263,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint generationId,std::st
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info->mGenerationId == generationId  &&  info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
+      if (info != NULL  &&  info->mGenerationId == generationId  &&  info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -4229,6 +4284,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint generationId,std::st
 
 void ContentInfoList::getContentInfoListByServerId(uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
@@ -4253,7 +4309,7 @@ void ContentInfoList::getContentInfoListByServerId(uint serverId,uint startFileI
     for (uint t=(uint)startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if ((info->mServerFlags & sf) != 0 && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+      if (info != NULL  &&  (info->mServerFlags & sf) != 0 && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -4277,6 +4333,7 @@ void ContentInfoList::getContentInfoListByServerId(uint serverId,uint startFileI
 
 void ContentInfoList::getContentInfoListByServerAndFileId(uint serverId,uint fileId,ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     unsigned long long sf = 0;
@@ -4297,10 +4354,10 @@ void ContentInfoList::getContentInfoListByServerAndFileId(uint serverId,uint fil
       for (uint t=(uint)startIdx; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
-        if (info->mFileId > fileId)
+        if (info != NULL  &&  info->mFileId > fileId)
           return;
 
-        if (info->mFileId == fileId  &&  (info->mServerFlags & sf) != 0)
+        if (info != NULL  &&  info->mFileId == fileId  &&  (info->mServerFlags & sf) != 0)
         {
           if (contentInfoList.getReleaseObjects())
             contentInfoList.addContentInfo(info->duplicate());
@@ -4315,7 +4372,7 @@ void ContentInfoList::getContentInfoListByServerAndFileId(uint serverId,uint fil
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info->mFileId == fileId  &&  (info->mServerFlags & sf) != 0)
+      if (info != NULL  &&  info->mFileId == fileId  &&  (info->mServerFlags & sf) != 0)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -4336,6 +4393,7 @@ void ContentInfoList::getContentInfoListByServerAndFileId(uint serverId,uint fil
 
 uint ContentInfoList::getLength()
 {
+  FUNCTION_TRACE
   try
   {
     return mLength;
@@ -4352,6 +4410,7 @@ uint ContentInfoList::getLength()
 
 uint ContentInfoList::getSize()
 {
+  FUNCTION_TRACE
   try
   {
     return mSize;
@@ -4367,6 +4426,7 @@ uint ContentInfoList::getSize()
 
 void ContentInfoList::lock()
 {
+  FUNCTION_TRACE
   try
   {
     return mModificationLock.lock();
@@ -4382,6 +4442,7 @@ void ContentInfoList::lock()
 
 void ContentInfoList::unlock()
 {
+  FUNCTION_TRACE
   try
   {
     return mModificationLock.unlock();
@@ -4398,6 +4459,7 @@ void ContentInfoList::unlock()
 
 bool ContentInfoList::getReleaseObjects()
 {
+  FUNCTION_TRACE
   try
   {
     return mReleaseObjects;
@@ -4413,6 +4475,7 @@ bool ContentInfoList::getReleaseObjects()
 
 void ContentInfoList::setReleaseObjects(bool releaseObjects)
 {
+  FUNCTION_TRACE
   try
   {
     mReleaseObjects = releaseObjects;
@@ -4429,6 +4492,7 @@ void ContentInfoList::setReleaseObjects(bool releaseObjects)
 
 void ContentInfoList::setComparisonMethod(ContentInfo::ComparisonMethod comparisonMethod)
 {
+  FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
@@ -4451,6 +4515,7 @@ void ContentInfoList::setComparisonMethod(ContentInfo::ComparisonMethod comparis
 
 void ContentInfoList::sort(ContentInfo::ComparisonMethod comparisonMethod)
 {
+  FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
@@ -4472,6 +4537,7 @@ void ContentInfoList::sort(ContentInfo::ComparisonMethod comparisonMethod)
 
 void ContentInfoList::writeToFile(std::string filename)
 {
+  FUNCTION_TRACE
   try
   {
     writeToFile(filename,"w");
@@ -4488,6 +4554,7 @@ void ContentInfoList::writeToFile(std::string filename)
 
 void ContentInfoList::writeToFile(std::string filename,const char *filemode)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -4503,7 +4570,8 @@ void ContentInfoList::writeToFile(std::string filename,const char *filemode)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      fprintf(file,"%s\n",info->getCsv().c_str());
+      if (info != NULL)
+        fprintf(file,"%s\n",info->getCsv().c_str());
     }
 
     fclose(file);
@@ -4520,6 +4588,7 @@ void ContentInfoList::writeToFile(std::string filename,const char *filemode)
 
 void ContentInfoList::print(std::ostream& stream,uint level,uint optionFlags)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -4527,7 +4596,8 @@ void ContentInfoList::print(std::ostream& stream,uint level,uint optionFlags)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      info->print(stream,level+1,optionFlags);
+      if (info != NULL)
+        info->print(stream,level+1,optionFlags);
     }
   }
   catch (...)

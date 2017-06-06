@@ -72,7 +72,6 @@ class ContentInfoList
      uint             getSize();
      bool             getReleaseObjects();
      void             print(std::ostream& stream,uint level,uint optionFlags);
-     void             increaseSize(uint newSize);
      void             lock();
      void             unlock();
 
@@ -86,6 +85,7 @@ class ContentInfoList
   protected:
 
      int              getClosestIndexNoLock(ContentInfo::ComparisonMethod comparisonMethod,ContentInfo& contentInfo);
+     void             increaseSize(uint newSize);
 
      ContentInfoPtr   *mArray;
      uint             mSize;

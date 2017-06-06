@@ -2984,7 +2984,7 @@ void CacheImplementation::event_fileListDeletedByGroupFlags(T::EventInfo& eventI
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    for (int t=0; t<CONTENT_LIST_COUNT; t++)
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].deleteContentInfoByGroupFlags(eventInfo.mId1);
 
     mFileInfoList.deleteFileInfoByGroupFlags(eventInfo.mId1);
@@ -3008,7 +3008,7 @@ void CacheImplementation::event_fileListDeletedByProducerId(T::EventInfo& eventI
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    for (int t=0; t<CONTENT_LIST_COUNT; t++)
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].deleteContentInfoByProducerId(eventInfo.mId1);
 
     mFileInfoList.deleteFileInfoByProducerId(eventInfo.mId1);
@@ -3032,7 +3032,7 @@ void CacheImplementation::event_fileListDeletedByGenerationId(T::EventInfo& even
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    for (int t=0; t<CONTENT_LIST_COUNT; t++)
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].deleteContentInfoByGenerationId(eventInfo.mId1);
 
     mFileInfoList.deleteFileInfoByGenerationId(eventInfo.mId1);
@@ -3057,7 +3057,7 @@ void CacheImplementation::event_contentListDeletedByFileId(T::EventInfo& eventIn
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    for (int t=0; t<CONTENT_LIST_COUNT; t++)
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].deleteContentInfoByFileId(eventInfo.mId1);
   }
   catch (...)
@@ -3079,7 +3079,7 @@ void CacheImplementation::event_contentListDeletedByGroupFlags(T::EventInfo& eve
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    for (int t=0; t<CONTENT_LIST_COUNT; t++)
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].deleteContentInfoByGroupFlags(eventInfo.mId1);
   }
   catch (...)
@@ -3101,7 +3101,7 @@ void CacheImplementation::event_contentListDeletedByProducerId(T::EventInfo& eve
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    for (int t=0; t<CONTENT_LIST_COUNT; t++)
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].deleteContentInfoByProducerId(eventInfo.mId1);
   }
   catch (...)
@@ -3123,7 +3123,7 @@ void CacheImplementation::event_contentListDeletedByGenerationId(T::EventInfo& e
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    for (int t=0; t<CONTENT_LIST_COUNT; t++)
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].deleteContentInfoByGenerationId(eventInfo.mId1);
   }
   catch (...)
@@ -3231,7 +3231,7 @@ void CacheImplementation::event_contentDeleted(T::EventInfo& eventInfo)
     T::ContentInfo *contentInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
     if (contentInfo != NULL)
     {
-      for (int t=0; t<CONTENT_LIST_COUNT; t++)
+      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
         mContentInfoList[t].deleteContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
     }
   }

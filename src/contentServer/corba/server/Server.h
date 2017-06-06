@@ -22,6 +22,7 @@ class Server
     virtual void  init(ContentServer::ServiceInterface *serviceInterface);
     virtual void  start();
     virtual void  run();
+    virtual void  shutdown();
 
     std::string   getServiceIor();
     uint          getServerId();

@@ -156,6 +156,21 @@ void Server::init(QueryServer::ServiceInterface *serviceInterface)
 
 
 
+void Server::shutdown()
+{
+  try
+  {
+    mOrb->shutdown(0);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
 void Server::start()
 {
   try

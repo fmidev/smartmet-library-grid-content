@@ -94,10 +94,10 @@ int ServiceInterface::getGridValueList(T::SessionId sessionId,T::ValueRecordList
 {
   try
   {
-    unsigned long long startTime = getTime();
+    //unsigned long long startTime = getTime();
     int result = _getGridValueList(sessionId,valueRecordList);
-    unsigned long long endTime = getTime();
-    printf("%s: %f sec\n\n",__FUNCTION__,(float)(endTime-startTime)/1000000);
+    //unsigned long long endTime = getTime();
+    //printf("%s: %f sec\n\n",__FUNCTION__,(float)(endTime-startTime)/1000000);
 
     return result;
   }
@@ -132,7 +132,11 @@ int ServiceInterface::getGridValue(T::SessionId sessionId,uint fileId,uint messa
 {
   try
   {
+    //unsigned long long startTime = getTime();
     int result = _getGridValue(sessionId,fileId,messageIndex,coordinateType,x,y,interpolationMethod,value);
+    //unsigned long long endTime = getTime();
+    //printf("%s(%u,%u): %f sec\n",__FUNCTION__,fileId,messageIndex,(float)(endTime-startTime)/1000000);
+
     return result;
   }
   catch (...)
