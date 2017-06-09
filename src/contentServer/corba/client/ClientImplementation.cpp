@@ -427,6 +427,34 @@ int ClientImplementation::_getDataServerInfoList(T::SessionId sessionId, T::Serv
 
 
 
+int ClientImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    ::CORBA::ULong corbaCount = 0;
+
+    int result = mService->getDataServerInfoCount(sessionId, corbaCount);
+
+    if (result == 0)
+      count = (uint)corbaCount;
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_addProducerInfo(T::SessionId sessionId, T::ProducerInfo& producerInfo)
 {
   try
@@ -571,6 +599,34 @@ int ClientImplementation::_getProducerInfoList(T::SessionId sessionId, T::Produc
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaProducerInfoList, producerInfoList);
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    ::CORBA::ULong corbaCount = 0;
+
+    int result = mService->getProducerInfoCount(sessionId, corbaCount);
+
+    if (result == 0)
+      count = (uint)corbaCount;
 
     mLastAccessTime = time(0);
     return result;
@@ -888,6 +944,34 @@ int ClientImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessi
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaGenerationInfo, generationInfo);
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    ::CORBA::ULong corbaCount = 0;
+
+    int result = mService->getGenerationInfoCount(sessionId, corbaCount);
+
+    if (result == 0)
+      count = (uint)corbaCount;
 
     mLastAccessTime = time(0);
     return result;
@@ -1398,6 +1482,34 @@ int ClientImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId, u
 
 
 
+int ClientImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    ::CORBA::ULong corbaCount = 0;
+
+    int result = mService->getFileInfoCount(sessionId, corbaCount);
+
+    if (result == 0)
+      count = (uint)corbaCount;
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
 {
   try
@@ -1478,6 +1590,34 @@ int ClientImplementation::_getEventInfoList(T::SessionId sessionId, uint request
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaEventInfoList, eventInfoList);
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    ::CORBA::ULong corbaCount = 0;
+
+    int result = mService->getEventInfoCount(sessionId, corbaCount);
+
+    if (result == 0)
+      count = (uint)corbaCount;
 
     mLastAccessTime = time(0);
     return result;
@@ -2304,6 +2444,33 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
   }
 }
 
+
+
+
+
+int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    ::CORBA::ULong corbaCount = 0;
+
+    int result = mService->getContentCount(sessionId, corbaCount);
+
+    if (result == 0)
+      count = (uint)corbaCount;
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
 
 
 }

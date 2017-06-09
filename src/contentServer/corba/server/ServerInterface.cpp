@@ -270,6 +270,35 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getDataServerInfoCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
+{
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    count = 0;
+    uint sCount = 0;
+
+    int result = mService->getDataServerInfoCount(sessionId,sCount);
+
+    if (result == 0)
+      count = (::CORBA::ULong)sCount;
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::addProducerInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaProducerInfo& producerInfo)
 {
   try
@@ -415,6 +444,35 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sProducerInfoList,*corbaProducerInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getProducerInfoCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
+{
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    count = 0;
+    uint sCount = 0;
+
+    int result = mService->getProducerInfoCount(sessionId,sCount);
+
+    if (result == 0)
+      count = (::CORBA::ULong)sCount;
 
     return result;
   }
@@ -736,6 +794,35 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sGenerationInfo,*corbaGenerationInfo);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getGenerationInfoCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
+{
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    count = 0;
+    uint sCount = 0;
+
+    int result = mService->getGenerationInfoCount(sessionId,sCount);
+
+    if (result == 0)
+      count = (::CORBA::ULong)sCount;
 
     return result;
   }
@@ -1242,6 +1329,35 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getFileInfoCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
+{
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    count = 0;
+    uint sCount = 0;
+
+    int result = mService->getFileInfoCount(sessionId,sCount);
+
+    if (result == 0)
+      count = (::CORBA::ULong)sCount;
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::addEventInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaEventInfo& eventInfo)
 {
   try
@@ -1315,6 +1431,35 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sEventInfoList,*corbaEventInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getEventInfoCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
+{
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    count = 0;
+    uint sCount = 0;
+
+    int result = mService->getEventInfoCount(sessionId,sCount);
+
+    if (result == 0)
+      count = (::CORBA::ULong)sCount;
 
     return result;
   }
@@ -2138,6 +2283,35 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getContentCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
+{
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    count = 0;
+    uint sCount = 0;
+
+    int result = mService->getContentCount(sessionId,sCount);
+
+    if (result == 0)
+      count = (::CORBA::ULong)sCount;
 
     return result;
   }

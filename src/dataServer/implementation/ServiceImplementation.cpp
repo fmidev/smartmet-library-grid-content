@@ -449,6 +449,9 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
     time_t checkTime = time(0);
     T::ContentInfoList contentList;
 
+    if ((fileInfo.mFileId % 1000) == 0)
+      printf("** addFile %u (%d)\n",fileInfo.mFileId,(int)mGridStorage.getFileCount());
+
     GRID::GridFile_sptr storageFile = mGridStorage.getFileByIdNoMapping(fileInfo.mFileId);
 
     GRID::GridFile *gridFile = NULL;
@@ -459,10 +462,9 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
     }
     else
     {
-      if ((fileInfo.mFileId % 10000) == 0)
-        fileInfo.print(std::cout,0,0);
+      //if ((fileInfo.mFileId % 1000) == 0)
+      //  fileInfo.print(std::cout,0,0);
 
-      //printf("** file created %u\n",fileInfo.mFileId);
       gridFile = new GRID::GridFile();
       gridFile->setFileName(mDataDir + "/" + fileInfo.mName);
       gridFile->setFileId(fileInfo.mFileId);
@@ -483,12 +485,13 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
         if (contentList.getLength() == 0)
         {
           // The content of the file is not registered. So, we need to read it.
-          //printf("*** READ %u\n",fileInfo.mFileId);
+          printf("  -- read content %u\n",fileInfo.mFileId);
           gridFile->read(mDataDir + "/" + fileInfo.mName);
         }
       }
 
-      mGridStorage.addFile(gridFile);
+      if (!storageFile)
+        mGridStorage.addFile(gridFile);
     }
     else
     {
@@ -600,15 +603,15 @@ void ServiceImplementation::fullUpdate()
 
     time_t checkTime = time(0);
     uint startFileId = 0;
-    uint len = 10000;
-    while (len == 10000)
+    uint len = 1000;
+    while (len == 1000)
     {
       if (mShutdownRequested)
         return;
 
       T::FileInfoList fileInfoList;
 
-      int result = mContentServer->getFileInfoList(mServerSessionId,startFileId,10000,fileInfoList);
+      int result = mContentServer->getFileInfoList(mServerSessionId,startFileId,1000,fileInfoList);
       if (result != 0)
       {
         fprintf(stderr,"ERROR: Cannot get the file list from the content server!");
@@ -618,6 +621,7 @@ void ServiceImplementation::fullUpdate()
 
       T::ContentInfoList contentInfoList;
       len = fileInfoList.getLength();
+      printf("READ %u\n",len);
       for (uint t=0; t<len; t++)
       {
         if (mShutdownRequested)
@@ -1334,6 +1338,7 @@ void ServiceImplementation::processEvents()
 
     if (mFullUpdateRequired)
     {
+      printf("** FULL UPDATE REQUIRED\n");
       fullUpdate();
       return;
     }
@@ -1344,6 +1349,7 @@ void ServiceImplementation::processEvents()
     {
       if (eventInfo.mServerTime > mContentServerStartTime)
       {
+        printf("*** CONTENT SERVER START TIME CHANGED\n");
         fullUpdate();
         mContentServerStartTime = eventInfo.mServerTime;
         return;

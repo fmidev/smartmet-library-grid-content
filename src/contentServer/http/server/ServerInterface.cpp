@@ -137,6 +137,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getDataServerInfoCount") == 0)
+    {
+      getDataServerInfoCount(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"addProducerInfo") == 0)
     {
       addProducerInfo(request,response);
@@ -170,6 +176,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
     if (strcasecmp(method,"getProducerInfoList") == 0)
     {
       getProducerInfoList(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getProducerInfoCount") == 0)
+    {
+      getProducerInfoCount(request,response);
       return;
     }
 
@@ -242,6 +254,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
     if (strcasecmp(method,"getLastGenerationInfoByProducerNameAndStatus") == 0)
     {
       getLastGenerationInfoByProducerNameAndStatus(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getGenerationInfoCount") == 0)
+    {
+      getGenerationInfoCount(request,response);
       return;
     }
 
@@ -359,6 +377,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getFileInfoCount") == 0)
+    {
+      getFileInfoCount(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"addEventInfo") == 0)
     {
       addEventInfo(request,response);
@@ -374,6 +398,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
     if (strcasecmp(method,"getEventInfoList") == 0)
     {
       getEventInfoList(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getEventInfoCount") == 0)
+    {
+      getEventInfoCount(request,response);
       return;
     }
 
@@ -560,6 +590,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
     if (strcasecmp(method,"getContentListByParameterAndProducerName") == 0)
     {
       getContentListByParameterAndProducerName(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getContentCount") == 0)
+    {
+      getContentCount(request,response);
       return;
     }
 
@@ -988,6 +1024,43 @@ void ServerInterface::getDataServerInfoList(T::RequestMessage& request,T::Respon
 
 
 
+void ServerInterface::getDataServerInfoCount(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint count = 0;
+
+    int result = mService->getDataServerInfoCount(sessionId,count);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      response.addLine("count",count);
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 void ServerInterface::addProducerInfo(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
@@ -1229,6 +1302,43 @@ void ServerInterface::getProducerInfoList(T::RequestMessage& request,T::Response
           response.addLine("producerInfoHeader",info->getCsvHeader());
         response.addLine("producerInfo",info->getCsv());
       }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ServerInterface::getProducerInfoCount(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint count = 0;
+
+    int result = mService->getProducerInfoCount(sessionId,count);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      response.addLine("count",count);
     }
     else
     {
@@ -1786,6 +1896,43 @@ void ServerInterface::getLastGenerationInfoByProducerNameAndStatus(T::RequestMes
     throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
   }
 }
+
+
+
+
+void ServerInterface::getGenerationInfoCount(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint count = 0;
+
+    int result = mService->getGenerationInfoCount(sessionId,count);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      response.addLine("count",count);
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
 
 
 
@@ -2747,6 +2894,43 @@ void ServerInterface::getFileInfoListByGroupFlags(T::RequestMessage& request,T::
 
 
 
+void ServerInterface::getFileInfoCount(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint count = 0;
+
+    int result = mService->getFileInfoCount(sessionId,count);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      response.addLine("count",count);
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 void ServerInterface::addEventInfo(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
@@ -2887,6 +3071,43 @@ void ServerInterface::getEventInfoList(T::RequestMessage& request,T::ResponseMes
         response.addLine("eventInfo",info->getCsv());
         info = info->nextItem;
       }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ServerInterface::getEventInfoCount(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint count = 0;
+
+    int result = mService->getEventInfoCount(sessionId,count);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      response.addLine("count",count);
     }
     else
     {
@@ -4899,6 +5120,43 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
           response.addLine("contentInfoHeader",info->getCsvHeader());
         response.addLine("contentInfo",info->getCsv());
       }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ServerInterface::getContentCount(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint count = 0;
+
+    int result = mService->getContentCount(sessionId,count);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      response.addLine("count",count);
     }
     else
     {

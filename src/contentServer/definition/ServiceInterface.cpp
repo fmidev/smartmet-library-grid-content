@@ -190,6 +190,23 @@ int ServiceInterface::getDataServerInfoList(T::SessionId sessionId,T::ServerInfo
 
 
 
+int ServiceInterface::getDataServerInfoCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    int result = _getDataServerInfoCount(sessionId,count);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
   try
@@ -280,6 +297,23 @@ int ServiceInterface::getProducerInfoList(T::SessionId sessionId,T::ProducerInfo
   try
   {
     int result = _getProducerInfoList(sessionId,producerInfoList);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getProducerInfoCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    int result = _getProducerInfoCount(sessionId,count);
     return result;
   }
   catch (...)
@@ -484,6 +518,23 @@ int ServiceInterface::getLastGenerationInfoByProducerNameAndStatus(T::SessionId 
   try
   {
     int result = _getLastGenerationInfoByProducerNameAndStatus(sessionId,producerName,generationStatus,generationInfo);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getGenerationInfoCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    int result = _getGenerationInfoCount(sessionId,count);
     return result;
   }
   catch (...)
@@ -836,6 +887,23 @@ int ServiceInterface::getFileInfoListByGroupFlags(T::SessionId sessionId,uint gr
 
 
 
+int ServiceInterface::getFileInfoCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    int result = _getFileInfoCount(sessionId,count);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
 {
   try
@@ -888,6 +956,23 @@ int ServiceInterface::getEventInfoList(T::SessionId sessionId,uint requestingSer
 
 
 
+int ServiceInterface::getEventInfoCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    int result = _getEventInfoCount(sessionId,count);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::addContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
 {
   try
@@ -910,6 +995,7 @@ int ServiceInterface::addContentList(T::SessionId sessionId,T::ContentInfoList& 
   try
   {
     int result = _addContentList(sessionId,contentInfoList);
+    printf("addContentList %d\n",result);
     return result;
   }
   catch (...)
@@ -1063,6 +1149,7 @@ int ServiceInterface::registerContentList(T::SessionId sessionId,uint serverId,T
   try
   {
     int result = _registerContentList(sessionId,serverId,contentInfoList);
+    printf("registerContentList %d\n",result);
     return result;
   }
   catch (...)
@@ -1415,6 +1502,23 @@ int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sess
 
 
 
+int ServiceInterface::getContentCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    int result = _getContentCount(sessionId,count);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::_clear(T::SessionId sessionId)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
@@ -1486,6 +1590,16 @@ int ServiceInterface::_getDataServerInfoList(T::SessionId sessionId,T::ServerInf
 
 
 
+
+int ServiceInterface::_getDataServerInfoCount(T::SessionId sessionId,uint& count)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
 int ServiceInterface::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
@@ -1532,6 +1646,15 @@ int ServiceInterface::_getProducerInfoByName(T::SessionId sessionId,std::string 
 
 
 int ServiceInterface::_getProducerInfoList(T::SessionId sessionId,T::ProducerInfoList& producerInfoList)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
+int ServiceInterface::_getProducerInfoCount(T::SessionId sessionId,uint& count)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
 }
@@ -1640,6 +1763,15 @@ int ServiceInterface::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId s
 
 
 int ServiceInterface::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,std::string producerName,T::GenerationStatus generationStatus,T::GenerationInfo& generationInfo)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
+int ServiceInterface::_getGenerationInfoCount(T::SessionId sessionId,uint& count)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
 }
@@ -1819,6 +1951,15 @@ int ServiceInterface::_getFileInfoListByGroupFlags(T::SessionId sessionId,uint g
 
 
 
+int ServiceInterface::_getFileInfoCount(T::SessionId sessionId,uint& count)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
 int ServiceInterface::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
@@ -1838,6 +1979,15 @@ int ServiceInterface::_getLastEventInfo(T::SessionId sessionId,uint requestingSe
 
 
 int ServiceInterface::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,uint maxRecords,T::EventInfoList& eventInfoList)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
+int ServiceInterface::_getEventInfoCount(T::SessionId sessionId,uint& count)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
 }
@@ -2125,7 +2275,10 @@ int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId ses
 
 
 
-
+int ServiceInterface::_getContentCount(T::SessionId sessionId,uint& count)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
 
 
 

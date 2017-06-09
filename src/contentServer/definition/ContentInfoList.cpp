@@ -16,6 +16,9 @@ namespace T
 {
 
 
+ThreadLock ContentInfoList_sortLock;
+
+
 
 ContentInfo::ComparisonMethod contentInfo_comparisonMethod = ContentInfo::ComparisonMethod::none;
 
@@ -1198,26 +1201,29 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (info->mGenerationId == generationId && strcasecmp(info->mGribParameterId.c_str(),gribParameterId.c_str()) == 0)
+          if (strcasecmp(info->mGribParameterId.c_str(),gribParameterId.c_str()) == 0)
           {
-            if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+            if (info->mGenerationId == generationId)
             {
-              if (info->mStartTime < startTime  && (prev == NULL || prev->mStartTime < info->mStartTime))
-                prev = info;
-
-              if (info->mStartTime > endTime  && (next == NULL || next->mStartTime > info->mStartTime))
-                next = info;
-
-              if (info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
+              if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
               {
-                if (contentInfoList.getReleaseObjects())
-                  contentInfoList.addContentInfo(info->duplicate());
-                else
-                  contentInfoList.addContentInfo(info);
+                if (info->mStartTime < startTime  && (prev == NULL || prev->mStartTime < info->mStartTime))
+                  prev = info;
+
+                if (info->mStartTime > endTime  && (next == NULL || next->mStartTime > info->mStartTime))
+                  next = info;
+
+                if (info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
+                {
+                  if (contentInfoList.getReleaseObjects())
+                    contentInfoList.addContentInfo(info->duplicate());
+                  else
+                    contentInfoList.addContentInfo(info);
+                }
               }
             }
           }
@@ -1661,26 +1667,29 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (info->mGenerationId == generationId && strcasecmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
+          if (strcasecmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
           {
-            if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+            if (info->mGenerationId == generationId)
             {
-              if (info->mStartTime < startTime  && (prev == NULL || prev->mStartTime < info->mStartTime))
-                prev = info;
-
-              if (info->mStartTime > endTime  && (next == NULL || next->mStartTime > info->mStartTime))
-                next = info;
-
-              if (info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
+              if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
               {
-                if (contentInfoList.getReleaseObjects())
-                  contentInfoList.addContentInfo(info->duplicate());
-                else
-                  contentInfoList.addContentInfo(info);
+                if (info->mStartTime < startTime  && (prev == NULL || prev->mStartTime < info->mStartTime))
+                  prev = info;
+
+                if (info->mStartTime > endTime  && (next == NULL || next->mStartTime > info->mStartTime))
+                  next = info;
+
+                if (info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
+                {
+                  if (contentInfoList.getReleaseObjects())
+                    contentInfoList.addContentInfo(info->duplicate());
+                  else
+                    contentInfoList.addContentInfo(info);
+                }
               }
             }
           }
@@ -2096,26 +2105,29 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (info->mGenerationId == generationId  &&  strcasecmp(info->mFmiParameterName.c_str(),fmiParameterName.c_str()) == 0)
+          if (strcasecmp(info->mFmiParameterName.c_str(),fmiParameterName.c_str()) == 0)
           {
-            if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+            if (info->mGenerationId == generationId)
             {
-              if (info->mStartTime < startTime  && (prev == NULL || prev->mStartTime < info->mStartTime))
-                prev = info;
-
-              if (info->mStartTime > endTime  && (next == NULL || next->mStartTime > info->mStartTime))
-                next = info;
-
-              if (info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
+              if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
               {
-                if (contentInfoList.getReleaseObjects())
-                  contentInfoList.addContentInfo(info->duplicate());
-                else
-                  contentInfoList.addContentInfo(info);
+                if (info->mStartTime < startTime  && (prev == NULL || prev->mStartTime < info->mStartTime))
+                  prev = info;
+
+                if (info->mStartTime > endTime  && (next == NULL || next->mStartTime > info->mStartTime))
+                  next = info;
+
+                if (info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
+                {
+                  if (contentInfoList.getReleaseObjects())
+                    contentInfoList.addContentInfo(info->duplicate());
+                  else
+                    contentInfoList.addContentInfo(info);
+                }
               }
             }
           }
@@ -2530,26 +2542,29 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (info->mGenerationId == generationId &&  strcasecmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
+          if (strcasecmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
           {
-            if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+            if (info->mGenerationId == generationId)
             {
-              if (info->mStartTime < startTime  && (prev == NULL || prev->mStartTime < info->mStartTime))
-                prev = info;
-
-              if (info->mStartTime > endTime  && (next == NULL || next->mStartTime > info->mStartTime))
-                next = info;
-
-              if (info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
+              if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
               {
-                if (contentInfoList.getReleaseObjects())
-                  contentInfoList.addContentInfo(info->duplicate());
-                else
-                  contentInfoList.addContentInfo(info);
+                if (info->mStartTime < startTime  && (prev == NULL || prev->mStartTime < info->mStartTime))
+                  prev = info;
+
+                if (info->mStartTime > endTime  && (next == NULL || next->mStartTime > info->mStartTime))
+                  next = info;
+
+                if (info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
+                {
+                  if (contentInfoList.getReleaseObjects())
+                    contentInfoList.addContentInfo(info->duplicate());
+                  else
+                    contentInfoList.addContentInfo(info);
+                }
               }
             }
           }
@@ -3073,26 +3088,29 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (info->mGenerationId == generationId  &&  strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0)
+          if (strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0)
           {
-            if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+            if (info->mGenerationId == generationId)
             {
-              if (info->mStartTime < startTime  && (prev == NULL || prev->mStartTime < info->mStartTime))
-                prev = info;
-
-              if (info->mStartTime > endTime  && (next == NULL || next->mStartTime > info->mStartTime))
-                next = info;
-
-              if (info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
+              if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
               {
-                if (contentInfoList.getReleaseObjects())
-                  contentInfoList.addContentInfo(info->duplicate());
-                else
-                  contentInfoList.addContentInfo(info);
+                if (info->mStartTime < startTime  && (prev == NULL || prev->mStartTime < info->mStartTime))
+                  prev = info;
+
+                if (info->mStartTime > endTime  && (next == NULL || next->mStartTime > info->mStartTime))
+                  next = info;
+
+                if (info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
+                {
+                  if (contentInfoList.getReleaseObjects())
+                    contentInfoList.addContentInfo(info->duplicate());
+                  else
+                    contentInfoList.addContentInfo(info);
+                }
               }
             }
           }
@@ -3508,26 +3526,29 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (info->mGenerationId == generationId && strcasecmp(info->mCdmParameterId.c_str(),cdmParameterId.c_str()) == 0)
+          if (strcasecmp(info->mCdmParameterId.c_str(),cdmParameterId.c_str()) == 0)
           {
-            if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+            if (info->mGenerationId == generationId)
             {
-              if (info->mStartTime < startTime  && (prev == NULL || prev->mStartTime < info->mStartTime))
-                prev = info;
-
-              if (info->mStartTime > endTime  && (next == NULL || next->mStartTime > info->mStartTime))
-                next = info;
-
-              if (info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
+              if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
               {
-                if (contentInfoList.getReleaseObjects())
-                  contentInfoList.addContentInfo(info->duplicate());
-                else
-                  contentInfoList.addContentInfo(info);
+                if (info->mStartTime < startTime  && (prev == NULL || prev->mStartTime < info->mStartTime))
+                  prev = info;
+
+                if (info->mStartTime > endTime  && (next == NULL || next->mStartTime > info->mStartTime))
+                  next = info;
+
+                if (info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
+                {
+                  if (contentInfoList.getReleaseObjects())
+                    contentInfoList.addContentInfo(info->duplicate());
+                  else
+                    contentInfoList.addContentInfo(info);
+                }
               }
             }
           }
@@ -3580,6 +3601,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
     throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
   }
 }
+
 
 
 
@@ -3728,6 +3750,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
 
 
 
+
 void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3872,6 +3895,7 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
 
 
 
+
 void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint generationId,std::string cdmParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3940,26 +3964,29 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (info->mGenerationId == generationId  &&  strcasecmp(info->mCdmParameterName.c_str(),cdmParameterName.c_str()) == 0)
+          if (strcasecmp(info->mCdmParameterName.c_str(),cdmParameterName.c_str()) == 0)
           {
-            if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+            if (info->mGenerationId == generationId)
             {
-              if (info->mStartTime < startTime  && (prev == NULL || prev->mStartTime < info->mStartTime))
-                prev = info;
-
-              if (info->mStartTime > endTime  && (next == NULL || next->mStartTime > info->mStartTime))
-                next = info;
-
-              if (info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
+              if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
+                  (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
               {
-                if (contentInfoList.getReleaseObjects())
-                  contentInfoList.addContentInfo(info->duplicate());
-                else
-                  contentInfoList.addContentInfo(info);
+                if (info->mStartTime < startTime  && (prev == NULL || prev->mStartTime < info->mStartTime))
+                  prev = info;
+
+                if (info->mStartTime > endTime  && (next == NULL || next->mStartTime > info->mStartTime))
+                  next = info;
+
+                if (info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
+                {
+                  if (contentInfoList.getReleaseObjects())
+                    contentInfoList.addContentInfo(info->duplicate());
+                  else
+                    contentInfoList.addContentInfo(info);
+                }
               }
             }
           }
@@ -4424,6 +4451,7 @@ uint ContentInfoList::getSize()
 
 
 
+
 void ContentInfoList::lock()
 {
   FUNCTION_TRACE
@@ -4469,6 +4497,7 @@ bool ContentInfoList::getReleaseObjects()
     throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
   }
 }
+
 
 
 
@@ -4521,6 +4550,7 @@ void ContentInfoList::sort(ContentInfo::ComparisonMethod comparisonMethod)
     AutoWriteLock lock(&mModificationLock);
     mComparisonMethod = comparisonMethod;
 
+    AutoThreadLock globalLock(&ContentInfoList_sortLock);
     contentInfo_comparisonMethod = comparisonMethod;
 
     qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare);

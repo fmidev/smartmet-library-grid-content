@@ -273,7 +273,6 @@ int ClientImplementation::_getDataServerInfoList(T::SessionId sessionId,T::Serve
 
     sendRequest(request,response);
 
-
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
@@ -286,6 +285,37 @@ int ClientImplementation::_getDataServerInfoList(T::SessionId sessionId,T::Serve
         serverInfoList.addServerInfo(info);
       }
     }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getDataServerInfoCount");
+    request.addLine("sessionId",sessionId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+      count = (uint)response.getLineValueByKey("count");
+    else
+      count = 0;
 
     return result;
   }
@@ -470,6 +500,37 @@ int ClientImplementation::_getProducerInfoList(T::SessionId sessionId,T::Produce
         producerInfoList.addProducerInfo(info);
       }
     }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getProducerInfoCount");
+    request.addLine("sessionId",sessionId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+      count = (uint)response.getLineValueByKey("count");
+    else
+      count = 0;
 
     return result;
   }
@@ -850,6 +911,37 @@ int ClientImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessi
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
       generationInfo.setCsv(response.getLineByKey("generationInfo"));
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getGenerationInfoCount");
+    request.addLine("sessionId",sessionId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+      count = (uint)response.getLineValueByKey("count");
+    else
+      count = 0;
 
     return result;
   }
@@ -1481,6 +1573,37 @@ int ClientImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,ui
 
 
 
+int ClientImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getFileInfoCount");
+    request.addLine("sessionId",sessionId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+      count = (uint)response.getLineValueByKey("count");
+    else
+      count = 0;
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
 {
   try
@@ -1569,6 +1692,37 @@ int ClientImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
         eventInfoList.addEventInfo(info);
       }
     }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getEventInfoCount");
+    request.addLine("sessionId",sessionId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+      count = (uint)response.getLineValueByKey("count");
+    else
+      count = 0;
 
     return result;
   }
@@ -2744,6 +2898,37 @@ size_t ClientImplementation_responseProcessing(char *ptr, size_t size, size_t nm
   }
 }
 
+
+
+
+
+
+int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getContentCount");
+    request.addLine("sessionId",sessionId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+      count = (uint)response.getLineValueByKey("count");
+    else
+      count = 0;
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
 
 
 

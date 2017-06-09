@@ -477,6 +477,30 @@ int CacheImplementation::_getDataServerInfoList(T::SessionId sessionId,T::Server
 
 
 
+int CacheImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getDataServerInfoCount(sessionId,count);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    count = mDataServerInfoList.getLength();
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
@@ -617,6 +641,30 @@ int CacheImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
       return Result::INVALID_SESSION;
 
     producerInfoList = mProducerInfoList;
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getProducerInfoCount(sessionId,count);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    count = mProducerInfoList.getLength();
     return Result::OK;
   }
   catch (...)
@@ -938,6 +986,30 @@ int CacheImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessio
       return Result::DATA_NOT_FOUND;
 
     generationInfo = *info;
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getGenerationInfoCount(sessionId,count);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    count = mGenerationInfoList.getLength();
     return Result::OK;
   }
   catch (...)
@@ -1424,6 +1496,30 @@ int CacheImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,uin
 
 
 
+int CacheImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getFileInfoCount(sessionId,count);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    count = mFileInfoList.getLength();
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -1506,6 +1602,30 @@ int CacheImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
     }
 
     mEventInfoList.getEventInfoList(startEventId,maxRecords,eventInfoList);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getEventInfoCount(sessionId,count);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    count = mEventInfoList.getLength();
     return Result::OK;
   }
   catch (...)
@@ -2476,6 +2596,31 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
 
 
 
+
+int CacheImplementation::_getContentCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getContentCount(sessionId,count);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    count = mContentInfoList[0].getLength();
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 void CacheImplementation::readProducerList()
 {
   FUNCTION_TRACE
@@ -3206,7 +3351,7 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
     }
     else
     {
-      printf("#### CONTENT NOT FOUND\n");
+      printf("#### CONTENT NOT FOUND: %u:%u\n",eventInfo.mId1,eventInfo.mId2);
     }
   }
   catch (...)

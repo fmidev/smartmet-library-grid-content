@@ -479,6 +479,21 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
           return res;
         return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
 
+      case ContentInfo::ComparisonMethod::fmiName_starttime_level_file_message:
+        res = strcasecmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
+        if (res != 0)
+          return res;
+        res = strcasecmp(mStartTime.c_str(),contentInfo->mStartTime.c_str());
+        if (res != 0)
+          return res;
+        res = uint64_compare(mParameterLevel,contentInfo->mParameterLevel);
+        if (res != 0)
+          return res;
+        res = uint_compare(mFileId,contentInfo->mFileId);
+        if (res != 0)
+          return res;
+        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+
 
       default:
         res = uint_compare(mFileId,contentInfo->mFileId);

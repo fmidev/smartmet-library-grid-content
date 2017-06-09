@@ -26,7 +26,8 @@ class ContentInfo
       newbaseName_level_starttime_file_message  = 6,  // Comparison order: newbaseName,level,startTime,fileId,messageIndex
       cdmId_level_starttime_file_message        = 7,  // Comparison order: cdmId,level,startTime,fileId,messageIndex
       cdmName_level_starttime_file_message      = 8,  // Comparison order: cdmName,level,startTime,fileId,messageIndex
-      starttime_file_message                    = 9   // Comparison order: startTime,fileId,messageIndex
+      starttime_file_message                    = 9,  // Comparison order: startTime,fileId,messageIndex
+      fmiName_starttime_level_file_message      = 10  // Comparison order: fmiName,level,startTime,fileId,messageIndex
     };
 
   public:

@@ -3,6 +3,7 @@
 #include "grid-files/common/GeneralFunctions.h"
 #include "grid-files/common/AutoWriteLock.h"
 #include "grid-files/common/AutoReadLock.h"
+#include "grid-files/common/AutoThreadLock.h"
 
 
 namespace SmartMet
@@ -10,6 +11,8 @@ namespace SmartMet
 namespace T
 {
 
+
+ThreadLock FileInfoList_sortLock;
 
 FileInfo::ComparisonMethod fileInfo_comparisonMethod = FileInfo::ComparisonMethod::fileId;
 
@@ -920,6 +923,8 @@ void FileInfoList::sort(FileInfo::ComparisonMethod comparisonMethod)
   {
     AutoWriteLock lock(&mModificationLock);
     mComparisonMethod = comparisonMethod;
+
+    AutoThreadLock globalLock(&FileInfoList_sortLock);
 
     fileInfo_comparisonMethod = comparisonMethod;
 

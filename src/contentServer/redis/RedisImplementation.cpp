@@ -2,6 +2,7 @@
 #include "grid-files/common/Exception.h"
 #include "grid-files/common/AutoThreadLock.h"
 #include "grid-files/common/ShowFunction.h"
+#include "grid-files/common/GeneralFunctions.h"
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -12,6 +13,69 @@ namespace SmartMet
 {
 namespace ContentServer
 {
+
+
+class RedisModificationLock
+{
+  public:
+    RedisModificationLock(redisContext *context)
+    {
+      requestId = 0;
+      mContext = context;
+
+      redisReply *reply = (redisReply*)redisCommand(mContext,"INCR modificationRequestOn");
+      if (reply == NULL)
+        return;
+
+      requestId = (uint)reply->integer;
+      freeReplyObject(reply);
+
+      bool locked = true;
+      uint counter = 0;
+      while (locked)
+      {
+        counter++;
+
+        reply = (redisReply*)redisCommand(mContext,"GET modificationRequestOff");
+        if (reply == NULL)
+          return;
+
+        uint id = 0;
+        if (reply->str != NULL)
+          id = (uint)atoll(reply->str);
+
+        freeReplyObject(reply);
+
+        if (requestId == (id+1) ||  counter > 10000)
+        {
+          printf("Match %u %u\n",requestId,(id+1));
+          locked = false;
+        }
+        else
+        {
+          printf("Wait %u %u\n",requestId,(id+1));
+          time_usleep(0,1000);
+        }
+      }
+    }
+
+
+    virtual ~RedisModificationLock()
+    {
+      redisReply *reply = (redisReply*)redisCommand(mContext,"SET modificationRequestOff %u",requestId);
+      if (reply == NULL)
+        return;
+
+      freeReplyObject(reply);
+    }
+
+  protected:
+
+    redisContext *mContext;
+    uint requestId;
+};
+
+
 
 
 RedisImplementation::RedisImplementation()
@@ -145,7 +209,7 @@ void RedisImplementation::shutdown()
   FUNCTION_TRACE
   try
   {
-    exit(0);
+    //exit(0);
   }
   catch (...)
   {
@@ -206,6 +270,8 @@ int RedisImplementation::_clear(T::SessionId sessionId)
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    RedisModificationLock redisModificationLock(mContext);
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"DEL producerCounter");
     if (reply == NULL)
@@ -366,6 +432,7 @@ int RedisImplementation::_addDataServerInfo(T::SessionId sessionId,T::ServerInfo
       return Result::INVALID_SERVER_ID;
 
     T::ServerInfoList serverInfoList;
+
     getDataServerList(serverInfoList);
 
     T::ServerInfo *info = serverInfoList.getServerInfoById(serverInfo.mServerId);
@@ -382,6 +449,8 @@ int RedisImplementation::_addDataServerInfo(T::SessionId sessionId,T::ServerInfo
       if (info != NULL)
         return Result::SERVER_IOR_ALREADY_REGISTERED;
     }
+
+    RedisModificationLock redisModificationLock(mContext);
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZADD dataServers %u %s", serverInfo.mServerId,serverInfo.getCsv().c_str());
     if (reply == NULL)
@@ -422,6 +491,8 @@ int RedisImplementation::_deleteDataServerInfoById(T::SessionId sessionId,uint s
     T::ServerInfo serverInfo;
     if (getDataServerById(serverId,serverInfo) != Result::OK)
       return Result::UNKNOWN_SERVER_ID;
+
+    RedisModificationLock redisModificationLock(mContext);
 
     int result = deleteDataServerById(serverInfo.mServerId);
 
@@ -556,6 +627,46 @@ int RedisImplementation::_getDataServerInfoList(T::SessionId sessionId,T::Server
 
 
 
+int RedisImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    count = 0;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    redisReply *reply = (redisReply*)redisCommand(mContext,"ZCOUNT dataServers 0 %llu",0xFFFFFFFF);
+    if (reply == NULL)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->str != NULL)
+      count = (uint)atoi(reply->str);
+    else
+      count = (uint)reply->integer;
+
+    freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int RedisImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
@@ -575,6 +686,8 @@ int RedisImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
     T::ProducerInfo *info = producerInfoList.getProducerInfoByName(producerInfo.mName);
     if (info != NULL)
       return Result::PRODUCER_NAME_ALREADY_REGISTERED;
+
+    RedisModificationLock redisModificationLock(mContext);
 
     redisReply *reply = NULL;
 
@@ -663,6 +776,8 @@ int RedisImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint pro
     if (getProducerById(producerId,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
 
+    RedisModificationLock redisModificationLock(mContext);
+
     int result = deleteProducerById(producerInfo.mProducerId);
 
     if (result == Result::OK)
@@ -696,6 +811,8 @@ int RedisImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::s
     T::ProducerInfo producerInfo;
     if (getProducerByName(producerName,producerInfo) != 0)
       return Result::UNKNOWN_PRODUCER_NAME;
+
+    RedisModificationLock redisModificationLock(mContext);
 
     int result = deleteProducerById(producerInfo.mProducerId);
 
@@ -789,6 +906,46 @@ int RedisImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
 
 
 
+int RedisImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    count = 0;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    redisReply *reply = (redisReply*)redisCommand(mContext,"ZCOUNT producers 0 %llu",0xFFFFFFFF);
+    if (reply == NULL)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->str != NULL)
+      count = (uint)atoi(reply->str);
+    else
+      count = (uint)reply->integer;
+
+    freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int RedisImplementation::_addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -819,6 +976,8 @@ int RedisImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
     }
+
+    RedisModificationLock redisModificationLock(mContext);
 
     generationInfo.mGenerationId = (uint)reply->integer;
     freeReplyObject(reply);
@@ -863,6 +1022,8 @@ int RedisImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint g
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
 
+    RedisModificationLock redisModificationLock(mContext);
+
     deleteContentByGenerationId(generationInfo.mGenerationId);
     deleteFileListByGenerationId(generationInfo.mGenerationId,false);
 
@@ -899,6 +1060,8 @@ int RedisImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std:
     T::GenerationInfo generationInfo;
     if (getGenerationByName(generationName,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_NAME;
+
+    RedisModificationLock redisModificationLock(mContext);
 
     deleteContentByGenerationId(generationInfo.mGenerationId);
     deleteFileListByGenerationId(generationInfo.mGenerationId,false);
@@ -937,6 +1100,8 @@ int RedisImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sess
     if (getProducerById(producerId,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
 
+    RedisModificationLock redisModificationLock(mContext);
+
     deleteContentByProducerId(producerInfo.mProducerId);
     deleteFileListByProducerId(producerInfo.mProducerId,false);
 
@@ -973,6 +1138,8 @@ int RedisImplementation::_deleteGenerationInfoListByProducerName(T::SessionId se
     T::ProducerInfo producerInfo;
     if (getProducerByName(producerName,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
+
+    RedisModificationLock redisModificationLock(mContext);
 
     deleteContentByProducerId(producerInfo.mProducerId);
     deleteFileListByProducerId(producerInfo.mProducerId,false);
@@ -1199,6 +1366,46 @@ int RedisImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessio
 
 
 
+int RedisImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    count = 0;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    redisReply *reply = (redisReply*)redisCommand(mContext,"ZCOUNT generations 0 %llu",0xFFFFFFFF);
+    if (reply == NULL)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->str != NULL)
+      count = (uint)atoi(reply->str);
+    else
+      count = (uint)reply->integer;
+
+    freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int RedisImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,T::GenerationStatus status)
 {
   FUNCTION_TRACE
@@ -1217,6 +1424,8 @@ int RedisImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uin
       return Result::UNKNOWN_GENERATION_ID;
 
     generationInfo.mStatus = status;
+
+    RedisModificationLock redisModificationLock(mContext);
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZREMRANGEBYSCORE generations %u %u",generationInfo.mGenerationId,generationInfo.mGenerationId);
     if (reply == NULL)
@@ -1268,6 +1477,8 @@ int RedisImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,s
       return Result::UNKNOWN_GENERATION_NAME;
 
     generationInfo.mStatus = status;
+
+    RedisModificationLock redisModificationLock(mContext);
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZREMRANGEBYSCORE generations %u %u",generationInfo.mGenerationId,generationInfo.mGenerationId);
     if (reply == NULL)
@@ -1342,6 +1553,8 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
     else
     {
       // ### Generating a new file-id.
+
+      RedisModificationLock redisModificationLock(mContext);
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"INCR fileCounter");
       if (reply == NULL)
@@ -1427,6 +1640,8 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
     else
     {
       // ### Generating a new file-id.
+
+      RedisModificationLock redisModificationLock(mContext);
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"INCR fileCounter");
       if (reply == NULL)
@@ -1526,6 +1741,8 @@ int RedisImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
     if (getFileById(fileId,fileInfo) != Result::OK)
       return Result::UNKNOWN_FILE_ID;
 
+    RedisModificationLock redisModificationLock(mContext);
+
     deleteFilename(fileInfo.mName);
     int result = deleteFileById(fileId,true);
 
@@ -1561,6 +1778,8 @@ int RedisImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::strin
     if (fileId == 0)
       return Result::UNKNOWN_FILE_NAME;
 
+    RedisModificationLock redisModificationLock(mContext);
+
     deleteFilename(filename);
     int result = deleteFileById(fileId,true);
 
@@ -1591,6 +1810,8 @@ int RedisImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId,
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    RedisModificationLock redisModificationLock(mContext);
 
     int result = deleteFileListByGroupFlags(groupFlags,true);
 
@@ -1626,6 +1847,8 @@ int RedisImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,
     if (getProducerById(producerId,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
 
+    RedisModificationLock redisModificationLock(mContext);
+
     int result = deleteFileListByProducerId(producerInfo.mProducerId,true);
 
     if (result == Result::OK)
@@ -1659,6 +1882,8 @@ int RedisImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionI
     T::ProducerInfo producerInfo;
     if (getProducerByName(producerName,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_NAME;
+
+    RedisModificationLock redisModificationLock(mContext);
 
     int result = deleteFileListByProducerId(producerInfo.mProducerId,true);
 
@@ -1694,6 +1919,8 @@ int RedisImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
 
+    RedisModificationLock redisModificationLock(mContext);
+
     int result = deleteFileListByGenerationId(generationInfo.mGenerationId,true);
 
     if (result == Result::OK)
@@ -1727,6 +1954,8 @@ int RedisImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessio
     T::GenerationInfo generationInfo;
     if (getGenerationByName(generationName,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_NAME;
+
+    RedisModificationLock redisModificationLock(mContext);
 
     int result = deleteFileListByGenerationId(generationInfo.mGenerationId,true);
 
@@ -1964,6 +2193,46 @@ int RedisImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,uin
 
 
 
+int RedisImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    count = 0;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    redisReply *reply = (redisReply*)redisCommand(mContext,"ZCOUNT files 0 %llu",0xFFFFFFFF);
+    if (reply == NULL)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->str != NULL)
+      count = (uint)atoi(reply->str);
+    else
+      count = (uint)reply->integer;
+
+    freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int RedisImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -2099,6 +2368,46 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
 
 
 
+int RedisImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    count = 0;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    redisReply *reply = (redisReply*)redisCommand(mContext,"ZCOUNT events 0 %llu",0xFFFFFFFFFFFFFFFF);
+    if (reply == NULL)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->str != NULL)
+      count = (uint)atoi(reply->str);
+    else
+      count = (uint)reply->integer;
+
+    freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int RedisImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
@@ -2133,6 +2442,8 @@ int RedisImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
     if (generationInfo.mGenerationId != fileInfo.mGenerationId)
       return Result::GENERATION_AND_FILE_DO_NOT_MATCH;
 
+
+    RedisModificationLock redisModificationLock(mContext);
 
     unsigned long long id = ((unsigned long long)contentInfo.mFileId << 32) + contentInfo.mMessageIndex;
 
@@ -2172,6 +2483,8 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    RedisModificationLock redisModificationLock(mContext);
+
     uint len = contentInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -2179,20 +2492,20 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
       T::ContentInfo contentInfo;
       if (getContent(info->mFileId,info->mMessageIndex,contentInfo) == Result::OK)
       {
+        printf("-- content already added %u\n",info->mFileId);
       }
       else
       {
-        /*
         T::ProducerInfo producerInfo;
         if (getProducerById(info->mProducerId,producerInfo) != Result::OK)
           return Result::UNKNOWN_PRODUCER_ID;
 
         T::GenerationInfo generationInfo;
-        if (getGenerationById(contentInfo.mGenerationId,generationInfo) != Result::OK)
+        if (getGenerationById(info->mGenerationId,generationInfo) != Result::OK)
           return Result::UNKNOWN_GENERATION_ID;
 
         T::FileInfo fileInfo;
-        if (getFileById(contentInfo.mFileId,fileInfo) != Result::OK)
+        if (getFileById(info->mFileId,fileInfo) != Result::OK)
           return Result::UNKNOWN_FILE_ID;
 
         if (producerInfo.mProducerId != generationInfo.mProducerId)
@@ -2203,7 +2516,8 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
 
         if (generationInfo.mGenerationId != fileInfo.mGenerationId)
           return Result::GENERATION_AND_FILE_DO_NOT_MATCH;
-        */
+
+        printf("-- add content %u\n",info->mFileId);
         unsigned long long id = ((unsigned long long)info->mFileId << 32) + info->mMessageIndex;
 
         redisReply *reply = (redisReply*)redisCommand(mContext,"ZADD content %llu %s",id,info->getCsv().c_str());
@@ -2248,6 +2562,8 @@ int RedisImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,u
     if (getContent(fileId,messageIndex,contentInfo) != Result::OK)
       return Result::UNKNOWN_CONTENT;
 
+    RedisModificationLock redisModificationLock(mContext);
+
     int result = deleteContent(fileId,messageIndex);
 
     if (result == Result::OK)
@@ -2281,6 +2597,8 @@ int RedisImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint 
     T::FileInfo fileInfo;
     if (getFileById(fileId,fileInfo) != Result::OK)
       return Result::UNKNOWN_FILE_ID;
+
+    RedisModificationLock redisModificationLock(mContext);
 
     int result = deleteContentByFileId(fileId);
 
@@ -2316,6 +2634,8 @@ int RedisImplementation::_deleteContentListByFileName(T::SessionId sessionId,std
     if (fileId == 0)
       return Result::UNKNOWN_FILE_NAME;
 
+    RedisModificationLock redisModificationLock(mContext);
+
     int result = deleteContentByFileId(fileId);
 
     if (result == Result::OK)
@@ -2345,6 +2665,8 @@ int RedisImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,u
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    RedisModificationLock redisModificationLock(mContext);
 
     int result = deleteContentByGroupFlags(groupFlags);
 
@@ -2380,6 +2702,8 @@ int RedisImplementation::_deleteContentListByProducerId(T::SessionId sessionId,u
     if (getProducerById(producerId,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
 
+    RedisModificationLock redisModificationLock(mContext);
+
     int result = deleteContentByProducerId(producerId);
 
     if (result == Result::OK)
@@ -2414,6 +2738,8 @@ int RedisImplementation::_deleteContentListByProducerName(T::SessionId sessionId
     if (getProducerByName(producerName,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_NAME;
 
+    RedisModificationLock redisModificationLock(mContext);
+
     int result = deleteContentByProducerId(producerInfo.mProducerId);
 
     if (result == Result::OK)
@@ -2446,6 +2772,8 @@ int RedisImplementation::_deleteContentListByGenerationId(T::SessionId sessionId
     T::GenerationInfo generationInfo;
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
+
+    RedisModificationLock redisModificationLock(mContext);
 
     int result = deleteContentByGenerationId(generationId);
 
@@ -2481,6 +2809,8 @@ int RedisImplementation::_deleteContentListByGenerationName(T::SessionId session
     if (getGenerationByName(generationName,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_NAME;
 
+    RedisModificationLock redisModificationLock(mContext);
+
     int result = deleteContentByGenerationId(generationInfo.mGenerationId);
 
     if (result == Result::OK)
@@ -2515,6 +2845,8 @@ int RedisImplementation::_registerContentList(T::SessionId sessionId,uint server
     if (serverId > 0)
       sf = (1 << (serverId-1));
 
+    RedisModificationLock redisModificationLock(mContext);
+
     uint len = contentInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -2523,6 +2855,8 @@ int RedisImplementation::_registerContentList(T::SessionId sessionId,uint server
       T::ContentInfo contentInfo;
       if (getContent(info->mFileId,info->mMessageIndex,contentInfo) == Result::OK)
       {
+        printf("Register content %u\n",info->mFileId);
+
         if (serverId > 0  &&  (info->mServerFlags & sf) == 0)
         {
           info->mServerFlags = contentInfo.mServerFlags | sf;
@@ -2532,6 +2866,28 @@ int RedisImplementation::_registerContentList(T::SessionId sessionId,uint server
       }
       else
       {
+        T::ProducerInfo producerInfo;
+        if (getProducerById(info->mProducerId,producerInfo) != Result::OK)
+          return Result::UNKNOWN_PRODUCER_ID;
+
+        T::GenerationInfo generationInfo;
+        if (getGenerationById(info->mGenerationId,generationInfo) != Result::OK)
+          return Result::UNKNOWN_GENERATION_ID;
+
+        T::FileInfo fileInfo;
+        if (getFileById(info->mFileId,fileInfo) != Result::OK)
+          return Result::UNKNOWN_FILE_ID;
+
+        if (producerInfo.mProducerId != generationInfo.mProducerId)
+          return Result::PRODUCER_AND_GENERATION_DO_NOT_MATCH;
+
+        if (producerInfo.mProducerId != fileInfo.mProducerId)
+          return Result::PRODUCER_AND_FILE_DO_NOT_MATCH;
+
+        if (generationInfo.mGenerationId != fileInfo.mGenerationId)
+          return Result::GENERATION_AND_FILE_DO_NOT_MATCH;
+
+        printf("Add content %u\n",info->mFileId);
         unsigned long long id = ((unsigned long long)info->mFileId << 32) + info->mMessageIndex;
         info->mServerFlags = sf;
 
@@ -2575,6 +2931,8 @@ int RedisImplementation::_registerContentListByFileId(T::SessionId sessionId,uin
 
     unsigned long long sf = (1 << (serverId-1));
 
+    RedisModificationLock redisModificationLock(mContext);
+
     T::ContentInfoList contentInfoList;
     getContentByFileId(fileId,contentInfoList);
     uint len = contentInfoList.getLength();
@@ -2614,6 +2972,8 @@ int RedisImplementation::_unregisterContentList(T::SessionId sessionId,uint serv
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    RedisModificationLock redisModificationLock(mContext);
+
     return unregisterContent(serverId);
   }
   catch (...)
@@ -2641,6 +3001,8 @@ int RedisImplementation::_unregisterContentListByFileId(T::SessionId sessionId,u
 
     unsigned long long sf = (1 << (serverId-1));
     unsigned long long nsf = ~sf;
+
+    RedisModificationLock redisModificationLock(mContext);
 
     T::ContentInfoList contentInfoList;
     getContentByFileId(fileId,contentInfoList);
@@ -2990,6 +3352,189 @@ int RedisImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
     throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
   }
 }
+
+
+
+
+
+int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    return getContentByParameterIdAndTimeRange(parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,contentInfoList);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationById(generationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    return getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,contentInfoList);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,std::string generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationByName(generationName,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_NAME;
+
+    return getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,contentInfoList);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::ProducerInfo producerInfo;
+    if (getProducerById(producerId,producerInfo) != Result::OK)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    return getContentByParameterIdAndProducer(producerInfo.mProducerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,contentInfoList);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,std::string producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::ProducerInfo producerInfo;
+    if (getProducerByName(producerName,producerInfo) != Result::OK)
+      return Result::UNKNOWN_PRODUCER_NAME;
+
+    return getContentByParameterIdAndProducer(producerInfo.mProducerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,contentInfoList);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_getContentCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    count = 0;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    redisReply *reply = (redisReply*)redisCommand(mContext,"ZCOUNT content 0 %llu",0xFFFFFFFFFFFFFFFF);
+    if (reply == NULL)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->str != NULL)
+      count = (uint)atoi(reply->str);
+    else
+      count = (uint)reply->integer;
+
+    freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
 
 
 
@@ -3633,7 +4178,11 @@ int RedisImplementation::getFileList(uint startFileId,uint maxRecords,T::FileInf
       {
         T::FileInfo *fileInfo = new T::FileInfo();
         fileInfo->setCsv(reply->element[t]->str);
-        fileInfoList.addFileInfo(fileInfo);
+
+        if (fileInfo->mFileId >= startFileId)
+          fileInfoList.addFileInfo(fileInfo);
+        else
+          delete fileInfo;
       }
     }
     freeReplyObject(reply);
@@ -3657,8 +4206,12 @@ int RedisImplementation::getFileListByGenerationId(uint generationId,uint startF
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    while (true)
+    uint prevFileId = 0xFFFFFFFF;
+
+    while (startFileId != prevFileId)
     {
+      prevFileId = startFileId;
+
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE files %u %u LIMIT 0 10000",startFileId,0xFFFFFFFF);
       if (reply == NULL)
       {
@@ -3678,10 +4231,15 @@ int RedisImplementation::getFileListByGenerationId(uint generationId,uint startF
         {
           T::FileInfo *fileInfo = new T::FileInfo();
           fileInfo->setCsv(reply->element[t]->str);
-          startFileId = fileInfo->mFileId + 1;
-          if (fileInfo->mGenerationId == generationId)
+
+          if (fileInfo->mFileId >= startFileId)
           {
-            fileInfoList.addFileInfo(fileInfo);
+            startFileId = fileInfo->mFileId + 1;
+            if (fileInfo->mGenerationId == generationId)
+              fileInfoList.addFileInfo(fileInfo);
+            else
+              delete fileInfo;
+
             if (fileInfoList.getLength() == maxRecords)
             {
               freeReplyObject(reply);
@@ -3693,8 +4251,13 @@ int RedisImplementation::getFileListByGenerationId(uint generationId,uint startF
             delete fileInfo;
           }
         }
+        freeReplyObject(reply);
       }
-      freeReplyObject(reply);
+      else
+      {
+        freeReplyObject(reply);
+        return Result::OK;
+      }
     }
     return Result::OK;
   }
@@ -3716,8 +4279,11 @@ int RedisImplementation::getFileListByGroupFlags(uint groupFlags,uint startFileI
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    while (true)
+    uint prevFileId = 0xFFFFFFFF;
+
+    while (startFileId != prevFileId)
     {
+      prevFileId = startFileId;
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE files %u %u LIMIT 0 10000",startFileId,0xFFFFFFFF);
       if (reply == NULL)
       {
@@ -3737,10 +4303,15 @@ int RedisImplementation::getFileListByGroupFlags(uint groupFlags,uint startFileI
         {
           T::FileInfo *fileInfo = new T::FileInfo();
           fileInfo->setCsv(reply->element[t]->str);
-          startFileId = fileInfo->mFileId + 1;
-          if ((fileInfo->mGroupFlags & groupFlags) != 0)
+
+          if (fileInfo->mFileId >= startFileId)
           {
-            fileInfoList.addFileInfo(fileInfo);
+            startFileId = fileInfo->mFileId + 1;
+            if ((fileInfo->mGroupFlags & groupFlags) != 0)
+              fileInfoList.addFileInfo(fileInfo);
+            else
+              delete fileInfo;
+
             if (fileInfoList.getLength() == maxRecords)
             {
               freeReplyObject(reply);
@@ -3752,8 +4323,13 @@ int RedisImplementation::getFileListByGroupFlags(uint groupFlags,uint startFileI
             delete fileInfo;
           }
         }
+        freeReplyObject(reply);
       }
-      freeReplyObject(reply);
+      else
+      {
+        freeReplyObject(reply);
+        return Result::OK;
+      }
     }
     return Result::OK;
   }
@@ -3808,8 +4384,12 @@ int RedisImplementation::getFileListByProducerId(uint producerId,uint startFileI
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    while (true)
+    uint prevFileId = 0xFFFFFFFF;
+
+    while (startFileId != prevFileId)
     {
+      prevFileId = startFileId;
+
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE files %u %u LIMIT 0 10000",startFileId,0xFFFFFFFF);
       if (reply == NULL)
       {
@@ -3829,10 +4409,14 @@ int RedisImplementation::getFileListByProducerId(uint producerId,uint startFileI
         {
           T::FileInfo *fileInfo = new T::FileInfo();
           fileInfo->setCsv(reply->element[t]->str);
-          startFileId = fileInfo->mFileId + 1;
-          if (fileInfo->mProducerId == producerId)
+          if (fileInfo->mFileId >= startFileId)
           {
-            fileInfoList.addFileInfo(fileInfo);
+            startFileId = fileInfo->mFileId + 1;
+            if (fileInfo->mProducerId == producerId)
+              fileInfoList.addFileInfo(fileInfo);
+            else
+              delete fileInfo;
+
             if (fileInfoList.getLength() == maxRecords)
             {
               freeReplyObject(reply);
@@ -3844,151 +4428,15 @@ int RedisImplementation::getFileListByProducerId(uint producerId,uint startFileI
             delete fileInfo;
           }
         }
+        freeReplyObject(reply);
       }
-      freeReplyObject(reply);
+      else
+      {
+        freeReplyObject(reply);
+        return Result::OK;
+      }
     }
     return Result::OK;
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
-  }
-}
-
-
-
-
-
-int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    AutoThreadLock lock(&mThreadLock);
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    return getContentByParameterIdAndTimeRange(parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,contentInfoList);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
-  }
-}
-
-
-
-
-
-int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    AutoThreadLock lock(&mThreadLock);
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    T::GenerationInfo generationInfo;
-    if (getGenerationById(generationId,generationInfo) != Result::OK)
-      return Result::UNKNOWN_GENERATION_ID;
-
-    return getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,contentInfoList);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
-  }
-}
-
-
-
-
-
-int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,std::string generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    AutoThreadLock lock(&mThreadLock);
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    T::GenerationInfo generationInfo;
-    if (getGenerationByName(generationName,generationInfo) != Result::OK)
-      return Result::UNKNOWN_GENERATION_NAME;
-
-    return getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,contentInfoList);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
-  }
-}
-
-
-
-
-
-int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    AutoThreadLock lock(&mThreadLock);
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    T::ProducerInfo producerInfo;
-    if (getProducerById(producerId,producerInfo) != Result::OK)
-      return Result::UNKNOWN_PRODUCER_ID;
-
-    return getContentByParameterIdAndProducer(producerInfo.mProducerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,contentInfoList);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
-  }
-}
-
-
-
-
-
-int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,std::string producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    AutoThreadLock lock(&mThreadLock);
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    T::ProducerInfo producerInfo;
-    if (getProducerByName(producerName,producerInfo) != Result::OK)
-      return Result::UNKNOWN_PRODUCER_NAME;
-
-    return getContentByParameterIdAndProducer(producerInfo.mProducerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,contentInfoList);
   }
   catch (...)
   {
@@ -4249,7 +4697,10 @@ int RedisImplementation::getContent(uint startFileId,uint startMessageIndex,uint
         T::ContentInfo *contentInfo = new T::ContentInfo();
         contentInfo->setCsv(reply->element[t]->str);
 
-        contentInfoList.addContentInfo(contentInfo);
+        if (contentInfo->mFileId > startFileId  ||  (contentInfo->mFileId == startFileId   &&  contentInfo->mMessageIndex > startMessageIndex))
+          contentInfoList.addContentInfo(contentInfo);
+        else
+          delete contentInfo;
       }
     }
     freeReplyObject(reply);
@@ -4273,9 +4724,12 @@ int RedisImplementation::getContentByGenerationId(uint generationId,uint startFi
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    while (true)
+    unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+    unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
+
+    while (startId != prevStartId)
     {
-      unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+      prevStartId = startId;
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE content %llu %llu LIMIT 0 10000",startId,0xFFFFFFFFFFFFFFFF);
       if (reply == NULL)
@@ -4297,12 +4751,16 @@ int RedisImplementation::getContentByGenerationId(uint generationId,uint startFi
           T::ContentInfo *contentInfo = new T::ContentInfo();
           contentInfo->setCsv(reply->element[t]->str);
 
-          startFileId = contentInfo->mFileId;
-          startMessageIndex = contentInfo->mMessageIndex + 1;
-
-          if (contentInfo->mGenerationId == generationId)
+          if (contentInfo->mFileId > startFileId  ||  (contentInfo->mFileId == startFileId   &&  contentInfo->mMessageIndex >= startMessageIndex))
           {
-            contentInfoList.addContentInfo(contentInfo);
+            startFileId = contentInfo->mFileId;
+            startMessageIndex = contentInfo->mMessageIndex + 1;
+
+            if (contentInfo->mGenerationId == generationId)
+              contentInfoList.addContentInfo(contentInfo);
+            else
+              delete contentInfo;
+
             if (contentInfoList.getLength() == maxRecords)
             {
               freeReplyObject(reply);
@@ -4314,8 +4772,14 @@ int RedisImplementation::getContentByGenerationId(uint generationId,uint startFi
             delete contentInfo;
           }
         }
+        freeReplyObject(reply);
       }
-      freeReplyObject(reply);
+      else
+      {
+        freeReplyObject(reply);
+        return Result::OK;
+      }
+      startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
     }
     return Result::OK;
   }
@@ -4337,9 +4801,12 @@ int RedisImplementation::getContentByGroupFlags(uint groupFlags,uint startFileId
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    while (true)
+    unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+    unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
+
+    while (startId != prevStartId)
     {
-      unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+      prevStartId = startId;
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE content %llu %llu LIMIT 0 10000",startId,0xFFFFFFFFFFFFFFFF);
       if (reply == NULL)
@@ -4361,12 +4828,16 @@ int RedisImplementation::getContentByGroupFlags(uint groupFlags,uint startFileId
           T::ContentInfo *contentInfo = new T::ContentInfo();
           contentInfo->setCsv(reply->element[t]->str);
 
-          startFileId = contentInfo->mFileId;
-          startMessageIndex = contentInfo->mMessageIndex + 1;
-
-          if ((contentInfo->mGroupFlags & groupFlags) != 0)
+          if (contentInfo->mFileId > startFileId  ||  (contentInfo->mFileId == startFileId   &&  contentInfo->mMessageIndex >= startMessageIndex))
           {
-            contentInfoList.addContentInfo(contentInfo);
+            startFileId = contentInfo->mFileId;
+            startMessageIndex = contentInfo->mMessageIndex + 1;
+
+            if ((contentInfo->mGroupFlags & groupFlags) != 0)
+              contentInfoList.addContentInfo(contentInfo);
+            else
+              delete contentInfo;
+
             if (contentInfoList.getLength() == maxRecords)
             {
               freeReplyObject(reply);
@@ -4378,8 +4849,14 @@ int RedisImplementation::getContentByGroupFlags(uint groupFlags,uint startFileId
             delete contentInfo;
           }
         }
+        freeReplyObject(reply);
       }
-      freeReplyObject(reply);
+      else
+      {
+        freeReplyObject(reply);
+        return Result::OK;
+      }
+      startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
     }
     return Result::OK;
   }
@@ -4615,9 +5092,12 @@ int RedisImplementation::getContentByProducerId(uint producerId,uint startFileId
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    while (true)
+    unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+    unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
+
+    while (startId != prevStartId)
     {
-      unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+      prevStartId = startId;
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE content %llu %llu LIMIT 0 10000",startId,0xFFFFFFFFFFFFFFFF);
       if (reply == NULL)
@@ -4625,6 +5105,8 @@ int RedisImplementation::getContentByProducerId(uint producerId,uint startFileId
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
       }
+
+      printf("getContentByProducerId %u %u => %u\n",startFileId,startMessageIndex,(uint)reply->elements);
 
       if (reply->elements == 0)
       {
@@ -4639,12 +5121,16 @@ int RedisImplementation::getContentByProducerId(uint producerId,uint startFileId
           T::ContentInfo *contentInfo = new T::ContentInfo();
           contentInfo->setCsv(reply->element[t]->str);
 
-          startFileId = contentInfo->mFileId;
-          startMessageIndex = contentInfo->mMessageIndex + 1;
-
-          if (contentInfo->mProducerId == producerId)
+          if (contentInfo->mFileId > startFileId  ||  (contentInfo->mFileId == startFileId   &&  contentInfo->mMessageIndex >= startMessageIndex))
           {
-            contentInfoList.addContentInfo(contentInfo);
+            startFileId = contentInfo->mFileId;
+            startMessageIndex = contentInfo->mMessageIndex + 1;
+
+            if (contentInfo->mProducerId == producerId)
+              contentInfoList.addContentInfo(contentInfo);
+            else
+              delete contentInfo;
+
             if (contentInfoList.getLength() == maxRecords)
             {
               freeReplyObject(reply);
@@ -4656,8 +5142,14 @@ int RedisImplementation::getContentByProducerId(uint producerId,uint startFileId
             delete contentInfo;
           }
         }
+        freeReplyObject(reply);
       }
-      freeReplyObject(reply);
+      else
+      {
+        freeReplyObject(reply);
+        return Result::OK;
+      }
+      startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
     }
     return Result::OK;
   }
@@ -4680,9 +5172,13 @@ int RedisImplementation::getContentByServerId(uint serverId,uint startFileId,uin
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     unsigned long long sf = 1 << (serverId-1);
-    while (true)
+    unsigned long long startId = 0;
+    unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
+
+    while (startId != prevStartId)
     {
-      unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+      startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+      prevStartId = startId;
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE content %llu %llu LIMIT 0 10000",startId,0xFFFFFFFFFFFFFFFF);
       if (reply == NULL)
@@ -4704,12 +5200,16 @@ int RedisImplementation::getContentByServerId(uint serverId,uint startFileId,uin
           T::ContentInfo *contentInfo = new T::ContentInfo();
           contentInfo->setCsv(reply->element[t]->str);
 
-          startFileId = contentInfo->mFileId;
-          startMessageIndex = contentInfo->mMessageIndex + 1;
-
-          if ((contentInfo->mServerFlags & sf) != 0)
+          if (contentInfo->mFileId > startFileId  ||  (contentInfo->mFileId == startFileId   &&  contentInfo->mMessageIndex >= startMessageIndex))
           {
-            contentInfoList.addContentInfo(contentInfo);
+            startFileId = contentInfo->mFileId;
+            startMessageIndex = contentInfo->mMessageIndex + 1;
+
+            if ((contentInfo->mServerFlags & sf) != 0)
+              contentInfoList.addContentInfo(contentInfo);
+            else
+              delete contentInfo;
+
             if (contentInfoList.getLength() == maxRecords)
             {
               freeReplyObject(reply);
@@ -4721,8 +5221,13 @@ int RedisImplementation::getContentByServerId(uint serverId,uint startFileId,uin
             delete contentInfo;
           }
         }
+        freeReplyObject(reply);
       }
-      freeReplyObject(reply);
+      else
+      {
+        freeReplyObject(reply);
+        return Result::OK;
+      }
     }
     return Result::OK;
   }
@@ -4763,8 +5268,13 @@ int RedisImplementation::getContentByFileId(uint fileId,T::ContentInfoList& cont
 
         contentInfoList.addContentInfo(contentInfo);
       }
+      freeReplyObject(reply);
     }
-    freeReplyObject(reply);
+    else
+    {
+      freeReplyObject(reply);
+      return Result::OK;
+    }
 
     return Result::OK;
   }
@@ -4871,6 +5381,9 @@ T::EventId RedisImplementation::addEvent(EventType eventType,uint id1,uint id2,u
 
     freeReplyObject(reply);
 
+    if ((eventId % 10000) == 0)
+      truncateEvents();
+
     return eventId;
   }
   catch (...)
@@ -4878,6 +5391,57 @@ T::EventId RedisImplementation::addEvent(EventType eventType,uint id1,uint id2,u
     throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
   }
 }
+
+
+
+
+void RedisImplementation::truncateEvents()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return;
+
+    uint maxEvents = 3000000;
+    uint count = 0;
+
+    redisReply *reply = (redisReply*)redisCommand(mContext,"ZCOUNT events 0 %llu",0xFFFFFFFFFFFFFFFF);
+    if (reply == NULL)
+    {
+      closeConnection();
+      return;
+    }
+
+    if (reply->str != NULL)
+      count = (uint)atoi(reply->str);
+    else
+      count = (uint)reply->integer;
+
+    printf("EVENTS %u (%s)\n",count,reply->str);
+
+    freeReplyObject(reply);
+
+
+    if (count > maxEvents)
+    {
+      RedisModificationLock redisModificationLock(mContext);
+
+      reply = (redisReply*)redisCommand(mContext,"ZREMRANGEBYRANK events 0 %u",count-maxEvents+10000);
+      if (reply == NULL)
+      {
+        closeConnection();
+        return;
+      }
+      freeReplyObject(reply);
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
 
 
 

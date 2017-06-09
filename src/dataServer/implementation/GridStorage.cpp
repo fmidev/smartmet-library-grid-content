@@ -202,7 +202,10 @@ void GridStorage::deleteFilesByProducerId(uint producerId)
     for (int t=sz; t>=0; t--)
     {
       if (mFileList[t]->getProducerId() == producerId)
+      {
+        printf("--- delete file %u (%d)\n",mFileList[t]->getFileId(),(int)mFileList.size()-1);
         mFileList.erase(mFileList.begin() + t);
+      }
     }
   }
   catch (...)

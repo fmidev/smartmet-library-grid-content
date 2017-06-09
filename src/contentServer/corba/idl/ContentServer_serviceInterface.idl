@@ -25,6 +25,7 @@ interface ServiceInterface
   long  getDataServerInfoByName(in long long sessionId,in string serverName,out CorbaServerInfo serverInfo);
   long  getDataServerInfoByIor(in long long sessionId,in string serverIor,out CorbaServerInfo serverInfo);
   long  getDataServerInfoList(in long long sessionId,out CorbaServerInfoList serverInfoList);
+  long  getDataServerInfoCount(in long long sessionId,out unsigned long count);
 
   long  addProducerInfo(in long long sessionId,inout CorbaProducerInfo producerInfo);
   long  deleteProducerInfoById(in long long sessionId,in unsigned long producerId);
@@ -32,6 +33,7 @@ interface ServiceInterface
   long  getProducerInfoById(in long long sessionId,in unsigned long producerId,out CorbaProducerInfo producerInfo);
   long  getProducerInfoByName(in long long sessionId,in string producerName,out CorbaProducerInfo producerInfo);
   long  getProducerInfoList(in long long sessionId,out CorbaProducerInfoList producerInfoList);
+  long  getProducerInfoCount(in long long sessionId,out unsigned long count);
 
   long  addGenerationInfo(in long long sessionId,inout CorbaGenerationInfo generationInfo);
   long  deleteGenerationInfoById(in long long sessionId,in unsigned long generationId);
@@ -45,6 +47,7 @@ interface ServiceInterface
   long  getGenerationInfoListByProducerName(in long long sessionId,in string producerName,out CorbaGenerationInfoList generationInfoList);
   long  getLastGenerationInfoByProducerIdAndStatus(in long long sessionId,in unsigned long producerId,in octet generationStatus,out CorbaGenerationInfo generationInfo);
   long  getLastGenerationInfoByProducerNameAndStatus(in long long sessionId,in string producerName,in octet generationStatus,out CorbaGenerationInfo generationInfo);
+  long  getGenerationInfoCount(in long long sessionId,out unsigned long count);
   long  setGenerationInfoStatusById(in long long sessionId,in unsigned long generationId,in octet status);
   long  setGenerationInfoStatusByName(in long long sessionId,in string generationName,in octet status);
 
@@ -65,10 +68,12 @@ interface ServiceInterface
   long  getFileInfoListByGenerationId(in long long sessionId,in unsigned long generationId,in unsigned long startFileId,in unsigned long maxRecords,out CorbaFileInfoList fileInfoList);
   long  getFileInfoListByGenerationName(in long long sessionId,in string generationName,in unsigned long startFileId,in unsigned long maxRecords,out CorbaFileInfoList fileInfoList);
   long  getFileInfoListByGroupFlags(in long long sessionId,in unsigned long groupFlags,in unsigned long startFileId,in unsigned long maxRecords,out CorbaFileInfoList fileInfoList);
+  long  getFileInfoCount(in long long sessionId,out unsigned long count);
   
   long  addEventInfo(in long long sessionId,inout CorbaEventInfo eventInfo);
   long  getLastEventInfo(in long long sessionId,in unsigned long requestingServerId,out CorbaEventInfo eventInfo);
   long  getEventInfoList(in long long sessionId,in unsigned long requestingServerId,in unsigned long long startEventId,in unsigned long maxRecords,out CorbaEventInfoList eventInfoList);
+  long  getEventInfoCount(in long long sessionId,out unsigned long count);
 
   long  addContentInfo(in long long sessionId,inout CorbaContentInfo contentInfo);
   long  addContentList(in long long sessionId,inout CorbaContentInfoList contentInfoList);
@@ -103,6 +108,8 @@ interface ServiceInterface
   long  getContentListByParameterAndGenerationName(in long long sessionId,in string generationName,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in unsigned long minLevel,in unsigned long maxLevel,in string startTime,in string endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
   long  getContentListByParameterAndProducerId(in long long sessionId,in unsigned long producerId,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in unsigned long minLevel,in unsigned long maxLevel,in string startTime,in string endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
   long  getContentListByParameterAndProducerName(in long long sessionId,in string producerName,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in unsigned long minLevel,in unsigned long maxLevel,in string startTime,in string endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
+
+  long  getContentCount(in long long sessionId,out unsigned long count);
 };  
 
 

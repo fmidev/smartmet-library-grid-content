@@ -33,6 +33,7 @@ class ClientImplementation : public ContentServer::ServiceInterface
      virtual int    _getDataServerInfoByName(T::SessionId sessionId,std::string serverName,T::ServerInfo& serverInfo);
      virtual int    _getDataServerInfoByIor(T::SessionId sessionId,std::string serverIor,T::ServerInfo& serverInfo);
      virtual int    _getDataServerInfoList(T::SessionId sessionId,T::ServerInfoList& serverInfoList);
+     virtual int    _getDataServerInfoCount(T::SessionId sessionId,uint& count);
 
      virtual int    _addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo);
      virtual int    _deleteProducerInfoById(T::SessionId sessionId,uint producerId);
@@ -40,6 +41,7 @@ class ClientImplementation : public ContentServer::ServiceInterface
      virtual int    _getProducerInfoById(T::SessionId sessionId,uint producerId,T::ProducerInfo& producerInfo);
      virtual int    _getProducerInfoByName(T::SessionId sessionId,std::string producerName,T::ProducerInfo& producerInfo);
      virtual int    _getProducerInfoList(T::SessionId sessionId,T::ProducerInfoList& producerInfoList);
+     virtual int    _getProducerInfoCount(T::SessionId sessionId,uint& count);
 
      virtual int    _addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo);
      virtual int    _deleteGenerationInfoById(T::SessionId sessionId,uint generationId);
@@ -53,6 +55,7 @@ class ClientImplementation : public ContentServer::ServiceInterface
      virtual int    _getGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName,T::GenerationInfoList& generationInfoList);
      virtual int    _getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,uint producerId,T::GenerationStatus generationStatus,T::GenerationInfo& generationInfo);
      virtual int    _getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,std::string producerName,T::GenerationStatus generationStatus,T::GenerationInfo& generationInfo);
+     virtual int    _getGenerationInfoCount(T::SessionId sessionId,uint& count);
      virtual int    _setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,T::GenerationStatus status);
      virtual int    _setGenerationInfoStatusByName(T::SessionId sessionId,std::string generationName,T::GenerationStatus status);
 
@@ -73,10 +76,12 @@ class ClientImplementation : public ContentServer::ServiceInterface
      virtual int    _getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      virtual int    _getFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      virtual int    _getFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
+     virtual int    _getFileInfoCount(T::SessionId sessionId,uint& count);
 
      virtual int    _addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo);
      virtual int    _getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo);
      virtual int    _getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,uint maxRecords,T::EventInfoList& eventInfoList);
+     virtual int    _getEventInfoCount(T::SessionId sessionId,uint& count);
 
      virtual int    _addContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo);
      virtual int    _addContentList(T::SessionId sessionId,T::ContentInfoList& contentInfoList);
@@ -111,6 +116,8 @@ class ClientImplementation : public ContentServer::ServiceInterface
      virtual int    _getContentListByParameterAndGenerationName(T::SessionId sessionId,std::string generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByParameterAndProducerName(T::SessionId sessionId,std::string producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList);
+
+     virtual int    _getContentCount(T::SessionId sessionId,uint& count);
 
      virtual void   sendRequest(T::RequestMessage& request,T::ResponseMessage& response);
 
