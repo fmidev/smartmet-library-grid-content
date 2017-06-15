@@ -252,27 +252,27 @@ INCLUDES := -Isrc $(INCLUDES)
 
 all:
 ifneq ($(CORBA), disabled)
-	make create_stubs;
+	$(MAKE) create_stubs;
 endif	
-	make obj_and_lib; 
+	$(MAKE) obj_and_lib; 
 
 debug:
 ifneq ($(CORBA), disabled)
-	make create_stubs;
+	$(MAKE) create_stubs;
 endif	
-	make obj_and_lib; 
+	$(MAKE) obj_and_lib; 
 
 release:
 ifneq ($(CORBA), disabled)
-	make create_stubs;
+	$(MAKE) create_stubs;
 endif	
-	make obj_and_lib; 
+	$(MAKE) obj_and_lib; 
 
 profile:
 ifneq ($(CORBA), disabled)
-	make create_stubs;
+	$(MAKE) create_stubs;
 endif	
-	make obj_and_lib; 
+	$(MAKE) obj_and_lib; 
 
 obj_and_lib: objdir $(LIBFILE)
 

@@ -1959,8 +1959,12 @@ int CacheImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    if (mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(fileId,messageIndex))
+    T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(fileId,messageIndex);
+    if (cInfo != NULL)
+    {
+      contentInfo = *cInfo;
       return Result::OK;
+    }
 
     return Result::DATA_NOT_FOUND;
   }
