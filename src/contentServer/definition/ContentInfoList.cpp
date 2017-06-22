@@ -221,6 +221,63 @@ void ContentInfoList::addContentInfo(ContentInfo *contentInfo)
 
 
 
+void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+    uint len = contentInfoList.getLength();
+
+    if (mArray == NULL  ||  mLength == mSize  ||  (mLength + len) > mSize)
+    {
+      increaseSize(mLength + len + 10);
+    }
+
+    for (uint t=0; t<len; t++)
+    {
+      ContentInfo *cInfo = contentInfoList.getContentInfoByIndex(t);
+      ContentInfo *contentInfo = cInfo->duplicate();
+
+      if (mComparisonMethod == ContentInfo::ComparisonMethod::none)
+      {
+        mArray[mLength] = contentInfo;
+        mLength++;
+      }
+      else
+      {
+        int idx = getClosestIndexNoLock(mComparisonMethod,*contentInfo);
+
+        while (idx < (int)mLength  &&  mArray[idx] != NULL  &&   mArray[idx]->compare(mComparisonMethod,contentInfo) < 0)
+        {
+          idx++;
+        }
+
+        if (idx == (int)mLength)
+        {
+          mArray[mLength] = contentInfo;
+          mLength++;
+        }
+        else
+        {
+          if (idx < (int)mLength)
+            memmove(&mArray[idx+1],&mArray[idx],sizeof(void*)*(mLength-idx));
+
+          mArray[idx] = contentInfo;
+          mLength++;
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
 void ContentInfoList::increaseSize(uint newSize)
 {
   FUNCTION_TRACE
@@ -774,6 +831,9 @@ bool ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,uint mes
 
 
 
+
+
+
 ContentInfo* ContentInfoList::getContentInfoByIndex(uint index)
 {
   FUNCTION_TRACE
@@ -807,6 +867,53 @@ ContentInfo* ContentInfoList::getContentInfoByIndexNoCheck(uint index)
     throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
   }
 }
+
+
+
+
+
+ContentInfo* ContentInfoList::getContentInfoByParameterLevelInfo(T::ParameterLevelInfo& levelInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != NULL  &&  info->mParameterLevel == levelInfo.mLevel)
+      {
+        if ((levelInfo.mParameterKeyType == T::ParamKeyType::FMI_ID  &&  info->mFmiParameterId == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyType::FMI_NAME  &&  info->mFmiParameterName == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyType::NEWBASE_ID  &&  info->mNewbaseParameterId == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyType::NEWBASE_NAME  &&  info->mNewbaseParameterName == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyType::CDM_ID  &&  info->mCdmParameterId == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyType::CDM_NAME  &&  info->mCdmParameterName == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyType::GRIB_ID  &&  info->mGribParameterId == levelInfo.mParameterKey))
+        {
+          if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdType::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdType::FMI) &&
+              info->mFmiParameterLevelId == levelInfo.mParameterLevelId)
+            return info;
+
+          if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdType::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdType::GRIB1) &&
+              info->mGrib1ParameterLevelId == levelInfo.mParameterLevelId)
+            return info;
+
+          if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdType::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdType::GRIB2) &&
+              info->mGrib2ParameterLevelId == levelInfo.mParameterLevelId)
+            return info;
+        }
+      }
+    }
+    return NULL;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
 
 
 
@@ -943,6 +1050,62 @@ void ContentInfoList::getContentInfoListByFileId(uint fileId,ContentInfoList& co
     {
       ContentInfo *info = mArray[t];
       if (info != NULL  &&  info->mFileId == fileId)
+      {
+        if (contentInfoList.getReleaseObjects())
+          contentInfoList.addContentInfo(info->duplicate());
+        else
+          contentInfoList.addContentInfo(info);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+void ContentInfoList::getContentInfoListByStartTime(std::string startTime,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+
+    if (mComparisonMethod == ContentInfo::ComparisonMethod::starttime_fmiId_fmiLevelId_level_file_message)
+    {
+      ContentInfo info;
+      info.mStartTime = startTime;
+      int idx = getClosestIndexNoLock(mComparisonMethod,info);
+      uint t = 0;
+      if (idx >= 0)
+        t = (uint)idx;
+
+      while (t < mLength)
+      {
+        ContentInfo *info = mArray[t];
+        if (info != NULL &&  info->mStartTime > startTime)
+          return;
+
+        if (info != NULL  &&  info->mStartTime == startTime)
+        {
+          if (contentInfoList.getReleaseObjects())
+            contentInfoList.addContentInfo(info->duplicate());
+          else
+            contentInfoList.addContentInfo(info);
+        }
+        t++;
+      }
+      return;
+    }
+
+
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != NULL  &&  info->mStartTime == startTime)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -4414,6 +4577,178 @@ void ContentInfoList::getContentInfoListByServerAndFileId(uint serverId,uint fil
   }
 }
 
+
+
+
+
+void ContentInfoList::getFmiParamLevelIdListByFmiParameterId(T::ParamId fmiParameterId,std::vector<T::ParamLevelId>& paramLevelIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != NULL)
+      {
+        uint vLen = (uint)paramLevelIdList.size();
+        uint c = 0;
+        while (c < vLen)
+        {
+          if (info->mFmiParameterId == fmiParameterId)
+          {
+            if (paramLevelIdList[c] == info->mFmiParameterLevelId)
+            {
+              c = vLen;
+            }
+            else
+            if (paramLevelIdList[c] > info->mFmiParameterLevelId)
+            {
+              paramLevelIdList.insert(paramLevelIdList.begin() + c,info->mFmiParameterLevelId);
+              c = vLen;
+            }
+          }
+          c++;
+        }
+        if (c == vLen)
+        {
+          if (info->mFmiParameterId == fmiParameterId)
+            paramLevelIdList.push_back(info->mFmiParameterLevelId);
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+
+void ContentInfoList::getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId,std::vector<T::ParamLevel>& paramLevelList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != NULL)
+      {
+        uint vLen = (uint)paramLevelList.size();
+        uint c = 0;
+        while (c < vLen)
+        {
+          if (info->mFmiParameterLevelId == paramLevelId)
+          {
+            if (paramLevelList[c] == info->mParameterLevel)
+            {
+              c = vLen;
+            }
+            else
+            if (paramLevelList[c] > info->mParameterLevel)
+            {
+              paramLevelList.insert(paramLevelList.begin() + c,info->mParameterLevel);
+              c = vLen;
+            }
+          }
+          c++;
+        }
+        if (c == vLen)
+        {
+          if (info->mFmiParameterLevelId == paramLevelId)
+          paramLevelList.push_back(info->mParameterLevel);
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getParamLevelInfoListByFmiParameterId(T::ParamId fmiParameterId,ParameterLevelInfoList& parameterLevelInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != NULL  &&  info->mFmiParameterId == fmiParameterId)
+      {
+        ParameterLevelInfo *pInfo = parameterLevelInfoList.getParameterLevelInfo(T::ParamKeyType::FMI_ID,
+            info->mFmiParameterId,T::ParamLevelIdType::FMI,info->mFmiParameterLevelId,info->mParameterLevel);
+
+        if (pInfo == NULL)
+        {
+          pInfo = new ParameterLevelInfo(T::ParamKeyType::FMI_ID,info->mFmiParameterId,T::ParamLevelIdType::FMI,info->mFmiParameterLevelId,info->mParameterLevel);
+          parameterLevelInfoList.addParameterLevelInfo(pInfo);
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getStartTimeList(std::vector<std::string>& startTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != NULL)
+      {
+        uint vLen = (uint)startTimeList.size();
+        uint c = 0;
+        while (c < vLen)
+        {
+          if (startTimeList[c] == info->mStartTime)
+          {
+            c = vLen;
+          }
+          else
+          if (startTimeList[c] > info->mStartTime)
+          {
+            startTimeList.insert(startTimeList.begin() + c,info->mStartTime);
+            c = vLen;
+          }
+          c++;
+        }
+        if (c == vLen)
+        {
+          startTimeList.push_back(info->mStartTime);
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
 
 
 

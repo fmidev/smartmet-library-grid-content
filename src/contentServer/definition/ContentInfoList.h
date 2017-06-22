@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ContentInfo.h"
+#include "ParameterLevelInfoList.h"
 #include "grid-files/common/ModificationLock.h"
 #include <vector>
 
@@ -21,6 +22,7 @@ class ContentInfoList
      void             operator=(ContentInfoList& contentInfoList);
 
      void             addContentInfo(ContentInfo *contentInfo);
+     void             addContentInfoList(ContentInfoList& contentInfoList);
      void             clear();
      uint             deleteContentInfoByFileId(uint fileId);
      uint             deleteContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex);
@@ -34,9 +36,11 @@ class ContentInfoList
      ContentInfo*     getContentInfoByIndexNoCheck(uint index);
      ContentInfo*     getContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex);
      bool             getContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex,ContentInfo& contentInfo);
+     ContentInfo*     getContentInfoByParameterLevelInfo(T::ParameterLevelInfo& levelInfo);
      void             getContentInfoList(uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
      void             getContentInfoListByGroupFlags(uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
      void             getContentInfoListByFileId(uint fileId,ContentInfoList& contentInfoList);
+     void             getContentInfoListByStartTime(std::string startTime,ContentInfoList& contentInfoList);
 
      void             getContentInfoListByGribParameterId(T::ParamId gribParameterId,ContentInfoList& contentInfoList);
      void             getContentInfoListByGribParameterId(T::ParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList);
@@ -68,6 +72,12 @@ class ContentInfoList
      void             getContentInfoListByServerId(uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
      void             getContentInfoListByServerAndFileId(uint serverId,uint fileId,ContentInfoList& contentInfoList);
      int              getClosestIndex(ContentInfo::ComparisonMethod comparisonMethod,ContentInfo& contentInfo);
+
+     void             getStartTimeList(std::vector<std::string>& startTimeList);
+     void             getFmiParamLevelIdListByFmiParameterId(T::ParamId fmiParameterId,std::vector<T::ParamLevelId>& paramLevelIdList);
+     void             getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId,std::vector<T::ParamLevel>& paramLevelList);
+     void             getParamLevelInfoListByFmiParameterId(T::ParamId fmiParameterId,ParameterLevelInfoList& parameterLevelInfoList);
+
      uint             getLength();
      uint             getSize();
      bool             getReleaseObjects();

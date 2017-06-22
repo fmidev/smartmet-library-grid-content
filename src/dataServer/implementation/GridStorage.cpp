@@ -246,7 +246,7 @@ GRID::GridFile_sptr GridStorage::getFileById(uint fileId)
 {
   try
   {
-    AutoReadLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock);
 
     int idx = getClosestFileIndexByIdNoLock(fileId);
     if (idx >= 0  &&  idx < (int)mFileList.size()  && mFileList[idx]->getFileId() == fileId)

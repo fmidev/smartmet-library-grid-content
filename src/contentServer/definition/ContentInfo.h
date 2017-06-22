@@ -28,7 +28,8 @@ class ContentInfo
       cdmName_level_starttime_file_message            = 8,  // Comparison order: cdmName,level,startTime,fileId,messageIndex
       starttime_file_message                          = 9,  // Comparison order: startTime,fileId,messageIndex
       fmiName_starttime_level_file_message            = 10, // Comparison order: fmiName,level,startTime,fileId,messageIndex
-      fmiId_fmiLevelId_level_starttime_file_message   = 11  // Comparison order: fmiId,fmiLevelId,level,startTime,fileId,messageIndex
+      fmiId_fmiLevelId_level_starttime_file_message   = 11,  // Comparison order: fmiId,fmiLevelId,level,startTime,fileId,messageIndex
+      starttime_fmiId_fmiLevelId_level_file_message   = 12
     };
 
   public:
