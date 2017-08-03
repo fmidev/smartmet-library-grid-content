@@ -36,6 +36,8 @@ struct CorbaContentInfo
   unsigned long      parameterLevel;
   string             fmiParameterUnits;
   string             gribParameterUnits;
+  octet              typeOfEnsembleForecast;
+  octet              perturbationNumber;
   unsigned long      flags;
 };
 

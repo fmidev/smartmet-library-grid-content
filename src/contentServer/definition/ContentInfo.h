@@ -70,6 +70,8 @@ class ContentInfo
      T::ParamLevel      mParameterLevel;
      std::string        mFmiParameterUnits;
      std::string        mGribParameterUnits;
+     unsigned char      mTypeOfEnsembleForecast;
+     unsigned char      mPerturbationNumber;
      unsigned long long mServerFlags;
      uint               mFlags;
 };

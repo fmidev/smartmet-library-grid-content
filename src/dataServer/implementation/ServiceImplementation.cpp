@@ -270,6 +270,8 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
     data.mProjection = (uint)message->getGridProjection();
     data.mColumns = (uint)message->getGridOriginalColumnCount();
     data.mRows = (uint)message->getGridOriginalRowCount();
+    data.mTypeOfEnsembleForecast = (unsigned char)*message->getTypeOfEnsembleForecast();
+    data.mPerturbationNumber = (unsigned char)*message->getPerturbationNumber();
     message->getGridProjectionAttributes("",data.mProjectionAttributes);
 
     message->getParameterValues(data.mValues);
@@ -561,6 +563,8 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
         contentInfo->mCdmParameterName = message->getCdmParameterName();
         contentInfo->mNewbaseParameterId = message->getNewbaseParameterId();
         contentInfo->mNewbaseParameterName = message->getNewbaseParameterName();
+        contentInfo->mTypeOfEnsembleForecast = (unsigned char)*message->getTypeOfEnsembleForecast();
+        contentInfo->mPerturbationNumber = (unsigned char)*message->getPerturbationNumber();
         contentInfo->mFlags = 0;
 
         //contentInfo->print(std::cout,0,0);

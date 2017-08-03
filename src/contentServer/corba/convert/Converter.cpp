@@ -66,6 +66,8 @@ void Converter::convert(T::ContentInfo& source,ContentServer::Corba::CorbaConten
     target.parameterLevel = source.mParameterLevel;
     target.fmiParameterUnits = CORBA::string_dup(source.mFmiParameterUnits.c_str());
     target.gribParameterUnits = CORBA::string_dup(source.mGribParameterUnits.c_str());
+    target.typeOfEnsembleForecast = source.mTypeOfEnsembleForecast;
+    target.perturbationNumber = source.mPerturbationNumber;
     target.flags = source.mFlags;
   }
   catch (...)
@@ -104,6 +106,8 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::
     target.mParameterLevel = source.parameterLevel;
     target.mFmiParameterUnits = source.fmiParameterUnits;
     target.mGribParameterUnits = source.gribParameterUnits;
+    target.mTypeOfEnsembleForecast = source.typeOfEnsembleForecast;
+    target.mPerturbationNumber = source.perturbationNumber;
     target.mFlags = source.flags;
   }
   catch (...)

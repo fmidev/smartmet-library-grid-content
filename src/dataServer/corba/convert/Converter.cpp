@@ -75,6 +75,8 @@ void Converter::convert(T::GridData& source,DataServer::Corba::CorbaGridData& ta
     target.projection = source.mProjection;
     target.columns = source.mColumns;
     target.rows = source.mRows;
+    target.typeOfEnsembleForecast = source.mTypeOfEnsembleForecast;
+    target.perturbationNumber = source.mPerturbationNumber;
 
     convert(source.mProjectionAttributes,target.projectionAttributes);
 
@@ -128,6 +130,8 @@ void Converter::convert(DataServer::Corba::CorbaGridData& source,T::GridData& ta
     target.mProjection = source.projection;
     target.mColumns = source.columns;
     target.mRows = source.rows;
+    target.mTypeOfEnsembleForecast = source.typeOfEnsembleForecast;
+    target.mPerturbationNumber = source.perturbationNumber;
 
     convert(source.projectionAttributes,target.mProjectionAttributes);
 

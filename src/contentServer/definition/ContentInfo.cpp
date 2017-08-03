@@ -26,6 +26,8 @@ ContentInfo::ContentInfo()
     mGrib1ParameterLevelId = 0;
     mGrib2ParameterLevelId = 0;
     mParameterLevel = 0;
+    mTypeOfEnsembleForecast = 0;
+    mPerturbationNumber = 0;
     mFlags = 0;
   }
   catch (...)
@@ -64,6 +66,8 @@ ContentInfo::ContentInfo(ContentInfo& contentInfo)
     mParameterLevel = contentInfo.mParameterLevel;
     mFmiParameterUnits = contentInfo.mFmiParameterUnits;
     mGribParameterUnits = contentInfo.mGribParameterUnits;
+    mTypeOfEnsembleForecast = contentInfo.mTypeOfEnsembleForecast;
+    mPerturbationNumber = contentInfo.mPerturbationNumber;
     mFlags = contentInfo.mFlags;
   }
   catch (...)
@@ -135,6 +139,8 @@ void ContentInfo::operator=(ContentInfo& contentInfo)
     mParameterLevel = contentInfo.mParameterLevel;
     mFmiParameterUnits = contentInfo.mFmiParameterUnits;
     mGribParameterUnits = contentInfo.mGribParameterUnits;
+    mTypeOfEnsembleForecast = contentInfo.mTypeOfEnsembleForecast;
+    mPerturbationNumber = contentInfo.mPerturbationNumber;
     mFlags = contentInfo.mFlags;
   }
   catch (...)
@@ -152,7 +158,7 @@ std::string ContentInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%u;%u;%u;%u;%s;%s;%s;%s;%s;%s;%s;%s;%s;%u;%u;%u;%u;%s;%s;%llu;%u",
+    sprintf(st,"%u;%u;%u;%u;%u;%u;%s;%s;%s;%s;%s;%s;%s;%s;%s;%u;%u;%u;%u;%s;%s;%u;%u;%llu;%u",
         mFileId,
         mMessageIndex,
         (uint)mFileType,
@@ -174,6 +180,8 @@ std::string ContentInfo::getCsv()
         mParameterLevel,
         mFmiParameterUnits.c_str(),
         mGribParameterUnits.c_str(),
+        mTypeOfEnsembleForecast,
+        mPerturbationNumber,
         mServerFlags,
         mFlags);
 
@@ -193,7 +201,7 @@ std::string ContentInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "fileId;messageIndex;fileType;producerId;generationId;groupFlags;startTime;endTime;fmiParameterId;fmiParameterName;gribParameterId;cdmParameterId;cdmParameterName;newbaseParameterId;newbaseParameterName;fmiParameterLevelId;grib1ParameterLevelId;grib2ParameterLevelId;parameterLevel;fmiParameterUnits;gribParameterUnits;serverFlags;flags";
+    std::string header = "fileId;messageIndex;fileType;producerId;generationId;groupFlags;startTime;endTime;fmiParameterId;fmiParameterName;gribParameterId;cdmParameterId;cdmParameterName;newbaseParameterId;newbaseParameterName;fmiParameterLevelId;grib1ParameterLevelId;grib2ParameterLevelId;parameterLevel;fmiParameterUnits;gribParameterUnits;mTypeOfEnsembleForecast;mPerturbationNumber;serverFlags;flags";
     return header;
   }
   catch (...)
@@ -232,7 +240,7 @@ void ContentInfo::setCsv(const char *csv)
       }
     }
 
-    if (c >= 22)
+    if (c >= 24)
     {
       mFileId = (uint)atoll(field[0]);
       mMessageIndex = (uint)atoll(field[1]);
@@ -255,8 +263,10 @@ void ContentInfo::setCsv(const char *csv)
       mParameterLevel = (uint)atoll(field[18]);
       mFmiParameterUnits = field[19];
       mGribParameterUnits = field[20];
-      mServerFlags = (unsigned long long)atoll(field[21]);
-      mFlags = (uint)atoll(field[22]);
+      mTypeOfEnsembleForecast = (unsigned char)atoll(field[21]);
+      mPerturbationNumber = (unsigned char)atoll(field[22]);
+      mServerFlags = (unsigned long long)atoll(field[23]);
+      mFlags = (uint)atoll(field[24]);
     }
   }
   catch (...)
@@ -504,6 +514,12 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         res = uint64_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
+        res = uint_compare(mTypeOfEnsembleForecast,contentInfo->mTypeOfEnsembleForecast);
+        if (res != 0)
+          return res;
+        res = uint_compare(mPerturbationNumber,contentInfo->mPerturbationNumber);
+        if (res != 0)
+          return res;
         res = strcasecmp(mStartTime.c_str(),contentInfo->mStartTime.c_str());
         if (res != 0)
           return res;
@@ -523,6 +539,12 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         if (res != 0)
           return res;
         res = uint64_compare(mParameterLevel,contentInfo->mParameterLevel);
+        if (res != 0)
+          return res;
+        res = uint_compare(mTypeOfEnsembleForecast,contentInfo->mTypeOfEnsembleForecast);
+        if (res != 0)
+          return res;
+        res = uint_compare(mPerturbationNumber,contentInfo->mPerturbationNumber);
         if (res != 0)
           return res;
         res = uint_compare(mFileId,contentInfo->mFileId);
@@ -572,29 +594,31 @@ void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags)
   try
   {
     stream << space(level) << "ContentInfo\n";
-    stream << space(level) << "- mFileId                = " << mFileId << "\n";
-    stream << space(level) << "- mFileType              = " << (uint)mFileType << "\n";
-    stream << space(level) << "- mMessageIndex          = " << mMessageIndex << "\n";
-    stream << space(level) << "- mProducerId            = " << mProducerId << "\n";
-    stream << space(level) << "- mGenerationId          = " << mGenerationId << "\n";
-    stream << space(level) << "- mGroupFlags            = " << mGroupFlags << "\n";
-    stream << space(level) << "- mStartTime             = " << mStartTime << "\n";
-    stream << space(level) << "- mEndTime               = " << mEndTime << "\n";
-    stream << space(level) << "- mFmiParameterId        = " << mFmiParameterId << "\n";
-    stream << space(level) << "- mFmiParameterName      = " << mFmiParameterName << "\n";
-    stream << space(level) << "- mGribParameterId       = " << mGribParameterId << "\n";
-    stream << space(level) << "- mCdmParameterId        = " << mCdmParameterId << "\n";
-    stream << space(level) << "- mCdmParameterName      = " << mCdmParameterName << "\n";
-    stream << space(level) << "- mNewbaseParameterId    = " << mNewbaseParameterId << "\n";
-    stream << space(level) << "- mNewbaseParameterName  = " << mNewbaseParameterName << "\n";
-    stream << space(level) << "- mFmiParameterLevelId   = " << (uint)mFmiParameterLevelId << "\n";
-    stream << space(level) << "- mGrib1ParameterLevelId = " << (uint)mGrib1ParameterLevelId << "\n";
-    stream << space(level) << "- mGrib2ParameterLevelId = " << (uint)mGrib2ParameterLevelId << "\n";
-    stream << space(level) << "- mParameterLevel        = " << mParameterLevel << "\n";
-    stream << space(level) << "- mFmiParameterUnits     = " << mFmiParameterUnits << "\n";
-    stream << space(level) << "- mGribParameterUnits    = " << mGribParameterUnits << "\n";
-    stream << space(level) << "- mServerFlags           = " << mServerFlags << "\n";
-    stream << space(level) << "- mFlags                 = " << mFlags << "\n";
+    stream << space(level) << "- mFileId                 = " << mFileId << "\n";
+    stream << space(level) << "- mFileType               = " << (uint)mFileType << "\n";
+    stream << space(level) << "- mMessageIndex           = " << mMessageIndex << "\n";
+    stream << space(level) << "- mProducerId             = " << mProducerId << "\n";
+    stream << space(level) << "- mGenerationId           = " << mGenerationId << "\n";
+    stream << space(level) << "- mGroupFlags             = " << mGroupFlags << "\n";
+    stream << space(level) << "- mStartTime              = " << mStartTime << "\n";
+    stream << space(level) << "- mEndTime                = " << mEndTime << "\n";
+    stream << space(level) << "- mFmiParameterId         = " << mFmiParameterId << "\n";
+    stream << space(level) << "- mFmiParameterName       = " << mFmiParameterName << "\n";
+    stream << space(level) << "- mGribParameterId        = " << mGribParameterId << "\n";
+    stream << space(level) << "- mCdmParameterId         = " << mCdmParameterId << "\n";
+    stream << space(level) << "- mCdmParameterName       = " << mCdmParameterName << "\n";
+    stream << space(level) << "- mNewbaseParameterId     = " << mNewbaseParameterId << "\n";
+    stream << space(level) << "- mNewbaseParameterName   = " << mNewbaseParameterName << "\n";
+    stream << space(level) << "- mFmiParameterLevelId    = " << (uint)mFmiParameterLevelId << "\n";
+    stream << space(level) << "- mGrib1ParameterLevelId  = " << (uint)mGrib1ParameterLevelId << "\n";
+    stream << space(level) << "- mGrib2ParameterLevelId  = " << (uint)mGrib2ParameterLevelId << "\n";
+    stream << space(level) << "- mParameterLevel         = " << mParameterLevel << "\n";
+    stream << space(level) << "- mFmiParameterUnits      = " << mFmiParameterUnits << "\n";
+    stream << space(level) << "- mGribParameterUnits     = " << mGribParameterUnits << "\n";
+    stream << space(level) << "- mTypeOfEnsembleForecast = " << (uint)mTypeOfEnsembleForecast << "\n";
+    stream << space(level) << "- mPerturbationNumber     = " << (uint)mPerturbationNumber << "\n";
+    stream << space(level) << "- mServerFlags            = " << mServerFlags << "\n";
+    stream << space(level) << "- mFlags                  = " << mFlags << "\n";
   }
   catch (...)
   {

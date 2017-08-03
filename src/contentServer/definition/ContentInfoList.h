@@ -37,6 +37,7 @@ class ContentInfoList
      ContentInfo*     getContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex);
      bool             getContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex,ContentInfo& contentInfo);
      ContentInfo*     getContentInfoByParameterLevelInfo(T::ParameterLevelInfo& levelInfo);
+     void             getContentInfoListByParameterLevelInfo(T::ParameterLevelInfo& levelInfo,ContentInfoList& contentInfoList);
      void             getContentInfoList(uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
      void             getContentInfoListByGroupFlags(uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
      void             getContentInfoListByFileId(uint fileId,ContentInfoList& contentInfoList);

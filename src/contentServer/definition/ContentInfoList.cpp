@@ -918,6 +918,56 @@ ContentInfo* ContentInfoList::getContentInfoByParameterLevelInfo(T::ParameterLev
 
 
 
+void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelInfo& levelInfo,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != NULL  &&  info->mParameterLevel == levelInfo.mLevel)
+      {
+        if ((levelInfo.mParameterKeyType == T::ParamKeyType::FMI_ID  &&  info->mFmiParameterId == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyType::FMI_NAME  &&  info->mFmiParameterName == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyType::NEWBASE_ID  &&  info->mNewbaseParameterId == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyType::NEWBASE_NAME  &&  info->mNewbaseParameterName == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyType::CDM_ID  &&  info->mCdmParameterId == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyType::CDM_NAME  &&  info->mCdmParameterName == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyType::GRIB_ID  &&  info->mGribParameterId == levelInfo.mParameterKey))
+        {
+          if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdType::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdType::FMI) &&
+              info->mFmiParameterLevelId == levelInfo.mParameterLevelId)
+          {
+            contentInfoList.addContentInfo(info->duplicate());
+          }
+
+          if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdType::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdType::GRIB1) &&
+              info->mGrib1ParameterLevelId == levelInfo.mParameterLevelId)
+          {
+            contentInfoList.addContentInfo(info->duplicate());
+          }
+
+          if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdType::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdType::GRIB2) &&
+              info->mGrib2ParameterLevelId == levelInfo.mParameterLevelId)
+          {
+            contentInfoList.addContentInfo(info->duplicate());
+          }
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
 
 void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList)
 {

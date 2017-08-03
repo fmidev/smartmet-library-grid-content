@@ -87,6 +87,8 @@ struct CorbaGridData
   unsigned long       projection;
   unsigned long       columns;
   unsigned long       rows;  
+  octet               typeOfEnsembleForecast;
+  octet               perturbationNumber;
   CorbaAttributeList  projectionAttributes;
   CorbaParamValueList valueList;
 };

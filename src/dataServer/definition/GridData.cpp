@@ -28,6 +28,8 @@ GridData::GridData()
     mProjection = 0;
     mColumns = 0;
     mRows = 0;
+    mTypeOfEnsembleForecast = 0;
+    mPerturbationNumber = 0;
   }
   catch (...)
   {
@@ -72,6 +74,8 @@ GridData::GridData(GridData& gridData)
     mProjection = gridData.mProjection;
     mColumns = gridData.mColumns;
     mRows = gridData.mRows;
+    mTypeOfEnsembleForecast = gridData.mTypeOfEnsembleForecast;
+    mPerturbationNumber = gridData.mPerturbationNumber;
     mProjectionAttributes = gridData.mProjectionAttributes;
     mValues = gridData.mValues;
   }
@@ -134,6 +138,8 @@ void GridData::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mProjection               = " << mProjection << "\n";
     stream << space(level) << "- mColumns                  = " << mColumns << "\n";
     stream << space(level) << "- mRows                     = " << mRows << "\n";
+    stream << space(level) << "- mTypeOfEnsembleForecast   = " << mTypeOfEnsembleForecast << "\n";
+    stream << space(level) << "- mPerturbationNumber       = " << mPerturbationNumber << "\n";
     stream << space(level) << "- mProjectionAttributes     = \n";
     mProjectionAttributes.print(stream,level+2,optionFlags);
   }

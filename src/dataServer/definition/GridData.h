@@ -49,6 +49,8 @@ class GridData
     uint                mProjection;
     uint                mColumns;
     uint                mRows;
+    unsigned char       mTypeOfEnsembleForecast;
+    unsigned char       mPerturbationNumber;
     T::AttributeList    mProjectionAttributes;
     T::ParamValue_vec   mValues;
 };
