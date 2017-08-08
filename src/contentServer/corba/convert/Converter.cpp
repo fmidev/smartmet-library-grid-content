@@ -69,6 +69,7 @@ void Converter::convert(T::ContentInfo& source,ContentServer::Corba::CorbaConten
     target.typeOfEnsembleForecast = source.mTypeOfEnsembleForecast;
     target.perturbationNumber = source.mPerturbationNumber;
     target.flags = source.mFlags;
+    target.sourceId = source.mSourceId;
   }
   catch (...)
   {
@@ -109,6 +110,7 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::
     target.mTypeOfEnsembleForecast = source.typeOfEnsembleForecast;
     target.mPerturbationNumber = source.perturbationNumber;
     target.mFlags = source.flags;
+    target.mSourceId = source.sourceId;
   }
   catch (...)
   {
@@ -180,6 +182,7 @@ void Converter::convert(T::FileInfo& source,ContentServer::Corba::CorbaFileInfo&
     target.fileType = (CORBA::Octet)source.mFileType;
     target.name = CORBA::string_dup(source.mName.c_str());
     target.flags = source.mFlags;
+    target.sourceId = source.mSourceId;
   }
   catch (...)
   {
@@ -202,6 +205,7 @@ void Converter::convert(ContentServer::Corba::CorbaFileInfo& source,T::FileInfo&
     target.mFileType = (T::FileType)source.fileType;
     target.mName = source.name;
     target.mFlags = source.flags;
+    target.mSourceId = source.sourceId;
   }
   catch (...)
   {
@@ -357,6 +361,7 @@ void Converter::convert(T::ProducerInfo& source,ContentServer::Corba::CorbaProdu
     target.title = CORBA::string_dup(source.mTitle.c_str());
     target.description = CORBA::string_dup(source.mDescription.c_str());
     target.flags = source.mFlags;
+    target.sourceId = source.mSourceId;
   }
   catch (...)
   {
@@ -377,6 +382,7 @@ void Converter::convert(ContentServer::Corba::CorbaProducerInfo& source,T::Produ
     target.mTitle = source.title;
     target.mDescription = source.description;
     target.mFlags = source.flags;
+    target.mSourceId = source.sourceId;
   }
   catch (...)
   {
@@ -446,6 +452,7 @@ void Converter::convert(T::GenerationInfo& source,ContentServer::Corba::CorbaGen
     target.description = CORBA::string_dup(source.mDescription.c_str());
     target.status = (CORBA::Octet)source.mStatus;
     target.flags = source.mFlags;
+    target.sourceId = source.mSourceId;
   }
   catch (...)
   {
@@ -468,6 +475,7 @@ void Converter::convert(ContentServer::Corba::CorbaGenerationInfo& source,T::Gen
     target.mDescription = source.description;
     target.mStatus = (T::GenerationStatus)source.status;
     target.mFlags = source.flags;
+    target.mSourceId = source.sourceId;
   }
   catch (...)
   {

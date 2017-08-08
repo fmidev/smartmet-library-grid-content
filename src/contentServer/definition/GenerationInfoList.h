@@ -24,11 +24,13 @@ class GenerationInfoList
      void             clear();
      bool             deleteGenerationInfoById(uint generationId);
      void             deleteGenerationInfoListByProducerId(uint producerId);
+     void             deleteGenerationInfoListBySourceId(uint producerId);
      GenerationInfo*  getGenerationInfoById(uint generationId);
      GenerationInfo*  getGenerationInfoByIndex(uint index);
      GenerationInfo*  getGenerationInfoByIndexNoCheck(uint index);
      GenerationInfo*  getGenerationInfoByName(std::string generationName);
      void             getGenerationInfoListByProducerId(uint producerId,GenerationInfoList& generationInfoList);
+     void             getGenerationInfoListBySourceId(uint sourceId,GenerationInfoList& generationInfoList);
      GenerationInfo*  getLastGenerationInfoByProducerIdAndStatus(uint producerId,T::GenerationStatus generationStatus);
      uint             getLength();
      void             lock();

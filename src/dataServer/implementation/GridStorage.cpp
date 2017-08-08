@@ -242,6 +242,33 @@ void GridStorage::deleteFilesByGenerationId(uint generationId)
 
 
 
+void GridStorage::deleteFilesBySourceId(uint sourceId)
+{
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+
+    int sz = (int)mFileList.size() - 1;
+
+    for (int t=sz; t>=0; t--)
+    {
+      if (mFileList[t]->getSourceId() == sourceId)
+      {
+        //printf("--- delete file %u (%d)\n",mFileList[t]->getFileId(),(int)mFileList.size()-1);
+        mFileList.erase(mFileList.begin() + t);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 GRID::GridFile_sptr GridStorage::getFileById(uint fileId)
 {
   try

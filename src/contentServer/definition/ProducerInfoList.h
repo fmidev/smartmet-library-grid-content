@@ -23,10 +23,12 @@ class ProducerInfoList
      void           addProducerInfo(ProducerInfo *producerInfo);
      void           clear();
      bool           deleteProducerInfoById(uint producerId);
+     void           deleteProducerInfoListBySourceId(uint sourceId);
      ProducerInfo*  getProducerInfoById(uint producerId);
      ProducerInfo*  getProducerInfoByName(std::string producerName);
      ProducerInfo*  getProducerInfoByIndex(uint index);
      ProducerInfo*  getProducerInfoByIndexNoCheck(uint index);
+     void           getProducerInfoListBySourceId(uint sourceId,ProducerInfoList& producerInfoList);
      uint           getLength();
      void           lock();
      void           unlock();

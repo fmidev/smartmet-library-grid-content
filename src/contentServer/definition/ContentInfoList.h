@@ -29,6 +29,7 @@ class ContentInfoList
      uint             deleteContentInfoByGroupFlags(uint groupFlags);
      uint             deleteContentInfoByProducerId(uint producerId);
      uint             deleteContentInfoByGenerationId(uint generationId);
+     uint             deleteContentInfoBySourceId(uint sourceId);
      uint             registerContentInfoByServerAndFileId(uint serverId,uint fileId);
      uint             unregisterContentInfoByServerId(uint serverId);
      uint             unregisterContentInfoByServerAndFileId(uint serverId,uint fileId);
@@ -73,6 +74,7 @@ class ContentInfoList
      void             getContentInfoListByServerId(uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
      void             getContentInfoListByServerAndFileId(uint serverId,uint fileId,ContentInfoList& contentInfoList);
      int              getClosestIndex(ContentInfo::ComparisonMethod comparisonMethod,ContentInfo& contentInfo);
+     void             getContentInfoListBySourceId(uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
 
      void             getStartTimeList(std::vector<std::string>& startTimeList);
      void             getFmiParamLevelIdListByFmiParameterId(T::ParamId fmiParameterId,std::vector<T::ParamLevelId>& paramLevelIdList);

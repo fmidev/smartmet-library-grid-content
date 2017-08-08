@@ -415,6 +415,34 @@ int ClientImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::
 
 
 
+int ClientImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","deleteProducerInfoListBySourceId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("sourceId",sourceId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getProducerInfoById(T::SessionId sessionId,uint producerId,T::ProducerInfo& producerInfo)
 {
   try
@@ -483,6 +511,45 @@ int ClientImplementation::_getProducerInfoList(T::SessionId sessionId,T::Produce
 
     request.addLine("method","getProducerInfoList");
     request.addLine("sessionId",sessionId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      std::vector<std::string> lines;
+      uint len = response.getLinesByKey("producerInfo",lines);
+      for (uint t=0; t<len; t++)
+      {
+        T::ProducerInfo *info = new T::ProducerInfo();
+        info->setCsv(lines[t]);
+        producerInfoList.addProducerInfo(info);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::ProducerInfoList& producerInfoList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getProducerInfoListBySourceId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("sourceId",sourceId);
 
     T::ResponseMessage response;
 
@@ -686,6 +753,34 @@ int ClientImplementation::_deleteGenerationInfoListByProducerName(T::SessionId s
 
 
 
+int ClientImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","deleteGenerationInfoListBySourceId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("sourceId",sourceId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getGenerationInfoById(T::SessionId sessionId,uint generationId,T::GenerationInfo& generationInfo)
 {
   try
@@ -832,6 +927,45 @@ int ClientImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
     request.addLine("method","getGenerationInfoListByProducerName");
     request.addLine("sessionId",sessionId);
     request.addLine("producerName",producerName);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      std::vector<std::string> lines;
+      uint len = response.getLinesByKey("generationInfo",lines);
+      for (uint t=0; t<len; t++)
+      {
+        T::GenerationInfo *info = new T::GenerationInfo();
+        info->setCsv(lines[t]);
+        generationInfoList.addGenerationInfo(info);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GenerationInfoList& generationInfoList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getGenerationInfoListBySourceId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("sourceId",sourceId);
 
     T::ResponseMessage response;
 
@@ -1268,6 +1402,34 @@ int ClientImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessi
 
 
 
+int ClientImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","deleteFileInfoListBySourceId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("sourceId",sourceId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+
+    return result;
+ }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::FileInfo& fileInfo)
 {
   try
@@ -1591,6 +1753,47 @@ int ClientImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
       count = (uint)response.getLineValueByKey("count");
     else
       count = 0;
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getFileInfoListBySourceId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("sourceId",sourceId);
+    request.addLine("startFileId",startFileId);
+    request.addLine("maxRecords",maxRecords);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      std::vector<std::string> lines;
+      uint len = response.getLinesByKey("fileInfo",lines);
+      for (uint t=0; t<len; t++)
+      {
+        T::FileInfo *info = new T::FileInfo();
+        info->setCsv(lines[t]);
+        fileInfoList.addFileInfo(info);
+      }
+    }
 
     return result;
   }
@@ -2005,6 +2208,34 @@ int ClientImplementation::_deleteContentListByGenerationName(T::SessionId sessio
     request.addLine("method","deleteContentListByGenerationName");
     request.addLine("sessionId",sessionId);
     request.addLine("generationName",generationName);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_deleteContentListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","deleteContentListBySourceId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("sourceId",sourceId);
 
     T::ResponseMessage response;
 
@@ -2592,6 +2823,48 @@ int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
     request.addLine("generationName",generationName);
     request.addLine("startTime",startTime);
     request.addLine("endTime",endTime);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      std::vector<std::string> lines;
+      uint len = response.getLinesByKey("contentInfo",lines);
+      for (uint t=0; t<len; t++)
+      {
+        T::ContentInfo *info = new T::ContentInfo();
+        info->setCsv(lines[t]);
+        contentInfoList.addContentInfo(info);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getContentListBySourceId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("sourceId",sourceId);
+    request.addLine("startFileId",startFileId);
+    request.addLine("startMessageIndex",startMessageIndex);
+    request.addLine("maxRecords",maxRecords);
 
     T::ResponseMessage response;
 

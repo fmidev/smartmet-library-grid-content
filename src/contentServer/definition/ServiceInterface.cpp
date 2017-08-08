@@ -258,6 +258,23 @@ int ServiceInterface::deleteProducerInfoByName(T::SessionId sessionId,std::strin
 
 
 
+int ServiceInterface::deleteProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  try
+  {
+    int result = _deleteProducerInfoListBySourceId(sessionId,sourceId);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getProducerInfoById(T::SessionId sessionId,uint producerId,T::ProducerInfo& producerInfo)
 {
   try
@@ -297,6 +314,23 @@ int ServiceInterface::getProducerInfoList(T::SessionId sessionId,T::ProducerInfo
   try
   {
     int result = _getProducerInfoList(sessionId,producerInfoList);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::ProducerInfoList& producerInfoList)
+{
+  try
+  {
+    int result = _getProducerInfoListBySourceId(sessionId,sourceId,producerInfoList);
     return result;
   }
   catch (...)
@@ -411,6 +445,23 @@ int ServiceInterface::deleteGenerationInfoListByProducerName(T::SessionId sessio
 
 
 
+int ServiceInterface::deleteGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  try
+  {
+    int result = _deleteGenerationInfoListBySourceId(sessionId,sourceId);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getGenerationInfoById(T::SessionId sessionId,uint generationId,T::GenerationInfo& generationInfo)
 {
   try
@@ -484,6 +535,23 @@ int ServiceInterface::getGenerationInfoListByProducerName(T::SessionId sessionId
   try
   {
     int result = _getGenerationInfoListByProducerName(sessionId,producerName,generationInfoList);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GenerationInfoList& generationInfoList)
+{
+  try
+  {
+    int result = _getGenerationInfoListBySourceId(sessionId,sourceId,generationInfoList);
     return result;
   }
   catch (...)
@@ -734,6 +802,23 @@ int ServiceInterface::deleteFileInfoListByGenerationName(T::SessionId sessionId,
 
 
 
+int ServiceInterface::deleteFileInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  try
+  {
+    int result = _deleteFileInfoListBySourceId(sessionId,sourceId);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getFileInfoById(T::SessionId sessionId,uint fileId,T::FileInfo& fileInfo)
 {
   try
@@ -852,12 +937,12 @@ int ServiceInterface::getFileInfoListByGenerationName(T::SessionId sessionId,std
 
 
 
-/*
-int ServiceInterface::getFileInfoListByServerId(T::SessionId sessionId,uint serverId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+
+int ServiceInterface::getFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   try
   {
-    int result = _getFileInfoListByServerId(sessionId,serverId,startFileId,maxRecords,fileInfoList);
+    int result = _getFileInfoListByGroupFlags(sessionId,groupFlags,startFileId,maxRecords,fileInfoList);
     return result;
   }
   catch (...)
@@ -865,16 +950,16 @@ int ServiceInterface::getFileInfoListByServerId(T::SessionId sessionId,uint serv
     throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
   }
 }
-*/
 
 
 
 
-int ServiceInterface::getFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+
+int ServiceInterface::getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   try
   {
-    int result = _getFileInfoListByGroupFlags(sessionId,groupFlags,startFileId,maxRecords,fileInfoList);
+    int result = _getFileInfoListBySourceId(sessionId,sourceId,startFileId,maxRecords,fileInfoList);
     return result;
   }
   catch (...)
@@ -995,7 +1080,6 @@ int ServiceInterface::addContentList(T::SessionId sessionId,T::ContentInfoList& 
   try
   {
     int result = _addContentList(sessionId,contentInfoList);
-    printf("addContentList %d\n",result);
     return result;
   }
   catch (...)
@@ -1144,12 +1228,28 @@ int ServiceInterface::deleteContentListByGenerationName(T::SessionId sessionId,s
 
 
 
+int ServiceInterface::deleteContentListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  try
+  {
+    int result = _deleteContentListBySourceId(sessionId,sourceId);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::registerContentList(T::SessionId sessionId,uint serverId,T::ContentInfoList& contentInfoList)
 {
   try
   {
     int result = _registerContentList(sessionId,serverId,contentInfoList);
-    printf("registerContentList %d\n",result);
     return result;
   }
   catch (...)
@@ -1337,6 +1437,23 @@ int ServiceInterface::getContentListByProducerName(T::SessionId sessionId,std::s
   try
   {
     int result = _getContentListByProducerName(sessionId,producerName,startFileId,startMessageIndex,maxRecords,contentInfoList);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+{
+  try
+  {
+    int result = _getContentListBySourceId(sessionId,sourceId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     return result;
   }
   catch (...)
@@ -1627,6 +1744,15 @@ int ServiceInterface::_deleteProducerInfoByName(T::SessionId sessionId,std::stri
 
 
 
+int ServiceInterface::_deleteProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
 int ServiceInterface::_getProducerInfoById(T::SessionId sessionId,uint producerId,T::ProducerInfo& producerInfo)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
@@ -1646,6 +1772,15 @@ int ServiceInterface::_getProducerInfoByName(T::SessionId sessionId,std::string 
 
 
 int ServiceInterface::_getProducerInfoList(T::SessionId sessionId,T::ProducerInfoList& producerInfoList)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
+int ServiceInterface::_getProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::ProducerInfoList& producerInfoList)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
 }
@@ -1708,6 +1843,15 @@ int ServiceInterface::_deleteGenerationInfoListByProducerName(T::SessionId sessi
 
 
 
+int ServiceInterface::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
 int ServiceInterface::_getGenerationInfoById(T::SessionId sessionId,uint generationId,T::GenerationInfo& generationInfo)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
@@ -1745,6 +1889,15 @@ int ServiceInterface::_getGenerationInfoListByProducerId(T::SessionId sessionId,
 
 
 int ServiceInterface::_getGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName,T::GenerationInfoList& generationInfoList)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
+int ServiceInterface::_getGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GenerationInfoList& generationInfoList)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
 }
@@ -1879,6 +2032,15 @@ int ServiceInterface::_deleteFileInfoListByGenerationName(T::SessionId sessionId
 
 
 
+int ServiceInterface::_deleteFileInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
 int ServiceInterface::_getFileInfoById(T::SessionId sessionId,uint fileId,T::FileInfo& fileInfo)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
@@ -1943,6 +2105,15 @@ int ServiceInterface::_getFileInfoListByGenerationName(T::SessionId sessionId,st
 
 
 int ServiceInterface::_getFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
+int ServiceInterface::_getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
 }
@@ -2122,6 +2293,15 @@ int ServiceInterface::_deleteContentListByGenerationName(T::SessionId sessionId,
 
 
 
+int ServiceInterface::_deleteContentListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
 int ServiceInterface::_getContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex,T::ContentInfo& contentInfo)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
@@ -2186,6 +2366,15 @@ int ServiceInterface::_getContentListByProducerName(T::SessionId sessionId,std::
 
 
 int ServiceInterface::_getContentListByServerId(T::SessionId sessionId,uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
+int ServiceInterface::_getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
 }

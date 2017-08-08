@@ -47,9 +47,11 @@ class ServiceInterface
      virtual int    addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo);
      virtual int    deleteProducerInfoById(T::SessionId sessionId,uint producerId);
      virtual int    deleteProducerInfoByName(T::SessionId sessionId,std::string producerName);
+     virtual int    deleteProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId);
      virtual int    getProducerInfoById(T::SessionId sessionId,uint producerId,T::ProducerInfo& producerInfo);
      virtual int    getProducerInfoByName(T::SessionId sessionId,std::string producerName,T::ProducerInfo& producerInfo);
      virtual int    getProducerInfoList(T::SessionId sessionId,T::ProducerInfoList& producerInfoList);
+     virtual int    getProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::ProducerInfoList& producerInfoList);
      virtual int    getProducerInfoCount(T::SessionId sessionId,uint& count);
 
      virtual int    addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo);
@@ -57,10 +59,12 @@ class ServiceInterface
      virtual int    deleteGenerationInfoByName(T::SessionId sessionId,std::string generationName);
      virtual int    deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId);
      virtual int    deleteGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName);
+     virtual int    deleteGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId);
      virtual int    getGenerationInfoById(T::SessionId sessionId,uint generationId,T::GenerationInfo& generationInfo);
      virtual int    getGenerationInfoByName(T::SessionId sessionId,std::string generationName,T::GenerationInfo& generationInfo);
      virtual int    getGenerationInfoList(T::SessionId sessionId,T::GenerationInfoList& generationInfoList);
      virtual int    getGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GenerationInfoList& generationInfoList);
+     virtual int    getGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GenerationInfoList& generationInfoList);
      virtual int    getGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName,T::GenerationInfoList& generationInfoList);
      virtual int    getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,uint producerId,T::GenerationStatus generationStatus,T::GenerationInfo& generationInfo);
      virtual int    getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,std::string producerName,T::GenerationStatus generationStatus,T::GenerationInfo& generationInfo);
@@ -77,6 +81,7 @@ class ServiceInterface
      virtual int    deleteFileInfoListByProducerName(T::SessionId sessionId,std::string producerName);
      virtual int    deleteFileInfoListByGenerationId(T::SessionId sessionId,uint generationId);
      virtual int    deleteFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName);
+     virtual int    deleteFileInfoListBySourceId(T::SessionId sessionId,uint sourceId);
      virtual int    getFileInfoById(T::SessionId sessionId,uint fileId,T::FileInfo& fileInfo);
      virtual int    getFileInfoByName(T::SessionId sessionId,std::string filename,T::FileInfo& fileInfo);
      virtual int    getFileInfoList(T::SessionId sessionId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
@@ -85,6 +90,7 @@ class ServiceInterface
      virtual int    getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      virtual int    getFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      virtual int    getFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
+     virtual int    getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      virtual int    getFileInfoCount(T::SessionId sessionId,uint& count);
 
      virtual int    addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo);
@@ -102,6 +108,7 @@ class ServiceInterface
      virtual int    deleteContentListByProducerName(T::SessionId sessionId,std::string producerName);
      virtual int    deleteContentListByGenerationId(T::SessionId sessionId,uint generationId);
      virtual int    deleteContentListByGenerationName(T::SessionId sessionId,std::string generationName);
+     virtual int    deleteContentListBySourceId(T::SessionId sessionId,uint sourceId);
      virtual int    registerContentList(T::SessionId sessionId,uint serverId,T::ContentInfoList& contentInfoList);
      virtual int    registerContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId);
      virtual int    unregisterContentList(T::SessionId sessionId,uint serverId);
@@ -115,6 +122,7 @@ class ServiceInterface
      virtual int    getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    getContentListByProducerName(T::SessionId sessionId,std::string producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    getContentListByServerId(T::SessionId sessionId,uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
+     virtual int    getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    getContentListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList);
@@ -144,9 +152,11 @@ class ServiceInterface
      virtual int    _addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo);
      virtual int    _deleteProducerInfoById(T::SessionId sessionId,uint producerId);
      virtual int    _deleteProducerInfoByName(T::SessionId sessionId,std::string producerName);
+     virtual int    _deleteProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId);
      virtual int    _getProducerInfoById(T::SessionId sessionId,uint producerId,T::ProducerInfo& producerInfo);
      virtual int    _getProducerInfoByName(T::SessionId sessionId,std::string producerName,T::ProducerInfo& producerInfo);
      virtual int    _getProducerInfoList(T::SessionId sessionId,T::ProducerInfoList& producerInfoList);
+     virtual int    _getProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::ProducerInfoList& producerInfoList);
      virtual int    _getProducerInfoCount(T::SessionId sessionId,uint& count);
 
      virtual int    _addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo);
@@ -154,11 +164,13 @@ class ServiceInterface
      virtual int    _deleteGenerationInfoByName(T::SessionId sessionId,std::string generationName);
      virtual int    _deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId);
      virtual int    _deleteGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName);
+     virtual int    _deleteGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId);
      virtual int    _getGenerationInfoById(T::SessionId sessionId,uint generationId,T::GenerationInfo& generationInfo);
      virtual int    _getGenerationInfoByName(T::SessionId sessionId,std::string generationName,T::GenerationInfo& generationInfo);
      virtual int    _getGenerationInfoList(T::SessionId sessionId,T::GenerationInfoList& generationInfoList);
      virtual int    _getGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GenerationInfoList& generationInfoList);
      virtual int    _getGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName,T::GenerationInfoList& generationInfoList);
+     virtual int    _getGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GenerationInfoList& generationInfoList);
      virtual int    _getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,uint producerId,T::GenerationStatus generationStatus,T::GenerationInfo& generationInfo);
      virtual int    _getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,std::string producerName,T::GenerationStatus generationStatus,T::GenerationInfo& generationInfo);
      virtual int    _getGenerationInfoCount(T::SessionId sessionId,uint& count);
@@ -174,6 +186,7 @@ class ServiceInterface
      virtual int    _deleteFileInfoListByProducerName(T::SessionId sessionId,std::string producerName);
      virtual int    _deleteFileInfoListByGenerationId(T::SessionId sessionId,uint generationId);
      virtual int    _deleteFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName);
+     virtual int    _deleteFileInfoListBySourceId(T::SessionId sessionId,uint sourceId);
      virtual int    _getFileInfoById(T::SessionId sessionId,uint fileId,T::FileInfo& fileInfo);
      virtual int    _getFileInfoByName(T::SessionId sessionId,std::string filename,T::FileInfo& fileInfo);
      virtual int    _getFileInfoList(T::SessionId sessionId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
@@ -182,6 +195,7 @@ class ServiceInterface
      virtual int    _getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      virtual int    _getFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      virtual int    _getFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
+     virtual int    _getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      virtual int    _getFileInfoCount(T::SessionId sessionId,uint& count);
 
      virtual int    _addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo);
@@ -199,6 +213,7 @@ class ServiceInterface
      virtual int    _deleteContentListByProducerName(T::SessionId sessionId,std::string producerName);
      virtual int    _deleteContentListByGenerationId(T::SessionId sessionId,uint generationId);
      virtual int    _deleteContentListByGenerationName(T::SessionId sessionId,std::string generationName);
+     virtual int    _deleteContentListBySourceId(T::SessionId sessionId,uint sourceId);
      virtual int    _registerContentList(T::SessionId sessionId,uint serverId,T::ContentInfoList& contentInfoList);
      virtual int    _registerContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId);
      virtual int    _unregisterContentList(T::SessionId sessionId,uint serverId);
@@ -212,6 +227,7 @@ class ServiceInterface
      virtual int    _getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByProducerName(T::SessionId sessionId,std::string producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByServerId(T::SessionId sessionId,uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
+     virtual int    _getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList);

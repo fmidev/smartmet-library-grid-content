@@ -19,6 +19,7 @@ FileInfo::FileInfo()
     mGenerationId = 0;
     mGroupFlags = 0;
     mFlags = 0;
+    mSourceId = 0;
   }
   catch (...)
   {
@@ -41,6 +42,7 @@ FileInfo::FileInfo(FileInfo& fileInfo)
     mGenerationId = fileInfo.mGenerationId;
     mGroupFlags = fileInfo.mGroupFlags;
     mFlags = fileInfo.mFlags;
+    mSourceId = fileInfo.mSourceId;
   }
   catch (...)
   {
@@ -52,7 +54,7 @@ FileInfo::FileInfo(FileInfo& fileInfo)
 
 
 
-FileInfo::FileInfo(uint producerId,uint generationId,uint groupFlags,T::FileType type,std::string filename)
+FileInfo::FileInfo(uint producerId,uint generationId,uint groupFlags,T::FileType type,std::string filename,uint sourceId)
 {
   try
   {
@@ -63,6 +65,7 @@ FileInfo::FileInfo(uint producerId,uint generationId,uint groupFlags,T::FileType
     mFileType = type;
     mName = filename;
     mFlags = 0;
+    mSourceId = sourceId;
   }
   catch (...)
   {
@@ -118,6 +121,7 @@ void FileInfo::operator=(FileInfo& fileInfo)
     mGenerationId = fileInfo.mGenerationId;
     mGroupFlags = fileInfo.mGroupFlags;
     mFlags = fileInfo.mFlags;
+    mSourceId = fileInfo.mSourceId;
   }
   catch (...)
   {
@@ -134,14 +138,15 @@ std::string FileInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%s;%u;%u;%u;%u",
+    sprintf(st,"%u;%u;%s;%u;%u;%u;%u;%u",
         mFileId,
         (uint)mFileType,
         mName.c_str(),
         mProducerId,
         mGenerationId,
         mGroupFlags,
-        mFlags);
+        mFlags,
+        mSourceId);
 
     return std::string(st);
   }
@@ -159,7 +164,7 @@ std::string FileInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "fileId;fileType;name;producerId;generationId;groupFlags;flags";
+    std::string header = "fileId;fileType;name;producerId;generationId;groupFlags;flags;sourceId";
     return header;
   }
   catch (...)
@@ -198,7 +203,7 @@ void FileInfo::setCsv(const char *csv)
       }
     }
 
-    if (c >= 6)
+    if (c >= 7)
     {
       mFileId = (uint)atoll(field[0]);
       mFileType = (T::FileType)atoll(field[1]);
@@ -207,6 +212,7 @@ void FileInfo::setCsv(const char *csv)
       mGenerationId = (uint)atoll(field[4]);
       mGroupFlags = (uint)atoll(field[5]);
       mFlags = (uint)atoll(field[6]);
+      mSourceId = (uint)atoll(field[7]);
     }
   }
   catch (...)
@@ -293,6 +299,7 @@ void FileInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mGenerationId = " << mGenerationId << "\n";
     stream << space(level) << "- mGroupFlags   = " << mGroupFlags << "\n";
     stream << space(level) << "- mFlags        = " << mFlags << "\n";
+    stream << space(level) << "- mSourceId     = " << mSourceId << "\n";
   }
   catch (...)
   {

@@ -39,6 +39,7 @@ struct CorbaContentInfo
   octet              typeOfEnsembleForecast;
   octet              perturbationNumber;
   unsigned long      flags;
+  unsigned long      sourceId;
 };
 
 typedef sequence<CorbaContentInfo> CorbaContentInfoList;
@@ -66,6 +67,7 @@ struct CorbaProducerInfo
   string             title;
   string             description;
   unsigned long      flags;
+  unsigned long      sourceId;
 };
 
 typedef sequence<CorbaProducerInfo> CorbaProducerInfoList;
@@ -82,7 +84,7 @@ struct CorbaFileInfo
   octet              fileType;
   string             name;
   unsigned long      flags;
-  unsigned long      pos;
+  unsigned long      sourceId;
 };
 
 typedef sequence<CorbaFileInfo> CorbaFileInfoList;
@@ -117,6 +119,7 @@ struct CorbaGenerationInfo
   string             description;
   octet              status;
   unsigned long      flags;
+  unsigned long      sourceId;
 };
 
 typedef sequence<CorbaGenerationInfo> CorbaGenerationInfoList;

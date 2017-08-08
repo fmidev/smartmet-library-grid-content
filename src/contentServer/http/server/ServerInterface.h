@@ -36,20 +36,24 @@ class ServerInterface
     virtual void addProducerInfo(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteProducerInfoById(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteProducerInfoByName(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void deleteProducerInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getProducerInfoById(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getProducerInfoByName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getProducerInfoList(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getProducerInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getProducerInfoCount(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void addGenerationInfo(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteGenerationInfoById(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteGenerationInfoByName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteGenerationInfoListByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteGenerationInfoListByProducerName(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void deleteGenerationInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getGenerationInfoById(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getGenerationInfoByName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getGenerationInfoList(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getGenerationInfoListByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getGenerationInfoListByProducerName(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getGenerationInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getLastGenerationInfoByProducerIdAndStatus(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getLastGenerationInfoByProducerNameAndStatus(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getGenerationInfoCount(T::RequestMessage& request,T::ResponseMessage& response);
@@ -64,6 +68,7 @@ class ServerInterface
     virtual void deleteFileInfoListByProducerName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteFileInfoListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteFileInfoListByGenerationName(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void deleteFileInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getFileInfoById(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getFileInfoByName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getFileInfoList(T::RequestMessage& request,T::ResponseMessage& response);
@@ -72,6 +77,7 @@ class ServerInterface
     virtual void getFileInfoListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getFileInfoListByGenerationName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getFileInfoListByGroupFlags(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getFileInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getFileInfoCount(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void addEventInfo(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getLastEventInfo(T::RequestMessage& request,T::ResponseMessage& response);
@@ -87,6 +93,7 @@ class ServerInterface
     virtual void deleteContentListByProducerName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteContentListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteContentListByGenerationName(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void deleteContentListBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void registerContentList(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void registerContentListByFileId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void unregisterContentList(T::RequestMessage& request,T::ResponseMessage& response);
@@ -103,6 +110,7 @@ class ServerInterface
     virtual void getContentListByGenerationName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByGenerationIdAndTimeRange(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByGenerationNameAndTimeRange(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getContentListBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByParameter(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByParameterAndGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByParameterAndGenerationName(T::RequestMessage& request,T::ResponseMessage& response);

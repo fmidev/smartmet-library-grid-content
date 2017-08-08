@@ -369,6 +369,27 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::deleteProducerInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId)
+{
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    return mService->deleteProducerInfoListBySourceId(sessionId,sourceId);
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::getProducerInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, SmartMet::ContentServer::Corba::CorbaProducerInfo_out producerInfo)
 {
   try
@@ -441,6 +462,36 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getProducerInfoList(sessionId,sProducerInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sProducerInfoList,*corbaProducerInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getProducerInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, SmartMet::ContentServer::Corba::CorbaProducerInfoList_out producerInfoList)
+{
+  try
+  {
+    T::ProducerInfoList sProducerInfoList;
+    ContentServer::Corba::CorbaProducerInfoList *corbaProducerInfoList = new ContentServer::Corba::CorbaProducerInfoList();
+    producerInfoList = corbaProducerInfoList;
+
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getProducerInfoListBySourceId(sessionId,sourceId,sProducerInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sProducerInfoList,*corbaProducerInfoList);
@@ -599,6 +650,27 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::deleteGenerationInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId)
+{
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    return mService->deleteGenerationInfoListBySourceId(sessionId,sourceId);
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::getGenerationInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, SmartMet::ContentServer::Corba::CorbaGenerationInfo_out generationInfo)
 {
   try
@@ -731,6 +803,36 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGenerationInfoListByProducerName(sessionId,producerName,sGenerationInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sGenerationInfoList,*corbaGenerationInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getGenerationInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, SmartMet::ContentServer::Corba::CorbaGenerationInfoList_out generationInfoList)
+{
+  try
+  {
+    T::GenerationInfoList sGenerationInfoList;
+    ContentServer::Corba::CorbaGenerationInfoList *corbaGenerationInfoList = new ContentServer::Corba::CorbaGenerationInfoList();
+    generationInfoList = corbaGenerationInfoList;
+
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getGenerationInfoListBySourceId(sessionId,sourceId,sGenerationInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sGenerationInfoList,*corbaGenerationInfoList);
@@ -1090,6 +1192,27 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::deleteFileInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId)
+{
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    return mService->deleteFileInfoListBySourceId(sessionId,sourceId);
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::getFileInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, SmartMet::ContentServer::Corba::CorbaFileInfo_out fileInfo)
 {
   try
@@ -1311,6 +1434,36 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getFileInfoListByGroupFlags(sessionId,groupFlags,startFileId,maxRecords,sFileInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sFileInfoList,*corbaFileInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getFileInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, ::CORBA::ULong startFileId, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
+{
+  try
+  {
+    T::FileInfoList sFileInfoList;
+    ContentServer::Corba::CorbaFileInfoList *corbaFileInfoList = new ContentServer::Corba::CorbaFileInfoList();
+    fileInfoList = corbaFileInfoList;
+
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getFileInfoListBySourceId(sessionId,sourceId,startFileId,maxRecords,sFileInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sFileInfoList,*corbaFileInfoList);
@@ -1687,6 +1840,27 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteContentListByGenerationName(sessionId,generationName);
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::deleteContentListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId)
+{
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    return mService->deleteContentListBySourceId(sessionId,sourceId);
   }
   catch (...)
   {
@@ -2133,6 +2307,36 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByGenerationNameAndTimeRange(sessionId,generationName,startTime,endTime,sContentInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getContentListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+{
+  try
+  {
+    T::ContentInfoList sContentInfoList;
+    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    contentInfoList = corbaContentInfoList;
+
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getContentListBySourceId(sessionId,sourceId,startFileId,startMessageIndex,maxRecords,sContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);

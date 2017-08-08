@@ -161,6 +161,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"deleteProducerInfoListBySourceId") == 0)
+    {
+      deleteProducerInfoListBySourceId(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"getProducerInfoById") == 0)
     {
       getProducerInfoById(request,response);
@@ -176,6 +182,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
     if (strcasecmp(method,"getProducerInfoList") == 0)
     {
       getProducerInfoList(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getProducerInfoListBySourceId") == 0)
+    {
+      getProducerInfoListBySourceId(request,response);
       return;
     }
 
@@ -215,6 +227,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"deleteGenerationInfoListBySourceId") == 0)
+    {
+      deleteGenerationInfoListBySourceId(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"getGenerationInfoById") == 0)
     {
       getGenerationInfoById(request,response);
@@ -242,6 +260,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
     if (strcasecmp(method,"getGenerationInfoListByProducerName") == 0)
     {
       getGenerationInfoListByProducerName(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getGenerationInfoListBySourceId") == 0)
+    {
+      getGenerationInfoListBySourceId(request,response);
       return;
     }
 
@@ -329,6 +353,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"deleteFileInfoListBySourceId") == 0)
+    {
+      deleteFileInfoListBySourceId(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"getFileInfoById") == 0)
     {
       getFileInfoById(request,response);
@@ -374,6 +404,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
     if (strcasecmp(method,"getFileInfoListByGroupFlags") == 0)
     {
       getFileInfoListByGroupFlags(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getFileInfoListBySourceId") == 0)
+    {
+      getFileInfoListBySourceId(request,response);
       return;
     }
 
@@ -464,6 +500,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
     if (strcasecmp(method,"deleteContentListByGenerationName") == 0)
     {
       deleteContentListByGenerationName(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"deleteContentListBySourceId") == 0)
+    {
+      deleteContentListBySourceId(request,response);
       return;
     }
 
@@ -560,6 +602,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
     if (strcasecmp(method,"getContentListByGenerationNameAndTimeRange") == 0)
     {
       getContentListByGenerationNameAndTimeRange(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getContentListBySourceId") == 0)
+    {
+      getContentListBySourceId(request,response);
       return;
     }
 
@@ -1183,6 +1231,44 @@ void ServerInterface::deleteProducerInfoByName(T::RequestMessage& request,T::Res
 
 
 
+void ServerInterface::deleteProducerInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint sourceId = 0;
+    if (!request.getLineByKey("sourceId",sourceId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sourceId");
+      return;
+    }
+
+    int result = mService->deleteProducerInfoListBySourceId(sessionId,sourceId);
+
+    response.addLine("result",result);
+
+    if (result != Result::OK)
+      response.addLine("resultString",getResultString(result));
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 void ServerInterface::getProducerInfoById(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
@@ -1290,6 +1376,57 @@ void ServerInterface::getProducerInfoList(T::RequestMessage& request,T::Response
 
     T::ProducerInfoList producerInfoList;
     int result = mService->getProducerInfoList(sessionId,producerInfoList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      uint len = producerInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::ProducerInfo *info = producerInfoList.getProducerInfoByIndex(t);
+        if (t == 0)
+          response.addLine("producerInfoHeader",info->getCsvHeader());
+        response.addLine("producerInfo",info->getCsv());
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ServerInterface::getProducerInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint sourceId = 0;
+    if (!request.getLineByKey("sourceId",sourceId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sourceId");
+      return;
+    }
+
+    T::ProducerInfoList producerInfoList;
+    int result = mService->getProducerInfoListBySourceId(sessionId,sourceId,producerInfoList);
 
     response.addLine("result",result);
     if (result == Result::OK)
@@ -1554,6 +1691,44 @@ void ServerInterface::deleteGenerationInfoListByProducerName(T::RequestMessage& 
 
 
 
+void ServerInterface::deleteGenerationInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint sourceId = 0;
+    if (!request.getLineByKey("sourceId",sourceId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sourceId");
+      return;
+    }
+
+    int result = mService->deleteGenerationInfoListBySourceId(sessionId,sourceId);
+
+    response.addLine("result",result);
+
+    if (result != Result::OK)
+      response.addLine("resultString",getResultString(result));
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 void ServerInterface::getGenerationInfoById(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
@@ -1766,6 +1941,58 @@ void ServerInterface::getGenerationInfoListByProducerName(T::RequestMessage& req
     T::GenerationInfoList generationInfoList;
 
     int result = mService->getGenerationInfoListByProducerName(sessionId,producerName,generationInfoList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      uint len = generationInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::GenerationInfo *info = generationInfoList.getGenerationInfoByIndex(t);
+        if (t == 0)
+          response.addLine("generationInfoHeader",info->getCsvHeader());
+        response.addLine("generationInfo",info->getCsv());
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ServerInterface::getGenerationInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint sourceId = 0;
+    if (!request.getLineByKey("sourceId",sourceId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sourceId");
+      return;
+    }
+
+    T::GenerationInfoList generationInfoList;
+
+    int result = mService->getGenerationInfoListBySourceId(sessionId,sourceId,generationInfoList);
 
     response.addLine("result",result);
     if (result == Result::OK)
@@ -2402,6 +2629,44 @@ void ServerInterface::deleteFileInfoListByGenerationName(T::RequestMessage& requ
 
 
 
+void ServerInterface::deleteFileInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint sourceId = 0;
+    if (!request.getLineByKey("sourceId",sourceId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sourceId");
+      return;
+    }
+
+    int result = mService->deleteFileInfoListBySourceId(sessionId,sourceId);
+
+    response.addLine("result",result);
+
+    if (result != Result::OK)
+      response.addLine("resultString",getResultString(result));
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 void ServerInterface::getFileInfoById(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
@@ -2866,6 +3131,74 @@ void ServerInterface::getFileInfoListByGroupFlags(T::RequestMessage& request,T::
     T::FileInfoList fileInfoList;
 
     int result = mService->getFileInfoListByGroupFlags(sessionId,groupFlags,startFileId,maxRecords,fileInfoList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      uint len = fileInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::FileInfo *info = fileInfoList.getFileInfoByIndex(t);
+        if (t == 0)
+          response.addLine("fileInfoHeader",info->getCsvHeader());
+        response.addLine("fileInfo",info->getCsv());
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ServerInterface::getFileInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint sourceId = 0;
+    if (!request.getLineByKey("sourceId",sourceId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sourceId");
+      return;
+    }
+
+    uint startFileId = 0;
+    if (!request.getLineByKey("startFileId",startFileId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: startFileId");
+      return;
+    }
+
+    uint maxRecords = 0;
+    if (!request.getLineByKey("maxRecords",maxRecords))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: maxRecords");
+      return;
+    }
+
+    T::FileInfoList fileInfoList;
+
+    int result = mService->getFileInfoListBySourceId(sessionId,sourceId,startFileId,maxRecords,fileInfoList);
 
     response.addLine("result",result);
     if (result == Result::OK)
@@ -3512,6 +3845,44 @@ void ServerInterface::deleteContentListByGenerationName(T::RequestMessage& reque
     }
 
     int result = mService->deleteContentListByGenerationName(sessionId,generationName);
+
+    response.addLine("result",result);
+
+    if (result != Result::OK)
+      response.addLine("resultString",getResultString(result));
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ServerInterface::deleteContentListBySourceId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint sourceId = 0;
+    if (!request.getLineByKey("sourceId",sourceId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sourceId");
+      return;
+    }
+
+    int result = mService->deleteContentListBySourceId(sessionId,sourceId);
 
     response.addLine("result",result);
 
@@ -4487,6 +4858,81 @@ void ServerInterface::getContentListByGenerationNameAndTimeRange(T::RequestMessa
     T::ContentInfoList contentInfoList;
 
     int result = mService->getContentListByGenerationNameAndTimeRange(sessionId,generationName,startTime,endTime,contentInfoList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      uint len = contentInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
+        if (t == 0)
+          response.addLine("contentInfoHeader",info->getCsvHeader());
+        response.addLine("contentInfo",info->getCsv());
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ServerInterface::getContentListBySourceId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint sourceId = 0;
+    if (!request.getLineByKey("sourceId",sourceId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sourceId");
+      return;
+    }
+
+    uint startFileId = 0;
+    if (!request.getLineByKey("startFileId",startFileId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: startFileId");
+      return;
+    }
+
+    uint startMessageIndex = 0;
+    if (!request.getLineByKey("startMessageIndex",startMessageIndex))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: startMessageIndex");
+      return;
+    }
+
+    uint maxRecords = 0;
+    if (!request.getLineByKey("maxRecords",maxRecords))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      return;
+    }
+
+    T::ContentInfoList contentInfoList;
+
+    int result = mService->getContentListBySourceId(sessionId,sourceId,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
     response.addLine("result",result);
     if (result == Result::OK)

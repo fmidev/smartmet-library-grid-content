@@ -396,6 +396,19 @@ FileInfo* FileInfoList::getFileInfoByName(std::string filename)
   try
   {
     AutoReadLock lock(&mModificationLock);
+
+    FileInfo search;
+    search.mName = filename;
+    int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileName,search);
+    if (idx < 0  ||  idx >= (int)getLength())
+      return NULL;
+
+    FileInfo *info = getFileInfoByIndexNoCheck(idx);
+    if (info != NULL  &&  info->mName == filename)
+      return info;
+
+    return NULL;
+    /*
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = getFileInfoByIndexNoCheck(t);
@@ -403,6 +416,7 @@ FileInfo* FileInfoList::getFileInfoByName(std::string filename)
         return info;
     }
     return NULL;
+    */
   }
   catch (...)
   {
@@ -608,6 +622,51 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,
     throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
   }
 }
+
+
+
+
+void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList)
+{
+  try
+  {
+    if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
+    {
+      printf("%s : Not supported when the records are not ordered by the 'fileId' field!\n",__FUNCTION__);
+      return;
+    }
+
+    AutoReadLock lock(&mModificationLock);
+    uint startIdx = 0;
+    uint sz = getLength();
+
+    FileInfo search;
+    search.mFileId = startFileId;
+    int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
+    if (idx >= 0)
+      startIdx = (uint)idx;
+
+    for (uint t=startIdx; t<sz; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != NULL  &&  info->mFileId >= startFileId  &&  info->mSourceId == sourceId)
+      {
+        if (fileInfoList.getReleaseObjects())
+          fileInfoList.addFileInfo(info->duplicate());
+        else
+          fileInfoList.addFileInfo(info);
+
+        if (fileInfoList.getLength() == maxRecords)
+          return;
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
 
 
 
@@ -820,6 +879,46 @@ bool FileInfoList::deleteFileInfoByIndex(uint index)
 
     mLength--;
     return true;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+uint FileInfoList::deleteFileInfoBySourceId(uint sourceId)
+{
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+    uint count = 0;
+    uint p = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      FileInfo *info = mArray[t];
+      mArray[t] = NULL;
+      if (info != NULL)
+      {
+        if (info->mSourceId == sourceId)
+        {
+          mArray[t] = NULL;
+          if (mReleaseObjects)
+            delete info;
+          count++;
+        }
+        else
+        {
+          mArray[p] = info;
+          p++;
+        }
+      }
+    }
+    mLength = p;
+    return count;
   }
   catch (...)
   {

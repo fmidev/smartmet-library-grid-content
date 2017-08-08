@@ -160,6 +160,32 @@ bool ProducerInfoList::deleteProducerInfoById(uint producerId)
 
 
 
+void ProducerInfoList::deleteProducerInfoListBySourceId(uint sourceId)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+    int sz = (int)getLength()-1;
+    for (int t=sz; t>=0; t--)
+    {
+      ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
+      if (info != NULL  &&  info->mSourceId == sourceId)
+      {
+        delete mList[t];
+        mList.erase(mList.begin() + t);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 ProducerInfo* ProducerInfoList::getProducerInfoById(uint producerId)
 {
   try
@@ -233,6 +259,31 @@ ProducerInfo* ProducerInfoList::getProducerInfoByIndexNoCheck(uint index)
   try
   {
     return mList.at(index);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ProducerInfoList::getProducerInfoListBySourceId(uint sourceId,ProducerInfoList& producerInfoList)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+    uint sz = getLength();
+    for (uint t=0; t<sz; t++)
+    {
+      ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
+      if (info != NULL  &&  info->mSourceId == sourceId)
+      {
+        producerInfoList.addProducerInfo(info->duplicate());
+      }
+    }
   }
   catch (...)
   {

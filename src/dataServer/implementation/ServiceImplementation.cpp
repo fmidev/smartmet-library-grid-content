@@ -473,6 +473,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
       gridFile->setGroupFlags(fileInfo.mGroupFlags);
       gridFile->setProducerId(fileInfo.mProducerId);
       gridFile->setGenerationId(fileInfo.mGenerationId);
+      gridFile->setSourceId(fileInfo.mSourceId);
     }
 
     if (gridFile->getModificationTime() != 0)
@@ -566,6 +567,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
         contentInfo->mTypeOfEnsembleForecast = (unsigned char)*message->getTypeOfEnsembleForecast();
         contentInfo->mPerturbationNumber = (unsigned char)*message->getPerturbationNumber();
         contentInfo->mFlags = 0;
+        contentInfo->mSourceId = fileInfo.mSourceId;
 
         //contentInfo->print(std::cout,0,0);
         contentInfoList.addContentInfo(contentInfo);
@@ -760,6 +762,25 @@ void ServiceImplementation::event_producerDeleted(T::EventInfo& eventInfo)
 
 
 
+void ServiceImplementation::event_producerListDeletedBySourceId(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    //printf("EVENT[%llu]: producerListDeletedBySourceId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
+
+    mGridStorage.deleteFilesBySourceId(eventInfo.mId1);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 void ServiceImplementation::event_generationAdded(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -821,6 +842,25 @@ void ServiceImplementation::event_generationListDeletedByProducerId(T::EventInfo
     //printf("EVENT[%llu]: generationListDeletedByProducerId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
     mGridStorage.deleteFilesByProducerId(eventInfo.mId1);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::event_generationListDeletedBySourceId(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    //printf("EVENT[%llu]: generationListDeletedBySourceId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
+
+    mGridStorage.deleteFilesBySourceId(eventInfo.mId1);
   }
   catch (...)
   {
@@ -995,6 +1035,25 @@ void ServiceImplementation::event_fileListDeletedByGenerationId(T::EventInfo& ev
 
 
 
+void ServiceImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    //printf("EVENT[%llu]: fileListDeletedBySourceId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
+
+    mGridStorage.deleteFilesBySourceId(eventInfo.mId1);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 void ServiceImplementation::event_contentListDeletedByFileId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -1058,6 +1117,23 @@ void ServiceImplementation::event_contentListDeletedByGenerationId(T::EventInfo&
     throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
   }
 }
+
+
+
+
+void ServiceImplementation::event_contentListDeletedBySourceId(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    //printf("EVENT[%llu]: contentListDeletedBySourceId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
 
 
 
@@ -1181,6 +1257,10 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo)
         event_producerDeleted(eventInfo);
         break;
 
+      case ContentServer::EventType::PRODUCER_LIST_DELETED_BY_SOURCE_ID:
+        event_producerListDeletedBySourceId(eventInfo);
+        break;
+
       case ContentServer::EventType::GENERATION_ADDED:
         event_generationAdded(eventInfo);
         break;
@@ -1195,6 +1275,10 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo)
 
       case ContentServer::EventType::GENERATION_LIST_DELETED_BY_PRODUCER_ID:
         event_generationListDeletedByProducerId(eventInfo);
+        break;
+
+      case ContentServer::EventType::GENERATION_LIST_DELETED_BY_SOURCE_ID:
+        event_generationListDeletedBySourceId(eventInfo);
         break;
 
       case ContentServer::EventType::FILE_ADDED:
@@ -1221,6 +1305,10 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo)
         event_fileListDeletedByGenerationId(eventInfo);
         break;
 
+      case ContentServer::EventType::FILE_LIST_DELETED_BY_SOURCE_ID:
+        event_fileListDeletedBySourceId(eventInfo);
+        break;
+
       case ContentServer::EventType::CONTENT_LIST_DELETED_BY_FILE_ID:
         event_contentListDeletedByFileId(eventInfo);
         break;
@@ -1235,6 +1323,10 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo)
 
       case ContentServer::EventType::CONTENT_LIST_DELETED_BY_GENERATION_ID:
         event_contentListDeletedByGenerationId(eventInfo);
+        break;
+
+      case ContentServer::EventType::CONTENT_LIST_DELETED_BY_SOURCE_ID:
+        event_contentListDeletedBySourceId(eventInfo);
         break;
 
       case ContentServer::EventType::DATA_SERVER_ADDED:

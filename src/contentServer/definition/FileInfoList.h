@@ -27,6 +27,7 @@ class FileInfoList
      uint       deleteFileInfoByProducerId(uint producerId);
      uint       deleteFileInfoByGenerationId(uint generationId);
      bool       deleteFileInfoByIndex(uint index);
+     uint       deleteFileInfoBySourceId(uint sourceId);
      int        getClosestIndex(FileInfo::ComparisonMethod comparisonMethod,FileInfo& fileInfo);
      int        getClosestIndexNoLock(FileInfo::ComparisonMethod comparisonMethod,FileInfo& fileInfo);
      FileInfo*  getFileInfoById(uint fileId);
@@ -37,6 +38,7 @@ class FileInfoList
      void       getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
      void       getFileInfoListByProducerId(uint producerId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
      void       getFileInfoListByGenerationId(uint generationId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
+     void       getFileInfoListBySourceId(uint sourceId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
      uint       getLength();
      bool       getReleaseObjects();
      void       increaseSize(uint newSize);

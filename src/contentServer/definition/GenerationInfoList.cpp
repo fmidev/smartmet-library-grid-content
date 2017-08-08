@@ -209,6 +209,31 @@ GenerationInfo* GenerationInfoList::getGenerationInfoById(uint generationId)
 
 
 
+void GenerationInfoList::deleteGenerationInfoListBySourceId(uint sourceId)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+    int sz = (int)getLength()-1;
+    for (int t=sz; t>=0; t--)
+    {
+      GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
+      if (info != NULL  &&  info->mSourceId == sourceId)
+      {
+        delete mList[t];
+        mList.erase(mList.begin() + t);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
 
 GenerationInfo* GenerationInfoList::getGenerationInfoByIndex(uint index)
 {
@@ -317,6 +342,28 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(u
   }
 }
 
+
+
+
+
+void GenerationInfoList::getGenerationInfoListBySourceId(uint sourceId,GenerationInfoList& generationInfoList)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+    uint sz = getLength();
+    for (uint t=0; t<sz; t++)
+    {
+      GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
+      if (info != NULL  &&  info->mSourceId == sourceId)
+        generationInfoList.addGenerationInfo(info->duplicate());
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
 
 
 

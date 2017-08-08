@@ -38,7 +38,7 @@ class FileInfo
   public:
                         FileInfo();
                         FileInfo(FileInfo& fileInfo);
-                        FileInfo(uint producerId,uint generationId,uint groupFlags,T::FileType type,std::string filename);
+                        FileInfo(uint producerId,uint generationId,uint groupFlags,T::FileType type,std::string filename,uint sourceId);
                         FileInfo(const char *csv);
      virtual            ~FileInfo();
 
@@ -81,6 +81,8 @@ class FileInfo
       * of the current file is predefined, which means that the data servers do not need
       * to open the file and register its content to the content server. */
      uint               mFlags;
+
+     uint               mSourceId;
 };
 
 

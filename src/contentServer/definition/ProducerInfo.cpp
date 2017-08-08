@@ -17,6 +17,7 @@ ProducerInfo::ProducerInfo()
   {
     mProducerId = 0;
     mFlags = 0;
+    mSourceId = 0;
   }
   catch (...)
   {
@@ -37,6 +38,7 @@ ProducerInfo::ProducerInfo(ProducerInfo& producerInfo)
     mTitle = producerInfo.mTitle;
     mDescription = producerInfo.mDescription;
     mFlags = producerInfo.mFlags;
+    mSourceId = producerInfo.mSourceId;
   }
   catch (...)
   {
@@ -90,6 +92,7 @@ void ProducerInfo::operator=(ProducerInfo& producerInfo)
     mTitle = producerInfo.mTitle;
     mDescription = producerInfo.mDescription;
     mFlags = producerInfo.mFlags;
+    mSourceId = producerInfo.mSourceId;
   }
   catch (...)
   {
@@ -106,12 +109,13 @@ std::string ProducerInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%s;%s;%s;%u",
+    sprintf(st,"%u;%s;%s;%s;%u;%u",
         mProducerId,
         mName.c_str(),
         mTitle.c_str(),
         mDescription.c_str(),
-        mFlags);
+        mFlags,
+        mSourceId);
 
     return std::string(st);
   }
@@ -129,7 +133,7 @@ std::string ProducerInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "producerId;name;title;description;flags";
+    std::string header = "producerId;name;title;description;flags;producerId";
     return header;
   }
   catch (...)
@@ -168,13 +172,14 @@ void ProducerInfo::setCsv(const char *csv)
       }
     }
 
-    if (c >= 4)
+    if (c >= 5)
     {
        mProducerId = (uint)atoll(field[0]);
        mName = field[1];
        mTitle = field[2];
        mDescription = field[3];
        mFlags = (uint)atoll(field[4]);
+       mSourceId = (uint)atoll(field[5]);
     }
   }
   catch (...)
@@ -229,6 +234,7 @@ void ProducerInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mTitle       = " << mTitle << "\n";
     stream << space(level) << "- mDescription = " << mDescription << "\n";
     stream << space(level) << "- mFlags       = " << mFlags << "\n";
+    stream << space(level) << "- mSourceId    = " << mSourceId << "\n";
   }
   catch (...)
   {

@@ -547,6 +547,44 @@ uint ContentInfoList::deleteContentInfoByGenerationId(uint generationId)
 
 
 
+uint ContentInfoList::deleteContentInfoBySourceId(uint sourceId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+    uint p = 0;
+    uint count = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      mArray[t] = NULL;
+      if (info != NULL &&  info->mSourceId == sourceId)
+      {
+        if (mReleaseObjects)
+          delete info;
+
+        count++;
+      }
+      else
+      {
+        mArray[p] = info;
+        p++;
+      }
+    }
+    mLength = p;
+    return count;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 uint ContentInfoList::registerContentInfoByServerAndFileId(uint serverId,uint fileId)
 {
   FUNCTION_TRACE
@@ -4550,6 +4588,52 @@ void ContentInfoList::getContentInfoListByServerId(uint serverId,uint startFileI
     {
       ContentInfo *info = mArray[t];
       if (info != NULL  &&  (info->mServerFlags & sf) != 0 && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+      {
+        if (contentInfoList.getReleaseObjects())
+          contentInfoList.addContentInfo(info->duplicate());
+        else
+          contentInfoList.addContentInfo(info);
+
+        if (contentInfoList.getLength() >= maxRecords)
+          return;
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListBySourceId(uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
+    {
+      printf("%s: Method not supported when records are not sorted by the fileId and the messageIndex fields!\n",__FUNCTION__);
+      return;
+    }
+
+
+    AutoReadLock lock(&mModificationLock);
+    ContentInfo contentInfo;
+    contentInfo.mFileId = startFileId;
+    contentInfo.mMessageIndex = startMessageIndex;
+
+    int startIdx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
+    if (startIdx < 0)
+      startIdx = 0;
+
+    for (uint t=(uint)startIdx; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != NULL  &&  info->mSourceId == sourceId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());

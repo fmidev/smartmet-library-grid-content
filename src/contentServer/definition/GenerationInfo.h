@@ -43,6 +43,7 @@ class GenerationInfo
      std::string      mDescription;
      GenerationStatus mStatus;
      uint             mFlags;
+     uint             mSourceId;
 };
 
 

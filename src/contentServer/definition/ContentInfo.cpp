@@ -29,6 +29,7 @@ ContentInfo::ContentInfo()
     mTypeOfEnsembleForecast = 0;
     mPerturbationNumber = 0;
     mFlags = 0;
+    mSourceId = 0;
   }
   catch (...)
   {
@@ -69,6 +70,7 @@ ContentInfo::ContentInfo(ContentInfo& contentInfo)
     mTypeOfEnsembleForecast = contentInfo.mTypeOfEnsembleForecast;
     mPerturbationNumber = contentInfo.mPerturbationNumber;
     mFlags = contentInfo.mFlags;
+    mSourceId = contentInfo.mSourceId;
   }
   catch (...)
   {
@@ -142,6 +144,7 @@ void ContentInfo::operator=(ContentInfo& contentInfo)
     mTypeOfEnsembleForecast = contentInfo.mTypeOfEnsembleForecast;
     mPerturbationNumber = contentInfo.mPerturbationNumber;
     mFlags = contentInfo.mFlags;
+    mSourceId = contentInfo.mSourceId;
   }
   catch (...)
   {
@@ -158,7 +161,7 @@ std::string ContentInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%u;%u;%u;%u;%s;%s;%s;%s;%s;%s;%s;%s;%s;%u;%u;%u;%u;%s;%s;%u;%u;%llu;%u",
+    sprintf(st,"%u;%u;%u;%u;%u;%u;%s;%s;%s;%s;%s;%s;%s;%s;%s;%u;%u;%u;%u;%s;%s;%u;%u;%llu;%u;%u",
         mFileId,
         mMessageIndex,
         (uint)mFileType,
@@ -183,7 +186,9 @@ std::string ContentInfo::getCsv()
         mTypeOfEnsembleForecast,
         mPerturbationNumber,
         mServerFlags,
-        mFlags);
+        mFlags,
+        mSourceId
+        );
 
     return std::string(st);
   }
@@ -201,7 +206,7 @@ std::string ContentInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "fileId;messageIndex;fileType;producerId;generationId;groupFlags;startTime;endTime;fmiParameterId;fmiParameterName;gribParameterId;cdmParameterId;cdmParameterName;newbaseParameterId;newbaseParameterName;fmiParameterLevelId;grib1ParameterLevelId;grib2ParameterLevelId;parameterLevel;fmiParameterUnits;gribParameterUnits;mTypeOfEnsembleForecast;mPerturbationNumber;serverFlags;flags";
+    std::string header = "fileId;messageIndex;fileType;producerId;generationId;groupFlags;startTime;endTime;fmiParameterId;fmiParameterName;gribParameterId;cdmParameterId;cdmParameterName;newbaseParameterId;newbaseParameterName;fmiParameterLevelId;grib1ParameterLevelId;grib2ParameterLevelId;parameterLevel;fmiParameterUnits;gribParameterUnits;mTypeOfEnsembleForecast;mPerturbationNumber;serverFlags;flags;sourceId";
     return header;
   }
   catch (...)
@@ -240,7 +245,8 @@ void ContentInfo::setCsv(const char *csv)
       }
     }
 
-    if (c >= 24)
+
+    if (c >= 25)
     {
       mFileId = (uint)atoll(field[0]);
       mMessageIndex = (uint)atoll(field[1]);
@@ -267,6 +273,7 @@ void ContentInfo::setCsv(const char *csv)
       mPerturbationNumber = (unsigned char)atoll(field[22]);
       mServerFlags = (unsigned long long)atoll(field[23]);
       mFlags = (uint)atoll(field[24]);
+      mSourceId = (uint)atoll(field[25]);
     }
   }
   catch (...)
@@ -619,6 +626,7 @@ void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mPerturbationNumber     = " << (uint)mPerturbationNumber << "\n";
     stream << space(level) << "- mServerFlags            = " << mServerFlags << "\n";
     stream << space(level) << "- mFlags                  = " << mFlags << "\n";
+    stream << space(level) << "- mSourceId               = " << mSourceId << "\n";
   }
   catch (...)
   {

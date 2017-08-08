@@ -33,6 +33,7 @@ class ProducerInfo
      std::string    mTitle;
      std::string    mDescription;
      uint           mFlags;
+     uint           mSourceId;
 };
 
 

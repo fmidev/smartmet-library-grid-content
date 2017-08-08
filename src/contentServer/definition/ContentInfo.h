@@ -74,6 +74,7 @@ class ContentInfo
      unsigned char      mPerturbationNumber;
      unsigned long long mServerFlags;
      uint               mFlags;
+     uint               mSourceId;
 };
 
 

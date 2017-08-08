@@ -597,6 +597,28 @@ int CacheImplementation::_getProducerInfoById(T::SessionId sessionId,uint produc
 
 
 
+int CacheImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == NULL)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->deleteProducerInfoListBySourceId(sessionId,sourceId);
+    processEvents();
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_getProducerInfoByName(T::SessionId sessionId,std::string producerName,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
@@ -641,6 +663,33 @@ int CacheImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
       return Result::INVALID_SESSION;
 
     producerInfoList = mProducerInfoList;
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::ProducerInfoList& producerInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getProducerInfoListBySourceId(sessionId,sourceId,producerInfoList);
+
+    AutoReadLock lock(&mModificationLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    mProducerInfoList.getProducerInfoListBySourceId(sourceId,producerInfoList);
+
     return Result::OK;
   }
   catch (...)
@@ -787,6 +836,28 @@ int CacheImplementation::_deleteGenerationInfoListByProducerName(T::SessionId se
 
 
 
+int CacheImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == NULL)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->deleteGenerationInfoListBySourceId(sessionId,sourceId);
+    processEvents();
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_getGenerationInfoById(T::SessionId sessionId,uint generationId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -917,6 +988,32 @@ int CacheImplementation::_getGenerationInfoListByProducerName(T::SessionId sessi
       return Result::UNKNOWN_PRODUCER_NAME;
 
     mGenerationInfoList.getGenerationInfoListByProducerId(producerInfo->mProducerId,generationInfoList);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GenerationInfoList& generationInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getGenerationInfoListBySourceId(sessionId,sourceId,generationInfoList);
+
+    AutoReadLock lock(&mModificationLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    mGenerationInfoList.getGenerationInfoListBySourceId(sourceId,generationInfoList);
     return Result::OK;
   }
   catch (...)
@@ -1264,6 +1361,28 @@ int CacheImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessio
 
 
 
+int CacheImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == NULL)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->deleteFileInfoListBySourceId(sessionId,sourceId);
+    processEvents();
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -1484,6 +1603,32 @@ int CacheImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,uin
       return Result::INVALID_SESSION;
 
     mFileInfoList.getFileInfoListByGroupFlags(groupFlags,startFileId,maxRecords,fileInfoList);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getFileInfoListBySourceId(sessionId,sourceId,startFileId,maxRecords,fileInfoList);
+
+    AutoReadLock lock(&mModificationLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    mFileInfoList.getFileInfoListBySourceId(sourceId,startFileId,maxRecords,fileInfoList);
     return Result::OK;
   }
   catch (...)
@@ -1845,6 +1990,28 @@ int CacheImplementation::_deleteContentListByGenerationName(T::SessionId session
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentListByGenerationName(sessionId,generationName);
+    processEvents();
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_deleteContentListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == NULL)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->deleteContentListBySourceId(sessionId,sourceId);
     processEvents();
     return result;
   }
@@ -2275,6 +2442,32 @@ int CacheImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
       return Result::UNKNOWN_GENERATION_NAME;
 
     mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mGenerationId,startTime,endTime,contentInfoList);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getContentListBySourceId(sessionId,sourceId,startFileId,startMessageIndex,maxRecords,contentInfoList);
+
+    AutoReadLock lock(&mModificationLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    mContentInfoList[0].getContentInfoListBySourceId(sourceId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     return Result::OK;
   }
   catch (...)
@@ -2938,6 +3131,32 @@ void CacheImplementation::event_producerDeleted(T::EventInfo& eventInfo)
 
 
 
+void CacheImplementation::event_producerListDeletedBySourceId(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    // printf("EVENT[%llu]: producerListDeletedBySourceId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
+
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+      mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
+
+    mFileInfoList.deleteFileInfoBySourceId(eventInfo.mId1);
+    mGenerationInfoList.deleteGenerationInfoListBySourceId(eventInfo.mId1);
+    mProducerInfoList.deleteProducerInfoListBySourceId(eventInfo.mId1);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 void CacheImplementation::event_generationAdded(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -3035,12 +3254,37 @@ void CacheImplementation::event_generationListDeletedByProducerId(T::EventInfo& 
 
 
 
+void CacheImplementation::event_generationListDeletedBySourceId(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    // printf("EVENT[%llu]: generationListDeletedBySourceId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
+
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+      mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
+
+    mFileInfoList.deleteFileInfoBySourceId(eventInfo.mId1);
+    mGenerationInfoList.deleteGenerationInfoListBySourceId(eventInfo.mId1);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: fileAdded(%u)\n",eventInfo.mEventId,eventInfo.mId1);
+    //printf("EVENT[%llu]: fileAdded(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
@@ -3048,6 +3292,22 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
     if (mContentStorage->getFileInfoById(mSessionId,eventInfo.mId1,fileInfo) == Result::OK)
     {
       mFileInfoList.addFileInfo(fileInfo.duplicate());
+      if (fileInfo.mFlags & (uint)T::FileInfoFlags::CONTENT_PREDEFINED)
+      {
+        T::ContentInfoList contentInfoList;
+        if (mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) == Result::OK)
+        {
+          uint len = contentInfoList.getLength();
+          for (uint c=0; c<len; c++)
+          {
+            T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
+            T::ContentInfo *cInfo = info->duplicate();
+
+            for (int t=0; t<CONTENT_LIST_COUNT; t++)
+              mContentInfoList[t].addContentInfo(cInfo);
+          }
+        }
+      }
     }
   }
   catch (...)
@@ -3197,6 +3457,30 @@ void CacheImplementation::event_fileListDeletedByGenerationId(T::EventInfo& even
 
 
 
+void CacheImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    // printf("EVENT[%llu]: fileListDeletedBySourceId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
+
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+      mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
+
+    mFileInfoList.deleteFileInfoBySourceId(eventInfo.mId1);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 void CacheImplementation::event_contentListDeletedByFileId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -3252,6 +3536,28 @@ void CacheImplementation::event_contentListDeletedByProducerId(T::EventInfo& eve
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].deleteContentInfoByProducerId(eventInfo.mId1);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void CacheImplementation::event_contentListDeletedBySourceId(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    // printf("EVENT[%llu]: contentListDeletedBySourceId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
+
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+      mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
   }
   catch (...)
   {
@@ -3340,7 +3646,7 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: contentAdded(%u,%u)\n",eventInfo.mEventId,eventInfo.mId1,eventInfo.mId2);
+    //printf("EVENT[%llu]: contentAdded(%u,%u)\n",eventInfo.mEventId,eventInfo.mId1,eventInfo.mId2);
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
@@ -3459,6 +3765,10 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
         event_producerDeleted(eventInfo);
         break;
 
+      case EventType::PRODUCER_LIST_DELETED_BY_SOURCE_ID:
+        event_producerListDeletedBySourceId(eventInfo);
+        break;
+
       case EventType::GENERATION_ADDED:
         event_generationAdded(eventInfo);
         break;
@@ -3473,6 +3783,10 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
 
       case EventType::GENERATION_LIST_DELETED_BY_PRODUCER_ID:
         event_generationListDeletedByProducerId(eventInfo);
+        break;
+
+      case EventType::GENERATION_LIST_DELETED_BY_SOURCE_ID:
+        event_generationListDeletedBySourceId(eventInfo);
         break;
 
       case EventType::FILE_ADDED:
@@ -3499,6 +3813,10 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
         event_fileListDeletedByGenerationId(eventInfo);
         break;
 
+      case EventType::FILE_LIST_DELETED_BY_SOURCE_ID:
+        event_fileListDeletedBySourceId(eventInfo);
+        break;
+
       case EventType::CONTENT_LIST_DELETED_BY_FILE_ID:
         event_contentListDeletedByFileId(eventInfo);
         break;
@@ -3513,6 +3831,10 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
 
       case EventType::CONTENT_LIST_DELETED_BY_GENERATION_ID:
         event_contentListDeletedByGenerationId(eventInfo);
+        break;
+
+      case EventType::CONTENT_LIST_DELETED_BY_SOURCE_ID:
+        event_contentListDeletedBySourceId(eventInfo);
         break;
 
       case EventType::DATA_SERVER_ADDED:

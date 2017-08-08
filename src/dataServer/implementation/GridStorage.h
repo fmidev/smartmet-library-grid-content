@@ -24,6 +24,7 @@ class GridStorage
     void                deleteFilesByGroupFlags(uint groupFlags);
     void                deleteFilesByProducerId(uint producerId);
     void                deleteFilesByGenerationId(uint generationId);
+    void                deleteFilesBySourceId(uint sourceId);
     GRID::GridFile_sptr getFileById(uint fileId);
     GRID::GridFile_sptr getFileByIdNoMapping(uint fileId);
     GRID::GridFile_sptr getFileByIndex(std::size_t fileIndex);

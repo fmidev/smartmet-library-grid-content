@@ -142,6 +142,7 @@ vpath %.cpp src/ \
 			src/contentServer/http/client \
 			src/contentServer/http/common \
 			src/contentServer/http/server \
+			src/contentServer/sync \
             src/dataServer \
 			src/dataServer/definition \
 			src/dataServer/implementation \ 
@@ -157,6 +158,7 @@ vpath %.h 	src/ \
 			src/contentServer/http/client \
 			src/contentServer/http/common \
 			src/contentServer/http/server \
+			src/contentServer/sync \
             src/dataServer \
 			src/dataServer/definition \
 			src/dataServer/implementation \ 
@@ -168,7 +170,7 @@ vpath %.o obj
 
 # The files to be compiled
 
-SRCS     = $(patsubst src/%,%,$(wildcard src/*.cpp src/*/*.cpp src/*/definition/*.cpp src/*/cache/*.cpp src/*/redis/*.cpp src/*/http/*/*.cpp src/*/implementation/*.cpp))
+SRCS     = $(patsubst src/%,%,$(wildcard src/*.cpp src/*/*.cpp src/*/definition/*.cpp src/*/cache/*.cpp src/*/redis/*.cpp src/*/http/*/*.cpp src/*/implementation/*.cpp src/*/sync/*.cpp ))
 
 else
 
@@ -188,6 +190,7 @@ vpath %.cpp src/ \
 			src/contentServer/http/client \
 			src/contentServer/http/common \
 			src/contentServer/http/server \
+			src/contentServer/sync \
             src/dataServer \
 			src/dataServer/definition \
 			src/dataServer/implementation \
@@ -216,6 +219,7 @@ vpath %.h 	src/ \
 			src/contentServer/http/client \
 			src/contentServer/http/common \
 			src/contentServer/http/server \
+			src/contentServer/sync \
             src/dataServer \
 			src/dataServer/definition \
 			src/dataServer/implementation \
@@ -235,7 +239,7 @@ vpath %.o obj
 
 # The files to be compiled
 
-SRCS     = $(patsubst src/%,%,$(wildcard src/*.cpp src/*/*.cpp src/*/definition/*.cpp src/*/cache/*.cpp src/*/redis/*.cpp src/*/corba/*/*.cpp src/*/http/*/*.cpp src/*/implementation/*.cpp))
+SRCS     = $(patsubst src/%,%,$(wildcard src/*.cpp src/*/*.cpp src/*/definition/*.cpp src/*/cache/*.cpp src/*/sync/*.cpp src/*/redis/*.cpp src/*/corba/*/*.cpp src/*/http/*/*.cpp src/*/implementation/*.cpp))
 
 endif
 
@@ -299,6 +303,7 @@ install:
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/http/client
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/http/common/
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/http/server
+	@mkdir -p $(includedir)/$(INCDIR)/contentServer/sync
 	@mkdir -p $(includedir)/$(INCDIR)/dataServer/definition
 	@mkdir -p $(includedir)/$(INCDIR)/dataServer/implementation
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer
@@ -310,6 +315,7 @@ install:
 	@cp src/contentServer/http/client/*.h $(includedir)/$(INCDIR)/contentServer/http/client
 	@cp src/contentServer/http/common/*.h $(includedir)/$(INCDIR)/contentServer/http/common
 	@cp src/contentServer/http/server/*.h $(includedir)/$(INCDIR)/contentServer/http/server	
+	@cp src/contentServer/sync/*.h $(includedir)/$(INCDIR)/contentServer/sync
 	@cp src/dataServer/definition/*.h $(includedir)/$(INCDIR)/dataServer/definition
 	@cp src/dataServer/implementation/*.h $(includedir)/$(INCDIR)/dataServer/implementation
 	@cp src/queryServer/definition/*.h $(includedir)/$(INCDIR)/queryServer/definition
@@ -359,6 +365,7 @@ objdir:
 	@mkdir -p obj/contentServer/http/client
 	@mkdir -p obj/contentServer/http/common
 	@mkdir -p obj/contentServer/http/server
+	@mkdir -p obj/contentServer/sync
 	@mkdir -p obj/dataServer/definition
 	@mkdir -p obj/dataServer/implementation
 	@mkdir -p obj/queryServer/definition

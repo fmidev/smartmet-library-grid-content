@@ -18,6 +18,7 @@ GenerationInfo::GenerationInfo()
     mProducerId = 0;
     mStatus = T::GenerationStatus::STATUS_DISABLED;
     mFlags = 0;
+    mSourceId = 0;
   }
   catch (...)
   {
@@ -40,6 +41,7 @@ GenerationInfo::GenerationInfo(GenerationInfo& generationInfo)
     mDescription = generationInfo.mDescription;
     mStatus = generationInfo.mStatus;
     mFlags = generationInfo.mFlags;
+    mSourceId = generationInfo.mSourceId;
   }
   catch (...)
   {
@@ -96,6 +98,7 @@ void GenerationInfo::operator=(GenerationInfo& generationInfo)
     mDescription = generationInfo.mDescription;
     mStatus = generationInfo.mStatus;
     mFlags = generationInfo.mFlags;
+    mSourceId = generationInfo.mSourceId;
   }
   catch (...)
   {
@@ -112,14 +115,15 @@ std::string GenerationInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%u;%s;%s;%u;%u",
+    sprintf(st,"%u;%u;%u;%s;%s;%u;%u;%u",
         mGenerationId,
         mGenerationType,
         mProducerId,
         mName.c_str(),
         mDescription.c_str(),
         (uint)mStatus,
-        mFlags);
+        mFlags,
+        mSourceId);
 
     return std::string(st);
   }
@@ -137,7 +141,7 @@ std::string GenerationInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "generationId;generationType;producerId;name;description;status;flags";
+    std::string header = "generationId;generationType;producerId;name;description;status;flags;sourceId";
     return header;
   }
   catch (...)
@@ -176,7 +180,7 @@ void GenerationInfo::setCsv(const char *csv)
       }
     }
 
-    if (c >= 6)
+    if (c >= 7)
     {
       mGenerationId = (uint)atoll(field[0]);
       mGenerationType = (uint)atoll(field[1]);
@@ -185,6 +189,7 @@ void GenerationInfo::setCsv(const char *csv)
       mDescription = field[4];
       mStatus = (GenerationStatus)atoll(field[5]);
       mFlags = (uint)atoll(field[6]);
+      mSourceId = (uint)atoll(field[7]);
     }
   }
   catch (...)
@@ -241,7 +246,7 @@ void GenerationInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mDescription    = " << mDescription << "\n";
     stream << space(level) << "- mStatus         = " << (int)mStatus << "\n";
     stream << space(level) << "- mFlags          = " << mFlags << "\n";
-
+    stream << space(level) << "- mSourceId       = " << mSourceId << "\n";
   }
   catch (...)
   {
