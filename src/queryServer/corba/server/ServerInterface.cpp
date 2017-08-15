@@ -2,6 +2,10 @@
 #include "queryServer/corba/convert/Converter.h"
 #include "contentServer/corba/convert/Converter.h"
 #include "grid-files/common/Exception.h"
+#include "grid-files/common/ShowFunction.h"
+
+
+#define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
 
 namespace SmartMet
@@ -14,6 +18,7 @@ namespace Corba
 
 ServerInterface::ServerInterface()
 {
+  FUNCTION_TRACE
   try
   {
     mService = NULL;
@@ -30,6 +35,7 @@ ServerInterface::ServerInterface()
 
 ServerInterface::~ServerInterface()
 {
+  FUNCTION_TRACE
   try
   {
   }
@@ -45,6 +51,7 @@ ServerInterface::~ServerInterface()
 
 void ServerInterface::init(QueryServer::ServiceInterface *service)
 {
+  FUNCTION_TRACE
   try
   {
     mService = service;
@@ -61,6 +68,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getValuesByGridPoint(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaContentInfoList& contentInfoList, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Octet interpolationMethod, SmartMet::QueryServer::Corba::CorbaGridPointValueList_out valueList)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)

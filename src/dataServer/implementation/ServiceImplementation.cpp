@@ -507,7 +507,6 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
       return;
     }
 
-
     gridFile->setCheckTime(checkTime);
 
     if ((fileInfo.mFlags & (uint)T::FileInfoFlags::CONTENT_PREDEFINED) != 0  ||  contentList.getLength() > 0)

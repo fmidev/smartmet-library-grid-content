@@ -1,6 +1,11 @@
 #include "ServiceInterface.h"
 #include "grid-files/common/Exception.h"
 #include "grid-files/common/GeneralFunctions.h"
+#include "grid-files/common/ShowFunction.h"
+
+
+#define FUNCTION_TRACE FUNCTION_TRACE_OFF
+
 
 
 namespace SmartMet
@@ -11,8 +16,10 @@ namespace ContentServer
 
 ServiceInterface::ServiceInterface()
 {
+  FUNCTION_TRACE
   try
   {
+    mProcessingLogPointer = NULL;
   }
   catch (...)
   {
@@ -26,6 +33,7 @@ ServiceInterface::ServiceInterface()
 
 ServiceInterface::~ServiceInterface()
 {
+  FUNCTION_TRACE
   try
   {
   }
@@ -39,8 +47,26 @@ ServiceInterface::~ServiceInterface()
 
 
 
+void ServiceInterface::setProcessingLog(Log *processingLogPointer)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mProcessingLogPointer = processingLogPointer;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 void ServiceInterface::shutdown()
 {
+  FUNCTION_TRACE
   try
   {
   }
@@ -56,6 +82,7 @@ void ServiceInterface::shutdown()
 
 int ServiceInterface::clear(T::SessionId sessionId)
 {
+  FUNCTION_TRACE
   try
   {
     int result = _clear(sessionId);
@@ -73,6 +100,7 @@ int ServiceInterface::clear(T::SessionId sessionId)
 
 int ServiceInterface::reload(T::SessionId sessionId)
 {
+  FUNCTION_TRACE
   try
   {
     int result = _reload(sessionId);
@@ -90,9 +118,14 @@ int ServiceInterface::reload(T::SessionId sessionId)
 
 int ServiceInterface::addDataServerInfo(T::SessionId sessionId,T::ServerInfo& serverInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _addDataServerInfo(sessionId,serverInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,serverInfo.getCsv().c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -107,9 +140,14 @@ int ServiceInterface::addDataServerInfo(T::SessionId sessionId,T::ServerInfo& se
 
 int ServiceInterface::deleteDataServerInfoById(T::SessionId sessionId,uint serverId)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteDataServerInfoById(sessionId,serverId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,serverId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -124,9 +162,14 @@ int ServiceInterface::deleteDataServerInfoById(T::SessionId sessionId,uint serve
 
 int ServiceInterface::getDataServerInfoById(T::SessionId sessionId,uint serverId,T::ServerInfo& serverInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getDataServerInfoById(sessionId,serverId,serverInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,serverId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -141,9 +184,14 @@ int ServiceInterface::getDataServerInfoById(T::SessionId sessionId,uint serverId
 
 int ServiceInterface::getDataServerInfoByName(T::SessionId sessionId,std::string serverName,T::ServerInfo& serverInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getDataServerInfoByName(sessionId,serverName,serverInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,serverName.c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -158,9 +206,14 @@ int ServiceInterface::getDataServerInfoByName(T::SessionId sessionId,std::string
 
 int ServiceInterface::getDataServerInfoByIor(T::SessionId sessionId,std::string serverIor,T::ServerInfo& serverInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getDataServerInfoByIor(sessionId,serverIor,serverInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,serverIor.c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -175,9 +228,14 @@ int ServiceInterface::getDataServerInfoByIor(T::SessionId sessionId,std::string 
 
 int ServiceInterface::getDataServerInfoList(T::SessionId sessionId,T::ServerInfoList& serverInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getDataServerInfoList(sessionId,serverInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,ServerInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,serverInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -192,9 +250,14 @@ int ServiceInterface::getDataServerInfoList(T::SessionId sessionId,T::ServerInfo
 
 int ServiceInterface::getDataServerInfoCount(T::SessionId sessionId,uint& count)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getDataServerInfoCount(sessionId,count);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,count,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -209,9 +272,14 @@ int ServiceInterface::getDataServerInfoCount(T::SessionId sessionId,uint& count)
 
 int ServiceInterface::addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _addProducerInfo(sessionId,producerInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,producerInfo.getCsv().c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -226,9 +294,14 @@ int ServiceInterface::addProducerInfo(T::SessionId sessionId,T::ProducerInfo& pr
 
 int ServiceInterface::deleteProducerInfoById(T::SessionId sessionId,uint producerId)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteProducerInfoById(sessionId,producerId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,producerId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -243,9 +316,14 @@ int ServiceInterface::deleteProducerInfoById(T::SessionId sessionId,uint produce
 
 int ServiceInterface::deleteProducerInfoByName(T::SessionId sessionId,std::string producerName)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteProducerInfoByName(sessionId,producerName);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,producerName.c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -260,9 +338,14 @@ int ServiceInterface::deleteProducerInfoByName(T::SessionId sessionId,std::strin
 
 int ServiceInterface::deleteProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteProducerInfoListBySourceId(sessionId,sourceId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,sourceId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -277,9 +360,14 @@ int ServiceInterface::deleteProducerInfoListBySourceId(T::SessionId sessionId,ui
 
 int ServiceInterface::getProducerInfoById(T::SessionId sessionId,uint producerId,T::ProducerInfo& producerInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getProducerInfoById(sessionId,producerId,producerInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,producerId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -294,9 +382,14 @@ int ServiceInterface::getProducerInfoById(T::SessionId sessionId,uint producerId
 
 int ServiceInterface::getProducerInfoByName(T::SessionId sessionId,std::string producerName,T::ProducerInfo& producerInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getProducerInfoByName(sessionId,producerName,producerInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,producerName.c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -311,9 +404,14 @@ int ServiceInterface::getProducerInfoByName(T::SessionId sessionId,std::string p
 
 int ServiceInterface::getProducerInfoList(T::SessionId sessionId,T::ProducerInfoList& producerInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getProducerInfoList(sessionId,producerInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,ProducerInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -328,9 +426,14 @@ int ServiceInterface::getProducerInfoList(T::SessionId sessionId,T::ProducerInfo
 
 int ServiceInterface::getProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::ProducerInfoList& producerInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getProducerInfoListBySourceId(sessionId,sourceId,producerInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,ProducerInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,sourceId,producerInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -345,9 +448,14 @@ int ServiceInterface::getProducerInfoListBySourceId(T::SessionId sessionId,uint 
 
 int ServiceInterface::getProducerInfoCount(T::SessionId sessionId,uint& count)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getProducerInfoCount(sessionId,count);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,count,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -362,9 +470,14 @@ int ServiceInterface::getProducerInfoCount(T::SessionId sessionId,uint& count)
 
 int ServiceInterface::addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _addGenerationInfo(sessionId,generationInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,generationInfo.getCsv().c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -379,9 +492,14 @@ int ServiceInterface::addGenerationInfo(T::SessionId sessionId,T::GenerationInfo
 
 int ServiceInterface::deleteGenerationInfoById(T::SessionId sessionId,uint generationId)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteGenerationInfoById(sessionId,generationId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,generationId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -396,9 +514,14 @@ int ServiceInterface::deleteGenerationInfoById(T::SessionId sessionId,uint gener
 
 int ServiceInterface::deleteGenerationInfoByName(T::SessionId sessionId,std::string generationName)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteGenerationInfoByName(sessionId,generationName);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -413,9 +536,14 @@ int ServiceInterface::deleteGenerationInfoByName(T::SessionId sessionId,std::str
 
 int ServiceInterface::deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteGenerationInfoListByProducerId(sessionId,producerId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,producerId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -430,9 +558,14 @@ int ServiceInterface::deleteGenerationInfoListByProducerId(T::SessionId sessionI
 
 int ServiceInterface::deleteGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteGenerationInfoListByProducerName(sessionId,producerName);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,producerName.c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -447,9 +580,14 @@ int ServiceInterface::deleteGenerationInfoListByProducerName(T::SessionId sessio
 
 int ServiceInterface::deleteGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteGenerationInfoListBySourceId(sessionId,sourceId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,sourceId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -464,9 +602,14 @@ int ServiceInterface::deleteGenerationInfoListBySourceId(T::SessionId sessionId,
 
 int ServiceInterface::getGenerationInfoById(T::SessionId sessionId,uint generationId,T::GenerationInfo& generationInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getGenerationInfoById(sessionId,generationId,generationInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,generationId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -481,9 +624,14 @@ int ServiceInterface::getGenerationInfoById(T::SessionId sessionId,uint generati
 
 int ServiceInterface::getGenerationInfoByName(T::SessionId sessionId,std::string generationName,T::GenerationInfo& generationInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getGenerationInfoByName(sessionId,generationName,generationInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -498,9 +646,14 @@ int ServiceInterface::getGenerationInfoByName(T::SessionId sessionId,std::string
 
 int ServiceInterface::getGenerationInfoList(T::SessionId sessionId,T::GenerationInfoList& generationInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getGenerationInfoList(sessionId,generationInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,GenerationInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -515,9 +668,14 @@ int ServiceInterface::getGenerationInfoList(T::SessionId sessionId,T::Generation
 
 int ServiceInterface::getGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GenerationInfoList& generationInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getGenerationInfoListByProducerId(sessionId,producerId,generationInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,GenerationInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerId,generationInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -532,9 +690,14 @@ int ServiceInterface::getGenerationInfoListByProducerId(T::SessionId sessionId,u
 
 int ServiceInterface::getGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName,T::GenerationInfoList& generationInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getGenerationInfoListByProducerName(sessionId,producerName,generationInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s,GenerationInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerName.c_str(),generationInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -549,9 +712,14 @@ int ServiceInterface::getGenerationInfoListByProducerName(T::SessionId sessionId
 
 int ServiceInterface::getGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GenerationInfoList& generationInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getGenerationInfoListBySourceId(sessionId,sourceId,generationInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,GenerationInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,sourceId,generationInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -566,9 +734,14 @@ int ServiceInterface::getGenerationInfoListBySourceId(T::SessionId sessionId,uin
 
 int ServiceInterface::getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,uint producerId,T::GenerationStatus generationStatus,T::GenerationInfo& generationInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getLastGenerationInfoByProducerIdAndStatus(sessionId,producerId,generationStatus,generationInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,producerId,generationStatus,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -583,9 +756,14 @@ int ServiceInterface::getLastGenerationInfoByProducerIdAndStatus(T::SessionId se
 
 int ServiceInterface::getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,std::string producerName,T::GenerationStatus generationStatus,T::GenerationInfo& generationInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getLastGenerationInfoByProducerNameAndStatus(sessionId,producerName,generationStatus,generationInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s,%u);result %d;time %f;",__FUNCTION__,sessionId,producerName.c_str(),generationStatus,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -600,9 +778,14 @@ int ServiceInterface::getLastGenerationInfoByProducerNameAndStatus(T::SessionId 
 
 int ServiceInterface::getGenerationInfoCount(T::SessionId sessionId,uint& count)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getGenerationInfoCount(sessionId,count);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,count,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -617,9 +800,14 @@ int ServiceInterface::getGenerationInfoCount(T::SessionId sessionId,uint& count)
 
 int ServiceInterface::setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,T::GenerationStatus status)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _setGenerationInfoStatusById(sessionId,generationId,status);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,generationId,status,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -634,9 +822,14 @@ int ServiceInterface::setGenerationInfoStatusById(T::SessionId sessionId,uint ge
 
 int ServiceInterface::setGenerationInfoStatusByName(T::SessionId sessionId,std::string generationName,T::GenerationStatus status)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _setGenerationInfoStatusByName(sessionId,generationName,status);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s,%u);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),status,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -651,9 +844,14 @@ int ServiceInterface::setGenerationInfoStatusByName(T::SessionId sessionId,std::
 
 int ServiceInterface::addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _addFileInfo(sessionId,fileInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,fileInfo.getCsv().c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -668,9 +866,14 @@ int ServiceInterface::addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 
 int ServiceInterface::addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _addFileInfoWithContentList(sessionId,fileInfo,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileInfo.getCsv().c_str(),contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -685,9 +888,14 @@ int ServiceInterface::addFileInfoWithContentList(T::SessionId sessionId,T::FileI
 
 int ServiceInterface::deleteFileInfoById(T::SessionId sessionId,uint fileId)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteFileInfoById(sessionId,fileId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,fileId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -702,9 +910,14 @@ int ServiceInterface::deleteFileInfoById(T::SessionId sessionId,uint fileId)
 
 int ServiceInterface::deleteFileInfoByName(T::SessionId sessionId,std::string filename)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteFileInfoByName(sessionId,filename);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,filename.c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -719,9 +932,14 @@ int ServiceInterface::deleteFileInfoByName(T::SessionId sessionId,std::string fi
 
 int ServiceInterface::deleteFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByGroupFlags(sessionId,groupFlags);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,groupFlags,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -736,9 +954,14 @@ int ServiceInterface::deleteFileInfoListByGroupFlags(T::SessionId sessionId,uint
 
 int ServiceInterface::deleteFileInfoListByProducerId(T::SessionId sessionId,uint producerId)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByProducerId(sessionId,producerId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,producerId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -753,9 +976,14 @@ int ServiceInterface::deleteFileInfoListByProducerId(T::SessionId sessionId,uint
 
 int ServiceInterface::deleteFileInfoListByProducerName(T::SessionId sessionId,std::string producerName)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByProducerName(sessionId,producerName);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,producerName.c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -770,9 +998,14 @@ int ServiceInterface::deleteFileInfoListByProducerName(T::SessionId sessionId,st
 
 int ServiceInterface::deleteFileInfoListByGenerationId(T::SessionId sessionId,uint generationId)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByGenerationId(sessionId,generationId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,generationId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -787,9 +1020,14 @@ int ServiceInterface::deleteFileInfoListByGenerationId(T::SessionId sessionId,ui
 
 int ServiceInterface::deleteFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByGenerationName(sessionId,generationName);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -804,9 +1042,14 @@ int ServiceInterface::deleteFileInfoListByGenerationName(T::SessionId sessionId,
 
 int ServiceInterface::deleteFileInfoListBySourceId(T::SessionId sessionId,uint sourceId)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListBySourceId(sessionId,sourceId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,sourceId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -821,9 +1064,14 @@ int ServiceInterface::deleteFileInfoListBySourceId(T::SessionId sessionId,uint s
 
 int ServiceInterface::getFileInfoById(T::SessionId sessionId,uint fileId,T::FileInfo& fileInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getFileInfoById(sessionId,fileId,fileInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,fileId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -838,9 +1086,14 @@ int ServiceInterface::getFileInfoById(T::SessionId sessionId,uint fileId,T::File
 
 int ServiceInterface::getFileInfoByName(T::SessionId sessionId,std::string filename,T::FileInfo& fileInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getFileInfoByName(sessionId,filename,fileInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,filename.c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -855,9 +1108,14 @@ int ServiceInterface::getFileInfoByName(T::SessionId sessionId,std::string filen
 
 int ServiceInterface::getFileInfoList(T::SessionId sessionId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getFileInfoList(sessionId,startFileId,maxRecords,fileInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,startFileId,maxRecords,fileInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -872,9 +1130,14 @@ int ServiceInterface::getFileInfoList(T::SessionId sessionId,uint startFileId,ui
 
 int ServiceInterface::getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getFileInfoListByProducerId(sessionId,producerId,startFileId,maxRecords,fileInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerId,startFileId,maxRecords,fileInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -889,9 +1152,14 @@ int ServiceInterface::getFileInfoListByProducerId(T::SessionId sessionId,uint pr
 
 int ServiceInterface::getFileInfoListByProducerName(T::SessionId sessionId,std::string producerName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getFileInfoListByProducerName(sessionId,producerName,startFileId,maxRecords,fileInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s,%u,%u,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerName.c_str(),startFileId,maxRecords,fileInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -906,9 +1174,14 @@ int ServiceInterface::getFileInfoListByProducerName(T::SessionId sessionId,std::
 
 int ServiceInterface::getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getFileInfoListByGenerationId(sessionId,generationId,startFileId,maxRecords,fileInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,startFileId,maxRecords,fileInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -923,9 +1196,14 @@ int ServiceInterface::getFileInfoListByGenerationId(T::SessionId sessionId,uint 
 
 int ServiceInterface::getFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getFileInfoListByGenerationName(sessionId,generationName,startFileId,maxRecords,fileInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s,%u,%u,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),startFileId,maxRecords,fileInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -940,9 +1218,14 @@ int ServiceInterface::getFileInfoListByGenerationName(T::SessionId sessionId,std
 
 int ServiceInterface::getFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getFileInfoListByGroupFlags(sessionId,groupFlags,startFileId,maxRecords,fileInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,groupFlags,startFileId,maxRecords,fileInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -957,9 +1240,14 @@ int ServiceInterface::getFileInfoListByGroupFlags(T::SessionId sessionId,uint gr
 
 int ServiceInterface::getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getFileInfoListBySourceId(sessionId,sourceId,startFileId,maxRecords,fileInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,sourceId,startFileId,maxRecords,fileInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -974,9 +1262,14 @@ int ServiceInterface::getFileInfoListBySourceId(T::SessionId sessionId,uint sour
 
 int ServiceInterface::getFileInfoCount(T::SessionId sessionId,uint& count)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getFileInfoCount(sessionId,count);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,count,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -991,9 +1284,14 @@ int ServiceInterface::getFileInfoCount(T::SessionId sessionId,uint& count)
 
 int ServiceInterface::addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _addEventInfo(sessionId,eventInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,eventInfo.getCsv().c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1008,9 +1306,16 @@ int ServiceInterface::addEventInfo(T::SessionId sessionId,T::EventInfo& eventInf
 
 int ServiceInterface::getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    // ### This method is polled all the time. Let's not write these calls to the processing log.
+
+    //unsigned long long timeStart = getTime();
     int result = _getLastEventInfo(sessionId,requestingServerId,eventInfo);
+    //unsigned long requestTime = getTime() - timeStart;
+
+    //PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,requestingServerId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1025,9 +1330,14 @@ int ServiceInterface::getLastEventInfo(T::SessionId sessionId,uint requestingSer
 
 int ServiceInterface::getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,uint maxRecords,T::EventInfoList& eventInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getEventInfoList(sessionId,requestingServerId,startEventId,maxRecords,eventInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%llu,%u,EventInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,requestingServerId,startEventId,maxRecords,eventInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1043,9 +1353,14 @@ int ServiceInterface::getEventInfoList(T::SessionId sessionId,uint requestingSer
 
 int ServiceInterface::getEventInfoCount(T::SessionId sessionId,uint& count)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getEventInfoCount(sessionId,count);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,count,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1060,9 +1375,14 @@ int ServiceInterface::getEventInfoCount(T::SessionId sessionId,uint& count)
 
 int ServiceInterface::addContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _addContentInfo(sessionId,contentInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,contentInfo.getCsv().c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1077,9 +1397,14 @@ int ServiceInterface::addContentInfo(T::SessionId sessionId,T::ContentInfo& cont
 
 int ServiceInterface::addContentList(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _addContentList(sessionId,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1094,9 +1419,14 @@ int ServiceInterface::addContentList(T::SessionId sessionId,T::ContentInfoList& 
 
 int ServiceInterface::deleteContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteContentInfo(sessionId,fileId,messageIndex);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1111,9 +1441,14 @@ int ServiceInterface::deleteContentInfo(T::SessionId sessionId,uint fileId,uint 
 
 int ServiceInterface::deleteContentListByFileId(T::SessionId sessionId,uint fileId)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteContentListByFileId(sessionId,fileId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,fileId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1128,9 +1463,14 @@ int ServiceInterface::deleteContentListByFileId(T::SessionId sessionId,uint file
 
 int ServiceInterface::deleteContentListByFileName(T::SessionId sessionId,std::string filename)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteContentListByFileName(sessionId,filename);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,filename.c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1145,9 +1485,14 @@ int ServiceInterface::deleteContentListByFileName(T::SessionId sessionId,std::st
 
 int ServiceInterface::deleteContentListByGroupFlags(T::SessionId sessionId,uint groupFlags)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteContentListByGroupFlags(sessionId,groupFlags);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,groupFlags,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1162,9 +1507,14 @@ int ServiceInterface::deleteContentListByGroupFlags(T::SessionId sessionId,uint 
 
 int ServiceInterface::deleteContentListByProducerId(T::SessionId sessionId,uint producerId)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteContentListByProducerId(sessionId,producerId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,producerId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1179,9 +1529,14 @@ int ServiceInterface::deleteContentListByProducerId(T::SessionId sessionId,uint 
 
 int ServiceInterface::deleteContentListByProducerName(T::SessionId sessionId,std::string producerName)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteContentListByProducerName(sessionId,producerName);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,producerName.c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1196,9 +1551,14 @@ int ServiceInterface::deleteContentListByProducerName(T::SessionId sessionId,std
 
 int ServiceInterface::deleteContentListByGenerationId(T::SessionId sessionId,uint generationId)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteContentListByGenerationId(sessionId,generationId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,generationId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1213,9 +1573,14 @@ int ServiceInterface::deleteContentListByGenerationId(T::SessionId sessionId,uin
 
 int ServiceInterface::deleteContentListByGenerationName(T::SessionId sessionId,std::string generationName)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteContentListByGenerationName(sessionId,generationName);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1230,9 +1595,14 @@ int ServiceInterface::deleteContentListByGenerationName(T::SessionId sessionId,s
 
 int ServiceInterface::deleteContentListBySourceId(T::SessionId sessionId,uint sourceId)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _deleteContentListBySourceId(sessionId,sourceId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,sourceId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1247,9 +1617,14 @@ int ServiceInterface::deleteContentListBySourceId(T::SessionId sessionId,uint so
 
 int ServiceInterface::registerContentList(T::SessionId sessionId,uint serverId,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _registerContentList(sessionId,serverId,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,serverId,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1264,9 +1639,14 @@ int ServiceInterface::registerContentList(T::SessionId sessionId,uint serverId,T
 
 int ServiceInterface::registerContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _registerContentListByFileId(sessionId,serverId,fileId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,serverId,fileId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1281,9 +1661,14 @@ int ServiceInterface::registerContentListByFileId(T::SessionId sessionId,uint se
 
 int ServiceInterface::unregisterContentList(T::SessionId sessionId,uint serverId)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _unregisterContentList(sessionId,serverId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,serverId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1298,9 +1683,14 @@ int ServiceInterface::unregisterContentList(T::SessionId sessionId,uint serverId
 
 int ServiceInterface::unregisterContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _unregisterContentListByFileId(sessionId,serverId,fileId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,serverId,fileId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1315,9 +1705,14 @@ int ServiceInterface::unregisterContentListByFileId(T::SessionId sessionId,uint 
 
 int ServiceInterface::getContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex,T::ContentInfo& contentInfo)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentInfo(sessionId,fileId,messageIndex,contentInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1332,9 +1727,14 @@ int ServiceInterface::getContentInfo(T::SessionId sessionId,uint fileId,uint mes
 
 int ServiceInterface::getContentList(T::SessionId sessionId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentList(sessionId,startFileId,startMessageIndex,maxRecords,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1349,9 +1749,14 @@ int ServiceInterface::getContentList(T::SessionId sessionId,uint startFileId,uin
 
 int ServiceInterface::getContentListByFileId(T::SessionId sessionId,uint fileId,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentListByFileId(sessionId,fileId,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1366,9 +1771,14 @@ int ServiceInterface::getContentListByFileId(T::SessionId sessionId,uint fileId,
 
 int ServiceInterface::getContentListByFileName(T::SessionId sessionId,std::string filename,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentListByFileName(sessionId,filename,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,filename.c_str(),contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1383,9 +1793,14 @@ int ServiceInterface::getContentListByFileName(T::SessionId sessionId,std::strin
 
 int ServiceInterface::getContentListByServerId(T::SessionId sessionId,uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentListByServerId(sessionId,serverId,startFileId,startMessageIndex,maxRecords,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,serverId,startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1400,9 +1815,14 @@ int ServiceInterface::getContentListByServerId(T::SessionId sessionId,uint serve
 
 int ServiceInterface::getContentListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentListByGroupFlags(sessionId,groupFlags,startFileId,startMessageIndex,maxRecords,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,groupFlags,startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1417,9 +1837,14 @@ int ServiceInterface::getContentListByGroupFlags(T::SessionId sessionId,uint gro
 
 int ServiceInterface::getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentListByProducerId(sessionId,producerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerId,startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1434,9 +1859,14 @@ int ServiceInterface::getContentListByProducerId(T::SessionId sessionId,uint pro
 
 int ServiceInterface::getContentListByProducerName(T::SessionId sessionId,std::string producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentListByProducerName(sessionId,producerName,startFileId,startMessageIndex,maxRecords,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s,%u,%u,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerName.c_str(),startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1451,9 +1881,14 @@ int ServiceInterface::getContentListByProducerName(T::SessionId sessionId,std::s
 
 int ServiceInterface::getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentListBySourceId(sessionId,sourceId,startFileId,startMessageIndex,maxRecords,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,sourceId,startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1468,9 +1903,14 @@ int ServiceInterface::getContentListBySourceId(T::SessionId sessionId,uint sourc
 
 int ServiceInterface::getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentListByGenerationId(sessionId,generationId,startFileId,startMessageIndex,maxRecords,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1485,9 +1925,14 @@ int ServiceInterface::getContentListByGenerationId(T::SessionId sessionId,uint g
 
 int ServiceInterface::getContentListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentListByGenerationName(sessionId,generationName,startFileId,startMessageIndex,maxRecords,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s,%u,%u,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1502,9 +1947,14 @@ int ServiceInterface::getContentListByGenerationName(T::SessionId sessionId,std:
 
 int ServiceInterface::getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentListByGenerationIdAndTimeRange(sessionId,generationId,startTime,endTime,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%s,%s,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,startTime.c_str(),endTime.c_str(),contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1519,9 +1969,14 @@ int ServiceInterface::getContentListByGenerationIdAndTimeRange(T::SessionId sess
 
 int ServiceInterface::getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,std::string generationName,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentListByGenerationNameAndTimeRange(sessionId,generationName,startTime,endTime,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s,%s,%s,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),startTime.c_str(),endTime.c_str(),contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1536,9 +1991,14 @@ int ServiceInterface::getContentListByGenerationNameAndTimeRange(T::SessionId se
 
 int ServiceInterface::getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentListByParameter(sessionId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,requestFlags,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%s,%u,%u,%d,%d,%s,%s,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,(uint)parameterKeyType,parameterKey.c_str(),(uint)parameterLevelIdType,(uint)parameterLevelId,minLevel,maxLevel,startTime.c_str(),endTime.c_str(),requestFlags,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1553,9 +2013,14 @@ int ServiceInterface::getContentListByParameter(T::SessionId sessionId,T::ParamK
 
 int ServiceInterface::getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,requestFlags,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%s,%u,%u,%d,%d,%s,%s,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,(uint)parameterKeyType,parameterKey.c_str(),(uint)parameterLevelIdType,(uint)parameterLevelId,minLevel,maxLevel,startTime.c_str(),endTime.c_str(),requestFlags,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1570,9 +2035,14 @@ int ServiceInterface::getContentListByParameterAndGenerationId(T::SessionId sess
 
 int ServiceInterface::getContentListByParameterAndGenerationName(T::SessionId sessionId,std::string generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,requestFlags,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s,%u,%s,%u,%u,%d,%d,%s,%s,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),(uint)parameterKeyType,parameterKey.c_str(),(uint)parameterLevelIdType,(uint)parameterLevelId,minLevel,maxLevel,startTime.c_str(),endTime.c_str(),requestFlags,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1587,9 +2057,14 @@ int ServiceInterface::getContentListByParameterAndGenerationName(T::SessionId se
 
 int ServiceInterface::getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,requestFlags,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%s,%u,%u,%d,%d,%s,%s,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerId,(uint)parameterKeyType,parameterKey.c_str(),(uint)parameterLevelIdType,(uint)parameterLevelId,minLevel,maxLevel,startTime.c_str(),endTime.c_str(),requestFlags,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1604,9 +2079,14 @@ int ServiceInterface::getContentListByParameterAndProducerId(T::SessionId sessio
 
 int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sessionId,std::string producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,requestFlags,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s,%u,%s,%u,%u,%d,%d,%s,%s,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerName.c_str(),(uint)parameterKeyType,parameterKey.c_str(),(uint)parameterLevelIdType,(uint)parameterLevelId,minLevel,maxLevel,startTime.c_str(),endTime.c_str(),requestFlags,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -1621,9 +2101,14 @@ int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sess
 
 int ServiceInterface::getContentCount(T::SessionId sessionId,uint& count)
 {
+  FUNCTION_TRACE
   try
   {
+    unsigned long long timeStart = getTime();
     int result = _getContentCount(sessionId,count);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,count,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)

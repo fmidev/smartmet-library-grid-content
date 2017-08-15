@@ -7,6 +7,7 @@
 
 #include "grid-files/grid/Typedefs.h"
 #include "grid-files/common/AttributeList.h"
+#include "grid-files/common/Log.h"
 #include "contentServer/definition/ServiceInterface.h"
 
 
@@ -23,6 +24,7 @@ class ServiceInterface
                     ServiceInterface();
      virtual        ~ServiceInterface();
 
+     virtual void   setProcessingLog(Log *processingLogPointer);
      virtual void   shutdown();
 
      virtual int    getGridAttributeList(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList);
@@ -40,6 +42,8 @@ class ServiceInterface
      virtual int    _getGridValue(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::ParamValue& value);
      virtual int    _getGridValueList(T::SessionId sessionId,T::ValueRecordList& valueRecordList);
      virtual int    _getGridValuesByArea(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,T::InterpolationMethod interpolationMethod,T::ParamValue_vec& values);
+
+     Log            *mProcessingLogPointer;
 };
 
 

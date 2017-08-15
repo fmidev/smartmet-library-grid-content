@@ -1,6 +1,10 @@
 #include "ServerInterface.h"
 #include "dataServer/corba/convert/Converter.h"
 #include "grid-files/common/Exception.h"
+#include "grid-files/common/ShowFunction.h"
+
+
+#define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
 
 namespace SmartMet
@@ -13,6 +17,7 @@ namespace Corba
 
 ServerInterface::ServerInterface()
 {
+  FUNCTION_TRACE
   try
   {
     mService = NULL;
@@ -29,6 +34,7 @@ ServerInterface::ServerInterface()
 
 ServerInterface::~ServerInterface()
 {
+  FUNCTION_TRACE
   try
   {
   }
@@ -44,6 +50,7 @@ ServerInterface::~ServerInterface()
 
 void ServerInterface::init(DataServer::ServiceInterface *service)
 {
+  FUNCTION_TRACE
   try
   {
     mService = service;
@@ -60,6 +67,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getGridCoordinates(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaGridCoordinates_out coordinates)
 {
+  FUNCTION_TRACE
   try
   {
     T::GridCoordinates sCoordinates;
@@ -90,6 +98,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getGridData(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaGridData_out data)
 {
+  FUNCTION_TRACE
   try
   {
     T::GridData sGridData;
@@ -120,6 +129,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getGridValueList(::CORBA::LongLong sessionId, SmartMet::DataServer::Corba::CorbaValueRecordList& valueRecordList)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -148,6 +158,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getGridAttributeList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaAttributeList_out attributeList)
 {
+  FUNCTION_TRACE
   try
   {
     T::AttributeList sAttributeList;
@@ -178,6 +189,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getGridValue(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Octet interpolationMethod, SmartMet::DataServer::Corba::CorbaParamValue& value)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -205,6 +217,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getGridValuesByArea(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::ULong columns, ::CORBA::ULong rows, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Double xStep, ::CORBA::Double yStep, ::CORBA::Octet interpolationMethod, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
 {
+  FUNCTION_TRACE
   try
   {
     T::ParamValue_vec sValues;

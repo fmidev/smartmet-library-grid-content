@@ -1391,7 +1391,7 @@ int CacheImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoById(sessionId,fileId,fileInfo);
 
-    AutoReadLock lock(&mModificationLock);
+    //AutoReadLock lock(&mModificationLock);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3363,14 +3363,31 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
       T::FileInfo *info = mFileInfoList.getFileInfoById(eventInfo.mId1);
       if (info != NULL)
       {
-        //for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-        //  mContentInfoList[t].deleteContentInfoByFileId(eventInfo.mId1);
+        for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+          mContentInfoList[t].deleteContentInfoByFileId(eventInfo.mId1);
 
         *info = fileInfo;
       }
       else
       {
         mFileInfoList.addFileInfo(fileInfo.duplicate());
+      }
+
+      if (fileInfo.mFlags & (uint)T::FileInfoFlags::CONTENT_PREDEFINED)
+      {
+        T::ContentInfoList contentInfoList;
+        if (mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) == Result::OK)
+        {
+          uint len = contentInfoList.getLength();
+          for (uint c=0; c<len; c++)
+          {
+            T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
+            T::ContentInfo *cInfo = info->duplicate();
+
+            for (int t=0; t<CONTENT_LIST_COUNT; t++)
+              mContentInfoList[t].addContentInfo(cInfo);
+          }
+        }
       }
     }
   }

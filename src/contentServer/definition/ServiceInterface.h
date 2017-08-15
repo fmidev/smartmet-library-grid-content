@@ -14,6 +14,7 @@
 #include "GenerationInfoList.h"
 #include "ServiceResults.h"
 #include "RequestFlags.h"
+#include "grid-files/common/Log.h"
 
 
 
@@ -31,6 +32,7 @@ class ServiceInterface
                     ServiceInterface();
      virtual        ~ServiceInterface();
 
+     virtual void   setProcessingLog(Log *processingLogPointer);
      virtual void   shutdown();
 
      virtual int    clear(T::SessionId sessionId);
@@ -240,6 +242,8 @@ class ServiceInterface
      virtual int    _getContentListByParameterAndProducerName(T::SessionId sessionId,std::string producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList);
 
      virtual int    _getContentCount(T::SessionId sessionId,uint& count);
+
+     Log            *mProcessingLogPointer;
 };
 
 

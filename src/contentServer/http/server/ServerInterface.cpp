@@ -2,17 +2,15 @@
 #include "grid-files/common/ShowFunction.h"
 
 
+#define FUNCTION_TRACE FUNCTION_TRACE_OFF
+
+
 namespace SmartMet
 {
 namespace ContentServer
 {
 namespace HTTP
 {
-
-
-//#define FUNCTION_TRACE ShowFunction sfunc(__FILE__,__LINE__,__FUNCTION__);
-#define FUNCTION_TRACE ;
-
 
 
 ServerInterface::ServerInterface()
@@ -649,92 +647,6 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
 
     response.addLine("result",(int)Result::UNKNOWN_METHOD);
     response.addLine("resultString","Unknown method: " + methodStr);
-
-
-    /*
-    response.addLine("method","clear(in sessionId)");
-    response.addLine("method","reload(in sessionId)");
-
-    response.addLine("method","addDataServerInfo(in sessionId,inout serverInfo)");
-    response.addLine("method","deleteDataServerInfoById(in sessionId,in serverId)");
-    response.addLine("method","getDataServerInfoById(in sessionId,in serverId,out serverInfo)");
-    response.addLine("method","getDataServerInfoByName(in sessionId,in serverName,out serverInfo)");
-    response.addLine("method","getDataServerInfoByIor(in sessionId,in serverIor,out serverInfo)");
-    response.addLine("method","getDataServerInfoList(in sessionId,out serverInfo[])");
-
-    response.addLine("method","addProducerInfo(in sessionId,inout producerInfo)");
-    response.addLine("method","deleteProducerInfoById(in sessionId,in producerId)");
-    response.addLine("method","deleteProducerInfoByName(in sessionId,in producerName)");
-    response.addLine("method","getProducerInfoById(in sessionId,in producerId,out producerInfo)");
-    response.addLine("method","getProducerInfoByName(in sessionId,in producerName,out producerInfo)");
-    response.addLine("method","getProducerInfoList(in sessionId,out producerInfo[])");
-
-    response.addLine("method","addGenerationInfo(in sessionId,inout generationInfo)");
-    response.addLine("method","deleteGenerationInfoById(in sessionId,in generationId)");
-    response.addLine("method","deleteGenerationInfoByName(in sessionId,in generationName)");
-    response.addLine("method","deleteGenerationInfoListByProducerId(in sessionId,in producerId)");
-    response.addLine("method","deleteGenerationInfoListByProducerName(in sessionId,in producerName)");
-    response.addLine("method","getGenerationInfoById(in sessionId,in generationId,out generationInfo)");
-    response.addLine("method","getGenerationInfoByName(in sessionId,in generationName,out generationInfo)");
-    response.addLine("method","getGenerationInfoList(in sessionId,out generationInfo[])");
-    response.addLine("method","getGenerationInfoListByProducerId(in sessionId,in producerId,out generationInfo[])");
-    response.addLine("method","getGenerationInfoListByProducerName(in sessionId,in producerName,out generationInfo[])");
-    response.addLine("method","setGenerationInfoStatusById(in sessionId,in generationId,in status)");
-    response.addLine("method","setGenerationInfoStatusByName(in sessionId,in generationName,in status)");
-
-    response.addLine("method","addFileInfo(in sessionId,inout fileInfo)");
-    response.addLine("method","addFileInfoWithContentList(in sessionId,inout fileInfo,inout contentInfo[])");
-    response.addLine("method","deleteFileInfoById(in sessionId,in fileId)");
-    response.addLine("method","deleteFileInfoListByGroupFlags(in sessionId,in groupFlags)");
-    response.addLine("method","deleteFileInfoListByProducerId(in sessionId,in producerId)");
-    response.addLine("method","deleteFileInfoListByProducerName(in sessionId,in producerName)");
-    response.addLine("method","deleteFileInfoListByGenerationId(in sessionId,in generationId)");
-    response.addLine("method","deleteFileInfoListByGenerationName(in sessionId,in generationName)");
-    response.addLine("method","getFileInfoById(in sessionId,in fileId,out fileInfo)");
-    response.addLine("method","getFileInfoByName(in sessionId,in filename,out fileInfo)");
-    response.addLine("method","getFileInfoList(in sessionId,in startFileId,in maxRecords,out fileInfo[])");
-    response.addLine("method","getFileInfoListByProducerId(in sessionId,in producerId,in startFileId,in maxRecords,out fileInfo[])");
-    response.addLine("method","getFileInfoListByProducerName(in sessionId,in producerName,in startFileId,in maxRecords,out fileInfo[])");
-    response.addLine("method","getFileInfoListByGenerationId(in sessionId,in generationId,in startFileId,in maxRecords,out fileInfo[])");
-    response.addLine("method","getFileInfoListByGenerationName(in sessionId,in generationName,in startFileId,in maxRecords,out fileInfo[])");
-    response.addLine("method","getFileInfoListByGroupFlags(in sessionId,in groupFlags,in startFileId,in maxRecords,out fileInfo[])");
-
-    response.addLine("method","addEventInfo(in sessionId,inout eventInfo)");
-    response.addLine("method","getLastEventInfo(in sessionId,in requestingServerId,out eventInfo)");
-    response.addLine("method","getEventInfoList(in sessionId,in requestingServerId,in startEventId,in maxRecords,out eventInfo[])");
-
-    response.addLine("method","addContentInfo(in sessionId,inout contentInfo)");
-    response.addLine("method","addContentList(in sessionId,inout contentInfo[])");
-    response.addLine("method","deleteContentInfo(in sessionId,in fileId,in messageIndex)");
-    response.addLine("method","deleteContentListByFileId(in sessionId,in fileId)");
-    response.addLine("method","deleteContentListByFileName(in sessionId,in filename)");
-    response.addLine("method","deleteContentListByGroupFlags(in sessionId,in groupFlags)");
-    response.addLine("method","deleteContentListByProducerId(in sessionId,in producerId)");
-    response.addLine("method","deleteContentListByProducerName(in sessionId,in producerName)");
-    response.addLine("method","deleteContentListByGenerationId(in sessionId,in generationId)");
-    response.addLine("method","deleteContentListByGenerationName(in sessionId,in generationName)");
-    response.addLine("method","registerContentList(in sessionId,in serverId,inout contentInfo[])");
-    response.addLine("method","registerContentListByFileId(in sessionId,in serverId,in fileId)");
-    response.addLine("method","unregisterContentList(in sessionId,in serverId)");
-    response.addLine("method","unregisterContentListByFileId(in sessionId,in serverId,in fileId)");
-
-    response.addLine("method","getContentInfo(in sessionId,in fileId,in messageIndex,out contentInfo)");
-    response.addLine("method","getContentList(in sessionId,in startFileId,in startMessageIndex,in maxRecords,out contentInfo[])");
-    response.addLine("method","getContentListByFileId(in sessionId,in fileId,out contentInfo[])");
-    response.addLine("method","getContentListByFileName(in sessionId,in filename,out contentInfo[])");
-    response.addLine("method","getContentListByGroupFlags(in sessionId,in groupFlags,in startFileId,in startMessageIndex,in maxRecords,out contentInfo[])");
-    response.addLine("method","getContentListByProducerId(in sessionId,in producerId,in startFileId,in startMessageIndex,in maxRecords,out contentInfo[])");
-    response.addLine("method","getContentListByProducerName(in sessionId,in producerName,in startFileId,in startMessageIndex,in maxRecords,out contentInfo[])");
-    response.addLine("method","getContentListByServerId(in sessionId,in serverId,in startFileId,in startMessageIndex,in maxRecords,out contentInfo[])");
-    response.addLine("method","getContentListByGenerationId(in sessionId,in generationId,in startFileId,in startMessageIndex,in maxRecords,out contentInfo[])");
-    response.addLine("method","getContentListByGenerationName(in sessionId,in generationName,in startFileId,in startMessageIndex,in maxRecords,out contentInfo[])");
-    response.addLine("method","getContentListByGenerationIdAndTimeRange(in sessionId,in generationId,in startTime,in endTime,out contentInfo[])");
-    response.addLine("method","getContentListByGenerationNameAndTimeRange(in sessionId,in generationName,in startTime,in endTime,out contentInfo[])");
-
-    response.addLine("method","getContentListByParameter(in sessionId,in parameterKeyType,in parameterKey,in parameterLevelIdType,in parameterLevelId,in minLevel,in maxLevel,in startTime,in endTime,out contentInfo[])");
-    response.addLine("method","getContentListByParameterAndGenerationId(in sessionId,in generationId,in parameterKeyType,in parameterKey,in parameterLevelIdType,in parameterLevelId,in minLevel,in maxLevel,in startTime,in endTime,out contentInfo[])");
-    response.addLine("method","getContentListByParameterAndGenerationName(in sessionId,in generationName,in parameterKeyType,in parameterKey,in parameterLevelIdType,in parameterLevelId,in minLevel,in maxLevel,in startTime,in endTime,out contentInfo[])");
-*/
   }
   catch (...)
   {

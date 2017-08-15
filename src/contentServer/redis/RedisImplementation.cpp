@@ -50,7 +50,7 @@ class RedisModificationLock
 
         if (mRequestId == (id+1) ||  counter > 10000)
         {
-          printf("Match %u %u\n",mRequestId,(id+1));
+          //printf("Match %u %u\n",mRequestId,(id+1));
           locked = false;
         }
         else

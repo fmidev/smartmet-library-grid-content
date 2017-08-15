@@ -2,6 +2,7 @@
 
 #include "grid-files/grid/Typedefs.h"
 #include "grid-files/grid/GridPointValueList.h"
+#include "grid-files/common/Log.h"
 #include "contentServer/definition/ContentInfoList.h"
 #include "ServiceResults.h"
 
@@ -68,6 +69,7 @@ class ServiceInterface
                     ServiceInterface();
      virtual        ~ServiceInterface();
 
+     virtual void   setProcessingLog(Log *processingLogPointer);
      virtual void   shutdown();
 
      virtual int    getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::GridPointValueList& valueList);
@@ -75,6 +77,8 @@ class ServiceInterface
   protected:
 
      virtual int    _getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::GridPointValueList& valueList);
+
+     Log            *mProcessingLogPointer;
 };
 
 

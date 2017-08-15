@@ -1,6 +1,10 @@
 #include "ServerInterface.h"
 #include "contentServer/corba/convert/Converter.h"
 #include "grid-files/common/Exception.h"
+#include "grid-files/common/ShowFunction.h"
+
+
+#define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
 
 namespace SmartMet
@@ -14,6 +18,7 @@ namespace Corba
 
 ServerInterface::ServerInterface()
 {
+  FUNCTION_TRACE
   try
   {
     mService = NULL;
@@ -30,6 +35,7 @@ ServerInterface::ServerInterface()
 
 ServerInterface::~ServerInterface()
 {
+  FUNCTION_TRACE
   try
   {
   }
@@ -45,6 +51,7 @@ ServerInterface::~ServerInterface()
 
 void ServerInterface::init(ContentServer::ServiceInterface *service)
 {
+  FUNCTION_TRACE
   try
   {
     mService = service;
@@ -61,6 +68,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::clear(::CORBA::LongLong sessionId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -82,6 +90,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::reload(::CORBA::LongLong sessionId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -103,6 +112,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::addDataServerInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaServerInfo& serverInfo)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -131,6 +141,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteDataServerInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong serverId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -152,6 +163,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getDataServerInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong serverId, SmartMet::ContentServer::Corba::CorbaServerInfo_out serverInfo)
 {
+  FUNCTION_TRACE
   try
   {
     T::ServerInfo sServerInfo;
@@ -182,6 +194,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getDataServerInfoByName(::CORBA::LongLong sessionId, const char* serverName, SmartMet::ContentServer::Corba::CorbaServerInfo_out serverInfo)
 {
+  FUNCTION_TRACE
   try
   {
     T::ServerInfo sServerInfo;
@@ -212,6 +225,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getDataServerInfoByIor(::CORBA::LongLong sessionId, const char* serverIor, SmartMet::ContentServer::Corba::CorbaServerInfo_out serverInfo)
 {
+  FUNCTION_TRACE
   try
   {
     T::ServerInfo sServerInfo;
@@ -242,6 +256,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getDataServerInfoList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaServerInfoList_out serverInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ServerInfoList sServerInfoList;
@@ -272,6 +287,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getDataServerInfoCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -301,6 +317,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::addProducerInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaProducerInfo& producerInfo)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -329,6 +346,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteProducerInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong producerId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -350,6 +368,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteProducerInfoByName(::CORBA::LongLong sessionId, const char* producerName)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -371,6 +390,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteProducerInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -392,6 +412,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getProducerInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, SmartMet::ContentServer::Corba::CorbaProducerInfo_out producerInfo)
 {
+  FUNCTION_TRACE
   try
   {
     T::ProducerInfo sProducerInfo;
@@ -422,6 +443,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getProducerInfoByName(::CORBA::LongLong sessionId, const char* producerName, SmartMet::ContentServer::Corba::CorbaProducerInfo_out producerInfo)
 {
+  FUNCTION_TRACE
   try
   {
     T::ProducerInfo sProducerInfo;
@@ -452,6 +474,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getProducerInfoList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaProducerInfoList_out producerInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ProducerInfoList sProducerInfoList;
@@ -482,6 +505,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getProducerInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, SmartMet::ContentServer::Corba::CorbaProducerInfoList_out producerInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ProducerInfoList sProducerInfoList;
@@ -512,6 +536,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getProducerInfoCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -541,6 +566,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::addGenerationInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaGenerationInfo& generationInfo)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -569,6 +595,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteGenerationInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -590,6 +617,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteGenerationInfoByName(::CORBA::LongLong sessionId, const char* generationName)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -611,6 +639,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteGenerationInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -632,6 +661,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteGenerationInfoListByProducerName(::CORBA::LongLong sessionId, const char* producerName)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -652,6 +682,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteGenerationInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -673,6 +704,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getGenerationInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, SmartMet::ContentServer::Corba::CorbaGenerationInfo_out generationInfo)
 {
+  FUNCTION_TRACE
   try
   {
     T::GenerationInfo sGenerationInfo;
@@ -703,6 +735,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getGenerationInfoByName(::CORBA::LongLong sessionId, const char* generationName, SmartMet::ContentServer::Corba::CorbaGenerationInfo_out generationInfo)
 {
+  FUNCTION_TRACE
   try
   {
     T::GenerationInfo sGenerationInfo;
@@ -733,6 +766,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getGenerationInfoList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaGenerationInfoList_out generationInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::GenerationInfoList sGenerationInfoList;
@@ -763,6 +797,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getGenerationInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, SmartMet::ContentServer::Corba::CorbaGenerationInfoList_out generationInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::GenerationInfoList sGenerationInfoList;
@@ -793,6 +828,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getGenerationInfoListByProducerName(::CORBA::LongLong sessionId, const char* producerName, SmartMet::ContentServer::Corba::CorbaGenerationInfoList_out generationInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::GenerationInfoList sGenerationInfoList;
@@ -823,6 +859,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getGenerationInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, SmartMet::ContentServer::Corba::CorbaGenerationInfoList_out generationInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::GenerationInfoList sGenerationInfoList;
@@ -853,6 +890,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getLastGenerationInfoByProducerIdAndStatus(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::Octet generationStatus, SmartMet::ContentServer::Corba::CorbaGenerationInfo_out generationInfo)
 {
+  FUNCTION_TRACE
   try
   {
     T::GenerationInfo sGenerationInfo;
@@ -883,6 +921,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getLastGenerationInfoByProducerNameAndStatus(::CORBA::LongLong sessionId, const char* producerName, ::CORBA::Octet generationStatus, SmartMet::ContentServer::Corba::CorbaGenerationInfo_out generationInfo)
 {
+  FUNCTION_TRACE
   try
   {
     T::GenerationInfo sGenerationInfo;
@@ -913,6 +952,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getGenerationInfoCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -942,6 +982,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::setGenerationInfoStatusById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Octet status)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -964,6 +1005,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::setGenerationInfoStatusByName(::CORBA::LongLong sessionId, const char* generationName, ::CORBA::Octet status)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -986,6 +1028,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::addFileInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaFileInfo& fileInfo)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1014,6 +1057,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::addFileInfoWithContentList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaFileInfo& fileInfo, SmartMet::ContentServer::Corba::CorbaContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1048,6 +1092,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteFileInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong fileId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1069,6 +1114,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteFileInfoByName(::CORBA::LongLong sessionId, const char* filename)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1090,6 +1136,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteFileInfoListByGroupFlags(::CORBA::LongLong sessionId, ::CORBA::ULong groupFlags)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1111,6 +1158,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteFileInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1132,6 +1180,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteFileInfoListByProducerName(::CORBA::LongLong sessionId, const char* producerName)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1152,6 +1201,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteFileInfoListByGenerationId(::CORBA::LongLong sessionId,::CORBA::ULong generationId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1173,6 +1223,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteFileInfoListByGenerationName(::CORBA::LongLong sessionId, const char* generationName)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1194,6 +1245,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteFileInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1215,6 +1267,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getFileInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, SmartMet::ContentServer::Corba::CorbaFileInfo_out fileInfo)
 {
+  FUNCTION_TRACE
   try
   {
     T::FileInfo sFileInfo;
@@ -1245,6 +1298,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getFileInfoByName(::CORBA::LongLong sessionId, const char* filename, SmartMet::ContentServer::Corba::CorbaFileInfo_out fileInfo)
 {
+  FUNCTION_TRACE
   try
   {
     T::FileInfo sFileInfo;
@@ -1275,6 +1329,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getFileInfoList(::CORBA::LongLong sessionId, ::CORBA::ULong startFileId, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::FileInfoList sFileInfoList;
@@ -1305,6 +1360,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getFileInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::ULong startFileId, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::FileInfoList sFileInfoList;
@@ -1335,6 +1391,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getFileInfoListByProducerName(::CORBA::LongLong sessionId, const char* producerName, ::CORBA::ULong startFileId, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::FileInfoList sFileInfoList;
@@ -1364,6 +1421,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getFileInfoListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId,::CORBA::ULong startFileId, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::FileInfoList sFileInfoList;
@@ -1394,6 +1452,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getFileInfoListByGenerationName(::CORBA::LongLong sessionId, const char* generationName, ::CORBA::ULong startFileId, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::FileInfoList sFileInfoList;
@@ -1424,6 +1483,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getFileInfoListByGroupFlags(::CORBA::LongLong sessionId, ::CORBA::ULong groupFlags, ::CORBA::ULong startFileId, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::FileInfoList sFileInfoList;
@@ -1454,6 +1514,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getFileInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, ::CORBA::ULong startFileId, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::FileInfoList sFileInfoList;
@@ -1484,6 +1545,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getFileInfoCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1513,6 +1575,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::addEventInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaEventInfo& eventInfo)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1541,6 +1604,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getLastEventInfo(::CORBA::LongLong sessionId, ::CORBA::ULong requestingServerId, SmartMet::ContentServer::Corba::CorbaEventInfo_out eventInfo)
 {
+  FUNCTION_TRACE
   try
   {
     T::EventInfo sEventInfo;
@@ -1571,6 +1635,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getEventInfoList(::CORBA::LongLong sessionId, ::CORBA::ULong requestingServerId, ::CORBA::ULongLong startEventId, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaEventInfoList_out eventInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::EventInfoList sEventInfoList;
@@ -1601,6 +1666,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getEventInfoCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1630,6 +1696,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::addContentInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaContentInfo& contentInfo)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1658,6 +1725,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::addContentList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1688,6 +1756,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteContentInfo(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1709,6 +1778,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteContentListByFileId(::CORBA::LongLong sessionId, ::CORBA::ULong fileId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1730,6 +1800,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteContentListByFileName(::CORBA::LongLong sessionId, const char* filename)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1750,6 +1821,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteContentListByGroupFlags(::CORBA::LongLong sessionId, ::CORBA::ULong groupFlags)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1771,6 +1843,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteContentListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1792,6 +1865,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteContentListByProducerName(::CORBA::LongLong sessionId, const char* producerName)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1813,6 +1887,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteContentListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1834,6 +1909,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteContentListByGenerationName(::CORBA::LongLong sessionId, const char* generationName)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1855,6 +1931,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::deleteContentListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1876,6 +1953,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::registerContentList(::CORBA::LongLong sessionId, ::CORBA::ULong serverId, SmartMet::ContentServer::Corba::CorbaContentInfoList& contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1906,6 +1984,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::registerContentListByFileId(::CORBA::LongLong sessionId, ::CORBA::ULong serverId, ::CORBA::ULong fileId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1926,6 +2005,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::unregisterContentList(::CORBA::LongLong sessionId, ::CORBA::ULong serverId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1947,6 +2027,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::unregisterContentListByFileId(::CORBA::LongLong sessionId, ::CORBA::ULong serverId, ::CORBA::ULong fileId)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)
@@ -1968,6 +2049,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentInfo(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::ContentServer::Corba::CorbaContentInfo_out contentInfo)
 {
+  FUNCTION_TRACE
   try
   {
     T::ContentInfo sContentInfo;
@@ -1998,6 +2080,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentList(::CORBA::LongLong sessionId, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
@@ -2028,6 +2111,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentListByFileId(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
@@ -2058,6 +2142,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentListByFileName(::CORBA::LongLong sessionId, const char* filename, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
@@ -2088,6 +2173,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentListByGroupFlags(::CORBA::LongLong sessionId, ::CORBA::ULong groupFlags, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
@@ -2118,6 +2204,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
@@ -2148,6 +2235,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentListByProducerName(::CORBA::LongLong sessionId, const char* producerName, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
@@ -2178,6 +2266,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentListByServerId(::CORBA::LongLong sessionId, ::CORBA::ULong serverId, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
@@ -2207,6 +2296,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
@@ -2237,6 +2327,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentListByGenerationName(::CORBA::LongLong sessionId, const char* generationName, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
@@ -2267,6 +2358,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentListByGenerationIdAndTimeRange(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, const char* startTime, const char* endTime, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
@@ -2297,6 +2389,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentListByGenerationNameAndTimeRange(::CORBA::LongLong sessionId, const char* generationName, const char* startTime, const char* endTime, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
@@ -2327,6 +2420,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
@@ -2357,6 +2451,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentListByParameter(::CORBA::LongLong sessionId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
@@ -2387,6 +2482,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentListByParameterAndGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
@@ -2417,6 +2513,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentListByParameterAndGenerationName(::CORBA::LongLong sessionId, const char* generationName, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
@@ -2445,6 +2542,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentListByParameterAndProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
@@ -2474,6 +2572,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentListByParameterAndProducerName(::CORBA::LongLong sessionId, const char* producerName, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
@@ -2504,6 +2603,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 ::CORBA::Long ServerInterface::getContentCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
 {
+  FUNCTION_TRACE
   try
   {
     if (mService == NULL)

@@ -3,7 +3,10 @@
 #include "grid-files/common/GeneralFunctions.h"
 #include "grid-files/common/AutoWriteLock.h"
 #include "grid-files/common/AutoReadLock.h"
+#include "grid-files/common/ShowFunction.h"
 
+
+#define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
 
 namespace SmartMet
@@ -15,8 +18,10 @@ namespace DataServer
 
 GridStorage::GridStorage()
 {
+  FUNCTION_TRACE
   try
   {
+    //mFileList.reserve(1000000);
   }
   catch (...)
   {
@@ -30,6 +35,7 @@ GridStorage::GridStorage()
 
 GridStorage::~GridStorage()
 {
+  FUNCTION_TRACE
   try
   {
   }
@@ -46,6 +52,7 @@ GridStorage::~GridStorage()
 
 void GridStorage::addFile(GRID::GridFile *gribFile)
 {
+  FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
@@ -86,6 +93,7 @@ void GridStorage::addFile(GRID::GridFile *gribFile)
 
 void GridStorage::clear()
 {
+  FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
@@ -103,6 +111,7 @@ void GridStorage::clear()
 
 void GridStorage::deleteFile(GRID::GridFile *gribFile)
 {
+  FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
@@ -128,6 +137,7 @@ void GridStorage::deleteFile(GRID::GridFile *gribFile)
 
 void GridStorage::deleteFileById(uint fileId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
@@ -148,6 +158,7 @@ void GridStorage::deleteFileById(uint fileId)
 
 void GridStorage::deleteFileByIndex(std::size_t fileIndex)
 {
+  FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
@@ -169,6 +180,7 @@ void GridStorage::deleteFileByIndex(std::size_t fileIndex)
 
 void GridStorage::deleteFilesByGroupFlags(uint groupFlags)
 {
+  FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
@@ -193,6 +205,7 @@ void GridStorage::deleteFilesByGroupFlags(uint groupFlags)
 
 void GridStorage::deleteFilesByProducerId(uint producerId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
@@ -220,6 +233,7 @@ void GridStorage::deleteFilesByProducerId(uint producerId)
 
 void GridStorage::deleteFilesByGenerationId(uint generationId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
@@ -244,6 +258,7 @@ void GridStorage::deleteFilesByGenerationId(uint generationId)
 
 void GridStorage::deleteFilesBySourceId(uint sourceId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
@@ -271,6 +286,7 @@ void GridStorage::deleteFilesBySourceId(uint sourceId)
 
 GRID::GridFile_sptr GridStorage::getFileById(uint fileId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
@@ -297,6 +313,7 @@ GRID::GridFile_sptr GridStorage::getFileById(uint fileId)
 
 GRID::GridFile_sptr GridStorage::getFileByIdNoMapping(uint fileId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -321,6 +338,7 @@ GRID::GridFile_sptr GridStorage::getFileByIdNoMapping(uint fileId)
 
 GRID::GridFile_sptr GridStorage::getFileByIndex(std::size_t fileIndex)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -341,6 +359,7 @@ GRID::GridFile_sptr GridStorage::getFileByIndex(std::size_t fileIndex)
 
 int GridStorage::getClosestFileIndexById(uint fileId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
@@ -357,6 +376,7 @@ int GridStorage::getClosestFileIndexById(uint fileId)
 
 int GridStorage::getClosestFileIndexByIdNoLock(uint fileId)
 {
+  FUNCTION_TRACE
   try
   {
     int high = (int)mFileList.size()-1;
@@ -408,6 +428,7 @@ int GridStorage::getClosestFileIndexByIdNoLock(uint fileId)
 
 std::size_t GridStorage::getFileCount()
 {
+  FUNCTION_TRACE
   try
   {
     return mFileList.size();
@@ -423,6 +444,7 @@ std::size_t GridStorage::getFileCount()
 
 void GridStorage::print(std::ostream& stream,uint level,uint optionFlags)
 {
+  FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);

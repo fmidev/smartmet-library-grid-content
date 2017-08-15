@@ -1,4 +1,9 @@
 #include "ContentSync.h"
+#include "grid-files/common/ShowFunction.h"
+#include "grid-files/common/GeneralFunctions.h"
+
+
+#define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
 
 namespace SmartMet
@@ -10,6 +15,7 @@ namespace ContentServer
 
 ContentSync::ContentSync()
 {
+  FUNCTION_TRACE
   try
   {
     mSourceId = 0;
@@ -27,6 +33,7 @@ ContentSync::ContentSync()
 
 ContentSync::~ContentSync()
 {
+  FUNCTION_TRACE
   try
   {
   }
@@ -42,6 +49,7 @@ ContentSync::~ContentSync()
 
 void ContentSync::synchronize(T::SessionId sessionId,ServiceInterface *sourceInterface,ServiceInterface *targetInterface,uint sourceId,uint targetId)
 {
+  FUNCTION_TRACE
   try
   {
     mSessionId = sessionId;
@@ -56,9 +64,11 @@ void ContentSync::synchronize(T::SessionId sessionId,ServiceInterface *sourceInt
     readTargetGenerations(targetInterface);
     updateGenerations(targetInterface);
 
+    readTargetGenerations(targetInterface);
     readSourceFiles(sourceInterface);
     readTargetFiles(targetInterface);
     readSourceContent(sourceInterface);
+    mSourceContentList.sort(T::ContentInfo::ComparisonMethod::file_message);
     mSourceFileList.sort(T::FileInfo::ComparisonMethod::fileName);
     mTargetFileList.sort(T::FileInfo::ComparisonMethod::fileName);
     updateFiles(targetInterface);
@@ -80,6 +90,7 @@ void ContentSync::synchronize(T::SessionId sessionId,ServiceInterface *sourceInt
 
 void ContentSync::synchronize(T::SessionId sessionId,const char *sourceDir,ServiceInterface *targetInterface,uint sourceId,uint targetId)
 {
+  FUNCTION_TRACE
   try
   {
     mSessionId = sessionId;
@@ -94,9 +105,11 @@ void ContentSync::synchronize(T::SessionId sessionId,const char *sourceDir,Servi
     readTargetGenerations(targetInterface);
     updateGenerations(targetInterface);
 
+    readTargetGenerations(targetInterface);
     readSourceFiles(sourceDir);
     readTargetFiles(targetInterface);
     readSourceContent(sourceDir);
+    mSourceContentList.sort(T::ContentInfo::ComparisonMethod::file_message);
     mSourceFileList.sort(T::FileInfo::ComparisonMethod::fileName);
     mTargetFileList.sort(T::FileInfo::ComparisonMethod::fileName);
     updateFiles(targetInterface);
@@ -118,6 +131,7 @@ void ContentSync::synchronize(T::SessionId sessionId,const char *sourceDir,Servi
 
 void ContentSync::readSourceProducers(ServiceInterface *sourceInterface)
 {
+  FUNCTION_TRACE
   try
   {
     printf("Reading producers from the source data storage\n");
@@ -142,6 +156,7 @@ void ContentSync::readSourceProducers(ServiceInterface *sourceInterface)
 
 void ContentSync::readSourceGenerations(ServiceInterface *sourceInterface)
 {
+  FUNCTION_TRACE
   try
   {
     printf("Reading generations from the source data storage\n");
@@ -166,6 +181,7 @@ void ContentSync::readSourceGenerations(ServiceInterface *sourceInterface)
 
 void ContentSync::readSourceFiles(ServiceInterface *sourceInterface)
 {
+  FUNCTION_TRACE
   try
   {
     printf("Reading files from the source data storage\n");
@@ -175,7 +191,6 @@ void ContentSync::readSourceFiles(ServiceInterface *sourceInterface)
     uint maxRecords = 10000;
     while (len > 0)
     {
-      printf("%u len = %u\n",startFileId,len);
       T::FileInfoList fileList;
       int result = sourceInterface->getFileInfoListBySourceId(mSessionId,mSourceId,startFileId,maxRecords,fileList);
       if (result != 0)
@@ -207,6 +222,7 @@ void ContentSync::readSourceFiles(ServiceInterface *sourceInterface)
 
 void ContentSync::readSourceContent(ServiceInterface *sourceInterface)
 {
+  FUNCTION_TRACE
   try
   {
     printf("Reading content from the source data storage\n");
@@ -252,6 +268,7 @@ void ContentSync::readSourceContent(ServiceInterface *sourceInterface)
 
 void ContentSync::readSourceProducers(const char *sourceDir)
 {
+  FUNCTION_TRACE
   try
   {
     printf("Reading producers from the file system\n");
@@ -294,6 +311,7 @@ void ContentSync::readSourceProducers(const char *sourceDir)
 
 void ContentSync::readSourceGenerations(const char *sourceDir)
 {
+  FUNCTION_TRACE
   try
   {
     printf("Reading generations from the file system\n");
@@ -336,6 +354,7 @@ void ContentSync::readSourceGenerations(const char *sourceDir)
 
 void ContentSync::readSourceFiles(const char *sourceDir)
 {
+  FUNCTION_TRACE
   try
   {
     printf("Reading files from the file system\n");
@@ -378,6 +397,7 @@ void ContentSync::readSourceFiles(const char *sourceDir)
 
 void ContentSync::readSourceContent(const char *sourceDir)
 {
+  FUNCTION_TRACE
   try
   {
     printf("Reading content from the file system\n");
@@ -420,6 +440,7 @@ void ContentSync::readSourceContent(const char *sourceDir)
 
 void ContentSync::readTargetProducers(ServiceInterface *targetInterface)
 {
+  FUNCTION_TRACE
   try
   {
     printf("Reading producers from the target data storage\n");
@@ -444,6 +465,7 @@ void ContentSync::readTargetProducers(ServiceInterface *targetInterface)
 
 void ContentSync::readTargetGenerations(ServiceInterface *targetInterface)
 {
+  FUNCTION_TRACE
   try
   {
     printf("Reading generations from the target data storage\n");
@@ -468,6 +490,7 @@ void ContentSync::readTargetGenerations(ServiceInterface *targetInterface)
 
 void ContentSync::readTargetFiles(ServiceInterface *targetInterface)
 {
+  FUNCTION_TRACE
   try
   {
     printf("Reading files from the target data storage\n");
@@ -479,7 +502,7 @@ void ContentSync::readTargetFiles(ServiceInterface *targetInterface)
     while (len > 0)
     {
       T::FileInfoList fileList;
-      int result = targetInterface->getFileInfoListBySourceId(mSessionId,mTargetId,startFileId,maxRecords,fileList);
+      int result = targetInterface->getFileInfoList(mSessionId,startFileId,maxRecords,fileList);
       if (result != 0)
       {
         SmartMet::Spine::Exception exception(BCP,"Cannot read the file list from the target data storage!");
@@ -510,6 +533,7 @@ void ContentSync::readTargetFiles(ServiceInterface *targetInterface)
 
 void ContentSync::readTargetContent(ServiceInterface *targetInterface)
 {
+  FUNCTION_TRACE
   try
   {
     printf("Reading content from the target data storage\n");
@@ -555,6 +579,7 @@ void ContentSync::readTargetContent(ServiceInterface *targetInterface)
 
 void ContentSync::updateProducers(ServiceInterface *targetInterface)
 {
+  FUNCTION_TRACE
   try
   {
     printf("Updating producers\n");
@@ -570,7 +595,7 @@ void ContentSync::updateProducers(ServiceInterface *targetInterface)
           // The producer information is not available in the source data storage. So, we should remove
           // it also from the target data storage.
 
-          printf("- Remove producer %u %s\n",targetProducer->mProducerId,targetProducer->mName.c_str());
+          printf("- Remove producer %s\n",targetProducer->mName.c_str());
 
           int result = targetInterface->deleteProducerInfoById(mSessionId,targetProducer->mProducerId);
           if (result != 0)
@@ -613,10 +638,6 @@ void ContentSync::updateProducers(ServiceInterface *targetInterface)
             throw exception;
           }
         }
-        else
-        {
-          printf("- Target producer found %s\n",sourceProducer->mName.c_str());
-        }
       }
     }
   }
@@ -632,6 +653,7 @@ void ContentSync::updateProducers(ServiceInterface *targetInterface)
 
 void ContentSync::updateGenerations(ServiceInterface *targetInterface)
 {
+  FUNCTION_TRACE
   try
   {
     printf("Updating generations\n");
@@ -718,9 +740,10 @@ void ContentSync::updateGenerations(ServiceInterface *targetInterface)
 
 void ContentSync::updateFiles(ServiceInterface *targetInterface)
 {
+  FUNCTION_TRACE
   try
   {
-    printf("- Updating files\n");
+    printf("Updating files\n");
     uint len = mTargetFileList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -736,7 +759,7 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
           // The file information is not available in the source data storage. So, we should remove
           // it also from the target data storage.
 
-          printf("- Remove file %u %s\n",targetFile->mFileId,targetFile->mName.c_str());
+          printf("- Remove file %s\n",targetFile->mName.c_str());
 
           int result = targetInterface->deleteFileInfoById(mSessionId,targetFile->mFileId);
           if (result != 0)
@@ -769,43 +792,44 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
           T::GenerationInfo *sourceGeneration = mSourceGenerationList.getGenerationInfoById(sourceFile->mGenerationId);
           if (sourceGeneration != NULL)
           {
-            // Finding producer id and generation od from the target data storage.
-            T::GenerationInfo targetGeneration;
-            int result = targetInterface->getGenerationInfoByName(mSessionId,sourceGeneration->mName,targetGeneration);
-            if (result != 0)
+            // Finding producer id and generation id from the target data storage.
+            T::GenerationInfo *targetGeneration = mTargetGenerationList.getGenerationInfoByName(sourceGeneration->mName);
+            if (targetGeneration != NULL)
             {
-              SmartMet::Spine::Exception exception(BCP,"The generation information not found from the target data storage!");
-              exception.addParameter("GenerationName",sourceGeneration->mName);
-              exception.addParameter("Result",getResultString(result));
-              throw exception;
-            }
+              T::FileInfo fileInfo(*sourceFile);
+              fileInfo.mProducerId = targetGeneration->mProducerId;
+              fileInfo.mGenerationId = targetGeneration->mGenerationId;
+              fileInfo.mSourceId = mTargetId;
 
-            T::FileInfo fileInfo(*sourceFile);
-            fileInfo.mProducerId = targetGeneration.mProducerId;
-            fileInfo.mGenerationId = targetGeneration.mGenerationId;
-            fileInfo.mSourceId = mTargetId;
+              T::ContentInfoList contentInfoList;
+              mSourceContentList.getContentInfoListByFileId(sourceFile->mFileId,contentInfoList);
+              uint cLen = contentInfoList.getLength();
+              for (uint c=0; c<cLen; c++)
+              {
+                T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(c);
+                contentInfo->mProducerId = targetGeneration->mProducerId;
+                contentInfo->mGenerationId = targetGeneration->mGenerationId;
+                contentInfo->mSourceId = mTargetId;
+              }
 
-            T::ContentInfoList contentInfoList;
-            mSourceContentList.getContentInfoListByFileId(sourceFile->mFileId,contentInfoList);
-            uint cLen = contentInfoList.getLength();
-            for (uint c=0; c<cLen; c++)
-            {
-              T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(c);
-              contentInfo->mProducerId = targetGeneration.mProducerId;
-              contentInfo->mGenerationId = targetGeneration.mGenerationId;
-              contentInfo->mSourceId = mTargetId;
+              printf("- Add file %s\n",fileInfo.mName.c_str());
+              int result = targetInterface->addFileInfoWithContentList(mSessionId,fileInfo,contentInfoList);
+              //result = targetInterface->addFileInfo(sessionId,fileInfo);
+              if (result != 0)
+              {
+                SmartMet::Spine::Exception exception(BCP,"Cannot add the file information into the target data storage!");
+                exception.addParameter("FileName",fileInfo.mName);
+                exception.addParameter("Result",getResultString(result));
+                throw exception;
+              }
             }
-
-            printf("- Add file %s (cLen = %u)\n",fileInfo.mName.c_str(),cLen);
-            result = targetInterface->addFileInfoWithContentList(mSessionId,fileInfo,contentInfoList);
-            //result = targetInterface->addFileInfo(sessionId,fileInfo);
-            if (result != 0)
-            {
-              SmartMet::Spine::Exception exception(BCP,"Cannot add the file information into the target data storage!");
-              exception.addParameter("FileName",fileInfo.mName);
-              exception.addParameter("Result",getResultString(result));
-              throw exception;
-            }
+          }
+        }
+        else
+        {
+          if (targetFile->mSourceId != mTargetId)
+          {
+            printf("- The file (%s) is already added by another source (%u)!\n",sourceFile->mName.c_str(),targetFile->mSourceId);
           }
         }
       }
@@ -823,6 +847,7 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
 
 void ContentSync::updateContent(ServiceInterface *targetInterface)
 {
+  FUNCTION_TRACE
   try
   {
     printf("Updating content\n");
@@ -839,8 +864,8 @@ void ContentSync::updateContent(ServiceInterface *targetInterface)
           // So, we should remove it.
 
           printf("- Remove content %u %u\n",targetContent->mFileId,targetContent->mMessageIndex);
-          /*
-          int result = targetInterface->deleteContentInfo(sessionId,targetFile->mFileId,targetFile->mMessageIndex);
+
+          int result = targetInterface->deleteContentInfo(mSessionId,targetContent->mFileId,targetContent->mMessageIndex);
           if (result != 0)
           {
             SmartMet::Spine::Exception exception(BCP,"Cannot delete the generation information from the target data storage!");
@@ -849,7 +874,6 @@ void ContentSync::updateContent(ServiceInterface *targetInterface)
             exception.addParameter("Result",getResultString(result));
             throw exception;
           }
-          */
         }
       }
     }
