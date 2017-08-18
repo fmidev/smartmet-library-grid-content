@@ -468,7 +468,12 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
       //  fileInfo.print(std::cout,0,0);
 
       gridFile = new GRID::GridFile();
+
+      //unsigned long long startTime = getTime();
       gridFile->setFileName(mDataDir + "/" + fileInfo.mName);
+      //unsigned long long endTime = getTime();
+      //printf("TIME : %f sec\n",(float)(endTime-startTime)/1000000);
+
       gridFile->setFileId(fileInfo.mFileId);
       gridFile->setGroupFlags(fileInfo.mGroupFlags);
       gridFile->setProducerId(fileInfo.mProducerId);
@@ -588,7 +593,7 @@ void ServiceImplementation::fullUpdate()
   FUNCTION_TRACE
   try
   {
-    //printf("********** FULL UPDATE %u ***************\n",mServerId);
+    printf("****************** FULL UPDATE *********************\n");
     // Remove all existing content registered for this server.
 
     // mContentServer->unregisterContentList(mServerSessionId,mServerId,0);
@@ -934,6 +939,7 @@ void ServiceImplementation::event_fileUpdated(T::EventInfo& eventInfo)
     {
       GRID::GridFile *gridFile = storageFile.get();
       std::string filename = gridFile->getFileName();
+
       if (getFileModificationTime(filename.c_str()) == gridFile->getModificationTime())
       {
         // The file has not been modified.

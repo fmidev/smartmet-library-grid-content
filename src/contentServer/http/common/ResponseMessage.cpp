@@ -14,6 +14,7 @@ ResponseMessage::ResponseMessage()
 {
   try
   {
+    mLinePos = 0;
   }
   catch (...)
   {
@@ -29,6 +30,7 @@ ResponseMessage::ResponseMessage(ResponseMessage& responseMessage)
 {
   try
   {
+    mLinePos = 0;
   }
   catch (...)
   {
@@ -44,6 +46,34 @@ ResponseMessage::~ResponseMessage()
 {
   try
   {
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ResponseMessage::addChar(char ch)
+{
+  try
+  {
+    if (ch == '\r'  || ch == '\n' ||  mLinePos == 9999)
+    {
+      mLine[mLinePos] = '\0';
+      if (mLinePos > 0)
+        addLine(mLine);
+
+      mLinePos = 0;
+    }
+    else
+    {
+      mLine[mLinePos] = ch;
+      mLinePos++;
+    }
   }
   catch (...)
   {

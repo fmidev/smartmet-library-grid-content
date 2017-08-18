@@ -3,6 +3,7 @@
 #include "contentServer/definition/ServiceInterface.h"
 #include "contentServer/http/common/RequestMessage.h"
 #include "contentServer/http/common/ResponseMessage.h"
+#include <curl/curl.h>
 
 
 
@@ -130,6 +131,8 @@ class ClientImplementation : public ContentServer::ServiceInterface
      virtual void   sendRequest(T::RequestMessage& request,T::ResponseMessage& response);
 
      std::string    mUrl;
+     CURL*          curl;
+
 };
 
 

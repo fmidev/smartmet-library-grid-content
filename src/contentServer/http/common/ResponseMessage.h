@@ -17,6 +17,7 @@ class ResponseMessage
                     ResponseMessage(ResponseMessage& responseMessage);
      virtual        ~ResponseMessage();
 
+     void           addChar(char ch);
      void           addLine(const char *line);
      void           addLine(std::string line);
      void           addLine(unsigned long long line);
@@ -48,6 +49,10 @@ class ResponseMessage
   protected:
 
      std::vector<std::string> mLines;
+
+     uint           mLinePos;
+     char           mLine[10000];
+
 };
 
 

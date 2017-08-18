@@ -1674,6 +1674,7 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
 
       // ### Adding an event to the event list.
 
+      //printf("-- File updated %s\n",fileInfo.mName.c_str());
       addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,0,0,0);
     }
     else
@@ -1710,6 +1711,7 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
 
       // ### Adding an event to the event list.
 
+      //printf("-- File added %s\n",fileInfo.mName.c_str());
       addEvent(EventType::FILE_ADDED,fileInfo.mFileId,0,0,0);
     }
 
@@ -1754,7 +1756,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
     uint fileId = getFileId(fileInfo.mName);
     if (fileId > 0)
     {
-      printf("File exists %s\n",fileInfo.mName.c_str());
+      //printf("** File exists %s\n",fileInfo.mName.c_str());
       // ### File with the same name already exists. Let's return
       // ### the current file-id.
 
@@ -1767,7 +1769,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
     else
     {
       // ### Generating a new file-id.
-      printf("New file %s\n",fileInfo.mName.c_str());
+      //printf("** File added %s\n",fileInfo.mName.c_str());
 
       RedisModificationLock redisModificationLock(mContext,mTablePrefix);
       redisReply *reply = (redisReply*)redisCommand(mContext,"INCR %sfileCounter",mTablePrefix.c_str());
@@ -1837,9 +1839,15 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
     // ### Adding an event to the event list.
 
     if (fileId > 0)
+    {
+      //printf("-- file update event\n");
       addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,0,0,0);
+    }
     else
+    {
+      //printf("-- file add event\n");
       addEvent(EventType::FILE_ADDED,fileInfo.mFileId,0,0,0);
+    }
 
     return Result::OK;
   }
@@ -5853,7 +5861,7 @@ int RedisImplementation::getContentByFileId(uint fileId,T::ContentInfoList& cont
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     unsigned long long startId = ((unsigned long long)fileId << 32);
-    unsigned long long endId = ((unsigned long long)fileId << 32) + 0xFFFFFFFF;
+    unsigned long long endId = ((unsigned long long)fileId << 32) + 0xFFFFFF;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),startId,endId);
     if (reply == NULL)
@@ -5869,7 +5877,10 @@ int RedisImplementation::getContentByFileId(uint fileId,T::ContentInfoList& cont
         T::ContentInfo *contentInfo = new T::ContentInfo();
         contentInfo->setCsv(reply->element[t]->str);
 
-        contentInfoList.addContentInfo(contentInfo);
+        if (contentInfo->mFileId == fileId)
+          contentInfoList.addContentInfo(contentInfo);
+        else
+          delete contentInfo;
       }
       freeReplyObject(reply);
     }
@@ -5984,7 +5995,7 @@ T::EventId RedisImplementation::addEvent(EventType eventType,uint id1,uint id2,u
 
     freeReplyObject(reply);
 
-    printf("EventId = %llu\n",eventId);
+    //printf("EventId = %llu\n",eventId);
     if ((eventId % 10000) == 0)
       truncateEvents();
 

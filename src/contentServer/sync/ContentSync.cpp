@@ -786,6 +786,9 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
         T::FileInfo *targetFile = mTargetFileList.getFileInfoByName(sourceFile->mName);
         if (targetFile == NULL)
         {
+          //printf("Target file not found\n");
+          //sourceFile->print(std::cout,0,0);
+
           // The file information is not available in the target data storage. So, we should add it.
 
           // Finding generation name:
@@ -800,6 +803,7 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
               fileInfo.mProducerId = targetGeneration->mProducerId;
               fileInfo.mGenerationId = targetGeneration->mGenerationId;
               fileInfo.mSourceId = mTargetId;
+              fileInfo.mFileId = 0;
 
               T::ContentInfoList contentInfoList;
               mSourceContentList.getContentInfoListByFileId(sourceFile->mFileId,contentInfoList);
@@ -810,6 +814,7 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
                 contentInfo->mProducerId = targetGeneration->mProducerId;
                 contentInfo->mGenerationId = targetGeneration->mGenerationId;
                 contentInfo->mSourceId = mTargetId;
+                contentInfo->mFileId = 0;
               }
 
               printf("- Add file %s\n",fileInfo.mName.c_str());

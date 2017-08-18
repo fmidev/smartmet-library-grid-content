@@ -2237,13 +2237,15 @@ void ServerInterface::addFileInfoWithContentList(T::RequestMessage& request,T::R
     T::FileInfo fileInfo(csv.c_str());
 
     std::vector<std::string> csvLines;
+    request.getLinesByKey("contentInfo",csvLines);
+/*
     if (request.getLinesByKey("contentInfo",csvLines) == 0)
     {
       response.addLine("result",(int)Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: contentInfo");
       return;
     }
-
+*/
     T::ContentInfoList contentInfoList;
     uint len = (uint)csvLines.size();
     for (uint t=0; t<len; t++)

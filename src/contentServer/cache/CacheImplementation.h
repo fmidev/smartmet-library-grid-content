@@ -170,11 +170,12 @@ class CacheImplementation : public ServiceInterface
      virtual void   event_contentRegistered(T::EventInfo& eventInfo);
 
      virtual void   processEvent(T::EventInfo& eventInfo);
-     virtual void   processEvents();
+     virtual void   processEvents(bool eventThread);
 
      virtual void   reloadData();
      virtual void   saveData();
 
+     bool                   mReloadActivated;
      bool                   mShutdownRequested;
      bool                   mUpdateInProgress;
      T::SessionId           mSessionId;

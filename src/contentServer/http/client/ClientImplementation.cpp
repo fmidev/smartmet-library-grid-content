@@ -1,6 +1,5 @@
 #include "ClientImplementation.h"
 #include "grid-files/common/Exception.h"
-#include <curl/curl.h>
 
 
 
@@ -12,10 +11,14 @@ namespace HTTP
 {
 
 
+
+
 ClientImplementation::ClientImplementation()
 {
   try
   {
+    curl_global_init(CURL_GLOBAL_ALL);
+    curl = curl_easy_init();
   }
   catch (...)
   {
@@ -31,6 +34,10 @@ ClientImplementation::~ClientImplementation()
 {
   try
   {
+    if (curl != NULL)
+      curl_easy_cleanup(curl);
+
+    curl_global_cleanup();
   }
   catch (...)
   {
@@ -1185,6 +1192,14 @@ int ClientImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
 
     request.addLine("method","addFileInfoWithContentList");
     request.addLine("sessionId",sessionId);
+    request.addLine("fileInfo",fileInfo.getCsv());
+
+    uint len = contentInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
+      request.addLine("contentInfo",info->getCsv());
+    }
 
     T::ResponseMessage response;
 
@@ -3135,34 +3150,40 @@ size_t ClientImplementation_responseProcessing(char *ptr, size_t size, size_t nm
 {
   try
   {
+    //printf("\n**** DATA %u (%u) ****\n",(uint)nmemb,(uint)size);
     T::ResponseMessage *response = (T::ResponseMessage*)userdata;
 
-    char line[10000];
-    uint c = 0;
+    //char line[10000];
+    //uint c = 0;
     for (size_t t=0; t<nmemb; t++)
     {
       char ch = ptr[t];
-      if (ch == '\r'  || ch == '\n')
+      response->addChar(ch);
+#if 0
+      //printf("%c",ch);
+      if (ch == '\r'  || ch == '\n' ||  linePos == 9999)
       {
-        line[c] = '\0';
-        if (c > 0)
+        line[linePos] = '\0';
+        if (linePos > 0)
           response->addLine(line);
 
-        c = 0;
+        linePos = 0;
       }
       else
       {
-        line[c] = ch;
-        c++;
+        line[linePos] = ch;
+        linePos++;
       }
+#endif
     }
-
+/*
     if (c > 0)
     {
       line[c] = '\0';
       response->addLine(line);
     }
-
+*/
+    //printf("###### \n");
     return nmemb;
   }
   catch (...)
@@ -3211,8 +3232,6 @@ void ClientImplementation::sendRequest(T::RequestMessage& request,T::ResponseMes
 {
   try
   {
-    curl_global_init(CURL_GLOBAL_ALL);
-    CURL *curl = curl_easy_init();
     if (curl)
     {
       curl_easy_setopt(curl,CURLOPT_PROXY,"");
@@ -3229,7 +3248,7 @@ void ClientImplementation::sendRequest(T::RequestMessage& request,T::ResponseMes
         std::string s = request.getLineByIndex(t);
         p += sprintf(p,"%s\n",s.c_str());
       }
-      printf("%s\n",data);
+      //printf("%s\n",data);
 
       curl_easy_setopt(curl, CURLOPT_POSTFIELDS,data);
 
@@ -3238,9 +3257,9 @@ void ClientImplementation::sendRequest(T::RequestMessage& request,T::ResponseMes
         fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res));
 
       delete data;
-      curl_easy_cleanup(curl);
     }
-    curl_global_cleanup();
+
+    response.addChar('\0');
 
     //request.print(std::cout,0,0);
 

@@ -59,6 +59,7 @@ CacheImplementation::CacheImplementation()
     mContentCount = 0xFFFFFFFF;
     mSaveEnabled = false;
     mSaveDir = "/tmp";
+    mReloadActivated = false;
 
     mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
     mContentInfoList[0].setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
@@ -212,7 +213,7 @@ int CacheImplementation::_clear(T::SessionId sessionId)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->clear(sessionId);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -295,7 +296,12 @@ void CacheImplementation::reloadData()
 
       mContentInfoList[0].sort(T::ContentInfo::ComparisonMethod::file_message);
       mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_level_starttime_file_message);
-      mContentInfoList[2].sort(T::ContentInfo::ComparisonMethod::gribId_level_starttime_file_message);
+      mContentInfoList[2].sort(T::ContentInfo::ComparisonMethod::fmiName_level_starttime_file_message);
+      mContentInfoList[3].sort(T::ContentInfo::ComparisonMethod::gribId_level_starttime_file_message);
+      mContentInfoList[4].sort(T::ContentInfo::ComparisonMethod::newbaseId_level_starttime_file_message);
+      mContentInfoList[5].sort(T::ContentInfo::ComparisonMethod::newbaseName_level_starttime_file_message);
+      mContentInfoList[6].sort(T::ContentInfo::ComparisonMethod::cdmId_level_starttime_file_message);
+      mContentInfoList[7].sort(T::ContentInfo::ComparisonMethod::cdmName_level_starttime_file_message);
 
       mUpdateInProgress = false;
 
@@ -304,6 +310,8 @@ void CacheImplementation::reloadData()
       T::EventInfo event;
       event.mType = EventType::CONTENT_SERVER_RELOAD;
       mContentStorage->addEventInfo(mSessionId,event);
+
+      mReloadActivated = false;
     }
   }
   catch (...)
@@ -326,7 +334,7 @@ int CacheImplementation::_addDataServerInfo(T::SessionId sessionId,T::ServerInfo
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addDataServerInfo(sessionId,serverInfo);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -348,7 +356,7 @@ int CacheImplementation::_deleteDataServerInfoById(T::SessionId sessionId,uint s
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteDataServerInfoById(sessionId,serverId);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -510,7 +518,7 @@ int CacheImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addProducerInfo(sessionId,producerInfo);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -532,7 +540,7 @@ int CacheImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint pro
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteProducerInfoById(sessionId,producerId);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -554,7 +562,7 @@ int CacheImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::s
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
      int result = mContentStorage->deleteProducerInfoByName(sessionId,producerName);
-     processEvents();
+     processEvents(false);
      return result;
   }
   catch (...)
@@ -606,7 +614,7 @@ int CacheImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionI
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteProducerInfoListBySourceId(sessionId,sourceId);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -735,7 +743,7 @@ int CacheImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addGenerationInfo(sessionId,generationInfo);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -757,7 +765,7 @@ int CacheImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint g
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteGenerationInfoById(sessionId,generationId);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -779,7 +787,7 @@ int CacheImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std:
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteGenerationInfoByName(sessionId,generationName);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -801,7 +809,7 @@ int CacheImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sess
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteGenerationInfoListByProducerId(sessionId,producerId);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -823,7 +831,7 @@ int CacheImplementation::_deleteGenerationInfoListByProducerName(T::SessionId se
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteGenerationInfoListByProducerName(sessionId,producerName);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -845,7 +853,7 @@ int CacheImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessio
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteGenerationInfoListBySourceId(sessionId,sourceId);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1128,7 +1136,7 @@ int CacheImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uin
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->setGenerationInfoStatusById(sessionId,generationId,status);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1150,7 +1158,7 @@ int CacheImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,s
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->setGenerationInfoStatusByName(sessionId,generationName,status);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1172,7 +1180,7 @@ int CacheImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addFileInfo(sessionId,fileInfo);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1194,7 +1202,7 @@ int CacheImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addFileInfoWithContentList(sessionId,fileInfo,contentInfoList);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1216,7 +1224,7 @@ int CacheImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoById(sessionId,fileId);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1238,7 +1246,7 @@ int CacheImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::strin
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoByName(sessionId,filename);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1260,7 +1268,7 @@ int CacheImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId,
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoListByGroupFlags(sessionId,groupFlags);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1282,7 +1290,7 @@ int CacheImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoListByProducerId(sessionId,producerId);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1304,7 +1312,7 @@ int CacheImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionI
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoListByProducerName(sessionId,producerName);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1326,7 +1334,7 @@ int CacheImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoListByGenerationId(sessionId,generationId);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1348,7 +1356,7 @@ int CacheImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessio
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoListByGenerationName(sessionId,generationName);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1370,7 +1378,7 @@ int CacheImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,ui
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoListBySourceId(sessionId,sourceId);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1674,7 +1682,7 @@ int CacheImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& even
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addEventInfo(sessionId,eventInfo);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1792,7 +1800,7 @@ int CacheImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addContentInfo(sessionId,contentInfo);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1814,7 +1822,7 @@ int CacheImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addContentList(sessionId,contentInfoList);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1836,7 +1844,7 @@ int CacheImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,u
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentInfo(sessionId,fileId,messageIndex);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1858,7 +1866,7 @@ int CacheImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint 
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentListByFileId(sessionId,fileId);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1880,7 +1888,7 @@ int CacheImplementation::_deleteContentListByFileName(T::SessionId sessionId,std
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentListByFileName(sessionId,filename);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1902,7 +1910,7 @@ int CacheImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,u
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentListByGroupFlags(sessionId,groupFlags);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1924,7 +1932,7 @@ int CacheImplementation::_deleteContentListByProducerId(T::SessionId sessionId,u
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentListByProducerId(sessionId,producerId);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1946,7 +1954,7 @@ int CacheImplementation::_deleteContentListByProducerName(T::SessionId sessionId
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentListByProducerName(sessionId,producerName);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1968,7 +1976,7 @@ int CacheImplementation::_deleteContentListByGenerationId(T::SessionId sessionId
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentListByGenerationId(sessionId,generationId);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -1990,7 +1998,7 @@ int CacheImplementation::_deleteContentListByGenerationName(T::SessionId session
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentListByGenerationName(sessionId,generationName);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -2012,7 +2020,7 @@ int CacheImplementation::_deleteContentListBySourceId(T::SessionId sessionId,uin
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentListBySourceId(sessionId,sourceId);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -2034,7 +2042,7 @@ int CacheImplementation::_registerContentList(T::SessionId sessionId,uint server
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->registerContentList(sessionId,serverId,contentInfoList);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -2056,7 +2064,7 @@ int CacheImplementation::_registerContentListByFileId(T::SessionId sessionId,uin
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->registerContentListByFileId(sessionId,serverId,fileId);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -2078,7 +2086,7 @@ int CacheImplementation::_unregisterContentList(T::SessionId sessionId,uint serv
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->unregisterContentList(sessionId,serverId);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -2100,7 +2108,7 @@ int CacheImplementation::_unregisterContentListByFileId(T::SessionId sessionId,u
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->unregisterContentListByFileId(sessionId,serverId,fileId);
-    processEvents();
+    processEvents(false);
     return result;
   }
   catch (...)
@@ -3353,6 +3361,7 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
+
     // printf("EVENT[%llu]: fileUpdated(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
@@ -3363,8 +3372,18 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
       T::FileInfo *info = mFileInfoList.getFileInfoById(eventInfo.mId1);
       if (info != NULL)
       {
+        // ToDo: Deleting content one by one is quite slow. It would
+        // be smarter to mark content records as deleted instead, and
+        // remove them time to time.
+
+        //unsigned long long startTime = getTime();
+
         for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
           mContentInfoList[t].deleteContentInfoByFileId(eventInfo.mId1);
+
+
+        //unsigned long long endTime = getTime();
+        //printf("DTIME : %f sec\n",(float)(endTime-startTime)/1000000);
 
         *info = fileInfo;
       }
@@ -3378,6 +3397,8 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
         T::ContentInfoList contentInfoList;
         if (mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) == Result::OK)
         {
+          //unsigned long long startTime = getTime();
+
           uint len = contentInfoList.getLength();
           for (uint c=0; c<len; c++)
           {
@@ -3387,6 +3408,9 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
             for (int t=0; t<CONTENT_LIST_COUNT; t++)
               mContentInfoList[t].addContentInfo(cInfo);
           }
+
+          //unsigned long long endTime = getTime();
+          //printf("ATIME : %f sec\n",(float)(endTime-startTime)/1000000);
         }
       }
     }
@@ -3885,7 +3909,7 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
 
 
 
-void CacheImplementation::processEvents()
+void CacheImplementation::processEvents(bool eventThread)
 {
   FUNCTION_TRACE
   try
@@ -3893,36 +3917,87 @@ void CacheImplementation::processEvents()
     if (mContentStorage == NULL)
       return;
 
-    AutoThreadLock lock(&mEventProcessingLock);
-
-    T::EventInfo eventInfo;
-    int result = mContentStorage->getLastEventInfo(mSessionId,0,eventInfo);
-    if (result == Result::OK)
+    if (!eventThread  &&  mReloadActivated)
     {
-      if (mContentStorageStartTime < eventInfo.mServerTime)
-      {
-        reloadData();
-        mContentStorageStartTime = eventInfo.mServerTime;
-        return;
-      }
+      // If this method is called from a service method (not from the event thread)
+      // then we should exit, because otherwise the call is blocked until the reload
+      // is finished.
 
-      if (eventInfo.mEventId == mLastProcessedEventId)
-      {
-        // There are no events to process.
-        return;
-      }
-    }
-    else
-    {
-      // printf("ERROR: getLastEventInfo : %d\n",result);
       return;
     }
+
+    AutoThreadLock lock(&mEventProcessingLock);
 
     uint len = 1000;
     while (len > 0)
     {
+      T::EventInfo eventInfo;
+      int result = mContentStorage->getLastEventInfo(mSessionId,0,eventInfo);
+      if (result == Result::OK)
+      {
+        if (eventThread  &&  mContentStorageStartTime < eventInfo.mServerTime)
+        {
+          mReloadActivated = true;
+          reloadData();
+          mContentStorageStartTime = eventInfo.mServerTime;
+          mReloadActivated = false;
+          return;
+        }
+
+        if (eventInfo.mEventId == mLastProcessedEventId)
+        {
+          // There are no events to process.
+          return;
+        }
+      }
+
+      if (eventThread)
+      {
+        uint count = 0;
+        if (mContentStorage->getFileInfoCount(mSessionId,count) == 0)
+        {
+          printf("FILES %u / %u\n",mFileInfoList.getLength(),count);
+          if (count > (mFileInfoList.getLength() + 10000))
+          {
+            // It seems that the data source contains so many new files that
+            // it is faster to update them by reloading than through the events.
+            // However, we should wait until there are no more events to come.
+
+            mReloadActivated = true;
+            uint elen = 1000;
+            while (elen > 0)
+            {
+              if (elen < 1000)
+                sleep(3);
+
+              T::EventInfoList eventInfoList;
+              result = mContentStorage->getEventInfoList(mSessionId,0,mLastProcessedEventId+1,1000,eventInfoList);
+              if (result != 0)
+              {
+                //printf("ERROR: getEventInfoList : %d\n",result);
+                return;
+              }
+
+              elen = eventInfoList.getLength();
+
+              T::EventInfo *it = eventInfoList.getFirstEvent();
+              while (it != NULL)
+              {
+                mLastProcessedEventId = it->mEventId;
+                it = it->nextItem;
+              }
+            }
+
+            reloadData();
+            mContentStorageStartTime = eventInfo.mServerTime;
+            mReloadActivated = false;
+            return;
+          }
+        }
+      }
+
       T::EventInfoList eventInfoList;
-      int result = mContentStorage->getEventInfoList(mSessionId,0,mLastProcessedEventId+1,1000,eventInfoList);
+      result = mContentStorage->getEventInfoList(mSessionId,0,mLastProcessedEventId+1,1000,eventInfoList);
       if (result != 0)
       {
         //printf("ERROR: getEventInfoList : %d\n",result);
@@ -3975,7 +4050,7 @@ void CacheImplementation::eventProcessingThread()
     {
       try
       {
-        processEvents();
+        processEvents(true);
       }
       catch (...)
       {
