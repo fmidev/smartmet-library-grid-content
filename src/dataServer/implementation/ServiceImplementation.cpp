@@ -613,15 +613,15 @@ void ServiceImplementation::fullUpdate()
 
     time_t checkTime = time(0);
     uint startFileId = 0;
-    uint len = 1000;
-    while (len == 1000)
+    uint len = 10000;
+    while (len == 10000)
     {
       if (mShutdownRequested)
         return;
 
       T::FileInfoList fileInfoList;
 
-      int result = mContentServer->getFileInfoList(mServerSessionId,startFileId,1000,fileInfoList);
+      int result = mContentServer->getFileInfoList(mServerSessionId,startFileId,10000,fileInfoList);
       if (result != 0)
       {
         fprintf(stderr,"ERROR: Cannot get the file list from the content server!");
@@ -664,24 +664,7 @@ void ServiceImplementation::fullUpdate()
       }
     }
 
-
-    std::size_t fcount = mGridStorage.getFileCount();
-    if (fcount > 0)
-    {
-      for (long long t=(long long)fcount-1; t>=0; t--)
-      {
-        if (mShutdownRequested)
-          return;
-
-        auto gridFile = mGridStorage.getFileByIndex((std::size_t)t);
-        if (gridFile->getCheckTime() < checkTime)
-        {
-          //printf("REMOVE %u\n",gridFile->getFileId());
-          mGridStorage.deleteFileByIndex((std::size_t)t);
-        }
-      }
-    }
-
+    mGridStorage.deleteFilesByCheckTime(checkTime);
     mFullUpdateRequired = false;
   }
   catch (...)

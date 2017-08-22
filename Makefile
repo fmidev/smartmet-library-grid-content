@@ -97,7 +97,6 @@ CFLAGS_PROFILE = $(DEFINES) $(FLAGS) $(FLAGS_PROFILE) -DNDEBUG -O2 -g -pg
 LIBS = -L$(libdir) \
 	-lsmartmet-grid-files \
 	-lhiredis \
-	-lmicrohttpd \
 	-lboost_date_time \
 	-lboost_filesystem \
 	-lboost_thread \

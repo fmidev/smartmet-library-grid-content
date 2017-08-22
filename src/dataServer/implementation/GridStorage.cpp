@@ -21,7 +21,6 @@ GridStorage::GridStorage()
   FUNCTION_TRACE
   try
   {
-    //mFileList.reserve(1000000);
   }
   catch (...)
   {
@@ -60,26 +59,7 @@ void GridStorage::addFile(GRID::GridFile *gribFile)
     GRID::GridFile_sptr ptr;
     ptr.reset(gribFile);
 
-    if (mFileList.size() == 0)
-    {
-      mFileList.push_back(ptr);
-      return;
-    }
-
-    int idx = getClosestFileIndexByIdNoLock(gribFile->getFileId());
-    if (idx < 0)
-    {
-      mFileList.insert(mFileList.begin(),ptr);
-      return;
-    }
-
-    if (idx >= (int)mFileList.size())
-    {
-      mFileList.push_back(ptr);
-      return;
-    }
-
-    mFileList.insert(mFileList.begin()+idx+1,ptr);
+    mFileList.insert(std::pair<uint,GRID::GridFile_sptr>(gribFile->getFileId(),ptr));
   }
   catch (...)
   {
@@ -115,15 +95,8 @@ void GridStorage::deleteFile(GRID::GridFile *gribFile)
   try
   {
     AutoWriteLock lock(&mModificationLock);
-    std::size_t sz = mFileList.size();
-    for (std::size_t t=0; t<sz; t++)
-    {
-      if (mFileList[t].get() == gribFile)
-      {
-        mFileList.erase(mFileList.begin() + t);
-        return;
-      }
-    }
+
+    mFileList.erase(gribFile->getFileId());
   }
   catch (...)
   {
@@ -141,32 +114,7 @@ void GridStorage::deleteFileById(uint fileId)
   try
   {
     AutoWriteLock lock(&mModificationLock);
-
-    int idx = getClosestFileIndexByIdNoLock(fileId);
-    if (idx >= 0  &&  idx < (int)mFileList.size()  && mFileList[idx]->getFileId() == fileId)
-      mFileList.erase(mFileList.begin() + idx);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
-  }
-}
-
-
-
-
-
-void GridStorage::deleteFileByIndex(std::size_t fileIndex)
-{
-  FUNCTION_TRACE
-  try
-  {
-    AutoWriteLock lock(&mModificationLock);
-
-    if (fileIndex >= mFileList.size())
-      return;
-
-    mFileList.erase(mFileList.begin() + fileIndex);
+    mFileList.erase(fileId);
   }
   catch (...)
   {
@@ -185,13 +133,15 @@ void GridStorage::deleteFilesByGroupFlags(uint groupFlags)
   {
     AutoWriteLock lock(&mModificationLock);
 
-    int sz = (int)mFileList.size() - 1;
+    std::vector<uint> idList;
 
-    for (int t=sz; t>=0; t--)
+    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
     {
-      if ((mFileList[t]->getGroupFlags() & groupFlags) != 0)
-        mFileList.erase(mFileList.begin() + t);
+      if ((it->second->getGroupFlags() & groupFlags) != 0)
+        idList.push_back(it->first);
     }
+
+    deleteFilesNoLock(idList);
   }
   catch (...)
   {
@@ -210,16 +160,15 @@ void GridStorage::deleteFilesByProducerId(uint producerId)
   {
     AutoWriteLock lock(&mModificationLock);
 
-    int sz = (int)mFileList.size() - 1;
+    std::vector<uint> idList;
 
-    for (int t=sz; t>=0; t--)
+    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
     {
-      if (mFileList[t]->getProducerId() == producerId)
-      {
-        printf("--- delete file %u (%d)\n",mFileList[t]->getFileId(),(int)mFileList.size()-1);
-        mFileList.erase(mFileList.begin() + t);
-      }
+      if (it->second->getProducerId() == producerId)
+        idList.push_back(it->first);
     }
+
+    deleteFilesNoLock(idList);
   }
   catch (...)
   {
@@ -238,13 +187,15 @@ void GridStorage::deleteFilesByGenerationId(uint generationId)
   {
     AutoWriteLock lock(&mModificationLock);
 
-    int sz = (int)mFileList.size() - 1;
+    std::vector<uint> idList;
 
-    for (int t=sz; t>=0; t--)
+    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
     {
-      if (mFileList[t]->getGenerationId() == generationId)
-        mFileList.erase(mFileList.begin() + t);
+      if (it->second->getGenerationId() == generationId)
+        idList.push_back(it->first);
     }
+
+    deleteFilesNoLock(idList);
   }
   catch (...)
   {
@@ -263,16 +214,42 @@ void GridStorage::deleteFilesBySourceId(uint sourceId)
   {
     AutoWriteLock lock(&mModificationLock);
 
-    int sz = (int)mFileList.size() - 1;
+    std::vector<uint> idList;
 
-    for (int t=sz; t>=0; t--)
+    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
     {
-      if (mFileList[t]->getSourceId() == sourceId)
-      {
-        //printf("--- delete file %u (%d)\n",mFileList[t]->getFileId(),(int)mFileList.size()-1);
-        mFileList.erase(mFileList.begin() + t);
-      }
+      if (it->second->getSourceId() == sourceId)
+        idList.push_back(it->first);
     }
+
+    deleteFilesNoLock(idList);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void GridStorage::deleteFilesByCheckTime(time_t checkTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+
+    std::vector<uint> idList;
+
+    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
+    {
+      if (it->second->getCheckTime() < checkTime)
+        idList.push_back(it->first);
+    }
+
+    deleteFilesNoLock(idList);
   }
   catch (...)
   {
@@ -291,13 +268,15 @@ GRID::GridFile_sptr GridStorage::getFileById(uint fileId)
   {
     AutoWriteLock lock(&mModificationLock);
 
-    int idx = getClosestFileIndexByIdNoLock(fileId);
-    if (idx >= 0  &&  idx < (int)mFileList.size()  && mFileList[idx]->getFileId() == fileId)
+    std::map<uint,GRID::GridFile_sptr>::iterator it = mFileList.find(fileId);
+
+    if (it != mFileList.end())
     {
-      GRID::GridFile_sptr gribFile = mFileList[idx];
+      GRID::GridFile_sptr gribFile = it->second;
       if (!gribFile->isMemoryMapped())
         gribFile->read(gribFile->getFileName());
-      return mFileList[idx];
+
+      return it->second;
     }
     return NULL;
   }
@@ -316,14 +295,13 @@ GRID::GridFile_sptr GridStorage::getFileByIdNoMapping(uint fileId)
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock);
 
-    int idx = getClosestFileIndexByIdNoLock(fileId);
-    if (idx >= 0  &&  idx < (int)mFileList.size()  && mFileList[idx]->getFileId() == fileId)
-    {
-      GRID::GridFile_sptr gribFile = mFileList[idx];
-      return mFileList[idx];
-    }
+    std::map<uint,GRID::GridFile_sptr>::iterator it = mFileList.find(fileId);
+
+    if (it != mFileList.end())
+      return it->second;
+
     return NULL;
   }
   catch (...)
@@ -332,96 +310,6 @@ GRID::GridFile_sptr GridStorage::getFileByIdNoMapping(uint fileId)
   }
 }
 
-
-
-
-
-GRID::GridFile_sptr GridStorage::getFileByIndex(std::size_t fileIndex)
-{
-  FUNCTION_TRACE
-  try
-  {
-    AutoReadLock lock(&mModificationLock);
-    if (fileIndex >= mFileList.size())
-      return NULL;
-
-    return mFileList[fileIndex];
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
-  }
-}
-
-
-
-
-
-int GridStorage::getClosestFileIndexById(uint fileId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    AutoReadLock lock(&mModificationLock);
-    return getClosestFileIndexByIdNoLock(fileId);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
-  }
-}
-
-
-
-
-int GridStorage::getClosestFileIndexByIdNoLock(uint fileId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    int high = (int)mFileList.size()-1;
-    //printf("COMPARE %d (%u)\n",high,fileId);
-    if (high < 0)
-      return -1;
-
-    int low = 0;
-
-    while (low <= high)
-    {
-      int mid = low + (high-low) / 2;
-      //printf(" --  %d < %d < %d\n",low,mid,high);
-      GRID::GridFile_sptr file = mFileList[mid];
-      if (!file)
-        return -1;
-
-      uint id = file->getFileId();
-      if (id == fileId)
-        return mid;
-
-      if (fileId > id)
-        low = mid + 1;
-      else
-      if (fileId < id)
-        high = mid-1;
-    }
-
-    if (low >= high)
-      return high;
-
-    while (low >= 0)
-    {
-      GRID::GridFile_sptr file = mFileList[low];
-      if (file->getFileId() < fileId)
-        return low;
-      low--;
-    }
-    return -1;
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
-  }
-}
 
 
 
@@ -442,6 +330,7 @@ std::size_t GridStorage::getFileCount()
 
 
 
+
 void GridStorage::print(std::ostream& stream,uint level,uint optionFlags)
 {
   FUNCTION_TRACE
@@ -450,11 +339,29 @@ void GridStorage::print(std::ostream& stream,uint level,uint optionFlags)
     AutoReadLock lock(&mModificationLock);
     stream << space(level) << "GridStorage\n";
     stream << space(level) << "- numberOfFiles = " << getFileCount() << "\n";
-
-    std::size_t sz = mFileList.size();
-    for (std::size_t t=0; t<sz; t++)
+    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
     {
-      mFileList[t]->print(stream,level+1,optionFlags);
+      it->second->print(stream,level+1,optionFlags);
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void GridStorage::deleteFilesNoLock(std::vector<uint>& fileIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    {
+      mFileList.erase(*it);
     }
   }
   catch (...)
