@@ -65,6 +65,8 @@ CacheImplementation::CacheImplementation()
     mContentInfoList[0].setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
     for (int t=1; t<CONTENT_LIST_COUNT; t++)
       mContentInfoList[t].setReleaseObjects(false);
+
+    mDelayedContentInfoList.setReleaseObjects(false);
   }
   catch (...)
   {
@@ -3296,23 +3298,81 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    T::FileInfo fileInfo;
-    if (mContentStorage->getFileInfoById(mSessionId,eventInfo.mId1,fileInfo) == Result::OK)
-    {
-      mFileInfoList.addFileInfo(fileInfo.duplicate());
-      if (fileInfo.mFlags & (uint)T::FileInfoFlags::CONTENT_PREDEFINED)
-      {
-        T::ContentInfoList contentInfoList;
-        if (mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) == Result::OK)
-        {
-          uint len = contentInfoList.getLength();
-          for (uint c=0; c<len; c++)
-          {
-            T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
-            T::ContentInfo *cInfo = info->duplicate();
+    uint len = eventInfo.mNote.length();
 
-            for (int t=0; t<CONTENT_LIST_COUNT; t++)
-              mContentInfoList[t].addContentInfo(cInfo);
+    if (len > 0)
+    {
+      char buf[len+10];
+      strcpy(buf,eventInfo.mNote.c_str());
+      char *s = buf;
+
+      while (s != NULL)
+      {
+        char *p = strstr(s,"\n");
+        if (p != NULL)
+        {
+          *p = '\0';
+          if (s == buf)
+          {
+            T::FileInfo *fileInfo = new T::FileInfo();
+            fileInfo->setCsv(s);
+            if (mFileInfoList.getFileInfoById(fileInfo->mFileId) == NULL)
+            {
+              mFileInfoList.addFileInfo(fileInfo);
+            }
+            else
+            {
+              delete fileInfo;
+            }
+          }
+          else
+          {
+            T::ContentInfo *contentInfo = new T::ContentInfo();
+            contentInfo->setCsv(s);
+            if (mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(contentInfo->mFileId,contentInfo->mMessageIndex) == NULL)
+            {
+              mContentInfoList[0].addContentInfo(contentInfo);
+              mDelayedContentInfoList.addContentInfo(contentInfo);
+
+//              for (int t=0; t<1 /*CONTENT_LIST_COUNT*/; t++)
+//                mContentInfoList[t].addContentInfo(contentInfo);
+            }
+            else
+            {
+              delete contentInfo;
+            }
+          }
+          s = p + 1;
+        }
+        else
+        {
+          s = NULL;
+        }
+      }
+    }
+    else
+    {
+      T::FileInfo fileInfo;
+      if (mContentStorage->getFileInfoById(mSessionId,eventInfo.mId1,fileInfo) == Result::OK)
+      {
+        mFileInfoList.addFileInfo(fileInfo.duplicate());
+        if (fileInfo.mFlags & (uint)T::FileInfoFlags::CONTENT_PREDEFINED)
+        {
+          T::ContentInfoList contentInfoList;
+          if (mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) == Result::OK)
+          {
+            uint len = contentInfoList.getLength();
+            for (uint c=0; c<len; c++)
+            {
+              T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
+              T::ContentInfo *cInfo = info->duplicate();
+
+              mContentInfoList[0].addContentInfo(cInfo);
+              mDelayedContentInfoList.addContentInfo(cInfo);
+
+              //for (int t=0; t<CONTENT_LIST_COUNT; t++)
+              //  mContentInfoList[t].addContentInfo(cInfo);
+            }
           }
         }
       }
@@ -3926,109 +3986,88 @@ void CacheImplementation::processEvents(bool eventThread)
       return;
     }
 
-    AutoThreadLock lock(&mEventProcessingLock);
+    AutoThreadLock eventLock(&mEventProcessingLock);
+
+    T::EventInfoList delayedEventInfoList;
 
     uint len = 1000;
     while (len > 0)
     {
+      len = 0;
       T::EventInfo eventInfo;
       int result = mContentStorage->getLastEventInfo(mSessionId,0,eventInfo);
-      if (result == Result::OK)
+      if (result != Result::OK)
+        return;
+
+      if (eventThread  &&  mContentStorageStartTime < eventInfo.mServerTime)
       {
-        if (eventThread  &&  mContentStorageStartTime < eventInfo.mServerTime)
-        {
-          mReloadActivated = true;
-          reloadData();
-          mContentStorageStartTime = eventInfo.mServerTime;
-          mReloadActivated = false;
-          return;
-        }
-
-        if (eventInfo.mEventId == mLastProcessedEventId)
-        {
-          // There are no events to process.
-          return;
-        }
-      }
-
-      if (eventThread)
-      {
-        uint count = 0;
-        if (mContentStorage->getFileInfoCount(mSessionId,count) == 0)
-        {
-          printf("FILES %u / %u\n",mFileInfoList.getLength(),count);
-          if (count > (mFileInfoList.getLength() + 10000))
-          {
-            // It seems that the data source contains so many new files that
-            // it is faster to update them by reloading than through the events.
-            // However, we should wait until there are no more events to come.
-
-            mReloadActivated = true;
-            uint elen = 1000;
-            while (elen > 0)
-            {
-              if (elen < 1000)
-                sleep(3);
-
-              T::EventInfoList eventInfoList;
-              result = mContentStorage->getEventInfoList(mSessionId,0,mLastProcessedEventId+1,1000,eventInfoList);
-              if (result != 0)
-              {
-                //printf("ERROR: getEventInfoList : %d\n",result);
-                return;
-              }
-
-              elen = eventInfoList.getLength();
-
-              T::EventInfo *it = eventInfoList.getFirstEvent();
-              while (it != NULL)
-              {
-                mLastProcessedEventId = it->mEventId;
-                it = it->nextItem;
-              }
-            }
-
-            reloadData();
-            mContentStorageStartTime = eventInfo.mServerTime;
-            mReloadActivated = false;
-            return;
-          }
-        }
-      }
-
-      T::EventInfoList eventInfoList;
-      result = mContentStorage->getEventInfoList(mSessionId,0,mLastProcessedEventId+1,1000,eventInfoList);
-      if (result != 0)
-      {
-        //printf("ERROR: getEventInfoList : %d\n",result);
+        mReloadActivated = true;
+        reloadData();
+        mContentStorageStartTime = eventInfo.mServerTime;
+        mReloadActivated = false;
         return;
       }
 
-      len = eventInfoList.getLength();
-      //printf("EVENT LIST %u\n",len);
-
-      T::EventInfo *it = eventInfoList.getFirstEvent();
-      while (it != NULL)
+      if (eventInfo.mEventId > mLastProcessedEventId)
       {
-        // printf("Process event %llu (%u)\n",it->mEventId,(uint)it->mType);
-        //it->print(std::cout,2,0);
-        processEvent(*it);
 
+        T::EventInfoList eventInfoList;
+        result = mContentStorage->getEventInfoList(mSessionId,0,mLastProcessedEventId+1,1000,eventInfoList);
+        if (result != 0)
         {
-          AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
-          //AutoThreadLock lock(&mEventLock);
-          T::EventInfo *event = it->duplicate();
-          event->mServerTime = mStartTime;
-
-          mEventInfoList.addEventInfo(event);
-          mLastProcessedEventId = it->mEventId;
+          //printf("ERROR: getEventInfoList : %d\n",result);
+          return;
         }
 
-        it = it->nextItem;
+        len = eventInfoList.getLength();
+        //printf("EVENT LIST %u\n",len);
 
-        if (mShutdownRequested)
-          return;
+        T::EventInfo *it = eventInfoList.getFirstEvent();
+        while (it != NULL)
+        {
+          // printf("Process event %llu (%u)\n",it->mEventId,(uint)it->mType);
+          //it->print(std::cout,2,0);
+          processEvent(*it);
+          {
+            AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+            //AutoThreadLock lock(&mEventLock);
+            T::EventInfo *event = it->duplicate();
+            event->mServerTime = mStartTime;
+
+            delayedEventInfoList.addEventInfo(event);
+            //mEventInfoList.addEventInfo(event);
+            mLastProcessedEventId = it->mEventId;
+          }
+
+          it = it->nextItem;
+
+          if (mShutdownRequested)
+            return;
+        }
       }
+    }
+
+    printf("**** CONTENT ADD TO WAIT %u\n",mDelayedContentInfoList.getLength());
+
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    if (mDelayedContentInfoList.getLength() > 0)
+    {
+      for (int t=1; t<CONTENT_LIST_COUNT; t++)
+        mContentInfoList[t].addContentInfoList(mDelayedContentInfoList);
+
+      mDelayedContentInfoList.clear();
+
+      //for (int t=0; t<CONTENT_LIST_COUNT; t++)
+      //  printf("contentList[%u] = %u\n",t,mContentInfoList[t].getLength());
+    }
+
+    T::EventInfo *it = delayedEventInfoList.getFirstEvent();
+    while (it != NULL)
+    {
+      T::EventInfo *event = it->duplicate();
+      mEventInfoList.addEventInfo(event);
+      it = it->nextItem;
     }
   }
   catch (...)

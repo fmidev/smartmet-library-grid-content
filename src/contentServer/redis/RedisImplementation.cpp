@@ -2546,6 +2546,30 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
       {
         T::EventInfo *eventInfo = new T::EventInfo();
         eventInfo->setCsv(reply->element[t]->str);
+
+        if (eventInfo->mType == EventType::FILE_ADDED)
+        {
+          char buf[100000];
+          char *p = buf;
+
+          T::FileInfo fileInfo;
+
+          if (getFileById(eventInfo->mId1,fileInfo) == 0)
+          {
+            p += sprintf(p,"%s\n",fileInfo.getCsv().c_str());
+            T::ContentInfoList contentInfoList;
+            getContentByFileId(eventInfo->mId1,contentInfoList);
+
+            uint len = contentInfoList.getLength();
+            for (uint t=0; t<len; t++)
+            {
+              T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
+              p += sprintf(p,"%s\n",contentInfo->getCsv().c_str());
+            }
+            eventInfo->mNote = buf;
+          }
+        }
+
         eventInfoList.addEventInfo(eventInfo);
       }
     }

@@ -87,6 +87,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
 
     // printf("[%s]\n",method);
 
+    if (strcasecmp(method,"crash") == 0)
+    {
+      sprintf(NULL,"Crash");
+      return;
+    }
+
     if (strcasecmp(method,"clear") == 0)
     {
       clear(request,response);

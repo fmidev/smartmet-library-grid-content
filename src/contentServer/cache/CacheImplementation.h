@@ -187,6 +187,7 @@ class CacheImplementation : public ServiceInterface
      T::ServerInfoList      mDataServerInfoList;
      T::EventInfoList       mEventInfoList;
      T::ContentInfoList     mContentInfoList[CONTENT_LIST_COUNT];
+     T::ContentInfoList     mDelayedContentInfoList;
 
      time_t                 mStartTime;
      pthread_t              mThread;

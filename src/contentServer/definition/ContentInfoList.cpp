@@ -220,7 +220,7 @@ void ContentInfoList::addContentInfo(ContentInfo *contentInfo)
 
 
 
-
+#if 0
 void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -274,6 +274,102 @@ void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
     throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
   }
 }
+#endif
+
+
+
+
+
+void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+    uint len1 = mLength;
+    uint len2 = contentInfoList.getLength();
+
+    if (mComparisonMethod == ContentInfo::ComparisonMethod::none)
+    {
+      if (mArray == NULL  ||  mLength == mSize  ||  (mLength + len2) > mSize)
+      {
+        increaseSize(len1 + len2);
+      }
+
+      for (uint t=0; t<len2; t++)
+      {
+        ContentInfo *cInfo = contentInfoList.getContentInfoByIndex(t);
+        ContentInfo *contentInfo = cInfo;
+
+        if (mReleaseObjects)
+          contentInfo = cInfo->duplicate();
+
+        mArray[mLength] = contentInfo;
+        mLength++;
+      }
+      return;
+    }
+
+    uint newSize = len1 + len2;
+    ContentInfoPtr *newArray = new ContentInfoPtr[newSize];
+    uint a = 0;
+    uint b = 0;
+
+    contentInfoList.sort(mComparisonMethod);
+
+    for (uint t=0; t<newSize; t++)
+    {
+      ContentInfo *cInfo1 = NULL;
+      ContentInfo *cInfo2 = NULL;
+
+      if (a < len1)
+        cInfo1 = mArray[a];
+
+      if (b < len2)
+        cInfo2 = contentInfoList.getContentInfoByIndex(b);
+
+      if (mReleaseObjects  && cInfo2 != NULL)
+        cInfo2 = cInfo2->duplicate();
+
+      if (cInfo1 != NULL  &&  cInfo2 == NULL)
+      {
+        newArray[t] = cInfo1;
+        a++;
+      }
+      else
+      if (cInfo1 == NULL  &&  cInfo2 != NULL)
+      {
+        newArray[t] = cInfo2;
+        b++;
+      }
+      else
+      if (cInfo1 != NULL  &&  cInfo2 != NULL)
+      {
+        if (cInfo1->compare(mComparisonMethod,cInfo2) <= 0)
+        {
+          newArray[t] = cInfo1;
+          a++;
+        }
+        else
+        {
+          newArray[t] = cInfo2;
+          b++;
+        }
+      }
+    }
+
+    mSize = newSize;
+    mLength = newSize;
+
+    delete mArray;
+    mArray = newArray;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
 
 
 
