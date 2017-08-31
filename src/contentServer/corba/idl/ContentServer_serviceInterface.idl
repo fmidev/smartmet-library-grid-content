@@ -65,6 +65,7 @@ interface ServiceInterface
   long  deleteFileInfoListByGenerationId(in long long sessionId,in unsigned long generationId);
   long  deleteFileInfoListByGenerationName(in long long sessionId,in string generationName);
   long  deleteFileInfoListBySourceId(in long long sessionId,in unsigned long sourceId);
+  long  deleteFileInfoListByFileIdList(in long long sessionId,in CorbaULongList fileIdList);
   long  getFileInfoById(in long long sessionId,in unsigned long fileId,out CorbaFileInfo fileInfo);
   long  getFileInfoByName(in long long sessionId,in string filename,out CorbaFileInfo fileInfo);
   long  getFileInfoList(in long long sessionId,in unsigned long startFileId,in unsigned long maxRecords,out CorbaFileInfoList fileInfoList);
@@ -116,6 +117,9 @@ interface ServiceInterface
   long  getContentListByParameterAndGenerationName(in long long sessionId,in string generationName,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in unsigned long minLevel,in unsigned long maxLevel,in string startTime,in string endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
   long  getContentListByParameterAndProducerId(in long long sessionId,in unsigned long producerId,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in unsigned long minLevel,in unsigned long maxLevel,in string startTime,in string endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
   long  getContentListByParameterAndProducerName(in long long sessionId,in string producerName,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in unsigned long minLevel,in unsigned long maxLevel,in string startTime,in string endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
+
+  long  getContentParamListByGenerationId(in long long sessionId,in unsigned long generationId,out CorbaContentInfoList contentParamList);
+  long  getContentTimeListByGenerationId(in long long sessionId,in unsigned long generationId,out CorbaStringList contentTimeList);
 
   long  getContentCount(in long long sessionId,out unsigned long count);
 };  

@@ -1445,6 +1445,38 @@ int ClientImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,u
 
 
 
+int ClientImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<uint>& fileIdList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","deleteFileInfoListByFileIdList");
+    request.addLine("sessionId",sessionId);
+
+    std::set<uint>::iterator it;
+    for (it=fileIdList.begin(); it!=fileIdList.end(); ++it)
+      request.addLine("fileId",*it);
+
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+
+    return result;
+ }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::FileInfo& fileInfo)
 {
   try
@@ -3146,6 +3178,113 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
 
 
 
+int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessionId,uint generationId,T::ContentInfoList& contentParamList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getContentParamListByGenerationId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("generationId",generationId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      std::vector<std::string> lines;
+      uint len = response.getLinesByKey("contentInfo",lines);
+      for (uint t=0; t<len; t++)
+      {
+        T::ContentInfo *info = new T::ContentInfo();
+        info->setCsv(lines[t]);
+        contentParamList.addContentInfo(info);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::vector<std::string>& contentTimeList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getContentTimeListByGenerationId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("generationId",generationId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      std::vector<std::string> lines;
+      uint len = response.getLinesByKey("contentTime",lines);
+      for (uint t=0; t<len; t++)
+      {
+        contentTimeList.push_back(lines[t]);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getContentCount");
+    request.addLine("sessionId",sessionId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+      count = (uint)response.getLineValueByKey("count");
+    else
+      count = 0;
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 size_t ClientImplementation_responseProcessing(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
   try
@@ -3192,37 +3331,6 @@ size_t ClientImplementation_responseProcessing(char *ptr, size_t size, size_t nm
   }
 }
 
-
-
-
-
-
-int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
-{
-  try
-  {
-    T::RequestMessage request;
-
-    request.addLine("method","getContentCount");
-    request.addLine("sessionId",sessionId);
-
-    T::ResponseMessage response;
-
-    sendRequest(request,response);
-
-    int result = (int)response.getLineValueByKey("result");
-    if (result == Result::OK)
-      count = (uint)response.getLineValueByKey("count");
-    else
-      count = 0;
-
-    return result;
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
-  }
-}
 
 
 

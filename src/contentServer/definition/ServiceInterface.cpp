@@ -1062,6 +1062,28 @@ int ServiceInterface::deleteFileInfoListBySourceId(T::SessionId sessionId,uint s
 
 
 
+int ServiceInterface::deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<uint>& fileIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _deleteFileInfoListByFileIdList(sessionId,fileIdList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,fileId[%u]);result %d;time %f;",__FUNCTION__,sessionId,(uint)fileIdList.size(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getFileInfoById(T::SessionId sessionId,uint fileId,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -2099,6 +2121,50 @@ int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sess
 
 
 
+int ServiceInterface::getContentParamListByGenerationId(T::SessionId sessionId,uint generationId,T::ContentInfoList& contentParamList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getContentParamListByGenerationId(sessionId,generationId,contentParamList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,contentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,contentParamList.getLength(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::vector<std::string>& contentTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getContentTimeListByGenerationId(sessionId,generationId,contentTimeList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,time[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,(uint)contentTimeList.size(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getContentCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -2526,6 +2592,15 @@ int ServiceInterface::_deleteFileInfoListBySourceId(T::SessionId sessionId,uint 
 
 
 
+int ServiceInterface::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<uint>& fileIdList)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
 int ServiceInterface::_getFileInfoById(T::SessionId sessionId,uint fileId,T::FileInfo& fileInfo)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
@@ -2941,6 +3016,24 @@ int ServiceInterface::_getContentListByParameterAndProducerId(T::SessionId sessi
 
 
 int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId sessionId,std::string producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
+int ServiceInterface::_getContentParamListByGenerationId(T::SessionId sessionId,uint generationId,T::ContentInfoList& contentParamList)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
+int ServiceInterface::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::vector<std::string>& contentTimeList)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
 }

@@ -15,6 +15,7 @@
 
 #include "contentServer/corba/stubs/ContentServer_serviceInterface_SK.h"
 
+#include <set>
 
 
 namespace SmartMet
@@ -67,6 +68,12 @@ class Converter
 
     static void   convert(T::EventInfoList& source,ContentServer::Corba::CorbaEventInfoList& target);
     static void   convert(ContentServer::Corba::CorbaEventInfoList& source,T::EventInfoList& target);
+
+    static void   convert(std::vector<std::string>& source,ContentServer::Corba::CorbaStringList& target);
+    static void   convert(ContentServer::Corba::CorbaStringList& source,std::vector<std::string>& target);
+
+    static void   convert(std::set<uint>& source,ContentServer::Corba::CorbaULongList& target);
+    static void   convert(const ContentServer::Corba::CorbaULongList& source,std::set<uint>& target);
 };
 
 

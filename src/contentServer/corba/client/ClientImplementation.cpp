@@ -1383,6 +1383,31 @@ int ClientImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId, 
 
 
 
+int ClientImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<uint>& fileIdList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaULongList_var corbaFileIdList = new ContentServer::Corba::CorbaULongList();
+    ContentServer::Corba::Converter::convert(fileIdList, corbaFileIdList);
+
+    int result = mService->deleteFileInfoListByFileIdList(sessionId, corbaFileIdList);
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
 int ClientImplementation::_getFileInfoById(T::SessionId sessionId, uint fileId, T::FileInfo& fileInfo)
 {
   try
@@ -2637,6 +2662,62 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessionId,uint generationId,T::ContentInfoList& contentParamList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaContentInfoList_var corbaContentParamList;
+
+    int result = mService->getContentParamListByGenerationId(sessionId,generationId,corbaContentParamList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaContentParamList,contentParamList);
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::vector<std::string>& contentTimeList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaStringList_var corbaContentTimeList;
+
+    int result = mService->getContentTimeListByGenerationId(sessionId,generationId,corbaContentTimeList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaContentTimeList,contentTimeList);
 
     mLastAccessTime = time(0);
     return result;

@@ -4,6 +4,7 @@
 #include "ParameterLevelInfoList.h"
 #include "grid-files/common/ModificationLock.h"
 #include <vector>
+#include <set>
 
 
 namespace SmartMet
@@ -30,6 +31,7 @@ class ContentInfoList
      uint             deleteContentInfoByProducerId(uint producerId);
      uint             deleteContentInfoByGenerationId(uint generationId);
      uint             deleteContentInfoBySourceId(uint sourceId);
+     uint             deleteContentInfoByFileIdList(std::set<uint>& fileIdList);
      uint             registerContentInfoByServerAndFileId(uint serverId,uint fileId);
      uint             unregisterContentInfoByServerId(uint serverId);
      uint             unregisterContentInfoByServerAndFileId(uint serverId,uint fileId);

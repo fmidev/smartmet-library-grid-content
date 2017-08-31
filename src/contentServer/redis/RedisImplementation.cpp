@@ -2143,6 +2143,39 @@ int RedisImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,ui
 
 
 
+int RedisImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<uint>& fileIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
+
+    for (auto it=fileIdList.begin(); it!=fileIdList.end(); ++it)
+    {
+      deleteFileById(*it,true);
+      addEvent(EventType::FILE_DELETED,*it,0,0,0);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int RedisImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -3769,6 +3802,108 @@ int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId 
   }
 }
 
+
+
+
+
+int RedisImplementation::_getContentParamListByGenerationId(T::SessionId sessionId,uint generationId,T::ContentInfoList& contentParamList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationById(generationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    T::ContentInfoList contentInfoList;
+    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
+
+    contentInfoList.sort(T::ContentInfo::ComparisonMethod::fmiName_fmiLevelId_level_starttime_file_message);
+    uint len = contentInfoList.getLength();
+    T::ContentInfo *prev = NULL;
+    T::ContentInfo *currentInfo = NULL;
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
+
+      if (prev == NULL ||
+          info->mFmiParameterName != prev->mFmiParameterName ||
+          info->mFmiParameterLevelId != prev->mFmiParameterLevelId ||
+          info->mParameterLevel != prev->mParameterLevel ||
+          info->mTypeOfEnsembleForecast != prev->mTypeOfEnsembleForecast ||
+          info->mPerturbationNumber != prev->mPerturbationNumber)
+      {
+        currentInfo = info->duplicate();
+        currentInfo->mMessageIndex = 1;
+        contentParamList.addContentInfo(currentInfo);
+      }
+      else
+      {
+        currentInfo->mEndTime = info->mStartTime;
+        currentInfo->mMessageIndex++;
+      }
+      prev = info;
+    }
+    return res;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::vector<std::string>& contentTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationById(generationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    T::ContentInfoList contentInfoList;
+    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
+
+    contentInfoList.sort(T::ContentInfo::ComparisonMethod::generationId_starttime_file_message);
+    uint len = contentInfoList.getLength();
+    T::ContentInfo *prev = NULL;
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
+
+      if (prev == NULL ||  info->mStartTime != prev->mStartTime)
+      {
+        contentTimeList.push_back(info->mStartTime);
+      }
+      prev = info;
+    }
+    return res;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
 
 
 

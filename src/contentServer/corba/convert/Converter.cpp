@@ -632,6 +632,92 @@ void Converter::convert(ContentServer::Corba::CorbaEventInfoList& source,T::Even
 
 
 
+
+
+void Converter::convert(std::vector<std::string>& source,ContentServer::Corba::CorbaStringList& target)
+{
+  try
+  {
+    uint len = (uint)source.size();
+    target.length(len);
+    for (uint t=0; t<len; t++)
+    {
+      target[t] = CORBA::string_dup(source[t].c_str());
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+void Converter::convert(ContentServer::Corba::CorbaStringList& source,std::vector<std::string>& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      target.push_back(std::string(source[t]));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void Converter::convert(std::set<uint>& source,ContentServer::Corba::CorbaULongList& target)
+{
+  try
+  {
+    uint len = (uint)source.size();
+    target.length(len);
+
+    uint t = 0;
+    std::set<uint>::iterator it;
+    for (it=source.begin(); it!=source.end(); ++it)
+    {
+      target[t] = *it;
+      t++;
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void Converter::convert(const ContentServer::Corba::CorbaULongList& source,std::set<uint>& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      target.insert(source[t]);
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
 }
 }
 }

@@ -139,6 +139,23 @@ int ServiceImplementation::_getGridValueList(T::SessionId sessionId,T::ValueReco
       {
         //rec->print(std::cout,0,0);
         GRID::GridFile_sptr gridFile = mGridStorage.getFileById(rec->mFileId);
+        if (!gridFile)
+        {
+          // If the grid file is not found from the grid storage but it is registered
+          // to the contentServer then we should try to add it to the grid storage.
+
+          T::FileInfo fileInfo;
+          if (mContentServer->getFileInfoById(sessionId,rec->mFileId,fileInfo) == 0)
+          {
+            if (getFileSize(fileInfo.mName.c_str()) > 0)
+            {
+              T::ContentInfoList contentInfoList;
+              addFile(fileInfo,contentInfoList);
+              gridFile = mGridStorage.getFileById(rec->mFileId);
+            }
+          }
+        }
+
         if (gridFile)
         {
           GRID::Message *message = gridFile->getMessageByIndex(rec->mMessageIndex);
@@ -204,6 +221,23 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileI
   {
     GRID::GridFile_sptr gridFile = mGridStorage.getFileById(fileId);
     if (!gridFile)
+    {
+      // If the grid file is not found from the grid storage but it is registered
+      // to the contentServer then we should try to add it to the grid storage.
+
+      T::FileInfo fileInfo;
+      if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
+      {
+        if (getFileSize(fileInfo.mName.c_str()) > 0)
+        {
+          T::ContentInfoList contentInfoList;
+          addFile(fileInfo,contentInfoList);
+          gridFile = mGridStorage.getFileById(fileId);
+        }
+      }
+    }
+
+    if (!gridFile)
       return Result::FILE_NOT_FOUND;
 
     GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
@@ -234,6 +268,23 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
   try
   {
     GRID::GridFile_sptr gridFile = mGridStorage.getFileById(fileId);
+    if (!gridFile)
+    {
+      // If the grid file is not found from the grid storage but it is registered
+      // to the contentServer then we should try to add it to the grid storage.
+
+      T::FileInfo fileInfo;
+      if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
+      {
+        if (getFileSize(fileInfo.mName.c_str()) > 0)
+        {
+          T::ContentInfoList contentInfoList;
+          addFile(fileInfo,contentInfoList);
+          gridFile = mGridStorage.getFileById(fileId);
+        }
+      }
+    }
+
     if (!gridFile)
       return Result::DATA_NOT_FOUND;
 
@@ -295,6 +346,23 @@ int ServiceImplementation::_getGridAttributeList(T::SessionId sessionId,uint fil
   {
     GRID::GridFile_sptr gridFile = mGridStorage.getFileById(fileId);
     if (!gridFile)
+    {
+      // If the grid file is not found from the grid storage but it is registered
+      // to the contentServer then we should try to add it to the grid storage.
+
+      T::FileInfo fileInfo;
+      if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
+      {
+        if (getFileSize(fileInfo.mName.c_str()) > 0)
+        {
+          T::ContentInfoList contentInfoList;
+          addFile(fileInfo,contentInfoList);
+          gridFile = mGridStorage.getFileById(fileId);
+        }
+      }
+    }
+
+    if (!gridFile)
       return Result::DATA_NOT_FOUND;
 
     GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
@@ -323,6 +391,23 @@ int ServiceImplementation::_getGridValue(T::SessionId sessionId,uint fileId,uint
     try
     {
       GRID::GridFile_sptr gridFile = mGridStorage.getFileById(fileId);
+      if (!gridFile)
+      {
+        // If the grid file is not found from the grid storage but it is registered
+        // to the contentServer then we should try to add it to the grid storage.
+
+        T::FileInfo fileInfo;
+        if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
+        {
+          if (getFileSize(fileInfo.mName.c_str()) > 0)
+          {
+            T::ContentInfoList contentInfoList;
+            addFile(fileInfo,contentInfoList);
+            gridFile = mGridStorage.getFileById(fileId);
+          }
+        }
+      }
+
       if (gridFile == NULL)
       {
         //printf("FILE NOT FOUND %u\n",fileId);
@@ -380,6 +465,23 @@ int ServiceImplementation::_getGridValuesByArea(T::SessionId sessionId,uint file
     try
     {
       GRID::GridFile_sptr gridFile = mGridStorage.getFileById(fileId);
+      if (!gridFile)
+      {
+        // If the grid file is not found from the grid storage but it is registered
+        // to the contentServer then we should try to add it to the grid storage.
+
+        T::FileInfo fileInfo;
+        if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
+        {
+          if (getFileSize(fileInfo.mName.c_str()) > 0)
+          {
+            T::ContentInfoList contentInfoList;
+            addFile(fileInfo,contentInfoList);
+            gridFile = mGridStorage.getFileById(fileId);
+          }
+        }
+      }
+
       if (gridFile == NULL)
         return Result::FILE_NOT_FOUND;
 

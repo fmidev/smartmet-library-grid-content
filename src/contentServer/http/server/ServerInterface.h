@@ -69,6 +69,7 @@ class ServerInterface
     virtual void deleteFileInfoListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteFileInfoListByGenerationName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteFileInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void deleteFileInfoListByFileIdList(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getFileInfoById(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getFileInfoByName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getFileInfoList(T::RequestMessage& request,T::ResponseMessage& response);
@@ -116,6 +117,8 @@ class ServerInterface
     virtual void getContentListByParameterAndGenerationName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByParameterAndProducerId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByParameterAndProducerName(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getContentParamListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getContentTimeListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentCount(T::RequestMessage& request,T::ResponseMessage& response);
 
   protected:

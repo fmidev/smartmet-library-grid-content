@@ -681,6 +681,44 @@ uint ContentInfoList::deleteContentInfoBySourceId(uint sourceId)
 
 
 
+uint ContentInfoList::deleteContentInfoByFileIdList(std::set<uint>& fileIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+    uint p = 0;
+    uint count = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      mArray[t] = NULL;
+      if (info != NULL &&  fileIdList.find(info->mFileId) != fileIdList.end())
+      {
+        if (mReleaseObjects)
+          delete info;
+
+        count++;
+      }
+      else
+      {
+        mArray[p] = info;
+        p++;
+      }
+    }
+    mLength = p;
+    return count;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 uint ContentInfoList::registerContentInfoByServerAndFileId(uint serverId,uint fileId)
 {
   FUNCTION_TRACE

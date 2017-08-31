@@ -66,7 +66,7 @@ CacheImplementation::CacheImplementation()
     for (int t=1; t<CONTENT_LIST_COUNT; t++)
       mContentInfoList[t].setReleaseObjects(false);
 
-    mDelayedContentInfoList.setReleaseObjects(false);
+    mDelayedContentAddList.setReleaseObjects(false);
   }
   catch (...)
   {
@@ -1380,6 +1380,28 @@ int CacheImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,ui
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoListBySourceId(sessionId,sourceId);
+    processEvents(false);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<uint>& fileIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == NULL)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->deleteFileInfoListByFileIdList(sessionId,fileIdList);
     processEvents(false);
     return result;
   }
@@ -2804,6 +2826,102 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
 
 
 
+
+int CacheImplementation::_getContentParamListByGenerationId(T::SessionId sessionId,uint generationId,T::ContentInfoList& contentParamList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getContentParamListByGenerationId(sessionId,generationId,contentParamList);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoReadLock lock(&mModificationLock);
+
+    T::ContentInfoList contentInfoList;
+    mContentInfoList[0].getContentInfoListByGenerationId(generationId,0,0,1000000,contentInfoList);
+    contentInfoList.sort(T::ContentInfo::ComparisonMethod::fmiName_fmiLevelId_level_starttime_file_message);
+    uint len = contentInfoList.getLength();
+    T::ContentInfo *prev = NULL;
+    T::ContentInfo *currentInfo = NULL;
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
+
+      if (prev == NULL ||
+          info->mFmiParameterName != prev->mFmiParameterName ||
+          info->mFmiParameterLevelId != prev->mFmiParameterLevelId ||
+          info->mParameterLevel != prev->mParameterLevel ||
+          info->mTypeOfEnsembleForecast != prev->mTypeOfEnsembleForecast ||
+          info->mPerturbationNumber != prev->mPerturbationNumber)
+      {
+        currentInfo = info->duplicate();
+        currentInfo->mMessageIndex = 1;
+        contentParamList.addContentInfo(currentInfo);
+      }
+      else
+      {
+        currentInfo->mEndTime = info->mStartTime;
+        currentInfo->mMessageIndex++;
+      }
+      prev = info;
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::vector<std::string>& contentTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getContentTimeListByGenerationId(sessionId,generationId,contentTimeList);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoReadLock lock(&mModificationLock);
+
+    T::ContentInfoList contentInfoList;
+    mContentInfoList[0].getContentInfoListByGenerationId(generationId,0,0,1000000,contentInfoList);
+
+    contentInfoList.sort(T::ContentInfo::ComparisonMethod::generationId_starttime_file_message);
+    uint len = contentInfoList.getLength();
+    T::ContentInfo *prev = NULL;
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
+
+      if (prev == NULL ||  info->mStartTime != prev->mStartTime)
+      {
+        contentTimeList.push_back(info->mStartTime);
+      }
+      prev = info;
+    }
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -3332,7 +3450,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
             if (mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(contentInfo->mFileId,contentInfo->mMessageIndex) == NULL)
             {
               mContentInfoList[0].addContentInfo(contentInfo);
-              mDelayedContentInfoList.addContentInfo(contentInfo);
+              mDelayedContentAddList.addContentInfo(contentInfo);
 
 //              for (int t=0; t<1 /*CONTENT_LIST_COUNT*/; t++)
 //                mContentInfoList[t].addContentInfo(contentInfo);
@@ -3368,7 +3486,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
               T::ContentInfo *cInfo = info->duplicate();
 
               mContentInfoList[0].addContentInfo(cInfo);
-              mDelayedContentInfoList.addContentInfo(cInfo);
+              mDelayedContentAddList.addContentInfo(cInfo);
 
               //for (int t=0; t<CONTENT_LIST_COUNT; t++)
               //  mContentInfoList[t].addContentInfo(cInfo);
@@ -3400,8 +3518,11 @@ void CacheImplementation::event_fileDeleted(T::EventInfo& eventInfo)
     T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(eventInfo.mId1);
     if (fileInfo != NULL)
     {
-      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-        mContentInfoList[t].deleteContentInfoByFileId(eventInfo.mId1);
+      if (mDelayedContentDeleteList.find(fileInfo->mFileId) != mDelayedContentDeleteList.end())
+        mDelayedContentDeleteList.insert(fileInfo->mFileId);
+
+      //for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+      //  mContentInfoList[t].deleteContentInfoByFileId(eventInfo.mId1);
 
       mFileInfoList.deleteFileInfoById(eventInfo.mId1);
     }
@@ -4047,20 +4168,33 @@ void CacheImplementation::processEvents(bool eventThread)
       }
     }
 
-    printf("**** CONTENT ADD TO WAIT %u\n",mDelayedContentInfoList.getLength());
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    if (mDelayedContentInfoList.getLength() > 0)
+    if (mDelayedContentAddList.getLength() > 0)
     {
-      for (int t=1; t<CONTENT_LIST_COUNT; t++)
-        mContentInfoList[t].addContentInfoList(mDelayedContentInfoList);
+      printf("**** CONTENT ADD TO WAIT %u\n",mDelayedContentAddList.getLength());
 
-      mDelayedContentInfoList.clear();
+      for (int t=1; t<CONTENT_LIST_COUNT; t++)
+        mContentInfoList[t].addContentInfoList(mDelayedContentAddList);
+
+      mDelayedContentAddList.clear();
 
       //for (int t=0; t<CONTENT_LIST_COUNT; t++)
       //  printf("contentList[%u] = %u\n",t,mContentInfoList[t].getLength());
     }
+
+
+    if (mDelayedContentDeleteList.size() > 0)
+    {
+      printf("**** CONTENT DELETE TO WAIT %u\n",(uint)mDelayedContentDeleteList.size());
+
+      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+        mContentInfoList[t].deleteContentInfoByFileIdList(mDelayedContentDeleteList);
+
+      mDelayedContentDeleteList.clear();
+    }
+
 
     T::EventInfo *it = delayedEventInfoList.getFirstEvent();
     while (it != NULL)

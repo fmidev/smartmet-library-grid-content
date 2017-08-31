@@ -931,6 +931,46 @@ uint FileInfoList::deleteFileInfoBySourceId(uint sourceId)
 
 
 
+uint FileInfoList::deleteFileInfoByFileIdList(std::set<uint>& fileIdList)
+{
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+    uint count = 0;
+    uint p = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      FileInfo *info = mArray[t];
+      mArray[t] = NULL;
+      if (info != NULL)
+      {
+        if (fileIdList.find(info->mFileId) != fileIdList.end())
+        {
+          mArray[t] = NULL;
+          if (mReleaseObjects)
+            delete info;
+          count++;
+        }
+        else
+        {
+          mArray[p] = info;
+          p++;
+        }
+      }
+    }
+    mLength = p;
+    return count;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 void FileInfoList::lock()
 {
   try

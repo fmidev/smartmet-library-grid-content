@@ -3,6 +3,7 @@
 #include "FileInfo.h"
 #include "grid-files/common/ModificationLock.h"
 #include <vector>
+#include <set>
 
 
 namespace SmartMet
@@ -28,6 +29,7 @@ class FileInfoList
      uint       deleteFileInfoByGenerationId(uint generationId);
      bool       deleteFileInfoByIndex(uint index);
      uint       deleteFileInfoBySourceId(uint sourceId);
+     uint       deleteFileInfoByFileIdList(std::set<uint>& fileIdList);
      int        getClosestIndex(FileInfo::ComparisonMethod comparisonMethod,FileInfo& fileInfo);
      int        getClosestIndexNoLock(FileInfo::ComparisonMethod comparisonMethod,FileInfo& fileInfo);
      FileInfo*  getFileInfoById(uint fileId);

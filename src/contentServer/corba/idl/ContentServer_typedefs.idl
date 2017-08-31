@@ -12,6 +12,10 @@ module Corba
 {
 
 
+typedef sequence<string> CorbaStringList;
+typedef sequence<unsigned long> CorbaULongList;
+
+
 struct CorbaContentInfo
 {
   unsigned long long serverFlags;
