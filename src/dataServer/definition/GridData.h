@@ -46,6 +46,7 @@ class GridData
     T::ParamId          mNewbaseParameterId;
     std::string         mNewbaseParameterName;
     T::ParamLevel       mParameterLevel;
+    uint                mGeometryId;
     uint                mProjection;
     uint                mColumns;
     uint                mRows;

@@ -886,6 +886,45 @@ int ClientImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Gener
 
 
 
+int ClientImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessionId,uint geometryId,T::GenerationInfoList& generationInfoList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getGenerationInfoListByGeometryId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("geometryId",geometryId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      std::vector<std::string> lines;
+      uint len = response.getLinesByKey("generationInfo",lines);
+      for (uint t=0; t<len; t++)
+      {
+        T::GenerationInfo *info = new T::GenerationInfo();
+        info->setCsv(lines[t]);
+        generationInfoList.addGenerationInfo(info);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GenerationInfoList& generationInfoList)
 {
   try
@@ -3163,6 +3202,43 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
         T::ContentInfo *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<uint>& geometryIdList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getContentGeometryIdListByGenerationId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("generationId",generationId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      std::vector<std::string> lines;
+      uint len = response.getLinesByKey("geometryId",lines);
+      for (uint t=0; t<len; t++)
+      {
+        geometryIdList.insert((uint)atoll(lines[t].c_str()));
       }
     }
 

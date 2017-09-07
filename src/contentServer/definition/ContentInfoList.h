@@ -78,6 +78,9 @@ class ContentInfoList
      int              getClosestIndex(ContentInfo::ComparisonMethod comparisonMethod,ContentInfo& contentInfo);
      void             getContentInfoListBySourceId(uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
 
+     void             getContentGeometryIdListByGenerationId(uint generationId,std::set<uint>& geometryIdList);
+     void             getGenerationIdListByGeometryId(uint geometryId,std::set<uint>& generationIdList);
+
      void             getStartTimeList(std::vector<std::string>& startTimeList);
      void             getFmiParamLevelIdListByFmiParameterId(T::ParamId fmiParameterId,std::vector<T::ParamLevelId>& paramLevelIdList);
      void             getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId,std::vector<T::ParamLevel>& paramLevelList);

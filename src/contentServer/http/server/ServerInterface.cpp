@@ -255,6 +255,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getGenerationInfoListByGeometryId") == 0)
+    {
+      getGenerationInfoListByGeometryId(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"getGenerationInfoListByProducerId") == 0)
     {
       getGenerationInfoListByProducerId(request,response);
@@ -648,6 +654,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
     if (strcasecmp(method,"getContentListByParameterAndProducerName") == 0)
     {
       getContentListByParameterAndProducerName(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getContentGeometryIdListByGenerationId") == 0)
+    {
+      getContentGeometryIdListByGenerationId(request,response);
       return;
     }
 
@@ -1773,6 +1785,58 @@ void ServerInterface::getGenerationInfoList(T::RequestMessage& request,T::Respon
     T::GenerationInfoList generationInfoList;
 
     int result = mService->getGenerationInfoList(sessionId,generationInfoList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      uint len = generationInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::GenerationInfo *info = generationInfoList.getGenerationInfoByIndex(t);
+        if (t == 0)
+          response.addLine("generationInfoHeader",info->getCsvHeader());
+        response.addLine("generationInfo",info->getCsv());
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ServerInterface::getGenerationInfoListByGeometryId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint geometryId = 0;
+    if (!request.getLineByKey("geometryId",geometryId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: producerId");
+      return;
+    }
+
+    T::GenerationInfoList generationInfoList;
+
+    int result = mService->getGenerationInfoListByGeometryId(sessionId,geometryId,generationInfoList);
 
     response.addLine("result",result);
     if (result == Result::OK)
@@ -5545,6 +5609,55 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
         if (t == 0)
           response.addLine("contentInfoHeader",info->getCsvHeader());
         response.addLine("contentInfo",info->getCsv());
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ServerInterface::getContentGeometryIdListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint generationId = 0;
+    if (!request.getLineByKey("generationId",generationId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    std::set<uint> geometryIdList;
+
+    int result = mService->getContentGeometryIdListByGenerationId(sessionId,generationId,geometryIdList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      std::set<uint>::iterator it;
+      for (it=geometryIdList.begin(); it!=geometryIdList.end(); ++it)
+      {
+        response.addLine("geometryId",*it);
       }
     }
     else

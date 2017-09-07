@@ -51,6 +51,7 @@ class ServerInterface
     virtual void getGenerationInfoById(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getGenerationInfoByName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getGenerationInfoList(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getGenerationInfoListByGeometryId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getGenerationInfoListByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getGenerationInfoListByProducerName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getGenerationInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
@@ -117,6 +118,7 @@ class ServerInterface
     virtual void getContentListByParameterAndGenerationName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByParameterAndProducerId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByParameterAndProducerName(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getContentGeometryIdListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentParamListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentTimeListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentCount(T::RequestMessage& request,T::ResponseMessage& response);

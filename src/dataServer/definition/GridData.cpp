@@ -25,6 +25,7 @@ GridData::GridData()
     mGrib1ParameterLevelId = 0;
     mGrib2ParameterLevelId = 0;
     mParameterLevel = 0;
+    mGeometryId = 0;
     mProjection = 0;
     mColumns = 0;
     mRows = 0;
@@ -71,6 +72,7 @@ GridData::GridData(GridData& gridData)
     mNewbaseParameterId = gridData.mNewbaseParameterId;
     mNewbaseParameterName = gridData.mNewbaseParameterName;
     mParameterLevel = gridData.mParameterLevel;
+    mGeometryId = gridData.mGeometryId;
     mProjection = gridData.mProjection;
     mColumns = gridData.mColumns;
     mRows = gridData.mRows;
@@ -135,6 +137,7 @@ void GridData::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mNewbaseParameterId       = " << mNewbaseParameterId << "\n";
     stream << space(level) << "- mNewbaseParameterName     = " << mNewbaseParameterName << "\n";
     stream << space(level) << "- mParameterLevel           = " << mParameterLevel << "\n";
+    stream << space(level) << "- mGeometryId               = " << mGeometryId << "\n";
     stream << space(level) << "- mProjection               = " << mProjection << "\n";
     stream << space(level) << "- mColumns                  = " << mColumns << "\n";
     stream << space(level) << "- mRows                     = " << mRows << "\n";

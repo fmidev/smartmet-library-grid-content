@@ -1337,6 +1337,31 @@ int RedisImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Genera
 
 
 
+int RedisImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessionId,uint geometryId,T::GenerationInfoList& generationInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    return getGenerationListByGeometryId(geometryId,generationInfoList);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int RedisImplementation::_getGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -3806,6 +3831,39 @@ int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId 
 
 
 
+int RedisImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<uint>& geometryIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationById(generationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    T::ContentInfoList contentInfoList;
+    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
+
+    contentInfoList.getContentGeometryIdListByGenerationId(generationId,geometryIdList);
+    return res;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int RedisImplementation::_getContentParamListByGenerationId(T::SessionId sessionId,uint generationId,T::ContentInfoList& contentParamList)
 {
   FUNCTION_TRACE
@@ -3904,6 +3962,7 @@ int RedisImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
     throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
   }
 }
+
 
 
 
@@ -4391,6 +4450,68 @@ int RedisImplementation::getGenerationList(T::GenerationInfoList& generationInfo
       }
     }
     freeReplyObject(reply);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::getGenerationListByGeometryId(uint geometryId,T::GenerationInfoList& generationInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF);
+    if (reply == NULL)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    std::set<uint> idList;
+
+    if (reply->type == REDIS_REPLY_ARRAY)
+    {
+      for (uint t = 0; t < reply->elements; t++)
+      {
+        T::ContentInfo info;
+        info.setCsv(reply->element[t]->str);
+        if (info.mGeometryId == geometryId)
+        {
+          if (idList.find(info.mGenerationId) == idList.end())
+          {
+            idList.insert(info.mGenerationId);
+          }
+        }
+      }
+    }
+
+    freeReplyObject(reply);
+
+    std::set<uint>::iterator it;
+    for (it=idList.begin(); it!=idList.end(); ++it)
+    {
+      T::GenerationInfo *generationInfo = new T::GenerationInfo();
+      if (getGenerationById(*it,*generationInfo) == Result::OK)
+      {
+        generationInfoList.addGenerationInfo(generationInfo);
+      }
+      else
+      {
+        delete generationInfo;
+      }
+    }
 
     return Result::OK;
   }

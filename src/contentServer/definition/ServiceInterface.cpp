@@ -600,6 +600,28 @@ int ServiceInterface::deleteGenerationInfoListBySourceId(T::SessionId sessionId,
 
 
 
+int ServiceInterface::getGenerationInfoListByGeometryId(T::SessionId sessionId,uint geometryId,T::GenerationInfoList& generationInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getGenerationInfoListByGeometryId(sessionId,geometryId,generationInfoList);;
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,generationInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,geometryId,(uint)generationInfoList.getLength(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getGenerationInfoById(T::SessionId sessionId,uint generationId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -2121,6 +2143,28 @@ int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sess
 
 
 
+int ServiceInterface::getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<uint>& geometryIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getContentGeometryIdListByGenerationId(sessionId,generationId,geometryIdList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,geometryId[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,(uint)geometryIdList.size(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getContentParamListByGenerationId(T::SessionId sessionId,uint generationId,T::ContentInfoList& contentParamList)
 {
   FUNCTION_TRACE
@@ -2422,6 +2466,15 @@ int ServiceInterface::_getGenerationInfoByName(T::SessionId sessionId,std::strin
 
 
 int ServiceInterface::_getGenerationInfoList(T::SessionId sessionId,T::GenerationInfoList& generationInfoList)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
+int ServiceInterface::_getGenerationInfoListByGeometryId(T::SessionId sessionId,uint geometryId,T::GenerationInfoList& generationInfoList)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
 }
@@ -3016,6 +3069,15 @@ int ServiceInterface::_getContentListByParameterAndProducerId(T::SessionId sessi
 
 
 int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId sessionId,std::string producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
+int ServiceInterface::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<uint>& geometryIdList)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
 }

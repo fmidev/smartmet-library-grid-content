@@ -795,6 +795,37 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getGenerationInfoListByGeometryId(::CORBA::LongLong sessionId, ::CORBA::ULong geometryId, SmartMet::ContentServer::Corba::CorbaGenerationInfoList_out generationInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::GenerationInfoList sGenerationInfoList;
+    ContentServer::Corba::CorbaGenerationInfoList *corbaGenerationInfoList = new ContentServer::Corba::CorbaGenerationInfoList();
+    generationInfoList = corbaGenerationInfoList;
+
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getGenerationInfoListByGeometryId(sessionId,geometryId,sGenerationInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sGenerationInfoList,*corbaGenerationInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::getGenerationInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, SmartMet::ContentServer::Corba::CorbaGenerationInfoList_out generationInfoList)
 {
   FUNCTION_TRACE
@@ -2615,6 +2646,37 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getContentGeometryIdListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, SmartMet::ContentServer::Corba::CorbaULongList_out geometryIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::set<uint> sGeometryIdList;
+    ContentServer::Corba::CorbaULongList *corbaGeometryIdList = new ContentServer::Corba::CorbaULongList();
+    geometryIdList = corbaGeometryIdList;
+
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getContentGeometryIdListByGenerationId(sessionId,generationId,sGeometryIdList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sGeometryIdList,*corbaGeometryIdList);
 
     return result;
   }

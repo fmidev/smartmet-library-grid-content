@@ -44,6 +44,7 @@ struct CorbaContentInfo
   octet              perturbationNumber;
   unsigned long      flags;
   unsigned long      sourceId;
+  unsigned long      geometryId;
 };
 
 typedef sequence<CorbaContentInfo> CorbaContentInfoList;

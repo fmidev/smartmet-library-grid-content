@@ -70,6 +70,7 @@ void Converter::convert(T::ContentInfo& source,ContentServer::Corba::CorbaConten
     target.perturbationNumber = source.mPerturbationNumber;
     target.flags = source.mFlags;
     target.sourceId = source.mSourceId;
+    target.geometryId = source.mGeometryId;
   }
   catch (...)
   {
@@ -111,6 +112,7 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::
     target.mPerturbationNumber = source.perturbationNumber;
     target.mFlags = source.flags;
     target.mSourceId = source.sourceId;
+    target.mGeometryId = source.geometryId;
   }
   catch (...)
   {

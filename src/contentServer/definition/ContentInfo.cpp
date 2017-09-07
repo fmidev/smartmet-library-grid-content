@@ -30,6 +30,7 @@ ContentInfo::ContentInfo()
     mPerturbationNumber = 0;
     mFlags = 0;
     mSourceId = 0;
+    mGeometryId = 0;
   }
   catch (...)
   {
@@ -71,6 +72,7 @@ ContentInfo::ContentInfo(ContentInfo& contentInfo)
     mPerturbationNumber = contentInfo.mPerturbationNumber;
     mFlags = contentInfo.mFlags;
     mSourceId = contentInfo.mSourceId;
+    mGeometryId = contentInfo.mGeometryId;
   }
   catch (...)
   {
@@ -145,6 +147,7 @@ void ContentInfo::operator=(ContentInfo& contentInfo)
     mPerturbationNumber = contentInfo.mPerturbationNumber;
     mFlags = contentInfo.mFlags;
     mSourceId = contentInfo.mSourceId;
+    mGeometryId = contentInfo.mGeometryId;
   }
   catch (...)
   {
@@ -161,7 +164,7 @@ std::string ContentInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%u;%u;%u;%u;%s;%s;%s;%s;%s;%s;%s;%s;%s;%u;%u;%u;%u;%s;%s;%u;%u;%llu;%u;%u",
+    sprintf(st,"%u;%u;%u;%u;%u;%u;%s;%s;%s;%s;%s;%s;%s;%s;%s;%u;%u;%u;%u;%s;%s;%u;%u;%llu;%u;%u;%u;",
         mFileId,
         mMessageIndex,
         (uint)mFileType,
@@ -187,7 +190,8 @@ std::string ContentInfo::getCsv()
         mPerturbationNumber,
         mServerFlags,
         mFlags,
-        mSourceId
+        mSourceId,
+        mGeometryId
         );
 
     return std::string(st);
@@ -206,7 +210,7 @@ std::string ContentInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "fileId;messageIndex;fileType;producerId;generationId;groupFlags;startTime;endTime;fmiParameterId;fmiParameterName;gribParameterId;cdmParameterId;cdmParameterName;newbaseParameterId;newbaseParameterName;fmiParameterLevelId;grib1ParameterLevelId;grib2ParameterLevelId;parameterLevel;fmiParameterUnits;gribParameterUnits;mTypeOfEnsembleForecast;mPerturbationNumber;serverFlags;flags;sourceId";
+    std::string header = "fileId;messageIndex;fileType;producerId;generationId;groupFlags;startTime;endTime;fmiParameterId;fmiParameterName;gribParameterId;cdmParameterId;cdmParameterName;newbaseParameterId;newbaseParameterName;fmiParameterLevelId;grib1ParameterLevelId;grib2ParameterLevelId;parameterLevel;fmiParameterUnits;gribParameterUnits;mTypeOfEnsembleForecast;mPerturbationNumber;serverFlags;flags;sourceId;geometryId";
     return header;
   }
   catch (...)
@@ -223,7 +227,8 @@ void ContentInfo::setCsv(const char *csv)
 {
   try
   {
-    char *field[100];
+    char empty = '\0';
+    char *field[100] = {&empty};
     char st[1000];
     strcpy(st,csv);
 
@@ -246,7 +251,7 @@ void ContentInfo::setCsv(const char *csv)
     }
 
 
-    if (c >= 25)
+    if (c >= 26)
     {
       mFileId = (uint)atoll(field[0]);
       mMessageIndex = (uint)atoll(field[1]);
@@ -274,6 +279,7 @@ void ContentInfo::setCsv(const char *csv)
       mServerFlags = (unsigned long long)atoll(field[23]);
       mFlags = (uint)atoll(field[24]);
       mSourceId = (uint)atoll(field[25]);
+      mGeometryId = (uint)atoll(field[26]);
     }
   }
   catch (...)
@@ -687,6 +693,7 @@ void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mServerFlags            = " << mServerFlags << "\n";
     stream << space(level) << "- mFlags                  = " << mFlags << "\n";
     stream << space(level) << "- mSourceId               = " << mSourceId << "\n";
+    stream << space(level) << "- mGeometryId             = " << mGeometryId << "\n";
   }
   catch (...)
   {

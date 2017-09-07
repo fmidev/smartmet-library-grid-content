@@ -1232,6 +1232,68 @@ void ContentInfoList::getContentInfoListByGroupFlags(uint groupFlags,uint startF
 
 
 
+void ContentInfoList::getContentGeometryIdListByGenerationId(uint generationId,std::set<uint>& geometryIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    geometryIdList.clear();
+
+    AutoReadLock lock(&mModificationLock);
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+
+      if (info != NULL  &&  info->mGenerationId == generationId)
+      {
+        if (geometryIdList.find(info->mGeometryId) == geometryIdList.end())
+        {
+          geometryIdList.insert(info->mGeometryId);
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getGenerationIdListByGeometryId(uint geometryId,std::set<uint>& generationIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    generationIdList.clear();
+
+    AutoReadLock lock(&mModificationLock);
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+
+      if (info != NULL  &&  info->mGeometryId == geometryId)
+      {
+        if (generationIdList.find(info->mGenerationId) == generationIdList.end())
+        {
+          generationIdList.insert(info->mGenerationId);
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 void ContentInfoList::getContentInfoListByFileId(uint fileId,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE

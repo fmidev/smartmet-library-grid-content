@@ -868,6 +868,44 @@ int CacheImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessio
 
 
 
+int CacheImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessionId,uint geometryId,T::GenerationInfoList& generationInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getGenerationInfoListByGeometryId(sessionId,geometryId,generationInfoList);;
+
+    AutoReadLock lock(&mModificationLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+
+    std::set<uint> idList;
+
+    mContentInfoList[0].getGenerationIdListByGeometryId(geometryId,idList);
+
+    std::set<uint>::iterator it;
+    for (it=idList.begin(); it!=idList.end(); ++it)
+    {
+      T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(*it);
+      if (generationInfo != NULL)
+        generationInfoList.addGenerationInfo(generationInfo->duplicate());
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_getGenerationInfoById(T::SessionId sessionId,uint generationId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -2815,6 +2853,32 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<uint>& geometryIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getContentGeometryIdListByGenerationId(sessionId,generationId,geometryIdList);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoReadLock lock(&mModificationLock);
+
+    mContentInfoList[0].getContentGeometryIdListByGenerationId(generationId,geometryIdList);
     return Result::OK;
   }
   catch (...)

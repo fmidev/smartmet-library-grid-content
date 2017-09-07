@@ -78,6 +78,7 @@ class ContentInfo
      unsigned long long mServerFlags;
      uint               mFlags;
      uint               mSourceId;
+     uint               mGeometryId;
 };
 
 

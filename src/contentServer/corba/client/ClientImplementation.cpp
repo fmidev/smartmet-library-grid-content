@@ -921,6 +921,34 @@ int ClientImplementation::_getGenerationInfoList(T::SessionId sessionId, T::Gene
 
 
 
+int ClientImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessionId,uint geometryId,T::GenerationInfoList& generationInfoList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaGenerationInfoList_var corbaGenerationInfoList;
+
+    int result = mService->getGenerationInfoListByGeometryId(sessionId, geometryId, corbaGenerationInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaGenerationInfoList, generationInfoList);
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getGenerationInfoListByProducerId(T::SessionId sessionId, uint producerId, T::GenerationInfoList& generationInfoList)
 {
   try
@@ -2673,6 +2701,33 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
   }
 }
 
+
+
+
+
+int ClientImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<uint>& geometryIdList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaULongList_var corbaGeometryIdList;
+
+    int result = mService->getContentGeometryIdListByGenerationId(sessionId,generationId,corbaGeometryIdList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaGeometryIdList,geometryIdList);
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
 
 
 
