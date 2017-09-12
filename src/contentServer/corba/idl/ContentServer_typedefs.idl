@@ -25,8 +25,9 @@ struct CorbaContentInfo
   octet              fileType;
   unsigned long      fileId;
   unsigned long      messageIndex;
-  string             startTime;
-  string             endTime;
+  string             forecastTime;
+  short              forecastType;
+  short              forecastNumber;
   string             fmiParameterId;
   string             fmiParameterName;
   string             gribParameterId;
@@ -40,8 +41,6 @@ struct CorbaContentInfo
   unsigned long      parameterLevel;
   string             fmiParameterUnits;
   string             gribParameterUnits;
-  octet              typeOfEnsembleForecast;
-  octet              perturbationNumber;
   unsigned long      flags;
   unsigned long      sourceId;
   unsigned long      geometryId;

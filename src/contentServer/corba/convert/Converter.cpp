@@ -51,8 +51,9 @@ void Converter::convert(T::ContentInfo& source,ContentServer::Corba::CorbaConten
     target.fileType = (CORBA::Octet)source.mFileType;
     target.fileId = source.mFileId;
     target.messageIndex = source.mMessageIndex;
-    target.startTime = CORBA::string_dup(source.mStartTime.c_str());
-    target.endTime = CORBA::string_dup(source.mEndTime.c_str());
+    target.forecastTime = CORBA::string_dup(source.mForecastTime.c_str());
+    target.forecastType = source.mForecastType;
+    target.forecastNumber = source.mForecastNumber;
     target.fmiParameterId = CORBA::string_dup(source.mFmiParameterId.c_str());
     target.fmiParameterName = CORBA::string_dup(source.mFmiParameterName.c_str());
     target.gribParameterId = CORBA::string_dup(source.mGribParameterId.c_str());
@@ -66,8 +67,6 @@ void Converter::convert(T::ContentInfo& source,ContentServer::Corba::CorbaConten
     target.parameterLevel = source.mParameterLevel;
     target.fmiParameterUnits = CORBA::string_dup(source.mFmiParameterUnits.c_str());
     target.gribParameterUnits = CORBA::string_dup(source.mGribParameterUnits.c_str());
-    target.typeOfEnsembleForecast = source.mTypeOfEnsembleForecast;
-    target.perturbationNumber = source.mPerturbationNumber;
     target.flags = source.mFlags;
     target.sourceId = source.mSourceId;
     target.geometryId = source.mGeometryId;
@@ -93,8 +92,9 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::
     target.mFileType = (T::FileType)source.fileType;
     target.mFileId = source.fileId;
     target.mMessageIndex = source.messageIndex;
-    target.mStartTime = source.startTime;
-    target.mEndTime = source.endTime;
+    target.mForecastTime = source.forecastTime;
+    target.mForecastType = source.forecastType;
+    target.mForecastNumber = source.forecastNumber;
     target.mFmiParameterId = source.fmiParameterId;
     target.mFmiParameterName = source.fmiParameterName;
     target.mGribParameterId = source.gribParameterId;
@@ -108,8 +108,6 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::
     target.mParameterLevel = source.parameterLevel;
     target.mFmiParameterUnits = source.fmiParameterUnits;
     target.mGribParameterUnits = source.gribParameterUnits;
-    target.mTypeOfEnsembleForecast = source.typeOfEnsembleForecast;
-    target.mPerturbationNumber = source.perturbationNumber;
     target.mFlags = source.flags;
     target.mSourceId = source.sourceId;
     target.mGeometryId = source.geometryId;
@@ -677,6 +675,49 @@ void Converter::convert(ContentServer::Corba::CorbaStringList& source,std::vecto
 
 
 
+void Converter::convert(std::set<std::string>& source,ContentServer::Corba::CorbaStringList& target)
+{
+  try
+  {
+    uint len = (uint)source.size();
+    target.length(len);
+    uint t = 0;
+    for (auto it=source.begin(); it!=source.end(); ++it)
+    {
+      target[t] = CORBA::string_dup(it->c_str());
+      t++;
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+void Converter::convert(ContentServer::Corba::CorbaStringList& source,std::set<std::string>& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      target.insert(std::string(source[t]));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 void Converter::convert(std::set<uint>& source,ContentServer::Corba::CorbaULongList& target)
 {
   try
@@ -685,8 +726,7 @@ void Converter::convert(std::set<uint>& source,ContentServer::Corba::CorbaULongL
     target.length(len);
 
     uint t = 0;
-    std::set<uint>::iterator it;
-    for (it=source.begin(); it!=source.end(); ++it)
+    for (auto it=source.begin(); it!=source.end(); ++it)
     {
       target[t] = *it;
       t++;

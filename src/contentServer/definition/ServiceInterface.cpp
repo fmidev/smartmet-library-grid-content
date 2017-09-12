@@ -1040,6 +1040,28 @@ int ServiceInterface::deleteFileInfoListByGenerationId(T::SessionId sessionId,ui
 
 
 
+int ServiceInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,uint geometryId,short forecastType,short forecastNumber,std::string forecastTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%d,%d,%s);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime.c_str(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::deleteFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName)
 {
   FUNCTION_TRACE
@@ -2187,16 +2209,38 @@ int ServiceInterface::getContentParamListByGenerationId(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::vector<std::string>& contentTimeList)
+int ServiceInterface::getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,uint geometryId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
   try
   {
     unsigned long long timeStart = getTime();
-    int result = _getContentTimeListByGenerationId(sessionId,generationId,contentTimeList);
+    int result = _getContentTimeListByGenerationAndGeometryId(sessionId,generationId,geometryId,contentTimeList);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,time[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,(uint)contentTimeList.size(),result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,time[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,(uint)contentTimeList.size(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getGenerationIdGeometryIdAndForecastTimeList(T::SessionId sessionId,std::set<std::string>& list)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getGenerationIdGeometryIdAndForecastTimeList(sessionId,list);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,listItem[%u]);result %d;time %f;",__FUNCTION__,sessionId,(uint)list.size(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -2619,6 +2663,15 @@ int ServiceInterface::_deleteFileInfoListByProducerName(T::SessionId sessionId,s
 
 
 int ServiceInterface::_deleteFileInfoListByGenerationId(T::SessionId sessionId,uint generationId)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
+int ServiceInterface::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,uint geometryId,short forecastType,short forecastNumber,std::string forecastTime)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
 }
@@ -3095,7 +3148,16 @@ int ServiceInterface::_getContentParamListByGenerationId(T::SessionId sessionId,
 
 
 
-int ServiceInterface::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::vector<std::string>& contentTimeList)
+int ServiceInterface::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,uint geometryId,std::set<std::string>& contentTimeList)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
+int ServiceInterface::_getGenerationIdGeometryIdAndForecastTimeList(T::SessionId sessionId,std::set<std::string>& list)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
 }

@@ -237,6 +237,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getGenerationIdGeometryIdAndForecastTimeList") == 0)
+    {
+      getGenerationIdGeometryIdAndForecastTimeList(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"getGenerationInfoById") == 0)
     {
       getGenerationInfoById(request,response);
@@ -669,9 +675,9 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
-    if (strcasecmp(method,"getContentTimeListByGenerationId") == 0)
+    if (strcasecmp(method,"getContentTimeListByGenerationAndGeometryId") == 0)
     {
-      getContentTimeListByGenerationId(request,response);
+      getContentTimeListByGenerationAndGeometryId(request,response);
       return;
     }
 
@@ -1677,6 +1683,45 @@ void ServerInterface::deleteGenerationInfoListBySourceId(T::RequestMessage& requ
 
 
 
+void ServerInterface::getGenerationIdGeometryIdAndForecastTimeList(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    std::set<std::string> list;
+
+    int result = mService->getGenerationIdGeometryIdAndForecastTimeList(sessionId,list);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      for (auto it=list.begin(); it!=list.end(); ++it)
+      {
+        response.addLine("line",*it);
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
 void ServerInterface::getGenerationInfoById(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
@@ -2589,6 +2634,76 @@ void ServerInterface::deleteFileInfoListByGenerationId(T::RequestMessage& reques
   }
 }
 
+
+
+
+
+void ServerInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint generationId = 0;
+    if (!request.getLineByKey("generationId",generationId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    uint geometryId = 0;
+    if (!request.getLineByKey("geometryId",geometryId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: geometryId");
+      return;
+    }
+
+    short forecastType = 0;
+    if (!request.getLineByKey("forecastType",forecastType))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: forecastType");
+      return;
+    }
+
+    short forecastNumber = 0;
+    if (!request.getLineByKey("forecastNumber",forecastNumber))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: forecastNumber");
+      return;
+    }
+
+    std::string forecastTime;
+    if (!request.getLineByKey("forecastTime",forecastTime))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: forecastTime");
+      return;
+    }
+
+
+    int result = mService->deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime);
+
+    response.addLine("result",result);
+
+    if (result != Result::OK)
+      response.addLine("resultString",getResultString(result));
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
 
 
 
@@ -5730,7 +5845,7 @@ void ServerInterface::getContentParamListByGenerationId(T::RequestMessage& reque
 
 
 
-void ServerInterface::getContentTimeListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response)
+void ServerInterface::getContentTimeListByGenerationAndGeometryId(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
   try
@@ -5751,17 +5866,24 @@ void ServerInterface::getContentTimeListByGenerationId(T::RequestMessage& reques
       return;
     }
 
-    std::vector<std::string> contentTimeList;
+    uint geometryId = 0;
+    if (!request.getLineByKey("geometryId",geometryId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: geometryId");
+      return;
+    }
 
-    int result = mService->getContentTimeListByGenerationId(sessionId,generationId,contentTimeList);
+    std::set<std::string> contentTimeList;
+
+    int result = mService->getContentTimeListByGenerationAndGeometryId(sessionId,generationId,geometryId,contentTimeList);
 
     response.addLine("result",result);
     if (result == Result::OK)
     {
-      uint len = (uint)contentTimeList.size();
-      for (uint t=0; t<len; t++)
+      for (auto it=contentTimeList.begin(); it!=contentTimeList.end(); ++it)
       {
-        response.addLine("contentTime",contentTimeList[t]);
+        response.addLine("contentTime",*it);
       }
     }
     else

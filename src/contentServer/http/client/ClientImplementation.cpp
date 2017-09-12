@@ -788,6 +788,42 @@ int ClientImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessi
 
 
 
+int ClientImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::SessionId sessionId,std::set<std::string>& list)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getGenerationIdGeometryIdAndForecastTimeList");
+    request.addLine("sessionId",sessionId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      std::vector<std::string> lines;
+      uint len = response.getLinesByKey("line",lines);
+      for (uint t=0; t<len; t++)
+      {
+        list.insert(lines[t]);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getGenerationInfoById(T::SessionId sessionId,uint generationId,T::GenerationInfo& generationInfo)
 {
   try
@@ -1409,6 +1445,38 @@ int ClientImplementation::_deleteFileInfoListByGenerationId(T::SessionId session
     request.addLine("method","deleteFileInfoListByGenerationId");
     request.addLine("sessionId",sessionId);
     request.addLine("generationId",generationId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,uint geometryId,short forecastType,short forecastNumber,std::string forecastTime)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","deleteFileInfoListByGenerationIdAndForecastTime");
+    request.addLine("sessionId",sessionId);
+    request.addLine("generationId",generationId);
+    request.addLine("geometryId",geometryId);
+    request.addLine("forecastType",forecastType);
+    request.addLine("forecastNumber",forecastNumber);
+    request.addLine("forecastTime",forecastTime);
 
     T::ResponseMessage response;
 
@@ -3293,15 +3361,16 @@ int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessio
 
 
 
-int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::vector<std::string>& contentTimeList)
+int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,uint geometryId,std::set<std::string>& contentTimeList)
 {
   try
   {
     T::RequestMessage request;
 
-    request.addLine("method","getContentTimeListByGenerationId");
+    request.addLine("method","getContentTimeListByGenerationAndGeometryId");
     request.addLine("sessionId",sessionId);
     request.addLine("generationId",generationId);
+    request.addLine("geometryId",geometryId);
 
     T::ResponseMessage response;
 
@@ -3314,7 +3383,7 @@ int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId session
       uint len = response.getLinesByKey("contentTime",lines);
       for (uint t=0; t<len; t++)
       {
-        contentTimeList.push_back(lines[t]);
+        contentTimeList.insert(lines[t]);
       }
     }
 

@@ -837,6 +837,33 @@ int ClientImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessi
 
 
 
+int ClientImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::SessionId sessionId,std::set<std::string>& list)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaStringList_var corbaList;
+
+    int result = mService->getGenerationIdGeometryIdAndForecastTimeList(sessionId,corbaList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaList,list);
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
 int ClientImplementation::_getGenerationInfoById(T::SessionId sessionId, uint generationId, T::GenerationInfo& generationInfo)
 {
   try
@@ -1350,6 +1377,29 @@ int ClientImplementation::_deleteFileInfoListByGenerationId(T::SessionId session
       throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteFileInfoListByGenerationId(sessionId, generationId);
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,uint geometryId,short forecastType,short forecastNumber,std::string forecastTime)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    int result = mService->deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime.c_str());
 
     mLastAccessTime = time(0);
     return result;
@@ -2760,7 +2810,7 @@ int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessio
 
 
 
-int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::vector<std::string>& contentTimeList)
+int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,uint geometryId,std::set<std::string>& contentTimeList)
 {
   try
   {
@@ -2769,7 +2819,7 @@ int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId session
 
     ContentServer::Corba::CorbaStringList_var corbaContentTimeList;
 
-    int result = mService->getContentTimeListByGenerationId(sessionId,generationId,corbaContentTimeList);
+    int result = mService->getContentTimeListByGenerationAndGeometryId(sessionId,generationId,geometryId,corbaContentTimeList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentTimeList,contentTimeList);

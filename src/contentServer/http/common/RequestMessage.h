@@ -37,6 +37,7 @@ class RequestMessage
      long long      getLineValueByKey(const char *key);
 
      bool           getLineByKey(const char *key,std::string& value);
+     bool           getLineByKey(const char *key,short& value);
      bool           getLineByKey(const char *key,int& value);
      bool           getLineByKey(const char *key,uint& value);
      bool           getLineByKey(const char *key,unsigned char& value);

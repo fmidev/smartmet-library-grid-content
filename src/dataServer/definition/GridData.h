@@ -28,8 +28,7 @@ class GridData
     T::FileType         mFileType;
     std::string         mFileName;
     uint                mMessageIndex;
-    std::string         mStartTime;
-    std::string         mEndTime;
+    std::string         mForecastTime;
     T::ParamId          mGribParameterId;
     T::ParamLevelId     mGrib1ParameterLevelId;
     T::ParamLevelId     mGrib2ParameterLevelId;
@@ -50,8 +49,8 @@ class GridData
     uint                mProjection;
     uint                mColumns;
     uint                mRows;
-    unsigned char       mTypeOfEnsembleForecast;
-    unsigned char       mPerturbationNumber;
+    short               mForecastType;
+    short               mForecastNumber;
     T::AttributeList    mProjectionAttributes;
     T::ParamValue_vec   mValues;
 };

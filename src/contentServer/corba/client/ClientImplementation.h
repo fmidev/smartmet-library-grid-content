@@ -56,6 +56,7 @@ class ClientImplementation : public ContentServer::ServiceInterface
      virtual int    _deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId);
      virtual int    _deleteGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName);
      virtual int    _deleteGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId);
+     virtual int    _getGenerationIdGeometryIdAndForecastTimeList(T::SessionId sessionId,std::set<std::string>& list);
      virtual int    _getGenerationInfoById(T::SessionId sessionId,uint generationId,T::GenerationInfo& generationInfo);
      virtual int    _getGenerationInfoByName(T::SessionId sessionId,std::string generationName,T::GenerationInfo& generationInfo);
      virtual int    _getGenerationInfoList(T::SessionId sessionId,T::GenerationInfoList& generationInfoList);
@@ -77,6 +78,7 @@ class ClientImplementation : public ContentServer::ServiceInterface
      virtual int    _deleteFileInfoListByProducerId(T::SessionId sessionId,uint producerId);
      virtual int    _deleteFileInfoListByProducerName(T::SessionId sessionId,std::string producerName);
      virtual int    _deleteFileInfoListByGenerationId(T::SessionId sessionId,uint generationId);
+     virtual int    _deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,uint geometryId,short forecastType,short forecastNumber,std::string forecastTime);
      virtual int    _deleteFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName);
      virtual int    _deleteFileInfoListBySourceId(T::SessionId sessionId,uint sourceId);
      virtual int    _deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<uint>& fileIdList);
@@ -134,7 +136,7 @@ class ClientImplementation : public ContentServer::ServiceInterface
 
      virtual int    _getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<uint>& geometryIdList);
      virtual int    _getContentParamListByGenerationId(T::SessionId sessionId,uint generationId,T::ContentInfoList& contentParamList);
-     virtual int    _getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::vector<std::string>& contentTimeList);
+     virtual int    _getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,uint geometryId,std::set<std::string>& contentTimeList);
 
      virtual int    _getContentCount(T::SessionId sessionId,uint& count);
 

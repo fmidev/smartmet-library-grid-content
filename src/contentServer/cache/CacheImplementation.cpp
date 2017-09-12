@@ -868,13 +868,52 @@ int CacheImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessio
 
 
 
+int CacheImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::SessionId sessionId,std::set<std::string>& list)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getGenerationIdGeometryIdAndForecastTimeList(sessionId,list);
+
+    AutoReadLock lock(&mModificationLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+
+    uint len = mContentInfoList[0].getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *info = mContentInfoList[0].getContentInfoByIndex(t);
+      char st[200];
+      sprintf(st,"%u;%u;%d;%d;%s;",info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->mForecastTime.c_str());
+      std::string str = st;
+
+
+      if (list.find(str) == list.end())
+        list.insert(str);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessionId,uint geometryId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
   try
   {
     if (mUpdateInProgress)
-      return mContentStorage->getGenerationInfoListByGeometryId(sessionId,geometryId,generationInfoList);;
+      return mContentStorage->getGenerationInfoListByGeometryId(sessionId,geometryId,generationInfoList);
 
     AutoReadLock lock(&mModificationLock);
 
@@ -1374,6 +1413,28 @@ int CacheImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoListByGenerationId(sessionId,generationId);
+    processEvents(false);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,uint geometryId,short forecastType,short forecastNumber,std::string forecastTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == NULL)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime);
     processEvents(false);
     return result;
   }
@@ -2918,8 +2979,8 @@ int CacheImplementation::_getContentParamListByGenerationId(T::SessionId session
           info->mFmiParameterName != prev->mFmiParameterName ||
           info->mFmiParameterLevelId != prev->mFmiParameterLevelId ||
           info->mParameterLevel != prev->mParameterLevel ||
-          info->mTypeOfEnsembleForecast != prev->mTypeOfEnsembleForecast ||
-          info->mPerturbationNumber != prev->mPerturbationNumber)
+          info->mForecastType != prev->mForecastType ||
+          info->mForecastNumber != prev->mForecastNumber)
       {
         currentInfo = info->duplicate();
         currentInfo->mMessageIndex = 1;
@@ -2927,7 +2988,6 @@ int CacheImplementation::_getContentParamListByGenerationId(T::SessionId session
       }
       else
       {
-        currentInfo->mEndTime = info->mStartTime;
         currentInfo->mMessageIndex++;
       }
       prev = info;
@@ -2945,13 +3005,13 @@ int CacheImplementation::_getContentParamListByGenerationId(T::SessionId session
 
 
 
-int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::vector<std::string>& contentTimeList)
+int CacheImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,uint geometryId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
   try
   {
     if (mUpdateInProgress)
-      return mContentStorage->getContentTimeListByGenerationId(sessionId,generationId,contentTimeList);
+      return mContentStorage->getContentTimeListByGenerationAndGeometryId(sessionId,generationId,geometryId,contentTimeList);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2959,20 +3019,18 @@ int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
     AutoReadLock lock(&mModificationLock);
 
     T::ContentInfoList contentInfoList;
-    mContentInfoList[0].getContentInfoListByGenerationId(generationId,0,0,1000000,contentInfoList);
+    mContentInfoList[0].getContentInfoListByGenerationAndGeometryId(generationId,geometryId,0,0,1000000,contentInfoList);
 
     contentInfoList.sort(T::ContentInfo::ComparisonMethod::generationId_starttime_file_message);
     uint len = contentInfoList.getLength();
-    T::ContentInfo *prev = NULL;
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
 
-      if (prev == NULL ||  info->mStartTime != prev->mStartTime)
+      if (contentTimeList.find(info->mForecastTime) == contentTimeList.end())
       {
-        contentTimeList.push_back(info->mStartTime);
+        contentTimeList.insert(info->mForecastTime);
       }
-      prev = info;
     }
     return Result::OK;
   }
@@ -3582,7 +3640,7 @@ void CacheImplementation::event_fileDeleted(T::EventInfo& eventInfo)
     T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(eventInfo.mId1);
     if (fileInfo != NULL)
     {
-      if (mDelayedContentDeleteList.find(fileInfo->mFileId) != mDelayedContentDeleteList.end())
+      if (mDelayedContentDeleteList.find(fileInfo->mFileId) == mDelayedContentDeleteList.end())
         mDelayedContentDeleteList.insert(fileInfo->mFileId);
 
       //for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)

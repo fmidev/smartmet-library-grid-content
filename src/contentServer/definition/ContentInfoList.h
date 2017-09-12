@@ -30,6 +30,8 @@ class ContentInfoList
      uint             deleteContentInfoByGroupFlags(uint groupFlags);
      uint             deleteContentInfoByProducerId(uint producerId);
      uint             deleteContentInfoByGenerationId(uint generationId);
+     uint             deleteContentInfoByGenerationAndGeometry(uint generationId,uint geometryId);
+     uint             deleteContentInfoByGenerationGeometryAndStartTime(uint generationId,uint geometryId,std::string startTime);
      uint             deleteContentInfoBySourceId(uint sourceId);
      uint             deleteContentInfoByFileIdList(std::set<uint>& fileIdList);
      uint             registerContentInfoByServerAndFileId(uint serverId,uint fileId);
@@ -42,6 +44,7 @@ class ContentInfoList
      ContentInfo*     getContentInfoByParameterLevelInfo(T::ParameterLevelInfo& levelInfo);
      void             getContentInfoListByParameterLevelInfo(T::ParameterLevelInfo& levelInfo,ContentInfoList& contentInfoList);
      void             getContentInfoList(uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
+     void             getContentInfoListByGeometryId(uint geometryId,ContentInfoList& contentInfoList);
      void             getContentInfoListByGroupFlags(uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
      void             getContentInfoListByFileId(uint fileId,ContentInfoList& contentInfoList);
      void             getContentInfoListByStartTime(std::string startTime,ContentInfoList& contentInfoList);
@@ -72,16 +75,20 @@ class ContentInfoList
 
      void             getContentInfoListByGenerationId(uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
      void             getContentInfoListByGenerationId(uint generationId,std::string startTime,std::string endTime,ContentInfoList& contentInfoList);
+     void             getContentInfoListByGenerationAndGeometryId(uint generationId,uint geometryId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
      void             getContentInfoListByProducerId(uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
      void             getContentInfoListByServerId(uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
      void             getContentInfoListByServerAndFileId(uint serverId,uint fileId,ContentInfoList& contentInfoList);
      int              getClosestIndex(ContentInfo::ComparisonMethod comparisonMethod,ContentInfo& contentInfo);
      void             getContentInfoListBySourceId(uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
 
+     void             getContentGeometryIdList(std::set<uint>& geometryIdList);
      void             getContentGeometryIdListByGenerationId(uint generationId,std::set<uint>& geometryIdList);
      void             getGenerationIdListByGeometryId(uint geometryId,std::set<uint>& generationIdList);
 
-     void             getStartTimeList(std::vector<std::string>& startTimeList);
+     void             getStartTimeList(std::set<std::string>& startTimeList);
+     void             getStartTimeListByGenerationAndGeometry(uint generationId,uint geometryId,std::set<std::string>& startTimeList);
+     //void             getStartTimeList(std::vector<std::string>& startTimeList);
      void             getFmiParamLevelIdListByFmiParameterId(T::ParamId fmiParameterId,std::vector<T::ParamLevelId>& paramLevelIdList);
      void             getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId,std::vector<T::ParamLevel>& paramLevelList);
      void             getParamLevelInfoListByFmiParameterId(T::ParamId fmiParameterId,ParameterLevelInfoList& parameterLevelInfoList);

@@ -365,6 +365,33 @@ bool RequestMessage::getLineByKey(const char *key,std::string& value)
 
 
 
+bool RequestMessage::getLineByKey(const char *key,short& value)
+{
+  try
+  {
+    uint len = (uint)strlen(key);
+    uint sz = getLineCount();
+    for (uint t=0; t<sz; t++)
+    {
+      const char *s = mLines[t].c_str();
+      if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
+      {
+        value = (short)atoll(s+len+1);
+        return true;
+      }
+    }
+
+    return false;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
 bool RequestMessage::getLineByKey(const char *key,int& value)
 {
   try

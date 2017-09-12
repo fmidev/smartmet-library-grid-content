@@ -702,6 +702,37 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getGenerationIdGeometryIdAndForecastTimeList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaStringList_out list)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::set<std::string> sList;
+    ContentServer::Corba::CorbaStringList *corbaList = new ContentServer::Corba::CorbaStringList();
+    list = corbaList;
+
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getGenerationIdGeometryIdAndForecastTimeList(sessionId,sList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sList,*corbaList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::getGenerationInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, SmartMet::ContentServer::Corba::CorbaGenerationInfo_out generationInfo)
 {
   FUNCTION_TRACE
@@ -1230,6 +1261,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+
 ::CORBA::Long ServerInterface::deleteFileInfoListByGenerationId(::CORBA::LongLong sessionId,::CORBA::ULong generationId)
 {
   FUNCTION_TRACE
@@ -1239,6 +1271,28 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteFileInfoListByGenerationId(sessionId,generationId);
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::deleteFileInfoListByGenerationIdAndForecastTime(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::ULong geometryId, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, const char* forecastTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    return mService->deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime);
   }
   catch (...)
   {
@@ -2723,19 +2777,19 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentTimeListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList)
+::CORBA::Long ServerInterface::getContentTimeListByGenerationAndGeometryId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::ULong geometryId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList)
 {
   FUNCTION_TRACE
   try
   {
-    std::vector<std::string> sContentTimeList;
+    std::set<std::string> sContentTimeList;
     ContentServer::Corba::CorbaStringList *corbaContentTimeList = new ContentServer::Corba::CorbaStringList();
     contentTimeList = corbaContentTimeList;
 
     if (mService == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentTimeListByGenerationId(sessionId,generationId,sContentTimeList);
+    int result = mService->getContentTimeListByGenerationAndGeometryId(sessionId,generationId,geometryId,sContentTimeList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sContentTimeList,*corbaContentTimeList);

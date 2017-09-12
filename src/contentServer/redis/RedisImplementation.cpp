@@ -2100,6 +2100,49 @@ int RedisImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
 
 
 
+int RedisImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,uint geometryId,short forecastType,short forecastNumber,std::string forecastTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationById(generationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
+
+    T::ContentInfoList contentInfoList;
+    int result = getContentByGenerationIdAndTimeRange(generationId,forecastTime,forecastTime,contentInfoList);
+    uint len = contentInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
+      if (info->mGeometryId == geometryId  &&  info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber)
+      {
+        deleteFileById(info->mFileId,true);
+        addEvent(EventType::FILE_DELETED,info->mFileId,0,0,0);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
 int RedisImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName)
 {
   FUNCTION_TRACE
@@ -3896,8 +3939,8 @@ int RedisImplementation::_getContentParamListByGenerationId(T::SessionId session
           info->mFmiParameterName != prev->mFmiParameterName ||
           info->mFmiParameterLevelId != prev->mFmiParameterLevelId ||
           info->mParameterLevel != prev->mParameterLevel ||
-          info->mTypeOfEnsembleForecast != prev->mTypeOfEnsembleForecast ||
-          info->mPerturbationNumber != prev->mPerturbationNumber)
+          info->mForecastType != prev->mForecastType ||
+          info->mForecastNumber != prev->mForecastNumber)
       {
         currentInfo = info->duplicate();
         currentInfo->mMessageIndex = 1;
@@ -3905,7 +3948,6 @@ int RedisImplementation::_getContentParamListByGenerationId(T::SessionId session
       }
       else
       {
-        currentInfo->mEndTime = info->mStartTime;
         currentInfo->mMessageIndex++;
       }
       prev = info;
@@ -3922,7 +3964,7 @@ int RedisImplementation::_getContentParamListByGenerationId(T::SessionId session
 
 
 
-int RedisImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::vector<std::string>& contentTimeList)
+int RedisImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,uint geometryId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
   try
@@ -3941,20 +3983,45 @@ int RedisImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
 
     T::ContentInfoList contentInfoList;
     int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
-
-    contentInfoList.sort(T::ContentInfo::ComparisonMethod::generationId_starttime_file_message);
     uint len = contentInfoList.getLength();
-    T::ContentInfo *prev = NULL;
+
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
-
-      if (prev == NULL ||  info->mStartTime != prev->mStartTime)
+      if (info->mGenerationId == generationId)
       {
-        contentTimeList.push_back(info->mStartTime);
+        if (contentTimeList.find(info->mForecastTime) == contentTimeList.end())
+        {
+          contentTimeList.insert(info->mForecastTime);
+        }
       }
-      prev = info;
     }
+    return res;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::SessionId sessionId,std::set<std::string>& list)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    int res = getGenerationTimeAndGeometryList(list);
     return res;
   }
   catch (...)
@@ -5528,6 +5595,74 @@ int RedisImplementation::getContent(uint startFileId,uint startMessageIndex,uint
 
 
 
+int RedisImplementation::getGenerationTimeAndGeometryList(std::set<std::string>& list)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    uint startFileId = 0;
+    uint startMessageIndex = 0;
+    unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+    unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
+
+    while (startId != prevStartId)
+    {
+      prevStartId = startId;
+
+      redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF);
+      if (reply == NULL)
+      {
+        closeConnection();
+        return Result::PERMANENT_STORAGE_ERROR;
+      }
+
+      if (reply->elements == 0)
+      {
+        freeReplyObject(reply);
+        return Result::OK;
+      }
+
+      if (reply->type == REDIS_REPLY_ARRAY)
+      {
+        for (uint t = 0; t < reply->elements; t++)
+        {
+          T::ContentInfo contentInfo;
+          contentInfo.setCsv(reply->element[t]->str);
+
+          char st[200];
+          sprintf(st,"%u;%u;%d;%d;%s;",contentInfo.mGenerationId,contentInfo.mGeometryId,contentInfo.mForecastType,contentInfo.mForecastNumber,contentInfo.mForecastTime.c_str());
+          std::string str = st;
+
+          if (list.find(str) == list.end())
+            list.insert(str);
+
+          startFileId = contentInfo.mFileId;
+          startMessageIndex = contentInfo.mMessageIndex + 1;
+        }
+        freeReplyObject(reply);
+      }
+      else
+      {
+        freeReplyObject(reply);
+        return Result::OK;
+      }
+      startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+    }
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int RedisImplementation::getContentByGenerationId(uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -5706,7 +5841,7 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
 
         if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
         {
-          if (info->hasKey(parameterKeyType,parameterKey) &&  info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
+          if (info->hasKey(parameterKeyType,parameterKey) &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
           {
             if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
                 (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
@@ -5764,7 +5899,7 @@ int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,
         {
           if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
           {
-            if (info->hasKey(parameterKeyType,parameterKey) &&  info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
+            if (info->hasKey(parameterKeyType,parameterKey) &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
             {
               if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
                   (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
@@ -5822,7 +5957,7 @@ int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::P
         {
           if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
           {
-            if (info->hasKey(parameterKeyType,parameterKey) &&  info->mStartTime >= startTime  &&  info->mStartTime <= endTime)
+            if (info->hasKey(parameterKeyType,parameterKey) &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
             {
               if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
                   (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
@@ -5876,7 +6011,7 @@ int RedisImplementation::getContentByGenerationIdAndTimeRange(uint generationId,
         T::ContentInfo *contentInfo = new T::ContentInfo();
         contentInfo->setCsv(reply->element[t]->str);
 
-        if (contentInfo->mGenerationId == generationId  &&  contentInfo->mStartTime >= startTime  &&  contentInfo->mStartTime <= endTime)
+        if (contentInfo->mGenerationId == generationId  &&  contentInfo->mForecastTime >= startTime  &&  contentInfo->mForecastTime <= endTime)
           contentInfoList.addContentInfo(contentInfo);
         else
           delete contentInfo;

@@ -66,8 +66,9 @@ struct CorbaGridData
   octet               fileType;
   string              fileName;
   unsigned long       messageIndex;
-  string              startTime;
-  string              endTime;
+  string              forecastTime;
+  short               forecastType;
+  short               forecastNumber;
   string              gribParameterId;
   unsigned long       grib1ParameterLevelId;
   unsigned long       grib2ParameterLevelId;
@@ -88,8 +89,6 @@ struct CorbaGridData
   unsigned long       projection;
   unsigned long       columns;
   unsigned long       rows;  
-  octet               typeOfEnsembleForecast;
-  octet               perturbationNumber;
   CorbaAttributeList  projectionAttributes;
   CorbaParamValueList valueList;
 };

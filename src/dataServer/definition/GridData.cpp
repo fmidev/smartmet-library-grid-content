@@ -29,8 +29,8 @@ GridData::GridData()
     mProjection = 0;
     mColumns = 0;
     mRows = 0;
-    mTypeOfEnsembleForecast = 0;
-    mPerturbationNumber = 0;
+    mForecastType = 0;
+    mForecastNumber = 0;
   }
   catch (...)
   {
@@ -54,8 +54,7 @@ GridData::GridData(GridData& gridData)
     mFileType = gridData.mFileType;
     mFileName = gridData.mFileName;
     mMessageIndex = gridData.mMessageIndex;
-    mStartTime = gridData.mStartTime;
-    mEndTime = gridData.mEndTime;
+    mForecastTime = gridData.mForecastTime;
     mGribParameterId = gridData.mGribParameterId;
     mGribParameterName = gridData.mGribParameterName;
     mGribParameterDescription = gridData.mGribParameterDescription;
@@ -76,8 +75,8 @@ GridData::GridData(GridData& gridData)
     mProjection = gridData.mProjection;
     mColumns = gridData.mColumns;
     mRows = gridData.mRows;
-    mTypeOfEnsembleForecast = gridData.mTypeOfEnsembleForecast;
-    mPerturbationNumber = gridData.mPerturbationNumber;
+    mForecastType = gridData.mForecastType;
+    mForecastNumber = gridData.mForecastNumber;
     mProjectionAttributes = gridData.mProjectionAttributes;
     mValues = gridData.mValues;
   }
@@ -119,8 +118,7 @@ void GridData::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mFileType                 = " << (uint)mFileType << "\n";
     stream << space(level) << "- mFileName                 = " << mFileName << "\n";
     stream << space(level) << "- mMessageIndex             = " << mMessageIndex << "\n";
-    stream << space(level) << "- mStartTime                = " << mStartTime << "\n";
-    stream << space(level) << "- mEndTime                  = " << mEndTime << "\n";
+    stream << space(level) << "- mForecastTime                = " << mForecastTime << "\n";
     stream << space(level) << "- mGribParameterId          = " << mGribParameterId << "\n";
     stream << space(level) << "- mGrib1ParameterLevelId    = " << (uint)mGrib1ParameterLevelId << "\n";
     stream << space(level) << "- mGrib2ParameterLevelId    = " << (uint)mGrib2ParameterLevelId << "\n";
@@ -141,8 +139,8 @@ void GridData::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mProjection               = " << mProjection << "\n";
     stream << space(level) << "- mColumns                  = " << mColumns << "\n";
     stream << space(level) << "- mRows                     = " << mRows << "\n";
-    stream << space(level) << "- mTypeOfEnsembleForecast   = " << mTypeOfEnsembleForecast << "\n";
-    stream << space(level) << "- mPerturbationNumber       = " << mPerturbationNumber << "\n";
+    stream << space(level) << "- mForecastType   = " << mForecastType << "\n";
+    stream << space(level) << "- mForecastNumber       = " << mForecastNumber << "\n";
     stream << space(level) << "- mProjectionAttributes     = \n";
     mProjectionAttributes.print(stream,level+2,optionFlags);
   }

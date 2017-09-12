@@ -43,6 +43,7 @@ interface ServiceInterface
   long  deleteGenerationInfoListByProducerId(in long long sessionId,in unsigned long producerId);
   long  deleteGenerationInfoListByProducerName(in long long sessionId,in string producerName);
   long  deleteGenerationInfoListBySourceId(in long long sessionId,in unsigned long sourceId);
+  long  getGenerationIdGeometryIdAndForecastTimeList(in long long sessionId,out CorbaStringList list);
   long  getGenerationInfoById(in long long sessionId,in unsigned long generationId,out CorbaGenerationInfo generationInfo);
   long  getGenerationInfoByName(in long long sessionId,in string generationName,out CorbaGenerationInfo generationInfo);
   long  getGenerationInfoList(in long long sessionId,out CorbaGenerationInfoList generationInfoList);
@@ -64,6 +65,7 @@ interface ServiceInterface
   long  deleteFileInfoListByProducerId(in long long sessionId,in unsigned long producerId);
   long  deleteFileInfoListByProducerName(in long long sessionId,in string producerName);
   long  deleteFileInfoListByGenerationId(in long long sessionId,in unsigned long generationId);
+  long  deleteFileInfoListByGenerationIdAndForecastTime(in long long sessionId,in unsigned long generationId,in unsigned long  geometryId,in short forecastType,in short forecastNumber,in string forecastTime);
   long  deleteFileInfoListByGenerationName(in long long sessionId,in string generationName);
   long  deleteFileInfoListBySourceId(in long long sessionId,in unsigned long sourceId);
   long  deleteFileInfoListByFileIdList(in long long sessionId,in CorbaULongList fileIdList);
@@ -121,7 +123,7 @@ interface ServiceInterface
 
   long  getContentGeometryIdListByGenerationId(in long long sessionId,in unsigned long generationId,out CorbaULongList geometryIdList);
   long  getContentParamListByGenerationId(in long long sessionId,in unsigned long generationId,out CorbaContentInfoList contentParamList);
-  long  getContentTimeListByGenerationId(in long long sessionId,in unsigned long generationId,out CorbaStringList contentTimeList);
+  long  getContentTimeListByGenerationAndGeometryId(in long long sessionId,in unsigned long generationId,in unsigned long geometryId,out CorbaStringList contentTimeList);
 
   long  getContentCount(in long long sessionId,out unsigned long count);
 };  

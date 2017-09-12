@@ -300,8 +300,7 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
     data.mFileType = gridFile->getFileType();
     data.mFileName = gridFile->getFileName().substr(mDataDir.length()+1);
     data.mMessageIndex = messageIndex;
-    data.mStartTime = message->getForecastStartTime();
-    data.mEndTime = message->getForecastEndTime();
+    data.mForecastTime = message->getForecastTime();
     data.mGribParameterId = message->getGribParameterId();
     data.mGrib1ParameterLevelId = message->getGrib1ParameterLevelId();
     data.mGrib2ParameterLevelId = message->getGrib2ParameterLevelId();
@@ -322,8 +321,8 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
     data.mProjection = (uint)message->getGridProjection();
     data.mColumns = (uint)message->getGridOriginalColumnCount();
     data.mRows = (uint)message->getGridOriginalRowCount();
-    data.mTypeOfEnsembleForecast = (unsigned char)*message->getTypeOfEnsembleForecast();
-    data.mPerturbationNumber = (unsigned char)*message->getPerturbationNumber();
+    data.mForecastType = message->getForecastType();
+    data.mForecastNumber = message->getForecastNumber();
     message->getGridProjectionAttributes("",data.mProjectionAttributes);
 
     message->getParameterValues(data.mValues);
@@ -656,8 +655,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
         contentInfo->mFileType = gridFile->getFileType();
         contentInfo->mFileId = fileInfo.mFileId;
         contentInfo->mMessageIndex = (uint)m;
-        contentInfo->mStartTime = message->getForecastStartTime();
-        contentInfo->mEndTime = message->getForecastEndTime();
+        contentInfo->mForecastTime = message->getForecastTime();
         contentInfo->mFmiParameterId = message->getFmiParameterId();
         contentInfo->mFmiParameterName = message->getFmiParameterName();
         contentInfo->mGribParameterId = message->getGribParameterId();
@@ -671,8 +669,8 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
         contentInfo->mCdmParameterName = message->getCdmParameterName();
         contentInfo->mNewbaseParameterId = message->getNewbaseParameterId();
         contentInfo->mNewbaseParameterName = message->getNewbaseParameterName();
-        contentInfo->mTypeOfEnsembleForecast = (unsigned char)*message->getTypeOfEnsembleForecast();
-        contentInfo->mPerturbationNumber = (unsigned char)*message->getPerturbationNumber();
+        contentInfo->mForecastType = message->getForecastType();
+        contentInfo->mForecastNumber = message->getForecastNumber();
         contentInfo->mFlags = 0;
         contentInfo->mSourceId = fileInfo.mSourceId;
         contentInfo->mGeometryId = message->getGridGeometryId();

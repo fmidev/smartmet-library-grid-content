@@ -54,8 +54,9 @@ void Converter::convert(T::GridData& source,DataServer::Corba::CorbaGridData& ta
     target.fileType = (CORBA::Octet)source.mFileType;
     target.fileName = CORBA::string_dup(source.mFileName.c_str());
     target.messageIndex = source.mMessageIndex;
-    target.startTime = CORBA::string_dup(source.mStartTime.c_str());
-    target.endTime = CORBA::string_dup(source.mEndTime.c_str());
+    target.forecastTime = CORBA::string_dup(source.mForecastTime.c_str());
+    target.forecastType = source.mForecastType;
+    target.forecastNumber = source.mForecastNumber;
     target.gribParameterId = CORBA::string_dup(source.mGribParameterId.c_str());
     target.grib1ParameterLevelId = source.mGrib1ParameterLevelId;
     target.grib2ParameterLevelId = source.mGrib2ParameterLevelId;
@@ -76,8 +77,6 @@ void Converter::convert(T::GridData& source,DataServer::Corba::CorbaGridData& ta
     target.projection = source.mProjection;
     target.columns = source.mColumns;
     target.rows = source.mRows;
-    target.typeOfEnsembleForecast = source.mTypeOfEnsembleForecast;
-    target.perturbationNumber = source.mPerturbationNumber;
 
     convert(source.mProjectionAttributes,target.projectionAttributes);
 
@@ -110,8 +109,9 @@ void Converter::convert(DataServer::Corba::CorbaGridData& source,T::GridData& ta
     target.mFileType = (T::FileType)source.fileType;
     target.mFileName = source.fileName;
     target.mMessageIndex = source.messageIndex;
-    target.mStartTime = source.startTime;
-    target.mEndTime = source.endTime;
+    target.mForecastTime = source.forecastTime;
+    target.mForecastType = source.forecastType;
+    target.mForecastNumber = source.forecastNumber;
     target.mGribParameterId = source.gribParameterId;
     target.mGrib1ParameterLevelId = (T::ParamLevelId)source.grib1ParameterLevelId;
     target.mGrib2ParameterLevelId = (T::ParamLevelId)source.grib2ParameterLevelId;
@@ -132,8 +132,6 @@ void Converter::convert(DataServer::Corba::CorbaGridData& source,T::GridData& ta
     target.mProjection = source.projection;
     target.mColumns = source.columns;
     target.mRows = source.rows;
-    target.mTypeOfEnsembleForecast = source.typeOfEnsembleForecast;
-    target.mPerturbationNumber = source.perturbationNumber;
 
     convert(source.projectionAttributes,target.mProjectionAttributes);
 

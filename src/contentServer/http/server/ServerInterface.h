@@ -48,6 +48,7 @@ class ServerInterface
     virtual void deleteGenerationInfoListByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteGenerationInfoListByProducerName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteGenerationInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getGenerationIdGeometryIdAndForecastTimeList(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getGenerationInfoById(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getGenerationInfoByName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getGenerationInfoList(T::RequestMessage& request,T::ResponseMessage& response);
@@ -68,6 +69,7 @@ class ServerInterface
     virtual void deleteFileInfoListByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteFileInfoListByProducerName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteFileInfoListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void deleteFileInfoListByGenerationIdAndForecastTime(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteFileInfoListByGenerationName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteFileInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteFileInfoListByFileIdList(T::RequestMessage& request,T::ResponseMessage& response);
@@ -120,7 +122,7 @@ class ServerInterface
     virtual void getContentListByParameterAndProducerName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentGeometryIdListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentParamListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
-    virtual void getContentTimeListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getContentTimeListByGenerationAndGeometryId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentCount(T::RequestMessage& request,T::ResponseMessage& response);
 
   protected:

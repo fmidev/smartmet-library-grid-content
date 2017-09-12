@@ -58,8 +58,7 @@ class ContentInfo
      uint               mProducerId;
      uint               mGenerationId;
      uint               mGroupFlags;
-     std::string        mStartTime;
-     std::string        mEndTime;
+     std::string        mForecastTime;
      T::ParamId         mFmiParameterId;
      std::string        mFmiParameterName;
      T::ParamId         mGribParameterId;
@@ -73,8 +72,8 @@ class ContentInfo
      T::ParamLevel      mParameterLevel;
      std::string        mFmiParameterUnits;
      std::string        mGribParameterUnits;
-     unsigned char      mTypeOfEnsembleForecast;
-     unsigned char      mPerturbationNumber;
+     short              mForecastType;
+     short              mForecastNumber;
      unsigned long long mServerFlags;
      uint               mFlags;
      uint               mSourceId;
