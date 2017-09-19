@@ -6,8 +6,6 @@
 #include "grid-files/common/AutoReadLock.h"
 #include "grid-files/common/AutoThreadLock.h"
 #include "grid-files/common/ShowFunction.h"
-#include "identification/GribDef.h"
-#include "contentServer/corba/client/ClientImplementation.h"
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -887,7 +885,7 @@ int CacheImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
     {
       T::ContentInfo *info = mContentInfoList[0].getContentInfoByIndex(t);
       char st[200];
-      sprintf(st,"%u;%u;%d;%d;%s;",info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->mForecastTime.c_str());
+      sprintf(st,"%u;%u;%d;%d;%s;%s;",info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->mForecastTime.c_str(),info->mModificationTime.c_str());
       std::string str = st;
 
 
@@ -1784,6 +1782,77 @@ int CacheImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
       return Result::INVALID_SESSION;
 
     count = mFileInfoList.getLength();
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,uint producerId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getFileInfoCountByProducerId(sessionId,producerId,count);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    count = mFileInfoList.getFileInfoCountByProducerId(producerId);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+int CacheImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,uint generationId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getFileInfoCountByGenerationId(sessionId,generationId,count);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    count = mFileInfoList.getFileInfoCountByGenerationId(generationId);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uint sourceId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getFileInfoCountBySourceId(sessionId,sourceId,count);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    count = mFileInfoList.getFileInfoCountBySourceId(sourceId);
     return Result::OK;
   }
   catch (...)

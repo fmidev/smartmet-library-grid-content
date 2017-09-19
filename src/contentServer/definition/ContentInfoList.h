@@ -24,7 +24,9 @@ class ContentInfoList
 
      void             addContentInfo(ContentInfo *contentInfo);
      void             addContentInfoList(ContentInfoList& contentInfoList);
+
      void             clear();
+
      uint             deleteContentInfoByFileId(uint fileId);
      uint             deleteContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex);
      uint             deleteContentInfoByGroupFlags(uint groupFlags);
@@ -34,9 +36,18 @@ class ContentInfoList
      uint             deleteContentInfoByGenerationGeometryAndStartTime(uint generationId,uint geometryId,std::string startTime);
      uint             deleteContentInfoBySourceId(uint sourceId);
      uint             deleteContentInfoByFileIdList(std::set<uint>& fileIdList);
+
+     void             keepContentInfoByGeometryIdList(std::set<uint>& geometryIdList);
+     void             keepContentInfoByGeometryId(uint geometryId);
+     void             keepContentInfoByGroupFlags(uint groupFlags);
+     void             keepContentInfoByProducerId(uint producerId);
+     void             keepContentInfoByGenerationId(uint generationId);
+     void             keepContentInfoBySourceId(uint sourceId);
+
      uint             registerContentInfoByServerAndFileId(uint serverId,uint fileId);
      uint             unregisterContentInfoByServerId(uint serverId);
      uint             unregisterContentInfoByServerAndFileId(uint serverId,uint fileId);
+
      ContentInfo*     getContentInfoByIndex(uint index);
      ContentInfo*     getContentInfoByIndexNoCheck(uint index);
      ContentInfo*     getContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex);

@@ -78,6 +78,7 @@ class ContentInfo
      uint               mFlags;
      uint               mSourceId;
      uint               mGeometryId;
+     std::string        mModificationTime;
 };
 
 

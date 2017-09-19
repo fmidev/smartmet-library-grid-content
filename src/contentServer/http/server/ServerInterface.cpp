@@ -441,6 +441,24 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getFileInfoCountByProducerId") == 0)
+    {
+      getFileInfoCountByProducerId(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getFileInfoCountByGenerationId") == 0)
+    {
+      getFileInfoCountByGenerationId(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getFileInfoCountBySourceId") == 0)
+    {
+      getFileInfoCountBySourceId(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"addEventInfo") == 0)
     {
       addEventInfo(request,response);
@@ -3419,6 +3437,140 @@ void ServerInterface::getFileInfoCount(T::RequestMessage& request,T::ResponseMes
   }
 }
 
+
+
+
+
+void ServerInterface::getFileInfoCountByProducerId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint producerId = 0;
+    if (!request.getLineByKey("producerId",producerId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: producerId");
+      return;
+    }
+
+    uint count = 0;
+
+    int result = mService->getFileInfoCountByProducerId(sessionId,producerId,count);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      response.addLine("count",count);
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ServerInterface::getFileInfoCountByGenerationId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint generationId = 0;
+    if (!request.getLineByKey("generationId",generationId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    uint count = 0;
+
+    int result = mService->getFileInfoCountByGenerationId(sessionId,generationId,count);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      response.addLine("count",count);
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ServerInterface::getFileInfoCountBySourceId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint sourceId = 0;
+    if (!request.getLineByKey("sourceId",sourceId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sourceId");
+      return;
+    }
+
+    uint count = 0;
+
+    int result = mService->getFileInfoCountBySourceId(sessionId,sourceId,count);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      response.addLine("count",count);
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
 
 
 

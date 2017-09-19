@@ -70,6 +70,7 @@ void Converter::convert(T::ContentInfo& source,ContentServer::Corba::CorbaConten
     target.flags = source.mFlags;
     target.sourceId = source.mSourceId;
     target.geometryId = source.mGeometryId;
+    target.modificationTime = CORBA::string_dup(source.mModificationTime.c_str());
   }
   catch (...)
   {
@@ -111,6 +112,7 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::
     target.mFlags = source.flags;
     target.mSourceId = source.sourceId;
     target.mGeometryId = source.geometryId;
+    target.mModificationTime = source.modificationTime;
   }
   catch (...)
   {

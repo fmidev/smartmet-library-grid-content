@@ -1687,6 +1687,96 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getFileInfoCountByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::ULong& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    count = 0;
+    uint sCount = 0;
+
+    int result = mService->getFileInfoCountByProducerId(sessionId,producerId,sCount);
+
+    if (result == 0)
+      count = (::CORBA::ULong)sCount;
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getFileInfoCountByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::ULong& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    count = 0;
+    uint sCount = 0;
+
+    int result = mService->getFileInfoCountByGenerationId(sessionId,generationId,sCount);
+
+    if (result == 0)
+      count = (::CORBA::ULong)sCount;
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getFileInfoCountBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, ::CORBA::ULong& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    count = 0;
+    uint sCount = 0;
+
+    int result = mService->getFileInfoCountBySourceId(sessionId,sourceId,sCount);
+
+    if (result == 0)
+      count = (::CORBA::ULong)sCount;
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::addEventInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaEventInfo& eventInfo)
 {
   FUNCTION_TRACE

@@ -83,6 +83,9 @@ class ServerInterface
     virtual void getFileInfoListByGroupFlags(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getFileInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getFileInfoCount(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getFileInfoCountByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getFileInfoCountByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getFileInfoCountBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void addEventInfo(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getLastEventInfo(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getEventInfoList(T::RequestMessage& request,T::ResponseMessage& response);

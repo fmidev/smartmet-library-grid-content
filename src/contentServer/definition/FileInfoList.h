@@ -36,6 +36,9 @@ class FileInfoList
      FileInfo*  getFileInfoByName(std::string filename);
      FileInfo*  getFileInfoByIndex(uint index);
      FileInfo*  getFileInfoByIndexNoCheck(uint index);
+     uint       getFileInfoCountByProducerId(uint producerId);
+     uint       getFileInfoCountByGenerationId(uint generationId);
+     uint       getFileInfoCountBySourceId(uint sourceId);
      void       getFileInfoList(uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
      void       getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
      void       getFileInfoListByProducerId(uint producerId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);

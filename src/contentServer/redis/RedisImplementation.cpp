@@ -2528,6 +2528,126 @@ int RedisImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+int RedisImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,uint producerId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    count = 0;
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sfiles %u %u",mTablePrefix.c_str(),0,0xFFFFFFFF);
+    if (reply == NULL)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->type == REDIS_REPLY_ARRAY)
+    {
+      for (uint t = 0; t < reply->elements; t++)
+      {
+        T::FileInfo fileInfo;
+        fileInfo.setCsv(reply->element[t]->str);
+
+        if (fileInfo.mProducerId == producerId)
+          count++;
+      }
+    }
+    freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,uint generationId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    count = 0;
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sfiles %u %u",mTablePrefix.c_str(),0,0xFFFFFFFF);
+    if (reply == NULL)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->type == REDIS_REPLY_ARRAY)
+    {
+      for (uint t = 0; t < reply->elements; t++)
+      {
+        T::FileInfo fileInfo;
+        fileInfo.setCsv(reply->element[t]->str);
+
+        if (fileInfo.mGenerationId == generationId)
+          count++;
+      }
+    }
+    freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uint sourceId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    count = 0;
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sfiles %u %u",mTablePrefix.c_str(),0,0xFFFFFFFF);
+    if (reply == NULL)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->type == REDIS_REPLY_ARRAY)
+    {
+      for (uint t = 0; t < reply->elements; t++)
+      {
+        T::FileInfo fileInfo;
+        fileInfo.setCsv(reply->element[t]->str);
+
+        if (fileInfo.mSourceId == sourceId)
+          count++;
+      }
+    }
+    freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int RedisImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5633,7 +5753,7 @@ int RedisImplementation::getGenerationTimeAndGeometryList(std::set<std::string>&
           contentInfo.setCsv(reply->element[t]->str);
 
           char st[200];
-          sprintf(st,"%u;%u;%d;%d;%s;",contentInfo.mGenerationId,contentInfo.mGeometryId,contentInfo.mForecastType,contentInfo.mForecastNumber,contentInfo.mForecastTime.c_str());
+          sprintf(st,"%u;%u;%d;%d;%s;%s;",contentInfo.mGenerationId,contentInfo.mGeometryId,contentInfo.mForecastType,contentInfo.mForecastNumber,contentInfo.mForecastTime.c_str(),contentInfo.mModificationTime.c_str());
           std::string str = st;
 
           if (list.find(str) == list.end())

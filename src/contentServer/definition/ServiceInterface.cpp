@@ -1348,6 +1348,72 @@ int ServiceInterface::getFileInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+int ServiceInterface::getFileInfoCountByProducerId(T::SessionId sessionId,uint producerId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getFileInfoCountByProducerId(sessionId,producerId,count);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,count,result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getFileInfoCountByGenerationId(T::SessionId sessionId,uint generationId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getFileInfoCountByGenerationId(sessionId,generationId,count);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,generationId,count,result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getFileInfoCountBySourceId(T::SessionId sessionId,uint sourceId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getFileInfoCountBySourceId(sessionId,sourceId,count);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,sourceId,count,result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -2789,6 +2855,33 @@ int ServiceInterface::_getFileInfoListBySourceId(T::SessionId sessionId,uint sou
 
 
 int ServiceInterface::_getFileInfoCount(T::SessionId sessionId,uint& count)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
+int ServiceInterface::_getFileInfoCountByProducerId(T::SessionId sessionId,uint producerId,uint& count)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
+int ServiceInterface::_getFileInfoCountByGenerationId(T::SessionId sessionId,uint generationId,uint& count)
+{
+  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+}
+
+
+
+
+
+int ServiceInterface::_getFileInfoCountBySourceId(T::SessionId sessionId,uint sourceId,uint& count)
 {
   throw SmartMet::Spine::Exception(BCP,"Not implemented!");
 }

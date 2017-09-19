@@ -1920,6 +1920,102 @@ int ClientImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+int ClientImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,uint producerId,uint& count)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getFileInfoCountByProducerId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("producerId",producerId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+      count = (uint)response.getLineValueByKey("count");
+    else
+      count = 0;
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,uint generationId,uint& count)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getFileInfoCountByGenerationId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("generationId",generationId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+      count = (uint)response.getLineValueByKey("count");
+    else
+      count = 0;
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uint sourceId,uint& count)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getFileInfoCountBySourceId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("sourceId",sourceId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+      count = (uint)response.getLineValueByKey("count");
+    else
+      count = 0;
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   try

@@ -672,6 +672,87 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,uint
 
 
 
+uint FileInfoList::getFileInfoCountByProducerId(uint producerId)
+{
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+    uint count = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != NULL)
+      {
+        if (info->mProducerId == producerId)
+          count++;
+      }
+    }
+    return count;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+uint FileInfoList::getFileInfoCountByGenerationId(uint generationId)
+{
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+    uint count = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != NULL)
+      {
+        if (info->mGenerationId == generationId)
+          count++;
+      }
+    }
+    return count;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+uint FileInfoList::getFileInfoCountBySourceId(uint sourceId)
+{
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+    uint count = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != NULL)
+      {
+        if (info->mSourceId == sourceId)
+          count++;
+      }
+    }
+    return count;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 FileInfo* FileInfoList::getFileInfoByIndexNoCheck(uint index)
 {
   try

@@ -1747,7 +1747,91 @@ int ClientImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
 
     ::CORBA::ULong corbaCount = 0;
 
-    int result = mService->getFileInfoCount(sessionId, corbaCount);
+    int result = mService->getFileInfoCount(sessionId,corbaCount);
+
+    if (result == 0)
+      count = (uint)corbaCount;
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,uint producerId,uint& count)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    ::CORBA::ULong corbaCount = 0;
+
+    int result = mService->getFileInfoCountByProducerId(sessionId,producerId,corbaCount);
+
+    if (result == 0)
+      count = (uint)corbaCount;
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,uint generationId,uint& count)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    ::CORBA::ULong corbaCount = 0;
+
+    int result = mService->getFileInfoCountByGenerationId(sessionId,generationId,corbaCount);
+
+    if (result == 0)
+      count = (uint)corbaCount;
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uint sourceId,uint& count)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    ::CORBA::ULong corbaCount = 0;
+
+    int result = mService->getFileInfoCountBySourceId(sessionId,sourceId,corbaCount);
 
     if (result == 0)
       count = (uint)corbaCount;

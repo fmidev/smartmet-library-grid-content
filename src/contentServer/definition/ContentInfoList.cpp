@@ -1,10 +1,10 @@
 #include "ContentInfoList.h"
+#include "RequestFlags.h"
 #include "grid-files/common/Exception.h"
 #include "grid-files/common/GeneralFunctions.h"
 #include "grid-files/common/AutoThreadLock.h"
 #include "grid-files/common/AutoReadLock.h"
 #include "grid-files/common/AutoWriteLock.h"
-#include "RequestFlags.h"
 #include "grid-files/common/ShowFunction.h"
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -791,6 +791,209 @@ uint ContentInfoList::deleteContentInfoByFileIdList(std::set<uint>& fileIdList)
   }
 }
 
+
+
+
+
+void ContentInfoList::keepContentInfoByGeometryIdList(std::set<uint>& geometryIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+    uint p = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      mArray[t] = NULL;
+      if (info != NULL &&  geometryIdList.find(info->mGeometryId) == geometryIdList.end())
+      {
+        if (mReleaseObjects)
+          delete info;
+      }
+      else
+      {
+        mArray[p] = info;
+        p++;
+      }
+    }
+    mLength = p;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ContentInfoList::keepContentInfoByGeometryId(uint geometryId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+    uint p = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      mArray[t] = NULL;
+      if (info != NULL &&  info->mGeometryId != geometryId)
+      {
+        if (mReleaseObjects)
+          delete info;
+      }
+      else
+      {
+        mArray[p] = info;
+        p++;
+      }
+    }
+    mLength = p;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ContentInfoList::keepContentInfoByGroupFlags(uint groupFlags)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+    uint p = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      mArray[t] = NULL;
+      if (info != NULL &&  (info->mGroupFlags & groupFlags) == 0)
+      {
+        if (mReleaseObjects)
+          delete info;
+      }
+      else
+      {
+        mArray[p] = info;
+        p++;
+      }
+    }
+    mLength = p;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ContentInfoList::keepContentInfoByProducerId(uint producerId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+    uint p = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      mArray[t] = NULL;
+      if (info != NULL &&  info->mProducerId != producerId)
+      {
+        if (mReleaseObjects)
+          delete info;
+      }
+      else
+      {
+        mArray[p] = info;
+        p++;
+      }
+    }
+    mLength = p;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ContentInfoList::keepContentInfoByGenerationId(uint generationId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+    uint p = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      mArray[t] = NULL;
+      if (info != NULL &&  info->mGenerationId != generationId)
+      {
+        if (mReleaseObjects)
+          delete info;
+      }
+      else
+      {
+        mArray[p] = info;
+        p++;
+      }
+    }
+    mLength = p;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
+void ContentInfoList::keepContentInfoBySourceId(uint sourceId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+    uint p = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      mArray[t] = NULL;
+      if (info != NULL &&  info->mSourceId != sourceId)
+      {
+        if (mReleaseObjects)
+          delete info;
+      }
+      else
+      {
+        mArray[p] = info;
+        p++;
+      }
+    }
+    mLength = p;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
 
 
 

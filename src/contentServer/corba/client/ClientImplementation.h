@@ -92,6 +92,9 @@ class ClientImplementation : public ContentServer::ServiceInterface
      virtual int    _getFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      virtual int    _getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      virtual int    _getFileInfoCount(T::SessionId sessionId,uint& count);
+     virtual int    _getFileInfoCountByProducerId(T::SessionId sessionId,uint producerId,uint& count);
+     virtual int    _getFileInfoCountByGenerationId(T::SessionId sessionId,uint generationId,uint& count);
+     virtual int    _getFileInfoCountBySourceId(T::SessionId sessionId,uint sourceId,uint& count);
 
      virtual int    _addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo);
      virtual int    _getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo);

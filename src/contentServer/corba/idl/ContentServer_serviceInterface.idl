@@ -79,6 +79,9 @@ interface ServiceInterface
   long  getFileInfoListByGroupFlags(in long long sessionId,in unsigned long groupFlags,in unsigned long startFileId,in unsigned long maxRecords,out CorbaFileInfoList fileInfoList);
   long  getFileInfoListBySourceId(in long long sessionId,in unsigned long sourceId,in unsigned long startFileId,in unsigned long maxRecords,out CorbaFileInfoList fileInfoList);
   long  getFileInfoCount(in long long sessionId,out unsigned long count);
+  long  getFileInfoCountByProducerId(in long long sessionId,in unsigned long producerId,out unsigned long count);
+  long  getFileInfoCountByGenerationId(in long long sessionId,in unsigned long generationId,out unsigned long count);
+  long  getFileInfoCountBySourceId(in long long sessionId,in unsigned long sourceId,out unsigned long count);
   
   long  addEventInfo(in long long sessionId,inout CorbaEventInfo eventInfo);
   long  getLastEventInfo(in long long sessionId,in unsigned long requestingServerId,out CorbaEventInfo eventInfo);

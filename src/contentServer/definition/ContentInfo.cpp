@@ -72,6 +72,7 @@ ContentInfo::ContentInfo(ContentInfo& contentInfo)
     mFlags = contentInfo.mFlags;
     mSourceId = contentInfo.mSourceId;
     mGeometryId = contentInfo.mGeometryId;
+    mModificationTime = contentInfo.mModificationTime;
   }
   catch (...)
   {
@@ -146,6 +147,7 @@ void ContentInfo::operator=(ContentInfo& contentInfo)
     mFlags = contentInfo.mFlags;
     mSourceId = contentInfo.mSourceId;
     mGeometryId = contentInfo.mGeometryId;
+    mModificationTime = contentInfo.mModificationTime;
   }
   catch (...)
   {
@@ -162,7 +164,7 @@ std::string ContentInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%u;%u;%u;%u;%s;%s;%s;%s;%s;%s;%s;%s;%u;%u;%u;%u;%s;%s;%d;%d;%llu;%u;%u;%u;",
+    sprintf(st,"%u;%u;%u;%u;%u;%u;%s;%s;%s;%s;%s;%s;%s;%s;%u;%u;%u;%u;%s;%s;%d;%d;%llu;%u;%u;%u;%s;",
         mFileId,
         mMessageIndex,
         (uint)mFileType,
@@ -188,7 +190,8 @@ std::string ContentInfo::getCsv()
         mServerFlags,
         mFlags,
         mSourceId,
-        mGeometryId
+        mGeometryId,
+        mModificationTime.c_str()
         );
 
     return std::string(st);
@@ -207,7 +210,7 @@ std::string ContentInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "fileId;messageIndex;fileType;producerId;generationId;groupFlags;startTime;fmiParameterId;fmiParameterName;gribParameterId;cdmParameterId;cdmParameterName;newbaseParameterId;newbaseParameterName;fmiParameterLevelId;grib1ParameterLevelId;grib2ParameterLevelId;parameterLevel;fmiParameterUnits;gribParameterUnits;mForecastType;mForecastNumber;serverFlags;flags;sourceId;geometryId";
+    std::string header = "fileId;messageIndex;fileType;producerId;generationId;groupFlags;startTime;fmiParameterId;fmiParameterName;gribParameterId;cdmParameterId;cdmParameterName;newbaseParameterId;newbaseParameterName;fmiParameterLevelId;grib1ParameterLevelId;grib2ParameterLevelId;parameterLevel;fmiParameterUnits;gribParameterUnits;mForecastType;mForecastNumber;serverFlags;flags;sourceId;geometryId;modificationTime";
     return header;
   }
   catch (...)
@@ -276,6 +279,8 @@ void ContentInfo::setCsv(const char *csv)
       mFlags = (uint)atoll(field[23]);
       mSourceId = (uint)atoll(field[24]);
       mGeometryId = (uint)atoll(field[25]);
+      if (c >= 26)
+        mModificationTime = field[26];
     }
   }
   catch (...)
@@ -689,6 +694,7 @@ void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mFlags                  = " << mFlags << "\n";
     stream << space(level) << "- mSourceId               = " << mSourceId << "\n";
     stream << space(level) << "- mGeometryId             = " << mGeometryId << "\n";
+    stream << space(level) << "- mModificationTime       = " << mModificationTime << "\n";
   }
   catch (...)
   {
