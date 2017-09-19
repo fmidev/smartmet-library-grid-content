@@ -46,7 +46,7 @@ ServiceImplementation::ServiceImplementation()
     mShutdownRequested = false;
     mFullUpdateRequired = false;
     mEventProcessingActive = false;
-    mContentRegistrationEnabled = true;
+    mContentRegistrationEnabled = false;
     mContentServerStartTime = 0;
   }
   catch (...)
