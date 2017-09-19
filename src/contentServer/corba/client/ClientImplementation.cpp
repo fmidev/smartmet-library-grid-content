@@ -2894,6 +2894,32 @@ int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessio
 
 
 
+int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaStringList_var corbaParamKeyList;
+
+    int result = mService->getContentParamKeyListByGenerationId(sessionId,generationId,(unsigned char)parameterKeyType,corbaParamKeyList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaParamKeyList,paramKeyList);
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
 int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,uint geometryId,std::set<std::string>& contentTimeList)
 {
   try

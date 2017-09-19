@@ -95,6 +95,7 @@ class ContentInfoList
 
      void             getContentGeometryIdList(std::set<uint>& geometryIdList);
      void             getContentGeometryIdListByGenerationId(uint generationId,std::set<uint>& geometryIdList);
+     void             getContentParamKeyListByGenerationId(uint generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList);
      void             getGenerationIdListByGeometryId(uint geometryId,std::set<uint>& generationIdList);
 
      void             getStartTimeList(std::set<std::string>& startTimeList);

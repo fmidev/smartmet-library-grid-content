@@ -1511,6 +1511,71 @@ void ContentInfoList::getContentInfoListByGroupFlags(uint groupFlags,uint startF
 
 
 
+void ContentInfoList::getContentParamKeyListByGenerationId(uint generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    paramKeyList.clear();
+
+    AutoReadLock lock(&mModificationLock);
+
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+
+      if (info != NULL  &&  info->mGenerationId == generationId)
+      {
+        switch (parameterKeyType)
+        {
+          case T::ParamKeyType::FMI_ID:
+            if (paramKeyList.find(info->mFmiParameterId) == paramKeyList.end())
+              paramKeyList.insert(info->mFmiParameterId);
+            break;
+
+          case T::ParamKeyType::FMI_NAME:
+            if (paramKeyList.find(info->mFmiParameterName) == paramKeyList.end())
+              paramKeyList.insert(info->mFmiParameterName);
+            break;
+
+          case T::ParamKeyType::GRIB_ID:
+            if (paramKeyList.find(info->mGribParameterId) == paramKeyList.end())
+              paramKeyList.insert(info->mGribParameterId);
+            break;
+
+          case T::ParamKeyType::NEWBASE_ID:
+            if (paramKeyList.find(info->mNewbaseParameterId) == paramKeyList.end())
+              paramKeyList.insert(info->mNewbaseParameterName);
+            break;
+
+          case T::ParamKeyType::NEWBASE_NAME:
+            if (paramKeyList.find(info->mFmiParameterId) == paramKeyList.end())
+              paramKeyList.insert(info->mFmiParameterId);
+            break;
+
+          case T::ParamKeyType::CDM_ID:
+            if (paramKeyList.find(info->mCdmParameterId) == paramKeyList.end())
+              paramKeyList.insert(info->mCdmParameterId);
+            break;
+
+          case T::ParamKeyType::CDM_NAME:
+            if (paramKeyList.find(info->mCdmParameterName) == paramKeyList.end())
+              paramKeyList.insert(info->mCdmParameterName);
+            break;
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
+
+
+
 void ContentInfoList::getContentGeometryIdListByGenerationId(uint generationId,std::set<uint>& geometryIdList)
 {
   FUNCTION_TRACE

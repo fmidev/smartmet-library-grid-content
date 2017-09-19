@@ -5994,6 +5994,59 @@ void ServerInterface::getContentParamListByGenerationId(T::RequestMessage& reque
 
 
 
+void ServerInterface::getContentParamKeyListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint generationId = 0;
+    if (!request.getLineByKey("generationId",generationId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    unsigned char parameterKeyType = 0;
+    if (!request.getLineByKey("parameterKeyType",parameterKeyType))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: parameterKeyType");
+      return;
+    }
+
+    std::set<std::string> paramKeyList;
+
+    int result = mService->getContentParamKeyListByGenerationId(sessionId,generationId,(T::ParamKeyType)parameterKeyType,paramKeyList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      for (auto it=paramKeyList.begin(); it!=paramKeyList.end(); ++it)
+      {
+        response.addLine("paramKey",*it);
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+  }
+}
+
+
 
 
 
