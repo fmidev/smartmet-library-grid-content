@@ -4388,7 +4388,7 @@ void CacheImplementation::processEvents(bool eventThread)
 
     if (mDelayedContentAddList.getLength() > 0)
     {
-      printf("**** CONTENT ADD TO WAIT %u\n",mDelayedContentAddList.getLength());
+      //printf("**** CONTENT ADD TO WAIT %u\n",mDelayedContentAddList.getLength());
 
       for (int t=1; t<CONTENT_LIST_COUNT; t++)
         mContentInfoList[t].addContentInfoList(mDelayedContentAddList);
@@ -4402,7 +4402,7 @@ void CacheImplementation::processEvents(bool eventThread)
 
     if (mDelayedContentDeleteList.size() > 0)
     {
-      printf("**** CONTENT DELETE TO WAIT %u\n",(uint)mDelayedContentDeleteList.size());
+      //printf("**** CONTENT DELETE TO WAIT %u\n",(uint)mDelayedContentDeleteList.size());
 
       for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
         mContentInfoList[t].deleteContentInfoByFileIdList(mDelayedContentDeleteList);
