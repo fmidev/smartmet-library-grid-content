@@ -13,7 +13,7 @@ module Corba
 
 
 typedef unsigned long long CorbaParamId;
-typedef double CorbaParamValue;
+typedef float CorbaParamValue;
 
 typedef sequence<CorbaParamValue> CorbaParamValueList;
 
@@ -37,7 +37,7 @@ struct CorbaValueRecord
   octet            interpolationMethod;
   double           x;
   double           y;
-  double           value;
+  CorbaParamValue  value;
   long             result;
 };
 

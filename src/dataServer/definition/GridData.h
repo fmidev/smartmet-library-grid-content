@@ -56,6 +56,7 @@ class GridData
 };
 
 
+typedef GridData* GridData_ptr;
 
 }
 }  // namespace SmartMet

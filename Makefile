@@ -144,6 +144,7 @@ vpath %.cpp src/ \
 			src/contentServer/sync \
             src/dataServer \
 			src/dataServer/definition \
+			src/dataServer/cache \
 			src/dataServer/implementation \ 
 			src/queryServer/definition \
 			src/queryServer/implementation 
@@ -160,6 +161,7 @@ vpath %.h 	src/ \
 			src/contentServer/sync \
             src/dataServer \
 			src/dataServer/definition \
+			src/dataServer/cache \
 			src/dataServer/implementation \ 
 			src/queryServer/definition \
 			src/queryServer/implementation 
@@ -192,6 +194,7 @@ vpath %.cpp src/ \
 			src/contentServer/sync \
             src/dataServer \
 			src/dataServer/definition \
+			src/dataServer/cache \
 			src/dataServer/implementation \
 			src/dataServer/corba/client \
 			src/dataServer/corba/convert \
@@ -221,6 +224,7 @@ vpath %.h 	src/ \
 			src/contentServer/sync \
             src/dataServer \
 			src/dataServer/definition \
+			src/dataServer/cache \
 			src/dataServer/implementation \
 			src/dataServer/corba/client \
 			src/dataServer/corba/convert \
@@ -304,6 +308,7 @@ install:
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/http/server
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/sync
 	@mkdir -p $(includedir)/$(INCDIR)/dataServer/definition
+	@mkdir -p $(includedir)/$(INCDIR)/dataServer/cache
 	@mkdir -p $(includedir)/$(INCDIR)/dataServer/implementation
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer/definition
@@ -316,6 +321,7 @@ install:
 	@cp src/contentServer/http/server/*.h $(includedir)/$(INCDIR)/contentServer/http/server	
 	@cp src/contentServer/sync/*.h $(includedir)/$(INCDIR)/contentServer/sync
 	@cp src/dataServer/definition/*.h $(includedir)/$(INCDIR)/dataServer/definition
+	@cp src/dataServer/cache/*.h $(includedir)/$(INCDIR)/dataServer/cache
 	@cp src/dataServer/implementation/*.h $(includedir)/$(INCDIR)/dataServer/implementation
 	@cp src/queryServer/definition/*.h $(includedir)/$(INCDIR)/queryServer/definition
 	@cp src/queryServer/implementation/*.h $(includedir)/$(INCDIR)/queryServer/implementation
@@ -366,6 +372,7 @@ objdir:
 	@mkdir -p obj/contentServer/http/server
 	@mkdir -p obj/contentServer/sync
 	@mkdir -p obj/dataServer/definition
+	@mkdir -p obj/dataServer/cache
 	@mkdir -p obj/dataServer/implementation
 	@mkdir -p obj/queryServer/definition
 	@mkdir -p obj/queryServer/implementation

@@ -1495,7 +1495,7 @@ void ServiceImplementation::checkServerRegistration()
         if (result2 != ContentServer::OK)
         {
           char msg[200];
-          sprintf(msg,"ERROR addDataServerInfo (%d) : %s\n",result,ContentServer::getResultString(result2).c_str());
+          sprintf(msg,"ERROR addDataServerInfo (%d) : %s\n",result2,ContentServer::getResultString(result2).c_str());
           throw SmartMet::Spine::Exception(BCP,msg);
         }
 
