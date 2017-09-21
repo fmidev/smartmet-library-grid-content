@@ -56,7 +56,7 @@ ContentInfoList::ContentInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -98,7 +98,7 @@ ContentInfoList::ContentInfoList(ContentInfoList& contentInfoList)
   catch (...)
   {
     contentInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -115,7 +115,7 @@ ContentInfoList::~ContentInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -164,7 +164,7 @@ void ContentInfoList::operator=(ContentInfoList& contentInfoList)
   catch (...)
   {
     contentInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -213,7 +213,7 @@ void ContentInfoList::addContentInfo(ContentInfo *contentInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -271,7 +271,7 @@ void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 #endif
@@ -366,7 +366,7 @@ void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -412,7 +412,7 @@ void ContentInfoList::increaseSize(uint newSize)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -445,7 +445,7 @@ void ContentInfoList::clear()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -484,7 +484,7 @@ uint ContentInfoList::deleteContentInfoByFileId(uint fileId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -523,7 +523,7 @@ uint ContentInfoList::deleteContentInfoByFileIdAndMessageIndex(uint fileId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -559,7 +559,7 @@ uint ContentInfoList::deleteContentInfoByGroupFlags(uint groupFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -597,7 +597,7 @@ uint ContentInfoList::deleteContentInfoByProducerId(uint producerId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -635,7 +635,7 @@ uint ContentInfoList::deleteContentInfoByGenerationId(uint generationId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -673,7 +673,7 @@ uint ContentInfoList::deleteContentInfoByGenerationAndGeometry(uint generationId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -711,7 +711,7 @@ uint ContentInfoList::deleteContentInfoByGenerationGeometryAndStartTime(uint gen
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -749,7 +749,7 @@ uint ContentInfoList::deleteContentInfoBySourceId(uint sourceId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -787,7 +787,7 @@ uint ContentInfoList::deleteContentInfoByFileIdList(std::set<uint>& fileIdList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -821,7 +821,7 @@ void ContentInfoList::keepContentInfoByGeometryIdList(std::set<uint>& geometryId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -855,7 +855,7 @@ void ContentInfoList::keepContentInfoByGeometryId(uint geometryId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -889,7 +889,7 @@ void ContentInfoList::keepContentInfoByGroupFlags(uint groupFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -923,7 +923,7 @@ void ContentInfoList::keepContentInfoByProducerId(uint producerId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -957,7 +957,7 @@ void ContentInfoList::keepContentInfoByGenerationId(uint generationId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -991,7 +991,7 @@ void ContentInfoList::keepContentInfoBySourceId(uint sourceId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1036,7 +1036,7 @@ uint ContentInfoList::registerContentInfoByServerAndFileId(uint serverId,uint fi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1068,7 +1068,7 @@ uint ContentInfoList::unregisterContentInfoByServerId(uint serverId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1117,7 +1117,7 @@ uint ContentInfoList::unregisterContentInfoByServerAndFileId(uint serverId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1135,7 +1135,7 @@ int ContentInfoList::getClosestIndex(ContentInfo::ComparisonMethod comparisonMet
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1215,7 +1215,7 @@ int ContentInfoList::getClosestIndexNoLock(ContentInfo::ComparisonMethod compari
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1244,7 +1244,7 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1276,7 +1276,7 @@ bool ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,uint mes
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1298,7 +1298,7 @@ ContentInfo* ContentInfoList::getContentInfoByIndex(uint index)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1315,7 +1315,7 @@ ContentInfo* ContentInfoList::getContentInfoByIndexNoCheck(uint index)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1361,7 +1361,7 @@ ContentInfo* ContentInfoList::getContentInfoByParameterLevelInfo(T::ParameterLev
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1412,7 +1412,7 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelIn
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1457,7 +1457,7 @@ void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1503,7 +1503,7 @@ void ContentInfoList::getContentInfoListByGroupFlags(uint groupFlags,uint startF
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1568,7 +1568,7 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint generationId,T::
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1599,7 +1599,7 @@ void ContentInfoList::getContentGeometryIdListByGenerationId(uint generationId,s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1630,7 +1630,7 @@ void ContentInfoList::getContentGeometryIdList(std::set<uint>& geometryIdList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1661,7 +1661,7 @@ void ContentInfoList::getGenerationIdListByGeometryId(uint geometryId,std::set<u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1719,7 +1719,7 @@ void ContentInfoList::getContentInfoListByFileId(uint fileId,ContentInfoList& co
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1748,7 +1748,7 @@ void ContentInfoList::getContentInfoListByGeometryId(uint geometryId,ContentInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1805,7 +1805,7 @@ void ContentInfoList::getContentInfoListByStartTime(std::string startTime,Conten
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1832,7 +1832,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1977,7 +1977,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2125,7 +2125,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2270,7 +2270,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2298,7 +2298,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2443,7 +2443,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2591,7 +2591,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2735,7 +2735,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2882,7 +2882,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3029,7 +3029,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3173,7 +3173,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3318,7 +3318,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3466,7 +3466,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3611,7 +3611,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3755,7 +3755,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3865,7 +3865,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 #endif
@@ -4012,7 +4012,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4157,7 +4157,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4302,7 +4302,7 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4450,7 +4450,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4595,7 +4595,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4740,7 +4740,7 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4888,7 +4888,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5033,7 +5033,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5079,7 +5079,7 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startF
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5124,7 +5124,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint generationId,uint st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5169,7 +5169,7 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(uint generatio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5198,7 +5198,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint generationId,std::st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5247,7 +5247,7 @@ void ContentInfoList::getContentInfoListByServerId(uint serverId,uint startFileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5293,7 +5293,7 @@ void ContentInfoList::getContentInfoListBySourceId(uint sourceId,uint startFileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5353,7 +5353,7 @@ void ContentInfoList::getContentInfoListByServerAndFileId(uint serverId,uint fil
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5401,7 +5401,7 @@ void ContentInfoList::getFmiParamLevelIdListByFmiParameterId(T::ParamId fmiParam
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5450,7 +5450,7 @@ void ContentInfoList::getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5482,7 +5482,7 @@ void ContentInfoList::getParamLevelInfoListByFmiParameterId(T::ParamId fmiParame
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5513,7 +5513,7 @@ void ContentInfoList::getStartTimeList(std::set<std::string>& startTimeList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5544,7 +5544,7 @@ void ContentInfoList::getStartTimeListByGenerationAndGeometry(uint generationId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5588,7 +5588,7 @@ void ContentInfoList::getStartTimeList(std::vector<std::string>& startTimeList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 #endif
@@ -5604,7 +5604,7 @@ uint ContentInfoList::getLength()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5621,7 +5621,7 @@ uint ContentInfoList::getSize()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5638,7 +5638,7 @@ void ContentInfoList::lock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5654,7 +5654,7 @@ void ContentInfoList::unlock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5671,7 +5671,7 @@ bool ContentInfoList::getReleaseObjects()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5688,7 +5688,7 @@ void ContentInfoList::setReleaseObjects(bool releaseObjects)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5712,7 +5712,7 @@ void ContentInfoList::setComparisonMethod(ContentInfo::ComparisonMethod comparis
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5734,7 +5734,7 @@ void ContentInfoList::sort(ContentInfo::ComparisonMethod comparisonMethod)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5751,7 +5751,7 @@ void ContentInfoList::writeToFile(std::string filename)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5785,7 +5785,7 @@ void ContentInfoList::writeToFile(std::string filename,const char *filemode)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5809,7 +5809,7 @@ void ContentInfoList::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 

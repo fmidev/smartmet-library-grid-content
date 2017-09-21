@@ -102,6 +102,7 @@ struct CorbaGridCoordinates
   unsigned long       columns;
   unsigned long       rows;  
   CorbaAttributeList  projectionAttributes;
+  octet               coordinateType;  
   CorbaCoordinateList coordinateList;
 };
 

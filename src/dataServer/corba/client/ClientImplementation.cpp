@@ -20,7 +20,7 @@ ClientImplementation::ClientImplementation()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -36,7 +36,7 @@ ClientImplementation::~ClientImplementation()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -100,7 +100,7 @@ void ClientImplementation::init(std::string serviceIor)
     }
     catch (SmartMet::Spine::Exception& e)
     {
-      SmartMet::Spine::Exception exception(BCP, "Operation failed!", &e);
+      SmartMet::Spine::Exception exception(BCP, exception_operation_failed, &e);
       throw exception;
     }
     catch (...)
@@ -111,7 +111,7 @@ void ClientImplementation::init(std::string serviceIor)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -119,7 +119,7 @@ void ClientImplementation::init(std::string serviceIor)
 
 
 
-int ClientImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileId,uint messageIndex,T::GridCoordinates& coordinates)
+int ClientImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,T::GridCoordinates& coordinates)
 {
   try
   {
@@ -128,7 +128,7 @@ int ClientImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileId
 
     DataServer::Corba::CorbaGridCoordinates_var corbaGridCoordinates;
 
-    int result = mService->getGridCoordinates(sessionId, fileId,messageIndex,corbaGridCoordinates);
+    int result = mService->getGridCoordinates(sessionId, fileId,messageIndex,coordinateType,corbaGridCoordinates);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaGridCoordinates, coordinates);
@@ -137,7 +137,7 @@ int ClientImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -163,7 +163,7 @@ int ClientImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint m
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -190,7 +190,7 @@ int ClientImplementation::_getGridValueList(T::SessionId sessionId,T::ValueRecor
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -216,7 +216,7 @@ int ClientImplementation::_getGridAttributeList(T::SessionId sessionId,uint file
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -242,7 +242,7 @@ int ClientImplementation::_getGridValue(T::SessionId sessionId,uint fileId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -268,7 +268,7 @@ int ClientImplementation::_getGridValuesByArea(T::SessionId sessionId,uint fileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 

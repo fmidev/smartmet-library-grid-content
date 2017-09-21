@@ -22,7 +22,7 @@ ClientImplementation::ClientImplementation()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -38,7 +38,7 @@ ClientImplementation::~ClientImplementation()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -102,7 +102,7 @@ void ClientImplementation::init(std::string serviceIor)
     }
     catch (SmartMet::Spine::Exception& e)
     {
-      SmartMet::Spine::Exception exception(BCP, "Operation failed!", &e);
+      SmartMet::Spine::Exception exception(BCP, exception_operation_failed, &e);
       throw exception;
     }
     catch (...)
@@ -113,7 +113,7 @@ void ClientImplementation::init(std::string serviceIor)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -144,7 +144,7 @@ int ClientImplementation::_getValuesByGridPoint(T::SessionId sessionId,T::Conten
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 

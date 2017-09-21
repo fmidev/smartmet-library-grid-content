@@ -22,7 +22,7 @@ ServerInterface::ServerInterface()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -37,7 +37,7 @@ ServerInterface::~ServerInterface()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -57,7 +57,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -710,7 +710,7 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -740,7 +740,7 @@ void ServerInterface::clear(T::RequestMessage& request,T::ResponseMessage& respo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -770,7 +770,7 @@ void ServerInterface::reload(T::RequestMessage& request,T::ResponseMessage& resp
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -816,7 +816,7 @@ void ServerInterface::addDataServerInfo(T::RequestMessage& request,T::ResponseMe
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -854,7 +854,7 @@ void ServerInterface::deleteDataServerInfoById(T::RequestMessage& request,T::Res
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -900,7 +900,7 @@ void ServerInterface::getDataServerInfoById(T::RequestMessage& request,T::Respon
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -946,7 +946,7 @@ void ServerInterface::getDataServerInfoByName(T::RequestMessage& request,T::Resp
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -992,7 +992,7 @@ void ServerInterface::getDataServerInfoByIor(T::RequestMessage& request,T::Respo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1036,7 +1036,7 @@ void ServerInterface::getDataServerInfoList(T::RequestMessage& request,T::Respon
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1073,7 +1073,7 @@ void ServerInterface::getDataServerInfoCount(T::RequestMessage& request,T::Respo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1119,7 +1119,7 @@ void ServerInterface::addProducerInfo(T::RequestMessage& request,T::ResponseMess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1157,7 +1157,7 @@ void ServerInterface::deleteProducerInfoById(T::RequestMessage& request,T::Respo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1195,7 +1195,7 @@ void ServerInterface::deleteProducerInfoByName(T::RequestMessage& request,T::Res
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1233,7 +1233,7 @@ void ServerInterface::deleteProducerInfoListBySourceId(T::RequestMessage& reques
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1279,7 +1279,7 @@ void ServerInterface::getProducerInfoById(T::RequestMessage& request,T::Response
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1325,7 +1325,7 @@ void ServerInterface::getProducerInfoByName(T::RequestMessage& request,T::Respon
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1368,7 +1368,7 @@ void ServerInterface::getProducerInfoList(T::RequestMessage& request,T::Response
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1419,7 +1419,7 @@ void ServerInterface::getProducerInfoListBySourceId(T::RequestMessage& request,T
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1456,7 +1456,7 @@ void ServerInterface::getProducerInfoCount(T::RequestMessage& request,T::Respons
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1502,7 +1502,7 @@ void ServerInterface::addGenerationInfo(T::RequestMessage& request,T::ResponseMe
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1540,7 +1540,7 @@ void ServerInterface::deleteGenerationInfoById(T::RequestMessage& request,T::Res
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1579,7 +1579,7 @@ void ServerInterface::deleteGenerationInfoByName(T::RequestMessage& request,T::R
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1617,7 +1617,7 @@ void ServerInterface::deleteGenerationInfoListByProducerId(T::RequestMessage& re
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1655,7 +1655,7 @@ void ServerInterface::deleteGenerationInfoListByProducerName(T::RequestMessage& 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1693,7 +1693,7 @@ void ServerInterface::deleteGenerationInfoListBySourceId(T::RequestMessage& requ
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1733,7 +1733,7 @@ void ServerInterface::getGenerationIdGeometryIdAndForecastTimeList(T::RequestMes
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1778,7 +1778,7 @@ void ServerInterface::getGenerationInfoById(T::RequestMessage& request,T::Respon
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1824,7 +1824,7 @@ void ServerInterface::getGenerationInfoByName(T::RequestMessage& request,T::Resp
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1868,7 +1868,7 @@ void ServerInterface::getGenerationInfoList(T::RequestMessage& request,T::Respon
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1920,7 +1920,7 @@ void ServerInterface::getGenerationInfoListByGeometryId(T::RequestMessage& reque
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1972,7 +1972,7 @@ void ServerInterface::getGenerationInfoListByProducerId(T::RequestMessage& reque
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2024,7 +2024,7 @@ void ServerInterface::getGenerationInfoListByProducerName(T::RequestMessage& req
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2076,7 +2076,7 @@ void ServerInterface::getGenerationInfoListBySourceId(T::RequestMessage& request
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2130,7 +2130,7 @@ void ServerInterface::getLastGenerationInfoByProducerIdAndStatus(T::RequestMessa
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2183,7 +2183,7 @@ void ServerInterface::getLastGenerationInfoByProducerNameAndStatus(T::RequestMes
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2219,7 +2219,7 @@ void ServerInterface::getGenerationInfoCount(T::RequestMessage& request,T::Respo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2265,7 +2265,7 @@ void ServerInterface::setGenerationInfoStatusById(T::RequestMessage& request,T::
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2311,7 +2311,7 @@ void ServerInterface::setGenerationInfoStatusByName(T::RequestMessage& request,T
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2356,7 +2356,7 @@ void ServerInterface::addFileInfo(T::RequestMessage& request,T::ResponseMessage&
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2420,7 +2420,7 @@ void ServerInterface::addFileInfoWithContentList(T::RequestMessage& request,T::R
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2458,7 +2458,7 @@ void ServerInterface::deleteFileInfoById(T::RequestMessage& request,T::ResponseM
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2496,7 +2496,7 @@ void ServerInterface::deleteFileInfoByName(T::RequestMessage& request,T::Respons
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2534,7 +2534,7 @@ void ServerInterface::deleteFileInfoListByGroupFlags(T::RequestMessage& request,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2572,7 +2572,7 @@ void ServerInterface::deleteFileInfoListByProducerId(T::RequestMessage& request,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2610,7 +2610,7 @@ void ServerInterface::deleteFileInfoListByProducerName(T::RequestMessage& reques
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2648,7 +2648,7 @@ void ServerInterface::deleteFileInfoListByGenerationId(T::RequestMessage& reques
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2719,7 +2719,7 @@ void ServerInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Request
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2756,7 +2756,7 @@ void ServerInterface::deleteFileInfoListByGenerationName(T::RequestMessage& requ
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2794,7 +2794,7 @@ void ServerInterface::deleteFileInfoListBySourceId(T::RequestMessage& request,T:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2840,7 +2840,7 @@ void ServerInterface::getFileInfoById(T::RequestMessage& request,T::ResponseMess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2886,7 +2886,7 @@ void ServerInterface::getFileInfoByName(T::RequestMessage& request,T::ResponseMe
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2946,7 +2946,7 @@ void ServerInterface::getFileInfoList(T::RequestMessage& request,T::ResponseMess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3014,7 +3014,7 @@ void ServerInterface::getFileInfoListByProducerId(T::RequestMessage& request,T::
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3082,7 +3082,7 @@ void ServerInterface::getFileInfoListByProducerName(T::RequestMessage& request,T
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3150,7 +3150,7 @@ void ServerInterface::getFileInfoListByGenerationId(T::RequestMessage& request,T
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3218,7 +3218,7 @@ void ServerInterface::getFileInfoListByGenerationName(T::RequestMessage& request
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3286,7 +3286,7 @@ void ServerInterface::getFileInfoListByGroupFlags(T::RequestMessage& request,T::
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3354,7 +3354,7 @@ void ServerInterface::getFileInfoListBySourceId(T::RequestMessage& request,T::Re
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3396,7 +3396,7 @@ void ServerInterface::deleteFileInfoListByFileIdList(T::RequestMessage& request,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3433,7 +3433,7 @@ void ServerInterface::getFileInfoCount(T::RequestMessage& request,T::ResponseMes
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3478,7 +3478,7 @@ void ServerInterface::getFileInfoCountByProducerId(T::RequestMessage& request,T:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3523,7 +3523,7 @@ void ServerInterface::getFileInfoCountByGenerationId(T::RequestMessage& request,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3568,7 +3568,7 @@ void ServerInterface::getFileInfoCountBySourceId(T::RequestMessage& request,T::R
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3608,7 +3608,7 @@ void ServerInterface::addEventInfo(T::RequestMessage& request,T::ResponseMessage
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3654,7 +3654,7 @@ void ServerInterface::getLastEventInfo(T::RequestMessage& request,T::ResponseMes
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3723,7 +3723,7 @@ void ServerInterface::getEventInfoList(T::RequestMessage& request,T::ResponseMes
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3760,7 +3760,7 @@ void ServerInterface::getEventInfoCount(T::RequestMessage& request,T::ResponseMe
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3806,7 +3806,7 @@ void ServerInterface::addContentInfo(T::RequestMessage& request,T::ResponseMessa
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3852,7 +3852,7 @@ void ServerInterface::addContentList(T::RequestMessage& request,T::ResponseMessa
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3898,7 +3898,7 @@ void ServerInterface::deleteContentInfo(T::RequestMessage& request,T::ResponseMe
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3936,7 +3936,7 @@ void ServerInterface::deleteContentListByFileId(T::RequestMessage& request,T::Re
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3974,7 +3974,7 @@ void ServerInterface::deleteContentListByFileName(T::RequestMessage& request,T::
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4012,7 +4012,7 @@ void ServerInterface::deleteContentListByGroupFlags(T::RequestMessage& request,T
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4050,7 +4050,7 @@ void ServerInterface::deleteContentListByProducerId(T::RequestMessage& request,T
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4088,7 +4088,7 @@ void ServerInterface::deleteContentListByProducerName(T::RequestMessage& request
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4126,7 +4126,7 @@ void ServerInterface::deleteContentListByGenerationId(T::RequestMessage& request
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4164,7 +4164,7 @@ void ServerInterface::deleteContentListByGenerationName(T::RequestMessage& reque
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4202,7 +4202,7 @@ void ServerInterface::deleteContentListBySourceId(T::RequestMessage& request,T::
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4242,7 +4242,7 @@ void ServerInterface::registerContentList(T::RequestMessage& request,T::Response
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4288,7 +4288,7 @@ void ServerInterface::registerContentListByFileId(T::RequestMessage& request,T::
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4326,7 +4326,7 @@ void ServerInterface::unregisterContentList(T::RequestMessage& request,T::Respon
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4372,7 +4372,7 @@ void ServerInterface::unregisterContentListByFileId(T::RequestMessage& request,T
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4426,7 +4426,7 @@ void ServerInterface::getContentInfo(T::RequestMessage& request,T::ResponseMessa
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4494,7 +4494,7 @@ void ServerInterface::getContentList(T::RequestMessage& request,T::ResponseMessa
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4546,7 +4546,7 @@ void ServerInterface::getContentListByFileId(T::RequestMessage& request,T::Respo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4598,7 +4598,7 @@ void ServerInterface::getContentListByFileName(T::RequestMessage& request,T::Res
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4674,7 +4674,7 @@ void ServerInterface::getContentListByGroupFlags(T::RequestMessage& request,T::R
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4749,7 +4749,7 @@ void ServerInterface::getContentListByProducerId(T::RequestMessage& request,T::R
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4825,7 +4825,7 @@ void ServerInterface::getContentListByProducerName(T::RequestMessage& request,T:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4901,7 +4901,7 @@ void ServerInterface::getContentListByServerId(T::RequestMessage& request,T::Res
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4977,7 +4977,7 @@ void ServerInterface::getContentListByGenerationId(T::RequestMessage& request,T:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5053,7 +5053,7 @@ void ServerInterface::getContentListByGenerationName(T::RequestMessage& request,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5121,7 +5121,7 @@ void ServerInterface::getContentListByGenerationIdAndTimeRange(T::RequestMessage
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5189,7 +5189,7 @@ void ServerInterface::getContentListByGenerationNameAndTimeRange(T::RequestMessa
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5264,7 +5264,7 @@ void ServerInterface::getContentListBySourceId(T::RequestMessage& request,T::Res
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5382,7 +5382,7 @@ void ServerInterface::getContentListByParameter(T::RequestMessage& request,T::Re
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5508,7 +5508,7 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5634,7 +5634,7 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5760,7 +5760,7 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5885,7 +5885,7 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5934,7 +5934,7 @@ void ServerInterface::getContentGeometryIdListByGenerationId(T::RequestMessage& 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -5986,7 +5986,7 @@ void ServerInterface::getContentParamListByGenerationId(T::RequestMessage& reque
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -6042,7 +6042,7 @@ void ServerInterface::getContentParamKeyListByGenerationId(T::RequestMessage& re
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -6098,7 +6098,7 @@ void ServerInterface::getContentTimeListByGenerationAndGeometryId(T::RequestMess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -6135,7 +6135,7 @@ void ServerInterface::getContentCount(T::RequestMessage& request,T::ResponseMess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 

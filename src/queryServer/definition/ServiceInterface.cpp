@@ -13,7 +13,6 @@ namespace QueryServer
 {
 
 
-
 ServiceInterface::ServiceInterface()
 {
   FUNCTION_TRACE
@@ -23,7 +22,7 @@ ServiceInterface::ServiceInterface()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -39,7 +38,7 @@ ServiceInterface::~ServiceInterface()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -56,7 +55,7 @@ void ServiceInterface::setProcessingLog(Log *processingLogPointer)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -72,7 +71,7 @@ void ServiceInterface::shutdown()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -94,7 +93,7 @@ int ServiceInterface::getValuesByGridPoint(T::SessionId sessionId,T::ContentInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -104,7 +103,7 @@ int ServiceInterface::getValuesByGridPoint(T::SessionId sessionId,T::ContentInfo
 
 int ServiceInterface::_getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::GridPointValueList& valueList)
 {
-  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
 
 

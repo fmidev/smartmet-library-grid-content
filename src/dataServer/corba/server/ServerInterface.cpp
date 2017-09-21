@@ -24,7 +24,7 @@ ServerInterface::ServerInterface()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -40,7 +40,7 @@ ServerInterface::~ServerInterface()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -57,7 +57,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -65,7 +65,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridCoordinates(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaGridCoordinates_out coordinates)
+::CORBA::Long ServerInterface::getGridCoordinates(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, SmartMet::DataServer::Corba::CorbaGridCoordinates_out coordinates)
 {
   FUNCTION_TRACE
   try
@@ -77,7 +77,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridCoordinates(sessionId,fileId,messageIndex,sCoordinates);
+    int result = mService->getGridCoordinates(sessionId,fileId,messageIndex,(T::CoordinateType)coordinateType,sCoordinates);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sCoordinates,*corbaGridCoordinates);

@@ -20,11 +20,12 @@ class GridCoordinates
 
     virtual void       print(std::ostream& stream,uint level,uint optionFlags);
 
-    uint               mProjection;
-    uint               mColumns;
-    uint               mRows;
-    T::AttributeList   mProjectionAttributes;
-    T::Coordinate_vec  mCoordinateList;
+    uint               mProjection;           // Original projection
+    T::AttributeList   mProjectionAttributes; // Original projection attributes
+    uint               mColumns;              // Grid columns
+    uint               mRows;                 // Grid rows
+    T::CoordinateType  mCoordinateType;       // Coordinate type used in the mCoordinateList
+    T::Coordinate_vec  mCoordinateList;       // Grid coordinates
 };
 
 

@@ -14,7 +14,6 @@ namespace DataServer
 {
 
 
-
 ServiceInterface::ServiceInterface()
 {
   FUNCTION_TRACE
@@ -24,7 +23,7 @@ ServiceInterface::ServiceInterface()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -40,7 +39,7 @@ ServiceInterface::~ServiceInterface()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -57,7 +56,7 @@ void ServiceInterface::setProcessingLog(Log *processingLogPointer)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -73,7 +72,7 @@ void ServiceInterface::shutdown()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -81,21 +80,21 @@ void ServiceInterface::shutdown()
 
 
 
-int ServiceInterface::getGridCoordinates(T::SessionId sessionId,uint fileId,uint messageIndex,T::GridCoordinates& coordinates)
+int ServiceInterface::getGridCoordinates(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,T::GridCoordinates& coordinates)
 {
   FUNCTION_TRACE
   try
   {
     unsigned long long timeStart = getTime();
-    int result = _getGridCoordinates(sessionId,fileId,messageIndex,coordinates);
+    int result = _getGridCoordinates(sessionId,fileId,messageIndex,coordinateType,coordinates);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -117,7 +116,7 @@ int ServiceInterface::getGridData(T::SessionId sessionId,uint fileId,uint messag
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -139,7 +138,29 @@ int ServiceInterface::getGridValueList(T::SessionId sessionId,T::ValueRecordList
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getGridValueListByArea(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,T::GridValueList& valueList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getGridValueListByArea(sessionId,fileId,messageIndex,coordinateType,x1,y1,x2,y2,valueList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,%f,%f,%f,%f,GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,x1,y1,x2,y2,valueList.getLength(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -161,7 +182,7 @@ int ServiceInterface::getGridAttributeList(T::SessionId sessionId,uint fileId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -183,7 +204,7 @@ int ServiceInterface::getGridValue(T::SessionId sessionId,uint fileId,uint messa
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -205,7 +226,7 @@ int ServiceInterface::getGridValuesByArea(T::SessionId sessionId,uint fileId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Operation failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -213,9 +234,16 @@ int ServiceInterface::getGridValuesByArea(T::SessionId sessionId,uint fileId,uin
 
 
 
-int ServiceInterface::_getGridCoordinates(T::SessionId sessionId,uint fileId,uint messageIndex,T::GridCoordinates& coordinates)
+// Notice : If you known the geometryId of the current grid, then you can fetch coordinates
+// much faster by using local definitions:
+//
+//    GRIB2::GridDefinition_ptr def = Identification::gribDef.getGridDefinition2ByGeometryId(geometryId);
+//    T::Coordinate_vec oridinalCoordinates = def->getGridCoordinates();
+//    T::Coordinate_vec latLonCoordinates = def->getGridLatLonCoordinates();
+
+int ServiceInterface::_getGridCoordinates(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,T::GridCoordinates& coordinates)
 {
-  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
 
 
@@ -224,7 +252,7 @@ int ServiceInterface::_getGridCoordinates(T::SessionId sessionId,uint fileId,uin
 
 int ServiceInterface::_getGridData(T::SessionId sessionId,uint fileId,uint messageIndex,T::GridData& data)
 {
-  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
 
 
@@ -233,7 +261,16 @@ int ServiceInterface::_getGridData(T::SessionId sessionId,uint fileId,uint messa
 
 int ServiceInterface::_getGridValueList(T::SessionId sessionId,T::ValueRecordList& valueRecordList)
 {
-  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
+
+
+
+
+int ServiceInterface::_getGridValueListByArea(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,T::GridValueList& valueList)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
 
 
@@ -242,7 +279,7 @@ int ServiceInterface::_getGridValueList(T::SessionId sessionId,T::ValueRecordLis
 
 int ServiceInterface::_getGridAttributeList(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList)
 {
-  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
 
 
@@ -251,7 +288,7 @@ int ServiceInterface::_getGridAttributeList(T::SessionId sessionId,uint fileId,u
 
 int ServiceInterface::_getGridValue(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::ParamValue& value)
 {
-  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
 
 
@@ -260,7 +297,7 @@ int ServiceInterface::_getGridValue(T::SessionId sessionId,uint fileId,uint mess
 
 int ServiceInterface::_getGridValuesByArea(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,T::InterpolationMethod interpolationMethod,T::ParamValue_vec& values)
 {
-  throw SmartMet::Spine::Exception(BCP,"Not implemented!");
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
 
 

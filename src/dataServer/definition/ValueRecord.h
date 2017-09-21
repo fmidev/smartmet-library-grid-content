@@ -25,7 +25,7 @@ class ValueRecord
     InterpolationMethod mInterpolationMethod;
     double              mX;
     double              mY;
-    double              mValue;
+    T::ParamValue       mValue;
     int                 mResult;
 };
 

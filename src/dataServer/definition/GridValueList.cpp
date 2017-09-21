@@ -1,4 +1,4 @@
-#include "ValueRecordList.h"
+#include "GridValueList.h"
 #include "grid-files/common/Exception.h"
 #include "grid-files/common/GeneralFunctions.h"
 
@@ -9,7 +9,7 @@ namespace T
 {
 
 
-ValueRecordList::ValueRecordList()
+GridValueList::GridValueList()
 {
   try
   {
@@ -23,16 +23,16 @@ ValueRecordList::ValueRecordList()
 
 
 
-ValueRecordList::ValueRecordList(ValueRecordList& valueRecordList)
+GridValueList::GridValueList(GridValueList& gridValueList)
 {
   try
   {
-    uint sz = valueRecordList.getLength();
+    uint sz = gridValueList.getLength();
     for (uint t=0; t<sz; t++)
     {
-      ValueRecord *rec = valueRecordList.getValueRecordByIndex(t);
+      GridValue *rec = gridValueList.getGridValueByIndex(t);
       if (rec != NULL)
-        mList.push_back(new ValueRecord(*rec));
+        mList.push_back(new GridValue(*rec));
     }
   }
   catch (...)
@@ -45,35 +45,7 @@ ValueRecordList::ValueRecordList(ValueRecordList& valueRecordList)
 
 
 
-ValueRecordList::ValueRecordList(ContentInfoList& contentInfoList,CoordinateType coordinateType,InterpolationMethod interpolationMethod,double x,double y)
-{
-  try
-  {
-    uint sz = contentInfoList.getLength();
-    for (uint t=0; t<sz; t++)
-    {
-      ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
-      ValueRecord *rec = new ValueRecord();
-      rec->mFileId = contentInfo->mFileId;
-      rec->mMessageIndex = contentInfo->mMessageIndex;
-      rec->mCoordinateType = coordinateType;
-      rec->mInterpolationMethod = interpolationMethod;
-      rec->mX = x;
-      rec->mY = y;
-      mList.push_back(new ValueRecord(*rec));
-    }
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
-}
-
-
-
-
-
-ValueRecordList::~ValueRecordList()
+GridValueList::~GridValueList()
 {
   try
   {
@@ -88,17 +60,18 @@ ValueRecordList::~ValueRecordList()
 
 
 
-void ValueRecordList::operator=(ValueRecordList& valueRecordList)
+
+void GridValueList::operator=(GridValueList& gridValueList)
 {
   try
   {
     clear();
-    uint sz = valueRecordList.getLength();
+    uint sz = gridValueList.getLength();
     for (uint t=0; t<sz; t++)
     {
-      ValueRecord *rec = valueRecordList.getValueRecordByIndex(t);
+      GridValue *rec = gridValueList.getGridValueByIndex(t);
       if (rec != NULL)
-        mList.push_back(new ValueRecord(*rec));
+        mList.push_back(new GridValue(*rec));
     }
   }
   catch (...)
@@ -110,11 +83,12 @@ void ValueRecordList::operator=(ValueRecordList& valueRecordList)
 
 
 
-void ValueRecordList::addValueRecord(ValueRecord *valueRecord)
+
+void GridValueList::addGridValue(GridValue *gridValue)
 {
   try
   {
-    mList.push_back(valueRecord);
+    mList.push_back(gridValue);
   }
   catch (...)
   {
@@ -126,14 +100,14 @@ void ValueRecordList::addValueRecord(ValueRecord *valueRecord)
 
 
 
-void ValueRecordList::clear()
+void GridValueList::clear()
 {
   try
   {
     uint sz = (uint)mList.size();
     for (uint t=0; t<sz; t++)
     {
-      ValueRecord *rec = mList[t];
+      GridValue *rec = mList[t];
       if (rec != NULL)
         delete rec;
     }
@@ -149,7 +123,7 @@ void ValueRecordList::clear()
 
 
 
-ValueRecord* ValueRecordList::getValueRecordByIndex(uint index)
+GridValue* GridValueList::getGridValueByIndex(uint index)
 {
   try
   {
@@ -167,7 +141,7 @@ ValueRecord* ValueRecordList::getValueRecordByIndex(uint index)
 
 
 
-uint ValueRecordList::getLength()
+uint GridValueList::getLength()
 {
   try
   {
@@ -183,17 +157,17 @@ uint ValueRecordList::getLength()
 
 
 
-void ValueRecordList::print(std::ostream& stream,uint level,uint optionFlags)
+void GridValueList::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try
   {
-    stream << space(level) << "ValueRecordList\n";
+    stream << space(level) << "GridValueList\n";
     stream << space(level) << "- mList = \n";
 
     uint sz = (uint)mList.size();
     for (uint t=0; t<sz; t++)
     {
-      ValueRecord *rec = mList[t];
+      GridValue *rec = mList[t];
       if (rec != NULL)
         rec->print(stream,level+2,optionFlags);
     }

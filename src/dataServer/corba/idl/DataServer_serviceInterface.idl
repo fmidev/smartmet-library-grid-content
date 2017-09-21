@@ -17,7 +17,7 @@ module Corba
 interface ServiceInterface
 {
   long  getGridAttributeList(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,out CorbaAttributeList attributeList);
-  long  getGridCoordinates(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,out CorbaGridCoordinates coordinates);
+  long  getGridCoordinates(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,out CorbaGridCoordinates coordinates);
   long  getGridData(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,out CorbaGridData data);
   long  getGridValue(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,in double x,in double y,in octet interpolationMethod,out CorbaParamValue value);
   long  getGridValueList(in long long sessionId,inout CorbaValueRecordList valueRecordList);

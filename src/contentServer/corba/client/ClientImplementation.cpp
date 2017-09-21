@@ -22,7 +22,7 @@ ClientImplementation::ClientImplementation()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -37,7 +37,7 @@ ClientImplementation::~ClientImplementation()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -102,7 +102,7 @@ void ClientImplementation::init(std::string serviceIor)
     }
     catch (SmartMet::Spine::Exception& e)
     {
-      SmartMet::Spine::Exception exception(BCP, "Operation failed!", &e);
+      SmartMet::Spine::Exception exception(BCP, exception_operation_failed, &e);
       throw exception;
     }
     catch (...)
@@ -113,7 +113,7 @@ void ClientImplementation::init(std::string serviceIor)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -129,7 +129,7 @@ uint ClientImplementation::getId()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -145,7 +145,7 @@ void ClientImplementation::setId(uint id)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -161,7 +161,7 @@ time_t ClientImplementation::getLastAccessTime()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -177,7 +177,7 @@ void ClientImplementation::setLastAccessTime(time_t accessTime)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -193,7 +193,7 @@ time_t ClientImplementation::getLastErrorTime()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -209,7 +209,7 @@ void ClientImplementation::setLastErrorTime(time_t errorTime)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -232,7 +232,7 @@ int ClientImplementation::_clear(T::SessionId sessionId)
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -255,7 +255,7 @@ int ClientImplementation::_reload(T::SessionId sessionId)
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -284,7 +284,7 @@ int ClientImplementation::_addDataServerInfo(T::SessionId sessionId, T::ServerIn
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -307,7 +307,7 @@ int ClientImplementation::_deleteDataServerInfoById(T::SessionId sessionId, uint
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -335,7 +335,7 @@ int ClientImplementation::_getDataServerInfoById(T::SessionId sessionId, uint se
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -363,7 +363,7 @@ int ClientImplementation::_getDataServerInfoByName(T::SessionId sessionId, std::
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -391,7 +391,7 @@ int ClientImplementation::_getDataServerInfoByIor(T::SessionId sessionId, std::s
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -419,7 +419,7 @@ int ClientImplementation::_getDataServerInfoList(T::SessionId sessionId, T::Serv
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -447,7 +447,7 @@ int ClientImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& c
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -476,7 +476,7 @@ int ClientImplementation::_addProducerInfo(T::SessionId sessionId, T::ProducerIn
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -499,7 +499,7 @@ int ClientImplementation::_deleteProducerInfoById(T::SessionId sessionId, uint p
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -522,7 +522,7 @@ int ClientImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -545,7 +545,7 @@ int ClientImplementation::_deleteProducerInfoListBySourceId(T::SessionId session
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -573,7 +573,7 @@ int ClientImplementation::_getProducerInfoById(T::SessionId sessionId, uint prod
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -601,7 +601,7 @@ int ClientImplementation::_getProducerInfoByName(T::SessionId sessionId, std::st
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -629,7 +629,7 @@ int ClientImplementation::_getProducerInfoList(T::SessionId sessionId, T::Produc
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -657,7 +657,7 @@ int ClientImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -685,7 +685,7 @@ int ClientImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& cou
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -714,7 +714,7 @@ int ClientImplementation::_addGenerationInfo(T::SessionId sessionId, T::Generati
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -737,7 +737,7 @@ int ClientImplementation::_deleteGenerationInfoById(T::SessionId sessionId, uint
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -760,7 +760,7 @@ int ClientImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -783,7 +783,7 @@ int ClientImplementation::_deleteGenerationInfoListByProducerId(T::SessionId ses
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -806,7 +806,7 @@ int ClientImplementation::_deleteGenerationInfoListByProducerName(T::SessionId s
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -829,7 +829,7 @@ int ClientImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessi
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -857,7 +857,7 @@ int ClientImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessi
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -884,7 +884,7 @@ int ClientImplementation::_getGenerationInfoById(T::SessionId sessionId, uint ge
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -912,7 +912,7 @@ int ClientImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::s
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -940,7 +940,7 @@ int ClientImplementation::_getGenerationInfoList(T::SessionId sessionId, T::Gene
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -968,7 +968,7 @@ int ClientImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -996,7 +996,7 @@ int ClientImplementation::_getGenerationInfoListByProducerId(T::SessionId sessio
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1024,7 +1024,7 @@ int ClientImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1052,7 +1052,7 @@ int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionI
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1080,7 +1080,7 @@ int ClientImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::Session
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1108,7 +1108,7 @@ int ClientImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessi
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1136,7 +1136,7 @@ int ClientImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& c
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1159,7 +1159,7 @@ int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,ui
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1182,7 +1182,7 @@ int ClientImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1211,7 +1211,7 @@ int ClientImplementation::_addFileInfo(T::SessionId sessionId, T::FileInfo& file
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1246,7 +1246,7 @@ int ClientImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1269,7 +1269,7 @@ int ClientImplementation::_deleteFileInfoById(T::SessionId sessionId, uint fileI
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1292,7 +1292,7 @@ int ClientImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::stri
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1315,7 +1315,7 @@ int ClientImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1338,7 +1338,7 @@ int ClientImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1361,7 +1361,7 @@ int ClientImplementation::_deleteFileInfoListByProducerName(T::SessionId session
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1384,7 +1384,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationId(T::SessionId session
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1407,7 +1407,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Se
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1430,7 +1430,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessi
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1453,7 +1453,7 @@ int ClientImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId, 
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1479,7 +1479,7 @@ int ClientImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1506,7 +1506,7 @@ int ClientImplementation::_getFileInfoById(T::SessionId sessionId, uint fileId, 
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1534,7 +1534,7 @@ int ClientImplementation::_getFileInfoByName(T::SessionId sessionId,std::string 
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1562,7 +1562,7 @@ int ClientImplementation::_getFileInfoList(T::SessionId sessionId, uint startFil
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1590,7 +1590,7 @@ int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId, u
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1618,7 +1618,7 @@ int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1646,7 +1646,7 @@ int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1674,7 +1674,7 @@ int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1702,7 +1702,7 @@ int ClientImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId, u
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1730,7 +1730,7 @@ int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId, uin
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1758,7 +1758,7 @@ int ClientImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1786,7 +1786,7 @@ int ClientImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,u
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1814,7 +1814,7 @@ int ClientImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1842,7 +1842,7 @@ int ClientImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uin
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1871,7 +1871,7 @@ int ClientImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eve
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1903,7 +1903,7 @@ int ClientImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1937,7 +1937,7 @@ int ClientImplementation::_getEventInfoList(T::SessionId sessionId, uint request
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1965,7 +1965,7 @@ int ClientImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1994,7 +1994,7 @@ int ClientImplementation::_addContentInfo(T::SessionId sessionId, T::ContentInfo
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2023,7 +2023,7 @@ int ClientImplementation::_addContentList(T::SessionId sessionId, T::ContentInfo
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2046,7 +2046,7 @@ int ClientImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2069,7 +2069,7 @@ int ClientImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2092,7 +2092,7 @@ int ClientImplementation::_deleteContentListByFileName(T::SessionId sessionId,st
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2115,7 +2115,7 @@ int ClientImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2138,7 +2138,7 @@ int ClientImplementation::_deleteContentListByProducerId(T::SessionId sessionId,
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2161,7 +2161,7 @@ int ClientImplementation::_deleteContentListByProducerName(T::SessionId sessionI
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2183,7 +2183,7 @@ int ClientImplementation::_deleteContentListByGenerationId(T::SessionId sessionI
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2206,7 +2206,7 @@ int ClientImplementation::_deleteContentListByGenerationName(T::SessionId sessio
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2229,7 +2229,7 @@ int ClientImplementation::_deleteContentListBySourceId(T::SessionId sessionId, u
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2258,7 +2258,7 @@ int ClientImplementation::_registerContentList(T::SessionId sessionId,uint serve
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2281,7 +2281,7 @@ int ClientImplementation::_registerContentListByFileId(T::SessionId sessionId, u
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2304,7 +2304,7 @@ int ClientImplementation::_unregisterContentList(T::SessionId sessionId, uint se
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2327,7 +2327,7 @@ int ClientImplementation::_unregisterContentListByFileId(T::SessionId sessionId,
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2355,7 +2355,7 @@ int ClientImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uin
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2383,7 +2383,7 @@ int ClientImplementation::_getContentList(T::SessionId sessionId, uint startFile
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2411,7 +2411,7 @@ int ClientImplementation::_getContentListByFileId(T::SessionId sessionId, uint f
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2439,7 +2439,7 @@ int ClientImplementation::_getContentListByFileName(T::SessionId sessionId,std::
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2466,7 +2466,7 @@ int ClientImplementation::_getContentListByGroupFlags(T::SessionId sessionId, ui
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2494,7 +2494,7 @@ int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId, ui
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2522,7 +2522,7 @@ int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,s
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2553,7 +2553,7 @@ int ClientImplementation::_getContentListByServerId(T::SessionId sessionId, uint
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2581,7 +2581,7 @@ int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,u
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2609,7 +2609,7 @@ int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2637,7 +2637,7 @@ int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2665,7 +2665,7 @@ int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2693,7 +2693,7 @@ int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId, uint
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2721,7 +2721,7 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2749,7 +2749,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2777,7 +2777,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2804,7 +2804,7 @@ int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId s
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2831,7 +2831,7 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2859,7 +2859,7 @@ int ClientImplementation::_getContentGeometryIdListByGenerationId(T::SessionId s
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2886,7 +2886,7 @@ int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessio
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2914,7 +2914,7 @@ int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId ses
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2940,7 +2940,7 @@ int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2968,7 +2968,7 @@ int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
