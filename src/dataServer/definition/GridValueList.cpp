@@ -157,6 +157,105 @@ uint GridValueList::getLength()
 
 
 
+T::ParamValue GridValueList::getMaxValue()
+{
+  try
+  {
+    T::ParamValue max = ParamValueMissing;
+
+    for (auto it=mList.begin(); it != mList.end(); ++it)
+    {
+      if ((*it)->mValue != ParamValueMissing  &&  (max == ParamValueMissing || (*it)->mValue > max))
+        max = (*it)->mValue;
+    }
+    return max;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+T::ParamValue GridValueList::getMinValue()
+{
+  try
+  {
+    T::ParamValue min = ParamValueMissing;
+
+    for (auto it=mList.begin(); it != mList.end(); ++it)
+    {
+      if ((*it)->mValue != ParamValueMissing  &&  (min == ParamValueMissing || (*it)->mValue < min))
+        min = (*it)->mValue;
+    }
+    return min;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+T::ParamValue GridValueList::getAverageValue()
+{
+  try
+  {
+    double total = 0;
+    uint cnt = 0;
+
+    for (auto it=mList.begin(); it != mList.end(); ++it)
+    {
+      if ((*it)->mValue != ParamValueMissing)
+      {
+        total = total + (*it)->mValue;
+        cnt++;
+      }
+    }
+
+    if (cnt != 0)
+      return (T::ParamValue)(total / (double)cnt);
+
+    return ParamValueMissing;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+uint GridValueList::getNumOfValuesInValueRange(T::ParamValue minValue,T::ParamValue maxValue)
+{
+  try
+  {
+    uint cnt = 0;
+    for (auto it=mList.begin(); it != mList.end(); ++it)
+    {
+      if ((*it)->mValue >= minValue  &&  (*it)->mValue <= maxValue)
+        cnt++;
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 void GridValueList::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try

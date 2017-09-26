@@ -2,6 +2,7 @@
 
 #include "dataServer/definition/GridData.h"
 #include "dataServer/definition/GridCoordinates.h"
+#include "dataServer/definition/GridValueList.h"
 #include "dataServer/definition/ValueRecordList.h"
 #include "grid-files/common/AttributeList.h"
 
@@ -45,6 +46,19 @@ class Converter
 
     static void   convert(T::ParamValue_vec& source,DataServer::Corba::CorbaParamValueList& target);
     static void   convert(DataServer::Corba::CorbaParamValueList& source,T::ParamValue_vec& target);
+
+    static void   convert(T::GridValue& source,DataServer::Corba::CorbaGridValue& target);
+    static void   convert(DataServer::Corba::CorbaGridValue& source,T::GridValue& target);
+
+    static void   convert(T::GridValueList& source,DataServer::Corba::CorbaGridValueList& target);
+    static void   convert(DataServer::Corba::CorbaGridValueList& source,T::GridValueList& target);
+
+    static void   convert(T::Coordinate& source,DataServer::Corba::CorbaCoordinate& target);
+    static void   convert(DataServer::Corba::CorbaCoordinate& source,T::Coordinate& target);
+
+    static void   convert(std::vector<T::Coordinate>& source,DataServer::Corba::CorbaCoordinateList& target);
+    static void   convert(const DataServer::Corba::CorbaCoordinateList& source,std::vector<T::Coordinate>& target);
+
 };
 
 

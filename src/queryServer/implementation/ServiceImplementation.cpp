@@ -154,7 +154,7 @@ int ServiceImplementation::_getValuesByGridPoint(T::SessionId sessionId,T::Conte
       if (dataServer)
       {
         T::ParamValue value = 0;
-        int res = dataServer->getGridValue(sessionId,contentInfo->mFileId,contentInfo->mMessageIndex,coordinateType,x,y,interpolationMethod,value);
+        int res = dataServer->getGridValueByPoint(sessionId,contentInfo->mFileId,contentInfo->mMessageIndex,coordinateType,x,y,interpolationMethod,value);
         if (res == DataServer::Result::OK)
         {
           valueList.addGridPointValue(new T::GridPointValue(contentInfo->mFileId,contentInfo->mMessageIndex,x,y,contentInfo->mParameterLevel,contentInfo->mForecastTime,value));

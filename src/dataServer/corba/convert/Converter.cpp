@@ -428,6 +428,170 @@ void Converter::convert(DataServer::Corba::CorbaParamValueList& source,T::ParamV
 
 
 
+
+
+
+
+
+void Converter::convert(T::GridValue& source,DataServer::Corba::CorbaGridValue& target)
+{
+  try
+  {
+    target.x = source.mX;
+    target.y = source.mY;
+    target.value = source.mValue;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void Converter::convert(DataServer::Corba::CorbaGridValue& source,T::GridValue& target)
+{
+  try
+  {
+    target.mX = source.x;
+    target.mY = source.y;
+    target.mValue = source.value;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+void Converter::convert(T::GridValueList& source,DataServer::Corba::CorbaGridValueList& target)
+{
+  try
+  {
+    uint len = source.getLength();
+    target.length(len);
+    for (uint t=0; t<len; t++)
+    {
+      T::GridValue *obj = source.getGridValueByIndex(t);
+      DataServer::Corba::CorbaGridValue corbaObject;
+      convert(*obj,corbaObject);
+      target[t] = corbaObject;
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void Converter::convert(DataServer::Corba::CorbaGridValueList& source,T::GridValueList& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      DataServer::Corba::CorbaGridValue corbaObject = source[t];
+      T::GridValue *obj = new T::GridValue();
+      convert(corbaObject,*obj);
+      target.addGridValue(obj);
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+
+void Converter::convert(T::Coordinate& source,DataServer::Corba::CorbaCoordinate& target)
+{
+  try
+  {
+    target.x = source.x();
+    target.y = source.y();
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void Converter::convert(DataServer::Corba::CorbaCoordinate& source,T::Coordinate& target)
+{
+  try
+  {
+    target.set(source.x,source.y);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void Converter::convert(std::vector<T::Coordinate>& source,DataServer::Corba::CorbaCoordinateList& target)
+{
+  try
+  {
+    uint len = source.size();
+    target.length(len);
+    for (uint t=0; t<len; t++)
+    {
+      auto obj = source[t];
+      DataServer::Corba::CorbaCoordinate corbaObject;
+      convert(obj,corbaObject);
+      target[t] = corbaObject;
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void Converter::convert(const DataServer::Corba::CorbaCoordinateList& source,std::vector<T::Coordinate>& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      DataServer::Corba::CorbaCoordinate corbaObject = source[t];
+      target.push_back(T::Coordinate(corbaObject.x,corbaObject.y));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
 }
 }
 }

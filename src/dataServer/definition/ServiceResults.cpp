@@ -34,6 +34,9 @@ std::string getResultString(int resultCode)
 
       case Result::UNKNOW_COORDINATE_TYPE:
         return std::string("Unknown coordinate type!");
+
+      case Result::INVALID_NUMBER_OF_COORDINATES:
+        return std::string("Invalid number of coordinates!");
     }
 
     return std::string("Unknown result code : ") + std::to_string((int)resultCode);

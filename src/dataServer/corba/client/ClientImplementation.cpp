@@ -171,33 +171,6 @@ int ClientImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint m
 
 
 
-int ClientImplementation::_getGridValueList(T::SessionId sessionId,T::ValueRecordList& valueRecordList)
-{
-  try
-  {
-    if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
-
-    DataServer::Corba::CorbaValueRecordList_var corbaValueRecordList = new DataServer::Corba::CorbaValueRecordList();
-    DataServer::Corba::Converter::convert(valueRecordList, corbaValueRecordList);
-
-    int result = mService->getGridValueList(sessionId,corbaValueRecordList);
-
-    if (result == 0)
-      DataServer::Corba::Converter::convert(corbaValueRecordList, valueRecordList);
-
-    return result;
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
-}
-
-
-
-
-
 int ClientImplementation::_getGridAttributeList(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList)
 {
   try
@@ -224,7 +197,7 @@ int ClientImplementation::_getGridAttributeList(T::SessionId sessionId,uint file
 
 
 
-int ClientImplementation::_getGridValue(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::ParamValue& value)
+int ClientImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::ParamValue& value)
 {
   try
   {
@@ -233,7 +206,7 @@ int ClientImplementation::_getGridValue(T::SessionId sessionId,uint fileId,uint 
 
     SmartMet::DataServer::Corba::CorbaParamValue corbaValue;
 
-    int result = mService->getGridValue(sessionId,fileId,messageIndex,(CORBA::Octet)coordinateType,x,y,(CORBA::Octet)interpolationMethod,corbaValue);
+    int result = mService->getGridValueByPoint(sessionId,fileId,messageIndex,(CORBA::Octet)coordinateType,x,y,(CORBA::Octet)interpolationMethod,corbaValue);
 
     if (result == 0)
       value = (T::ParamValue)corbaValue;
@@ -250,7 +223,90 @@ int ClientImplementation::_getGridValue(T::SessionId sessionId,uint fileId,uint 
 
 
 
-int ClientImplementation::_getGridValuesByArea(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,T::InterpolationMethod interpolationMethod,T::ParamValue_vec& values)
+int ClientImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double origoX,double origoY,double radius,T::GridValueList& valueList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+
+
+    int result = mService->getGridValueListByCircle(sessionId,fileId,messageIndex,coordinateType,origoX,origoY,radius,corbaGridValueList);
+
+    if (result == 0)
+      DataServer::Corba::Converter::convert(corbaGridValueList, valueList);
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,T::GridValueList& valueList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    DataServer::Corba::CorbaCoordinateList_var corbaPolygonPoints = new DataServer::Corba::CorbaCoordinateList();
+    DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+
+    DataServer::Corba::Converter::convert(polygonPoints, corbaPolygonPoints);
+
+
+    int result = mService->getGridValueListByPolygon(sessionId,fileId,messageIndex,coordinateType,corbaPolygonPoints,corbaGridValueList);
+
+    if (result == 0)
+      DataServer::Corba::Converter::convert(corbaGridValueList, valueList);
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getGridValueListByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,T::GridValueList& valueList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+
+    int result = mService->getGridValueListByRectangle(sessionId,fileId,messageIndex,coordinateType,x1,y1,x2,y2,corbaGridValueList);
+
+    if (result == 0)
+      DataServer::Corba::Converter::convert(corbaGridValueList, valueList);
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getGridValueVector(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& values)
 {
   try
   {
@@ -259,7 +315,7 @@ int ClientImplementation::_getGridValuesByArea(T::SessionId sessionId,uint fileI
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
 
-    int result = mService->getGridValuesByArea(sessionId, fileId,messageIndex,(CORBA::Octet)coordinateType,columns,rows,x,y,xStep,yStep,(CORBA::Octet)interpolationMethod,corbaValues);
+    int result = mService->getGridValueVector(sessionId, fileId,messageIndex,corbaValues);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaValues, values);
@@ -271,6 +327,61 @@ int ClientImplementation::_getGridValuesByArea(T::SessionId sessionId,uint fileI
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
+
+
+
+
+
+int ClientImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,T::InterpolationMethod interpolationMethod,T::ParamValue_vec& values)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaValues;
+
+    int result = mService->getGridValueVectorByRectangle(sessionId, fileId,messageIndex,(CORBA::Octet)coordinateType,columns,rows,x,y,xStep,yStep,(CORBA::Octet)interpolationMethod,corbaValues);
+
+    if (result == 0)
+      DataServer::Corba::Converter::convert(corbaValues, values);
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getGridValueList(T::SessionId sessionId,T::ValueRecordList& valueRecordList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    DataServer::Corba::CorbaValueRecordList_var corbaValueRecordList = new DataServer::Corba::CorbaValueRecordList();
+    DataServer::Corba::Converter::convert(valueRecordList, corbaValueRecordList);
+
+    int result = mService->getGridValueList(sessionId,corbaValueRecordList);
+
+    if (result == 0)
+      DataServer::Corba::Converter::convert(corbaValueRecordList, valueRecordList);
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
 
 
 

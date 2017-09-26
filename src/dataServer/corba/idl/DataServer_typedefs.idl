@@ -55,6 +55,16 @@ typedef sequence<CorbaCoordinate> CorbaCoordinateList;
 
 
 
+struct CorbaGridValue
+{
+  double x;
+  double y;
+  float  value;
+};
+
+typedef sequence<CorbaGridValue> CorbaGridValueList;
+
+
 
 struct CorbaGridData
 {

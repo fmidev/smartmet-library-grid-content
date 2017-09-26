@@ -19,9 +19,14 @@ interface ServiceInterface
   long  getGridAttributeList(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,out CorbaAttributeList attributeList);
   long  getGridCoordinates(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,out CorbaGridCoordinates coordinates);
   long  getGridData(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,out CorbaGridData data);
-  long  getGridValue(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,in double x,in double y,in octet interpolationMethod,out CorbaParamValue value);
+  long  getGridValueByPoint(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,in double x,in double y,in octet interpolationMethod,out CorbaParamValue value);
+  long  getGridValueListByCircle(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,in double origoX,in double origoY,in double radius,out CorbaGridValueList valueList);
+  long  getGridValueListByPolygon(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,in CorbaCoordinateList polygonPoints,out CorbaGridValueList valueList);
+  long  getGridValueListByRectangle(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,in double x1,in double y1,in double x2,in double y2,out CorbaGridValueList valueList);
+  long  getGridValueVector(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,out CorbaParamValueList values);
+  long  getGridValueVectorByRectangle(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,in unsigned long columns,in unsigned long rows,in double x,in double y,in double xStep,in double yStep,in octet interpolationMethod,out CorbaParamValueList values);
+
   long  getGridValueList(in long long sessionId,inout CorbaValueRecordList valueRecordList);
-  long  getGridValuesByArea(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,in unsigned long columns,in unsigned long rows,in double x,in double y,in double xStep,in double yStep,in octet interpolationMethod,out CorbaParamValueList values);
 };  
 
 
