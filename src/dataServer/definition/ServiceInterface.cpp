@@ -278,13 +278,13 @@ int ServiceInterface::getGridValueVectorByRectangle(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::getGridValueList(T::SessionId sessionId,T::ValueRecordList& valueRecordList)
+int ServiceInterface::getMultipleGridValues(T::SessionId sessionId,T::ValueRecordList& valueRecordList)
 {
   FUNCTION_TRACE
   try
   {
     unsigned long long timeStart = getTime();
-    int result = _getGridValueList(sessionId,valueRecordList);
+    int result = _getMultipleGridValues(sessionId,valueRecordList);
     unsigned long requestTime = getTime() - timeStart;
 
     PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,ValueRecord[%u]);result %d;time %f;",__FUNCTION__,sessionId,valueRecordList.getLength(),result,(float)requestTime / 1000000);
@@ -387,7 +387,7 @@ int ServiceInterface::_getGridValueVectorByRectangle(T::SessionId sessionId,uint
 
 
 
-int ServiceInterface::_getGridValueList(T::SessionId sessionId,T::ValueRecordList& valueRecordList)
+int ServiceInterface::_getMultipleGridValues(T::SessionId sessionId,T::ValueRecordList& valueRecordList)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }

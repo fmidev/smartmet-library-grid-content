@@ -358,7 +358,7 @@ int ClientImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,
 
 
 
-int ClientImplementation::_getGridValueList(T::SessionId sessionId,T::ValueRecordList& valueRecordList)
+int ClientImplementation::_getMultipleGridValues(T::SessionId sessionId,T::ValueRecordList& valueRecordList)
 {
   try
   {
@@ -368,7 +368,7 @@ int ClientImplementation::_getGridValueList(T::SessionId sessionId,T::ValueRecor
     DataServer::Corba::CorbaValueRecordList_var corbaValueRecordList = new DataServer::Corba::CorbaValueRecordList();
     DataServer::Corba::Converter::convert(valueRecordList, corbaValueRecordList);
 
-    int result = mService->getGridValueList(sessionId,corbaValueRecordList);
+    int result = mService->getMultipleGridValues(sessionId,corbaValueRecordList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaValueRecordList, valueRecordList);

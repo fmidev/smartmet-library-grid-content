@@ -26,7 +26,7 @@ interface ServiceInterface
   long  getGridValueVector(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,out CorbaParamValueList values);
   long  getGridValueVectorByRectangle(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,in unsigned long columns,in unsigned long rows,in double x,in double y,in double xStep,in double yStep,in octet interpolationMethod,out CorbaParamValueList values);
 
-  long  getGridValueList(in long long sessionId,inout CorbaValueRecordList valueRecordList);
+  long  getMultipleGridValues(in long long sessionId,inout CorbaValueRecordList valueRecordList);
 };  
 
 

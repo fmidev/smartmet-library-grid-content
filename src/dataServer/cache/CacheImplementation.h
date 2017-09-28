@@ -31,7 +31,7 @@ class CacheImplementation : public ServiceInterface
      virtual int    _getGridValueVector(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& values);
      virtual int    _getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,T::InterpolationMethod interpolationMethod,T::ParamValue_vec& values);
 
-     virtual int    _getGridValueList(T::SessionId sessionId,T::ValueRecordList& valueRecordList);
+     virtual int    _getMultipleGridValues(T::SessionId sessionId,T::ValueRecordList& valueRecordList);
 
      PointValueCache           mPointValueCache;
      T::GridData_ptr*          mDataCache;

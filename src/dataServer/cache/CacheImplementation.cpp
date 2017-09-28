@@ -203,14 +203,14 @@ int CacheImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId
 
 
 
-int CacheImplementation::_getGridValueList(T::SessionId sessionId,T::ValueRecordList& valueRecordList)
+int CacheImplementation::_getMultipleGridValues(T::SessionId sessionId,T::ValueRecordList& valueRecordList)
 {
   try
   {
     if (mDataServer == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    return mDataServer->getGridValueList(sessionId,valueRecordList);
+    return mDataServer->getMultipleGridValues(sessionId,valueRecordList);
   }
   catch (...)
   {

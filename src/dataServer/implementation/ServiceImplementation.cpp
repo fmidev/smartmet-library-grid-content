@@ -128,7 +128,7 @@ void ServiceImplementation::startEventProcessing()
 
 
 
-int ServiceImplementation::_getGridValueList(T::SessionId sessionId,T::ValueRecordList& valueRecordList)
+int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,T::ValueRecordList& valueRecordList)
 {
   FUNCTION_TRACE
   try
@@ -169,12 +169,12 @@ int ServiceImplementation::_getGridValueList(T::SessionId sessionId,T::ValueReco
               {
                 case T::CoordinateType::UNKNOWN:
                 case T::CoordinateType::LATLON_COORDINATES:
-                  rec->mValue = message->getParameterValueByLatLon(rec->mY,rec->mX,(T::InterpolationMethod)rec->mInterpolationMethod);
+                  rec->mValue = message->getGridValueByLatLonCoordinate(rec->mY,rec->mX,(T::InterpolationMethod)rec->mInterpolationMethod);
                   rec->mResult = 0;
                   break;
 
                 case T::CoordinateType::GRID_COORDINATES:
-                  rec->mValue = message->getParameterValueByGridPosition(rec->mX,rec->mY,(T::InterpolationMethod)rec->mInterpolationMethod);
+                  rec->mValue = message->getGridValueByGridPoint(rec->mX,rec->mY,(T::InterpolationMethod)rec->mInterpolationMethod);
                   rec->mResult = 0;
                   break;
 
@@ -341,7 +341,7 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
     data.mCdmParameterName = message->getCdmParameterName();
     data.mNewbaseParameterId = message->getNewbaseParameterId();
     data.mNewbaseParameterName = message->getNewbaseParameterName();
-    data.mParameterLevel = message->getParameterLevel();
+    data.mParameterLevel = message->getGridParameterLevel();
     data.mGeometryId = (uint)message->getGridGeometryId();
     data.mProjection = (uint)message->getGridProjection();
     data.mColumns = (uint)message->getGridOriginalColumnCount();
@@ -350,7 +350,7 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
     data.mForecastNumber = message->getForecastNumber();
     message->getGridProjectionAttributes("",data.mProjectionAttributes);
 
-    message->getParameterValues(data.mValues);
+    message->getGridValueVector(data.mValues);
 
     return Result::OK;
   }
@@ -446,15 +446,18 @@ int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint file
         return Result::MESSAGE_NOT_FOUND;
       }
 
+      message->getGridValueByPoint(coordinateType,x,y,interpolationMethod,value);
+
+#if 0
       switch (coordinateType)
       {
         case T::CoordinateType::UNKNOWN:
         case T::CoordinateType::LATLON_COORDINATES:
-           value = message->getParameterValueByLatLon(y,x,interpolationMethod);
+           value = message->getGridValueByLatLonCoordinate(y,x,interpolationMethod);
            return Result::OK;
 
         case T::CoordinateType::GRID_COORDINATES:
-          value = message->getParameterValueByGridPosition(x,y,interpolationMethod);
+          value = message->getGridValueByGridPoint(x,y,interpolationMethod);
           return Result::OK;
 
         case T::CoordinateType::ORIGINAL_COORDINATES:
@@ -462,6 +465,9 @@ int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint file
            return Result::NOT_IMPLEMENTED;
       }
       return Result::UNKNOW_COORDINATE_TYPE;
+#endif
+
+      return Result::OK;
     }
     catch (...)
     {
@@ -514,7 +520,7 @@ int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,uint fileI
       if (message == NULL)
         return Result::MESSAGE_NOT_FOUND;
 
-      message->getParameterValues(values);
+      message->getGridValueVector(values);
       return Result::OK;
     }
     catch (...)
@@ -574,6 +580,11 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint
         return Result::MESSAGE_NOT_FOUND;
       }
 
+
+      message->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList);
+      return Result::OK;
+
+#if 0
       T::Dimensions_opt d = message->getGridDimensions();
       uint cols = d->nx();
       uint rows = d->ny();
@@ -647,7 +658,7 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint
 
             rec->mX = it->x();
             rec->mY = it->y();
-            rec->mValue = message->getParameterValueByGridPoint(it->x(),it->y());
+            rec->mValue = message->getGridValueByGridPoint(it->x(),it->y());
             valueList.addGridValue(rec);
           }
         }
@@ -732,6 +743,7 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint
       }
 
       return Result::OK;
+#endif
     }
     catch (...)
     {
@@ -792,7 +804,7 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
             double xx = x;
             for (uint c=0; c < columns; c++)
             {
-              T::ParamValue value = message->getParameterValueByLatLon(y,xx,interpolationMethod);
+              T::ParamValue value = message->getGridValueByLatLonCoordinate(y,xx,interpolationMethod);
               values.push_back(value);
               xx = xx + xStep;
             }
@@ -806,7 +818,7 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
             double xx = x;
             for (uint c=0; c < columns; c++)
             {
-              T::ParamValue value = message->getParameterValueByGridPosition(xx,y,interpolationMethod);
+              T::ParamValue value = message->getGridValueByGridPoint(xx,y,interpolationMethod);
               values.push_back(value);
               xx = xx + xStep;
             }
@@ -877,6 +889,11 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
         return Result::MESSAGE_NOT_FOUND;
       }
 
+      message->getGridValueListByPolygon(coordinateType,polygonPoints,valueList);
+      return Result::OK;
+
+#if 0
+
       T::Dimensions_opt d = message->getGridDimensions();
       uint cols = d->nx();
       uint rows = d->ny();
@@ -912,7 +929,7 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
                 //printf("%d,%d => %f,%f => %f,%f\n",it->x(),it->y(),rec->mX,rec->mY,lon,lat);
             }
 
-            rec->mValue = message->getParameterValueByGridPoint(it->x(),it->y());
+            rec->mValue = message->getGridValueByGridPoint(it->x(),it->y());
             valueList.addGridValue(rec);
           }
         }
@@ -929,7 +946,7 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
 
             rec->mX = it->x();
             rec->mY = it->y();
-            rec->mValue = message->getParameterValueByGridPoint(it->x(),it->y());
+            rec->mValue = message->getGridValueByGridPoint(it->x(),it->y());
             valueList.addGridValue(rec);
           }
         }
@@ -963,7 +980,7 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
                 //printf("%d,%d => %f,%f => %f,%f\n",it->x(),it->y(),rec->mX,rec->mY,lon,lat);
             }
 
-            rec->mValue = message->getParameterValueByGridPoint(it->x(),it->y());
+            rec->mValue = message->getGridValueByGridPoint(it->x(),it->y());
             valueList.addGridValue(rec);
           }
         }
@@ -974,6 +991,7 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
       }
 
       return Result::OK;
+#endif
     }
     catch (...)
     {
@@ -999,6 +1017,53 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
+    try
+    {
+      GRID::GridFile_sptr gridFile = mGridStorage.getFileById(fileId);
+      if (!gridFile)
+      {
+        // If the grid file is not found from the grid storage but it is registered
+        // to the contentServer then we should try to add it to the grid storage.
+
+        T::FileInfo fileInfo;
+        if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
+        {
+          if (getFileSize(fileInfo.mName.c_str()) > 0)
+          {
+            T::ContentInfoList contentInfoList;
+            addFile(fileInfo,contentInfoList);
+            gridFile = mGridStorage.getFileById(fileId);
+          }
+        }
+      }
+
+      if (gridFile == NULL)
+      {
+        //printf("FILE NOT FOUND %u\n",fileId);
+        return Result::FILE_NOT_FOUND;
+      }
+
+      GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
+      if (message == NULL)
+      {
+        //printf("MESSAGE NOT FOUND %u:%u\n",fileId,messageIndex);
+        return Result::MESSAGE_NOT_FOUND;
+      }
+
+      message->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,valueList);
+      return Result::OK;
+    }
+    catch (...)
+    {
+       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+       exception.addParameter("FileId",std::to_string(fileId));
+       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.printError();
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+
+#if 0
+
     std::vector<T::Coordinate> polygonPoints;
     polygonPoints.push_back(T::Coordinate(x1,y1));
     polygonPoints.push_back(T::Coordinate(x2,y1));
@@ -1006,6 +1071,7 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,u
     polygonPoints.push_back(T::Coordinate(x1,y2));
 
     return getGridValueListByPolygon(sessionId,fileId,messageIndex,coordinateType,polygonPoints,valueList);
+#endif
   }
   catch (...)
   {
@@ -1134,7 +1200,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
         contentInfo->mFmiParameterLevelId = message->getFmiParameterLevelId();
         contentInfo->mGrib1ParameterLevelId = message->getGrib1ParameterLevelId();
         contentInfo->mGrib2ParameterLevelId = message->getGrib2ParameterLevelId();
-        contentInfo->mParameterLevel = message->getParameterLevel();
+        contentInfo->mParameterLevel = message->getGridParameterLevel();
         contentInfo->mFmiParameterUnits = message->getFmiParameterUnits();
         contentInfo->mGribParameterUnits = message->getGribParameterUnits();
         contentInfo->mCdmParameterId = message->getCdmParameterId();

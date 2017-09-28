@@ -127,7 +127,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueList(::CORBA::LongLong sessionId, SmartMet::DataServer::Corba::CorbaValueRecordList& valueRecordList)
+::CORBA::Long ServerInterface::getMultipleGridValues(::CORBA::LongLong sessionId, SmartMet::DataServer::Corba::CorbaValueRecordList& valueRecordList)
 {
   FUNCTION_TRACE
   try
@@ -138,7 +138,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::ValueRecordList sValueRecordList;
     DataServer::Corba::Converter::convert(valueRecordList,sValueRecordList);
 
-    int result = mService->getGridValueList(sessionId,sValueRecordList);
+    int result = mService->getMultipleGridValues(sessionId,sValueRecordList);
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueRecordList,valueRecordList);
 
