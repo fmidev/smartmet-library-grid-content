@@ -356,6 +356,9 @@ bool ContentInfo::hasKey(T::ParamKeyType parameterKeyType,std::string parameterK
           return true;
         else
           return false;
+
+      default:
+        return false;
     }
     return false;
   }
@@ -688,8 +691,8 @@ void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mParameterLevel         = " << mParameterLevel << "\n";
     stream << space(level) << "- mFmiParameterUnits      = " << mFmiParameterUnits << "\n";
     stream << space(level) << "- mGribParameterUnits     = " << mGribParameterUnits << "\n";
-    stream << space(level) << "- mForecastType = " << (int)mForecastType << "\n";
-    stream << space(level) << "- mForecastNumber     = " << (int)mForecastNumber << "\n";
+    stream << space(level) << "- mForecastType           = " << (int)mForecastType << "\n";
+    stream << space(level) << "- mForecastNumber         = " << (int)mForecastNumber << "\n";
     stream << space(level) << "- mServerFlags            = " << mServerFlags << "\n";
     stream << space(level) << "- mFlags                  = " << mFlags << "\n";
     stream << space(level) << "- mSourceId               = " << mSourceId << "\n";

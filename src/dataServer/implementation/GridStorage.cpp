@@ -268,7 +268,7 @@ GRID::GridFile_sptr GridStorage::getFileById(uint fileId)
   {
     AutoWriteLock lock(&mModificationLock);
 
-    std::map<uint,GRID::GridFile_sptr>::iterator it = mFileList.find(fileId);
+    auto it = mFileList.find(fileId);
 
     if (it != mFileList.end())
     {
@@ -297,7 +297,7 @@ GRID::GridFile_sptr GridStorage::getFileByIdNoMapping(uint fileId)
   {
     AutoWriteLock lock(&mModificationLock);
 
-    std::map<uint,GRID::GridFile_sptr>::iterator it = mFileList.find(fileId);
+    auto it = mFileList.find(fileId);
 
     if (it != mFileList.end())
       return it->second;

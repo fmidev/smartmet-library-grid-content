@@ -424,6 +424,28 @@ int ServiceInterface::getProducerInfoList(T::SessionId sessionId,T::ProducerInfo
 
 
 
+int ServiceInterface::getProducerInfoListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ProducerInfoList& producerInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getProducerInfoListByParameter(sessionId,parameterKeyType,parameterKey,producerInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%s,ProducerInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,(uint)parameterKeyType,parameterKey.c_str(),producerInfoList.getLength(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::ProducerInfoList& producerInfoList)
 {
   FUNCTION_TRACE
@@ -600,7 +622,7 @@ int ServiceInterface::deleteGenerationInfoListBySourceId(T::SessionId sessionId,
 
 
 
-int ServiceInterface::getGenerationInfoListByGeometryId(T::SessionId sessionId,uint geometryId,T::GenerationInfoList& generationInfoList)
+int ServiceInterface::getGenerationInfoListByGeometryId(T::SessionId sessionId,T::GeometryId geometryId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1040,7 +1062,7 @@ int ServiceInterface::deleteFileInfoListByGenerationId(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,uint geometryId,short forecastType,short forecastNumber,std::string forecastTime)
+int ServiceInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,std::string forecastTime)
 {
   FUNCTION_TRACE
   try
@@ -2121,16 +2143,16 @@ int ServiceInterface::getContentListByGenerationNameAndTimeRange(T::SessionId se
 
 
 
-int ServiceInterface::getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     unsigned long long timeStart = getTime();
-    int result = _getContentListByParameter(sessionId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,requestFlags,contentInfoList);
+    int result = _getContentListByParameter(sessionId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%s,%u,%u,%d,%d,%s,%s,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,(uint)parameterKeyType,parameterKey.c_str(),(uint)parameterLevelIdType,(uint)parameterLevelId,minLevel,maxLevel,startTime.c_str(),endTime.c_str(),requestFlags,contentInfoList.getLength(),result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%s,%u,%u,%d,%d,%d,%d,%d,%s,%s,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,(uint)parameterKeyType,parameterKey.c_str(),(uint)parameterLevelIdType,(uint)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime.c_str(),endTime.c_str(),requestFlags,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -2143,16 +2165,16 @@ int ServiceInterface::getContentListByParameter(T::SessionId sessionId,T::ParamK
 
 
 
-int ServiceInterface::getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     unsigned long long timeStart = getTime();
-    int result = _getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,requestFlags,contentInfoList);
+    int result = _getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%s,%u,%u,%d,%d,%s,%s,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,(uint)parameterKeyType,parameterKey.c_str(),(uint)parameterLevelIdType,(uint)parameterLevelId,minLevel,maxLevel,startTime.c_str(),endTime.c_str(),requestFlags,contentInfoList.getLength(),result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%s,%u,%u,%d,%d,%d,%d,%d,%s,%s,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,(uint)parameterKeyType,parameterKey.c_str(),(uint)parameterLevelIdType,(uint)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime.c_str(),endTime.c_str(),requestFlags,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -2165,16 +2187,16 @@ int ServiceInterface::getContentListByParameterAndGenerationId(T::SessionId sess
 
 
 
-int ServiceInterface::getContentListByParameterAndGenerationName(T::SessionId sessionId,std::string generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByParameterAndGenerationName(T::SessionId sessionId,std::string generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     unsigned long long timeStart = getTime();
-    int result = _getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,requestFlags,contentInfoList);
+    int result = _getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s,%u,%s,%u,%u,%d,%d,%s,%s,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),(uint)parameterKeyType,parameterKey.c_str(),(uint)parameterLevelIdType,(uint)parameterLevelId,minLevel,maxLevel,startTime.c_str(),endTime.c_str(),requestFlags,contentInfoList.getLength(),result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s,%u,%s,%u,%u,%d,%d,%d,%d,%d,%s,%s,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),(uint)parameterKeyType,parameterKey.c_str(),(uint)parameterLevelIdType,(uint)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime.c_str(),endTime.c_str(),requestFlags,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -2187,16 +2209,16 @@ int ServiceInterface::getContentListByParameterAndGenerationName(T::SessionId se
 
 
 
-int ServiceInterface::getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     unsigned long long timeStart = getTime();
-    int result = _getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,requestFlags,contentInfoList);
+    int result = _getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%s,%u,%u,%d,%d,%s,%s,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerId,(uint)parameterKeyType,parameterKey.c_str(),(uint)parameterLevelIdType,(uint)parameterLevelId,minLevel,maxLevel,startTime.c_str(),endTime.c_str(),requestFlags,contentInfoList.getLength(),result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%s,%u,%u,%d,%d,%d,%d,%d,%s,%s,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerId,(uint)parameterKeyType,parameterKey.c_str(),(uint)parameterLevelIdType,(uint)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime.c_str(),endTime.c_str(),requestFlags,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -2209,16 +2231,16 @@ int ServiceInterface::getContentListByParameterAndProducerId(T::SessionId sessio
 
 
 
-int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sessionId,std::string producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sessionId,std::string producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     unsigned long long timeStart = getTime();
-    int result = _getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,requestFlags,contentInfoList);
+    int result = _getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s,%u,%s,%u,%u,%d,%d,%s,%s,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerName.c_str(),(uint)parameterKeyType,parameterKey.c_str(),(uint)parameterLevelIdType,(uint)parameterLevelId,minLevel,maxLevel,startTime.c_str(),endTime.c_str(),requestFlags,contentInfoList.getLength(),result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%s,%u,%s,%u,%u,%d,%d,%d,%d,%d,%s,%s,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerName.c_str(),(uint)parameterKeyType,parameterKey.c_str(),(uint)parameterLevelIdType,(uint)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime.c_str(),endTime.c_str(),requestFlags,contentInfoList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -2231,7 +2253,29 @@ int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sess
 
 
 
-int ServiceInterface::getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<uint>& geometryIdList)
+int ServiceInterface::getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string forecastTime,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%s,%u,%u,%d,%d,%d,%d,%s,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,(uint)parameterKeyType,parameterKey.c_str(),(uint)parameterLevelIdType,(uint)parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime.c_str(),contentInfoList.getLength(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<T::GeometryId>& geometryIdList)
 {
   FUNCTION_TRACE
   try
@@ -2296,7 +2340,7 @@ int ServiceInterface::getContentParamKeyListByGenerationId(T::SessionId sessionI
 
 
 
-int ServiceInterface::getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,uint geometryId,std::set<std::string>& contentTimeList)
+int ServiceInterface::getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
   try
@@ -2506,6 +2550,15 @@ int ServiceInterface::_getProducerInfoList(T::SessionId sessionId,T::ProducerInf
 
 
 
+int ServiceInterface::_getProducerInfoListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ProducerInfoList& producerInfoList)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
+
+
+
+
 int ServiceInterface::_getProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::ProducerInfoList& producerInfoList)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
@@ -2605,7 +2658,7 @@ int ServiceInterface::_getGenerationInfoList(T::SessionId sessionId,T::Generatio
 
 
 
-int ServiceInterface::_getGenerationInfoListByGeometryId(T::SessionId sessionId,uint geometryId,T::GenerationInfoList& generationInfoList)
+int ServiceInterface::_getGenerationInfoListByGeometryId(T::SessionId sessionId,T::GeometryId geometryId,T::GenerationInfoList& generationInfoList)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
@@ -2758,7 +2811,7 @@ int ServiceInterface::_deleteFileInfoListByGenerationId(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,uint geometryId,short forecastType,short forecastNumber,std::string forecastTime)
+int ServiceInterface::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,std::string forecastTime)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
@@ -3199,7 +3252,7 @@ int ServiceInterface::_getContentListByGenerationNameAndTimeRange(T::SessionId s
 
 
 
-int ServiceInterface::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
@@ -3208,7 +3261,7 @@ int ServiceInterface::_getContentListByParameter(T::SessionId sessionId,T::Param
 
 
 
-int ServiceInterface::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
@@ -3217,7 +3270,7 @@ int ServiceInterface::_getContentListByParameterAndGenerationId(T::SessionId ses
 
 
 
-int ServiceInterface::_getContentListByParameterAndGenerationName(T::SessionId sessionId,std::string generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByParameterAndGenerationName(T::SessionId sessionId,std::string generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
@@ -3226,7 +3279,7 @@ int ServiceInterface::_getContentListByParameterAndGenerationName(T::SessionId s
 
 
 
-int ServiceInterface::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
@@ -3235,7 +3288,7 @@ int ServiceInterface::_getContentListByParameterAndProducerId(T::SessionId sessi
 
 
 
-int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId sessionId,std::string producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId sessionId,std::string producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
@@ -3244,7 +3297,16 @@ int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId ses
 
 
 
-int ServiceInterface::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<uint>& geometryIdList)
+int ServiceInterface::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string forecastTime,T::ContentInfoList& contentInfoList)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
+
+
+
+
+int ServiceInterface::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<T::GeometryId>& geometryIdList)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
@@ -3271,7 +3333,7 @@ int ServiceInterface::_getContentParamKeyListByGenerationId(T::SessionId session
 
 
 
-int ServiceInterface::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,uint geometryId,std::set<std::string>& contentTimeList)
+int ServiceInterface::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }

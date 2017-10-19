@@ -190,6 +190,28 @@ int ServiceInterface::getGridValueListByCircle(T::SessionId sessionId,uint fileI
 
 
 
+int ServiceInterface::getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,T::InterpolationMethod interpolationMethod,T::GridValueList& valueList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getGridValueListByPointList(sessionId,fileId,messageIndex,coordinateType,pointList,interpolationMethod,valueList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,Point[%u],%u,GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,(uint)pointList.size(),(uint)interpolationMethod,valueList.getLength(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
@@ -344,6 +366,15 @@ int ServiceInterface::_getGridValueByPoint(T::SessionId sessionId,uint fileId,ui
 
 
 int ServiceInterface::_getGridValueListByCircle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double origoX,double origoY,double radius,T::GridValueList& valueList)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
+
+
+
+
+int ServiceInterface::_getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,T::InterpolationMethod interpolationMethod,T::GridValueList& valueList)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }

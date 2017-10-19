@@ -762,6 +762,49 @@ void Converter::convert(const ContentServer::Corba::CorbaULongList& source,std::
 }
 
 
+
+
+
+void Converter::convert(std::set<int>& source,ContentServer::Corba::CorbaLongList& target)
+{
+  try
+  {
+    uint len = (uint)source.size();
+    target.length(len);
+
+    uint t = 0;
+    for (auto it=source.begin(); it!=source.end(); ++it)
+    {
+      target[t] = *it;
+      t++;
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void Converter::convert(const ContentServer::Corba::CorbaLongList& source,std::set<int>& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      target.insert(source[t]);
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
 }
 }
 }

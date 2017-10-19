@@ -681,6 +681,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getContentListByParameterGenerationIdAndForecastTime") == 0)
+    {
+      getContentListByParameterGenerationIdAndForecastTime(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"getContentGeometryIdListByGenerationId") == 0)
     {
       getContentGeometryIdListByGenerationId(request,response);
@@ -1376,6 +1382,65 @@ void ServerInterface::getProducerInfoList(T::RequestMessage& request,T::Response
 
 
 
+void ServerInterface::getProducerInfoListByParameter(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    unsigned char parameterKeyType = 0;
+    if (!request.getLineByKey("parameterKeyType",parameterKeyType))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: parameterKeyType");
+      return;
+    }
+
+    std::string parameterKey;
+    if (!request.getLineByKey("parameterKey",parameterKey))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: parameterKey");
+      return;
+    }
+
+    T::ProducerInfoList producerInfoList;
+    int result = mService->getProducerInfoListByParameter(sessionId,(T::ParamKeyType)parameterKeyType,parameterKey,producerInfoList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      uint len = producerInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::ProducerInfo *info = producerInfoList.getProducerInfoByIndex(t);
+        if (t == 0)
+          response.addLine("producerInfoHeader",info->getCsvHeader());
+        response.addLine("producerInfo",info->getCsv());
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 void ServerInterface::getProducerInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
@@ -1889,7 +1954,7 @@ void ServerInterface::getGenerationInfoListByGeometryId(T::RequestMessage& reque
       return;
     }
 
-    uint geometryId = 0;
+    T::GeometryId geometryId = 0;
     if (!request.getLineByKey("geometryId",geometryId))
     {
       response.addLine("result",(int)Result::MISSING_PARAMETER);
@@ -2677,7 +2742,7 @@ void ServerInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Request
       return;
     }
 
-    uint geometryId = 0;
+    T::GeometryId geometryId = 0;
     if (!request.getLineByKey("geometryId",geometryId))
     {
       response.addLine("result",(int)Result::MISSING_PARAMETER);
@@ -3385,8 +3450,7 @@ void ServerInterface::deleteFileInfoListByFileIdList(T::RequestMessage& request,
 
     std::set<uint> fileIdList;
 
-    std::vector<std::string>::iterator it;
-    for (it=csvLines.begin(); it!=csvLines.end(); ++it)
+    for (auto it=csvLines.begin(); it!=csvLines.end(); ++it)
     {
       fileIdList.insert((uint)atoll(it->c_str()));
     }
@@ -5333,6 +5397,30 @@ void ServerInterface::getContentListByParameter(T::RequestMessage& request,T::Re
       return;
     }
 
+    T::ForecastType forecastType = 0;
+    if (!request.getLineByKey("forecastType",forecastType))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: forecastType");
+      return;
+    }
+
+    T::ForecastNumber forecastNumber = 0;
+    if (!request.getLineByKey("forecastNumber",forecastNumber))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: forecastNumber");
+      return;
+    }
+
+    T::GeometryId geometryId = 0;
+    if (!request.getLineByKey("geometryId",geometryId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: geometryId");
+      return;
+    }
+
     std::string startTime;
     if (!request.getLineByKey("startTime",startTime))
     {
@@ -5361,7 +5449,7 @@ void ServerInterface::getContentListByParameter(T::RequestMessage& request,T::Re
 
     int result = mService->getContentListByParameter(sessionId,(T::ParamKeyType)parameterKeyType,
         parameterKey,(T::ParamLevelIdType)parameterLevelIdType,parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
-        startTime,endTime,requestFlags,contentInfoList);
+        forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     response.addLine("result",result);
     if (result == Result::OK)
@@ -5459,6 +5547,30 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
       return;
     }
 
+    T::ForecastType forecastType = 0;
+    if (!request.getLineByKey("forecastType",forecastType))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: forecastType");
+      return;
+    }
+
+    T::ForecastNumber forecastNumber = 0;
+    if (!request.getLineByKey("forecastNumber",forecastNumber))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: forecastNumber");
+      return;
+    }
+
+    T::GeometryId geometryId = 0;
+    if (!request.getLineByKey("geometryId",geometryId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: geometryId");
+      return;
+    }
+
     std::string startTime;
     if (!request.getLineByKey("startTime",startTime))
     {
@@ -5487,7 +5599,7 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
 
     int result = mService->getContentListByParameterAndGenerationId(sessionId,generationId,(T::ParamKeyType)parameterKeyType,
         parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
-        startTime,endTime,requestFlags,contentInfoList);
+        forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     response.addLine("result",result);
     if (result == Result::OK)
@@ -5585,6 +5697,30 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
       return;
     }
 
+    T::ForecastType forecastType = 0;
+    if (!request.getLineByKey("forecastType",forecastType))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: forecastType");
+      return;
+    }
+
+    T::ForecastNumber forecastNumber = 0;
+    if (!request.getLineByKey("forecastNumber",forecastNumber))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: forecastNumber");
+      return;
+    }
+
+    T::GeometryId geometryId = 0;
+    if (!request.getLineByKey("geometryId",geometryId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: geometryId");
+      return;
+    }
+
     std::string startTime;
     if (!request.getLineByKey("startTime",startTime))
     {
@@ -5613,7 +5749,7 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
 
     int result = mService->getContentListByParameterAndGenerationName(sessionId,generationName,(T::ParamKeyType)parameterKeyType,
         parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
-        startTime,endTime,requestFlags,contentInfoList);
+        forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     response.addLine("result",result);
     if (result == Result::OK)
@@ -5711,6 +5847,30 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
       return;
     }
 
+    T::ForecastType forecastType = 0;
+    if (!request.getLineByKey("forecastType",forecastType))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: forecastType");
+      return;
+    }
+
+    T::ForecastNumber forecastNumber = 0;
+    if (!request.getLineByKey("forecastNumber",forecastNumber))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: forecastNumber");
+      return;
+    }
+
+    T::GeometryId geometryId = 0;
+    if (!request.getLineByKey("geometryId",geometryId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: geometryId");
+      return;
+    }
+
     std::string startTime;
     if (!request.getLineByKey("startTime",startTime))
     {
@@ -5739,7 +5899,7 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
 
     int result = mService->getContentListByParameterAndProducerId(sessionId,producerId,(T::ParamKeyType)parameterKeyType,
         parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
-        startTime,endTime,requestFlags,contentInfoList);
+        forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     response.addLine("result",result);
     if (result == Result::OK)
@@ -5836,6 +5996,30 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
       return;
     }
 
+    T::ForecastType forecastType = 0;
+    if (!request.getLineByKey("forecastType",forecastType))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: forecastType");
+      return;
+    }
+
+    T::ForecastNumber forecastNumber = 0;
+    if (!request.getLineByKey("forecastNumber",forecastNumber))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: forecastNumber");
+      return;
+    }
+
+    T::GeometryId geometryId = 0;
+    if (!request.getLineByKey("geometryId",geometryId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: geometryId");
+      return;
+    }
+
     std::string startTime;
     if (!request.getLineByKey("startTime",startTime))
     {
@@ -5864,7 +6048,133 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
 
     int result = mService->getContentListByParameterAndProducerName(sessionId,producerName,(T::ParamKeyType)parameterKeyType,
         parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
-        startTime,endTime,requestFlags,contentInfoList);
+        forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      uint len = contentInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
+        if (t == 0)
+          response.addLine("contentInfoHeader",info->getCsvHeader());
+        response.addLine("contentInfo",info->getCsv());
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void ServerInterface::getContentListByParameterGenerationIdAndForecastTime(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint generationId = 0;
+    if (!request.getLineByKey("generationId",generationId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    uint parameterKeyType = 0;
+    if (!request.getLineByKey("parameterKeyType",parameterKeyType))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: parameterKeyType");
+      return;
+    }
+
+    std::string parameterKey;
+    if (!request.getLineByKey("parameterKey",parameterKey))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: parameterKey");
+      return;
+    }
+
+    uint parameterLevelIdType = 0;
+    if (!request.getLineByKey("parameterLevelIdType",parameterLevelIdType))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: parameterLevelIdType");
+      return;
+    }
+
+    unsigned char parameterLevelId = 0;
+    if (!request.getLineByKey("parameterLevelId",parameterLevelId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: parameterLevelId");
+      return;
+    }
+
+    int level = 0;
+    if (!request.getLineByKey("level",level))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: level");
+      return;
+    }
+
+    T::ForecastType forecastType = 0;
+    if (!request.getLineByKey("forecastType",forecastType))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: forecastType");
+      return;
+    }
+
+    T::ForecastNumber forecastNumber = 0;
+    if (!request.getLineByKey("forecastNumber",forecastNumber))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: forecastNumber");
+      return;
+    }
+
+    T::GeometryId geometryId = 0;
+    if (!request.getLineByKey("geometryId",geometryId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: geometryId");
+      return;
+    }
+
+    std::string forecastTime;
+    if (!request.getLineByKey("forecastTime",forecastTime))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: forecastTime");
+      return;
+    }
+
+    T::ContentInfoList contentInfoList;
+
+    int result = mService->getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,(T::ParamKeyType)parameterKeyType,
+        parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,(T::ParamLevel)level,
+        forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
 
     response.addLine("result",result);
     if (result == Result::OK)
@@ -5914,15 +6224,14 @@ void ServerInterface::getContentGeometryIdListByGenerationId(T::RequestMessage& 
       return;
     }
 
-    std::set<uint> geometryIdList;
+    std::set<T::GeometryId> geometryIdList;
 
     int result = mService->getContentGeometryIdListByGenerationId(sessionId,generationId,geometryIdList);
 
     response.addLine("result",result);
     if (result == Result::OK)
     {
-      std::set<uint>::iterator it;
-      for (it=geometryIdList.begin(); it!=geometryIdList.end(); ++it)
+      for (auto it=geometryIdList.begin(); it!=geometryIdList.end(); ++it)
       {
         response.addLine("geometryId",*it);
       }
@@ -6071,7 +6380,7 @@ void ServerInterface::getContentTimeListByGenerationAndGeometryId(T::RequestMess
       return;
     }
 
-    uint geometryId = 0;
+    T::GeometryId geometryId = 0;
     if (!request.getLineByKey("geometryId",geometryId))
     {
       response.addLine("result",(int)Result::MISSING_PARAMETER);

@@ -851,6 +851,66 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
 
 
 
+int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,T::InterpolationMethod interpolationMethod,T::GridValueList& valueList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    try
+    {
+      GRID::GridFile_sptr gridFile = mGridStorage.getFileById(fileId);
+      if (!gridFile)
+      {
+        // If the grid file is not found from the grid storage but it is registered
+        // to the contentServer then we should try to add it to the grid storage.
+
+        T::FileInfo fileInfo;
+        if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
+        {
+          if (getFileSize(fileInfo.mName.c_str()) > 0)
+          {
+            T::ContentInfoList contentInfoList;
+            addFile(fileInfo,contentInfoList);
+            gridFile = mGridStorage.getFileById(fileId);
+          }
+        }
+      }
+
+      if (gridFile == NULL)
+      {
+        //printf("FILE NOT FOUND %u\n",fileId);
+        return Result::FILE_NOT_FOUND;
+      }
+
+      GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
+      if (message == NULL)
+      {
+        //printf("MESSAGE NOT FOUND %u:%u\n",fileId,messageIndex);
+        return Result::MESSAGE_NOT_FOUND;
+      }
+
+      message->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList);
+
+      return Result::OK;
+    }
+    catch (...)
+    {
+       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+       exception.addParameter("FileId",std::to_string(fileId));
+       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.printError();
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
 int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,T::GridValueList& valueList)
 {
   FUNCTION_TRACE

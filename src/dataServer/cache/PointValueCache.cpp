@@ -54,7 +54,7 @@ void PointValueCache::addValue(uint fileId,uint messageIndex,T::CoordinateType c
     std::size_t key = getKey(fileId,messageIndex,coordinateType,x,y,interpolationMethod);
     AutoWriteLock lock(&mModificationLock);
 
-    std::map<std::size_t,CacheValueRec_ptr>::iterator it = mValueList.find(key);
+    auto it = mValueList.find(key);
 
     if (it != mValueList.end())
     {
@@ -89,7 +89,7 @@ bool PointValueCache::getValue(uint fileId,uint messageIndex,T::CoordinateType c
     std::size_t key = getKey(fileId,messageIndex,coordinateType,x,y,interpolationMethod);
     AutoReadLock lock(&mModificationLock);
 
-    std::map<std::size_t,CacheValueRec_ptr>::iterator it = mValueList.find(key);
+    auto it = mValueList.find(key);
 
     if (it != mValueList.end())
     {
@@ -138,7 +138,7 @@ void PointValueCache::deleteValue(uint fileId,uint messageIndex,T::CoordinateTyp
     std::size_t key = getKey(fileId,messageIndex,coordinateType,x,y,interpolationMethod);
     AutoReadLock lock(&mModificationLock);
 
-    std::map<std::size_t,CacheValueRec_ptr>::iterator it = mValueList.find(key);
+    auto it = mValueList.find(key);
 
     if (it != mValueList.end())
     {
@@ -160,7 +160,7 @@ void PointValueCache::deleteValue(std::size_t key)
 {
   try
   {
-    std::map<std::size_t,CacheValueRec_ptr>::iterator it = mValueList.find(key);
+    auto it = mValueList.find(key);
 
     if (it != mValueList.end())
     {

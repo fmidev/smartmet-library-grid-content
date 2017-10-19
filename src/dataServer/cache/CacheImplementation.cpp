@@ -241,6 +241,25 @@ int CacheImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint f
 
 
 
+int CacheImplementation::_getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,T::InterpolationMethod interpolationMethod,T::GridValueList& valueList)
+{
+  try
+  {
+    if (mDataServer == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    return mDataServer->getGridValueListByPointList(sessionId,fileId,messageIndex,coordinateType,pointList,interpolationMethod,valueList);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,T::GridValueList& valueList)
 {
   try

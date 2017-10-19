@@ -77,6 +77,9 @@ class Converter
 
     static void   convert(std::set<uint>& source,ContentServer::Corba::CorbaULongList& target);
     static void   convert(const ContentServer::Corba::CorbaULongList& source,std::set<uint>& target);
+
+    static void   convert(std::set<int>& source,ContentServer::Corba::CorbaLongList& target);
+    static void   convert(const ContentServer::Corba::CorbaLongList& source,std::set<int>& target);
 };
 
 

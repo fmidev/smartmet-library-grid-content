@@ -947,6 +947,48 @@ int RedisImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
 
 
 
+int RedisImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ProducerInfoList& producerInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::ContentInfoList contentInfoList;
+    getContentByParameterId(parameterKeyType,parameterKey,contentInfoList);
+
+    std::set<uint> producerIdList;
+    uint len = contentInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
+      if (producerIdList.find(info->mProducerId) == producerIdList.end())
+      {
+        producerIdList.insert(info->mProducerId);
+
+        T::ProducerInfo *producerInfo = new T::ProducerInfo;
+        getProducerById(info->mProducerId,*producerInfo);
+        producerInfoList.addProducerInfo(producerInfo);
+      }
+    }
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int RedisImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::ProducerInfoList& producerInfoList)
 {
   FUNCTION_TRACE
@@ -1337,7 +1379,7 @@ int RedisImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Genera
 
 
 
-int RedisImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessionId,uint geometryId,T::GenerationInfoList& generationInfoList)
+int RedisImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessionId,T::GeometryId geometryId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2100,7 +2142,7 @@ int RedisImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
 
 
 
-int RedisImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,uint geometryId,short forecastType,short forecastNumber,std::string forecastTime)
+int RedisImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,std::string forecastTime)
 {
   FUNCTION_TRACE
   try
@@ -3853,7 +3895,7 @@ int RedisImplementation::_getContentListBySourceId(T::SessionId sessionId,uint s
 
 
 
-int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3866,7 +3908,7 @@ int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    return getContentByParameterIdAndTimeRange(parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,contentInfoList);
+    return getContentByParameterIdAndTimeRange(parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
   }
   catch (...)
   {
@@ -3878,7 +3920,7 @@ int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
 
 
 
-int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3895,7 +3937,7 @@ int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
 
-    return getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,contentInfoList);
+    return getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
   }
   catch (...)
   {
@@ -3907,7 +3949,7 @@ int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
 
 
 
-int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,std::string generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,std::string generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3924,7 +3966,7 @@ int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionI
     if (getGenerationByName(generationName,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_NAME;
 
-    return getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,contentInfoList);
+    return getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
   }
   catch (...)
   {
@@ -3936,7 +3978,7 @@ int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionI
 
 
 
-int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3953,7 +3995,7 @@ int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId se
     if (getProducerById(producerId,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
 
-    return getContentByParameterIdAndProducer(producerInfo.mProducerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,contentInfoList);
+    return getContentByParameterIdAndProducer(producerInfo.mProducerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
   }
   catch (...)
   {
@@ -3965,7 +4007,43 @@ int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId se
 
 
 
-int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,std::string producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string forecastTime,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationById(generationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    std::string startTime = "19000101T000000";
+    std::string endTime = "23000101T000000";
+
+    T::ContentInfoList contentList;
+    int res = getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,contentList);
+
+    contentList.getContentListByForecastTime(forecastTime,contentInfoList);
+    return res;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,std::string producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3982,7 +4060,7 @@ int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId 
     if (getProducerByName(producerName,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_NAME;
 
-    return getContentByParameterIdAndProducer(producerInfo.mProducerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,startTime,endTime,contentInfoList);
+    return getContentByParameterIdAndProducer(producerInfo.mProducerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
   }
   catch (...)
   {
@@ -3994,7 +4072,7 @@ int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId 
 
 
 
-int RedisImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<uint>& geometryIdList)
+int RedisImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<T::GeometryId>& geometryIdList)
 {
   FUNCTION_TRACE
   try
@@ -4115,7 +4193,7 @@ int RedisImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
 
 
 
-int RedisImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,uint geometryId,std::set<std::string>& contentTimeList)
+int RedisImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
   try
@@ -4681,7 +4759,7 @@ int RedisImplementation::getGenerationList(T::GenerationInfoList& generationInfo
 
 
 
-int RedisImplementation::getGenerationListByGeometryId(uint geometryId,T::GenerationInfoList& generationInfoList)
+int RedisImplementation::getGenerationListByGeometryId(T::GeometryId geometryId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4717,8 +4795,7 @@ int RedisImplementation::getGenerationListByGeometryId(uint geometryId,T::Genera
 
     freeReplyObject(reply);
 
-    std::set<uint>::iterator it;
-    for (it=idList.begin(); it!=idList.end(); ++it)
+    for (auto it=idList.begin(); it!=idList.end(); ++it)
     {
       T::GenerationInfo *generationInfo = new T::GenerationInfo();
       if (getGenerationById(*it,*generationInfo) == Result::OK)
@@ -5968,7 +6045,53 @@ int RedisImplementation::getContentByGroupFlags(uint groupFlags,uint startFileId
 
 
 
-int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
+int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyType,std::string parameterKey,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF);
+    if (reply == NULL)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->type == REDIS_REPLY_ARRAY)
+    {
+      for (uint t = 0; t < reply->elements; t++)
+      {
+        T::ContentInfo *info = new T::ContentInfo();
+        info->setCsv(reply->element[t]->str);
+
+        if (info->hasKey(parameterKeyType,parameterKey))
+        {
+          contentInfoList.addContentInfo(info);
+          info = NULL;
+        }
+
+        if (info != NULL)
+          delete info;
+      }
+    }
+
+    freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5992,63 +6115,7 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
 
         if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
         {
-          if (info->hasKey(parameterKeyType,parameterKey) &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
-          {
-            if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
-            {
-              contentInfoList.addContentInfo(info);
-              info = NULL;
-            }
-          }
-        }
-
-        if (info != NULL)
-          delete info;
-      }
-    }
-
-    freeReplyObject(reply);
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
-}
-
-
-
-
-
-int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF);
-    if (reply == NULL)
-    {
-      closeConnection();
-      return Result::PERMANENT_STORAGE_ERROR;
-    }
-
-    if (reply->type == REDIS_REPLY_ARRAY)
-    {
-      for (uint t = 0; t < reply->elements; t++)
-      {
-        T::ContentInfo *info = new T::ContentInfo();
-        info->setCsv(reply->element[t]->str);
-
-        if (info->mGenerationId == generationId)
-        {
-          if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+          if (info->mForecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
           {
             if (info->hasKey(parameterKeyType,parameterKey) &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
             {
@@ -6082,7 +6149,72 @@ int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,
 
 
 
-int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
+
+int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF);
+    if (reply == NULL)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->type == REDIS_REPLY_ARRAY)
+    {
+      for (uint t = 0; t < reply->elements; t++)
+      {
+        T::ContentInfo *info = new T::ContentInfo();
+        info->setCsv(reply->element[t]->str);
+
+        if (info->mGenerationId == generationId)
+        {
+          if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+          {
+            if (info->mForecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            {
+              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              {
+                if (info->hasKey(parameterKeyType,parameterKey) &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                {
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                      (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
+                      (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
+                      (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
+                      (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                  {
+                    contentInfoList.addContentInfo(info);
+                    info = NULL;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        if (info != NULL)
+          delete info;
+      }
+    }
+
+    freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -6108,16 +6240,22 @@ int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::P
         {
           if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
           {
-            if (info->hasKey(parameterKeyType,parameterKey) &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+            if (info->mForecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
             {
-              if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                  (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                  (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                  (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                  (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+              if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
-                contentInfoList.addContentInfo(info);
-                info = NULL;
+                if (info->hasKey(parameterKeyType,parameterKey) &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                {
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                      (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
+                      (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
+                      (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
+                      (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                  {
+                    contentInfoList.addContentInfo(info);
+                    info = NULL;
+                  }
+                }
               }
             }
           }

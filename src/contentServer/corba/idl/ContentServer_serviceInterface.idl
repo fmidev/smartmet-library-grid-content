@@ -34,6 +34,7 @@ interface ServiceInterface
   long  getProducerInfoById(in long long sessionId,in unsigned long producerId,out CorbaProducerInfo producerInfo);
   long  getProducerInfoByName(in long long sessionId,in string producerName,out CorbaProducerInfo producerInfo);
   long  getProducerInfoList(in long long sessionId,out CorbaProducerInfoList producerInfoList);
+  long  getProducerInfoListByParameter(in long long sessionId,in octet parameterKeyType,in string parameterKey,out CorbaProducerInfoList producerInfoList);
   long  getProducerInfoListBySourceId(in long long sessionId,in unsigned long sourceId,out CorbaProducerInfoList producerInfoList);
   long  getProducerInfoCount(in long long sessionId,out unsigned long count);
 
@@ -47,7 +48,7 @@ interface ServiceInterface
   long  getGenerationInfoById(in long long sessionId,in unsigned long generationId,out CorbaGenerationInfo generationInfo);
   long  getGenerationInfoByName(in long long sessionId,in string generationName,out CorbaGenerationInfo generationInfo);
   long  getGenerationInfoList(in long long sessionId,out CorbaGenerationInfoList generationInfoList);
-  long  getGenerationInfoListByGeometryId(in long long sessionId,in unsigned long geometryId,out CorbaGenerationInfoList generationInfoList);
+  long  getGenerationInfoListByGeometryId(in long long sessionId,in long geometryId,out CorbaGenerationInfoList generationInfoList);
   long  getGenerationInfoListByProducerId(in long long sessionId,in unsigned long producerId,out CorbaGenerationInfoList generationInfoList);
   long  getGenerationInfoListByProducerName(in long long sessionId,in string producerName,out CorbaGenerationInfoList generationInfoList);
   long  getGenerationInfoListBySourceId(in long long sessionId,in unsigned long sourceId,out CorbaGenerationInfoList generationInfoList);
@@ -65,7 +66,7 @@ interface ServiceInterface
   long  deleteFileInfoListByProducerId(in long long sessionId,in unsigned long producerId);
   long  deleteFileInfoListByProducerName(in long long sessionId,in string producerName);
   long  deleteFileInfoListByGenerationId(in long long sessionId,in unsigned long generationId);
-  long  deleteFileInfoListByGenerationIdAndForecastTime(in long long sessionId,in unsigned long generationId,in unsigned long  geometryId,in short forecastType,in short forecastNumber,in string forecastTime);
+  long  deleteFileInfoListByGenerationIdAndForecastTime(in long long sessionId,in unsigned long generationId,in long  geometryId,in short forecastType,in short forecastNumber,in string forecastTime);
   long  deleteFileInfoListByGenerationName(in long long sessionId,in string generationName);
   long  deleteFileInfoListBySourceId(in long long sessionId,in unsigned long sourceId);
   long  deleteFileInfoListByFileIdList(in long long sessionId,in CorbaULongList fileIdList);
@@ -118,16 +119,17 @@ interface ServiceInterface
   long  getContentListByGenerationNameAndTimeRange(in long long sessionId,in string generationName,in string startTime,in string endTime,out CorbaContentInfoList contentInfoList);
   long  getContentListBySourceId(in long long sessionId,in unsigned long sourceId,in unsigned long startFileId,in unsigned long startMessageIndex,in unsigned long maxRecords,out CorbaContentInfoList contentInfoList);
 
-  long  getContentListByParameter(in long long sessionId,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in unsigned long minLevel,in unsigned long maxLevel,in string startTime,in string endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
-  long  getContentListByParameterAndGenerationId(in long long sessionId,in unsigned long generationId,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in unsigned long minLevel,in unsigned long maxLevel,in string startTime,in string endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
-  long  getContentListByParameterAndGenerationName(in long long sessionId,in string generationName,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in unsigned long minLevel,in unsigned long maxLevel,in string startTime,in string endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
-  long  getContentListByParameterAndProducerId(in long long sessionId,in unsigned long producerId,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in unsigned long minLevel,in unsigned long maxLevel,in string startTime,in string endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
-  long  getContentListByParameterAndProducerName(in long long sessionId,in string producerName,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in unsigned long minLevel,in unsigned long maxLevel,in string startTime,in string endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
-
-  long  getContentGeometryIdListByGenerationId(in long long sessionId,in unsigned long generationId,out CorbaULongList geometryIdList);
+  long  getContentListByParameter(in long long sessionId,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in unsigned long minLevel,in unsigned long maxLevel,in short forecastType,in short forecastNumber,in long geometryId,in string startTime,in string endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
+  long  getContentListByParameterAndGenerationId(in long long sessionId,in unsigned long generationId,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in unsigned long minLevel,in unsigned long maxLevel,in short forecastType,in short forecastNumber,in long geometryId,in string startTime,in string endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
+  long  getContentListByParameterAndGenerationName(in long long sessionId,in string generationName,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in unsigned long minLevel,in unsigned long maxLevel,in short forecastType,in short forecastNumber,in long geometryId,in string startTime,in string endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
+  long  getContentListByParameterAndProducerId(in long long sessionId,in unsigned long producerId,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in unsigned long minLevel,in unsigned long maxLevel,in short forecastType,in short forecastNumber,in long geometryId,in string startTime,in string endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
+  long  getContentListByParameterAndProducerName(in long long sessionId,in string producerName,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in unsigned long minLevel,in unsigned long maxLevel,in short forecastType,in short forecastNumber,in long geometryId,in string startTime,in string endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
+  long  getContentListByParameterGenerationIdAndForecastTime(in long long sessionId,in unsigned long generationId,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in unsigned long level,in short forecastType,in short forecastNumber,in long geometryId,in string forecastTime,out CorbaContentInfoList contentInfoList);
+  
+  long  getContentGeometryIdListByGenerationId(in long long sessionId,in unsigned long generationId,out CorbaLongList geometryIdList);
   long  getContentParamListByGenerationId(in long long sessionId,in unsigned long generationId,out CorbaContentInfoList contentParamList);
   long  getContentParamKeyListByGenerationId(in long long sessionId,in unsigned long generationId,in octet parameterKeyType,out CorbaStringList paramKeyList);
-  long  getContentTimeListByGenerationAndGeometryId(in long long sessionId,in unsigned long generationId,in unsigned long geometryId,out CorbaStringList contentTimeList);
+  long  getContentTimeListByGenerationAndGeometryId(in long long sessionId,in unsigned long generationId,in long geometryId,out CorbaStringList contentTimeList);
 
   long  getContentCount(in long long sessionId,out unsigned long count);
 };  

@@ -14,6 +14,7 @@ module Corba
 
 typedef sequence<string> CorbaStringList;
 typedef sequence<unsigned long> CorbaULongList;
+typedef sequence<long> CorbaLongList;
 
 
 struct CorbaContentInfo
@@ -43,7 +44,7 @@ struct CorbaContentInfo
   string             gribParameterUnits;
   unsigned long      flags;
   unsigned long      sourceId;
-  unsigned long      geometryId;
+  long      		 geometryId;
   string             modificationTime;
 };
 

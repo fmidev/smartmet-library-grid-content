@@ -250,6 +250,36 @@ int ClientImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint 
 
 
 
+int ClientImplementation::_getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,T::InterpolationMethod interpolationMethod,T::GridValueList& valueList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    DataServer::Corba::CorbaCoordinateList_var corbaPointList = new DataServer::Corba::CorbaCoordinateList();
+    DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+
+    DataServer::Corba::Converter::convert(pointList, corbaPointList);
+
+
+    int result = mService->getGridValueListByPointList(sessionId,fileId,messageIndex,coordinateType,corbaPointList,(::CORBA::Octet)interpolationMethod,corbaGridValueList);
+
+    if (result == 0)
+      DataServer::Corba::Converter::convert(corbaGridValueList, valueList);
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,T::GridValueList& valueList)
 {
   try

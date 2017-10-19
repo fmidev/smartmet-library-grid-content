@@ -503,6 +503,37 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getProducerInfoListByParameter(::CORBA::LongLong sessionId, ::CORBA::Octet parameterKeyType, const char* parameterKey, SmartMet::ContentServer::Corba::CorbaProducerInfoList_out producerInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ProducerInfoList sProducerInfoList;
+    ContentServer::Corba::CorbaProducerInfoList *corbaProducerInfoList = new ContentServer::Corba::CorbaProducerInfoList();
+    producerInfoList = corbaProducerInfoList;
+
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getProducerInfoListByParameter(sessionId,(T::ParamKeyType)parameterKeyType,parameterKey,sProducerInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sProducerInfoList,*corbaProducerInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::getProducerInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, SmartMet::ContentServer::Corba::CorbaProducerInfoList_out producerInfoList)
 {
   FUNCTION_TRACE
@@ -826,7 +857,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGenerationInfoListByGeometryId(::CORBA::LongLong sessionId, ::CORBA::ULong geometryId, SmartMet::ContentServer::Corba::CorbaGenerationInfoList_out generationInfoList)
+::CORBA::Long ServerInterface::getGenerationInfoListByGeometryId(::CORBA::LongLong sessionId, ::CORBA::Long geometryId, SmartMet::ContentServer::Corba::CorbaGenerationInfoList_out generationInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1284,7 +1315,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteFileInfoListByGenerationIdAndForecastTime(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::ULong geometryId, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, const char* forecastTime)
+::CORBA::Long ServerInterface::deleteFileInfoListByGenerationIdAndForecastTime(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, const char* forecastTime)
 {
   FUNCTION_TRACE
   try
@@ -2653,7 +2684,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByParameter(::CORBA::LongLong sessionId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+::CORBA::Long ServerInterface::getContentListByParameter(::CORBA::LongLong sessionId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2665,7 +2696,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentListByParameter(sessionId,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,startTime,endTime,requestFlags,sContentInfoList);
+    int result = mService->getContentListByParameter(sessionId,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
@@ -2684,7 +2715,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByParameterAndGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+::CORBA::Long ServerInterface::getContentListByParameterAndGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2696,7 +2727,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentListByParameterAndGenerationId(sessionId,generationId,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,startTime,endTime,requestFlags,sContentInfoList);
+    int result = mService->getContentListByParameterAndGenerationId(sessionId,generationId,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
@@ -2715,7 +2746,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByParameterAndGenerationName(::CORBA::LongLong sessionId, const char* generationName, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+::CORBA::Long ServerInterface::getContentListByParameterAndGenerationName(::CORBA::LongLong sessionId, const char* generationName, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2727,66 +2758,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentListByParameterAndGenerationName(sessionId,generationName,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,startTime,endTime,requestFlags,sContentInfoList);
-
-    if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
-
-    return result;
-  }
-  catch (...)
-  {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
-
-
-::CORBA::Long ServerInterface::getContentListByParameterAndProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
-    contentInfoList = corbaContentInfoList;
-
-    if (mService == NULL)
-      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
-
-    int result = mService->getContentListByParameterAndProducerId(sessionId,producerId,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,startTime,endTime,requestFlags,sContentInfoList);
-
-    if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
-
-    return result;
-  }
-  catch (...)
-  {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
-
-
-
-::CORBA::Long ServerInterface::getContentListByParameterAndProducerName(::CORBA::LongLong sessionId, const char* producerName, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
-    contentInfoList = corbaContentInfoList;
-
-    if (mService == NULL)
-      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
-
-    int result = mService->getContentListByParameterAndProducerName(sessionId,producerName,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,startTime,endTime,requestFlags,sContentInfoList);
+    int result = mService->getContentListByParameterAndGenerationName(sessionId,generationName,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
@@ -2805,13 +2777,106 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentGeometryIdListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, SmartMet::ContentServer::Corba::CorbaULongList_out geometryIdList)
+::CORBA::Long ServerInterface::getContentListByParameterAndProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
-    std::set<uint> sGeometryIdList;
-    ContentServer::Corba::CorbaULongList *corbaGeometryIdList = new ContentServer::Corba::CorbaULongList();
+    T::ContentInfoList sContentInfoList;
+    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    contentInfoList = corbaContentInfoList;
+
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getContentListByParameterAndProducerId(sessionId,producerId,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getContentListByParameterAndProducerName(::CORBA::LongLong sessionId, const char* producerName, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ContentInfoList sContentInfoList;
+    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    contentInfoList = corbaContentInfoList;
+
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getContentListByParameterAndProducerName(sessionId,producerName,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getContentListByParameterGenerationIdAndForecastTime(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong level, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, const char* forecastTime, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ContentInfoList sContentInfoList;
+    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    contentInfoList = corbaContentInfoList;
+
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,sContentInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getContentGeometryIdListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, SmartMet::ContentServer::Corba::CorbaLongList_out geometryIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::set<T::GeometryId> sGeometryIdList;
+    ContentServer::Corba::CorbaLongList *corbaGeometryIdList = new ContentServer::Corba::CorbaLongList();
     geometryIdList = corbaGeometryIdList;
 
     if (mService == NULL)
@@ -2898,7 +2963,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentTimeListByGenerationAndGeometryId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::ULong geometryId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList)
+::CORBA::Long ServerInterface::getContentTimeListByGenerationAndGeometryId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList)
 {
   FUNCTION_TRACE
   try

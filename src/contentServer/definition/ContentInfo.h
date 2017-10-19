@@ -72,12 +72,12 @@ class ContentInfo
      T::ParamLevel      mParameterLevel;
      std::string        mFmiParameterUnits;
      std::string        mGribParameterUnits;
-     short              mForecastType;
-     short              mForecastNumber;
+     T::ForecastType    mForecastType;
+     T::ForecastNumber  mForecastNumber;
      unsigned long long mServerFlags;
      uint               mFlags;
      uint               mSourceId;
-     uint               mGeometryId;
+     T::GeometryId      mGeometryId;
      std::string        mModificationTime;
 };
 
