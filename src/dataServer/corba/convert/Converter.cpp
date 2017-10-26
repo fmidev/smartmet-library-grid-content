@@ -592,6 +592,56 @@ void Converter::convert(const DataServer::Corba::CorbaCoordinateList& source,std
   }
 }
 
+
+
+
+
+void Converter::convert(std::vector<std::vector<T::Coordinate>>& source,SmartMet::DataServer::Corba::CorbaPolygonPath& target)
+{
+  try
+  {
+    uint len = source.size();
+    target.length(len);
+    for (uint t=0; t<len; t++)
+    {
+      auto obj = source[t];
+      DataServer::Corba::CorbaCoordinateList corbaObject;
+      convert(obj,corbaObject);
+      target[t] = corbaObject;
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void Converter::convert(const SmartMet::DataServer::Corba::CorbaPolygonPath& source,std::vector<std::vector<T::Coordinate>>& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      DataServer::Corba::CorbaCoordinateList corbaObject = source[t];
+      std::vector<T::Coordinate> obj;
+      convert(corbaObject,obj);
+      target.push_back(obj);
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
 }
 }
 }

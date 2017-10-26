@@ -59,6 +59,8 @@ class Converter
     static void   convert(std::vector<T::Coordinate>& source,DataServer::Corba::CorbaCoordinateList& target);
     static void   convert(const DataServer::Corba::CorbaCoordinateList& source,std::vector<T::Coordinate>& target);
 
+    static void   convert(std::vector<std::vector<T::Coordinate>>& source,SmartMet::DataServer::Corba::CorbaPolygonPath& target);
+    static void   convert(const SmartMet::DataServer::Corba::CorbaPolygonPath& source,std::vector<std::vector<T::Coordinate>>& target);
 };
 
 

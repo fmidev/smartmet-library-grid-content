@@ -31,6 +31,7 @@ class GenerationInfoList
      GenerationInfo*  getGenerationInfoByName(std::string generationName);
      void             getGenerationInfoListByProducerId(uint producerId,GenerationInfoList& generationInfoList);
      void             getGenerationInfoListBySourceId(uint sourceId,GenerationInfoList& generationInfoList);
+     GenerationInfo*  getPrevGenerationInfoByProducerId(uint producerId,std::string nextGenerationName);
      GenerationInfo*  getLastGenerationInfoByProducerId(uint producerId);
      GenerationInfo*  getLastGenerationInfoByProducerIdAndStatus(uint producerId,T::GenerationStatus generationStatus);
      uint             getLength();

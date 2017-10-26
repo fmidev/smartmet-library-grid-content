@@ -374,6 +374,34 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(uint produ
 
 
 
+GenerationInfo*  GenerationInfoList::getPrevGenerationInfoByProducerId(uint producerId,std::string nextGenerationName)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+    T::GenerationInfo *generationInfo = NULL;
+    uint sz = getLength();
+    for (uint t=0; t<sz; t++)
+    {
+      GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
+      if (info != NULL  &&  info->mProducerId == producerId)
+      {
+        if ((generationInfo == NULL  &&  info->mName < nextGenerationName)  ||  (generationInfo != NULL  &&  generationInfo->mName < info->mName  &&  info->mName < nextGenerationName))
+          generationInfo = info;
+      }
+    }
+    return generationInfo;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 void GenerationInfoList::getGenerationInfoListBySourceId(uint sourceId,GenerationInfoList& generationInfoList)
 {
   try

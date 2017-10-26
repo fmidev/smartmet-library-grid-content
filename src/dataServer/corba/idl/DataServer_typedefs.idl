@@ -52,6 +52,7 @@ struct CorbaCoordinate
 };
 
 typedef sequence<CorbaCoordinate> CorbaCoordinateList;
+typedef sequence<CorbaCoordinateList> CorbaPolygonPath;
 
 
 

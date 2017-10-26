@@ -315,6 +315,40 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getGridValueListByPolygonPath(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaPolygonPath& polygonPath, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::GridValueList sValueList;
+    std::vector<std::vector<T::Coordinate>> sPolygonPath;
+    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    valueList = corbaValueList;
+
+    DataServer::Corba::Converter::convert(polygonPath,sPolygonPath);
+
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getGridValueListByPolygonPath(sessionId,fileId,messageIndex,(T::CoordinateType)coordinateType,sPolygonPath,sValueList);
+
+    if (result == 0)
+      DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::getGridValueListByRectangle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::Double x1, ::CORBA::Double y1, ::CORBA::Double x2, ::CORBA::Double y2, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE

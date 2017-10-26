@@ -1,7 +1,7 @@
 #include "ServiceImplementation.h"
 #include "grid-files/common/GeneralFunctions.h"
 #include "grid-files/common/ShowFunction.h"
-#include "grid-files/common/ImageFunctions.h"
+#include "grid-files/common/GraphFunctions.h"
 #include "grid-files/common/CoordinateConversions.h"
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -448,25 +448,6 @@ int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint file
 
       message->getGridValueByPoint(coordinateType,x,y,interpolationMethod,value);
 
-#if 0
-      switch (coordinateType)
-      {
-        case T::CoordinateType::UNKNOWN:
-        case T::CoordinateType::LATLON_COORDINATES:
-           value = message->getGridValueByLatLonCoordinate(y,x,interpolationMethod);
-           return Result::OK;
-
-        case T::CoordinateType::GRID_COORDINATES:
-          value = message->getGridValueByGridPoint(x,y,interpolationMethod);
-          return Result::OK;
-
-        case T::CoordinateType::ORIGINAL_COORDINATES:
-           // TODO: Implementation required
-           return Result::NOT_IMPLEMENTED;
-      }
-      return Result::UNKNOW_COORDINATE_TYPE;
-#endif
-
       return Result::OK;
     }
     catch (...)
@@ -583,167 +564,6 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint
 
       message->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList);
       return Result::OK;
-
-#if 0
-      T::Dimensions_opt d = message->getGridDimensions();
-      uint cols = d->nx();
-      uint rows = d->ny();
-
-      switch (coordinateType)
-      {
-        case T::CoordinateType::UNKNOWN:
-        case T::CoordinateType::LATLON_COORDINATES:
-        {
-          double x1 = origoX;
-          double dist = 0;
-          while (dist < radius)
-          {
-            dist = latlon_distance(origoY,origoX,origoY,x1);
-            x1 = x1 - 0.01;
-          }
-
-          double x2 = origoX;
-          dist = 0;
-          while (dist < radius)
-          {
-            dist = latlon_distance(origoY,origoX,origoY,x2);
-            x2 = x2 + 0.01;
-          }
-
-          double y1 = origoY;
-          dist = 0;
-          while (dist < radius)
-          {
-            dist = latlon_distance(origoY,origoX,y1,origoX);
-            y1 = y1 - 0.01;
-          }
-
-          double y2 = origoY;
-          dist = 0;
-          while (dist < radius)
-          {
-            dist = latlon_distance(origoY,origoX,y2,origoX);
-            y2 = y2 + 0.01;
-          }
-
-          //printf("%f,%f  ...  %f,%f\n",x1,y1,x2,y2);
-          std::vector<T::Coordinate> polygonPoints;
-          polygonPoints.push_back(T::Coordinate(x1,y1));
-          polygonPoints.push_back(T::Coordinate(x2,y1));
-          polygonPoints.push_back(T::Coordinate(x2,y2));
-          polygonPoints.push_back(T::Coordinate(x1,y2));
-
-          T::GridValueList tmpValueList;
-          getGridValueListByPolygon(sessionId,fileId,messageIndex,coordinateType,polygonPoints,tmpValueList);
-
-          uint len = tmpValueList.getLength();
-          for (uint t=0; t<len; t++)
-          {
-            T::GridValue *rec = tmpValueList.getGridValueByIndex(t);
-            if (latlon_distance(origoY,origoX,rec->mY,rec->mX) <= radius)
-              valueList.addGridValue(new T::GridValue(*rec));
-          }
-        }
-        return Result::OK;
-
-
-        case T::CoordinateType::GRID_COORDINATES:
-        {
-          std::vector<T::Point> gridPoints;
-
-          getPointsInsideCircle(cols,rows,origoX,origoY,radius,gridPoints);
-          for (auto it=gridPoints.begin(); it != gridPoints.end(); ++it)
-          {
-            T::GridValue *rec = new T::GridValue();
-
-            rec->mX = it->x();
-            rec->mY = it->y();
-            rec->mValue = message->getGridValueByGridPoint(it->x(),it->y());
-            valueList.addGridValue(rec);
-          }
-        }
-        return Result::OK;
-
-
-        case T::CoordinateType::ORIGINAL_COORDINATES:
-        {
-          double newOrigoX = 0;
-          double newOrigoY = 0;
-
-          message->getGridLatLonCoordinatesByOriginalCoordinates(origoX,origoY,newOrigoY,newOrigoX);
-
-          double x1 = newOrigoX;
-          double dist = 0;
-          while (dist < radius)
-          {
-            dist = latlon_distance(newOrigoY,newOrigoX,newOrigoY,x1);
-            x1 = x1 - 0.01;
-          }
-
-          double x2 = newOrigoX;
-          dist = 0;
-          while (dist < radius)
-          {
-            dist = latlon_distance(newOrigoY,newOrigoX,newOrigoY,x2);
-            x2 = x2 + 0.01;
-          }
-
-          double y1 = newOrigoY;
-          dist = 0;
-          while (dist < radius)
-          {
-            dist = latlon_distance(newOrigoY,newOrigoX,y1,newOrigoX);
-            y1 = y1 - 0.01;
-          }
-
-          double y2 = newOrigoY;
-          dist = 0;
-          while (dist < radius)
-          {
-            dist = latlon_distance(newOrigoY,newOrigoX,y2,newOrigoX);
-            y2 = y2 + 0.01;
-          }
-
-          double xx1 = 0;
-          double yy1 = 0;
-          double xx2 = 0;
-          double yy2 = 0;
-
-          message->getGridOriginalCoordinatesByLatLonCoordinates(y1,x1,xx1,yy1);
-          message->getGridOriginalCoordinatesByLatLonCoordinates(y2,x2,xx2,yy2);
-
-
-          //printf("%f,%f  ...  %f,%f\n",x1,y1,x2,y2);
-          std::vector<T::Coordinate> polygonPoints;
-          polygonPoints.push_back(T::Coordinate(xx1,yy1));
-          polygonPoints.push_back(T::Coordinate(xx2,yy1));
-          polygonPoints.push_back(T::Coordinate(xx2,yy2));
-          polygonPoints.push_back(T::Coordinate(xx1,yy2));
-
-          T::GridValueList tmpValueList;
-          getGridValueListByPolygon(sessionId,fileId,messageIndex,coordinateType,polygonPoints,tmpValueList);
-
-          uint len = tmpValueList.getLength();
-          for (uint t=0; t<len; t++)
-          {
-            T::GridValue *rec = tmpValueList.getGridValueByIndex(t);
-
-            double lat = 0;
-            double lon = 0;
-            message->getGridLatLonCoordinatesByOriginalCoordinates(rec->mY,rec->mX,lat,lon);
-
-            if (latlon_distance(origoY,origoX,lat,lon) <= radius)
-              valueList.addGridValue(new T::GridValue(*rec));
-          }
-        }
-        return Result::OK;
-
-        default:
-          return Result::UNKNOW_COORDINATE_TYPE;
-      }
-
-      return Result::OK;
-#endif
     }
     catch (...)
     {
@@ -951,107 +771,66 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
 
       message->getGridValueListByPolygon(coordinateType,polygonPoints,valueList);
       return Result::OK;
+    }
+    catch (...)
+    {
+       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+       exception.addParameter("FileId",std::to_string(fileId));
+       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.printError();
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
 
-#if 0
 
-      T::Dimensions_opt d = message->getGridDimensions();
-      uint cols = d->nx();
-      uint rows = d->ny();
 
-      switch (coordinateType)
+
+
+int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,T::GridValueList& valueList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    try
+    {
+      GRID::GridFile_sptr gridFile = mGridStorage.getFileById(fileId);
+      if (!gridFile)
       {
-        case T::CoordinateType::UNKNOWN:
-        case T::CoordinateType::LATLON_COORDINATES:
+        // If the grid file is not found from the grid storage but it is registered
+        // to the contentServer then we should try to add it to the grid storage.
+
+        T::FileInfo fileInfo;
+        if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
         {
-          std::vector<T::Coordinate> newPolygonPoints;
-
-          for (auto it = polygonPoints.begin(); it != polygonPoints.end(); ++it)
+          if (getFileSize(fileInfo.mName.c_str()) > 0)
           {
-            double grid_i = 0;
-            double grid_j = 0;
-            message->getGridPointByLatLonCoordinates(it->y(),it->x(),grid_i,grid_j);
-            newPolygonPoints.push_back(T::Coordinate(grid_i,grid_j));
-          }
-
-          std::vector<T::Point> gridPoints;
-
-          getPointsInsidePolygon(cols,rows,newPolygonPoints,gridPoints);
-          for (auto it=gridPoints.begin(); it != gridPoints.end(); ++it)
-          {
-            T::GridValue *rec = new T::GridValue();
-
-            double lat = 0;
-            double lon = 0;
-            if (message->getGridLatLonCoordinatesByGridPoint(it->x(),it->y(),lat,lon))
-            {
-              rec->mX = lon;
-              rec->mY = lat;
-                //printf("%d,%d => %f,%f => %f,%f\n",it->x(),it->y(),rec->mX,rec->mY,lon,lat);
-            }
-
-            rec->mValue = message->getGridValueByGridPoint(it->x(),it->y());
-            valueList.addGridValue(rec);
+            T::ContentInfoList contentInfoList;
+            addFile(fileInfo,contentInfoList);
+            gridFile = mGridStorage.getFileById(fileId);
           }
         }
-        return Result::OK;
-
-        case T::CoordinateType::GRID_COORDINATES:
-        {
-          std::vector<T::Point> gridPoints;
-
-          getPointsInsidePolygon(cols,rows,polygonPoints,gridPoints);
-          for (auto it=gridPoints.begin(); it != gridPoints.end(); ++it)
-          {
-            T::GridValue *rec = new T::GridValue();
-
-            rec->mX = it->x();
-            rec->mY = it->y();
-            rec->mValue = message->getGridValueByGridPoint(it->x(),it->y());
-            valueList.addGridValue(rec);
-          }
-        }
-        return Result::OK;
-
-        case T::CoordinateType::ORIGINAL_COORDINATES:
-        {
-          std::vector<T::Coordinate> newPolygonPoints;
-
-          for (auto it = polygonPoints.begin(); it != polygonPoints.end(); ++it)
-          {
-            double grid_i = 0;
-            double grid_j = 0;
-            message->getGridPointByOriginalCoordinates(it->x(),it->y(),grid_i,grid_j);
-            newPolygonPoints.push_back(T::Coordinate(grid_i,grid_j));
-          }
-
-          std::vector<T::Point> gridPoints;
-
-          getPointsInsidePolygon(cols,rows,newPolygonPoints,gridPoints);
-          for (auto it=gridPoints.begin(); it != gridPoints.end(); ++it)
-          {
-            T::GridValue *rec = new T::GridValue();
-
-            double x = 0;
-            double y = 0;
-            if (message->getGridOriginalCoordinatesByGridPoint(it->x(),it->y(),x,y))
-            {
-              rec->mX = x;
-              rec->mY = y;
-                //printf("%d,%d => %f,%f => %f,%f\n",it->x(),it->y(),rec->mX,rec->mY,lon,lat);
-            }
-
-            rec->mValue = message->getGridValueByGridPoint(it->x(),it->y());
-            valueList.addGridValue(rec);
-          }
-        }
-        return Result::OK;
-
-        default:
-          return Result::UNKNOW_COORDINATE_TYPE;
       }
 
+      if (gridFile == NULL)
+      {
+        //printf("FILE NOT FOUND %u\n",fileId);
+        return Result::FILE_NOT_FOUND;
+      }
+
+      GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
+      if (message == NULL)
+      {
+        //printf("MESSAGE NOT FOUND %u:%u\n",fileId,messageIndex);
+        return Result::MESSAGE_NOT_FOUND;
+      }
+
+      message->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList);
       return Result::OK;
-#endif
     }
     catch (...)
     {

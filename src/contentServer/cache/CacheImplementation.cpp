@@ -731,6 +731,9 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
         mContentInfoList[7].getContentInfoListByCdmParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
         break;
 
+      case T::ParamKeyType::BUILD_IN:
+        break;
+
       default:
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
@@ -2808,6 +2811,9 @@ int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
         mContentInfoList[7].getContentInfoListByCdmParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
+      case T::ParamKeyType::BUILD_IN:
+        break;
+
       default:
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
@@ -2870,6 +2876,9 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
       case T::ParamKeyType::CDM_NAME:
         mContentInfoList[7].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
+
+      case T::ParamKeyType::BUILD_IN:
+        break;
 
       default:
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
@@ -2934,6 +2943,9 @@ int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionI
         mContentInfoList[7].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
+      case T::ParamKeyType::BUILD_IN:
+        break;
+
       default:
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
@@ -2996,6 +3008,9 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
         mContentInfoList[7].getContentInfoListByCdmParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
+      case T::ParamKeyType::BUILD_IN:
+        break;
+
       default:
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
@@ -3057,6 +3072,9 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
       case T::ParamKeyType::CDM_NAME:
         mContentInfoList[7].getContentInfoListByCdmParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
+
+      case T::ParamKeyType::BUILD_IN:
+        break;
 
       default:
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
@@ -3135,6 +3153,9 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
 
       case T::ParamKeyType::CDM_NAME:
         mContentInfoList[7].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+        break;
+
+      case T::ParamKeyType::BUILD_IN:
         break;
 
       default:
