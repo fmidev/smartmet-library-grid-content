@@ -46,6 +46,7 @@ class ClientImplementation : public ContentServer::ServiceInterface
      virtual int    _getProducerInfoListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ProducerInfoList& producerInfoList);
      virtual int    _getProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::ProducerInfoList& producerInfoList);
      virtual int    _getProducerInfoCount(T::SessionId sessionId,uint& count);
+     virtual int    _getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list);
 
      virtual int    _addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo);
      virtual int    _deleteGenerationInfoById(T::SessionId sessionId,uint generationId);

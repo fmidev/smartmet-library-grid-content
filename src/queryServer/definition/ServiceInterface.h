@@ -5,6 +5,10 @@
 #include "grid-files/common/Log.h"
 #include "contentServer/definition/ContentInfoList.h"
 #include "ServiceResults.h"
+#include "Query.h"
+#include "ParameterInfo.h"
+#include "ParameterAlias.h"
+#include "ParameterValues.h"
 
 
 namespace SmartMet
@@ -72,10 +76,13 @@ class ServiceInterface
      virtual void   setProcessingLog(Log *processingLogPointer);
      virtual void   shutdown();
 
+     virtual int    executeQuery(T::SessionId sessionId,Query& query);
+
      virtual int    getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::GridPointValueList& valueList);
 
   protected:
 
+     virtual int    _executeQuery(T::SessionId sessionId,Query& query);
      virtual int    _getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::GridPointValueList& valueList);
 
      Log            *mProcessingLogPointer;

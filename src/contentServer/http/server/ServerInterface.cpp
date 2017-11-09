@@ -201,6 +201,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getProducerNameAndGeometryList") == 0)
+    {
+      getProducerNameAndGeometryList(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"addGenerationInfo") == 0)
     {
       addGenerationInfo(request,response);
@@ -1513,6 +1519,46 @@ void ServerInterface::getProducerInfoCount(T::RequestMessage& request,T::Respons
     if (result == Result::OK)
     {
       response.addLine("count",count);
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void ServerInterface::getProducerNameAndGeometryList(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    std::set<std::string> list;
+
+    int result = mService->getProducerNameAndGeometryList(sessionId,list);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      for (auto it=list.begin(); it!=list.end(); ++it)
+      {
+        response.addLine("line",*it);
+      }
     }
     else
     {

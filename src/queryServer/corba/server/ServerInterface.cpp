@@ -66,6 +66,35 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::executeQuery(::CORBA::LongLong sessionId, SmartMet::QueryServer::Corba::CorbaQuery& query)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    QueryServer::Query sQuery;
+    QueryServer::Corba::Converter::convert(query,sQuery);
+
+    int result = mService->executeQuery(sessionId,sQuery);
+    if (result == 0)
+      QueryServer::Corba::Converter::convert(sQuery,query);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::getValuesByGridPoint(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaContentInfoList& contentInfoList, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Octet interpolationMethod, SmartMet::QueryServer::Corba::CorbaGridPointValueList_out valueList)
 {
   FUNCTION_TRACE

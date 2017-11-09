@@ -121,6 +121,33 @@ void ClientImplementation::init(std::string serviceIor)
 
 
 
+int ClientImplementation::_executeQuery(T::SessionId sessionId,Query& query)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    QueryServer::Corba::CorbaQuery_var corbaQuery = new QueryServer::Corba::CorbaQuery();
+    QueryServer::Corba::Converter::convert(query, corbaQuery);
+
+    int result = mService->executeQuery(sessionId, corbaQuery);
+
+    if (result == 0)
+      QueryServer::Corba::Converter::convert(corbaQuery, query);
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::GridPointValueList& valueList)
 {
   try

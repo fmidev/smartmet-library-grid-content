@@ -43,6 +43,7 @@ class ServerInterface
     virtual void getProducerInfoListByParameter(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getProducerInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getProducerInfoCount(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getProducerNameAndGeometryList(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void addGenerationInfo(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteGenerationInfoById(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteGenerationInfoByName(T::RequestMessage& request,T::ResponseMessage& response);

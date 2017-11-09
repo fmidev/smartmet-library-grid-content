@@ -28,7 +28,7 @@ static void* CacheImplementation_eventProcessingThread(void *arg)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+    Spine::Exception exception(BCP,exception_operation_failed,NULL);
     exception.printError();
     exit(-1);
   }
@@ -58,17 +58,23 @@ CacheImplementation::CacheImplementation()
     mSaveEnabled = false;
     mSaveDir = "/tmp";
     mReloadActivated = false;
+    mContentDeleteCount = 0;
 
     mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
     mContentInfoList[0].setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
+    mContentInfoListEnabled[0] = true;
+
     for (int t=1; t<CONTENT_LIST_COUNT; t++)
+    {
       mContentInfoList[t].setReleaseObjects(false);
+      mContentInfoListEnabled[t] = true;
+    }
 
     mDelayedContentAddList.setReleaseObjects(false);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -84,7 +90,7 @@ CacheImplementation::~CacheImplementation()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -125,19 +131,45 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
 
       mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
 
+      mContentInfoListEnabled[0] = true;
+      mContentInfoListEnabled[1] = true;
+      mContentInfoListEnabled[2] = true;
+      mContentInfoListEnabled[3] = false;
+      mContentInfoListEnabled[4] = false;
+      mContentInfoListEnabled[5] = true;
+      mContentInfoListEnabled[6] = false;
+      mContentInfoListEnabled[7] = false;
+
       readContentList();
 
       for (int t=1; t<CONTENT_LIST_COUNT; t++)
-        mContentInfoList[t] = mContentInfoList[0];
+      {
+        if (mContentInfoListEnabled[t])
+          mContentInfoList[t] = mContentInfoList[0];
+      }
 
       mContentInfoList[0].sort(T::ContentInfo::ComparisonMethod::file_message);
-      mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_level_starttime_file_message);
-      mContentInfoList[2].sort(T::ContentInfo::ComparisonMethod::fmiName_level_starttime_file_message);
-      mContentInfoList[3].sort(T::ContentInfo::ComparisonMethod::gribId_level_starttime_file_message);
-      mContentInfoList[4].sort(T::ContentInfo::ComparisonMethod::newbaseId_level_starttime_file_message);
-      mContentInfoList[5].sort(T::ContentInfo::ComparisonMethod::newbaseName_level_starttime_file_message);
-      mContentInfoList[6].sort(T::ContentInfo::ComparisonMethod::cdmId_level_starttime_file_message);
-      mContentInfoList[7].sort(T::ContentInfo::ComparisonMethod::cdmName_level_starttime_file_message);
+
+      if (mContentInfoListEnabled[1])
+        mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_level_starttime_file_message);
+
+      if (mContentInfoListEnabled[2])
+        mContentInfoList[2].sort(T::ContentInfo::ComparisonMethod::fmiName_level_starttime_file_message);
+
+      if (mContentInfoListEnabled[3])
+        mContentInfoList[3].sort(T::ContentInfo::ComparisonMethod::gribId_level_starttime_file_message);
+
+      if (mContentInfoListEnabled[4])
+        mContentInfoList[4].sort(T::ContentInfo::ComparisonMethod::newbaseId_level_starttime_file_message);
+
+      if (mContentInfoListEnabled[5])
+        mContentInfoList[5].sort(T::ContentInfo::ComparisonMethod::newbaseName_level_starttime_file_message);
+
+      if (mContentInfoListEnabled[6])
+        mContentInfoList[6].sort(T::ContentInfo::ComparisonMethod::cdmId_level_starttime_file_message);
+
+      if (mContentInfoListEnabled[7])
+        mContentInfoList[7].sort(T::ContentInfo::ComparisonMethod::cdmName_level_starttime_file_message);
 
       mUpdateInProgress = false;
     }
@@ -145,7 +177,7 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
   catch (...)
   {
     mUpdateInProgress = false;
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -162,7 +194,7 @@ void CacheImplementation::startEventProcessing()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -179,7 +211,7 @@ void CacheImplementation::shutdown()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -196,7 +228,7 @@ bool CacheImplementation::isSessionValid(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -218,7 +250,7 @@ int CacheImplementation::_clear(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -241,7 +273,7 @@ int CacheImplementation::_reload(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -292,16 +324,33 @@ void CacheImplementation::reloadData()
       readContentList();
 
       for (int t=1; t<CONTENT_LIST_COUNT; t++)
-        mContentInfoList[t] = mContentInfoList[0];
+      {
+        if (mContentInfoListEnabled[t])
+          mContentInfoList[t] = mContentInfoList[0];
+      }
 
       mContentInfoList[0].sort(T::ContentInfo::ComparisonMethod::file_message);
-      mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_level_starttime_file_message);
-      mContentInfoList[2].sort(T::ContentInfo::ComparisonMethod::fmiName_level_starttime_file_message);
-      mContentInfoList[3].sort(T::ContentInfo::ComparisonMethod::gribId_level_starttime_file_message);
-      mContentInfoList[4].sort(T::ContentInfo::ComparisonMethod::newbaseId_level_starttime_file_message);
-      mContentInfoList[5].sort(T::ContentInfo::ComparisonMethod::newbaseName_level_starttime_file_message);
-      mContentInfoList[6].sort(T::ContentInfo::ComparisonMethod::cdmId_level_starttime_file_message);
-      mContentInfoList[7].sort(T::ContentInfo::ComparisonMethod::cdmName_level_starttime_file_message);
+
+      if (mContentInfoListEnabled[1])
+        mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_level_starttime_file_message);
+
+      if (mContentInfoListEnabled[2])
+        mContentInfoList[2].sort(T::ContentInfo::ComparisonMethod::fmiName_level_starttime_file_message);
+
+      if (mContentInfoListEnabled[3])
+        mContentInfoList[3].sort(T::ContentInfo::ComparisonMethod::gribId_level_starttime_file_message);
+
+      if (mContentInfoListEnabled[4])
+        mContentInfoList[4].sort(T::ContentInfo::ComparisonMethod::newbaseId_level_starttime_file_message);
+
+      if (mContentInfoListEnabled[5])
+        mContentInfoList[5].sort(T::ContentInfo::ComparisonMethod::newbaseName_level_starttime_file_message);
+
+      if (mContentInfoListEnabled[6])
+        mContentInfoList[6].sort(T::ContentInfo::ComparisonMethod::cdmId_level_starttime_file_message);
+
+      if (mContentInfoListEnabled[7])
+        mContentInfoList[7].sort(T::ContentInfo::ComparisonMethod::cdmName_level_starttime_file_message);
 
       mUpdateInProgress = false;
 
@@ -317,7 +366,7 @@ void CacheImplementation::reloadData()
   catch (...)
   {
     mUpdateInProgress = false;
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -339,7 +388,7 @@ int CacheImplementation::_addDataServerInfo(T::SessionId sessionId,T::ServerInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -361,7 +410,7 @@ int CacheImplementation::_deleteDataServerInfoById(T::SessionId sessionId,uint s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -391,7 +440,7 @@ int CacheImplementation::_getDataServerInfoById(T::SessionId sessionId,uint serv
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -421,7 +470,7 @@ int CacheImplementation::_getDataServerInfoByName(T::SessionId sessionId,std::st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -451,7 +500,7 @@ int CacheImplementation::_getDataServerInfoByIor(T::SessionId sessionId,std::str
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -477,7 +526,7 @@ int CacheImplementation::_getDataServerInfoList(T::SessionId sessionId,T::Server
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -501,7 +550,7 @@ int CacheImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& co
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -523,7 +572,7 @@ int CacheImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -545,7 +594,7 @@ int CacheImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint pro
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -567,7 +616,7 @@ int CacheImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -597,7 +646,7 @@ int CacheImplementation::_getProducerInfoById(T::SessionId sessionId,uint produc
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -619,7 +668,7 @@ int CacheImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -649,7 +698,7 @@ int CacheImplementation::_getProducerInfoByName(T::SessionId sessionId,std::stri
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -675,7 +724,7 @@ int CacheImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -704,31 +753,38 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
     switch (parameterKeyType)
     {
       case T::ParamKeyType::FMI_ID:
-        mContentInfoList[1].getContentInfoListByFmiParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+        if (mContentInfoListEnabled[1])
+          mContentInfoList[1].getContentInfoListByFmiParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyType::FMI_NAME:
-        mContentInfoList[2].getContentInfoListByFmiParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+        if (mContentInfoListEnabled[2])
+          mContentInfoList[2].getContentInfoListByFmiParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyType::GRIB_ID:
-        mContentInfoList[3].getContentInfoListByGribParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+        if (mContentInfoListEnabled[3])
+          mContentInfoList[3].getContentInfoListByGribParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyType::NEWBASE_ID:
-        mContentInfoList[4].getContentInfoListByNewbaseParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+        if (mContentInfoListEnabled[4])
+          mContentInfoList[4].getContentInfoListByNewbaseParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyType::NEWBASE_NAME:
-        mContentInfoList[5].getContentInfoListByNewbaseParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+        if (mContentInfoListEnabled[5])
+          mContentInfoList[5].getContentInfoListByNewbaseParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyType::CDM_ID:
-        mContentInfoList[6].getContentInfoListByCdmParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+        if (mContentInfoListEnabled[6])
+          mContentInfoList[6].getContentInfoListByCdmParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyType::CDM_NAME:
-        mContentInfoList[7].getContentInfoListByCdmParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+        if (mContentInfoListEnabled[7])
+          mContentInfoList[7].getContentInfoListByCdmParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyType::BUILD_IN:
@@ -759,7 +815,7 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -785,7 +841,7 @@ int CacheImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -809,7 +865,54 @@ int CacheImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& coun
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getProducerNameAndGeometryList(sessionId,list);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoReadLock lock(&mModificationLock);
+
+    uint pLen = mProducerInfoList.getLength();
+
+    for (uint p=0; p<pLen; p++)
+    {
+      T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByIndex(p);
+
+      std::set<uint> geometryIdList;
+
+      uint len = mContentInfoList[0].getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::ContentInfo *contentInfo = mContentInfoList[0].getContentInfoByIndex(t);
+        if (producerInfo->mProducerId == contentInfo->mProducerId  &&  geometryIdList.find(contentInfo->mGeometryId) == geometryIdList.end())
+        {
+          char tmp[100];
+          sprintf(tmp,"%s;%u",producerInfo->mName.c_str(),contentInfo->mGeometryId);
+          list.insert(std::string(tmp));
+          geometryIdList.insert(contentInfo->mGeometryId);
+        }
+      }
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -831,7 +934,7 @@ int CacheImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -853,7 +956,7 @@ int CacheImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint g
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -875,7 +978,7 @@ int CacheImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -897,7 +1000,7 @@ int CacheImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -919,7 +1022,7 @@ int CacheImplementation::_deleteGenerationInfoListByProducerName(T::SessionId se
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -941,7 +1044,7 @@ int CacheImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -980,7 +1083,7 @@ int CacheImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1017,7 +1120,7 @@ int CacheImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1047,7 +1150,7 @@ int CacheImplementation::_getGenerationInfoById(T::SessionId sessionId,uint gene
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1077,7 +1180,7 @@ int CacheImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1103,7 +1206,7 @@ int CacheImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Genera
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1129,7 +1232,7 @@ int CacheImplementation::_getGenerationInfoListByProducerId(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1159,7 +1262,7 @@ int CacheImplementation::_getGenerationInfoListByProducerName(T::SessionId sessi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1185,7 +1288,7 @@ int CacheImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1220,7 +1323,7 @@ int CacheImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1254,7 +1357,7 @@ int CacheImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1278,7 +1381,7 @@ int CacheImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1300,7 +1403,7 @@ int CacheImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1322,7 +1425,7 @@ int CacheImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1344,7 +1447,7 @@ int CacheImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1366,7 +1469,7 @@ int CacheImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1388,7 +1491,7 @@ int CacheImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1410,7 +1513,7 @@ int CacheImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::strin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1432,7 +1535,7 @@ int CacheImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1454,7 +1557,7 @@ int CacheImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1476,7 +1579,7 @@ int CacheImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1498,7 +1601,7 @@ int CacheImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1520,7 +1623,7 @@ int CacheImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1542,7 +1645,7 @@ int CacheImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1564,7 +1667,7 @@ int CacheImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1586,7 +1689,7 @@ int CacheImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1616,7 +1719,7 @@ int CacheImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1646,7 +1749,7 @@ int CacheImplementation::_getFileInfoByName(T::SessionId sessionId,std::string f
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1672,7 +1775,7 @@ int CacheImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1702,7 +1805,7 @@ int CacheImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1732,7 +1835,7 @@ int CacheImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1762,7 +1865,7 @@ int CacheImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1792,7 +1895,7 @@ int CacheImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1818,7 +1921,7 @@ int CacheImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1844,7 +1947,7 @@ int CacheImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1868,7 +1971,7 @@ int CacheImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1892,7 +1995,7 @@ int CacheImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1915,7 +2018,7 @@ int CacheImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1939,7 +2042,7 @@ int CacheImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -1961,7 +2064,7 @@ int CacheImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& even
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2000,7 +2103,7 @@ int CacheImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2033,7 +2136,7 @@ int CacheImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2057,7 +2160,7 @@ int CacheImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2079,7 +2182,7 @@ int CacheImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2101,7 +2204,7 @@ int CacheImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2123,7 +2226,7 @@ int CacheImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2145,7 +2248,7 @@ int CacheImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2167,7 +2270,7 @@ int CacheImplementation::_deleteContentListByFileName(T::SessionId sessionId,std
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2189,7 +2292,7 @@ int CacheImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2211,7 +2314,7 @@ int CacheImplementation::_deleteContentListByProducerId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2233,7 +2336,7 @@ int CacheImplementation::_deleteContentListByProducerName(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2255,7 +2358,7 @@ int CacheImplementation::_deleteContentListByGenerationId(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2277,7 +2380,7 @@ int CacheImplementation::_deleteContentListByGenerationName(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2299,7 +2402,7 @@ int CacheImplementation::_deleteContentListBySourceId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2321,7 +2424,7 @@ int CacheImplementation::_registerContentList(T::SessionId sessionId,uint server
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2343,7 +2446,7 @@ int CacheImplementation::_registerContentListByFileId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2365,7 +2468,7 @@ int CacheImplementation::_unregisterContentList(T::SessionId sessionId,uint serv
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2387,7 +2490,7 @@ int CacheImplementation::_unregisterContentListByFileId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2419,7 +2522,7 @@ int CacheImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2445,7 +2548,7 @@ int CacheImplementation::_getContentList(T::SessionId sessionId,uint startFileId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2471,7 +2574,7 @@ int CacheImplementation::_getContentListByFileId(T::SessionId sessionId,uint fil
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2501,7 +2604,7 @@ int CacheImplementation::_getContentListByFileName(T::SessionId sessionId,std::s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2531,7 +2634,7 @@ int CacheImplementation::_getContentListByServerId(T::SessionId sessionId,uint s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2557,7 +2660,7 @@ int CacheImplementation::_getContentListByGroupFlags(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2587,7 +2690,7 @@ int CacheImplementation::_getContentListByProducerId(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2617,7 +2720,7 @@ int CacheImplementation::_getContentListByProducerName(T::SessionId sessionId,st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2642,7 +2745,7 @@ int CacheImplementation::_getContentListByGenerationId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2672,7 +2775,7 @@ int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2698,7 +2801,7 @@ int CacheImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2728,7 +2831,7 @@ int CacheImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2754,7 +2857,7 @@ int CacheImplementation::_getContentListBySourceId(T::SessionId sessionId,uint s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2782,33 +2885,39 @@ int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
     switch (parameterKeyType)
     {
       case T::ParamKeyType::FMI_ID:
-        mContentInfoList[1].getContentInfoListByFmiParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[1])
+          mContentInfoList[1].getContentInfoListByFmiParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::FMI_NAME:
-      {
-        mContentInfoList[2].getContentInfoListByFmiParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[2])
+          mContentInfoList[2].getContentInfoListByFmiParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
-      }
+
 
       case T::ParamKeyType::GRIB_ID:
-        mContentInfoList[3].getContentInfoListByGribParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[3])
+          mContentInfoList[3].getContentInfoListByGribParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::NEWBASE_ID:
-        mContentInfoList[4].getContentInfoListByNewbaseParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[4])
+          mContentInfoList[4].getContentInfoListByNewbaseParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::NEWBASE_NAME:
-        mContentInfoList[5].getContentInfoListByNewbaseParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[5])
+          mContentInfoList[5].getContentInfoListByNewbaseParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::CDM_ID:
-        mContentInfoList[6].getContentInfoListByCdmParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[6])
+          mContentInfoList[6].getContentInfoListByCdmParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::CDM_NAME:
-        mContentInfoList[7].getContentInfoListByCdmParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[7])
+          mContentInfoList[7].getContentInfoListByCdmParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::BUILD_IN:
@@ -2822,7 +2931,7 @@ int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2850,31 +2959,38 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
     switch (parameterKeyType)
     {
       case T::ParamKeyType::FMI_ID:
-        mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[1])
+          mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::FMI_NAME:
-        mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[2])
+          mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::GRIB_ID:
-        mContentInfoList[3].getContentInfoListByGribParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[3])
+          mContentInfoList[3].getContentInfoListByGribParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::NEWBASE_ID:
-        mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[4])
+          mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::NEWBASE_NAME:
-        mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[5])
+          mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::CDM_ID:
-        mContentInfoList[6].getContentInfoListByCdmParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[6])
+          mContentInfoList[6].getContentInfoListByCdmParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::CDM_NAME:
-        mContentInfoList[7].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[7])
+          mContentInfoList[7].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::BUILD_IN:
@@ -2888,7 +3004,7 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2916,31 +3032,38 @@ int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionI
     switch (parameterKeyType)
     {
       case T::ParamKeyType::FMI_ID:
-        mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[1])
+          mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::FMI_NAME:
-        mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[2])
+          mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::GRIB_ID:
-        mContentInfoList[3].getContentInfoListByGribParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[3])
+          mContentInfoList[3].getContentInfoListByGribParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::NEWBASE_ID:
-        mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[4])
+          mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::NEWBASE_NAME:
-        mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[5])
+          mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::CDM_ID:
-        mContentInfoList[6].getContentInfoListByCdmParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[6])
+          mContentInfoList[6].getContentInfoListByCdmParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::CDM_NAME:
-        mContentInfoList[7].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[7])
+          mContentInfoList[7].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::BUILD_IN:
@@ -2954,7 +3077,7 @@ int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -2981,31 +3104,38 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
     switch (parameterKeyType)
     {
       case T::ParamKeyType::FMI_ID:
-        mContentInfoList[1].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[1])
+          mContentInfoList[1].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::FMI_NAME:
-        mContentInfoList[2].getContentInfoListByFmiParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[2])
+          mContentInfoList[2].getContentInfoListByFmiParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::GRIB_ID:
-        mContentInfoList[3].getContentInfoListByGribParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[3])
+          mContentInfoList[3].getContentInfoListByGribParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::NEWBASE_ID:
-        mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[4])
+          mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::NEWBASE_NAME:
-        mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[5])
+          mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::CDM_ID:
-        mContentInfoList[6].getContentInfoListByCdmParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[6])
+          mContentInfoList[6].getContentInfoListByCdmParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::CDM_NAME:
-        mContentInfoList[7].getContentInfoListByCdmParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[7])
+          mContentInfoList[7].getContentInfoListByCdmParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::BUILD_IN:
@@ -3019,7 +3149,7 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3046,31 +3176,38 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
     switch (parameterKeyType)
     {
       case T::ParamKeyType::FMI_ID:
-        mContentInfoList[1].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[1])
+          mContentInfoList[1].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::FMI_NAME:
-        mContentInfoList[2].getContentInfoListByFmiParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[2])
+          mContentInfoList[2].getContentInfoListByFmiParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::GRIB_ID:
-        mContentInfoList[3].getContentInfoListByGribParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[3])
+          mContentInfoList[3].getContentInfoListByGribParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::NEWBASE_ID:
-        mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[4])
+          mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::NEWBASE_NAME:
-        mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[5])
+          mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::CDM_ID:
-        mContentInfoList[6].getContentInfoListByCdmParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[6])
+          mContentInfoList[6].getContentInfoListByCdmParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::CDM_NAME:
-        mContentInfoList[7].getContentInfoListByCdmParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+        if (mContentInfoListEnabled[7])
+          mContentInfoList[7].getContentInfoListByCdmParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyType::BUILD_IN:
@@ -3084,7 +3221,7 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3128,31 +3265,38 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     switch (parameterKeyType)
     {
       case T::ParamKeyType::FMI_ID:
-        mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+        if (mContentInfoListEnabled[1])
+          mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         break;
 
       case T::ParamKeyType::FMI_NAME:
-        mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+        if (mContentInfoListEnabled[2])
+          mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         break;
 
       case T::ParamKeyType::GRIB_ID:
-        mContentInfoList[3].getContentInfoListByGribParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+        if (mContentInfoListEnabled[3])
+          mContentInfoList[3].getContentInfoListByGribParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         break;
 
       case T::ParamKeyType::NEWBASE_ID:
-        mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+        if (mContentInfoListEnabled[4])
+          mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         break;
 
       case T::ParamKeyType::NEWBASE_NAME:
-        mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+        if (mContentInfoListEnabled[5])
+          mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         break;
 
       case T::ParamKeyType::CDM_ID:
-        mContentInfoList[6].getContentInfoListByCdmParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+        if (mContentInfoListEnabled[6])
+          mContentInfoList[6].getContentInfoListByCdmParameterIdAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         break;
 
       case T::ParamKeyType::CDM_NAME:
-        mContentInfoList[7].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+        if (mContentInfoListEnabled[7])
+          mContentInfoList[7].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         break;
 
       case T::ParamKeyType::BUILD_IN:
@@ -3168,7 +3312,64 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+
+    uint cLen = mContentInfoList[0].getLength();
+    for (uint c=0; c<cLen; c++)
+    {
+      T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByIndex(c);
+      T::ContentInfo *cError = NULL;
+      if (cInfo != NULL)
+      {
+        T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(cInfo->mFileId);
+        if (fileInfo == NULL)
+        {
+          printf("**** INTEGRITY ERROR : File missing (%u)! *****\n",cInfo->mFileId);
+          cError = cInfo;
+        }
+
+        if (cError == NULL)
+        {
+          T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(cInfo->mGenerationId);
+          if (generationInfo == NULL)
+          {
+            printf("**** INTEGRITY ERROR : Generation missing (%u)! *****\n",cInfo->mGenerationId);
+            cError = cInfo;
+          }
+        }
+
+        if (cError == NULL)
+        {
+          T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(cInfo->mProducerId);
+          if (producerInfo == NULL)
+          {
+            printf("**** INTEGRITY ERROR : Producer missing (%u)! *****\n",cInfo->mProducerId);
+            cError = cInfo;
+          }
+        }
+
+        if (cError != NULL)
+          contentInfoList.addContentInfo(cError->duplicate());
+      }
+    }
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3194,7 +3395,7 @@ int CacheImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3247,7 +3448,7 @@ int CacheImplementation::_getContentParamListByGenerationId(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3273,7 +3474,7 @@ int CacheImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3310,7 +3511,7 @@ int CacheImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3334,7 +3535,7 @@ int CacheImplementation::_getContentCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3355,14 +3556,14 @@ void CacheImplementation::readProducerList()
     int result = mContentStorage->getProducerInfoList(mSessionId,mProducerInfoList);
     if (result != 0)
     {
-      SmartMet::Spine::Exception exception(BCP,"Cannot read the producer list from the content storage!");
+      Spine::Exception exception(BCP,"Cannot read the producer list from the content storage!");
       exception.addParameter("ServiceResult",getResultString(result));
       throw exception;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3382,14 +3583,14 @@ void CacheImplementation::readGenerationList()
     int result = mContentStorage->getGenerationInfoList(mSessionId,mGenerationInfoList);
     if (result != 0)
     {
-      SmartMet::Spine::Exception exception(BCP,"Cannot read the generation list from the content storage!");
+      Spine::Exception exception(BCP,"Cannot read the generation list from the content storage!");
       exception.addParameter("ServiceResult",getResultString(result));
       throw exception;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3405,6 +3606,8 @@ void CacheImplementation::readFileList()
       return;
 
     mFileInfoList.clear();
+    mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
+
 
     uint startFileId = 0;
     uint len = 10000;
@@ -3415,7 +3618,7 @@ void CacheImplementation::readFileList()
       int result = mContentStorage->getFileInfoList(mSessionId,startFileId,10000,fileInfoList);
       if (result != 0)
       {
-        SmartMet::Spine::Exception exception(BCP,"Cannot read the file list from the content storage!");
+        Spine::Exception exception(BCP,"Cannot read the file list from the content storage!");
         exception.addParameter("ServiceResult",getResultString(result));
         throw exception;
       }
@@ -3433,7 +3636,7 @@ void CacheImplementation::readFileList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3460,7 +3663,7 @@ void CacheImplementation::readContentList()
       int result = mContentStorage->getContentList(mSessionId,startFileId,startMessageIndex,10000,contentInfoList);
       if (result != 0)
       {
-        SmartMet::Spine::Exception exception(BCP,"Cannot read the content list from the content storage!");
+        Spine::Exception exception(BCP,"Cannot read the content list from the content storage!");
         exception.addParameter("ServiceResult",getResultString(result));
         throw exception;
       }
@@ -3478,7 +3681,7 @@ void CacheImplementation::readContentList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3497,14 +3700,14 @@ void CacheImplementation::readDataServerList()
     int result = mContentStorage->getDataServerInfoList(mSessionId,mDataServerInfoList);
     if (result != 0)
     {
-      SmartMet::Spine::Exception exception(BCP,"Cannot read the data server list from the content storage!");
+      Spine::Exception exception(BCP,"Cannot read the data server list from the content storage!");
       exception.addParameter("ServiceResult",getResultString(result));
       throw exception;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3532,7 +3735,7 @@ void CacheImplementation::event_clear(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3597,7 +3800,7 @@ void CacheImplementation::event_contentServerReload(T::EventInfo& eventInfo)
   catch (...)
   {
     mUpdateInProgress = false;
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3622,7 +3825,7 @@ void CacheImplementation::event_producerAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3640,14 +3843,17 @@ void CacheImplementation::event_producerDeleted(T::EventInfo& eventInfo)
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoByProducerId(eventInfo.mId1);
+    {
+      if (mContentInfoListEnabled[t])
+        mContentInfoList[t].deleteContentInfoByProducerId(eventInfo.mId1);
+    }
 
     mFileInfoList.deleteFileInfoByProducerId(eventInfo.mId1);
     mProducerInfoList.deleteProducerInfoById(eventInfo.mId1);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3665,7 +3871,10 @@ void CacheImplementation::event_producerListDeletedBySourceId(T::EventInfo& even
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
+    {
+      if (mContentInfoListEnabled[t])
+        mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
+    }
 
     mFileInfoList.deleteFileInfoBySourceId(eventInfo.mId1);
     mGenerationInfoList.deleteGenerationInfoListBySourceId(eventInfo.mId1);
@@ -3673,7 +3882,7 @@ void CacheImplementation::event_producerListDeletedBySourceId(T::EventInfo& even
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3698,7 +3907,7 @@ void CacheImplementation::event_generationAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3716,7 +3925,10 @@ void CacheImplementation::event_generationDeleted(T::EventInfo& eventInfo)
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoByGenerationId(eventInfo.mId1);
+    {
+      if (mContentInfoListEnabled[t])
+        mContentInfoList[t].deleteContentInfoByGenerationId(eventInfo.mId1);
+    }
 
     mFileInfoList.deleteFileInfoByGenerationId(eventInfo.mId1);
 
@@ -3724,7 +3936,7 @@ void CacheImplementation::event_generationDeleted(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3745,7 +3957,7 @@ void CacheImplementation::event_generationStatusChanged(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3763,14 +3975,17 @@ void CacheImplementation::event_generationListDeletedByProducerId(T::EventInfo& 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoByProducerId(eventInfo.mId1);
+    {
+      if (mContentInfoListEnabled[t])
+        mContentInfoList[t].deleteContentInfoByProducerId(eventInfo.mId1);
+    }
 
     mFileInfoList.deleteFileInfoByProducerId(eventInfo.mId1);
     mGenerationInfoList.deleteGenerationInfoListByProducerId(eventInfo.mId1);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3788,14 +4003,17 @@ void CacheImplementation::event_generationListDeletedBySourceId(T::EventInfo& ev
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
+    {
+      if (mContentInfoListEnabled[t])
+        mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
+    }
 
     mFileInfoList.deleteFileInfoBySourceId(eventInfo.mId1);
     mGenerationInfoList.deleteGenerationInfoListBySourceId(eventInfo.mId1);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3894,7 +4112,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3925,7 +4143,7 @@ void CacheImplementation::event_fileDeleted(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -3949,16 +4167,21 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
       T::FileInfo *info = mFileInfoList.getFileInfoById(eventInfo.mId1);
       if (info != NULL)
       {
+        mContentDeleteCount += mContentInfoList[0].markDeletedByFileId(info->mFileId);
+
         // ToDo: Deleting content one by one is quite slow. It would
         // be smarter to mark content records as deleted instead, and
         // remove them time to time.
 
         //unsigned long long startTime = getTime();
-
+/*
         for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-          mContentInfoList[t].deleteContentInfoByFileId(eventInfo.mId1);
+        {
+          if (mContentInfoListEnabled[t])
+            mContentInfoList[t].deleteContentInfoByFileId(eventInfo.mId1);
+        }
 
-
+*/
         //unsigned long long endTime = getTime();
         //printf("DTIME : %f sec\n",(float)(endTime-startTime)/1000000);
 
@@ -3983,7 +4206,10 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
             T::ContentInfo *cInfo = info->duplicate();
 
             for (int t=0; t<CONTENT_LIST_COUNT; t++)
-              mContentInfoList[t].addContentInfo(cInfo);
+            {
+              if (mContentInfoListEnabled[t])
+                mContentInfoList[t].addContentInfo(cInfo);
+            }
           }
 
           //unsigned long long endTime = getTime();
@@ -3994,7 +4220,7 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4012,13 +4238,16 @@ void CacheImplementation::event_fileListDeletedByGroupFlags(T::EventInfo& eventI
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoByGroupFlags(eventInfo.mId1);
+    {
+      if (mContentInfoListEnabled[t])
+        mContentInfoList[t].deleteContentInfoByGroupFlags(eventInfo.mId1);
+    }
 
     mFileInfoList.deleteFileInfoByGroupFlags(eventInfo.mId1);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4036,13 +4265,16 @@ void CacheImplementation::event_fileListDeletedByProducerId(T::EventInfo& eventI
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoByProducerId(eventInfo.mId1);
+    {
+      if (mContentInfoListEnabled[t])
+        mContentInfoList[t].deleteContentInfoByProducerId(eventInfo.mId1);
+    }
 
     mFileInfoList.deleteFileInfoByProducerId(eventInfo.mId1);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4060,13 +4292,16 @@ void CacheImplementation::event_fileListDeletedByGenerationId(T::EventInfo& even
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoByGenerationId(eventInfo.mId1);
+    {
+      if (mContentInfoListEnabled[t])
+        mContentInfoList[t].deleteContentInfoByGenerationId(eventInfo.mId1);
+    }
 
     mFileInfoList.deleteFileInfoByGenerationId(eventInfo.mId1);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4085,13 +4320,16 @@ void CacheImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventInf
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
+    {
+      if (mContentInfoListEnabled[t])
+        mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
+    }
 
     mFileInfoList.deleteFileInfoBySourceId(eventInfo.mId1);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4109,11 +4347,14 @@ void CacheImplementation::event_contentListDeletedByFileId(T::EventInfo& eventIn
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoByFileId(eventInfo.mId1);
+    {
+      if (mContentInfoListEnabled[t])
+        mContentInfoList[t].deleteContentInfoByFileId(eventInfo.mId1);
+    }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4131,11 +4372,14 @@ void CacheImplementation::event_contentListDeletedByGroupFlags(T::EventInfo& eve
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoByGroupFlags(eventInfo.mId1);
+    {
+      if (mContentInfoListEnabled[t])
+        mContentInfoList[t].deleteContentInfoByGroupFlags(eventInfo.mId1);
+    }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4153,11 +4397,14 @@ void CacheImplementation::event_contentListDeletedByProducerId(T::EventInfo& eve
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoByProducerId(eventInfo.mId1);
+    {
+      if (mContentInfoListEnabled[t])
+        mContentInfoList[t].deleteContentInfoByProducerId(eventInfo.mId1);
+    }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4175,11 +4422,14 @@ void CacheImplementation::event_contentListDeletedBySourceId(T::EventInfo& event
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
+    {
+      if (mContentInfoListEnabled[t])
+        mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
+    }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4197,11 +4447,13 @@ void CacheImplementation::event_contentListDeletedByGenerationId(T::EventInfo& e
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+    {
       mContentInfoList[t].deleteContentInfoByGenerationId(eventInfo.mId1);
+    }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4227,7 +4479,7 @@ void CacheImplementation::event_dataServerAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4251,7 +4503,7 @@ void CacheImplementation::event_dataServerDeleted(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4275,7 +4527,10 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
       T::ContentInfo *cInfo = contentInfo.duplicate();
 
       for (int t=0; t<CONTENT_LIST_COUNT; t++)
-        mContentInfoList[t].addContentInfo(cInfo);
+      {
+        if (mContentInfoListEnabled[t])
+          mContentInfoList[t].addContentInfo(cInfo);
+      }
     }
     else
     {
@@ -4284,7 +4539,7 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4305,12 +4560,15 @@ void CacheImplementation::event_contentDeleted(T::EventInfo& eventInfo)
     if (contentInfo != NULL)
     {
       for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-        mContentInfoList[t].deleteContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
+      {
+        if (mContentInfoListEnabled[t])
+          mContentInfoList[t].deleteContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
+      }
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4349,7 +4607,7 @@ void CacheImplementation::event_contentRegistered(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4478,7 +4736,7 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4572,7 +4830,10 @@ void CacheImplementation::processEvents(bool eventThread)
       //printf("**** CONTENT ADD TO WAIT %u\n",mDelayedContentAddList.getLength());
 
       for (int t=1; t<CONTENT_LIST_COUNT; t++)
-        mContentInfoList[t].addContentInfoList(mDelayedContentAddList);
+      {
+        if (mContentInfoListEnabled[t])
+          mContentInfoList[t].addContentInfoList(mDelayedContentAddList);
+      }
 
       mDelayedContentAddList.clear();
 
@@ -4586,9 +4847,22 @@ void CacheImplementation::processEvents(bool eventThread)
       //printf("**** CONTENT DELETE TO WAIT %u\n",(uint)mDelayedContentDeleteList.size());
 
       for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-        mContentInfoList[t].deleteContentInfoByFileIdList(mDelayedContentDeleteList);
+      {
+        if (mContentInfoListEnabled[t])
+          mContentInfoList[t].deleteContentInfoByFileIdList(mDelayedContentDeleteList);
+      }
 
       mDelayedContentDeleteList.clear();
+    }
+
+
+    if (mContentDeleteCount > 1000)
+    {
+      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+      {
+        mContentInfoList[t].deleteMarkedContent();
+      }
+      mContentDeleteCount = 0;
     }
 
 
@@ -4602,7 +4876,7 @@ void CacheImplementation::processEvents(bool eventThread)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4623,7 +4897,7 @@ void CacheImplementation::eventProcessingThread()
       }
       catch (...)
       {
-        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+        Spine::Exception exception(BCP,exception_operation_failed,NULL);
         exception.printError();
       }
 
@@ -4636,7 +4910,7 @@ void CacheImplementation::eventProcessingThread()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 
@@ -4676,7 +4950,7 @@ void CacheImplementation::saveData()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 

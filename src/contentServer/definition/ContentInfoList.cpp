@@ -18,9 +18,8 @@ namespace T
 
 ThreadLock ContentInfoList_sortLock;
 
-
-
 ContentInfo::ComparisonMethod contentInfo_comparisonMethod = ContentInfo::ComparisonMethod::none;
+
 
 
 int contentInfo_compare(const void *_val1,const void *_val2)
@@ -220,65 +219,6 @@ void ContentInfoList::addContentInfo(ContentInfo *contentInfo)
 
 
 
-#if 0
-void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    AutoWriteLock lock(&mModificationLock);
-    uint len = contentInfoList.getLength();
-
-    if (mArray == NULL  ||  mLength == mSize  ||  (mLength + len) > mSize)
-    {
-      increaseSize(mLength + len + 10);
-    }
-
-    for (uint t=0; t<len; t++)
-    {
-      ContentInfo *cInfo = contentInfoList.getContentInfoByIndex(t);
-      ContentInfo *contentInfo = cInfo->duplicate();
-
-      if (mComparisonMethod == ContentInfo::ComparisonMethod::none)
-      {
-        mArray[mLength] = contentInfo;
-        mLength++;
-      }
-      else
-      {
-        int idx = getClosestIndexNoLock(mComparisonMethod,*contentInfo);
-
-        while (idx < (int)mLength  &&  mArray[idx] != NULL  &&   mArray[idx]->compare(mComparisonMethod,contentInfo) < 0)
-        {
-          idx++;
-        }
-
-        if (idx == (int)mLength)
-        {
-          mArray[mLength] = contentInfo;
-          mLength++;
-        }
-        else
-        {
-          if (idx < (int)mLength)
-            memmove(&mArray[idx+1],&mArray[idx],sizeof(void*)*(mLength-idx));
-
-          mArray[idx] = contentInfo;
-          mLength++;
-        }
-      }
-    }
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
-}
-#endif
-
-
-
-
 
 void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
 {
@@ -453,6 +393,39 @@ void ContentInfoList::clear()
 
 
 
+bool ContentInfoList::containsSameForecastTimes()
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::set<std::string> timeList;
+
+    AutoReadLock lock(&mModificationLock);
+
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0)
+      {
+        if (timeList.find(info->mForecastTime) != timeList.end())
+          return true;
+
+        timeList.insert(info->mForecastTime);
+      }
+    }
+
+    return false;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 uint ContentInfoList::deleteContentInfoByFileId(uint fileId)
 {
   FUNCTION_TRACE
@@ -466,7 +439,7 @@ uint ContentInfoList::deleteContentInfoByFileId(uint fileId)
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info != NULL  &&  info->mFileId == fileId)
+      if (info != NULL  &&  (info->mFileId == fileId  ||  (info->mFlags & CONTENT_INFO_DELETED) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -492,6 +465,96 @@ uint ContentInfoList::deleteContentInfoByFileId(uint fileId)
 
 
 
+uint ContentInfoList::deleteMarkedContent()
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+
+    uint p = 0;
+    uint count = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      mArray[t] = NULL;
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) != 0)
+      {
+        if (mReleaseObjects)
+          delete info;
+
+        count++;
+      }
+      else
+      {
+        mArray[p] = info;
+        p++;
+      }
+    }
+    mLength = p;
+    return count;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+uint ContentInfoList::markDeletedByFileId(uint fileId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+
+    uint cnt = 0;
+    if (mComparisonMethod == ContentInfo::ComparisonMethod::file_message)
+    {
+      ContentInfo info;
+      info.mFileId = fileId;
+      info.mMessageIndex = 0;
+      int idx = getClosestIndexNoLock(mComparisonMethod,info);
+      uint t = 0;
+      if (idx >= 0)
+        t = (uint)idx;
+
+      while (t < mLength)
+      {
+        ContentInfo *info = mArray[t];
+        if (info != NULL)
+        {
+          if (info->mFileId > fileId)
+            return cnt;
+
+          if (info->mFileId == fileId)
+          {
+            info->mFlags = info->mFlags | CONTENT_INFO_DELETED;
+            cnt++;
+          }
+        }
+        t++;
+      }
+      return cnt;
+    }
+
+
+    // The array is not sorted, so we should just remove the content.
+
+    return deleteContentInfoByFileId(fileId);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
 uint ContentInfoList::deleteContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex)
 {
   FUNCTION_TRACE
@@ -505,7 +568,7 @@ uint ContentInfoList::deleteContentInfoByFileIdAndMessageIndex(uint fileId,uint 
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info != NULL  &&  info->mFileId == fileId  &&  info->mMessageIndex == messageIndex)
+      if (info != NULL  &&  ((info->mFileId == fileId  &&  info->mMessageIndex == messageIndex)  ||  (info->mFlags & CONTENT_INFO_DELETED) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -542,7 +605,7 @@ uint ContentInfoList::deleteContentInfoByGroupFlags(uint groupFlags)
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info != NULL  &&  (info->mGroupFlags & groupFlags) != 0)
+      if (info != NULL  &&  ((info->mGroupFlags & groupFlags) != 0  ||  (info->mFlags & CONTENT_INFO_DELETED) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -579,7 +642,7 @@ uint ContentInfoList::deleteContentInfoByProducerId(uint producerId)
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info != NULL &&  info->mProducerId == producerId)
+      if (info != NULL  &&  (info->mProducerId == producerId  ||  (info->mFlags & CONTENT_INFO_DELETED) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -617,7 +680,7 @@ uint ContentInfoList::deleteContentInfoByGenerationId(uint generationId)
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info != NULL  &&  info->mGenerationId == generationId)
+      if (info != NULL  &&  (info->mGenerationId == generationId  ||  (info->mFlags & CONTENT_INFO_DELETED) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -655,7 +718,7 @@ uint ContentInfoList::deleteContentInfoByGenerationAndGeometry(uint generationId
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info != NULL  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)
+      if (info != NULL  &&  ((info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)  ||  (info->mFlags & CONTENT_INFO_DELETED) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -693,7 +756,7 @@ uint ContentInfoList::deleteContentInfoByGenerationGeometryAndStartTime(uint gen
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info != NULL  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId  &&  info->mForecastTime == startTime)
+      if (info != NULL  &&  ((info->mGenerationId == generationId  &&  info->mGeometryId == geometryId  &&  info->mForecastTime == startTime)  ||  (info->mFlags & CONTENT_INFO_DELETED) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -731,7 +794,7 @@ uint ContentInfoList::deleteContentInfoBySourceId(uint sourceId)
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info != NULL &&  info->mSourceId == sourceId)
+      if (info != NULL &&  (info->mSourceId == sourceId  ||  (info->mFlags & CONTENT_INFO_DELETED) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -769,7 +832,7 @@ uint ContentInfoList::deleteContentInfoByFileIdList(std::set<uint>& fileIdList)
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info != NULL &&  fileIdList.find(info->mFileId) != fileIdList.end())
+      if (info != NULL  &&  (fileIdList.find(info->mFileId) != fileIdList.end()  ||  (info->mFlags & CONTENT_INFO_DELETED) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -806,7 +869,7 @@ void ContentInfoList::keepContentInfoByGeometryIdList(std::set<T::GeometryId>& g
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info != NULL &&  geometryIdList.find(info->mGeometryId) == geometryIdList.end())
+      if (info != NULL &&  ((info->mFlags & CONTENT_INFO_DELETED) != 0  ||  geometryIdList.find(info->mGeometryId) == geometryIdList.end()))
       {
         if (mReleaseObjects)
           delete info;
@@ -840,7 +903,7 @@ void ContentInfoList::keepContentInfoByGeometryId(T::GeometryId geometryId)
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info != NULL &&  info->mGeometryId != geometryId)
+      if (info != NULL &&  ((info->mFlags & CONTENT_INFO_DELETED) != 0 ||  info->mGeometryId != geometryId))
       {
         if (mReleaseObjects)
           delete info;
@@ -874,7 +937,7 @@ void ContentInfoList::keepContentInfoByGroupFlags(uint groupFlags)
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info != NULL &&  (info->mGroupFlags & groupFlags) == 0)
+      if (info != NULL  && ((info->mFlags & CONTENT_INFO_DELETED) != 0 || (info->mGroupFlags & groupFlags) == 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -908,7 +971,7 @@ void ContentInfoList::keepContentInfoByProducerId(uint producerId)
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info != NULL &&  info->mProducerId != producerId)
+      if (info != NULL  &&  ((info->mFlags & CONTENT_INFO_DELETED) != 0 || info->mProducerId != producerId))
       {
         if (mReleaseObjects)
           delete info;
@@ -942,7 +1005,7 @@ void ContentInfoList::keepContentInfoByGenerationId(uint generationId)
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info != NULL &&  info->mGenerationId != generationId)
+      if (info != NULL  &&  ((info->mFlags & CONTENT_INFO_DELETED) != 0 || info->mGenerationId != generationId))
       {
         if (mReleaseObjects)
           delete info;
@@ -976,7 +1039,7 @@ void ContentInfoList::keepContentInfoBySourceId(uint sourceId)
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info != NULL &&  info->mSourceId != sourceId)
+      if (info != NULL  &&  ((info->mFlags & CONTENT_INFO_DELETED) != 0 ||  info->mSourceId != sourceId))
       {
         if (mReleaseObjects)
           delete info;
@@ -1138,7 +1201,7 @@ void ContentInfoList::getContentListByForecastTime(std::string forecastTime,T::C
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0)
       {
         if (info->mForecastTime <= forecastTime)
         {
@@ -1155,9 +1218,18 @@ void ContentInfoList::getContentListByForecastTime(std::string forecastTime,T::C
 
     if (prevInfo != NULL  &&  (nextInfo != NULL  ||  prevInfo->mForecastTime == forecastTime))
     {
-      contentInfoList.addContentInfo(prevInfo->duplicate());
+      if (contentInfoList.getReleaseObjects())
+        contentInfoList.addContentInfo(prevInfo->duplicate());
+      else
+        contentInfoList.addContentInfo(prevInfo);
+
       if (nextInfo != NULL  &&  prevInfo->mForecastTime != forecastTime)
-        contentInfoList.addContentInfo(nextInfo->duplicate());
+      {
+        if (contentInfoList.getReleaseObjects())
+          contentInfoList.addContentInfo(nextInfo->duplicate());
+        else
+          contentInfoList.addContentInfo(nextInfo);
+      }
     }
   }
   catch (...)
@@ -1283,7 +1355,8 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,
     if (idx < 0  ||  (uint)idx >= mLength)
       return NULL;
 
-    if (mArray[idx] != NULL &&  mArray[idx]->mFileId == fileId  &&  mArray[idx]->mMessageIndex == messageIndex)
+    T::ContentInfo *info = mArray[idx];
+    if (info != NULL &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mFileId == fileId  &&  info->mMessageIndex == messageIndex)
       return mArray[idx];
 
     return NULL;
@@ -1312,9 +1385,10 @@ bool ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,uint mes
     if (idx < 0 ||  (uint)idx >= mLength)
       return NULL;
 
-    if (mArray[idx] != NULL  &&  mArray[idx]->mFileId == fileId  &&  mArray[idx]->mMessageIndex == messageIndex)
+    T::ContentInfo *info = mArray[idx];
+    if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mFileId == fileId  &&  info->mMessageIndex == messageIndex  )
     {
-      contentInfo = *mArray[idx];
+      contentInfo = *info;
       return true;
     }
 
@@ -1379,7 +1453,7 @@ ContentInfo* ContentInfoList::getContentInfoByParameterLevelInfo(T::ParameterLev
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  info->mParameterLevel == levelInfo.mLevel)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mParameterLevel == levelInfo.mLevel)
       {
         if ((levelInfo.mParameterKeyType == T::ParamKeyType::FMI_ID  &&  info->mFmiParameterId == levelInfo.mParameterKey) ||
             (levelInfo.mParameterKeyType == T::ParamKeyType::FMI_NAME  &&  info->mFmiParameterName == levelInfo.mParameterKey) ||
@@ -1425,7 +1499,7 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelIn
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  info->mParameterLevel == levelInfo.mLevel)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mParameterLevel == levelInfo.mLevel)
       {
         if ((levelInfo.mParameterKeyType == T::ParamKeyType::FMI_ID  &&  info->mFmiParameterId == levelInfo.mParameterKey) ||
             (levelInfo.mParameterKeyType == T::ParamKeyType::FMI_NAME  &&  info->mFmiParameterName == levelInfo.mParameterKey) ||
@@ -1438,19 +1512,28 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelIn
           if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdType::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdType::FMI) &&
               info->mFmiParameterLevelId == levelInfo.mParameterLevelId)
           {
-            contentInfoList.addContentInfo(info->duplicate());
+            if (contentInfoList.getReleaseObjects())
+              contentInfoList.addContentInfo(info->duplicate());
+            else
+              contentInfoList.addContentInfo(info);
           }
 
           if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdType::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdType::GRIB1) &&
               info->mGrib1ParameterLevelId == levelInfo.mParameterLevelId)
           {
-            contentInfoList.addContentInfo(info->duplicate());
+            if (contentInfoList.getReleaseObjects())
+              contentInfoList.addContentInfo(info->duplicate());
+            else
+              contentInfoList.addContentInfo(info);
           }
 
           if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdType::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdType::GRIB2) &&
               info->mGrib2ParameterLevelId == levelInfo.mParameterLevelId)
           {
-            contentInfoList.addContentInfo(info->duplicate());
+            if (contentInfoList.getReleaseObjects())
+              contentInfoList.addContentInfo(info->duplicate());
+            else
+              contentInfoList.addContentInfo(info);
           }
         }
       }
@@ -1489,15 +1572,18 @@ void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex
     for (uint t=(uint)startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0)
       {
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(info->duplicate());
-        else
-          contentInfoList.addContentInfo(info);
+        if (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex))
+        {
+          if (contentInfoList.getReleaseObjects())
+            contentInfoList.addContentInfo(info->duplicate());
+          else
+            contentInfoList.addContentInfo(info);
 
-        if (contentInfoList.getLength() >= maxRecords)
-          return;
+          if (contentInfoList.getLength() >= maxRecords)
+            return;
+        }
       }
     }
   }
@@ -1535,15 +1621,18 @@ void ContentInfoList::getContentInfoListByGroupFlags(uint groupFlags,uint startF
     {
       ContentInfo *info = mArray[t];
 
-      if (info != NULL  &&  ((info->mGroupFlags & groupFlags) != 0 && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex))))
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0)
       {
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(info->duplicate());
-        else
-          contentInfoList.addContentInfo(info);
+        if ((info->mGroupFlags & groupFlags) != 0  &&  (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+        {
+          if (contentInfoList.getReleaseObjects())
+            contentInfoList.addContentInfo(info->duplicate());
+          else
+            contentInfoList.addContentInfo(info);
 
-        if (contentInfoList.getLength() >= maxRecords)
-          return;
+          if (contentInfoList.getLength() >= maxRecords)
+            return;
+        }
       }
     }
   }
@@ -1570,7 +1659,7 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint generationId,T::
     {
       ContentInfo *info = mArray[t];
 
-      if (info != NULL  &&  info->mGenerationId == generationId)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mGenerationId == generationId)
       {
         switch (parameterKeyType)
         {
@@ -1637,7 +1726,7 @@ void ContentInfoList::getContentGeometryIdListByGenerationId(uint generationId,s
     {
       ContentInfo *info = mArray[t];
 
-      if (info != NULL  &&  info->mGenerationId == generationId)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mGenerationId == generationId)
       {
         if (geometryIdList.find(info->mGeometryId) == geometryIdList.end())
         {
@@ -1668,7 +1757,7 @@ void ContentInfoList::getContentGeometryIdList(std::set<T::GeometryId>& geometry
     {
       ContentInfo *info = mArray[t];
 
-      if (info != NULL)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0)
       {
         if (geometryIdList.find(info->mGeometryId) == geometryIdList.end())
         {
@@ -1699,7 +1788,7 @@ void ContentInfoList::getGenerationIdListByGeometryId(T::GeometryId geometryId,s
     {
       ContentInfo *info = mArray[t];
 
-      if (info != NULL  &&  info->mGeometryId == geometryId)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mGeometryId == geometryId)
       {
         if (generationIdList.find(info->mGenerationId) == generationIdList.end())
         {
@@ -1738,15 +1827,18 @@ void ContentInfoList::getContentInfoListByFileId(uint fileId,ContentInfoList& co
       while (t < mLength)
       {
         ContentInfo *info = mArray[t];
-        if (info != NULL &&  info->mFileId > fileId)
-          return;
-
-        if (info != NULL  &&  info->mFileId == fileId)
+        if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0)
         {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
+          if (info->mFileId > fileId)
+            return;
+
+          if (info->mFileId == fileId)
+          {
+            if (contentInfoList.getReleaseObjects())
+              contentInfoList.addContentInfo(info->duplicate());
+            else
+              contentInfoList.addContentInfo(info);
+          }
         }
         t++;
       }
@@ -1757,7 +1849,7 @@ void ContentInfoList::getContentInfoListByFileId(uint fileId,ContentInfoList& co
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  info->mFileId == fileId)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mFileId == fileId)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -1786,7 +1878,7 @@ void ContentInfoList::getContentInfoListByGeometryId(T::GeometryId geometryId,Co
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  info->mGeometryId == geometryId)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mGeometryId == geometryId)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -1824,15 +1916,18 @@ void ContentInfoList::getContentInfoListByStartTime(std::string startTime,Conten
       while (t < mLength)
       {
         ContentInfo *info = mArray[t];
-        if (info != NULL &&  info->mForecastTime > startTime)
-          return;
-
-        if (info != NULL  &&  info->mForecastTime == startTime)
+        if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0)
         {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
+          if (info->mForecastTime > startTime)
+            return;
+
+          if (info->mForecastTime == startTime)
+          {
+            if (contentInfoList.getReleaseObjects())
+              contentInfoList.addContentInfo(info->duplicate());
+            else
+              contentInfoList.addContentInfo(info);
+          }
         }
         t++;
       }
@@ -1843,7 +1938,7 @@ void ContentInfoList::getContentInfoListByStartTime(std::string startTime,Conten
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  info->mForecastTime == startTime)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mForecastTime == startTime)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -1870,7 +1965,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  info->mGribParameterId == gribParameterId)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mGribParameterId == gribParameterId)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -1957,44 +2052,46 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (strcasecmp(info->mGribParameterId.c_str(),gribParameterId.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (strcasecmp(info->mGribParameterId.c_str(),gribParameterId.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -2005,7 +2102,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  && (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -2108,47 +2205,49 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (strcasecmp(info->mGribParameterId.c_str(),gribParameterId.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (strcasecmp(info->mGribParameterId.c_str(),gribParameterId.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if (info->mGenerationId == generationId)
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                  if (info->mGenerationId == generationId)
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                      prev = info;
-
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                      next = info;
-
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                        (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                        (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                        (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                     {
-                      if (contentInfoList.getReleaseObjects())
-                        contentInfoList.addContentInfo(info->duplicate());
-                      else
-                        contentInfoList.addContentInfo(info);
+                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                        prev = info;
+
+                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                        next = info;
+
+                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      {
+                        if (contentInfoList.getReleaseObjects())
+                          contentInfoList.addContentInfo(info->duplicate());
+                        else
+                          contentInfoList.addContentInfo(info);
+                      }
                     }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  && (prev->mFlags & CONTENT_INFO_DELETED) == 0 &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -2159,7 +2258,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  && (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -2262,44 +2361,46 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (info->mProducerId == producerId && strcasecmp(info->mGribParameterId.c_str(),gribParameterId.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (info->mProducerId == producerId && strcasecmp(info->mGribParameterId.c_str(),gribParameterId.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -2310,7 +2411,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  &&  (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -2354,7 +2455,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL &&  info->mFmiParameterId == fmiParameterId)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mFmiParameterId == fmiParameterId)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -2441,44 +2542,46 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (strcasecmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (strcasecmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -2489,7 +2592,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  &&  (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -2592,47 +2695,49 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (strcasecmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (strcasecmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if (info->mGenerationId == generationId)
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                  if (info->mGenerationId == generationId)
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                      prev = info;
-
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                      next = info;
-
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                        (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                        (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                        (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                     {
-                      if (contentInfoList.getReleaseObjects())
-                        contentInfoList.addContentInfo(info->duplicate());
-                      else
-                        contentInfoList.addContentInfo(info);
+                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                        prev = info;
+
+                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                        next = info;
+
+                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      {
+                        if (contentInfoList.getReleaseObjects())
+                          contentInfoList.addContentInfo(info->duplicate());
+                        else
+                          contentInfoList.addContentInfo(info);
+                      }
                     }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -2643,7 +2748,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  &&  (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -2745,44 +2850,46 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (info->mProducerId == producerId  &&  strcasecmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (info->mProducerId == producerId  &&  strcasecmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -2793,7 +2900,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  &&  (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -2897,45 +3004,47 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          //printf("-- INDEX %u %s %u\n",idx,mArray[t]->mFmiParameterName.c_str(),mArray[t]->mParameterLevel);
-          if (strcasecmp(info->mFmiParameterName.c_str(),fmiParameterName.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            //printf("-- INDEX %u %s %u\n",idx,mArray[t]->mFmiParameterName.c_str(),mArray[t]->mParameterLevel);
+            if (strcasecmp(info->mFmiParameterName.c_str(),fmiParameterName.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -2946,7 +3055,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  &&  (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -3048,47 +3157,49 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (strcasecmp(info->mFmiParameterName.c_str(),fmiParameterName.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (strcasecmp(info->mFmiParameterName.c_str(),fmiParameterName.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if (info->mGenerationId == generationId)
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                  if (info->mGenerationId == generationId)
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                      prev = info;
-
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                      next = info;
-
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                        (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                        (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                        (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                     {
-                      if (contentInfoList.getReleaseObjects())
-                        contentInfoList.addContentInfo(info->duplicate());
-                      else
-                        contentInfoList.addContentInfo(info);
+                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                        prev = info;
+
+                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                        next = info;
+
+                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      {
+                        if (contentInfoList.getReleaseObjects())
+                          contentInfoList.addContentInfo(info->duplicate());
+                        else
+                          contentInfoList.addContentInfo(info);
+                      }
                     }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -3099,7 +3210,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  &&  (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -3202,44 +3313,46 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (info->mProducerId == producerId && strcasecmp(info->mFmiParameterName.c_str(),fmiParameterName.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (info->mProducerId == producerId && strcasecmp(info->mFmiParameterName.c_str(),fmiParameterName.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -3250,7 +3363,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  &&  (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -3353,44 +3466,46 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (strcasecmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (strcasecmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -3401,7 +3516,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  &&  (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -3504,47 +3619,49 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (strcasecmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (strcasecmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if (info->mGenerationId == generationId)
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                  if (info->mGenerationId == generationId)
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                      prev = info;
-
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                      next = info;
-
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                        (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                        (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                        (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                     {
-                      if (contentInfoList.getReleaseObjects())
-                        contentInfoList.addContentInfo(info->duplicate());
-                      else
-                        contentInfoList.addContentInfo(info);
+                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                        prev = info;
+
+                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                        next = info;
+
+                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      {
+                        if (contentInfoList.getReleaseObjects())
+                          contentInfoList.addContentInfo(info->duplicate());
+                        else
+                          contentInfoList.addContentInfo(info);
+                      }
                     }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -3555,7 +3672,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  &&  (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -3658,44 +3775,46 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (info->mProducerId == producerId  &&  strcasecmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (info->mProducerId == producerId  &&  strcasecmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -3706,7 +3825,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  &&  (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -3808,44 +3927,46 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -3856,7 +3977,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  &&  (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -3888,115 +4009,6 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
 }
 
 
-
-
-#if 0
-void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newbaseParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList)
-{
-  try
-  {
-    AutoReadLock lock(&mModificationLock);
-
-    ContentInfo *prev = NULL;
-    ContentInfo *next = NULL;
-
-    if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseName_level_starttime_file_message)
-    {
-      ContentInfo info;
-      info.mNewbaseParameterName = newbaseParameterName;
-      //info.mParameterLevel = minLevel;
-      int idx = getClosestIndexNoLock(mComparisonMethod,info);
-
-      for (uint t=(uint)idx; t<mLength; t++)
-      {
-        ContentInfo *info = mArray[t];
-        if (strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0  && ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel)))
-        {
-          if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-              (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-              (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-              (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-              (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
-          {
-            if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-              prev = info;
-
-            if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-              next = info;
-
-            if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
-            {
-              if (contentInfoList.getReleaseObjects())
-                contentInfoList.addContentInfo(info->duplicate());
-              else
-                contentInfoList.addContentInfo(info);
-            }
-          }
-        }
-
-        if (t > (uint)idx)
-        {
-          if (strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0  || (strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0  &&  info->mParameterLevel > maxLevel))
-          {
-            t = mLength;
-          }
-        }
-      }
-    }
-    else
-    {
-
-      for (uint t=0; t<mLength; t++)
-      {
-        ContentInfo *info = mArray[t];
-        if (strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0  && ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel)))
-        {
-          if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-            (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-            (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-            (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-            (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
-          {
-            if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-              prev = info;
-
-            if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-              next = info;
-
-            if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
-            {
-              if (contentInfoList.getReleaseObjects())
-                contentInfoList.addContentInfo(info->duplicate());
-              else
-                contentInfoList.addContentInfo(info);
-            }
-          }
-        }
-      }
-    }
-
-    if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
-    {
-      if (contentInfoList.getReleaseObjects())
-        contentInfoList.addContentInfo(prev->duplicate());
-      else
-        contentInfoList.addContentInfo(prev);
-    }
-
-    if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
-    {
-      if (contentInfoList.getReleaseObjects())
-        contentInfoList.addContentInfo(next->duplicate());
-      else
-        contentInfoList.addContentInfo(next);
-    }
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
-}
-#endif
 
 
 
@@ -4068,47 +4080,49 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if (info->mGenerationId == generationId)
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                  if (info->mGenerationId == generationId)
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                      prev = info;
-
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                      next = info;
-
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                        (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                        (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                        (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                     {
-                      if (contentInfoList.getReleaseObjects())
-                        contentInfoList.addContentInfo(info->duplicate());
-                      else
-                        contentInfoList.addContentInfo(info);
+                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                        prev = info;
+
+                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                        next = info;
+
+                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      {
+                        if (contentInfoList.getReleaseObjects())
+                          contentInfoList.addContentInfo(info->duplicate());
+                        else
+                          contentInfoList.addContentInfo(info);
+                      }
                     }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -4119,7 +4133,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  &&  (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -4222,44 +4236,46 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (info->mProducerId == producerId &&  strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (info->mProducerId == producerId &&  strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -4270,7 +4286,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  &&  (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -4373,44 +4389,46 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (strcasecmp(info->mCdmParameterId.c_str(),cdmParameterId.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (strcasecmp(info->mCdmParameterId.c_str(),cdmParameterId.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -4421,7 +4439,7 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  &&  (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -4524,47 +4542,49 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (strcasecmp(info->mCdmParameterId.c_str(),cdmParameterId.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (strcasecmp(info->mCdmParameterId.c_str(),cdmParameterId.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if (info->mGenerationId == generationId)
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                  if (info->mGenerationId == generationId)
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                      prev = info;
-
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                      next = info;
-
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                        (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                        (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                        (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                     {
-                      if (contentInfoList.getReleaseObjects())
-                        contentInfoList.addContentInfo(info->duplicate());
-                      else
-                        contentInfoList.addContentInfo(info);
+                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                        prev = info;
+
+                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                        next = info;
+
+                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      {
+                        if (contentInfoList.getReleaseObjects())
+                          contentInfoList.addContentInfo(info->duplicate());
+                        else
+                          contentInfoList.addContentInfo(info);
+                      }
                     }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -4575,7 +4595,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  &&  (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -4678,44 +4698,46 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (info->mProducerId == producerId  &&  strcasecmp(info->mCdmParameterId.c_str(),cdmParameterId.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (info->mProducerId == producerId  &&  strcasecmp(info->mCdmParameterId.c_str(),cdmParameterId.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -4726,7 +4748,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  &&  (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -4829,44 +4851,46 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (strcasecmp(info->mCdmParameterName.c_str(),cdmParameterName.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (strcasecmp(info->mCdmParameterName.c_str(),cdmParameterName.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -4980,47 +5004,49 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (strcasecmp(info->mCdmParameterName.c_str(),cdmParameterName.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (strcasecmp(info->mCdmParameterName.c_str(),cdmParameterName.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if (info->mGenerationId == generationId)
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                  if (info->mGenerationId == generationId)
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                      prev = info;
-
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                      next = info;
-
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                        (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                        (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                        (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                     {
-                      if (contentInfoList.getReleaseObjects())
-                        contentInfoList.addContentInfo(info->duplicate());
-                      else
-                        contentInfoList.addContentInfo(info);
+                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                        prev = info;
+
+                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                        next = info;
+
+                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      {
+                        if (contentInfoList.getReleaseObjects())
+                          contentInfoList.addContentInfo(info->duplicate());
+                        else
+                          contentInfoList.addContentInfo(info);
+                      }
                     }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
 
-        if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+        if (prev != NULL  &&  (prev->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
         {
           // We need to add the previous entry before the start time. Notice that this must be
           // done in all requested levels.
@@ -5031,7 +5057,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
             contentInfoList.addContentInfo(prev);
         }
 
-        if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+        if (next != NULL  &&  (next->mFlags & CONTENT_INFO_DELETED) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
         {
           // We need to add the next entry after the end time. Notice that this must be
           // done in all requested levels.
@@ -5134,39 +5160,41 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
         while (t < mLength  &&  mArray[t] != NULL  &&  mArray[t]->mParameterLevel == level)
         {
           ContentInfo *info = mArray[t];
-          if (info->mProducerId == producerId  &&  strcasecmp(info->mCdmParameterName.c_str(),cdmParameterName.c_str()) == 0)
+          if ((info->mFlags & CONTENT_INFO_DELETED) == 0)
           {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (info->mProducerId == producerId  &&  strcasecmp(info->mCdmParameterName.c_str(),cdmParameterName.c_str()) == 0)
             {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                    (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
             }
-          }
-          else
-          {
-            if (t > (uint)idx)
-              t = mLength;
+            else
+            {
+              if (t > (uint)idx)
+                t = mLength;
+            }
           }
           t++;
         }
@@ -5228,7 +5256,6 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startF
       return;
     }
 
-
     AutoReadLock lock(&mModificationLock);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
@@ -5241,7 +5268,7 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startF
     for (uint t=(uint)startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  info->mProducerId == producerId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mProducerId == producerId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -5286,7 +5313,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint generationId,uint st
     for (uint t=(uint)startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  info->mGenerationId == generationId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mGenerationId == generationId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -5331,7 +5358,7 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(uint generatio
     for (uint t=(uint)startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -5363,7 +5390,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint generationId,std::st
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  info->mGenerationId == generationId  &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mGenerationId == generationId  &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -5409,7 +5436,7 @@ void ContentInfoList::getContentInfoListByServerId(uint serverId,uint startFileI
     for (uint t=(uint)startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mServerFlags & sf) != 0 && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  (info->mServerFlags & sf) != 0 && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -5455,7 +5482,7 @@ void ContentInfoList::getContentInfoListBySourceId(uint sourceId,uint startFileI
     for (uint t=(uint)startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  info->mSourceId == sourceId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mSourceId == sourceId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -5503,7 +5530,7 @@ void ContentInfoList::getContentInfoListByServerAndFileId(uint serverId,uint fil
         if (info != NULL  &&  info->mFileId > fileId)
           return;
 
-        if (info != NULL  &&  info->mFileId == fileId  &&  (info->mServerFlags & sf) != 0)
+        if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mFileId == fileId  &&  (info->mServerFlags & sf) != 0)
         {
           if (contentInfoList.getReleaseObjects())
             contentInfoList.addContentInfo(info->duplicate());
@@ -5518,7 +5545,7 @@ void ContentInfoList::getContentInfoListByServerAndFileId(uint serverId,uint fil
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  info->mFileId == fileId  &&  (info->mServerFlags & sf) != 0)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mFileId == fileId  &&  (info->mServerFlags & sf) != 0)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -5546,7 +5573,7 @@ void ContentInfoList::getFmiParamLevelIdListByFmiParameterId(T::ParamId fmiParam
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0)
       {
         uint vLen = (uint)paramLevelIdList.size();
         uint c = 0;
@@ -5595,7 +5622,7 @@ void ContentInfoList::getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0)
       {
         uint vLen = (uint)paramLevelList.size();
         uint c = 0;
@@ -5643,7 +5670,7 @@ void ContentInfoList::getParamLevelInfoListByFmiParameterId(T::ParamId fmiParame
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  info->mFmiParameterId == fmiParameterId)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mFmiParameterId == fmiParameterId)
       {
         ParameterLevelInfo *pInfo = parameterLevelInfoList.getParameterLevelInfo(T::ParamKeyType::FMI_ID,
             info->mFmiParameterId,T::ParamLevelIdType::FMI,info->mFmiParameterLevelId,info->mParameterLevel);
@@ -5675,7 +5702,7 @@ void ContentInfoList::getStartTimeList(std::set<std::string>& startTimeList)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0)
       {
         if (info != NULL)
         {
@@ -5708,7 +5735,7 @@ void ContentInfoList::getStartTimeListByGenerationAndGeometry(uint generationId,
       ContentInfo *info = mArray[t];
       if (info != NULL)
       {
-        if (info != NULL && info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)
+        if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)
         {
           if (startTimeList.find(info->mForecastTime) == startTimeList.end())
           {
@@ -5725,49 +5752,6 @@ void ContentInfoList::getStartTimeListByGenerationAndGeometry(uint generationId,
 }
 
 
-
-
-#if 0
-void ContentInfoList::getStartTimeList(std::vector<std::string>& startTimeList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    AutoReadLock lock(&mModificationLock);
-    for (uint t=0; t<mLength; t++)
-    {
-      ContentInfo *info = mArray[t];
-      if (info != NULL)
-      {
-        uint vLen = (uint)startTimeList.size();
-        uint c = 0;
-        while (c < vLen)
-        {
-          if (startTimeList[c] == info->mForecastTime)
-          {
-            c = vLen;
-          }
-          else
-          if (startTimeList[c] > info->mForecastTime)
-          {
-            startTimeList.insert(startTimeList.begin() + c,info->mForecastTime);
-            c = vLen;
-          }
-          c++;
-        }
-        if (c == vLen)
-        {
-          startTimeList.push_back(info->mForecastTime);
-        }
-      }
-    }
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
-}
-#endif
 
 
 
@@ -5953,7 +5937,7 @@ void ContentInfoList::writeToFile(std::string filename,const char *filemode)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0)
         fprintf(file,"%s\n",info->getCsv().c_str());
     }
 
@@ -5979,7 +5963,7 @@ void ContentInfoList::print(std::ostream& stream,uint level,uint optionFlags)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0)
         info->print(stream,level+1,optionFlags);
     }
   }

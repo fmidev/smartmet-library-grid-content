@@ -83,6 +83,7 @@ else
 	-I$(includedir) \
 	-I$(includedir)/smartmet \
 	-I$(includedir)/smartmet/grid-files \
+	-I /usr/include/lua5.3 \
 	$(pkg-config --cflags icu-i18n) \
 	$(CORBA_INCLUDE)
 
@@ -103,6 +104,7 @@ LIBS = -L$(libdir) \
 	-lboost_regex \
 	-lboost_system \
 	$(pkg-config --libs icu-i18n) \
+	-llua5.3 \
 	-lfmt \
 	-lctpp2 \
 	-lpthread -lrt \

@@ -27,6 +27,8 @@ class ContentInfoList
 
      void             clear();
 
+     bool             containsSameForecastTimes();
+
      uint             deleteContentInfoByFileId(uint fileId);
      uint             deleteContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex);
      uint             deleteContentInfoByGroupFlags(uint groupFlags);
@@ -36,6 +38,9 @@ class ContentInfoList
      uint             deleteContentInfoByGenerationGeometryAndStartTime(uint generationId,T::GeometryId geometryId,std::string startTime);
      uint             deleteContentInfoBySourceId(uint sourceId);
      uint             deleteContentInfoByFileIdList(std::set<uint>& fileIdList);
+     uint             deleteMarkedContent();
+     uint             markDeletedByFileId(uint fileId);
+
 
      void             keepContentInfoByGeometryIdList(std::set<T::GeometryId>& geometryIdList);
      void             keepContentInfoByGeometryId(T::GeometryId geometryId);

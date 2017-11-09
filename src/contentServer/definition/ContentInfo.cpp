@@ -390,6 +390,9 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
         if (res != 0)
           return res;
+        res = uint_compare(mFlags,contentInfo->mFlags);
+        if (res != 0)
+          return res;
         return 0;
 
       case ContentInfo::ComparisonMethod::gribId_level_starttime_file_message:
@@ -405,7 +408,10 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        if (res != 0)
+          return res;
+        return uint_compare(mFlags,contentInfo->mFlags);
 
       case ContentInfo::ComparisonMethod::fmiId_level_starttime_file_message:
         res = strcasecmp(mFmiParameterId.c_str(),contentInfo->mFmiParameterId.c_str());
@@ -420,7 +426,10 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        if (res != 0)
+          return res;
+        return uint_compare(mFlags,contentInfo->mFlags);
 
       case ContentInfo::ComparisonMethod::fmiName_level_starttime_file_message:
         res = strcasecmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
@@ -435,7 +444,10 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        if (res != 0)
+          return res;
+        return uint_compare(mFlags,contentInfo->mFlags);
 
       case ContentInfo::ComparisonMethod::newbaseId_level_starttime_file_message:
         res = strcasecmp(mNewbaseParameterId.c_str(),contentInfo->mNewbaseParameterId.c_str());
@@ -450,7 +462,10 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        if (res != 0)
+          return res;
+        return uint_compare(mFlags,contentInfo->mFlags);
 
       case ContentInfo::ComparisonMethod::newbaseName_level_starttime_file_message:
         res = strcasecmp(mNewbaseParameterName.c_str(),contentInfo->mNewbaseParameterName.c_str());
@@ -465,7 +480,10 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        if (res != 0)
+          return res;
+        return uint_compare(mFlags,contentInfo->mFlags);
 
       case ContentInfo::ComparisonMethod::cdmId_level_starttime_file_message:
         res = strcasecmp(mCdmParameterId.c_str(),contentInfo->mCdmParameterId.c_str());
@@ -480,7 +498,10 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        if (res != 0)
+          return res;
+        return uint_compare(mFlags,contentInfo->mFlags);
 
       case ContentInfo::ComparisonMethod::cdmName_level_starttime_file_message:
         res = strcasecmp(mCdmParameterName.c_str(),contentInfo->mCdmParameterName.c_str());
@@ -495,7 +516,10 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        if (res != 0)
+          return res;
+        return uint_compare(mFlags,contentInfo->mFlags);
 
       case ContentInfo::ComparisonMethod::starttime_file_message:
         res = strcasecmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
@@ -504,7 +528,10 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        if (res != 0)
+          return res;
+        return uint_compare(mFlags,contentInfo->mFlags);
 
       case ContentInfo::ComparisonMethod::fmiName_starttime_level_file_message:
         res = strcasecmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
@@ -519,7 +546,10 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        if (res != 0)
+          return res;
+        return uint_compare(mFlags,contentInfo->mFlags);
 
       case ContentInfo::ComparisonMethod::fmiId_fmiLevelId_level_starttime_file_message:
         res = strcasecmp(mFmiParameterId.c_str(),contentInfo->mFmiParameterId.c_str());
@@ -543,7 +573,10 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        if (res != 0)
+          return res;
+        return uint_compare(mFlags,contentInfo->mFlags);
 
       case ContentInfo::ComparisonMethod::starttime_fmiId_fmiLevelId_level_file_message:
         res = strcasecmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
@@ -567,7 +600,10 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        if (res != 0)
+          return res;
+        return uint_compare(mFlags,contentInfo->mFlags);
 
       case ContentInfo::ComparisonMethod::starttime_fmiName_fmiLevelId_level_file_message:
         res = strcasecmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
@@ -591,7 +627,10 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        if (res != 0)
+          return res;
+        return uint_compare(mFlags,contentInfo->mFlags);
 
       case ContentInfo::ComparisonMethod::generationId_starttime_file_message:
         res = uint_compare(mGenerationId,contentInfo->mGenerationId);
@@ -603,7 +642,10 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        if (res != 0)
+          return res;
+        return uint_compare(mFlags,contentInfo->mFlags);
 
       case ContentInfo::ComparisonMethod::fmiName_fmiLevelId_level_starttime_file_message:
         res = strcasecmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
@@ -627,7 +669,10 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        if (res != 0)
+          return res;
+        return uint_compare(mFlags,contentInfo->mFlags);
 
       default:
         res = uint_compare(mFileId,contentInfo->mFileId);
@@ -636,7 +681,7 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
         if (res != 0)
           return res;
-        return 0;
+        return uint_compare(mFlags,contentInfo->mFlags);
     }
     return 0;
   }

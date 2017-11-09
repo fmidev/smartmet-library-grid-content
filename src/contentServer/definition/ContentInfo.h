@@ -11,6 +11,8 @@ namespace T
 {
 
 
+#define CONTENT_INFO_DELETED   0x80000000
+
 
 class ContentInfo
 {

@@ -490,6 +490,28 @@ int ServiceInterface::getProducerInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+int ServiceInterface::getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getProducerNameAndGeometryList(sessionId,list);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,string[%u]);result %d;time %f;",__FUNCTION__,sessionId,(uint)list.size(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -2275,6 +2297,28 @@ int ServiceInterface::getContentListByParameterGenerationIdAndForecastTime(T::Se
 
 
 
+int ServiceInterface::getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getContentListOfInvalidIntegrity(sessionId,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,contentInfoList.getLength(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<T::GeometryId>& geometryIdList)
 {
   FUNCTION_TRACE
@@ -2569,6 +2613,15 @@ int ServiceInterface::_getProducerInfoListBySourceId(T::SessionId sessionId,uint
 
 
 int ServiceInterface::_getProducerInfoCount(T::SessionId sessionId,uint& count)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
+
+
+
+
+int ServiceInterface::_getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
@@ -3298,6 +3351,15 @@ int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId ses
 
 
 int ServiceInterface::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string forecastTime,T::ContentInfoList& contentInfoList)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
+
+
+
+
+int ServiceInterface::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }

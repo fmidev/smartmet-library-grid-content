@@ -1054,6 +1054,56 @@ int RedisImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& coun
 
 
 
+int RedisImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    T::ProducerInfoList producerInfoList;
+    getProducerList(producerInfoList);
+
+    uint pLen = producerInfoList.getLength();
+
+    for (uint p=0; p<pLen; p++)
+    {
+      T::ProducerInfo *producerInfo = producerInfoList.getProducerInfoByIndex(p);
+
+      std::set<uint> geometryIdList;
+
+      T::ContentInfoList contentInfoList;
+      getContentByProducerId(producerInfo->mProducerId,0,0,10000000,contentInfoList);
+
+      uint len = contentInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
+        if (producerInfo->mProducerId == contentInfo->mProducerId  &&  geometryIdList.find(contentInfo->mGeometryId) == geometryIdList.end())
+        {
+          char tmp[100];
+          sprintf(tmp,"%s;%u",producerInfo->mName.c_str(),contentInfo->mGeometryId);
+          list.insert(std::string(tmp));
+          geometryIdList.insert(contentInfo->mGeometryId);
+        }
+      }
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int RedisImplementation::_addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -2169,8 +2219,15 @@ int RedisImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
       if (info->mGeometryId == geometryId  &&  info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber)
       {
-        deleteFileById(info->mFileId,true);
-        addEvent(EventType::FILE_DELETED,info->mFileId,0,0,0);
+        deleteContent(info->mFileId,info->mMessageIndex);
+
+        T::FileInfo fileInfo;
+        if (getFileById(info->mFileId,fileInfo) == Result::OK)
+        {
+          deleteFilename(fileInfo.mName);
+          deleteFileById(info->mFileId,false);
+          addEvent(EventType::FILE_DELETED,info->mFileId,0,0,0);
+        }
       }
     }
 
@@ -4072,6 +4129,76 @@ int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId 
 
 
 
+int RedisImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    T::ProducerInfoList producerInfoList;
+    getProducerList(producerInfoList);
+
+    T::GenerationInfoList generationInfoList;
+    getGenerationList(generationInfoList);
+
+    T::FileInfoList fileInfoList;
+    getFileList(0,10000000,fileInfoList);
+    fileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
+
+    T::ContentInfoList contentList;
+    getContent(0,0,10000000,contentList);
+
+    uint cLen = contentList.getLength();
+    for (uint c=0; c<cLen; c++)
+    {
+      T::ContentInfo *cInfo = contentList.getContentInfoByIndex(c);
+      T::ContentInfo *cError = NULL;
+      if (cInfo != NULL)
+      {
+        T::FileInfo *fileInfo = fileInfoList.getFileInfoById(cInfo->mFileId);
+        if (fileInfo == NULL)
+        {
+          printf("**** INTEGRITY ERROR : File missing (%u)! *****\n",cInfo->mFileId);
+          cError = cInfo;
+        }
+
+        if (cError == NULL)
+        {
+          T::GenerationInfo *generationInfo = generationInfoList.getGenerationInfoById(cInfo->mGenerationId);
+          if (generationInfo == NULL)
+          {
+            printf("**** INTEGRITY ERROR : Generation missing (%u)! *****\n",cInfo->mGenerationId);
+            cError = cInfo;
+          }
+        }
+
+        if (cError == NULL)
+        {
+          T::ProducerInfo *producerInfo = producerInfoList.getProducerInfoById(cInfo->mProducerId);
+          if (producerInfo == NULL)
+          {
+            printf("**** INTEGRITY ERROR : Producer missing (%u)! *****\n",cInfo->mProducerId);
+            cError = cInfo;
+          }
+        }
+
+        if (cError != NULL)
+          contentInfoList.addContentInfo(cError->duplicate());
+      }
+    }
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int RedisImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<T::GeometryId>& geometryIdList)
 {
   FUNCTION_TRACE
@@ -4914,7 +5041,7 @@ int RedisImplementation::deleteGenerationById(uint generationId,bool deleteFiles
       deleteContentByGenerationId(generationId);
 
     if (deleteFiles)
-      deleteFileListByGenerationId(generationId,deleteContent);
+      deleteFileListByGenerationId(generationId,false);
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZREMRANGEBYSCORE %sgenerations %u %u",mTablePrefix.c_str(),generationId,generationId);
     if (reply == NULL)

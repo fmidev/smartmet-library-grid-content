@@ -210,7 +210,6 @@ void FileInfoList::clear()
 
     mSize = 100;
     mLength = 0;
-    mComparisonMethod = FileInfo::ComparisonMethod::none;
     mArray = new FileInfoPtr[100];
 
     for (uint t=0; t<100; t++)

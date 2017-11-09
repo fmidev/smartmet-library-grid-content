@@ -79,6 +79,28 @@ void ServiceInterface::shutdown()
 
 
 
+int ServiceInterface::executeQuery(T::SessionId sessionId,Query& query)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _executeQuery(sessionId,query);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,Query);result %d;time %f;",__FUNCTION__,sessionId,result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::GridPointValueList& valueList)
 {
   FUNCTION_TRACE
@@ -95,6 +117,15 @@ int ServiceInterface::getValuesByGridPoint(T::SessionId sessionId,T::ContentInfo
   {
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
+}
+
+
+
+
+
+int ServiceInterface::_executeQuery(T::SessionId sessionId,Query& query)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
 
 

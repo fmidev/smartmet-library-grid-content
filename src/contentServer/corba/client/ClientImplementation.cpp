@@ -22,7 +22,7 @@ ClientImplementation::ClientImplementation()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -37,7 +37,7 @@ ClientImplementation::~ClientImplementation()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -65,7 +65,7 @@ void ClientImplementation::init(std::string serviceIor)
 
       if (CORBA::is_nil(mService))
       {
-        SmartMet::Spine::Exception exception(BCP, "Can't narrow reference to type ContentServer::Corba::ServiceInterace (or it was nil)!");
+        Spine::Exception exception(BCP, "Can't narrow reference to type ContentServer::Corba::ServiceInterace (or it was nil)!");
         throw exception;
       }
 
@@ -76,44 +76,44 @@ void ClientImplementation::init(std::string serviceIor)
     }
     catch (CORBA::TRANSIENT&)
     {
-      SmartMet::Spine::Exception exception(BCP, "Caught system exception TRANSIENT -- unable to contact the server!");
+      Spine::Exception exception(BCP, "Caught system exception TRANSIENT -- unable to contact the server!");
       throw exception;
     }
     catch (CORBA::SystemException& ex)
     {
       char msg[500];
       sprintf(msg, "Caught a CORBA::%s\n", ex._name());
-      SmartMet::Spine::Exception exception(BCP, msg);
+      Spine::Exception exception(BCP, msg);
       throw exception;
     }
     catch (CORBA::Exception& ex)
     {
       char msg[500];
       sprintf(msg, "Exception CORBA::%s\n", ex._name());
-      SmartMet::Spine::Exception exception(BCP, msg);
+      Spine::Exception exception(BCP, msg);
       throw exception;
     }
     catch (omniORB::fatalException& fe)
     {
       char msg[500];
       sprintf(msg, "Caught omniORB::fatalException:%s\n", fe.errmsg());
-      SmartMet::Spine::Exception exception(BCP, msg);
+      Spine::Exception exception(BCP, msg);
       throw exception;
     }
-    catch (SmartMet::Spine::Exception& e)
+    catch (Spine::Exception& e)
     {
-      SmartMet::Spine::Exception exception(BCP, exception_operation_failed, &e);
+      Spine::Exception exception(BCP, exception_operation_failed, &e);
       throw exception;
     }
     catch (...)
     {
-      SmartMet::Spine::Exception exception(BCP, "Unexpected exception!", NULL);
+      Spine::Exception exception(BCP, "Unexpected exception!", NULL);
       throw exception;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -129,7 +129,7 @@ uint ClientImplementation::getId()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -145,7 +145,7 @@ void ClientImplementation::setId(uint id)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -161,7 +161,7 @@ time_t ClientImplementation::getLastAccessTime()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -177,7 +177,7 @@ void ClientImplementation::setLastAccessTime(time_t accessTime)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -193,7 +193,7 @@ time_t ClientImplementation::getLastErrorTime()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -209,7 +209,7 @@ void ClientImplementation::setLastErrorTime(time_t errorTime)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -222,7 +222,7 @@ int ClientImplementation::_clear(T::SessionId sessionId)
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->clear(sessionId);
 
@@ -232,7 +232,7 @@ int ClientImplementation::_clear(T::SessionId sessionId)
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -245,7 +245,7 @@ int ClientImplementation::_reload(T::SessionId sessionId)
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->reload(sessionId);
 
@@ -255,7 +255,7 @@ int ClientImplementation::_reload(T::SessionId sessionId)
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -268,7 +268,7 @@ int ClientImplementation::_addDataServerInfo(T::SessionId sessionId, T::ServerIn
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaServerInfo_var corbaServerInfo = new ContentServer::Corba::CorbaServerInfo();
     ContentServer::Corba::Converter::convert(serverInfo, corbaServerInfo);
@@ -284,7 +284,7 @@ int ClientImplementation::_addDataServerInfo(T::SessionId sessionId, T::ServerIn
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -297,7 +297,7 @@ int ClientImplementation::_deleteDataServerInfoById(T::SessionId sessionId, uint
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteDataServerInfoById(sessionId, serverId);
 
@@ -307,7 +307,7 @@ int ClientImplementation::_deleteDataServerInfoById(T::SessionId sessionId, uint
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -320,7 +320,7 @@ int ClientImplementation::_getDataServerInfoById(T::SessionId sessionId, uint se
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaServerInfo_var corbaServerInfo;
 
@@ -335,7 +335,7 @@ int ClientImplementation::_getDataServerInfoById(T::SessionId sessionId, uint se
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -348,7 +348,7 @@ int ClientImplementation::_getDataServerInfoByName(T::SessionId sessionId, std::
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaServerInfo_var corbaServerInfo;
 
@@ -363,7 +363,7 @@ int ClientImplementation::_getDataServerInfoByName(T::SessionId sessionId, std::
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -376,7 +376,7 @@ int ClientImplementation::_getDataServerInfoByIor(T::SessionId sessionId, std::s
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaServerInfo_var corbaServerInfo;
 
@@ -391,7 +391,7 @@ int ClientImplementation::_getDataServerInfoByIor(T::SessionId sessionId, std::s
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -404,7 +404,7 @@ int ClientImplementation::_getDataServerInfoList(T::SessionId sessionId, T::Serv
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaServerInfoList_var corbaServerInfoList;
 
@@ -419,7 +419,7 @@ int ClientImplementation::_getDataServerInfoList(T::SessionId sessionId, T::Serv
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -432,7 +432,7 @@ int ClientImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& c
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ::CORBA::ULong corbaCount = 0;
 
@@ -447,7 +447,7 @@ int ClientImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& c
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -460,7 +460,7 @@ int ClientImplementation::_addProducerInfo(T::SessionId sessionId, T::ProducerIn
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaProducerInfo_var corbaProducerInfo = new ContentServer::Corba::CorbaProducerInfo();
     ContentServer::Corba::Converter::convert(producerInfo, corbaProducerInfo);
@@ -476,7 +476,7 @@ int ClientImplementation::_addProducerInfo(T::SessionId sessionId, T::ProducerIn
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -489,7 +489,7 @@ int ClientImplementation::_deleteProducerInfoById(T::SessionId sessionId, uint p
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteProducerInfoById(sessionId, producerId);
 
@@ -499,7 +499,7 @@ int ClientImplementation::_deleteProducerInfoById(T::SessionId sessionId, uint p
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -512,7 +512,7 @@ int ClientImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteProducerInfoByName(sessionId, producerName.c_str());
 
@@ -522,7 +522,7 @@ int ClientImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -535,7 +535,7 @@ int ClientImplementation::_deleteProducerInfoListBySourceId(T::SessionId session
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteProducerInfoListBySourceId(sessionId,sourceId);
 
@@ -545,7 +545,7 @@ int ClientImplementation::_deleteProducerInfoListBySourceId(T::SessionId session
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -558,7 +558,7 @@ int ClientImplementation::_getProducerInfoById(T::SessionId sessionId, uint prod
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaProducerInfo_var corbaProducerInfo;
 
@@ -573,7 +573,7 @@ int ClientImplementation::_getProducerInfoById(T::SessionId sessionId, uint prod
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -586,7 +586,7 @@ int ClientImplementation::_getProducerInfoByName(T::SessionId sessionId, std::st
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaProducerInfo_var corbaProducerInfo;
 
@@ -601,7 +601,7 @@ int ClientImplementation::_getProducerInfoByName(T::SessionId sessionId, std::st
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -614,7 +614,7 @@ int ClientImplementation::_getProducerInfoList(T::SessionId sessionId, T::Produc
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaProducerInfoList_var corbaProducerInfoList;
 
@@ -629,7 +629,7 @@ int ClientImplementation::_getProducerInfoList(T::SessionId sessionId, T::Produc
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -642,7 +642,7 @@ int ClientImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaProducerInfoList_var corbaProducerInfoList;
 
@@ -657,7 +657,7 @@ int ClientImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -670,7 +670,7 @@ int ClientImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaProducerInfoList_var corbaProducerInfoList;
 
@@ -685,7 +685,7 @@ int ClientImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -698,7 +698,7 @@ int ClientImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& cou
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ::CORBA::ULong corbaCount = 0;
 
@@ -713,7 +713,35 @@ int ClientImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& cou
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaStringList_var corbaList;
+
+    int result = mService->getProducerNameAndGeometryList(sessionId,corbaList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaList,list);
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -726,7 +754,7 @@ int ClientImplementation::_addGenerationInfo(T::SessionId sessionId, T::Generati
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaGenerationInfo_var corbaGenerationInfo = new ContentServer::Corba::CorbaGenerationInfo();
     ContentServer::Corba::Converter::convert(generationInfo, corbaGenerationInfo);
@@ -742,7 +770,7 @@ int ClientImplementation::_addGenerationInfo(T::SessionId sessionId, T::Generati
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -755,7 +783,7 @@ int ClientImplementation::_deleteGenerationInfoById(T::SessionId sessionId, uint
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteGenerationInfoById(sessionId, generationId);
 
@@ -765,7 +793,7 @@ int ClientImplementation::_deleteGenerationInfoById(T::SessionId sessionId, uint
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -778,7 +806,7 @@ int ClientImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteGenerationInfoByName(sessionId, generationName.c_str());
 
@@ -788,7 +816,7 @@ int ClientImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -801,7 +829,7 @@ int ClientImplementation::_deleteGenerationInfoListByProducerId(T::SessionId ses
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteGenerationInfoListByProducerId(sessionId, producerId);
 
@@ -811,7 +839,7 @@ int ClientImplementation::_deleteGenerationInfoListByProducerId(T::SessionId ses
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -824,7 +852,7 @@ int ClientImplementation::_deleteGenerationInfoListByProducerName(T::SessionId s
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteGenerationInfoListByProducerName(sessionId, producerName.c_str());
 
@@ -834,7 +862,7 @@ int ClientImplementation::_deleteGenerationInfoListByProducerName(T::SessionId s
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -847,7 +875,7 @@ int ClientImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessi
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteGenerationInfoListBySourceId(sessionId, sourceId);
 
@@ -857,7 +885,7 @@ int ClientImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessi
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -870,7 +898,7 @@ int ClientImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessi
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaStringList_var corbaList;
 
@@ -885,7 +913,7 @@ int ClientImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessi
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -897,7 +925,7 @@ int ClientImplementation::_getGenerationInfoById(T::SessionId sessionId, uint ge
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaGenerationInfo_var corbaGenerationInfo;
 
@@ -912,7 +940,7 @@ int ClientImplementation::_getGenerationInfoById(T::SessionId sessionId, uint ge
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -925,7 +953,7 @@ int ClientImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::s
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaGenerationInfo_var corbaGenerationInfo;
 
@@ -940,7 +968,7 @@ int ClientImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::s
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -953,7 +981,7 @@ int ClientImplementation::_getGenerationInfoList(T::SessionId sessionId, T::Gene
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaGenerationInfoList_var corbaGenerationInfoList;
 
@@ -968,7 +996,7 @@ int ClientImplementation::_getGenerationInfoList(T::SessionId sessionId, T::Gene
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -981,7 +1009,7 @@ int ClientImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaGenerationInfoList_var corbaGenerationInfoList;
 
@@ -996,7 +1024,7 @@ int ClientImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1009,7 +1037,7 @@ int ClientImplementation::_getGenerationInfoListByProducerId(T::SessionId sessio
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaGenerationInfoList_var corbaGenerationInfoList;
 
@@ -1024,7 +1052,7 @@ int ClientImplementation::_getGenerationInfoListByProducerId(T::SessionId sessio
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1037,7 +1065,7 @@ int ClientImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaGenerationInfoList_var corbaGenerationInfoList;
 
@@ -1052,7 +1080,7 @@ int ClientImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1065,7 +1093,7 @@ int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionI
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaGenerationInfoList_var corbaGenerationInfoList;
 
@@ -1080,7 +1108,7 @@ int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionI
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1093,7 +1121,7 @@ int ClientImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::Session
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaGenerationInfo_var corbaGenerationInfo;
 
@@ -1108,7 +1136,7 @@ int ClientImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::Session
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1121,7 +1149,7 @@ int ClientImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessi
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaGenerationInfo_var corbaGenerationInfo;
 
@@ -1136,7 +1164,7 @@ int ClientImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessi
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1149,7 +1177,7 @@ int ClientImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& c
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ::CORBA::ULong corbaCount = 0;
 
@@ -1164,7 +1192,7 @@ int ClientImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& c
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1177,7 +1205,7 @@ int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,ui
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->setGenerationInfoStatusById(sessionId, generationId,  (CORBA::Octet)status);
 
@@ -1187,7 +1215,7 @@ int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,ui
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1200,7 +1228,7 @@ int ClientImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->setGenerationInfoStatusByName(sessionId, generationName.c_str(),  (CORBA::Octet)status);
 
@@ -1210,7 +1238,7 @@ int ClientImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1223,7 +1251,7 @@ int ClientImplementation::_addFileInfo(T::SessionId sessionId, T::FileInfo& file
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaFileInfo_var corbaFileInfo = new ContentServer::Corba::CorbaFileInfo();
     ContentServer::Corba::Converter::convert(fileInfo, corbaFileInfo);
@@ -1239,7 +1267,7 @@ int ClientImplementation::_addFileInfo(T::SessionId sessionId, T::FileInfo& file
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1252,7 +1280,7 @@ int ClientImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaFileInfo_var corbaFileInfo = new ContentServer::Corba::CorbaFileInfo();
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
@@ -1274,7 +1302,7 @@ int ClientImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1287,7 +1315,7 @@ int ClientImplementation::_deleteFileInfoById(T::SessionId sessionId, uint fileI
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteFileInfoById(sessionId, fileId);
 
@@ -1297,7 +1325,7 @@ int ClientImplementation::_deleteFileInfoById(T::SessionId sessionId, uint fileI
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1310,7 +1338,7 @@ int ClientImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::stri
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteFileInfoByName(sessionId, filename.c_str());
 
@@ -1320,7 +1348,7 @@ int ClientImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::stri
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1333,7 +1361,7 @@ int ClientImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteFileInfoListByGroupFlags(sessionId, groupFlags);
 
@@ -1343,7 +1371,7 @@ int ClientImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1356,7 +1384,7 @@ int ClientImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteFileInfoListByProducerId(sessionId, producerId);
 
@@ -1366,7 +1394,7 @@ int ClientImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1379,7 +1407,7 @@ int ClientImplementation::_deleteFileInfoListByProducerName(T::SessionId session
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteFileInfoListByProducerName(sessionId, producerName.c_str());
 
@@ -1389,7 +1417,7 @@ int ClientImplementation::_deleteFileInfoListByProducerName(T::SessionId session
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1402,7 +1430,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationId(T::SessionId session
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteFileInfoListByGenerationId(sessionId, generationId);
 
@@ -1412,7 +1440,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationId(T::SessionId session
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1425,7 +1453,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Se
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime.c_str());
 
@@ -1435,7 +1463,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Se
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1448,7 +1476,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessi
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteFileInfoListByGenerationName(sessionId, generationName.c_str());
 
@@ -1458,7 +1486,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessi
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1471,7 +1499,7 @@ int ClientImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId, 
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteFileInfoListBySourceId(sessionId, sourceId);
 
@@ -1481,7 +1509,7 @@ int ClientImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId, 
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1494,7 +1522,7 @@ int ClientImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaULongList_var corbaFileIdList = new ContentServer::Corba::CorbaULongList();
     ContentServer::Corba::Converter::convert(fileIdList, corbaFileIdList);
@@ -1507,7 +1535,7 @@ int ClientImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1519,7 +1547,7 @@ int ClientImplementation::_getFileInfoById(T::SessionId sessionId, uint fileId, 
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaFileInfo_var corbaFileInfo;
 
@@ -1534,7 +1562,7 @@ int ClientImplementation::_getFileInfoById(T::SessionId sessionId, uint fileId, 
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1547,7 +1575,7 @@ int ClientImplementation::_getFileInfoByName(T::SessionId sessionId,std::string 
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaFileInfo_var corbaFileInfo;
 
@@ -1562,7 +1590,7 @@ int ClientImplementation::_getFileInfoByName(T::SessionId sessionId,std::string 
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1575,7 +1603,7 @@ int ClientImplementation::_getFileInfoList(T::SessionId sessionId, uint startFil
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaFileInfoList_var corbaFileInfoList;
 
@@ -1590,7 +1618,7 @@ int ClientImplementation::_getFileInfoList(T::SessionId sessionId, uint startFil
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1603,7 +1631,7 @@ int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId, u
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaFileInfoList_var corbaFileInfoList;
 
@@ -1618,7 +1646,7 @@ int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId, u
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1631,7 +1659,7 @@ int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaFileInfoList_var corbaFileInfoList;
 
@@ -1646,7 +1674,7 @@ int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1659,7 +1687,7 @@ int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaFileInfoList_var corbaFileInfoList;
 
@@ -1674,7 +1702,7 @@ int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1687,7 +1715,7 @@ int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaFileInfoList_var corbaFileInfoList;
 
@@ -1702,7 +1730,7 @@ int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1715,7 +1743,7 @@ int ClientImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId, u
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaFileInfoList_var corbaFileInfoList;
 
@@ -1730,7 +1758,7 @@ int ClientImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId, u
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1743,7 +1771,7 @@ int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId, uin
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaFileInfoList_var corbaFileInfoList;
 
@@ -1758,7 +1786,7 @@ int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId, uin
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1771,7 +1799,7 @@ int ClientImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ::CORBA::ULong corbaCount = 0;
 
@@ -1786,7 +1814,7 @@ int ClientImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1799,7 +1827,7 @@ int ClientImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,u
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ::CORBA::ULong corbaCount = 0;
 
@@ -1814,7 +1842,7 @@ int ClientImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,u
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1827,7 +1855,7 @@ int ClientImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ::CORBA::ULong corbaCount = 0;
 
@@ -1842,7 +1870,7 @@ int ClientImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1855,7 +1883,7 @@ int ClientImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uin
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ::CORBA::ULong corbaCount = 0;
 
@@ -1870,7 +1898,7 @@ int ClientImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uin
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1883,7 +1911,7 @@ int ClientImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eve
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaEventInfo_var corbaEventInfo = new ContentServer::Corba::CorbaEventInfo();
     ContentServer::Corba::Converter::convert(eventInfo, corbaEventInfo);
@@ -1899,7 +1927,7 @@ int ClientImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eve
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1910,7 +1938,7 @@ int ClientImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     if (mLastErrorTime > mLastAccessTime)
     {
@@ -1931,7 +1959,7 @@ int ClientImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1944,7 +1972,7 @@ int ClientImplementation::_getEventInfoList(T::SessionId sessionId, uint request
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     if (mLastErrorTime > mLastAccessTime)
     {
@@ -1965,7 +1993,7 @@ int ClientImplementation::_getEventInfoList(T::SessionId sessionId, uint request
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -1978,7 +2006,7 @@ int ClientImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ::CORBA::ULong corbaCount = 0;
 
@@ -1993,7 +2021,7 @@ int ClientImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2006,7 +2034,7 @@ int ClientImplementation::_addContentInfo(T::SessionId sessionId, T::ContentInfo
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfo_var corbaContentInfo = new ContentServer::Corba::CorbaContentInfo();
     ContentServer::Corba::Converter::convert(contentInfo, corbaContentInfo);
@@ -2022,7 +2050,7 @@ int ClientImplementation::_addContentInfo(T::SessionId sessionId, T::ContentInfo
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2035,7 +2063,7 @@ int ClientImplementation::_addContentList(T::SessionId sessionId, T::ContentInfo
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     ContentServer::Corba::Converter::convert(contentInfoList, corbaContentInfoList);
@@ -2051,7 +2079,7 @@ int ClientImplementation::_addContentList(T::SessionId sessionId, T::ContentInfo
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2064,7 +2092,7 @@ int ClientImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteContentInfo(sessionId,fileId,messageIndex);
 
@@ -2074,7 +2102,7 @@ int ClientImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2087,7 +2115,7 @@ int ClientImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteContentListByFileId(sessionId, fileId);
 
@@ -2097,7 +2125,7 @@ int ClientImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2110,7 +2138,7 @@ int ClientImplementation::_deleteContentListByFileName(T::SessionId sessionId,st
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteContentListByFileName(sessionId, filename.c_str());
 
@@ -2120,7 +2148,7 @@ int ClientImplementation::_deleteContentListByFileName(T::SessionId sessionId,st
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2133,7 +2161,7 @@ int ClientImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteContentListByGroupFlags(sessionId, groupFlags);
 
@@ -2143,7 +2171,7 @@ int ClientImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2156,7 +2184,7 @@ int ClientImplementation::_deleteContentListByProducerId(T::SessionId sessionId,
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteContentListByProducerId(sessionId, producerId);
 
@@ -2166,7 +2194,7 @@ int ClientImplementation::_deleteContentListByProducerId(T::SessionId sessionId,
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2179,7 +2207,7 @@ int ClientImplementation::_deleteContentListByProducerName(T::SessionId sessionI
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteContentListByProducerName(sessionId, producerName.c_str());
 
@@ -2189,7 +2217,7 @@ int ClientImplementation::_deleteContentListByProducerName(T::SessionId sessionI
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2201,7 +2229,7 @@ int ClientImplementation::_deleteContentListByGenerationId(T::SessionId sessionI
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteContentListByGenerationId(sessionId, generationId);
 
@@ -2211,7 +2239,7 @@ int ClientImplementation::_deleteContentListByGenerationId(T::SessionId sessionI
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2224,7 +2252,7 @@ int ClientImplementation::_deleteContentListByGenerationName(T::SessionId sessio
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteContentListByGenerationName(sessionId, generationName.c_str());
 
@@ -2234,7 +2262,7 @@ int ClientImplementation::_deleteContentListByGenerationName(T::SessionId sessio
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2247,7 +2275,7 @@ int ClientImplementation::_deleteContentListBySourceId(T::SessionId sessionId, u
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteContentListBySourceId(sessionId, sourceId);
 
@@ -2257,7 +2285,7 @@ int ClientImplementation::_deleteContentListBySourceId(T::SessionId sessionId, u
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2270,7 +2298,7 @@ int ClientImplementation::_registerContentList(T::SessionId sessionId,uint serve
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     ContentServer::Corba::Converter::convert(contentInfoList, corbaContentInfoList);
@@ -2286,7 +2314,7 @@ int ClientImplementation::_registerContentList(T::SessionId sessionId,uint serve
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2299,7 +2327,7 @@ int ClientImplementation::_registerContentListByFileId(T::SessionId sessionId, u
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->registerContentListByFileId(sessionId, serverId, fileId);
 
@@ -2309,7 +2337,7 @@ int ClientImplementation::_registerContentListByFileId(T::SessionId sessionId, u
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2322,7 +2350,7 @@ int ClientImplementation::_unregisterContentList(T::SessionId sessionId, uint se
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->unregisterContentList(sessionId, serverId);
 
@@ -2332,7 +2360,7 @@ int ClientImplementation::_unregisterContentList(T::SessionId sessionId, uint se
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2345,7 +2373,7 @@ int ClientImplementation::_unregisterContentListByFileId(T::SessionId sessionId,
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->unregisterContentListByFileId(sessionId, serverId, fileId);
 
@@ -2355,7 +2383,7 @@ int ClientImplementation::_unregisterContentListByFileId(T::SessionId sessionId,
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2368,7 +2396,7 @@ int ClientImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uin
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfo_var corbaContentInfo;
 
@@ -2383,7 +2411,7 @@ int ClientImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uin
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2396,7 +2424,7 @@ int ClientImplementation::_getContentList(T::SessionId sessionId, uint startFile
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
@@ -2411,7 +2439,7 @@ int ClientImplementation::_getContentList(T::SessionId sessionId, uint startFile
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2424,7 +2452,7 @@ int ClientImplementation::_getContentListByFileId(T::SessionId sessionId, uint f
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
@@ -2439,7 +2467,7 @@ int ClientImplementation::_getContentListByFileId(T::SessionId sessionId, uint f
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2452,7 +2480,7 @@ int ClientImplementation::_getContentListByFileName(T::SessionId sessionId,std::
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
@@ -2467,7 +2495,7 @@ int ClientImplementation::_getContentListByFileName(T::SessionId sessionId,std::
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2479,7 +2507,7 @@ int ClientImplementation::_getContentListByGroupFlags(T::SessionId sessionId, ui
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
@@ -2494,7 +2522,7 @@ int ClientImplementation::_getContentListByGroupFlags(T::SessionId sessionId, ui
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2507,7 +2535,7 @@ int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId, ui
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
@@ -2522,7 +2550,7 @@ int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId, ui
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2535,7 +2563,7 @@ int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,s
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
@@ -2550,7 +2578,7 @@ int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,s
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2566,7 +2594,7 @@ int ClientImplementation::_getContentListByServerId(T::SessionId sessionId, uint
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
@@ -2581,7 +2609,7 @@ int ClientImplementation::_getContentListByServerId(T::SessionId sessionId, uint
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2594,7 +2622,7 @@ int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,u
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
@@ -2609,7 +2637,7 @@ int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,u
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2622,7 +2650,7 @@ int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
@@ -2637,7 +2665,7 @@ int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2650,7 +2678,7 @@ int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
@@ -2665,7 +2693,7 @@ int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2678,7 +2706,7 @@ int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
@@ -2693,7 +2721,7 @@ int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2706,7 +2734,7 @@ int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId, uint
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
@@ -2721,7 +2749,7 @@ int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId, uint
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2734,7 +2762,7 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
@@ -2749,7 +2777,7 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2762,7 +2790,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
@@ -2777,7 +2805,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2790,7 +2818,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
@@ -2805,7 +2833,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2817,7 +2845,7 @@ int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId s
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
@@ -2832,7 +2860,7 @@ int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId s
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2844,7 +2872,7 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
@@ -2859,7 +2887,7 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2872,7 +2900,7 @@ int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
@@ -2887,7 +2915,35 @@ int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+
+    int result = mService->getContentListOfInvalidIntegrity(sessionId,corbaContentInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2900,7 +2956,7 @@ int ClientImplementation::_getContentGeometryIdListByGenerationId(T::SessionId s
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaLongList_var corbaGeometryIdList;
 
@@ -2915,7 +2971,7 @@ int ClientImplementation::_getContentGeometryIdListByGenerationId(T::SessionId s
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2927,7 +2983,7 @@ int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessio
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentParamList;
 
@@ -2942,7 +2998,7 @@ int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessio
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2955,7 +3011,7 @@ int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId ses
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaStringList_var corbaParamKeyList;
 
@@ -2970,7 +3026,7 @@ int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId ses
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -2981,7 +3037,7 @@ int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ContentServer::Corba::CorbaStringList_var corbaContentTimeList;
 
@@ -2996,7 +3052,7 @@ int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 
@@ -3009,7 +3065,7 @@ int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Spine::Exception(BCP, "The client is not initialized!");
 
     ::CORBA::ULong corbaCount = 0;
 
@@ -3024,7 +3080,7 @@ int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
   catch (...)
   {
     mLastErrorTime = time(0);
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
   }
 }
 

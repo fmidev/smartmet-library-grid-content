@@ -12,6 +12,9 @@ module Corba
 {
 
 
+typedef sequence<string> CorbaStringList;
+
+
 struct CorbaGridPointValue
 {
   unsigned long fileId;
@@ -25,6 +28,99 @@ struct CorbaGridPointValue
 
 typedef sequence<CorbaGridPointValue> CorbaGridPointValueList;
 
+
+
+
+struct CorbaGridValue
+{
+  double x;
+  double y;
+  double value;
+};
+
+typedef sequence<CorbaGridValue> CorbaGridValueList;
+
+
+
+
+struct CorbaFunctionParam
+{
+  unsigned long id;
+  string        param;
+};
+
+typedef sequence<CorbaFunctionParam> CorbaFunctionParamList;
+
+
+
+
+
+struct CorbaParameterValues
+{
+  string             forecastTime;
+  unsigned long      producerId;
+  unsigned long      generationId;
+  unsigned long      geometryId;
+  octet              parameterKeyType;
+  string             parameterKey;
+  octet              parameterLevelIdType;
+  octet              parameterLevelId;
+  long               parameterLevel;
+  short              forecastType;
+  short              forecastNumber;
+  CorbaGridValueList valueList;
+};
+
+typedef sequence<CorbaParameterValues> CorbaParameterValuesList;
+
+
+
+struct CorbaQueryParameter
+{
+  unsigned long            id;
+  string                   param;
+  string                   symbolicName;
+  octet                    parameterKeyType;
+  string                   parameterKey;
+  octet                    parameterLevelIdType;
+  octet                    parameterLevelId;
+  long                     parameterLevel;
+  short                    forecastType;
+  short                    forecastNumber;
+  octet                    interpolationMethod;
+  string                   function;
+  CorbaFunctionParamList   functionParams;
+  CorbaParameterValuesList valueList;
+};
+
+typedef sequence<CorbaQueryParameter> CorbaQueryParameterList;
+
+
+
+
+struct CorbaCoordinate
+{
+  double x;
+  double y;
+};
+
+typedef sequence<CorbaCoordinate> CorbaCoordinateList;
+typedef sequence<CorbaCoordinateList> CorbaQueryCoordinates;
+
+
+
+struct CorbaQuery
+{
+  CorbaStringList          producerNameList;
+  string                   startTime;
+  string                   endTime;
+  CorbaStringList          forecastTimeList;
+  CorbaQueryCoordinates    coordinateList;
+  CorbaQueryParameterList  queryParameterList;
+  unsigned long            flags;
+};
+
+typedef sequence<CorbaQuery> CorbaQueryList;
 
 
 };
