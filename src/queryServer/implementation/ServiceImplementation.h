@@ -1,6 +1,8 @@
 #pragma once
 
 #include "queryServer/definition/ServiceInterface.h"
+#include "queryServer/definition/ParameterAliasList.h"
+#include "queryServer/definition/ParameterMappingList.h"
 #include "contentServer/definition/ServiceInterface.h"
 #include "dataServer/definition/ServiceInterface.h"
 
@@ -24,8 +26,8 @@ class ServiceImplementation : public ServiceInterface
                              ContentServer::ServiceInterface *contentServer,
                              DataServer::ServiceInterface *dataServer,
                              std::string gridConfigDirectory,
-                             std::string parameterFile,
-                             std::string parameterAliasFile,
+                             std::vector<std::string> parameterMappingFiles,
+                             std::vector<std::string> parameterAliasFiles,
                              std::string producerFile,
                              std::string luaFunctionFile);
 
@@ -47,6 +49,7 @@ class ServiceImplementation : public ServiceInterface
 
   protected:
 
+     bool               getAlias(std::string name,std::string& alias);
      void               checkConfigurationUpdates();
      T::ParamValue      executeFunction(std::string& function,std::vector<T::ParamValue>& parameters);
      void               executeQueryFunctions(Query& query);
@@ -56,7 +59,11 @@ class ServiceImplementation : public ServiceInterface
 
      void               getGridValues(
                              Producer_vec& producers,
-                             ParameterInfo_vec& parameterInfoList,
+                             uint producerId,
+                             uint generationFlags,
+                             std::string parameterKey,
+                             T::ParamLevelId paramLevelId,
+                             T::ParamLevel paramLevel,
                              T::ForecastType forecastType,
                              T::ForecastNumber forecastNumber,
                              std::string forecastTime,
@@ -67,7 +74,11 @@ class ServiceImplementation : public ServiceInterface
 
      void               getGridValues(
                              Producer_vec& producers,
-                             ParameterInfo_vec& parameterInfoList,
+                             uint producerId,
+                             uint generationFlags,
+                             std::string parameterKey,
+                             T::ParamLevelId paramLevelId,
+                             T::ParamLevel paramLevel,
                              T::ForecastType forecastType,
                              T::ForecastNumber forecastNumber,
                              std::string startTime,
@@ -76,22 +87,15 @@ class ServiceImplementation : public ServiceInterface
                              bool areaSearch,
                              ParameterValues_vec& valueList);
 
-
-     void               getParameterInfoList(
-                             T::ParamKeyType parameterKeyType,
-                             T::ParamId paramKey,
-                             T::ParamLevelIdType paramLevelIdType,
-                             T::ParamLevelId paramLevelId,
-                             T::ParamLevel paramLevel,
-                             ParameterInfo_vec& parameterInfoList);
-
-     void               getParameterLevelInfo(
+     void               getParameterStringInfo(
                              std::string param,
                              std::string& key,
                              T::ParamLevelId& paramLevelId,
                              T::ParamLevel& paramLevel,
                              T::ForecastType& forecastType,
-                             T::ForecastNumber& forecastNumber);
+                             T::ForecastNumber& forecastNumber,
+                             uint& producerId,
+                             uint& generationFlags);
 
      bool               getFunctionParams(
                              std::string functionParamsStr,
@@ -101,13 +105,6 @@ class ServiceImplementation : public ServiceInterface
                              std::string paramStr,
                              std::string& function,
                              std::string& functionParams);
-
-     void               getParameterInfoList(
-                             std::string parameterName,
-                             T::ParamLevelIdType paramLevelIdType,
-                             T::ParamLevelId paramLevelId,
-                             T::ParamLevel paramLevel,
-                             std::vector<ParameterInfo>& infoList);
 
      void               getProducerList(
                              Query& query,
@@ -125,23 +122,12 @@ class ServiceImplementation : public ServiceInterface
                              std::vector<QueryParameter>& additionalParameterList);
 
      void               loadLuaFunctionFile();
-     void               loadParameterFile();
-     void               loadParameterAliasFile();
      void               loadProducerFile();
+
      void               updateQueryParameters(Query& query);
 
 
   private:
-
-     std::string        mGridConfigDirectory;
-
-     std::string        mParameterAliasFile;
-     time_t             mParameterAliasFileModificationTime;
-     ParameterAlias_vec mParameterAliasList;
-
-     std::string        mParameterFile;
-     time_t             mParameterFileModificationTime;
-     ParameterInfo_vec  mParameterList;
 
      std::string        mProducerFile;
      time_t             mProducerFileModificationTime;
@@ -153,9 +139,7 @@ class ServiceImplementation : public ServiceInterface
      time_t             mLastConfiguratonCheck;
      ThreadLock         mThreadLock;
 
-     uint               mServerCounter;
-     time_t             mServerCheckTime;
-
+     std::string        mGridConfigDirectory;
      uint               mFunctionParamId;
 
   private:
@@ -166,8 +150,14 @@ class ServiceImplementation : public ServiceInterface
      ContentServer::ServiceInterface*   mContentServer;
      DataServer::ServiceInterface*      mDataServer;
      DataServer::ServiceInterface*      mDataServerClient[64];
+     uint                               mServerCounter;
+     time_t                             mServerCheckTime;
 
+     std::vector<std::string>           mParameterMappingFiles;
+     std::vector<ParameterMappingList>  mParameterMappings;
 
+     std::vector<std::string>           mParameterAliasFiles;
+     std::vector<ParameterAliasList>    mParameterAliases;
 };
 
 

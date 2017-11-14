@@ -459,6 +459,8 @@ void Converter::convert(QueryServer::Corba::CorbaQueryParameter& source,QuerySer
     target.mForecastType = source.forecastType;
     target.mForecastNumber = source.forecastNumber;
     target.mInterpolationMethod = (T::InterpolationMethod)source.interpolationMethod;
+    target.mProducerId = source.producerId;
+    target.mGenerationFlags = source.generationFlags;
     target.mFunction = source.function;
 
     convert(source.functionParams,target.mFunctionParams);
@@ -489,6 +491,8 @@ void Converter::convert(QueryServer::QueryParameter& source,QueryServer::Corba::
     target.forecastType = source.mForecastType;
     target.forecastNumber = source.mForecastNumber;
     target.interpolationMethod = (::CORBA::Octet)source.mInterpolationMethod;
+    target.producerId = source.mProducerId;
+    target.generationFlags = source.mGenerationFlags;
     target.function = CORBA::string_dup(source.mFunction.c_str());
 
     convert(source.mFunctionParams,target.functionParams);
@@ -688,6 +692,7 @@ void Converter::convert(QueryServer::Corba::CorbaQuery& source,QueryServer::Quer
     convert(source.forecastTimeList,target.mForecastTimeList);
     convert(source.coordinateList,target.mCoordinateList);
     convert(source.queryParameterList,target.mQueryParameterList);
+    target.mGenerationFlags = source.generationFlags;
     target.mFlags = source.flags;
   }
   catch (...)
@@ -710,6 +715,7 @@ void Converter::convert(QueryServer::Query& source,QueryServer::Corba::CorbaQuer
     convert(source.mForecastTimeList,target.forecastTimeList);
     convert(source.mCoordinateList,target.coordinateList);
     convert(source.mQueryParameterList,target.queryParameterList);
+    target.generationFlags = source.mGenerationFlags;
     target.flags = source.mFlags;
   }
   catch (...)

@@ -19,12 +19,11 @@ class ParameterAlias
     void           print(std::ostream& stream,uint level,uint optionFlags);
 
     std::string    mName;   // Alias name (must be unique)
-    std::string    mTitle;
     std::string    mParameterString;
 };
 
 
-typedef std::map<std::string,ParameterAlias> ParameterAlias_vec;
+typedef std::map<std::string,ParameterAlias> ParameterAlias_map;
 
 
 }  // namespace QueryServer

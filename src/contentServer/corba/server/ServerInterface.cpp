@@ -626,6 +626,37 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getProducerParameterList(::CORBA::LongLong sessionId, ::CORBA::Octet parameterKeyType, SmartMet::ContentServer::Corba::CorbaStringList_out list)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::set<std::string> sList;
+    ContentServer::Corba::CorbaStringList *corbaList = new ContentServer::Corba::CorbaStringList();
+    list = corbaList;
+
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getProducerParameterList(sessionId,(T::ParamKeyType)parameterKeyType,sList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sList,*corbaList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::addGenerationInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaGenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -2715,7 +2746,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByParameter(::CORBA::LongLong sessionId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+::CORBA::Long ServerInterface::getContentListByParameter(::CORBA::LongLong sessionId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::Long minLevel, ::CORBA::Long maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2746,7 +2777,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByParameterAndGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+::CORBA::Long ServerInterface::getContentListByParameterAndGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::Long minLevel, ::CORBA::Long maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2777,7 +2808,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByParameterAndGenerationName(::CORBA::LongLong sessionId, const char* generationName, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+::CORBA::Long ServerInterface::getContentListByParameterAndGenerationName(::CORBA::LongLong sessionId, const char* generationName, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::Long minLevel, ::CORBA::Long maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2808,7 +2839,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByParameterAndProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+::CORBA::Long ServerInterface::getContentListByParameterAndProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::Long minLevel, ::CORBA::Long maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2839,7 +2870,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByParameterAndProducerName(::CORBA::LongLong sessionId, const char* producerName, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong minLevel, ::CORBA::ULong maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+::CORBA::Long ServerInterface::getContentListByParameterAndProducerName(::CORBA::LongLong sessionId, const char* producerName, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::Long minLevel, ::CORBA::Long maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, const char* startTime, const char* endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2870,7 +2901,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByParameterGenerationIdAndForecastTime(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::ULong level, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, const char* forecastTime, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+::CORBA::Long ServerInterface::getContentListByParameterGenerationIdAndForecastTime(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Octet parameterLevelIdType, ::CORBA::ULong parameterLevelId, ::CORBA::Long level, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, const char* forecastTime, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try

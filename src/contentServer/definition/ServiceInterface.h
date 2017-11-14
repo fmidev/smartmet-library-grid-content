@@ -59,6 +59,7 @@ class ServiceInterface
      virtual int    getProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::ProducerInfoList& producerInfoList);
      virtual int    getProducerInfoCount(T::SessionId sessionId,uint& count);
      virtual int    getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list);
+     virtual int    getProducerParameterList(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::set<std::string>& list);
 
      virtual int    addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo);
      virtual int    deleteGenerationInfoById(T::SessionId sessionId,uint generationId);
@@ -181,6 +182,7 @@ class ServiceInterface
      virtual int    _getProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::ProducerInfoList& producerInfoList);
      virtual int    _getProducerInfoCount(T::SessionId sessionId,uint& count);
      virtual int    _getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list);
+     virtual int    _getProducerParameterList(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::set<std::string>& list);
 
      virtual int    _addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo);
      virtual int    _deleteGenerationInfoById(T::SessionId sessionId,uint generationId);

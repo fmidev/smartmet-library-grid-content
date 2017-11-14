@@ -95,7 +95,7 @@ struct CorbaGridData
   string              cdmParameterName;
   string              newbaseParameterId;
   string              newbaseParameterName;
-  unsigned long       parameterLevel;
+  long                parameterLevel;
   unsigned long	      geometryId;
   unsigned long       projection;
   unsigned long       columns;

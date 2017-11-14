@@ -512,6 +512,28 @@ int ServiceInterface::getProducerNameAndGeometryList(T::SessionId sessionId,std:
 
 
 
+int ServiceInterface::getProducerParameterList(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::set<std::string>& list)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getProducerParameterList(sessionId,parameterKeyType,list);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%d,string[%u]);result %d;time %f;",__FUNCTION__,sessionId,(int)parameterKeyType,(uint)list.size(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -2622,6 +2644,15 @@ int ServiceInterface::_getProducerInfoCount(T::SessionId sessionId,uint& count)
 
 
 int ServiceInterface::_getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
+
+
+
+
+int ServiceInterface::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::set<std::string>& list)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }

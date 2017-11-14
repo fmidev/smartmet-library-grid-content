@@ -23,7 +23,7 @@ struct CorbaGridPointValue
   double        value;
   double        x;
   double        y;
-  unsigned long level;
+  long          level;
 };
 
 typedef sequence<CorbaGridPointValue> CorbaGridPointValueList;
@@ -88,6 +88,8 @@ struct CorbaQueryParameter
   short                    forecastType;
   short                    forecastNumber;
   octet                    interpolationMethod;
+  unsigned long            producerId;
+  unsigned long            generationFlags;
   string                   function;
   CorbaFunctionParamList   functionParams;
   CorbaParameterValuesList valueList;
@@ -117,6 +119,7 @@ struct CorbaQuery
   CorbaStringList          forecastTimeList;
   CorbaQueryCoordinates    coordinateList;
   CorbaQueryParameterList  queryParameterList;
+  unsigned long            generationFlags;
   unsigned long            flags;
 };
 

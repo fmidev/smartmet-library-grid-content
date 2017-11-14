@@ -6,7 +6,6 @@
 #include "contentServer/definition/ContentInfoList.h"
 #include "ServiceResults.h"
 #include "Query.h"
-#include "ParameterInfo.h"
 #include "ParameterAlias.h"
 #include "ParameterValues.h"
 

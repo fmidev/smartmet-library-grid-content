@@ -207,6 +207,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getProducerParameterList") == 0)
+    {
+      getProducerParameterList(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"addGenerationInfo") == 0)
     {
       addGenerationInfo(request,response);
@@ -1551,6 +1557,54 @@ void ServerInterface::getProducerNameAndGeometryList(T::RequestMessage& request,
     std::set<std::string> list;
 
     int result = mService->getProducerNameAndGeometryList(sessionId,list);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      for (auto it=list.begin(); it!=list.end(); ++it)
+      {
+        response.addLine("line",*it);
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void ServerInterface::getProducerParameterList(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    int parameterKeyType = 0;
+    if (!request.getLineByKey("parameterKeyType",parameterKeyType))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: parameterKeyType");
+      return;
+    }
+
+    std::set<std::string> list;
+
+    int result = mService->getProducerParameterList(sessionId,(T::ParamKeyType)parameterKeyType,list);
 
     response.addLine("result",result);
     if (result == Result::OK)

@@ -694,6 +694,43 @@ int ClientImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId
 
 
 
+int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::set<std::string>& list)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getProducerParameterList");
+    request.addLine("sessionId",sessionId);
+    request.addLine("parameterKeyType",(int)parameterKeyType);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      std::vector<std::string> lines;
+      uint len = response.getLinesByKey("line",lines);
+      for (uint t=0; t<len; t++)
+      {
+        list.insert(lines[t]);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
   try

@@ -15,6 +15,7 @@ Query::Query()
   try
   {
     mFlags = 0;
+    mGenerationFlags = 0;
   }
   catch (...)
   {
@@ -36,6 +37,7 @@ Query::Query(Query& query)
     mForecastTimeList = query.mForecastTimeList;
     mCoordinateList = query.mCoordinateList;
     mQueryParameterList = query.mQueryParameterList;
+    mGenerationFlags = query.mGenerationFlags;
     mFlags = query.mFlags;
   }
   catch (...)
@@ -182,6 +184,7 @@ void Query::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mStartTime              = " << mStartTime << "\n";
     stream << space(level) << "- mEndTime                = " << mEndTime << "\n";
     stream << space(level) << "- mFlags                  = " << mFlags << "\n";
+    stream << space(level) << "- mGenerationFlags        = " << mGenerationFlags << "\n";
 
     stream << space(level) << "- mForecastTimeList\n";
     for (auto it = mForecastTimeList.begin(); it != mForecastTimeList.end(); ++it)

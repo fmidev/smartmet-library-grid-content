@@ -920,6 +920,121 @@ int CacheImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,
 
 
 
+int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::set<std::string>& list)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getProducerParameterList(sessionId,parameterKeyType,list);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoReadLock lock(&mModificationLock);
+
+    std::set<std::string> tmpList;
+
+    uint pLen = mProducerInfoList.getLength();
+    for (uint p=0; p<pLen; p++)
+    {
+      T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByIndex(p);
+      uint len = mContentInfoList[0].getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::ContentInfo *contentInfo = mContentInfoList[0].getContentInfoByIndex(t);
+        std::string paramKey;
+
+        if (producerInfo->mProducerId == contentInfo->mProducerId)
+        {
+          switch (parameterKeyType)
+          {
+            case T::ParamKeyType::FMI_ID:
+              paramKey = contentInfo->mFmiParameterId;
+              break;
+
+            case T::ParamKeyType::FMI_NAME:
+              paramKey = contentInfo->mFmiParameterName;
+              break;
+
+            case T::ParamKeyType::GRIB_ID:
+              paramKey = contentInfo->mGribParameterId;
+              break;
+
+            case T::ParamKeyType::NEWBASE_ID:
+              paramKey = contentInfo->mNewbaseParameterId;
+              break;
+
+            case T::ParamKeyType::NEWBASE_NAME:
+              paramKey = contentInfo->mNewbaseParameterName;
+              break;
+
+            case T::ParamKeyType::CDM_ID:
+              paramKey = contentInfo->mCdmParameterId;
+              break;
+
+            case T::ParamKeyType::CDM_NAME:
+              paramKey = contentInfo->mCdmParameterName;
+              break;
+
+            default:
+              break;
+          }
+
+
+          if (paramKey.length() > 0)
+          {
+            char tmp[200];
+            sprintf(tmp,"%s;%s;%d;%s;%d;%d;%05d;%d",
+                producerInfo->mName.c_str(),
+                paramKey.c_str(),
+                (int)T::ParamKeyType::FMI_NAME,
+                contentInfo->mFmiParameterName.c_str(),
+                (int)T::ParamLevelIdType::FMI,
+                (int)contentInfo->mFmiParameterLevelId,
+                (int)contentInfo->mParameterLevel,
+                (int)T::InterpolationMethod::Linear);
+
+            if (tmpList.find(std::string(tmp)) == tmpList.end())
+              tmpList.insert(std::string(tmp));
+          }
+        }
+      }
+    }
+
+    std::string prevPrefix;
+    for (auto it=tmpList.begin(); it != tmpList.end(); ++it)
+    {
+      char *str = (char*)it->c_str();
+      char *pp = strstr(str,";");
+      if (pp != NULL)
+      {
+        pp = strstr(pp+1,";");
+        if (pp != NULL)
+        {
+          std::string prefix = it->substr(0,pp-str);
+          if (prevPrefix != prefix)
+            list.insert(*it + ";E");
+          else
+            list.insert(*it + ";D");
+
+          prevPrefix = prefix;
+        }
+      }
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -3306,6 +3421,7 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
+    //contentList.print(std::cout,0,0);
     contentList.getContentListByForecastTime(forecastTime,contentInfoList);
 
     return Result::OK;

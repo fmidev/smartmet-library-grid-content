@@ -41,7 +41,8 @@ class Query
     QueryParameter_vec        mQueryParameterList;
     std::string               mStartTime;
     std::string               mEndTime;
-    unsigned long             mFlags;
+    uint                      mGenerationFlags;
+    uint                      mFlags;
 };
 
 

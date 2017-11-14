@@ -192,6 +192,17 @@ void ContentInfoList::addContentInfo(ContentInfo *contentInfo)
 
     int idx = getClosestIndexNoLock(mComparisonMethod,*contentInfo);
 
+    if (idx < (int)mLength  &&  mArray[idx] != NULL  &&   mArray[idx]->compare(mComparisonMethod,contentInfo) == 0)
+    {
+      // If content with the same id exists, then we should replace it.
+
+      if (mReleaseObjects)
+        delete mArray[idx];
+
+      mArray[idx] = contentInfo;
+      return;
+    }
+
     while (idx < (int)mLength  &&  mArray[idx] != NULL  &&   mArray[idx]->compare(mComparisonMethod,contentInfo) < 0)
     {
       idx++;
@@ -1198,6 +1209,7 @@ void ContentInfoList::getContentListByForecastTime(std::string forecastTime,T::C
     ContentInfo *prevInfo = NULL;
     ContentInfo *nextInfo = NULL;
 
+
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -2038,7 +2050,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -2056,7 +2068,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
           {
             if (strcasecmp(info->mGribParameterId.c_str(),gribParameterId.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -2191,7 +2203,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -2209,7 +2221,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
           {
             if (strcasecmp(info->mGribParameterId.c_str(),gribParameterId.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -2347,7 +2359,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -2365,7 +2377,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
           {
             if (info->mProducerId == producerId && strcasecmp(info->mGribParameterId.c_str(),gribParameterId.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -2528,7 +2540,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -2546,7 +2558,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
           {
             if (strcasecmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -2681,7 +2693,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -2699,7 +2711,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
           {
             if (strcasecmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -2836,7 +2848,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -2854,7 +2866,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
           {
             if (info->mProducerId == producerId  &&  strcasecmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -2990,7 +3002,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -3009,7 +3021,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
             //printf("-- INDEX %u %s %u\n",idx,mArray[t]->mFmiParameterName.c_str(),mArray[t]->mParameterLevel);
             if (strcasecmp(info->mFmiParameterName.c_str(),fmiParameterName.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -3143,7 +3155,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -3161,7 +3173,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
           {
             if (strcasecmp(info->mFmiParameterName.c_str(),fmiParameterName.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -3299,7 +3311,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -3317,7 +3329,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
           {
             if (info->mProducerId == producerId && strcasecmp(info->mFmiParameterName.c_str(),fmiParameterName.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -3452,7 +3464,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -3470,7 +3482,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
           {
             if (strcasecmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -3605,7 +3617,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -3623,7 +3635,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
           {
             if (strcasecmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -3761,7 +3773,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -3779,7 +3791,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
           {
             if (info->mProducerId == producerId  &&  strcasecmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -3913,7 +3925,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -3931,7 +3943,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
           {
             if (strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -4066,7 +4078,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -4084,7 +4096,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
           {
             if (strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -4222,7 +4234,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -4240,7 +4252,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
           {
             if (info->mProducerId == producerId &&  strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -4375,7 +4387,7 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -4393,7 +4405,7 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
           {
             if (strcasecmp(info->mCdmParameterId.c_str(),cdmParameterId.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -4528,7 +4540,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -4546,7 +4558,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
           {
             if (strcasecmp(info->mCdmParameterId.c_str(),cdmParameterId.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -4684,7 +4696,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -4702,7 +4714,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
           {
             if (info->mProducerId == producerId  &&  strcasecmp(info->mCdmParameterId.c_str(),cdmParameterId.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -4837,7 +4849,7 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -4855,7 +4867,7 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
           {
             if (strcasecmp(info->mCdmParameterName.c_str(),cdmParameterName.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -4990,7 +5002,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -5008,7 +5020,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
           {
             if (strcasecmp(info->mCdmParameterName.c_str(),cdmParameterName.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
@@ -5146,7 +5158,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
         ContentInfo *prev = NULL;
         ContentInfo *next = NULL;
 
-        uint level = mArray[t]->mParameterLevel;
+        int level = mArray[t]->mParameterLevel;
         if (parameterLevelIdType != T::ParamLevelIdType::IGNORE  &&  level > maxLevel)
         {
           // Checking if we need to include the content that is one level above the "maxLevel".
@@ -5164,7 +5176,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
           {
             if (info->mProducerId == producerId  &&  strcasecmp(info->mCdmParameterName.c_str(),cdmParameterName.c_str()) == 0)
             {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {

@@ -19,6 +19,8 @@ QueryParameter::QueryParameter()
     mForecastType = -1;
     mForecastNumber = -1;
     mInterpolationMethod = T::InterpolationMethod::Linear;
+    mProducerId = 0;
+    mGenerationFlags = 0;
     mTemporary = false;
   }
   catch (...)
@@ -46,6 +48,8 @@ QueryParameter::QueryParameter(const QueryParameter& queryParameter)
     mForecastType = queryParameter.mForecastType;
     mForecastNumber = queryParameter.mForecastNumber;
     mInterpolationMethod = queryParameter.mInterpolationMethod;
+    mProducerId = queryParameter.mProducerId;
+    mGenerationFlags = queryParameter.mGenerationFlags;
     mValueList = queryParameter.mValueList;
     mTemporary = queryParameter.mTemporary;
     mFunction = queryParameter.mFunction;
@@ -108,6 +112,8 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mForecastType         = " << (int)mForecastType << "\n";
     stream << space(level) << "- mForecastNumber       = " << (int)mForecastNumber << "\n";
     stream << space(level) << "- mInterpolationMethod  = " << (uint)mInterpolationMethod << "\n";
+    stream << space(level) << "- mProducerId           = " << mProducerId << "\n";
+    stream << space(level) << "- mGenerationFlags      = " << mGenerationFlags << "\n";
     stream << space(level) << "- mTemporary            = " << (int)mTemporary << "\n";
     stream << space(level) << "- mFunction             = " << mFunction << "\n";
 

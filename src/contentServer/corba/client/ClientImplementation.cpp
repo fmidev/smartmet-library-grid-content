@@ -646,7 +646,7 @@ int ClientImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
 
     ContentServer::Corba::CorbaProducerInfoList_var corbaProducerInfoList;
 
-    int result = mService->getProducerInfoListByParameter(sessionId,(uint)parameterKeyType,parameterKey.c_str(),corbaProducerInfoList);
+    int result = mService->getProducerInfoListByParameter(sessionId,(CORBA::Octet)parameterKeyType,parameterKey.c_str(),corbaProducerInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaProducerInfoList, producerInfoList);
@@ -731,6 +731,34 @@ int ClientImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId
     ContentServer::Corba::CorbaStringList_var corbaList;
 
     int result = mService->getProducerNameAndGeometryList(sessionId,corbaList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaList,list);
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::set<std::string>& list)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaStringList_var corbaList;
+
+    int result = mService->getProducerParameterList(sessionId,(CORBA::Octet)parameterKeyType,corbaList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaList,list);

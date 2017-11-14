@@ -39,7 +39,7 @@ struct CorbaContentInfo
   octet              fmiParameterLevelId;
   octet              grib1ParameterLevelId;
   octet              grib2ParameterLevelId;
-  unsigned long      parameterLevel;
+  long      		 parameterLevel;
   string             fmiParameterUnits;
   string             gribParameterUnits;
   unsigned long      flags;
