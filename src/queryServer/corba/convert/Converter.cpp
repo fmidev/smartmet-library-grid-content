@@ -41,7 +41,7 @@ Converter::~Converter()
 
 
 
-void Converter::convert(std::vector<std::string>& source,QueryServer::Corba::CorbaStringList& target)
+void Converter::convert(string_vec& source,QueryServer::Corba::CorbaStringList& target)
 {
   try
   {
@@ -63,7 +63,7 @@ void Converter::convert(std::vector<std::string>& source,QueryServer::Corba::Cor
 
 
 
-void Converter::convert(QueryServer::Corba::CorbaStringList& source,std::vector<std::string>& target)
+void Converter::convert(QueryServer::Corba::CorbaStringList& source,string_vec& target)
 {
   try
   {
@@ -450,6 +450,7 @@ void Converter::convert(QueryServer::Corba::CorbaQueryParameter& source,QuerySer
   {
     target.mId = source.id;
     target.mParam = source.param;
+    target.mOrigParam = source.origParam;
     target.mSymbolicName = source.symbolicName;
     target.mParameterKeyType = (T::ParamKeyType)source.parameterKeyType;
     target.mParameterKey = source.parameterKey;
@@ -482,6 +483,7 @@ void Converter::convert(QueryServer::QueryParameter& source,QueryServer::Corba::
   {
     target.id = source.mId;
     target.param = CORBA::string_dup(source.mParam.c_str());
+    target.origParam = CORBA::string_dup(source.mOrigParam.c_str());
     target.symbolicName = CORBA::string_dup(source.mSymbolicName.c_str());
     target.parameterKeyType = (::CORBA::Octet)source.mParameterKeyType;
     target.parameterKey = CORBA::string_dup(source.mParameterKey.c_str());

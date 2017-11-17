@@ -283,7 +283,7 @@ int ClientImplementation::_getDataServerInfoList(T::SessionId sessionId,T::Serve
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("serverInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -526,7 +526,7 @@ int ClientImplementation::_getProducerInfoList(T::SessionId sessionId,T::Produce
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("producerInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -566,7 +566,7 @@ int ClientImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("producerInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -605,7 +605,7 @@ int ClientImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("producerInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -674,7 +674,7 @@ int ClientImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("line",lines);
       for (uint t=0; t<len; t++)
       {
@@ -711,7 +711,7 @@ int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("line",lines);
       for (uint t=0; t<len; t++)
       {
@@ -917,7 +917,7 @@ int ClientImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessi
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("line",lines);
       for (uint t=0; t<len; t++)
       {
@@ -1013,7 +1013,7 @@ int ClientImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Gener
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("generationInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -1052,7 +1052,7 @@ int ClientImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("generationInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -1091,7 +1091,7 @@ int ClientImplementation::_getGenerationInfoListByProducerId(T::SessionId sessio
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("generationInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -1130,7 +1130,7 @@ int ClientImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("generationInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -1169,7 +1169,7 @@ int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionI
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("generationInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -1774,7 +1774,7 @@ int ClientImplementation::_getFileInfoList(T::SessionId sessionId,uint startFile
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -1815,7 +1815,7 @@ int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,ui
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -1856,7 +1856,7 @@ int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -1897,7 +1897,7 @@ int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -1938,7 +1938,7 @@ int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -1979,7 +1979,7 @@ int ClientImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,ui
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -2147,7 +2147,7 @@ int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -2248,7 +2248,7 @@ int ClientImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -2781,7 +2781,7 @@ int ClientImplementation::_getContentList(T::SessionId sessionId,uint startFileI
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -2820,7 +2820,7 @@ int ClientImplementation::_getContentListByFileId(T::SessionId sessionId,uint fi
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -2859,7 +2859,7 @@ int ClientImplementation::_getContentListByFileName(T::SessionId sessionId,std::
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -2901,7 +2901,7 @@ int ClientImplementation::_getContentListByGroupFlags(T::SessionId sessionId,uin
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -2943,7 +2943,7 @@ int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId,uin
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -2985,7 +2985,7 @@ int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,s
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -3027,7 +3027,7 @@ int ClientImplementation::_getContentListByServerId(T::SessionId sessionId,uint 
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -3069,7 +3069,7 @@ int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,u
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -3111,7 +3111,7 @@ int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -3152,7 +3152,7 @@ int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -3193,7 +3193,7 @@ int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -3235,7 +3235,7 @@ int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId,uint 
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -3284,7 +3284,7 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -3334,7 +3334,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -3384,7 +3384,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -3432,7 +3432,7 @@ int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId s
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -3481,7 +3481,7 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -3529,7 +3529,7 @@ int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -3565,7 +3565,7 @@ int ClientImplementation::_getContentGeometryIdListByGenerationId(T::SessionId s
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("geometryId",lines);
       for (uint t=0; t<len; t++)
       {
@@ -3602,7 +3602,7 @@ int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessio
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
@@ -3642,7 +3642,7 @@ int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId ses
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("paramKey",lines);
       for (uint t=0; t<len; t++)
       {
@@ -3680,7 +3680,7 @@ int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
     int result = (int)response.getLineValueByKey("result");
     if (result == Result::OK)
     {
-      std::vector<std::string> lines;
+      string_vec lines;
       uint len = response.getLinesByKey("contentTime",lines);
       for (uint t=0; t<len; t++)
       {

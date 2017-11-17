@@ -21,7 +21,7 @@ ParameterMapping::ParameterMapping()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -45,7 +45,7 @@ ParameterMapping::ParameterMapping(const ParameterMapping& mapping)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -60,7 +60,7 @@ ParameterMapping::~ParameterMapping()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -85,7 +85,7 @@ void ParameterMapping::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 

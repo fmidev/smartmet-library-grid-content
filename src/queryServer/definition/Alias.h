@@ -9,21 +9,21 @@ namespace QueryServer
 {
 
 
-class ParameterAlias
+class Alias
 {
   public:
-                   ParameterAlias();
-                   ParameterAlias(const ParameterAlias& alias);
-    virtual        ~ParameterAlias();
+                   Alias();
+                   Alias(const Alias& alias);
+    virtual        ~Alias();
 
     void           print(std::ostream& stream,uint level,uint optionFlags);
 
     std::string    mName;   // Alias name (must be unique)
-    std::string    mParameterString;
+    std::string    mAliasString;
 };
 
 
-typedef std::map<std::string,ParameterAlias> ParameterAlias_map;
+typedef std::map<std::string,Alias> Alias_map;
 
 
 }  // namespace QueryServer

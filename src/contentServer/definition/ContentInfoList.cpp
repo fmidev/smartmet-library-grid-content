@@ -2072,7 +2072,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                       (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -2227,7 +2227,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
                 {
                   if (info->mGenerationId == generationId)
                   {
-                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                         (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                         (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                         (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -2381,7 +2381,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                       (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -2562,7 +2562,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                       (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -2717,7 +2717,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
                 {
                   if (info->mGenerationId == generationId)
                   {
-                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                         (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                         (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                         (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -2870,7 +2870,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                       (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -3025,7 +3025,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                       (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -3179,7 +3179,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
                 {
                   if (info->mGenerationId == generationId)
                   {
-                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                         (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                         (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                         (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -3333,7 +3333,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                       (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -3486,7 +3486,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                       (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -3641,7 +3641,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
                 {
                   if (info->mGenerationId == generationId)
                   {
-                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                         (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                         (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                         (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -3795,7 +3795,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                       (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -3947,7 +3947,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                       (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -4102,7 +4102,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
                 {
                   if (info->mGenerationId == generationId)
                   {
-                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                         (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                         (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                         (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -4256,7 +4256,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                       (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -4409,7 +4409,7 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                       (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -4564,7 +4564,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
                 {
                   if (info->mGenerationId == generationId)
                   {
-                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                         (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                         (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                         (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -4718,7 +4718,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                       (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -4871,7 +4871,7 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                       (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -5026,7 +5026,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
                 {
                   if (info->mGenerationId == generationId)
                   {
-                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                    if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                         (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                         (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                         (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
@@ -5180,7 +5180,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
+                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
                       (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))

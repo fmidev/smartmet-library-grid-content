@@ -25,8 +25,8 @@ class Converter
                   Converter();
     virtual       ~Converter();
 
-    static void   convert(std::vector<std::string>& source,QueryServer::Corba::CorbaStringList& target);
-    static void   convert(QueryServer::Corba::CorbaStringList& source,std::vector<std::string>& target);
+    static void   convert(string_vec& source,QueryServer::Corba::CorbaStringList& target);
+    static void   convert(QueryServer::Corba::CorbaStringList& source,string_vec& target);
 
     static void   convert(T::GridPointValue& source,QueryServer::Corba::CorbaGridPointValue& target);
     static void   convert(QueryServer::Corba::CorbaGridPointValue& source,T::GridPointValue& target);

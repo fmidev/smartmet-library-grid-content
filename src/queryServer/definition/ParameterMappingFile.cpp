@@ -1,4 +1,4 @@
-#include "ParameterMappingList.h"
+#include "ParameterMappingFile.h"
 #include <grid-files/common/GeneralFunctions.h>
 
 
@@ -8,7 +8,7 @@ namespace QueryServer
 {
 
 
-ParameterMappingList::ParameterMappingList(std::string filename)
+ParameterMappingFile::ParameterMappingFile(std::string filename)
 {
   try
   {
@@ -16,7 +16,7 @@ ParameterMappingList::ParameterMappingList(std::string filename)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -24,7 +24,7 @@ ParameterMappingList::ParameterMappingList(std::string filename)
 
 
 
-ParameterMappingList::ParameterMappingList(const ParameterMappingList& mappingList)
+ParameterMappingFile::ParameterMappingFile(const ParameterMappingFile& mappingList)
 {
   try
   {
@@ -33,7 +33,7 @@ ParameterMappingList::ParameterMappingList(const ParameterMappingList& mappingLi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -41,14 +41,14 @@ ParameterMappingList::ParameterMappingList(const ParameterMappingList& mappingLi
 
 
 
-ParameterMappingList::~ParameterMappingList()
+ParameterMappingFile::~ParameterMappingFile()
 {
   try
   {
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -56,16 +56,16 @@ ParameterMappingList::~ParameterMappingList()
 
 
 
-void ParameterMappingList::init()
+void ParameterMappingFile::init()
 {
   try
   {
     AutoThreadLock lock(&mThreadLock);
-    load();
+    loadFile();
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -73,7 +73,7 @@ void ParameterMappingList::init()
 
 
 
-void ParameterMappingList::checkUpdates()
+void ParameterMappingFile::checkUpdates()
 {
   try
   {
@@ -81,12 +81,12 @@ void ParameterMappingList::checkUpdates()
 
     time_t tt = getFileModificationTime(mFilename.c_str());
 
-    if (tt != mLastModified  &&  (tt-5) > time(0))
-      load();
+    if (tt != mLastModified  &&  (tt+3) < time(0))
+      loadFile();
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -94,7 +94,7 @@ void ParameterMappingList::checkUpdates()
 
 
 
-void ParameterMappingList::getMappings(std::string producerName,std::string parameterName,bool onlySearchEnabled,ParameterMapping_vec& mappings)
+void ParameterMappingFile::getMappings(std::string producerName,std::string parameterName,bool onlySearchEnabled,ParameterMapping_vec& mappings)
 {
   try
   {
@@ -102,7 +102,7 @@ void ParameterMappingList::getMappings(std::string producerName,std::string para
 
     for (auto it = mMappingVector.begin(); it != mMappingVector.end(); ++it)
     {
-      if (it->mProducerName == producerName  &&  it->mParameterName == parameterName)
+      if (it->mProducerName == producerName  &&  strcasecmp(it->mParameterName.c_str(),parameterName.c_str()) == 0)
       {
         if (onlySearchEnabled)
         {
@@ -118,7 +118,7 @@ void ParameterMappingList::getMappings(std::string producerName,std::string para
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -126,14 +126,14 @@ void ParameterMappingList::getMappings(std::string producerName,std::string para
 
 
 
-void ParameterMappingList::load()
+void ParameterMappingFile::loadFile()
 {
   try
   {
     FILE *file = fopen(mFilename.c_str(),"r");
     if (file == NULL)
     {
-      SmartMet::Spine::Exception exception(BCP,"Cannot open the mapping file!");
+      Spine::Exception exception(BCP,"Cannot open the mapping file!");
       exception.addParameter("Filename",mFilename);
       throw exception;
     }
@@ -213,7 +213,7 @@ void ParameterMappingList::load()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -221,14 +221,14 @@ void ParameterMappingList::load()
 
 
 
-void ParameterMappingList::print(std::ostream& stream,uint level,uint optionFlags)
+void ParameterMappingFile::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try
   {
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 

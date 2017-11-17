@@ -32,7 +32,7 @@ std::string getResultString(int resultCode)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
 

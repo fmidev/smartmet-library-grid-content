@@ -69,8 +69,8 @@ class Converter
     static void   convert(T::EventInfoList& source,ContentServer::Corba::CorbaEventInfoList& target);
     static void   convert(ContentServer::Corba::CorbaEventInfoList& source,T::EventInfoList& target);
 
-    static void   convert(std::vector<std::string>& source,ContentServer::Corba::CorbaStringList& target);
-    static void   convert(ContentServer::Corba::CorbaStringList& source,std::vector<std::string>& target);
+    static void   convert(string_vec& source,ContentServer::Corba::CorbaStringList& target);
+    static void   convert(ContentServer::Corba::CorbaStringList& source,string_vec& target);
 
     static void   convert(std::set<std::string>& source,ContentServer::Corba::CorbaStringList& target);
     static void   convert(ContentServer::Corba::CorbaStringList& source,std::set<std::string>& target);

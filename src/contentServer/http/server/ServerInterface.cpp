@@ -2552,7 +2552,7 @@ void ServerInterface::addFileInfoWithContentList(T::RequestMessage& request,T::R
 
     T::FileInfo fileInfo(csv.c_str());
 
-    std::vector<std::string> csvLines;
+    string_vec csvLines;
     request.getLinesByKey("contentInfo",csvLines);
 /*
     if (request.getLinesByKey("contentInfo",csvLines) == 0)
@@ -3540,7 +3540,7 @@ void ServerInterface::deleteFileInfoListByFileIdList(T::RequestMessage& request,
       return;
     }
 
-    std::vector<std::string> csvLines;
+    string_vec csvLines;
     if (request.getLinesByKey("fileId",csvLines) == 0)
     {
       response.addLine("result",(int)Result::MISSING_PARAMETER);
@@ -3991,7 +3991,7 @@ void ServerInterface::addContentList(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
-    std::vector<std::string> csvLines;
+    string_vec csvLines;
     if (request.getLinesByKey("contentInfo",csvLines) == 0)
     {
       response.addLine("result",(int)Result::MISSING_PARAMETER);

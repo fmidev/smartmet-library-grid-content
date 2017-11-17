@@ -79,6 +79,7 @@ struct CorbaQueryParameter
 {
   unsigned long            id;
   string                   param;
+  string                   origParam;
   string                   symbolicName;
   octet                    parameterKeyType;
   string                   parameterKey;

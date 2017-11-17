@@ -24,6 +24,7 @@ class QueryParameter
 
     uint                    mId;
     std::string             mParam;
+    std::string             mOrigParam;
     std::string             mSymbolicName;
     T::ParamKeyType         mParameterKeyType;
     T::ParamId              mParameterKey;

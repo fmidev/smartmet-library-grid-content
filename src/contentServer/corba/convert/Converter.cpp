@@ -636,7 +636,7 @@ void Converter::convert(ContentServer::Corba::CorbaEventInfoList& source,T::Even
 
 
 
-void Converter::convert(std::vector<std::string>& source,ContentServer::Corba::CorbaStringList& target)
+void Converter::convert(string_vec& source,ContentServer::Corba::CorbaStringList& target)
 {
   try
   {
@@ -656,7 +656,7 @@ void Converter::convert(std::vector<std::string>& source,ContentServer::Corba::C
 
 
 
-void Converter::convert(ContentServer::Corba::CorbaStringList& source,std::vector<std::string>& target)
+void Converter::convert(ContentServer::Corba::CorbaStringList& source,string_vec& target)
 {
   try
   {

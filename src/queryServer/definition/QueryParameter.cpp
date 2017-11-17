@@ -25,7 +25,7 @@ QueryParameter::QueryParameter()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -39,6 +39,7 @@ QueryParameter::QueryParameter(const QueryParameter& queryParameter)
   {
     mId = queryParameter.mId;
     mParam = queryParameter.mParam;
+    mOrigParam = queryParameter.mOrigParam;
     mSymbolicName = queryParameter.mSymbolicName;
     mParameterKeyType = queryParameter.mParameterKeyType;
     mParameterKey = queryParameter.mParameterKey;
@@ -57,7 +58,7 @@ QueryParameter::QueryParameter(const QueryParameter& queryParameter)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -72,7 +73,7 @@ QueryParameter::~QueryParameter()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -88,7 +89,7 @@ QueryParameter* QueryParameter::duplicate()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -103,6 +104,7 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "QueryParameter\n";
     stream << space(level) << "- mId                   = " << mId << "\n";
     stream << space(level) << "- mParam                = " << mParam << "\n";
+    stream << space(level) << "- mOrigParam            = " << mOrigParam << "\n";
     stream << space(level) << "- mSymbolicName         = " << mSymbolicName << "\n";
     stream << space(level) << "- mParameterKeyType     = " << (uint)mParameterKeyType << "\n";
     stream << space(level) << "- mParameterKey         = " << mParameterKey << "\n";
@@ -133,7 +135,7 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 

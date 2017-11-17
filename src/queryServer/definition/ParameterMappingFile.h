@@ -11,12 +11,12 @@ namespace QueryServer
 {
 
 
-class ParameterMappingList
+class ParameterMappingFile
 {
   public:
-                          ParameterMappingList(std::string filename);
-                          ParameterMappingList(const ParameterMappingList& mappingList);
-    virtual               ~ParameterMappingList();
+                          ParameterMappingFile(std::string filename);
+                          ParameterMappingFile(const ParameterMappingFile& mappingList);
+    virtual               ~ParameterMappingFile();
 
     virtual void          init();
     virtual void          checkUpdates();
@@ -25,7 +25,7 @@ class ParameterMappingList
 
   protected:
 
-    virtual void          load();
+    virtual void          loadFile();
 
     std::string           mFilename;
     time_t                mLastModified;
@@ -33,6 +33,8 @@ class ParameterMappingList
     ThreadLock            mThreadLock;
 };
 
+
+typedef std::vector<ParameterMappingFile> ParamMappingFile_vec;
 
 
 }  // namespace QueryServer

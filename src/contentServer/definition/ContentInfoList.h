@@ -107,7 +107,7 @@ class ContentInfoList
 
      void             getStartTimeList(std::set<std::string>& startTimeList);
      void             getStartTimeListByGenerationAndGeometry(uint generationId,T::GeometryId geometryId,std::set<std::string>& startTimeList);
-     //void             getStartTimeList(std::vector<std::string>& startTimeList);
+     //void             getStartTimeList(string_vec& startTimeList);
      void             getFmiParamLevelIdListByFmiParameterId(T::ParamId fmiParameterId,std::vector<T::ParamLevelId>& paramLevelIdList);
      void             getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId,std::vector<T::ParamLevel>& paramLevelList);
      void             getParamLevelInfoListByFmiParameterId(T::ParamId fmiParameterId,ParameterLevelInfoList& parameterLevelInfoList);
