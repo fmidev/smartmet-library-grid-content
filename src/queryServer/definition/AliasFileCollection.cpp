@@ -12,6 +12,8 @@ AliasFileCollection::AliasFileCollection()
 {
   try
   {
+    mLastCheck = 0;
+    mCheckInterval = 10;
   }
   catch (...)
   {
@@ -117,15 +119,20 @@ void AliasFileCollection::init(string_vec& filenames)
 
 
 
-void AliasFileCollection::checkUpdates()
+void AliasFileCollection::checkUpdates(bool force)
 {
   try
   {
     AutoThreadLock lock(&mThreadLock);
 
-    for (auto it = mAliasFileList.begin(); it != mAliasFileList.end(); ++it)
+    time_t tt = time(0);
+    if (force ||  (tt-mLastCheck) > mCheckInterval)
     {
-      it->checkUpdates();
+      for (auto it = mAliasFileList.begin(); it != mAliasFileList.end(); ++it)
+      {
+        it->checkUpdates();
+      }
+      mLastCheck = tt;
     }
   }
   catch (...)

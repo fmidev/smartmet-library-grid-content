@@ -1,8 +1,7 @@
 #pragma once
 
+#include <grid-files/grid/Typedefs.h>
 #include <string>
-
-#include "grid-files/grid/Typedefs.h"
 
 
 namespace SmartMet
@@ -11,7 +10,9 @@ namespace T
 {
 
 
-#define CONTENT_INFO_DELETED   0x80000000
+#define CONTENT_INFO_PREDEFINED  0x00000001
+#define CONTENT_INFO_VIRTUAL     0x00000002
+#define CONTENT_INFO_DELETED     0x80000000
 
 
 class ContentInfo

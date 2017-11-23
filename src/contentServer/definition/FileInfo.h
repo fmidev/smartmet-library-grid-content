@@ -1,7 +1,7 @@
 #pragma once
 
+#include <grid-files/grid/Typedefs.h>
 #include <string>
-#include "grid-files/grid/Typedefs.h"
 
 
 
@@ -92,7 +92,8 @@ typedef FileInfo* FileInfoPtr;
 
 enum class FileInfoFlags
 {
-  CONTENT_PREDEFINED   = 1
+  CONTENT_PREDEFINED   = 1,
+  CONTENT_VIRTUAL      = 2
 };
 
 

@@ -2,7 +2,8 @@
 
 #include "ContentInfo.h"
 #include "ParameterLevelInfoList.h"
-#include "grid-files/common/ModificationLock.h"
+
+#include <grid-files/common/ModificationLock.h>
 #include <vector>
 #include <set>
 
@@ -39,6 +40,7 @@ class ContentInfoList
      uint             deleteContentInfoBySourceId(uint sourceId);
      uint             deleteContentInfoByFileIdList(std::set<uint>& fileIdList);
      uint             deleteMarkedContent();
+     uint             deleteVirtualContent();
      uint             markDeletedByFileId(uint fileId);
 
 

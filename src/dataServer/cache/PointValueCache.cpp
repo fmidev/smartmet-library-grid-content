@@ -1,6 +1,6 @@
 #include "PointValueCache.h"
-#include "grid-files/common/AutoReadLock.h"
-#include "grid-files/common/AutoWriteLock.h"
+#include <grid-files/common/AutoReadLock.h>
+#include <grid-files/common/AutoWriteLock.h>
 
 namespace SmartMet
 {

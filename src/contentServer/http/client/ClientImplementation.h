@@ -144,6 +144,9 @@ class ClientImplementation : public ContentServer::ServiceInterface
 
      virtual int    _getContentCount(T::SessionId sessionId,uint& count);
 
+     virtual int    _deleteVirtualContent(T::SessionId sessionId);
+     virtual int    _updateVirtualContent(T::SessionId sessionId);
+
      virtual void   sendRequest(T::RequestMessage& request,T::ResponseMessage& response);
 
      std::string    mUrl;

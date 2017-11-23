@@ -14,8 +14,9 @@
 #include "GenerationInfoList.h"
 #include "ServiceResults.h"
 #include "RequestFlags.h"
-#include "grid-files/common/Log.h"
-#include "grid-files/grid/Typedefs.h"
+
+#include <grid-files/common/Log.h>
+#include <grid-files/grid/Typedefs.h>
 #include <set>
 
 
@@ -26,6 +27,14 @@ namespace SmartMet
 namespace ContentServer
 {
 
+enum class Implementation
+{
+  Interface = 0,
+  Redis = 1,
+  Cache = 2,
+  CorbaClient = 3,
+  HttpClient = 4,
+};
 
 
 class ServiceInterface
@@ -33,6 +42,8 @@ class ServiceInterface
   public:
                     ServiceInterface();
      virtual        ~ServiceInterface();
+
+     Implementation getImplementationType();
 
      virtual void   setProcessingLog(Log *processingLogPointer);
      virtual void   shutdown();
@@ -158,6 +169,9 @@ class ServiceInterface
 
      virtual int    getContentCount(T::SessionId sessionId,uint& count);
 
+     virtual int    deleteVirtualContent(T::SessionId sessionId);
+     virtual int    updateVirtualContent(T::SessionId sessionId);
+
    protected:
 
      virtual int    _clear(T::SessionId sessionId);
@@ -281,7 +295,11 @@ class ServiceInterface
 
      virtual int    _getContentCount(T::SessionId sessionId,uint& count);
 
+     virtual int    _deleteVirtualContent(T::SessionId sessionId);
+     virtual int    _updateVirtualContent(T::SessionId sessionId);
+
      Log            *mProcessingLogPointer;
+     Implementation mImplementationType;
 };
 
 

@@ -1,6 +1,6 @@
 #include "ContentSync.h"
-#include "grid-files/common/ShowFunction.h"
-#include "grid-files/common/GeneralFunctions.h"
+#include <grid-files/common/ShowFunction.h>
+#include <grid-files/common/GeneralFunctions.h>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF

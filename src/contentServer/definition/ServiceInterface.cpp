@@ -1,7 +1,7 @@
 #include "ServiceInterface.h"
-#include "grid-files/common/Exception.h"
-#include "grid-files/common/GeneralFunctions.h"
-#include "grid-files/common/ShowFunction.h"
+#include <grid-files/common/Exception.h>
+#include <grid-files/common/GeneralFunctions.h>
+#include <grid-files/common/ShowFunction.h>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -20,6 +20,7 @@ ServiceInterface::ServiceInterface()
   try
   {
     mProcessingLogPointer = NULL;
+    mImplementationType = Implementation::Interface;
   }
   catch (...)
   {
@@ -43,6 +44,22 @@ ServiceInterface::~ServiceInterface()
   }
 }
 
+
+
+
+
+Implementation ServiceInterface::getImplementationType()
+{
+  FUNCTION_TRACE
+  try
+  {
+    return mImplementationType;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
 
 
 
@@ -2472,6 +2489,50 @@ int ServiceInterface::getContentCount(T::SessionId sessionId,uint& count)
 
 
 
+int ServiceInterface::deleteVirtualContent(T::SessionId sessionId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _deleteVirtualContent(sessionId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu);result %d;time %f;",__FUNCTION__,sessionId,result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int ServiceInterface::updateVirtualContent(T::SessionId sessionId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _updateVirtualContent(sessionId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu);result %d;time %f;",__FUNCTION__,sessionId,result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::_clear(T::SessionId sessionId)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
@@ -3448,6 +3509,27 @@ int ServiceInterface::_getContentCount(T::SessionId sessionId,uint& count)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
+
+
+
+
+
+int ServiceInterface::_deleteVirtualContent(T::SessionId sessionId)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
+
+
+
+
+int ServiceInterface::_updateVirtualContent(T::SessionId sessionId)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
+
+
 
 
 

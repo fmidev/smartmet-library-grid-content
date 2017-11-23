@@ -1,7 +1,8 @@
 #pragma once
 
 #include "GenerationInfo.h"
-#include "grid-files/common/ThreadLock.h"
+
+#include <grid-files/common/ThreadLock.h>
 #include <vector>
 
 

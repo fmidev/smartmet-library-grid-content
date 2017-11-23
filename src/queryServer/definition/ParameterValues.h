@@ -1,7 +1,8 @@
 #pragma once
 
-#include "grid-files/grid/Typedefs.h"
-#include "grid-files/grid/GridValueList.h"
+#include <grid-files/grid/Typedefs.h>
+#include <grid-files/grid/GridValueList.h>
+
 
 
 namespace SmartMet

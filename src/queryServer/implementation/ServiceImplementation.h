@@ -2,10 +2,10 @@
 
 #include "queryServer/definition/ServiceInterface.h"
 #include "queryServer/definition/AliasFileCollection.h"
-#include "queryServer/definition/LuaFileCollection.h"
 #include "queryServer/definition/ParameterMappingFile.h"
 #include "dataServer/definition/ServiceInterface.h"
 #include "contentServer/definition/ServiceInterface.h"
+#include "lua/LuaFileCollection.h"
 
 
 namespace SmartMet
@@ -29,10 +29,10 @@ class ServiceImplementation : public ServiceInterface
                        ContentServer::ServiceInterface *contentServerPtr,
                        DataServer::ServiceInterface *dataServerPtr,
                        std::string gridConfigDirectory,
-                       string_vec parameterMappingFiles,
-                       string_vec aliasFiles,
+                       string_vec& parameterMappingFiles,
+                       string_vec& aliasFiles,
                        std::string producerFile,
-                       string_vec luaFileNames);
+                       string_vec& luaFileNames);
 
      virtual void   shutdown();
 
@@ -57,7 +57,7 @@ class ServiceImplementation : public ServiceInterface
 
      void           checkConfigurationUpdates();
      bool           getAlias(std::string name,std::string& alias);
-     double         executeFunction(std::string& function,std::vector<double>& parameters);
+     double         executeFunctionType1(std::string& function,std::vector<double>& parameters);
      void           executeQueryFunctions(Query& query);
      int            executeTimeRangeQuery(Query& query);
      int            executeTimeStepQuery(Query& query);
@@ -135,19 +135,20 @@ class ServiceImplementation : public ServiceInterface
 
      // Private attributes
 
-     AliasFileCollection  mAliasFileCollection;
-     uint                 mFunctionParamId;
-     std::string          mGridConfigDirectory;
-     time_t               mLastConfiguratonCheck;
-     LuaFileCollection    mLuaFileCollection;
-     string_vec           mParameterMappingFiles;
-     ParamMappingFile_vec mParameterMappings;
-     std::string          mProducerFile;
-     time_t               mProducerFileModificationTime;
-     Producer_vec         mProducerList;
-     ThreadLock           mThreadLock;
-     ContentServer_ptr    mContentServerPtr;
-     DataServer_ptr       mDataServerPtr;
+     AliasFileCollection    mAliasFileCollection;
+     uint                   mFunctionParamId;
+     std::string            mGridConfigDirectory;
+     time_t                 mLastConfiguratonCheck;
+     Lua::LuaFileCollection mLuaFileCollection;
+     string_vec             mParameterMappingFiles;
+     ParamMappingFile_vec   mParameterMappings;
+     std::string            mProducerFile;
+     time_t                 mProducerFileModificationTime;
+     Producer_vec           mProducerList;
+     ThreadLock             mThreadLock;
+     ContentServer_ptr      mContentServerPtr;
+     DataServer_ptr         mDataServerPtr;
+     uint                   mCheckInterval;
 };
 
 

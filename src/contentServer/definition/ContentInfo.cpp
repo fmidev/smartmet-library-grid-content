@@ -1,7 +1,7 @@
 #include "ContentInfo.h"
-#include "grid-files/common/Exception.h"
-#include "grid-files/common/GeneralFunctions.h"
 
+#include <grid-files/common/Exception.h>
+#include <grid-files/common/GeneralFunctions.h>
 #include <string.h>
 
 

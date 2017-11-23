@@ -1,5 +1,6 @@
 #include "QueryParameter.h"
-#include "grid-files/common/GeneralFunctions.h"
+#include <grid-files/common/GeneralFunctions.h>
+
 
 namespace SmartMet
 {

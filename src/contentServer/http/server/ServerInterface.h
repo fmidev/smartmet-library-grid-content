@@ -140,6 +140,9 @@ class ServerInterface
     virtual void getContentTimeListByGenerationAndGeometryId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentCount(T::RequestMessage& request,T::ResponseMessage& response);
 
+    virtual void deleteVirtualContent(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void updateVirtualContent(T::RequestMessage& request,T::ResponseMessage& response);
+
   protected:
 
     ContentServer::ServiceInterface *mService;

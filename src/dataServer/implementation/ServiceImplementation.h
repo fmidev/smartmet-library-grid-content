@@ -1,8 +1,11 @@
 #pragma once
 
-#include "GridStorage.h"
+#include "GridFileManager.h"
+#include "VirtualContentManager.h"
 #include "dataServer/definition/ServiceInterface.h"
-#include "grid-files/common/AttributeList.h"
+#include "lua/LuaFileCollection.h"
+
+#include <grid-files/common/AttributeList.h>
 #include <pthread.h>
 
 
@@ -19,10 +22,19 @@ class ServiceImplementation : public ServiceInterface
                     ServiceImplementation();
      virtual        ~ServiceImplementation();
 
-     virtual void   init(T::SessionId serverSessionId,uint serverId,std::string serverName,std::string serverIor,std::string dataDir,ContentServer::ServiceInterface *contentServer);
+     virtual void   init(
+                       T::SessionId serverSessionId,
+                       uint serverId,
+                       std::string serverName,
+                       std::string serverIor,
+                       std::string dataDir,
+                       ContentServer::ServiceInterface *contentServer,
+                       string_vec& luaFileNames);
+
      virtual void   startEventProcessing();
      virtual void   shutdown();
 
+     virtual void   addVirtualContentFactory(VirtualContentFactory *factory);
      virtual void   eventProcessingThread();
 
   protected:
@@ -70,29 +82,39 @@ class ServiceImplementation : public ServiceInterface
      virtual void   event_contentAdded(T::EventInfo& eventInfo);
      virtual void   event_contentDeleted(T::EventInfo& eventInfo);
      virtual void   event_contentRegistered(T::EventInfo& eventInfo);
+     virtual void   event_deleteVirtualContent(T::EventInfo& eventInfo);
+     virtual void   event_updateVirtualContent(T::EventInfo& eventInfo);
 
-     virtual void   addFile(T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList);
+     virtual void   addFile(T::FileInfo& fileInfo,T::ContentInfoList& currentContentList,T::ContentInfoList& contentInfoList);
      virtual void   checkServerRegistration();
      virtual void   fullUpdate();
+     virtual void   updateVirtualFiles();
      virtual void   processEvent(T::EventInfo& eventInfo);
      virtual void   processEvents();
+     virtual void   readContentList(T::ContentInfoList& contentList);
 
-     T::EventId     mLastProcessedEventId;
-     bool           mShutdownRequested;
-     bool           mFullUpdateRequired;
-     bool           mEventProcessingActive;
-     bool           mContentRegistrationEnabled;
+     GRID::GridFile_sptr  getGridFile(uint fileId);
 
-     T::SessionId   mServerSessionId;
-     uint           mServerId;
-     std::string    mServerName;
-     std::string    mServerIor;
-     std::string    mDataDir;
-     pthread_t      mThread;
-     time_t         mContentServerStartTime;
-     GridStorage    mGridStorage;
+     T::EventId           mLastProcessedEventId;
+     bool                 mShutdownRequested;
+     bool                 mFullUpdateRequired;
+     bool                 mEventProcessingActive;
+     bool                 mContentRegistrationEnabled;
+     bool                 mVirtualContentEnabled;
 
+     T::SessionId         mServerSessionId;
+     uint                 mServerId;
+     std::string          mServerName;
+     std::string          mServerIor;
+     std::string          mDataDir;
+     pthread_t            mThread;
+     time_t               mContentServerStartTime;
+     GridFileManager      mGridFileManager;
+
+     VirtualContentManager            mVirtualContentManager;
      ContentServer::ServiceInterface* mContentServer;
+     Lua::LuaFileCollection           mLuaFileCollection;
+     Functions::FunctionCollection    mFunctionCollection;
 
 };
 

@@ -1,8 +1,9 @@
 #include "ServerInterface.h"
 #include "queryServer/corba/convert/Converter.h"
 #include "contentServer/corba/convert/Converter.h"
-#include "grid-files/common/Exception.h"
-#include "grid-files/common/ShowFunction.h"
+
+#include <grid-files/common/Exception.h>
+#include <grid-files/common/ShowFunction.h>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF

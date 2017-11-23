@@ -1,13 +1,14 @@
 #pragma once
 
-#include "grid-files/grid/Typedefs.h"
-#include "grid-files/grid/GridPointValueList.h"
-#include "grid-files/common/Log.h"
-#include "contentServer/definition/ContentInfoList.h"
 #include "ServiceResults.h"
 #include "Query.h"
 #include "Alias.h"
 #include "ParameterValues.h"
+#include "contentServer/definition/ContentInfoList.h"
+
+#include <grid-files/grid/Typedefs.h>
+#include <grid-files/grid/GridPointValueList.h>
+#include <grid-files/common/Log.h>
 
 
 namespace SmartMet

@@ -4,7 +4,7 @@
 
 namespace SmartMet
 {
-namespace QueryServer
+namespace Lua
 {
 
 
@@ -89,5 +89,5 @@ void LuaFunction::print(std::ostream& stream,uint level,uint optionFlags)
 
 
 
-}  // namespace QueryServer
+}  // namespace Lua
 }  // namespace SmartMet

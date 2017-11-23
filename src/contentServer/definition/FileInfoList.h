@@ -1,7 +1,8 @@
 #pragma once
 
 #include "FileInfo.h"
-#include "grid-files/common/ModificationLock.h"
+
+#include <grid-files/common/ModificationLock.h>
 #include <vector>
 #include <set>
 
@@ -30,6 +31,7 @@ class FileInfoList
      bool       deleteFileInfoByIndex(uint index);
      uint       deleteFileInfoBySourceId(uint sourceId);
      uint       deleteFileInfoByFileIdList(std::set<uint>& fileIdList);
+     uint       deleteVirtualFiles();
      int        getClosestIndex(FileInfo::ComparisonMethod comparisonMethod,FileInfo& fileInfo);
      int        getClosestIndexNoLock(FileInfo::ComparisonMethod comparisonMethod,FileInfo& fileInfo);
      FileInfo*  getFileInfoById(uint fileId);

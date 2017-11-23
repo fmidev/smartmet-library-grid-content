@@ -1,11 +1,11 @@
 #include "CacheImplementation.h"
 
-#include "grid-files/common/Exception.h"
-#include "grid-files/common/GeneralFunctions.h"
-#include "grid-files/common/AutoWriteLock.h"
-#include "grid-files/common/AutoReadLock.h"
-#include "grid-files/common/AutoThreadLock.h"
-#include "grid-files/common/ShowFunction.h"
+#include <grid-files/common/Exception.h>
+#include <grid-files/common/GeneralFunctions.h>
+#include <grid-files/common/AutoWriteLock.h>
+#include <grid-files/common/AutoReadLock.h>
+#include <grid-files/common/AutoThreadLock.h>
+#include <grid-files/common/ShowFunction.h>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -43,6 +43,8 @@ CacheImplementation::CacheImplementation()
   FUNCTION_TRACE
   try
   {
+    mImplementationType = Implementation::Cache;
+
     mContentStorage = NULL;
     mContentStorageStartTime = 0;
     mStartTime = 0;
@@ -61,6 +63,10 @@ CacheImplementation::CacheImplementation()
     mContentDeleteCount = 0;
 
     mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
+
+    mFileInfoListByName.setReleaseObjects(false);
+    mFileInfoListByName.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
+
     mContentInfoList[0].setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
     mContentInfoListEnabled[0] = true;
 
@@ -129,7 +135,10 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
       readGenerationList();
       readFileList();
 
+      mFileInfoListByName = mFileInfoList;
+
       mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
+      mFileInfoListByName.sort(T::FileInfo::ComparisonMethod::fileName);
 
       mContentInfoListEnabled[0] = true;
       mContentInfoListEnabled[1] = true;
@@ -299,6 +308,7 @@ void CacheImplementation::reloadData()
       mFileCount = 0xFFFFFFFF;
       mContentCount = 0xFFFFFFFF;
 
+      mFileInfoListByName.clear();
       mFileInfoList.clear();
       mProducerInfoList.clear();
       mGenerationInfoList.clear();
@@ -319,7 +329,10 @@ void CacheImplementation::reloadData()
       readGenerationList();
       readFileList();
 
+      mFileInfoListByName = mFileInfoList;
+
       mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
+      mFileInfoListByName.sort(T::FileInfo::ComparisonMethod::fileName);
 
       readContentList();
 
@@ -1579,7 +1592,7 @@ int CacheImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addFileInfoWithContentList(sessionId,fileInfo,contentInfoList);
-    processEvents(false);
+    //processEvents(false);
     return result;
   }
   catch (...)
@@ -1855,7 +1868,7 @@ int CacheImplementation::_getFileInfoByName(T::SessionId sessionId,std::string f
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::FileInfo *info = mFileInfoList.getFileInfoByName(filename);
+    T::FileInfo *info = mFileInfoListByName.getFileInfoByName(filename);
     if (info == NULL)
       return Result::DATA_NOT_FOUND;
 
@@ -2710,7 +2723,7 @@ int CacheImplementation::_getContentListByFileName(T::SessionId sessionId,std::s
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::FileInfo *fileInfo = mFileInfoList.getFileInfoByName(filename);
+    T::FileInfo *fileInfo = mFileInfoListByName.getFileInfoByName(filename);
     if (fileInfo == NULL)
       return Result::UNKNOWN_FILE_NAME;
 
@@ -3659,6 +3672,50 @@ int CacheImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 
 
 
+int CacheImplementation::_deleteVirtualContent(T::SessionId sessionId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == NULL)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->deleteVirtualContent(sessionId);
+    processEvents(false);
+    return result;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_updateVirtualContent(T::SessionId sessionId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == NULL)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->updateVirtualContent(sessionId);
+    processEvents(false);
+    return result;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 void CacheImplementation::readProducerList()
 {
   FUNCTION_TRACE
@@ -3840,6 +3897,7 @@ void CacheImplementation::event_clear(T::EventInfo& eventInfo)
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
+    mFileInfoListByName.clear();
     mFileInfoList.clear();
     mProducerInfoList.clear();
     mGenerationInfoList.clear();
@@ -3873,6 +3931,7 @@ void CacheImplementation::event_contentServerReload(T::EventInfo& eventInfo)
       mUpdateInProgress = true;
       mLastProcessedEventId = 0;
 
+      mFileInfoListByName.clear();
       mFileInfoList.clear();
       mProducerInfoList.clear();
       mGenerationInfoList.clear();
@@ -3899,7 +3958,10 @@ void CacheImplementation::event_contentServerReload(T::EventInfo& eventInfo)
       readGenerationList();
       readFileList();
 
+      mFileInfoListByName = mFileInfoList;
+
       mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
+      mFileInfoListByName.sort(T::FileInfo::ComparisonMethod::fileName);
 
       readContentList();
 
@@ -3964,6 +4026,7 @@ void CacheImplementation::event_producerDeleted(T::EventInfo& eventInfo)
         mContentInfoList[t].deleteContentInfoByProducerId(eventInfo.mId1);
     }
 
+    mFileInfoListByName.deleteFileInfoByProducerId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoByProducerId(eventInfo.mId1);
     mProducerInfoList.deleteProducerInfoById(eventInfo.mId1);
   }
@@ -3992,6 +4055,7 @@ void CacheImplementation::event_producerListDeletedBySourceId(T::EventInfo& even
         mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
     }
 
+    mFileInfoListByName.deleteFileInfoBySourceId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoBySourceId(eventInfo.mId1);
     mGenerationInfoList.deleteGenerationInfoListBySourceId(eventInfo.mId1);
     mProducerInfoList.deleteProducerInfoListBySourceId(eventInfo.mId1);
@@ -4046,6 +4110,7 @@ void CacheImplementation::event_generationDeleted(T::EventInfo& eventInfo)
         mContentInfoList[t].deleteContentInfoByGenerationId(eventInfo.mId1);
     }
 
+    mFileInfoListByName.deleteFileInfoByGenerationId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoByGenerationId(eventInfo.mId1);
 
     mGenerationInfoList.deleteGenerationInfoById(eventInfo.mId1);
@@ -4096,6 +4161,7 @@ void CacheImplementation::event_generationListDeletedByProducerId(T::EventInfo& 
         mContentInfoList[t].deleteContentInfoByProducerId(eventInfo.mId1);
     }
 
+    mFileInfoListByName.deleteFileInfoByProducerId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoByProducerId(eventInfo.mId1);
     mGenerationInfoList.deleteGenerationInfoListByProducerId(eventInfo.mId1);
   }
@@ -4124,6 +4190,7 @@ void CacheImplementation::event_generationListDeletedBySourceId(T::EventInfo& ev
         mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
     }
 
+    mFileInfoListByName.deleteFileInfoBySourceId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoBySourceId(eventInfo.mId1);
     mGenerationInfoList.deleteGenerationInfoListBySourceId(eventInfo.mId1);
   }
@@ -4167,6 +4234,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
             if (mFileInfoList.getFileInfoById(fileInfo->mFileId) == NULL)
             {
               mFileInfoList.addFileInfo(fileInfo);
+              mFileInfoListByName.addFileInfo(fileInfo);
             }
             else
             {
@@ -4203,7 +4271,9 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
       T::FileInfo fileInfo;
       if (mContentStorage->getFileInfoById(mSessionId,eventInfo.mId1,fileInfo) == Result::OK)
       {
-        mFileInfoList.addFileInfo(fileInfo.duplicate());
+        T::FileInfo *fInfo = fileInfo.duplicate();
+        mFileInfoList.addFileInfo(fInfo);
+        mFileInfoListByName.addFileInfo(fInfo);
         if (fileInfo.mFlags & (uint)T::FileInfoFlags::CONTENT_PREDEFINED)
         {
           T::ContentInfoList contentInfoList;
@@ -4254,6 +4324,7 @@ void CacheImplementation::event_fileDeleted(T::EventInfo& eventInfo)
       //for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       //  mContentInfoList[t].deleteContentInfoByFileId(eventInfo.mId1);
 
+      mFileInfoListByName.deleteFileInfoById(eventInfo.mId1);
       mFileInfoList.deleteFileInfoById(eventInfo.mId1);
     }
   }
@@ -4305,7 +4376,9 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
       }
       else
       {
-        mFileInfoList.addFileInfo(fileInfo.duplicate());
+        T::FileInfo *fInfo = fileInfo.duplicate();
+        mFileInfoList.addFileInfo(fInfo);
+        mFileInfoListByName.addFileInfo(fInfo);
       }
 
       if (fileInfo.mFlags & (uint)T::FileInfoFlags::CONTENT_PREDEFINED)
@@ -4359,6 +4432,7 @@ void CacheImplementation::event_fileListDeletedByGroupFlags(T::EventInfo& eventI
         mContentInfoList[t].deleteContentInfoByGroupFlags(eventInfo.mId1);
     }
 
+    mFileInfoListByName.deleteFileInfoByGroupFlags(eventInfo.mId1);
     mFileInfoList.deleteFileInfoByGroupFlags(eventInfo.mId1);
   }
   catch (...)
@@ -4386,6 +4460,7 @@ void CacheImplementation::event_fileListDeletedByProducerId(T::EventInfo& eventI
         mContentInfoList[t].deleteContentInfoByProducerId(eventInfo.mId1);
     }
 
+    mFileInfoListByName.deleteFileInfoByProducerId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoByProducerId(eventInfo.mId1);
   }
   catch (...)
@@ -4413,6 +4488,7 @@ void CacheImplementation::event_fileListDeletedByGenerationId(T::EventInfo& even
         mContentInfoList[t].deleteContentInfoByGenerationId(eventInfo.mId1);
     }
 
+    mFileInfoListByName.deleteFileInfoByGenerationId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoByGenerationId(eventInfo.mId1);
   }
   catch (...)
@@ -4441,6 +4517,7 @@ void CacheImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventInf
         mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
     }
 
+    mFileInfoListByName.deleteFileInfoBySourceId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoBySourceId(eventInfo.mId1);
   }
   catch (...)
@@ -4731,6 +4808,47 @@ void CacheImplementation::event_contentRegistered(T::EventInfo& eventInfo)
 
 
 
+void CacheImplementation::event_deleteVirtualContent(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+    {
+      if (mContentInfoListEnabled[t])
+        mContentInfoList[t].deleteVirtualContent();
+    }
+
+    mFileInfoListByName.deleteVirtualFiles();
+    mFileInfoList.deleteVirtualFiles();
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void CacheImplementation::event_updateVirtualContent(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
 void CacheImplementation::processEvent(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -4847,6 +4965,14 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
 
       case EventType::CONTENT_REGISTERED:
         event_contentRegistered(eventInfo);
+        break;
+
+      case EventType::DELETE_VIRTUAL_CONTENT:
+        event_deleteVirtualContent(eventInfo);
+        break;
+
+      case EventType::UPDATE_VIRTUAL_CONTENT:
+        event_updateVirtualContent(eventInfo);
         break;
     }
   }

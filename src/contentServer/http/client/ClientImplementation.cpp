@@ -1,5 +1,5 @@
 #include "ClientImplementation.h"
-#include "grid-files/common/Exception.h"
+#include <grid-files/common/Exception.h>
 
 
 
@@ -17,6 +17,7 @@ ClientImplementation::ClientImplementation()
 {
   try
   {
+    mImplementationType = Implementation::HttpClient;
     curl_global_init(CURL_GLOBAL_ALL);
     curl = curl_easy_init();
   }
@@ -3727,6 +3728,57 @@ int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
   }
 }
 
+
+
+
+
+int ClientImplementation::_deleteVirtualContent(T::SessionId sessionId)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","deleteVirtualContent");
+    request.addLine("sessionId",sessionId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_updateVirtualContent(T::SessionId sessionId)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","updateVirtualContent");
+    request.addLine("sessionId",sessionId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
 
 
 

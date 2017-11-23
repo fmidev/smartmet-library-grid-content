@@ -149,7 +149,9 @@ vpath %.cpp src/ \
 			src/dataServer/cache \
 			src/dataServer/implementation \ 
 			src/queryServer/definition \
-			src/queryServer/implementation 
+			src/queryServer/implementation \ 
+			src/functions \ 
+			src/lua 
 			
 vpath %.h 	src/ \
             src/contentServer \
@@ -166,7 +168,9 @@ vpath %.h 	src/ \
 			src/dataServer/cache \
 			src/dataServer/implementation \ 
 			src/queryServer/definition \
-			src/queryServer/implementation 
+			src/queryServer/implementation \ 
+			src/functions \ 
+			src/lua 
 
 vpath %.o obj
 
@@ -207,7 +211,9 @@ vpath %.cpp src/ \
 			src/queryServer/corba/client \
 			src/queryServer/corba/convert \
 			src/queryServer/corba/stubs \
-			src/queryServer/corba/server
+			src/queryServer/corba/server \
+			src/functions \
+			src/lua
 			
 vpath %.h 	src/ \
             src/contentServer \
@@ -237,7 +243,9 @@ vpath %.h 	src/ \
 			src/queryServer/corba/client \
 			src/queryServer/corba/convert \
 			src/queryServer/corba/stubs \
-			src/queryServer/corba/server
+			src/queryServer/corba/server \
+			src/functions \
+			src/lua
 
 vpath %.o obj
 
@@ -315,6 +323,8 @@ install:
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer/definition
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer/implementation
+	@mkdir -p $(includedir)/$(INCDIR)/functions
+	@mkdir -p $(includedir)/$(INCDIR)/lua
 	@cp src/contentServer/definition/*.h $(includedir)/$(INCDIR)/contentServer/definition
 	@cp src/contentServer/cache/*.h $(includedir)/$(INCDIR)/contentServer/cache
 	@cp src/contentServer/redis/*.h $(includedir)/$(INCDIR)/contentServer/redis
@@ -327,6 +337,8 @@ install:
 	@cp src/dataServer/implementation/*.h $(includedir)/$(INCDIR)/dataServer/implementation
 	@cp src/queryServer/definition/*.h $(includedir)/$(INCDIR)/queryServer/definition
 	@cp src/queryServer/implementation/*.h $(includedir)/$(INCDIR)/queryServer/implementation
+	@cp src/functions/*.h $(includedir)/$(INCDIR)/functions
+	@cp src/lua/*.h $(includedir)/$(INCDIR)/lua
 ifneq ($(CORBA), disabled)
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/corba
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/corba/client
@@ -378,6 +390,8 @@ objdir:
 	@mkdir -p obj/dataServer/implementation
 	@mkdir -p obj/queryServer/definition
 	@mkdir -p obj/queryServer/implementation
+	@mkdir -p obj/functions
+	@mkdir -p obj/lua
 ifneq ($(CORBA), disabled)
 	@mkdir -p obj/contentServer/corba
 	@mkdir -p obj/contentServer/corba/client

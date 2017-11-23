@@ -1,7 +1,8 @@
 #pragma once
 
 #include "EventInfo.h"
-#include "grid-files/common/ThreadLock.h"
+
+#include <grid-files/common/ThreadLock.h>
 #include <list>
 
 

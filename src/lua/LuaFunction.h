@@ -7,7 +7,7 @@
 
 namespace SmartMet
 {
-namespace QueryServer
+namespace Lua
 {
 
 
@@ -29,5 +29,5 @@ class LuaFunction
 typedef std::map<std::string,LuaFunction> LuaFunction_map;
 
 
-}  // namespace QueryServer
+}  // namespace Lua
 }  // namespace SmartMet

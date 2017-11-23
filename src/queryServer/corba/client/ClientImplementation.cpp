@@ -2,7 +2,7 @@
 #include "queryServer/corba/convert/Converter.h"
 #include "contentServer/corba/convert/Converter.h"
 #include "contentServer/definition/ServiceInterface.h"
-#include "grid-files/common/Exception.h"
+#include <grid-files/common/Exception.h>
 
 
 namespace SmartMet

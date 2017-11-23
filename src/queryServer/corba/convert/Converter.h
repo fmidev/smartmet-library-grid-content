@@ -1,12 +1,12 @@
 #pragma once
 
-#include "grid-files/grid/GridPointValue.h"
-#include "grid-files/grid/GridPointValueList.h"
-#include "grid-files/grid/GridValueList.h"
-
 #include "queryServer/corba/stubs/QueryServer_serviceInterface_SK.h"
 #include "queryServer/definition/Query.h"
 #include "queryServer/definition/Query.h"
+
+#include <grid-files/grid/GridPointValue.h>
+#include <grid-files/grid/GridPointValueList.h>
+#include <grid-files/grid/GridValueList.h>
 
 
 

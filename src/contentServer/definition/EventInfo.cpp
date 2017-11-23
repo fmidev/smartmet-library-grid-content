@@ -1,6 +1,6 @@
 #include "EventInfo.h"
-#include "grid-files/common/Exception.h"
-#include "grid-files/common/GeneralFunctions.h"
+#include <grid-files/common/Exception.h>
+#include <grid-files/common/GeneralFunctions.h>
 
 
 namespace SmartMet

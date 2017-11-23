@@ -38,7 +38,9 @@ enum class EventType
   CONTENT_LIST_DELETED_BY_FILE_ID         = 46,
   CONTENT_LIST_DELETED_BY_SOURCE_ID       = 47,
   DATA_SERVER_ADDED                       = 50,
-  DATA_SERVER_DELETED                     = 51
+  DATA_SERVER_DELETED                     = 51,
+  DELETE_VIRTUAL_CONTENT                  = 60,
+  UPDATE_VIRTUAL_CONTENT                  = 61
 };
 
 }

@@ -143,6 +143,9 @@ class RedisImplementation : public ServiceInterface
 
      virtual int    _getContentCount(T::SessionId sessionId,uint& count);
 
+     virtual int    _deleteVirtualContent(T::SessionId sessionId);
+     virtual int    _updateVirtualContent(T::SessionId sessionId);
+
    protected:
 
      bool           isConnectionValid();
@@ -189,6 +192,9 @@ class RedisImplementation : public ServiceInterface
      int            getFileListByProducerId(uint producerId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      int            getFileListBySourceId(uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
 
+     int            deleteVirtualFiles(bool deleteContent);
+     int            getVirtualFiles(uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
+
      int            setContent(T::ContentInfo& contentInfo);
      int            deleteContent(uint fileId,uint messageIndex);
      int            deleteContentByFileId(uint fileId);
@@ -210,6 +216,10 @@ class RedisImplementation : public ServiceInterface
      int            getContentByParameterIdAndGeneration(uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList);
      int            getContentByParameterIdAndProducer(uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList);
      int            getGenerationTimeAndGeometryList(std::set<std::string>& list);
+
+     int            removeVirtualContent();
+     int            getVirtualContent(uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
+
      void           truncateEvents();
      int            unregisterContent(uint serverId);
      void           resetContentRegistrations();

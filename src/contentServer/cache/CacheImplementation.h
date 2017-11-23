@@ -1,7 +1,8 @@
 #pragma once
 
 #include "contentServer/definition/ServiceInterface.h"
-#include "grid-files/common/ModificationLock.h"
+
+#include <grid-files/common/ModificationLock.h>
 #include <pthread.h>
 
 
@@ -149,6 +150,9 @@ class CacheImplementation : public ServiceInterface
 
      virtual int    _getContentCount(T::SessionId sessionId,uint& count);
 
+     virtual int    _deleteVirtualContent(T::SessionId sessionId);
+     virtual int    _updateVirtualContent(T::SessionId sessionId);
+
    protected:
 
      virtual bool   isSessionValid(T::SessionId sessionId);
@@ -186,6 +190,8 @@ class CacheImplementation : public ServiceInterface
      virtual void   event_contentAdded(T::EventInfo& eventInfo);
      virtual void   event_contentDeleted(T::EventInfo& eventInfo);
      virtual void   event_contentRegistered(T::EventInfo& eventInfo);
+     virtual void   event_deleteVirtualContent(T::EventInfo& eventInfo);
+     virtual void   event_updateVirtualContent(T::EventInfo& eventInfo);
 
      virtual void   processEvent(T::EventInfo& eventInfo);
      virtual void   processEvents(bool eventThread);
@@ -200,6 +206,7 @@ class CacheImplementation : public ServiceInterface
      T::EventId             mLastProcessedEventId;
 
      T::FileInfoList        mFileInfoList;
+     T::FileInfoList        mFileInfoListByName;
      T::ProducerInfoList    mProducerInfoList;
      T::GenerationInfoList  mGenerationInfoList;
      T::ServerInfoList      mDataServerInfoList;

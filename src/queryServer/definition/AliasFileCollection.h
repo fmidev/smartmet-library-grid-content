@@ -21,7 +21,7 @@ class AliasFileCollection
 
     virtual void    init();
     virtual void    init(string_vec& filenames);
-    virtual void    checkUpdates();
+    virtual void    checkUpdates(bool force);
     virtual bool    getAlias(std::string& name,std::string& alias);
     virtual void    print(std::ostream& stream,uint level,uint optionFlags);
 
@@ -30,6 +30,8 @@ class AliasFileCollection
     AliasFile_vec   mAliasFileList;
     string_vec      mFilenames;
     ThreadLock      mThreadLock;
+    time_t          mLastCheck;
+    uint            mCheckInterval;
 };
 
 

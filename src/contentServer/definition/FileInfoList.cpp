@@ -1,9 +1,10 @@
 #include "FileInfoList.h"
-#include "grid-files/common/Exception.h"
-#include "grid-files/common/GeneralFunctions.h"
-#include "grid-files/common/AutoWriteLock.h"
-#include "grid-files/common/AutoReadLock.h"
-#include "grid-files/common/AutoThreadLock.h"
+
+#include <grid-files/common/Exception.h>
+#include <grid-files/common/GeneralFunctions.h>
+#include <grid-files/common/AutoWriteLock.h>
+#include <grid-files/common/AutoReadLock.h>
+#include <grid-files/common/AutoThreadLock.h>
 
 
 namespace SmartMet
@@ -1025,6 +1026,46 @@ uint FileInfoList::deleteFileInfoByFileIdList(std::set<uint>& fileIdList)
       if (info != NULL)
       {
         if (fileIdList.find(info->mFileId) != fileIdList.end())
+        {
+          mArray[t] = NULL;
+          if (mReleaseObjects)
+            delete info;
+          count++;
+        }
+        else
+        {
+          mArray[p] = info;
+          p++;
+        }
+      }
+    }
+    mLength = p;
+    return count;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+uint FileInfoList::deleteVirtualFiles()
+{
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+    uint count = 0;
+    uint p = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      FileInfo *info = mArray[t];
+      mArray[t] = NULL;
+      if (info != NULL)
+      {
+        if (info->mFileType == T::FileType::Virtual || (info->mFlags & (uint)T::FileInfoFlags::CONTENT_VIRTUAL) != 0)
         {
           mArray[t] = NULL;
           if (mReleaseObjects)

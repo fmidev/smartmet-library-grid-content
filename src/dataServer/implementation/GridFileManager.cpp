@@ -1,9 +1,9 @@
-#include "GridStorage.h"
-#include "grid-files/common/Exception.h"
-#include "grid-files/common/GeneralFunctions.h"
-#include "grid-files/common/AutoWriteLock.h"
-#include "grid-files/common/AutoReadLock.h"
-#include "grid-files/common/ShowFunction.h"
+#include "GridFileManager.h"
+#include <grid-files/common/Exception.h>
+#include <grid-files/common/GeneralFunctions.h>
+#include <grid-files/common/AutoWriteLock.h>
+#include <grid-files/common/AutoReadLock.h>
+#include <grid-files/common/ShowFunction.h>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -16,7 +16,24 @@ namespace DataServer
 
 
 
-GridStorage::GridStorage()
+GridFileManager::GridFileManager()
+{
+  FUNCTION_TRACE
+  try
+  {
+    mContentServer = NULL;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+GridFileManager::~GridFileManager()
 {
   FUNCTION_TRACE
   try
@@ -32,11 +49,12 @@ GridStorage::GridStorage()
 
 
 
-GridStorage::~GridStorage()
+void GridFileManager::init(ContentServer::ServiceInterface* contentServer)
 {
   FUNCTION_TRACE
   try
   {
+    mContentServer = contentServer;
   }
   catch (...)
   {
@@ -48,18 +66,19 @@ GridStorage::~GridStorage()
 
 
 
-
-void GridStorage::addFile(GRID::GridFile *gribFile)
+void GridFileManager::addFile(GRID::GridFile *gridFile)
 {
   FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
 
-    GRID::GridFile_sptr ptr;
-    ptr.reset(gribFile);
+    gridFile->setCheckTime(time(0));
 
-    mFileList.insert(std::pair<uint,GRID::GridFile_sptr>(gribFile->getFileId(),ptr));
+    GRID::GridFile_sptr ptr;
+    ptr.reset(gridFile);
+
+    mFileList.insert(std::pair<uint,GRID::GridFile_sptr>(gridFile->getFileId(),ptr));
   }
   catch (...)
   {
@@ -71,7 +90,28 @@ void GridStorage::addFile(GRID::GridFile *gribFile)
 
 
 
-void GridStorage::clear()
+void GridFileManager::addFileUser(uint fileId,uint userFileId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+
+    auto it = mFileList.find(fileId);
+    if (it != mFileList.end())
+      it->second->addUser(userFileId);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void GridFileManager::clear()
 {
   FUNCTION_TRACE
   try
@@ -89,14 +129,13 @@ void GridStorage::clear()
 
 
 
-void GridStorage::deleteFile(GRID::GridFile *gribFile)
+void GridFileManager::deleteFile(GRID::GridFile *gridFile)
 {
   FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
-
-    mFileList.erase(gribFile->getFileId());
+    deleteFileNoLock(gridFile->getFileId(),true);
   }
   catch (...)
   {
@@ -108,13 +147,13 @@ void GridStorage::deleteFile(GRID::GridFile *gribFile)
 
 
 
-void GridStorage::deleteFileById(uint fileId)
+void GridFileManager::deleteFileById(uint fileId)
 {
   FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
-    mFileList.erase(fileId);
+    deleteFileNoLock(fileId,true);
   }
   catch (...)
   {
@@ -126,7 +165,7 @@ void GridStorage::deleteFileById(uint fileId)
 
 
 
-void GridStorage::deleteFilesByGroupFlags(uint groupFlags)
+void GridFileManager::deleteFilesByGroupFlags(uint groupFlags)
 {
   FUNCTION_TRACE
   try
@@ -141,7 +180,7 @@ void GridStorage::deleteFilesByGroupFlags(uint groupFlags)
         idList.push_back(it->first);
     }
 
-    deleteFilesNoLock(idList);
+    deleteFilesNoLock(idList,false);
   }
   catch (...)
   {
@@ -153,7 +192,7 @@ void GridStorage::deleteFilesByGroupFlags(uint groupFlags)
 
 
 
-void GridStorage::deleteFilesByProducerId(uint producerId)
+void GridFileManager::deleteFilesByProducerId(uint producerId)
 {
   FUNCTION_TRACE
   try
@@ -168,7 +207,7 @@ void GridStorage::deleteFilesByProducerId(uint producerId)
         idList.push_back(it->first);
     }
 
-    deleteFilesNoLock(idList);
+    deleteFilesNoLock(idList,false);
   }
   catch (...)
   {
@@ -180,7 +219,7 @@ void GridStorage::deleteFilesByProducerId(uint producerId)
 
 
 
-void GridStorage::deleteFilesByGenerationId(uint generationId)
+void GridFileManager::deleteFilesByGenerationId(uint generationId)
 {
   FUNCTION_TRACE
   try
@@ -195,7 +234,7 @@ void GridStorage::deleteFilesByGenerationId(uint generationId)
         idList.push_back(it->first);
     }
 
-    deleteFilesNoLock(idList);
+    deleteFilesNoLock(idList,false);
   }
   catch (...)
   {
@@ -207,7 +246,7 @@ void GridStorage::deleteFilesByGenerationId(uint generationId)
 
 
 
-void GridStorage::deleteFilesBySourceId(uint sourceId)
+void GridFileManager::deleteFilesBySourceId(uint sourceId)
 {
   FUNCTION_TRACE
   try
@@ -222,7 +261,7 @@ void GridStorage::deleteFilesBySourceId(uint sourceId)
         idList.push_back(it->first);
     }
 
-    deleteFilesNoLock(idList);
+    deleteFilesNoLock(idList,false);
   }
   catch (...)
   {
@@ -234,7 +273,7 @@ void GridStorage::deleteFilesBySourceId(uint sourceId)
 
 
 
-void GridStorage::deleteFilesByCheckTime(time_t checkTime)
+void GridFileManager::deleteFilesByCheckTime(time_t checkTime)
 {
   FUNCTION_TRACE
   try
@@ -249,7 +288,7 @@ void GridStorage::deleteFilesByCheckTime(time_t checkTime)
         idList.push_back(it->first);
     }
 
-    deleteFilesNoLock(idList);
+    deleteFilesNoLock(idList,true);
   }
   catch (...)
   {
@@ -261,7 +300,34 @@ void GridStorage::deleteFilesByCheckTime(time_t checkTime)
 
 
 
-GRID::GridFile_sptr GridStorage::getFileById(uint fileId)
+void GridFileManager::deleteVirtualFiles()
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+
+    std::vector<uint> idList;
+
+    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
+    {
+      if (it->second->isVirtual())
+        idList.push_back(it->first);
+    }
+
+    deleteFilesNoLock(idList,false);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+GRID::GridFile_sptr GridFileManager::getFileById(uint fileId)
 {
   FUNCTION_TRACE
   try
@@ -272,9 +338,10 @@ GRID::GridFile_sptr GridStorage::getFileById(uint fileId)
 
     if (it != mFileList.end())
     {
-      GRID::GridFile_sptr gribFile = it->second;
-      if (!gribFile->isMemoryMapped())
-        gribFile->read(gribFile->getFileName());
+      GRID::GridFile_sptr gridFile = it->second;
+      if (!gridFile->isMemoryMapped())
+        gridFile->mapToMemory();
+//        gridFile->read(gridFile->getFileName());
 
       return it->second;
     }
@@ -290,7 +357,7 @@ GRID::GridFile_sptr GridStorage::getFileById(uint fileId)
 
 
 
-GRID::GridFile_sptr GridStorage::getFileByIdNoMapping(uint fileId)
+GRID::GridFile_sptr GridFileManager::getFileByIdNoMapping(uint fileId)
 {
   FUNCTION_TRACE
   try
@@ -314,7 +381,7 @@ GRID::GridFile_sptr GridStorage::getFileByIdNoMapping(uint fileId)
 
 
 
-std::size_t GridStorage::getFileCount()
+std::size_t GridFileManager::getFileCount()
 {
   FUNCTION_TRACE
   try
@@ -331,13 +398,13 @@ std::size_t GridStorage::getFileCount()
 
 
 
-void GridStorage::print(std::ostream& stream,uint level,uint optionFlags)
+void GridFileManager::print(std::ostream& stream,uint level,uint optionFlags)
 {
   FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock);
-    stream << space(level) << "GridStorage\n";
+    stream << space(level) << "GridFileManager\n";
     stream << space(level) << "- numberOfFiles = " << getFileCount() << "\n";
     for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
     {
@@ -354,14 +421,71 @@ void GridStorage::print(std::ostream& stream,uint level,uint optionFlags)
 
 
 
-void GridStorage::deleteFilesNoLock(std::vector<uint>& fileIdList)
+void GridFileManager::deleteFileNoLock(uint fileId,bool sentMessageToContentServer)
+{
+  FUNCTION_TRACE
+  try
+  {
+    //printf("--- deleteFileNoLock %u\n",fileId);
+
+    auto gridRec = mFileList.find(fileId);
+
+    if (gridRec != mFileList.end())
+    {
+      std::set<uint> userList;
+      gridRec->second->getUsers(userList);
+      for (auto it = userList.begin();it != userList.end(); ++it)
+      {
+        deleteFileNoLock(*it,sentMessageToContentServer);
+      }
+
+      if (sentMessageToContentServer &&  gridRec->second->isVirtual())
+      {
+        // We should tell the content server when virtual files are removed.
+        mContentServer->deleteFileInfoById(0,fileId);
+      }
+
+      mFileList.erase(fileId);
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void GridFileManager::deleteFilesNoLock(std::vector<uint>& fileIdList,bool sentMessageToContentServer)
 {
   FUNCTION_TRACE
   try
   {
     for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
     {
-      mFileList.erase(*it);
+      deleteFileNoLock(*it,sentMessageToContentServer);
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void GridFileManager::deleteFilesNoLock(std::set<uint>& fileIdList,bool sentMessageToContentServer)
+{
+  FUNCTION_TRACE
+  try
+  {
+    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    {
+      deleteFileNoLock(*it,sentMessageToContentServer);
     }
   }
   catch (...)

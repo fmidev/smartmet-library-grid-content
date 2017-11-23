@@ -1,7 +1,7 @@
 #include "ServerInfoList.h"
-#include "grid-files/common/Exception.h"
-#include "grid-files/common/GeneralFunctions.h"
-#include "grid-files/common/AutoThreadLock.h"
+#include <grid-files/common/Exception.h>
+#include <grid-files/common/GeneralFunctions.h>
+#include <grid-files/common/AutoThreadLock.h>
 
 
 namespace SmartMet

@@ -1,7 +1,8 @@
 #include "ServerInterface.h"
 #include "contentServer/corba/convert/Converter.h"
-#include "grid-files/common/Exception.h"
-#include "grid-files/common/ShowFunction.h"
+
+#include <grid-files/common/Exception.h>
+#include <grid-files/common/ShowFunction.h>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -3114,6 +3115,52 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 }
 
 
+
+
+
+::CORBA::Long ServerInterface::deleteVirtualContent(::CORBA::LongLong sessionId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->deleteVirtualContent(sessionId);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::updateVirtualContent(::CORBA::LongLong sessionId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->updateVirtualContent(sessionId);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
 
 }
 }

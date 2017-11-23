@@ -1,5 +1,5 @@
 #include "ServerInterface.h"
-#include "grid-files/common/ShowFunction.h"
+#include <grid-files/common/ShowFunction.h>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -720,6 +720,18 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
     if (strcasecmp(method,"getContentCount") == 0)
     {
       getContentCount(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"deleteVirtualContent") == 0)
+    {
+      deleteVirtualContent(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"updateVirtualContent") == 0)
+    {
+      updateVirtualContent(request,response);
       return;
     }
 
@@ -6541,6 +6553,59 @@ void ServerInterface::getContentCount(T::RequestMessage& request,T::ResponseMess
     {
       response.addLine("resultString",getResultString(result));
     }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+void ServerInterface::deleteVirtualContent(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    int result = mService->deleteVirtualContent(sessionId);
+
+    response.addLine("result",result);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void ServerInterface::updateVirtualContent(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    int result = mService->updateVirtualContent(sessionId);
+
+    response.addLine("result",result);
   }
   catch (...)
   {

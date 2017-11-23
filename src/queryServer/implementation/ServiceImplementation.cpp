@@ -1,7 +1,7 @@
 #include "ServiceImplementation.h"
-#include "grid-files/common/Exception.h"
-#include "grid-files/common/GeneralFunctions.h"
-#include "grid-files/identification/GribDef.h"
+#include <grid-files/common/Exception.h>
+#include <grid-files/common/GeneralFunctions.h>
+#include <grid-files/identification/GribDef.h>
 
 
 namespace SmartMet
@@ -19,6 +19,7 @@ ServiceImplementation::ServiceImplementation()
     mFunctionParamId = 0;
     mProducerFileModificationTime = 0;
     mLastConfiguratonCheck = 0;
+    mCheckInterval = 5;
   }
   catch (...)
   {
@@ -49,10 +50,10 @@ void ServiceImplementation::init(
     ContentServer::ServiceInterface *contentServerPtr,
     DataServer::ServiceInterface *dataServerPtr,
     std::string gridConfigDirectory,
-    string_vec parameterMappingFiles,
-    string_vec aliasFiles,
+    string_vec& parameterMappingFiles,
+    string_vec& aliasFiles,
     std::string producerFile,
-    string_vec luaFiles)
+    string_vec& luaFiles)
 {
   try
   {
@@ -1139,11 +1140,11 @@ bool ServiceImplementation::parseFunction(QueryParameter& queryParam,std::string
 
 
 
-double ServiceImplementation::executeFunction(std::string& function,std::vector<double>& parameters)
+double ServiceImplementation::executeFunctionType1(std::string& function,std::vector<double>& parameters)
 {
   try
   {
-    return mLuaFileCollection.executeFunction(function,parameters);
+    return mLuaFileCollection.executeFunctionType1(function,parameters);
   }
   catch (...)
   {
@@ -1161,7 +1162,7 @@ void ServiceImplementation::checkConfigurationUpdates()
   {
     AutoThreadLock lock(&mThreadLock);
 
-    if ((time(0) - mLastConfiguratonCheck) > 3)
+    if ((time(0) - mLastConfiguratonCheck) > mCheckInterval)
     {
       mLastConfiguratonCheck = time(0);
 
@@ -1174,10 +1175,10 @@ void ServiceImplementation::checkConfigurationUpdates()
       {
         it->checkUpdates();
       }
-
-      mAliasFileCollection.checkUpdates();
-      mLuaFileCollection.checkUpdates();
     }
+
+    mAliasFileCollection.checkUpdates(false);
+    mLuaFileCollection.checkUpdates(false);
   }
   catch (...)
   {
@@ -1361,7 +1362,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
 
             if (qParam->mFunction.substr(0,1) != "@")
             {
-              double val = executeFunction(qParam->mFunction,parameters);
+              double val = executeFunctionType1(qParam->mFunction,parameters);
               pValues.mValueList.addGridValue(new T::GridValue(lastRec.mX,lastRec.mY,(T::ParamValue)val));
               pValues.mProducerId = producerId;
               pValues.mGenerationId = generationId;
@@ -1371,7 +1372,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
 
           if (areaCnt  &&  qParam->mFunction.substr(0,1) != "@")
           {
-            double val = executeFunction(qParam->mFunction,extParameters);
+            double val = executeFunctionType1(qParam->mFunction,extParameters);
             pValues.mValueList.addGridValue(new T::GridValue(-1000,-1000,(T::ParamValue)val));
           }
 
@@ -1379,7 +1380,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
           {
             //T::ParamValue val = executeAreaFunction(qParam->mFunction,areaParameters);
             std::string func = qParam->mFunction.substr(1);
-            double val = executeFunction(func,areaParameters);
+            double val = executeFunctionType1(func,areaParameters);
             pValues.mValueList.addGridValue(new T::GridValue(-1000,-1000,(T::ParamValue)val));
           }
 

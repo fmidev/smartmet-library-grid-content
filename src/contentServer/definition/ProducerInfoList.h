@@ -1,7 +1,8 @@
 #pragma once
 
 #include "ProducerInfo.h"
-#include "grid-files/common/ThreadLock.h"
+
+#include <grid-files/common/ThreadLock.h>
 #include <vector>
 
 

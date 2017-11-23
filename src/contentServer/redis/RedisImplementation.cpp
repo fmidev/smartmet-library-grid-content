@@ -1,8 +1,8 @@
 #include "RedisImplementation.h"
-#include "grid-files/common/Exception.h"
-#include "grid-files/common/AutoThreadLock.h"
-#include "grid-files/common/ShowFunction.h"
-#include "grid-files/common/GeneralFunctions.h"
+#include <grid-files/common/Exception.h>
+#include <grid-files/common/AutoThreadLock.h>
+#include <grid-files/common/ShowFunction.h>
+#include <grid-files/common/GeneralFunctions.h>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -87,6 +87,7 @@ RedisImplementation::RedisImplementation()
   FUNCTION_TRACE
   try
   {
+    mImplementationType = Implementation::Redis;
     mContext = NULL;
     mStartTime = time(0);
     mRedisPort = 0;
@@ -1950,7 +1951,7 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
       // ### Adding an event to the event list.
 
       //printf("-- File added %s\n",fileInfo.mName.c_str());
-      addEvent(EventType::FILE_ADDED,fileInfo.mFileId,0,0,0);
+      addEvent(EventType::FILE_ADDED,fileInfo.mFileId,(uint)fileInfo.mFileType,0,0);
     }
 
     return Result::OK;
@@ -1994,7 +1995,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
     uint fileId = getFileId(fileInfo.mName);
     if (fileId > 0)
     {
-      //printf("** File exists %s\n",fileInfo.mName.c_str());
+      printf("** File exists %s\n",fileInfo.mName.c_str());
       // ### File with the same name already exists. Let's return
       // ### the current file-id.
 
@@ -2007,7 +2008,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
     else
     {
       // ### Generating a new file-id.
-      //printf("** File added %s\n",fileInfo.mName.c_str());
+      printf("** File added %s\n",fileInfo.mName.c_str());
 
       RedisModificationLock redisModificationLock(mContext,mTablePrefix);
       redisReply *reply = (redisReply*)redisCommand(mContext,"INCR %sfileCounter",mTablePrefix.c_str());
@@ -2084,7 +2085,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
     else
     {
       //printf("-- file add event\n");
-      addEvent(EventType::FILE_ADDED,fileInfo.mFileId,0,0,0);
+      addEvent(EventType::FILE_ADDED,fileInfo.mFileId,(uint)fileInfo.mFileType,0,0);
     }
 
     return Result::OK;
@@ -4550,6 +4551,71 @@ int RedisImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 
 
 
+int RedisImplementation::_deleteVirtualContent(T::SessionId sessionId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
+
+    int result = deleteVirtualFiles(true);
+
+    if (result == Result::OK)
+      addEvent(EventType::DELETE_VIRTUAL_CONTENT,0,0,0,0);
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_updateVirtualContent(T::SessionId sessionId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
+
+    int result = deleteVirtualFiles(true);
+
+    if (result == Result::OK)
+    {
+      addEvent(EventType::UPDATE_VIRTUAL_CONTENT,0,0,0,0);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
 
 // *****************************************************************************************************************************************
 // *****************************************************************************************************************************************
@@ -5774,6 +5840,111 @@ int RedisImplementation::getFileListBySourceId(uint sourceId,uint startFileId,ui
 
 
 
+int RedisImplementation::getVirtualFiles(uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    uint prevFileId = 0xFFFFFFFF;
+
+    while (startFileId != prevFileId)
+    {
+      prevFileId = startFileId;
+
+      redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sfiles %u %u LIMIT 0 10000",mTablePrefix.c_str(),startFileId,0xFFFFFFFF);
+      if (reply == NULL)
+      {
+        closeConnection();
+        return Result::PERMANENT_STORAGE_ERROR;
+      }
+
+      if (reply->type == REDIS_REPLY_ARRAY)
+      {
+        if (reply->elements == 0)
+        {
+          freeReplyObject(reply);
+          return Result::OK;
+        }
+
+        for (uint t = 0; t < reply->elements; t++)
+        {
+          T::FileInfo *fileInfo = new T::FileInfo();
+          fileInfo->setCsv(reply->element[t]->str);
+          if (fileInfo->mFileId >= startFileId)
+          {
+            startFileId = fileInfo->mFileId + 1;
+            if (fileInfo->mFileType == T::FileType::Virtual || (fileInfo->mFlags & (uint)T::FileInfoFlags::CONTENT_VIRTUAL) != 0)
+              fileInfoList.addFileInfo(fileInfo);
+            else
+              delete fileInfo;
+
+            if (fileInfoList.getLength() == maxRecords)
+            {
+              freeReplyObject(reply);
+              return Result::OK;
+            }
+          }
+          else
+          {
+            delete fileInfo;
+          }
+        }
+        freeReplyObject(reply);
+      }
+      else
+      {
+        freeReplyObject(reply);
+        return Result::OK;
+      }
+    }
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::deleteVirtualFiles(bool deleteContent)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    if (deleteContent)
+      removeVirtualContent();
+
+    T::FileInfoList fileInfoList;
+    getVirtualFiles(0,0xFFFFFFFF,fileInfoList);
+    uint len = fileInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::FileInfo *fileInfo = fileInfoList.getFileInfoByIndex(t);
+      deleteFilename(fileInfo->mName);
+      deleteFileById(fileInfo->mFileId,false);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int RedisImplementation::deleteContent(uint fileId,uint messageIndex)
 {
   FUNCTION_TRACE
@@ -5931,6 +6102,35 @@ int RedisImplementation::deleteContentBySourceId(uint sourceId)
 
     T::ContentInfoList contentInfoList;
     getContentBySourceId(sourceId,0,0,0xFFFFFFFF,contentInfoList);
+    uint len = contentInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
+      deleteContent(contentInfo->mFileId,contentInfo->mMessageIndex);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::removeVirtualContent()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::ContentInfoList contentInfoList;
+    getVirtualContent(0,0,0xFFFFFFFF,contentInfoList);
     uint len = contentInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -6257,6 +6457,83 @@ int RedisImplementation::getContentByGroupFlags(uint groupFlags,uint startFileId
             startMessageIndex = contentInfo->mMessageIndex + 1;
 
             if ((contentInfo->mGroupFlags & groupFlags) != 0)
+              contentInfoList.addContentInfo(contentInfo);
+            else
+              delete contentInfo;
+
+            if (contentInfoList.getLength() == maxRecords)
+            {
+              freeReplyObject(reply);
+              return Result::OK;
+            }
+          }
+          else
+          {
+            delete contentInfo;
+          }
+        }
+        freeReplyObject(reply);
+      }
+      else
+      {
+        freeReplyObject(reply);
+        return Result::OK;
+      }
+      startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+    }
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::getVirtualContent(uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+    unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
+
+    while (startId != prevStartId)
+    {
+      prevStartId = startId;
+
+      redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF);
+      if (reply == NULL)
+      {
+        closeConnection();
+        return Result::PERMANENT_STORAGE_ERROR;
+      }
+
+      if (reply->elements == 0)
+      {
+        freeReplyObject(reply);
+        return Result::OK;
+      }
+
+      if (reply->type == REDIS_REPLY_ARRAY)
+      {
+        for (uint t = 0; t < reply->elements; t++)
+        {
+          T::ContentInfo *contentInfo = new T::ContentInfo();
+          contentInfo->setCsv(reply->element[t]->str);
+
+          if (contentInfo->mFileId > startFileId  ||  (contentInfo->mFileId == startFileId   &&  contentInfo->mMessageIndex >= startMessageIndex))
+          {
+            startFileId = contentInfo->mFileId;
+            startMessageIndex = contentInfo->mMessageIndex + 1;
+
+            if (contentInfo->mFileType == T::FileType::Virtual ||  (contentInfo->mFlags & CONTENT_INFO_VIRTUAL) != 0)
               contentInfoList.addContentInfo(contentInfo);
             else
               delete contentInfo;

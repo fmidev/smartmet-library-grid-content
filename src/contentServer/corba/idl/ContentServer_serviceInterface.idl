@@ -136,6 +136,9 @@ interface ServiceInterface
   long  getContentTimeListByGenerationAndGeometryId(in long long sessionId,in unsigned long generationId,in long geometryId,out CorbaStringList contentTimeList);
 
   long  getContentCount(in long long sessionId,out unsigned long count);
+
+  long  deleteVirtualContent(in long long sessionId);
+  long  updateVirtualContent(in long long sessionId);
 };  
 
 

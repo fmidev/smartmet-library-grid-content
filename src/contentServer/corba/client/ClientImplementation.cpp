@@ -1,7 +1,8 @@
 #include "ClientImplementation.h"
 #include "contentServer/corba/convert/Converter.h"
-#include "grid-files/common/GeneralFunctions.h"
-#include "grid-files/common/Exception.h"
+
+#include <grid-files/common/GeneralFunctions.h>
+#include <grid-files/common/Exception.h>
 
 namespace SmartMet
 {
@@ -15,6 +16,7 @@ ClientImplementation::ClientImplementation()
 {
   try
   {
+    mImplementationType = Implementation::CorbaClient;
     mId = 0;
     mInitialized = false;
     mLastAccessTime = 0;
@@ -3101,6 +3103,52 @@ int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 
     if (result == 0)
       count = (uint)corbaCount;
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_deleteVirtualContent(T::SessionId sessionId)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Spine::Exception(BCP, "The client is not initialized!");
+
+    int result = mService->deleteVirtualContent(sessionId);
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_updateVirtualContent(T::SessionId sessionId)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Spine::Exception(BCP, "The client is not initialized!");
+
+    int result = mService->updateVirtualContent(sessionId);
 
     mLastAccessTime = time(0);
     return result;

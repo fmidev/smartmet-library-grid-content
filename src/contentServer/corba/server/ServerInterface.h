@@ -136,6 +136,8 @@ class ServerInterface : public POA_SmartMet::ContentServer::Corba::ServiceInterf
     ::CORBA::Long getContentParamKeyListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Octet parameterKeyType, SmartMet::ContentServer::Corba::CorbaStringList_out paramKeyList);
     ::CORBA::Long getContentTimeListByGenerationAndGeometryId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList);
     ::CORBA::Long getContentCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count);
+    ::CORBA::Long deleteVirtualContent(::CORBA::LongLong sessionId);
+    ::CORBA::Long updateVirtualContent(::CORBA::LongLong sessionId);
 
   protected:
 
