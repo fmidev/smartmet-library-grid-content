@@ -162,8 +162,8 @@ vpath %.h 	src/ \
 			src/contentServer/http/client \
 			src/contentServer/http/common \
 			src/contentServer/http/server \
-			src/contentServer/redis \
 			src/contentServer/memory \
+			src/contentServer/redis \
 			src/contentServer/sync \
             src/dataServer \
 			src/dataServer/definition \
@@ -179,7 +179,7 @@ vpath %.o obj
 
 # The files to be compiled
 
-SRCS     = $(patsubst src/%,%,$(wildcard src/*.cpp src/*/*.cpp src/*/definition/*.cpp src/*/cache/*.cpp src/*/redis/*.cpp src/*/http/*/*.cpp src/*/implementation/*.cpp src/*/sync/*.cpp ))
+SRCS     = $(patsubst src/%,%,$(wildcard src/*.cpp src/*/*.cpp src/*/definition/*.cpp src/*/cache/*.cpp src/*/redis/*.cpp src/*/memory/*.cpp src/*/http/*/*.cpp src/*/implementation/*.cpp src/*/sync/*.cpp ))
 
 else
 
@@ -256,7 +256,7 @@ vpath %.o obj
 
 # The files to be compiled
 
-SRCS     = $(patsubst src/%,%,$(wildcard src/*.cpp src/*/*.cpp src/*/definition/*.cpp src/*/cache/*.cpp src/*/sync/*.cpp src/*/redis/*.cpp src/*/corba/*/*.cpp src/*/http/*/*.cpp src/*/implementation/*.cpp))
+SRCS     = $(patsubst src/%,%,$(wildcard src/*.cpp src/*/*.cpp src/*/definition/*.cpp src/*/cache/*.cpp src/*/sync/*.cpp src/*/redis/*.cpp src/*/memory/*.cpp src/*/corba/*/*.cpp src/*/http/*/*.cpp src/*/implementation/*.cpp))
 
 endif
 
