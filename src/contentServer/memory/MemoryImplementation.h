@@ -15,17 +15,14 @@ namespace ContentServer
 #define CONTENT_LIST_COUNT 8
 
 
-class CacheImplementation : public ServiceInterface
+class MemoryImplementation : public ServiceInterface
 {
   public:
-                    CacheImplementation();
-     virtual        ~CacheImplementation();
+                    MemoryImplementation();
+     virtual        ~MemoryImplementation();
 
-     virtual void   init(T::SessionId sessionId,ServiceInterface *contentStorage);
-     virtual void   startEventProcessing();
+     virtual void   init();
      virtual void   shutdown();
-
-     virtual void   eventProcessingThread();
 
    protected:
 
@@ -157,6 +154,7 @@ class CacheImplementation : public ServiceInterface
    protected:
 
      virtual bool   isSessionValid(T::SessionId sessionId);
+     T::EventId     addEvent(EventType eventType,uint id1,uint id2,uint id3,unsigned long long flags);
 
      virtual void   readContentList();
      virtual void   readFileList();
@@ -164,47 +162,10 @@ class CacheImplementation : public ServiceInterface
      virtual void   readGenerationList();
      virtual void   readDataServerList();
 
-     virtual void   event_clear(T::EventInfo& eventInfo);
-     virtual void   event_contentServerReload(T::EventInfo& eventInfo);
-     virtual void   event_producerAdded(T::EventInfo& eventInfo);
-     virtual void   event_producerDeleted(T::EventInfo& eventInfo);
-     virtual void   event_producerListDeletedBySourceId(T::EventInfo& eventInfo);
-     virtual void   event_generationAdded(T::EventInfo& eventInfo);
-     virtual void   event_generationDeleted(T::EventInfo& eventInfo);
-     virtual void   event_generationStatusChanged(T::EventInfo& eventInfo);
-     virtual void   event_generationListDeletedByProducerId(T::EventInfo& eventInfo);
-     virtual void   event_generationListDeletedBySourceId(T::EventInfo& eventInfo);
-     virtual void   event_fileAdded(T::EventInfo& eventInfo);
-     virtual void   event_fileDeleted(T::EventInfo& eventInfo);
-     virtual void   event_fileUpdated(T::EventInfo& eventInfo);
-     virtual void   event_fileListDeletedByGroupFlags(T::EventInfo& eventInfo);
-     virtual void   event_fileListDeletedByProducerId(T::EventInfo& eventInfo);
-     virtual void   event_fileListDeletedByGenerationId(T::EventInfo& eventInfo);
-     virtual void   event_fileListDeletedBySourceId(T::EventInfo& eventInfo);
-     virtual void   event_contentListDeletedByFileId(T::EventInfo& eventInfo);
-     virtual void   event_contentListDeletedByGroupFlags(T::EventInfo& eventInfo);
-     virtual void   event_contentListDeletedByProducerId(T::EventInfo& eventInfo);
-     virtual void   event_contentListDeletedByGenerationId(T::EventInfo& eventInfo);
-     virtual void   event_contentListDeletedBySourceId(T::EventInfo& eventInfo);
-     virtual void   event_dataServerAdded(T::EventInfo& eventInfo);
-     virtual void   event_dataServerDeleted(T::EventInfo& eventInfo);
-     virtual void   event_contentAdded(T::EventInfo& eventInfo);
-     virtual void   event_contentDeleted(T::EventInfo& eventInfo);
-     virtual void   event_contentRegistered(T::EventInfo& eventInfo);
-     virtual void   event_deleteVirtualContent(T::EventInfo& eventInfo);
-     virtual void   event_updateVirtualContent(T::EventInfo& eventInfo);
-
-     virtual void   processEvent(T::EventInfo& eventInfo);
-     virtual void   processEvents(bool eventThread);
-
-     virtual void   reloadData();
-     virtual void   saveData();
-
      bool                   mReloadActivated;
      bool                   mShutdownRequested;
      bool                   mUpdateInProgress;
      T::SessionId           mSessionId;
-     T::EventId             mLastProcessedEventId;
 
      T::FileInfoList        mFileInfoList;
      T::FileInfoList        mFileInfoListByName;
@@ -214,26 +175,19 @@ class CacheImplementation : public ServiceInterface
      T::EventInfoList       mEventInfoList;
      T::ContentInfoList     mContentInfoList[CONTENT_LIST_COUNT];
      bool                   mContentInfoListEnabled[CONTENT_LIST_COUNT];
-     std::set<ulonglong>    mDelayedContentAddList;
-     std::set<uint>         mDelayedContentDeleteList;
 
      time_t                 mStartTime;
      pthread_t              mThread;
      ThreadLock             mEventProcessingLock;
      ModificationLock       mModificationLock;
 
-     ServiceInterface*      mContentStorage;
-     time_t                 mContentStorageStartTime;
-
      bool                   mSaveEnabled;
      std::string            mSaveDir;
-     uint                   mDataServerCount;
-     uint                   mProducerCount;
-     uint                   mGenerationCount;
-     uint                   mFileCount;
-     uint                   mContentCount;
-     uint                   mContentDeleteCount;
 
+     uint                   mMaxProducerId;
+     uint                   mMaxGenerationId;
+     uint                   mMaxFileId;
+     T::EventId             mMaxEventId;
 };
 
 

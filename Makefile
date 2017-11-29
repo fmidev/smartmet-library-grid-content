@@ -136,13 +136,14 @@ ifeq ($(CORBA), disabled)
 
 vpath %.cpp src/ \
             src/contentServer \
-			src/contentServer/definition \
 			src/contentServer/cache \
-			src/contentServer/redis \
+			src/contentServer/definition \
 			src/contentServer/http \
 			src/contentServer/http/client \
 			src/contentServer/http/common \
 			src/contentServer/http/server \
+			src/contentServer/memory \
+			src/contentServer/redis \
 			src/contentServer/sync \
             src/dataServer \
 			src/dataServer/definition \
@@ -155,13 +156,14 @@ vpath %.cpp src/ \
 			
 vpath %.h 	src/ \
             src/contentServer \
-			src/contentServer/definition \
 			src/contentServer/cache \
-			src/contentServer/redis \
+			src/contentServer/definition \
 			src/contentServer/http \
 			src/contentServer/http/client \
 			src/contentServer/http/common \
 			src/contentServer/http/server \
+			src/contentServer/redis \
+			src/contentServer/memory \
 			src/contentServer/sync \
             src/dataServer \
 			src/dataServer/definition \
@@ -185,18 +187,19 @@ else
 
 vpath %.cpp src/ \
             src/contentServer \
-			src/contentServer/definition \
 			src/contentServer/cache \
-			src/contentServer/redis \
 			src/contentServer/corba \
 			src/contentServer/corba/client \
 			src/contentServer/corba/convert \
 			src/contentServer/corba/stubs \
 			src/contentServer/corba/server \
+			src/contentServer/definition \
 			src/contentServer/http \
 			src/contentServer/http/client \
 			src/contentServer/http/common \
 			src/contentServer/http/server \
+			src/contentServer/memory \
+			src/contentServer/redis \
 			src/contentServer/sync \
             src/dataServer \
 			src/dataServer/definition \
@@ -217,18 +220,19 @@ vpath %.cpp src/ \
 			
 vpath %.h 	src/ \
             src/contentServer \
-			src/contentServer/definition \
 			src/contentServer/cache \
-			src/contentServer/redis \
 			src/contentServer/corba \
 			src/contentServer/corba/client \
 			src/contentServer/corba/convert \
 			src/contentServer/corba/stubs \
 			src/contentServer/corba/server \
+			src/contentServer/definition \
 			src/contentServer/http \
 			src/contentServer/http/client \
 			src/contentServer/http/common \
 			src/contentServer/http/server \
+			src/contentServer/memory \
+			src/contentServer/redis \
 			src/contentServer/sync \
             src/dataServer \
 			src/dataServer/definition \
@@ -309,13 +313,14 @@ install:
 	@mkdir -p $(includedir)/$(INCDIR)
 	@rm -rf $(includedir)/$(INCDIR)/*
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer
-	@mkdir -p $(includedir)/$(INCDIR)/contentServer/definition
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/cache
-	@mkdir -p $(includedir)/$(INCDIR)/contentServer/redis
+	@mkdir -p $(includedir)/$(INCDIR)/contentServer/definition
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/http
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/http/client
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/http/common/
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/http/server
+	@mkdir -p $(includedir)/$(INCDIR)/contentServer/memory
+	@mkdir -p $(includedir)/$(INCDIR)/contentServer/redis
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/sync
 	@mkdir -p $(includedir)/$(INCDIR)/dataServer/definition
 	@mkdir -p $(includedir)/$(INCDIR)/dataServer/cache
@@ -325,12 +330,13 @@ install:
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer/implementation
 	@mkdir -p $(includedir)/$(INCDIR)/functions
 	@mkdir -p $(includedir)/$(INCDIR)/lua
-	@cp src/contentServer/definition/*.h $(includedir)/$(INCDIR)/contentServer/definition
 	@cp src/contentServer/cache/*.h $(includedir)/$(INCDIR)/contentServer/cache
-	@cp src/contentServer/redis/*.h $(includedir)/$(INCDIR)/contentServer/redis
+	@cp src/contentServer/definition/*.h $(includedir)/$(INCDIR)/contentServer/definition
 	@cp src/contentServer/http/client/*.h $(includedir)/$(INCDIR)/contentServer/http/client
 	@cp src/contentServer/http/common/*.h $(includedir)/$(INCDIR)/contentServer/http/common
 	@cp src/contentServer/http/server/*.h $(includedir)/$(INCDIR)/contentServer/http/server	
+	@cp src/contentServer/memory/*.h $(includedir)/$(INCDIR)/contentServer/memory
+	@cp src/contentServer/redis/*.h $(includedir)/$(INCDIR)/contentServer/redis
 	@cp src/contentServer/sync/*.h $(includedir)/$(INCDIR)/contentServer/sync
 	@cp src/dataServer/definition/*.h $(includedir)/$(INCDIR)/dataServer/definition
 	@cp src/dataServer/cache/*.h $(includedir)/$(INCDIR)/dataServer/cache
@@ -377,13 +383,14 @@ test:
 objdir:
 	@mkdir -p obj
 	@mkdir -p obj/contentServer
-	@mkdir -p obj/contentServer/definition
 	@mkdir -p obj/contentServer/cache
-	@mkdir -p obj/contentServer/redis
+	@mkdir -p obj/contentServer/definition
 	@mkdir -p obj/contentServer/http
 	@mkdir -p obj/contentServer/http/client
 	@mkdir -p obj/contentServer/http/common
 	@mkdir -p obj/contentServer/http/server
+	@mkdir -p obj/contentServer/memory
+	@mkdir -p obj/contentServer/redis
 	@mkdir -p obj/contentServer/sync
 	@mkdir -p obj/dataServer/definition
 	@mkdir -p obj/dataServer/cache

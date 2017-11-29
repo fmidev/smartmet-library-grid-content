@@ -115,7 +115,7 @@ void FileInfoList::operator=(FileInfoList& fileInfoList)
 
     clear();
 
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     fileInfoList.lock();
     mSize = fileInfoList.mSize;
@@ -152,7 +152,7 @@ void FileInfoList::addFileInfo(FileInfo *fileInfo)
       increaseSize(mSize + mSize/5 + 10);
     }
 
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     if (mComparisonMethod == FileInfo::ComparisonMethod::none)
     {
@@ -191,11 +191,107 @@ void FileInfoList::addFileInfo(FileInfo *fileInfo)
 
 
 
+void FileInfoList::addFileInfoList(FileInfoList& fileInfoList)
+{
+  try
+  {
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    uint len1 = mLength;
+    uint len2 = fileInfoList.getLength();
+
+    if (mComparisonMethod == FileInfo::ComparisonMethod::none)
+    {
+      if (mArray == NULL  ||  mLength == mSize  ||  (mLength + len2) > mSize)
+      {
+        increaseSize(len1 + len2);
+      }
+
+      for (uint t=0; t<len2; t++)
+      {
+        FileInfo *fInfo = fileInfoList.getFileInfoByIndex(t);
+        FileInfo *fileInfo = fInfo;
+
+        if (mReleaseObjects)
+          fileInfo = fInfo->duplicate();
+
+        mArray[mLength] = fileInfo;
+        mLength++;
+      }
+      return;
+    }
+
+    uint newSize = len1 + len2;
+    FileInfoPtr *newArray = new FileInfoPtr[newSize + 100];
+    uint a = 0;
+    uint b = 0;
+
+    fileInfoList.sort(mComparisonMethod);
+
+    for (uint t=0; t<newSize; t++)
+    {
+      FileInfo *fInfo1 = NULL;
+      FileInfo *fInfo2 = NULL;
+
+      if (a < len1)
+        fInfo1 = mArray[a];
+
+      if (b < len2)
+        fInfo2 = fileInfoList.getFileInfoByIndex(b);
+
+      if (fInfo1 != NULL  &&  fInfo2 == NULL)
+      {
+        newArray[t] = fInfo1;
+        a++;
+      }
+      else
+      if (fInfo1 == NULL  &&  fInfo2 != NULL)
+      {
+        if (mReleaseObjects)
+          newArray[t] = fInfo2->duplicate();
+        else
+          newArray[t] = fInfo2;
+        b++;
+      }
+      else
+      if (fInfo1 != NULL  &&  fInfo2 != NULL)
+      {
+        if (fInfo1->compare(mComparisonMethod,fInfo2) <= 0)
+        {
+          newArray[t] = fInfo1;
+          a++;
+        }
+        else
+        {
+          if (mReleaseObjects)
+            newArray[t] = fInfo2->duplicate();
+          else
+            newArray[t] = fInfo2;
+
+          b++;
+        }
+      }
+    }
+
+    mSize = newSize+100;
+    mLength = newSize;
+
+    delete mArray;
+    mArray = newArray;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
 void FileInfoList::clear()
 {
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     if (mArray != NULL)
     {
       for (uint t=0; t<mLength; t++)
@@ -231,7 +327,7 @@ void FileInfoList::increaseSize(uint newSize)
 {
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     if (mArray == NULL)
     {
       mSize = newSize;
@@ -276,7 +372,7 @@ FileInfo* FileInfoList::getFileInfoById(uint fileId)
 {
   try
   {
-    AutoReadLock lock(&mModificationLock);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     FileInfo search;
     search.mFileId = fileId;
@@ -304,7 +400,7 @@ int FileInfoList::getClosestIndex(FileInfo::ComparisonMethod comparisonMethod,Fi
 {
   try
   {
-    AutoReadLock lock(&mModificationLock);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
     return getClosestIndexNoLock(comparisonMethod,fileInfo);
   }
   catch (...)
@@ -396,7 +492,7 @@ FileInfo* FileInfoList::getFileInfoByName(std::string filename)
 {
   try
   {
-    AutoReadLock lock(&mModificationLock);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     FileInfo search;
     search.mName = filename;
@@ -433,7 +529,7 @@ FileInfo* FileInfoList::getFileInfoByIndex(uint index)
 {
   try
   {
-    AutoReadLock lock(&mModificationLock);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
     if (index > mLength)
       return NULL;
 
@@ -458,7 +554,7 @@ void FileInfoList::getFileInfoList(uint startFileId,uint maxRecords,FileInfoList
       return;
     }
 
-    AutoReadLock lock(&mModificationLock);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
     uint startIdx = 0;
     uint sz = getLength();
 
@@ -503,7 +599,7 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,
       return;
     }
 
-    AutoReadLock lock(&mModificationLock);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
     uint startIdx = 0;
     uint sz = getLength();
 
@@ -548,7 +644,7 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFil
       return;
     }
 
-    AutoReadLock lock(&mModificationLock);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
     uint startIdx = 0;
     uint sz = getLength();
 
@@ -593,7 +689,7 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,
       return;
     }
 
-    AutoReadLock lock(&mModificationLock);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
     uint startIdx = 0;
     uint sz = getLength();
 
@@ -637,7 +733,7 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,uint
       return;
     }
 
-    AutoReadLock lock(&mModificationLock);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
     uint startIdx = 0;
     uint sz = getLength();
 
@@ -676,7 +772,7 @@ uint FileInfoList::getFileInfoCountByProducerId(uint producerId)
 {
   try
   {
-    AutoReadLock lock(&mModificationLock);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
     uint count = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -703,7 +799,7 @@ uint FileInfoList::getFileInfoCountByGenerationId(uint generationId)
 {
   try
   {
-    AutoReadLock lock(&mModificationLock);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
     uint count = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -730,7 +826,7 @@ uint FileInfoList::getFileInfoCountBySourceId(uint sourceId)
 {
   try
   {
-    AutoReadLock lock(&mModificationLock);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
     uint count = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -788,7 +884,7 @@ bool FileInfoList::deleteFileInfoById(uint fileId)
 {
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     FileInfo search;
     search.mFileId = fileId;
@@ -822,11 +918,48 @@ bool FileInfoList::deleteFileInfoById(uint fileId)
 
 
 
+bool FileInfoList::deleteFileInfoByName(std::string filename)
+{
+  try
+  {
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    FileInfo search;
+    search.mName = filename;
+    int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileName,search);
+    if (idx < 0 ||  idx >= (int)mLength)
+      return false;
+
+    FileInfo *info = mArray[idx];
+    if (info->mName != filename)
+      return false;
+
+    for (uint t=(uint)idx+1; t<mLength; t++)
+    {
+      mArray[t-1] = mArray[t];
+      mArray[t] = NULL;
+    }
+
+    if (mReleaseObjects)
+      delete info;
+
+    mLength--;
+    return true;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
 uint FileInfoList::deleteFileInfoByGroupFlags(uint groupFlags)
 {
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -864,7 +997,7 @@ uint FileInfoList::deleteFileInfoByProducerId(uint producerId)
 {
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -904,7 +1037,7 @@ uint FileInfoList::deleteFileInfoByGenerationId(uint generationId)
 {
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -943,7 +1076,7 @@ bool FileInfoList::deleteFileInfoByIndex(uint index)
 {
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     if (index >= mLength)
       return false;
@@ -976,7 +1109,7 @@ uint FileInfoList::deleteFileInfoBySourceId(uint sourceId)
 {
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1016,7 +1149,7 @@ uint FileInfoList::deleteFileInfoByFileIdList(std::set<uint>& fileIdList)
 {
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1056,7 +1189,7 @@ uint FileInfoList::deleteVirtualFiles()
 {
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1159,7 +1292,7 @@ void FileInfoList::setComparisonMethod(FileInfo::ComparisonMethod comparisonMeth
 {
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     mComparisonMethod = comparisonMethod;
     if (mLength == 0)
       return;
@@ -1182,7 +1315,7 @@ void FileInfoList::sort(FileInfo::ComparisonMethod comparisonMethod)
 {
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     mComparisonMethod = comparisonMethod;
 
     AutoThreadLock globalLock(&FileInfoList_sortLock);
@@ -1221,7 +1354,7 @@ void FileInfoList::writeToFile(std::string filename,const char *filemode)
 {
   try
   {
-    AutoReadLock lock(&mModificationLock);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     FILE *file = fopen(filename.c_str(),filemode);
     if (file == NULL)
@@ -1251,7 +1384,7 @@ void FileInfoList::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try
   {
-    AutoReadLock lock(&mModificationLock);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     stream << space(level) << "FileInfoList\n";
     for (uint t=0; t<mLength; t++)

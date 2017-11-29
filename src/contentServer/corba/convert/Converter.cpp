@@ -196,7 +196,7 @@ void Converter::convert(T::FileInfo& source,ContentServer::Corba::CorbaFileInfo&
 
 
 
-void Converter::convert(ContentServer::Corba::CorbaFileInfo& source,T::FileInfo& target)
+void Converter::convert(const ContentServer::Corba::CorbaFileInfo& source,T::FileInfo& target)
 {
   try
   {
@@ -243,7 +243,7 @@ void Converter::convert(T::FileInfoList& source,ContentServer::Corba::CorbaFileI
 
 
 
-void Converter::convert(ContentServer::Corba::CorbaFileInfoList& source,T::FileInfoList& target)
+void Converter::convert(const ContentServer::Corba::CorbaFileInfoList& source,T::FileInfoList& target)
 {
   try
   {
@@ -287,7 +287,7 @@ void Converter::convert(T::ServerInfo& source,ContentServer::Corba::CorbaServerI
 
 
 
-void Converter::convert(ContentServer::Corba::CorbaServerInfo& source,T::ServerInfo& target)
+void Converter::convert(const ContentServer::Corba::CorbaServerInfo& source,T::ServerInfo& target)
 {
   try
   {
@@ -330,7 +330,7 @@ void Converter::convert(T::ServerInfoList& source,ContentServer::Corba::CorbaSer
 
 
 
-void Converter::convert(ContentServer::Corba::CorbaServerInfoList& source,T::ServerInfoList& target)
+void Converter::convert(const ContentServer::Corba::CorbaServerInfoList& source,T::ServerInfoList& target)
 {
   try
   {
@@ -375,7 +375,7 @@ void Converter::convert(T::ProducerInfo& source,ContentServer::Corba::CorbaProdu
 
 
 
-void Converter::convert(ContentServer::Corba::CorbaProducerInfo& source,T::ProducerInfo& target)
+void Converter::convert(const ContentServer::Corba::CorbaProducerInfo& source,T::ProducerInfo& target)
 {
   try
   {
@@ -420,7 +420,7 @@ void Converter::convert(T::ProducerInfoList& source,ContentServer::Corba::CorbaP
 
 
 
-void Converter::convert(ContentServer::Corba::CorbaProducerInfoList& source,T::ProducerInfoList& target)
+void Converter::convert(const ContentServer::Corba::CorbaProducerInfoList& source,T::ProducerInfoList& target)
 {
   try
   {
@@ -466,7 +466,7 @@ void Converter::convert(T::GenerationInfo& source,ContentServer::Corba::CorbaGen
 
 
 
-void Converter::convert(ContentServer::Corba::CorbaGenerationInfo& source,T::GenerationInfo& target)
+void Converter::convert(const ContentServer::Corba::CorbaGenerationInfo& source,T::GenerationInfo& target)
 {
   try
   {
@@ -513,7 +513,7 @@ void Converter::convert(T::GenerationInfoList& source,ContentServer::Corba::Corb
 
 
 
-void Converter::convert(ContentServer::Corba::CorbaGenerationInfoList& source,T::GenerationInfoList& target)
+void Converter::convert(const ContentServer::Corba::CorbaGenerationInfoList& source,T::GenerationInfoList& target)
 {
   try
   {
@@ -561,7 +561,7 @@ void Converter::convert(T::EventInfo& source,ContentServer::Corba::CorbaEventInf
 
 
 
-void Converter::convert(ContentServer::Corba::CorbaEventInfo& source,T::EventInfo& target)
+void Converter::convert(const ContentServer::Corba::CorbaEventInfo& source,T::EventInfo& target)
 {
   try
   {
@@ -612,7 +612,7 @@ void Converter::convert(T::EventInfoList& source,ContentServer::Corba::CorbaEven
 
 
 
-void Converter::convert(ContentServer::Corba::CorbaEventInfoList& source,T::EventInfoList& target)
+void Converter::convert(const ContentServer::Corba::CorbaEventInfoList& source,T::EventInfoList& target)
 {
   try
   {
@@ -656,7 +656,7 @@ void Converter::convert(string_vec& source,ContentServer::Corba::CorbaStringList
 
 
 
-void Converter::convert(ContentServer::Corba::CorbaStringList& source,string_vec& target)
+void Converter::convert(const ContentServer::Corba::CorbaStringList& source,string_vec& target)
 {
   try
   {
@@ -699,7 +699,7 @@ void Converter::convert(std::set<std::string>& source,ContentServer::Corba::Corb
 
 
 
-void Converter::convert(ContentServer::Corba::CorbaStringList& source,std::set<std::string>& target)
+void Converter::convert(const ContentServer::Corba::CorbaStringList& source,std::set<std::string>& target)
 {
   try
   {
@@ -805,6 +805,88 @@ void Converter::convert(const ContentServer::Corba::CorbaLongList& source,std::s
     throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
+
+
+
+
+void Converter::convert(T::FileAndContent& source,ContentServer::Corba::CorbaFileContent& target)
+{
+  try
+  {
+    convert(source.mFileInfo,target.fileInfo);
+    convert(source.mContentInfoList,target.contentInfoList);
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void Converter::convert(const ContentServer::Corba::CorbaFileContent& source,T::FileAndContent& target)
+{
+  try
+  {
+    convert(source.fileInfo,target.mFileInfo);
+    convert(source.contentInfoList,target.mContentInfoList);
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void Converter::convert(std::vector<T::FileAndContent>& source,ContentServer::Corba::CorbaFileContentList& target)
+{
+  try
+  {
+    uint len = (uint)source.size();
+    target.length(len);
+    for (uint t = 0; t<len; t++)
+    {
+      ContentServer::Corba::CorbaFileContent corbaObject;
+      convert(source[t],corbaObject);
+      target[t] = corbaObject;
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+void Converter::convert(const ContentServer::Corba::CorbaFileContentList& source,std::vector<T::FileAndContent>& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      T::FileAndContent fc;
+      convert(source[t],fc);
+      target.push_back(fc);
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
 }
 }
 }

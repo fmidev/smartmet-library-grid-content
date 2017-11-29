@@ -69,6 +69,7 @@ class ServerInterface : public POA_SmartMet::ContentServer::Corba::ServiceInterf
     ::CORBA::Long setGenerationInfoStatusByName(::CORBA::LongLong sessionId, const char* generationName, ::CORBA::Octet status);
     ::CORBA::Long addFileInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaFileInfo& fileInfo);
     ::CORBA::Long addFileInfoWithContentList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaFileInfo& fileInfo, SmartMet::ContentServer::Corba::CorbaContentInfoList& contentInfoList);
+    ::CORBA::Long addFileInfoListWithContent(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaFileContentList& fileContentList);
     ::CORBA::Long deleteFileInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong fileId);
     ::CORBA::Long deleteFileInfoByName(::CORBA::LongLong sessionId, const char* filename);
     ::CORBA::Long deleteFileInfoListByGroupFlags(::CORBA::LongLong sessionId, ::CORBA::ULong groupFlags);

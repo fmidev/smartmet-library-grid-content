@@ -54,7 +54,7 @@ void VirtualContentFactory_type1::init(std::string definitionFileName)
   try
   {
     mContentDefinitionFile.init(definitionFileName);
-    mContentDefinitionFile.print(std::cout,0,0);
+    //mContentDefinitionFile.print(std::cout,0,0);
   }
   catch (...)
   {
@@ -66,7 +66,7 @@ void VirtualContentFactory_type1::init(std::string definitionFileName)
 
 
 
-void VirtualContentFactory_type1::addFile(T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
+void VirtualContentFactory_type1::addFile(T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList,VirtualGridFilePtr_map& gridFileMap)
 {
   FUNCTION_TRACE
   try
@@ -82,7 +82,7 @@ void VirtualContentFactory_type1::addFile(T::FileInfo& fileInfo,T::ContentInfoLi
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
-      addContent(fileInfo,*contentInfo);
+      addContent(fileInfo,*contentInfo,gridFileMap);
     }
   }
   catch (...)
@@ -95,7 +95,7 @@ void VirtualContentFactory_type1::addFile(T::FileInfo& fileInfo,T::ContentInfoLi
 
 
 
-void VirtualContentFactory_type1::addContent(T::FileInfo& fileInfo,T::ContentInfo& contentInfo)
+void VirtualContentFactory_type1::addContent(T::FileInfo& fileInfo,T::ContentInfo& contentInfo,VirtualGridFilePtr_map& gridFileMap)
 {
   FUNCTION_TRACE
   try
@@ -121,8 +121,8 @@ void VirtualContentFactory_type1::addContent(T::FileInfo& fileInfo,T::ContentInf
         if (def != NULL)
         {
 
-          bool found = true;
-          bool registered = false;
+          bool componentsFound = true;
+          bool fileExists = false;
           uint virtualFileId = 0;
           char filename[200];
           filename[0] = '\0';
@@ -130,7 +130,7 @@ void VirtualContentFactory_type1::addContent(T::FileInfo& fileInfo,T::ContentInf
           std::vector<GRID::SourceMessage> sourceMessages;
           //sourceMessages.push_back(GRID::SourceMessage(sourceGridFile,contentInfo.mMessageIndex));
 
-          for (auto sourceParam = contentDef->mSourceParameters.begin(); sourceParam != contentDef->mSourceParameters.end() && found; ++sourceParam)
+          for (auto sourceParam = contentDef->mSourceParameters.begin(); sourceParam != contentDef->mSourceParameters.end() && componentsFound; ++sourceParam)
           {
             T::ContentInfoList contentList;
             T::ContentInfo *cInfo = NULL;
@@ -143,42 +143,48 @@ void VirtualContentFactory_type1::addContent(T::FileInfo& fileInfo,T::ContentInf
               mContentServer->getContentListByParameterGenerationIdAndForecastTime(0,contentInfo.mGenerationId,T::ParamKeyType::FMI_NAME,*sourceParam,
                 T::ParamLevelIdType::FMI,contentInfo.mFmiParameterLevelId,contentInfo.mParameterLevel,contentInfo.mForecastType,contentInfo.mForecastNumber,
                 contentInfo.mGeometryId,contentInfo.mForecastTime,contentList);
+
               cInfo = contentList.getContentInfoByIndex(0);
             }
 
             if (cInfo == NULL)
             {
-              found = false;
+              componentsFound = false;
             }
             else
             {
               if (sourceParam == contentDef->mSourceParameters.begin())
               {
                 // Checking if the virtual file is already registered to the contentServer.
-                sprintf(filename,"%s-%u-%u",contentDef->mTargetParameter.c_str(),cInfo->mFileId,cInfo->mMessageIndex);
+                sprintf(filename,"VIRT-%s-%u-%u",contentDef->mTargetParameter.c_str(),cInfo->mFileId,cInfo->mMessageIndex);
 
-                T::FileInfo tmpFileInfo;
-                if (mContentServer->getFileInfoByName(0,std::string(filename),tmpFileInfo) == 0)
+                if (gridFileMap.find(std::string(filename)) != gridFileMap.end())
                 {
-                  // The content is already registered.
-                  registered = true;
-
-                  GRID::GridFile_sptr vGridFile = mGridFileManager->getFileByIdNoMapping(tmpFileInfo.mFileId);
-                  if (vGridFile)
+                  fileExists = true;
+                }
+                else
+                {
+                  T::FileInfo tmpFileInfo;
+                  if (mContentServer->getFileInfoByName(0,std::string(filename),tmpFileInfo) == 0)
                   {
-                    //printf("**** File is already in the file storage %u\n",tmpFileInfo.mFileId);
-                    found = false;  // File is already in the file storage
-                  }
-                  else
-                  {
-                    virtualFileId = tmpFileInfo.mFileId;
+                    // The content is already registered.
+                    GRID::GridFile_sptr vGridFile = mGridFileManager->getFileByIdNoMapping(tmpFileInfo.mFileId);
+                    if (vGridFile)
+                    {
+                      //printf("**** File is already in the file storage %u\n",tmpFileInfo.mFileId);
+                      fileExists = true;  // File is already in the file storage
+                    }
+                    else
+                    {
+                      virtualFileId = tmpFileInfo.mFileId;
+                    }
                   }
                 }
               }
 
               GRID::GridFile_sptr sGridFile = mGridFileManager->getFileByIdNoMapping(cInfo->mFileId);
               if (!sGridFile)
-                found = false;
+                componentsFound = false;
               else
                 sourceMessages.push_back(GRID::SourceMessage(sGridFile,cInfo->mMessageIndex));
             }
@@ -188,64 +194,55 @@ void VirtualContentFactory_type1::addContent(T::FileInfo& fileInfo,T::ContentInf
             //printf("**** VIRTUAL CONTENT %s\n",contentDef->mTargetParameter.c_str());
 
 
-          if (found  &&  filename[0] != '\0')
+          if (!fileExists &&  componentsFound  &&  filename[0] != '\0')
           {
-            if (!registered)
-            {
-              T::FileInfo newFileInfo(fileInfo);
-              newFileInfo.mName = filename;
-              newFileInfo.mFileType = T::FileType::Virtual;
-              newFileInfo.mFlags = fileInfo.mFlags | (uint)T::FileInfoFlags::CONTENT_VIRTUAL;
+            GRID::VirtualGridFile *virtualGridFile = new GRID::VirtualGridFile();
+            virtualGridFile->setFileName(filename);
+            virtualGridFile->setFileId(virtualFileId);
+            virtualGridFile->setProducerId(contentInfo.mProducerId);
+            virtualGridFile->setGenerationId(contentInfo.mGenerationId);
+            virtualGridFile->setSourceId(contentInfo.mSourceId);
 
-              T::ContentInfoList contentInfoList;
-              T::ContentInfo *newContentInfo = new T::ContentInfo(contentInfo);
+            for (auto sm = sourceMessages.begin(); sm != sourceMessages.end(); ++sm)
+              virtualGridFile->addPhysicalGridFile(sm->first);
 
-              newContentInfo->mFileId = virtualFileId;
-              newContentInfo->mFileType = T::FileType::Virtual;
-              newContentInfo->mMessageIndex = 0;
-              newContentInfo->mFmiParameterId = def->mFmiParameterId;
-              newContentInfo->mFmiParameterName = def->mParameterName;
-              newContentInfo->mGribParameterId = "";
-              newContentInfo->mFmiParameterUnits = def->mParameterUnits;
-              newContentInfo->mGribParameterUnits = def->mParameterUnits;
-              newContentInfo->mCdmParameterId = "";
-              newContentInfo->mCdmParameterName = "";
-              newContentInfo->mNewbaseParameterId = def->mNewbaseId;
-              newContentInfo->mNewbaseParameterName = "";
-              newContentInfo->mFlags = CONTENT_INFO_VIRTUAL;
+            GRID::VirtualMessage *virtualMessage = new GRID::VirtualMessage(sourceMessages);
+            virtualMessage->setFunction(mFunctionCollection,mLuaFileCollection,contentDef->mFunctionName);
 
-              contentInfoList.addContentInfo(newContentInfo);
+            virtualGridFile->addMessage(virtualMessage);
 
-              if (mContentServer->addFileInfoWithContentList(0,newFileInfo,contentInfoList) == 0)
-                virtualFileId = newFileInfo.mFileId;
-            }
+            T::ContentInfo *newContentInfo = virtualMessage->getContentInfo();
 
-            if (virtualFileId > 0)
-            {
-              GRID::VirtualGridFile *virtualGridFile = new GRID::VirtualGridFile();
-              virtualGridFile->setFileId(virtualFileId);
+            newContentInfo->mFileId = 0;
+            newContentInfo->mFileType = T::FileType::Virtual;
+            newContentInfo->mMessageIndex = 0;
+            newContentInfo->mProducerId = contentInfo.mProducerId;
+            newContentInfo->mGenerationId = contentInfo.mGenerationId;
+            newContentInfo->mGroupFlags = contentInfo.mGroupFlags;
+            newContentInfo->mForecastTime = contentInfo.mForecastTime;
+            newContentInfo->mFmiParameterId = def->mFmiParameterId;
+            newContentInfo->mFmiParameterName = def->mParameterName;
+            newContentInfo->mGribParameterId = "";
+            newContentInfo->mCdmParameterId = "";
+            newContentInfo->mCdmParameterName = "";
+            newContentInfo->mNewbaseParameterId = def->mNewbaseId;
+            newContentInfo->mNewbaseParameterName = "";
+            newContentInfo->mFmiParameterLevelId = contentInfo.mFmiParameterLevelId;
+            newContentInfo->mGrib1ParameterLevelId = contentInfo.mGrib1ParameterLevelId;
+            newContentInfo->mGrib2ParameterLevelId = contentInfo.mGrib2ParameterLevelId;
+            newContentInfo->mParameterLevel = contentInfo.mParameterLevel;
+            newContentInfo->mFmiParameterUnits = def->mParameterUnits;
+            newContentInfo->mGribParameterUnits = def->mParameterUnits;
+            newContentInfo->mForecastType = contentInfo.mForecastType;
+            newContentInfo->mForecastNumber = contentInfo.mForecastNumber;
+            newContentInfo->mServerFlags = contentInfo.mServerFlags;
+            newContentInfo->mFlags = CONTENT_INFO_VIRTUAL;
+            newContentInfo->mSourceId = contentInfo.mSourceId;
+            newContentInfo->mGeometryId = contentInfo.mGeometryId;
+            newContentInfo->mModificationTime = contentInfo.mModificationTime;
 
-              for (auto sm = sourceMessages.begin(); sm != sourceMessages.end(); ++sm)
-              {
-                virtualGridFile->addPhysicalGridFile(sm->first);
-                mGridFileManager->addFileUser(sm->first->getFileId(),virtualFileId);
-              }
-
-              GRID::VirtualMessage *virtualMessage = new GRID::VirtualMessage(sourceMessages);
-              virtualMessage->setFunction(mFunctionCollection,mLuaFileCollection,contentDef->mFunctionName);
-
-              virtualGridFile->addMessage(virtualMessage);
-
-              mGridFileManager->addFile(virtualGridFile);
-
-              //printf("AddVirtualFile %u %s\n",virtualFileId,filename);
-            }
-            else
-            {
-              printf("The virtual file has no file id. Maybe the content registration failed!\n");
-            }
+            gridFileMap.insert(std::pair<std::string,GRID::VirtualGridFilePtr>(std::string(filename),virtualGridFile));
           }
-
         }
         else
         {

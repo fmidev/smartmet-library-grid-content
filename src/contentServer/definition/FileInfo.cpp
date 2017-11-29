@@ -54,6 +54,29 @@ FileInfo::FileInfo(FileInfo& fileInfo)
 
 
 
+FileInfo::FileInfo(const FileInfo& fileInfo)
+{
+  try
+  {
+    mFileId = fileInfo.mFileId;
+    mFileType = fileInfo.mFileType;
+    mName = fileInfo.mName;
+    mProducerId = fileInfo.mProducerId;
+    mGenerationId = fileInfo.mGenerationId;
+    mGroupFlags = fileInfo.mGroupFlags;
+    mFlags = fileInfo.mFlags;
+    mSourceId = fileInfo.mSourceId;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 FileInfo::FileInfo(uint producerId,uint generationId,uint groupFlags,T::FileType type,std::string filename,uint sourceId)
 {
   try
@@ -129,6 +152,31 @@ void FileInfo::operator=(FileInfo& fileInfo)
   }
 }
 
+
+
+
+
+void FileInfo::operator=(const FileInfo& fileInfo)
+{
+  try
+  {
+    if (&fileInfo == this)
+      return;
+
+    mFileId = fileInfo.mFileId;
+    mFileType = fileInfo.mFileType;
+    mName = fileInfo.mName;
+    mProducerId = fileInfo.mProducerId;
+    mGenerationId = fileInfo.mGenerationId;
+    mGroupFlags = fileInfo.mGroupFlags;
+    mFlags = fileInfo.mFlags;
+    mSourceId = fileInfo.mSourceId;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
 
 
 

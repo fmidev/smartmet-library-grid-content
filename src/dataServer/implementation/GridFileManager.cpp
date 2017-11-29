@@ -71,7 +71,7 @@ void GridFileManager::addFile(GRID::GridFile *gridFile)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     gridFile->setCheckTime(time(0));
 
@@ -95,7 +95,7 @@ void GridFileManager::addFileUser(uint fileId,uint userFileId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     auto it = mFileList.find(fileId);
     if (it != mFileList.end())
@@ -116,7 +116,7 @@ void GridFileManager::clear()
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     mFileList.clear();
   }
   catch (...)
@@ -134,7 +134,7 @@ void GridFileManager::deleteFile(GRID::GridFile *gridFile)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     deleteFileNoLock(gridFile->getFileId(),true);
   }
   catch (...)
@@ -152,7 +152,7 @@ void GridFileManager::deleteFileById(uint fileId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     deleteFileNoLock(fileId,true);
   }
   catch (...)
@@ -170,7 +170,7 @@ void GridFileManager::deleteFilesByGroupFlags(uint groupFlags)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     std::vector<uint> idList;
 
@@ -197,7 +197,7 @@ void GridFileManager::deleteFilesByProducerId(uint producerId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     std::vector<uint> idList;
 
@@ -224,7 +224,7 @@ void GridFileManager::deleteFilesByGenerationId(uint generationId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     std::vector<uint> idList;
 
@@ -251,7 +251,7 @@ void GridFileManager::deleteFilesBySourceId(uint sourceId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     std::vector<uint> idList;
 
@@ -278,7 +278,7 @@ void GridFileManager::deleteFilesByCheckTime(time_t checkTime)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     std::vector<uint> idList;
 
@@ -305,7 +305,7 @@ void GridFileManager::deleteVirtualFiles()
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     std::vector<uint> idList;
 
@@ -332,7 +332,7 @@ GRID::GridFile_sptr GridFileManager::getFileById(uint fileId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     auto it = mFileList.find(fileId);
 
@@ -362,7 +362,7 @@ GRID::GridFile_sptr GridFileManager::getFileByIdNoMapping(uint fileId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     auto it = mFileList.find(fileId);
 
@@ -403,7 +403,7 @@ void GridFileManager::print(std::ostream& stream,uint level,uint optionFlags)
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
     stream << space(level) << "GridFileManager\n";
     stream << space(level) << "- numberOfFiles = " << getFileCount() << "\n";
     for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )

@@ -1340,6 +1340,38 @@ int ClientImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
 
 
 
+int ClientImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std::vector<T::FileAndContent>& fileAndContentList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaFileContentList_var corbaFileContentList = new ContentServer::Corba::CorbaFileContentList();
+
+    ContentServer::Corba::Converter::convert(fileAndContentList, corbaFileContentList);
+
+    int result = mService->addFileInfoListWithContent(sessionId,corbaFileContentList);
+
+    if (result == 0)
+    {
+      ContentServer::Corba::Converter::convert(corbaFileContentList, fileAndContentList);
+    }
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_deleteFileInfoById(T::SessionId sessionId, uint fileId)
 {
   try

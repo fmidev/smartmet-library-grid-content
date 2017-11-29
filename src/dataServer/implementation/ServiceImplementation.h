@@ -88,10 +88,11 @@ class ServiceImplementation : public ServiceInterface
      virtual void   addFile(T::FileInfo& fileInfo,T::ContentInfoList& currentContentList,T::ContentInfoList& contentInfoList);
      virtual void   checkServerRegistration();
      virtual void   fullUpdate();
-     virtual void   updateVirtualFiles();
+     virtual void   updateVirtualFiles(T::ContentInfoList fullContentList);
+     virtual void   registerVirtualFiles(VirtualGridFilePtr_map& gridFileMap);
      virtual void   processEvent(T::EventInfo& eventInfo);
      virtual void   processEvents();
-     virtual void   readContentList(T::ContentInfoList& contentList);
+     virtual void   readContentList(T::ContentInfoList& contentList,bool includePhysicalContent,bool includeVirtualContent);
 
      GRID::GridFile_sptr  getGridFile(uint fileId);
 
@@ -115,7 +116,8 @@ class ServiceImplementation : public ServiceInterface
      ContentServer::ServiceInterface* mContentServer;
      Lua::LuaFileCollection           mLuaFileCollection;
      Functions::FunctionCollection    mFunctionCollection;
-
+     VirtualGridFilePtr_map           mGridFileMap;
+     time_t                           mLastVirtualFileRegistration;
 };
 
 

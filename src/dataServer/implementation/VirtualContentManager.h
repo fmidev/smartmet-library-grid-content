@@ -18,7 +18,7 @@ class VirtualContentManager
 
     virtual void init();
 
-    virtual void addFile(T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList);
+    virtual void addFile(T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList,VirtualGridFilePtr_map& gridFileMap);
 
     virtual void addVirtualContentFactory(VirtualContentFactory_ptr factory);
 

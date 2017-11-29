@@ -69,6 +69,7 @@ class ServerInterface
 
     virtual void addFileInfo(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void addFileInfoWithContentList(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void addFileInfoListWithContent(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteFileInfoById(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteFileInfoByName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteFileInfoListByGroupFlags(T::RequestMessage& request,T::ResponseMessage& response);

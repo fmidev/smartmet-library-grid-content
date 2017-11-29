@@ -2,6 +2,7 @@
 
 #include "lua/LuaFileCollection.h"
 #include "functions/FunctionCollection.h"
+#include "contentServer/definition/ContentInfo.h"
 
 #include <grid-files/grid/Message.h>
 #include <grid-files/grid/GridFile.h>
@@ -77,6 +78,9 @@ class VirtualMessage : public Message
     virtual T::SpatialReference*    getSpatialReference() const;
     virtual std::string             getWKT() const;
 
+    virtual void                    setContentInfo(T::ContentInfo& contentInfo);
+    virtual T::ContentInfo*         getContentInfo();
+
     virtual bool                    isGridGlobal() const;
 
     virtual void                    print(std::ostream& stream,uint level,uint optionFlags) const;
@@ -102,6 +106,7 @@ class VirtualMessage : public Message
     Lua::LuaFileCollection*         mLuaFileCollection;
     std::string                     mFunctionName;
     std::vector<SourceMessage>      mSourceMessages;
+    T::ContentInfo                  mContentInfo;
 };
 
 

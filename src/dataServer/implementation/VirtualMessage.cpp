@@ -1454,6 +1454,40 @@ void VirtualMessage::executeFunctionType3(T::GridValueList& inValueList1,T::Grid
 
 
 
+void VirtualMessage::setContentInfo(T::ContentInfo& contentInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mContentInfo = contentInfo;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+T::ContentInfo* VirtualMessage::getContentInfo()
+{
+  FUNCTION_TRACE
+  try
+  {
+    return &mContentInfo;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 void VirtualMessage::print(std::ostream& stream,uint level,uint optionFlags) const
 {
   FUNCTION_TRACE

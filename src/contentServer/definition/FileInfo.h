@@ -38,6 +38,7 @@ class FileInfo
   public:
                         FileInfo();
                         FileInfo(FileInfo& fileInfo);
+                        FileInfo(const FileInfo& fileInfo);
                         FileInfo(uint producerId,uint generationId,uint groupFlags,T::FileType type,std::string filename,uint sourceId);
                         FileInfo(const char *csv);
      virtual            ~FileInfo();
@@ -48,6 +49,7 @@ class FileInfo
      void               setCsv(std::string csv);
 
      void               operator=(FileInfo& fileInfo);
+     void               operator=(const FileInfo& fileInfo);
      int                compare(ComparisonMethod comparisonMethod,FileInfo *fileInfo);
      FileInfo*          duplicate();
      void               print(std::ostream& stream,uint level,uint optionFlags);

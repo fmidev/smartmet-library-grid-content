@@ -2,6 +2,7 @@
 
 #include "ContentInfo.h"
 #include "ContentInfoList.h"
+#include "FileAndContent.h"
 #include "FileInfo.h"
 #include "FileInfoList.h"
 #include "EventInfo.h"
@@ -34,6 +35,7 @@ enum class Implementation
   Cache = 2,
   CorbaClient = 3,
   HttpClient = 4,
+  Memory
 };
 
 
@@ -94,6 +96,7 @@ class ServiceInterface
 
      virtual int    addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo);
      virtual int    addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList);
+     virtual int    addFileInfoListWithContent(T::SessionId sessionId,std::vector<T::FileAndContent>& fileAndContentList);
      virtual int    deleteFileInfoById(T::SessionId sessionId,uint fileId);
      virtual int    deleteFileInfoByName(T::SessionId sessionId,std::string filename);
      virtual int    deleteFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags);
@@ -220,6 +223,7 @@ class ServiceInterface
 
      virtual int    _addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo);
      virtual int    _addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList);
+     virtual int    _addFileInfoListWithContent(T::SessionId sessionId,std::vector<T::FileAndContent>& fileAndContentList);
      virtual int    _deleteFileInfoById(T::SessionId sessionId,uint fileId);
      virtual int    _deleteFileInfoByName(T::SessionId sessionId,std::string filename);
      virtual int    _deleteFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags);

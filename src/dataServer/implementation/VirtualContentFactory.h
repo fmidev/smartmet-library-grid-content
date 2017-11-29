@@ -13,6 +13,9 @@ namespace SmartMet
 namespace DataServer
 {
 
+typedef std::map<std::string,GRID::VirtualGridFilePtr> VirtualGridFilePtr_map;
+
+
 
 class VirtualContentFactory
 {
@@ -25,11 +28,11 @@ class VirtualContentFactory
     void          setLuaFileCollection(Lua::LuaFileCollection *luaFileCollection);
     void          setFunctionCollection(Functions::FunctionCollection *functionCollection);
 
-    virtual void  addFile(T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList);
+    virtual void  addFile(T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList,VirtualGridFilePtr_map& gridFileMap);
 
   protected:
 
-    virtual void addContent(T::FileInfo& fileInfo,T::ContentInfo& contentInfo);
+    virtual void addContent(T::FileInfo& fileInfo,T::ContentInfo& contentInfo,VirtualGridFilePtr_map& gridFileMap);
 
   protected:
 
@@ -41,6 +44,7 @@ class VirtualContentFactory
 
 
 typedef VirtualContentFactory* VirtualContentFactory_ptr;
+
 
 
 }

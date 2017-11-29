@@ -116,7 +116,7 @@ void VirtualContentFactory::setFunctionCollection(Functions::FunctionCollection 
 
 
 
-void VirtualContentFactory::addFile(T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
+void VirtualContentFactory::addFile(T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList,VirtualGridFilePtr_map& gridFileMap)
 {
   FUNCTION_TRACE
   try
@@ -125,7 +125,7 @@ void VirtualContentFactory::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
-      addContent(fileInfo,*contentInfo);
+      addContent(fileInfo,*contentInfo,gridFileMap);
     }
   }
   catch (...)
@@ -138,7 +138,7 @@ void VirtualContentFactory::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
 
 
 
-void VirtualContentFactory::addContent(T::FileInfo& fileInfo,T::ContentInfo& contentInfo)
+void VirtualContentFactory::addContent(T::FileInfo& fileInfo,T::ContentInfo& contentInfo,VirtualGridFilePtr_map& gridFileMap)
 {
   FUNCTION_TRACE
   try

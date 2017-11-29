@@ -342,14 +342,6 @@ int RedisImplementation::_clear(T::SessionId sessionId)
 
     freeReplyObject(reply);
 
-    reply = (redisReply*)redisCommand(mContext,"DEL %scontentCounter",mTablePrefix.c_str());
-    if (reply == NULL)
-    {
-      closeConnection();
-      return Result::PERMANENT_STORAGE_ERROR;
-    }
-
-    freeReplyObject(reply);
 
     reply = (redisReply*)redisCommand(mContext,"DEL %scontent",mTablePrefix.c_str());
     if (reply == NULL)
@@ -377,6 +369,13 @@ int RedisImplementation::_clear(T::SessionId sessionId)
     }
 
     freeReplyObject(reply);
+
+    reply = (redisReply*)redisCommand(mContext,"DEL %seventCounter",mTablePrefix.c_str());
+    if (reply == NULL)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
 
     reply = (redisReply*)redisCommand(mContext,"DEL %sevents",mTablePrefix.c_str());
     if (reply == NULL)
@@ -1914,7 +1913,7 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
       // ### Adding an event to the event list.
 
       //printf("-- File updated %s\n",fileInfo.mName.c_str());
-      addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,0,0,0);
+      addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,(uint)fileInfo.mFileType,0,0);
     }
     else
     {
@@ -1995,7 +1994,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
     uint fileId = getFileId(fileInfo.mName);
     if (fileId > 0)
     {
-      printf("** File exists %s\n",fileInfo.mName.c_str());
+      //printf("** File exists %s\n",fileInfo.mName.c_str());
       // ### File with the same name already exists. Let's return
       // ### the current file-id.
 
@@ -2008,7 +2007,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
     else
     {
       // ### Generating a new file-id.
-      printf("** File added %s\n",fileInfo.mName.c_str());
+      //printf("** File added %s\n",fileInfo.mName.c_str());
 
       RedisModificationLock redisModificationLock(mContext,mTablePrefix);
       redisReply *reply = (redisReply*)redisCommand(mContext,"INCR %sfileCounter",mTablePrefix.c_str());
@@ -2080,12 +2079,150 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
     if (fileId > 0)
     {
       //printf("-- file update event\n");
-      addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,0,0,0);
+      addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,(uint)fileInfo.mFileType,0,0);
     }
     else
     {
       //printf("-- file add event\n");
       addEvent(EventType::FILE_ADDED,fileInfo.mFileId,(uint)fileInfo.mFileType,0,0);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std::vector<T::FileAndContent>& fileAndContentList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
+
+    for (auto ff = fileAndContentList.begin();ff != fileAndContentList.end(); ++ff)
+    {
+      T::ProducerInfo producerInfo;
+      if (getProducerById(ff->mFileInfo.mProducerId,producerInfo) != Result::OK)
+        return Result::UNKNOWN_PRODUCER_ID;
+
+      T::GenerationInfo generationInfo;
+      if (getGenerationById(ff->mFileInfo.mGenerationId,generationInfo) != Result::OK)
+        return Result::UNKNOWN_GENERATION_ID;
+
+      if (producerInfo.mProducerId != generationInfo.mProducerId)
+        return Result::PRODUCER_AND_GENERATION_DO_NOT_MATCH;
+
+      // ### Checking if the filename already exists in the database.
+
+      uint fileId = getFileId(ff->mFileInfo.mName);
+      if (fileId > 0)
+      {
+        //printf("** File exists %s\n",fileInfo.mName.c_str());
+        // ### File with the same name already exists. Let's return
+        // ### the current file-id.
+
+        ff->mFileInfo.mFileId = fileId;
+
+        // ### Deleting old content information.
+
+        deleteContentByFileId(ff->mFileInfo.mFileId);
+      }
+      else
+      {
+        // ### Generating a new file-id.
+        //printf("** File added %s\n",fileInfo.mName.c_str());
+
+        redisReply *reply = (redisReply*)redisCommand(mContext,"INCR %sfileCounter",mTablePrefix.c_str());
+        if (reply == NULL)
+        {
+          closeConnection();
+          return Result::PERMANENT_STORAGE_ERROR;
+        }
+
+        ff->mFileInfo.mFileId = (uint)reply->integer;
+        ff->mFileInfo.mFlags = ff->mFileInfo.mFlags | (uint)T::FileInfoFlags::CONTENT_PREDEFINED;
+        freeReplyObject(reply);
+
+        // ### Adding the file information into the database.
+
+        reply = (redisReply*)redisCommand(mContext,"ZADD %sfiles %u %s",mTablePrefix.c_str(),ff->mFileInfo.mFileId,ff->mFileInfo.getCsv().c_str());
+        if (reply == NULL)
+        {
+          closeConnection();
+          return Result::PERMANENT_STORAGE_ERROR;
+        }
+
+        freeReplyObject(reply);
+
+        // ### Adding the filename into the database. This needs to be added to another
+        // ### table so that we can fetch it fast.
+
+        addFilename(ff->mFileInfo.mName,ff->mFileInfo.mFileId);
+      }
+
+
+      // ### Adding the content information into the database.
+
+      uint len = ff->mContentInfoList.getLength();
+      //printf("-- contentList %u\n",len);
+      for (uint t=0; t<len; t++)
+      {
+        T::ContentInfo *info = ff->mContentInfoList.getContentInfoByIndex(t);
+        if (info != NULL)
+        {
+          // ### Making sure that content data matches the file data.
+
+          info->mFileId = ff->mFileInfo.mFileId;
+          info->mFileType = ff->mFileInfo.mFileType;
+          info->mProducerId = ff->mFileInfo.mProducerId;
+          info->mGenerationId = ff->mFileInfo.mGenerationId;
+          info->mGroupFlags = ff->mFileInfo.mGroupFlags;
+          info->mFlags = info->mFlags | (uint)T::FileInfoFlags::CONTENT_PREDEFINED;
+
+          // ### Creating a key for the content.
+
+          unsigned long long id = ((unsigned long long)info->mFileId << 32) + info->mMessageIndex;
+
+          // ### Adding the content record into the database.
+
+          redisReply *reply = (redisReply*)redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,info->getCsv().c_str());
+          if (reply == NULL)
+          {
+            closeConnection();
+            return Result::PERMANENT_STORAGE_ERROR;
+          }
+
+          freeReplyObject(reply);
+        }
+      }
+
+      // ### Adding an event to the event list.
+
+      if (fileId > 0)
+      {
+        //printf("-- file update event\n");
+        addEvent(EventType::FILE_UPDATED,ff->mFileInfo.mFileId,(uint)ff->mFileInfo.mFileType,0,0);
+      }
+      else
+      {
+        //printf("-- file add event\n");
+        addEvent(EventType::FILE_ADDED,ff->mFileInfo.mFileId,(uint)ff->mFileInfo.mFileType,0,0);
+      }
     }
 
     return Result::OK;
@@ -2123,7 +2260,7 @@ int RedisImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
     int result = deleteFileById(fileId,true);
 
     if (result == Result::OK)
-      addEvent(EventType::FILE_DELETED,fileId,0,0,0);
+      addEvent(EventType::FILE_DELETED,fileId,(uint)fileInfo.mFileType,0,0);
 
     return result;
   }
@@ -2160,7 +2297,12 @@ int RedisImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::strin
     int result = deleteFileById(fileId,true);
 
     if (result == Result::OK)
-      addEvent(EventType::FILE_DELETED,fileId,0,0,0);
+    {
+      if (strncmp(filename.c_str(),"VIRT-",5) == 0)
+        addEvent(EventType::FILE_DELETED,fileId,(uint)T::FileType::Virtual,0,0);
+      else
+        addEvent(EventType::FILE_DELETED,fileId,0,0,0);
+    }
 
     return result;
   }
@@ -2348,7 +2490,7 @@ int RedisImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
         {
           deleteFilename(fileInfo.mName);
           deleteFileById(info->mFileId,false);
-          addEvent(EventType::FILE_DELETED,info->mFileId,0,0,0);
+          addEvent(EventType::FILE_DELETED,info->mFileId,(uint)fileInfo.mFileType,0,0);
         }
       }
     }

@@ -1246,6 +1246,38 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::addFileInfoListWithContent(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaFileContentList& fileContentList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    std::vector<T::FileAndContent> sFileContentList;
+
+    ContentServer::Corba::Converter::convert(fileContentList,sFileContentList);
+
+    int result = mService->addFileInfoListWithContent(sessionId,sFileContentList);
+    if (result == 0)
+    {
+      ContentServer::Corba::Converter::convert(sFileContentList,fileContentList);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::deleteFileInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong fileId)
 {
   FUNCTION_TRACE

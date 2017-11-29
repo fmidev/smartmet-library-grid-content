@@ -1,8 +1,10 @@
 #include "ServiceImplementation.h"
 #include "VirtualContentFactory_type1.h"
+#include "VirtualMessage.h"
 #include "functions/Function_valueAdd.h"
 #include "functions/Function_valueMultiply.h"
 #include "functions/Function_sequence.h"
+#include "functions/Function_hypotenuse.h"
 
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/ShowFunction.h>
@@ -57,6 +59,7 @@ ServiceImplementation::ServiceImplementation()
     mContentRegistrationEnabled = false;
     mVirtualContentEnabled = true;
     mContentServerStartTime = 0;
+    mLastVirtualFileRegistration = 0;
   }
   catch (...)
   {
@@ -118,6 +121,8 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,std:
     k2f->addFunction(new Functions::Function_valueAdd(32.0));
 
     mFunctionCollection.addFunction("K2F",k2f);
+
+    mFunctionCollection.addFunction("HYPOTENUSE",new Functions::Function_hypotenuse());
 
     checkServerRegistration();
     // fullUpdate();
@@ -222,27 +227,7 @@ int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,T::Valu
       T::ValueRecord *rec = valueRecordList.getValueRecordByIndex(t);
       if (rec != NULL)
       {
-        //rec->print(std::cout,0,0);
         GRID::GridFile_sptr gridFile = getGridFile(rec->mFileId);
-#if 0
-        GRID::GridFile_sptr gridFile = mGridFileManager.getFileById(rec->mFileId);
-        if (!gridFile)
-        {
-          // If the grid file is not found from the grid storage but it is registered
-          // to the contentServer then we should try to add it to the grid storage.
-
-          T::FileInfo fileInfo;
-          if (mContentServer->getFileInfoById(sessionId,rec->mFileId,fileInfo) == 0)
-          {
-            if (getFileSize(fileInfo.mName.c_str()) > 0)
-            {
-              T::ContentInfoList contentInfoList;
-              addFile(fileInfo,contentInfoList);
-              gridFile = mGridFileManager.getFileById(rec->mFileId);
-            }
-          }
-        }
-#endif
         if (gridFile)
         {
           GRID::Message *message = gridFile->getMessageByIndex(rec->mMessageIndex);
@@ -307,25 +292,6 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileI
   try
   {
     GRID::GridFile_sptr gridFile = getGridFile(fileId);
-#if 0
-    GRID::GridFile_sptr gridFile = mGridFileManager.getFileById(fileId);
-    if (!gridFile)
-    {
-      // If the grid file is not found from the grid storage but it is registered
-      // to the contentServer then we should try to add it to the grid storage.
-
-      T::FileInfo fileInfo;
-      if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
-      {
-        if (getFileSize(fileInfo.mName.c_str()) > 0)
-        {
-          T::ContentInfoList contentInfoList;
-          addFile(fileInfo,contentInfoList);
-          gridFile = mGridFileManager.getFileById(fileId);
-        }
-      }
-    }
-#endif
     if (!gridFile)
       return Result::FILE_NOT_FOUND;
 
@@ -380,25 +346,6 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
   try
   {
     GRID::GridFile_sptr gridFile = getGridFile(fileId);
-#if 0
-    GRID::GridFile_sptr gridFile = mGridFileManager.getFileById(fileId);
-    if (!gridFile)
-    {
-      // If the grid file is not found from the grid storage but it is registered
-      // to the contentServer then we should try to add it to the grid storage.
-
-      T::FileInfo fileInfo;
-      if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
-      {
-        if (getFileSize(fileInfo.mName.c_str()) > 0)
-        {
-          T::ContentInfoList contentInfoList;
-          addFile(fileInfo,contentInfoList);
-          gridFile = mGridFileManager.getFileById(fileId);
-        }
-      }
-    }
-#endif
     if (!gridFile)
       return Result::DATA_NOT_FOUND;
 
@@ -463,28 +410,6 @@ int ServiceImplementation::_getGridAttributeList(T::SessionId sessionId,uint fil
   try
   {
     GRID::GridFile_sptr gridFile = getGridFile(fileId);
-#if 0
-    printf("_getGridAttributeList %u\n",fileId);
-    GRID::GridFile_sptr gridFile = mGridFileManager.getFileById(fileId);
-    if (!gridFile)
-    {
-      printf("_getGridAttributeList - not in GridFileManager %u\n",fileId);
-
-      // If the grid file is not found from the grid storage but it is registered
-      // to the contentServer then we should try to add it to the grid storage.
-
-      T::FileInfo fileInfo;
-      if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
-      {
-        if (getFileSize(fileInfo.mName.c_str()) > 0)
-        {
-          T::ContentInfoList contentInfoList;
-          addFile(fileInfo,contentInfoList);
-          gridFile = mGridFileManager.getFileById(fileId);
-        }
-      }
-    }
-#endif
     if (!gridFile)
       return Result::DATA_NOT_FOUND;
 
@@ -514,25 +439,6 @@ int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint file
     try
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-  #if 0
-      GRID::GridFile_sptr gridFile = mGridFileManager.getFileById(fileId);
-      if (!gridFile)
-      {
-        // If the grid file is not found from the grid storage but it is registered
-        // to the contentServer then we should try to add it to the grid storage.
-
-        T::FileInfo fileInfo;
-        if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
-        {
-          if (getFileSize(fileInfo.mName.c_str()) > 0)
-          {
-            T::ContentInfoList contentInfoList;
-            addFile(fileInfo,contentInfoList);
-            gridFile = mGridFileManager.getFileById(fileId);
-          }
-        }
-      }
-#endif
       if (gridFile == NULL)
       {
         //printf("FILE NOT FOUND %u\n",fileId);
@@ -577,25 +483,6 @@ int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,uint fileI
     try
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-  #if 0
-      GRID::GridFile_sptr gridFile = mGridFileManager.getFileById(fileId);
-      if (!gridFile)
-      {
-        // If the grid file is not found from the grid storage but it is registered
-        // to the contentServer then we should try to add it to the grid storage.
-
-        T::FileInfo fileInfo;
-        if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
-        {
-          if (getFileSize(fileInfo.mName.c_str()) > 0)
-          {
-            T::ContentInfoList contentInfoList;
-            addFile(fileInfo,contentInfoList);
-            gridFile = mGridFileManager.getFileById(fileId);
-          }
-        }
-      }
-#endif
       if (gridFile == NULL)
         return Result::FILE_NOT_FOUND;
 
@@ -633,25 +520,6 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint
     try
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-  #if 0
-      GRID::GridFile_sptr gridFile = mGridFileManager.getFileById(fileId);
-      if (!gridFile)
-      {
-        // If the grid file is not found from the grid storage but it is registered
-        // to the contentServer then we should try to add it to the grid storage.
-
-        T::FileInfo fileInfo;
-        if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
-        {
-          if (getFileSize(fileInfo.mName.c_str()) > 0)
-          {
-            T::ContentInfoList contentInfoList;
-            addFile(fileInfo,contentInfoList);
-            gridFile = mGridFileManager.getFileById(fileId);
-          }
-        }
-      }
-#endif
       if (gridFile == NULL)
       {
         //printf("FILE NOT FOUND %u\n",fileId);
@@ -695,25 +563,6 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
     try
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-  #if 0
-      GRID::GridFile_sptr gridFile = mGridFileManager.getFileById(fileId);
-      if (!gridFile)
-      {
-        // If the grid file is not found from the grid storage but it is registered
-        // to the contentServer then we should try to add it to the grid storage.
-
-        T::FileInfo fileInfo;
-        if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
-        {
-          if (getFileSize(fileInfo.mName.c_str()) > 0)
-          {
-            T::ContentInfoList contentInfoList;
-            addFile(fileInfo,contentInfoList);
-            gridFile = mGridFileManager.getFileById(fileId);
-          }
-        }
-      }
-#endif
       if (gridFile == NULL)
         return Result::FILE_NOT_FOUND;
 
@@ -785,28 +634,6 @@ int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,u
     try
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-  #if 0
-      printf("getGridValueListByPointList %u\n",fileId);
-      GRID::GridFile_sptr gridFile = mGridFileManager.getFileById(fileId);
-      if (!gridFile)
-      {
-        printf("getGridValueListByPointList - not in GridFileManager %u\n",fileId);
-
-        // If the grid file is not found from the grid storage but it is registered
-        // to the contentServer then we should try to add it to the grid storage.
-
-        T::FileInfo fileInfo;
-        if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
-        {
-          if (getFileSize(fileInfo.mName.c_str()) > 0)
-          {
-            T::ContentInfoList contentInfoList;
-            addFile(fileInfo,contentInfoList);
-            gridFile = mGridFileManager.getFileById(fileId);
-          }
-        }
-      }
-#endif
       if (gridFile == NULL)
       {
         //printf("FILE NOT FOUND %u\n",fileId);
@@ -850,25 +677,6 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
     try
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-  #if 0
-      GRID::GridFile_sptr gridFile = mGridFileManager.getFileById(fileId);
-      if (!gridFile)
-      {
-        // If the grid file is not found from the grid storage but it is registered
-        // to the contentServer then we should try to add it to the grid storage.
-
-        T::FileInfo fileInfo;
-        if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
-        {
-          if (getFileSize(fileInfo.mName.c_str()) > 0)
-          {
-            T::ContentInfoList contentInfoList;
-            addFile(fileInfo,contentInfoList);
-            gridFile = mGridFileManager.getFileById(fileId);
-          }
-        }
-      }
-#endif
       if (gridFile == NULL)
       {
         //printf("FILE NOT FOUND %u\n",fileId);
@@ -912,25 +720,6 @@ int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId
     try
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-  #if 0
-      GRID::GridFile_sptr gridFile = mGridFileManager.getFileById(fileId);
-      if (!gridFile)
-      {
-        // If the grid file is not found from the grid storage but it is registered
-        // to the contentServer then we should try to add it to the grid storage.
-
-        T::FileInfo fileInfo;
-        if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
-        {
-          if (getFileSize(fileInfo.mName.c_str()) > 0)
-          {
-            T::ContentInfoList contentInfoList;
-            addFile(fileInfo,contentInfoList);
-            gridFile = mGridFileManager.getFileById(fileId);
-          }
-        }
-      }
-#endif
       if (gridFile == NULL)
       {
         //printf("FILE NOT FOUND %u\n",fileId);
@@ -974,25 +763,6 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,u
     try
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-  #if 0
-      GRID::GridFile_sptr gridFile = mGridFileManager.getFileById(fileId);
-      if (!gridFile)
-      {
-        // If the grid file is not found from the grid storage but it is registered
-        // to the contentServer then we should try to add it to the grid storage.
-
-        T::FileInfo fileInfo;
-        if (mContentServer->getFileInfoById(sessionId,fileId,fileInfo) == 0)
-        {
-          if (getFileSize(fileInfo.mName.c_str()) > 0)
-          {
-            T::ContentInfoList contentInfoList;
-            addFile(fileInfo,contentInfoList);
-            gridFile = mGridFileManager.getFileById(fileId);
-          }
-        }
-      }
-#endif
       if (gridFile == NULL)
       {
         //printf("FILE NOT FOUND %u\n",fileId);
@@ -1017,17 +787,6 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,u
        exception.printError();
        return Result::UNEXPECTED_EXCEPTION;
     }
-
-#if 0
-
-    std::vector<T::Coordinate> polygonPoints;
-    polygonPoints.push_back(T::Coordinate(x1,y1));
-    polygonPoints.push_back(T::Coordinate(x2,y1));
-    polygonPoints.push_back(T::Coordinate(x2,y2));
-    polygonPoints.push_back(T::Coordinate(x1,y2));
-
-    return getGridValueListByPolygon(sessionId,fileId,messageIndex,coordinateType,polygonPoints,valueList);
-#endif
   }
   catch (...)
   {
@@ -1039,7 +798,7 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,u
 
 
 
-void ServiceImplementation::readContentList(T::ContentInfoList& contentList)
+void ServiceImplementation::readContentList(T::ContentInfoList& contentList,bool includePhysicalContent,bool includeVirtualContent)
 {
   FUNCTION_TRACE
   try
@@ -1067,14 +826,22 @@ void ServiceImplementation::readContentList(T::ContentInfoList& contentList)
         startFileId = contentInfo->mFileId;
         startMessageIndex = contentInfo->mMessageIndex + 1;
 
-        contentList.addContentInfo(contentInfo->duplicate());
+        if (includePhysicalContent && contentInfo->mFileType != T::FileType::Virtual)
+          contentList.addContentInfo(contentInfo->duplicate());
+        else
+        if (includeVirtualContent && contentInfo->mFileType == T::FileType::Virtual)
+          contentList.addContentInfo(contentInfo->duplicate());
 
         counter++;
         if ((counter % 10000) == 0)
-          printf("Read Content : %u\n",counter);
+        {
+          printf("* Caching content information : %u\r",counter);
+          fflush(stdout);
+        }
       }
     }
-    printf("Read Content end : %u\n",counter);
+    printf("* Caching content information : %u\n",counter);
+    fflush(stdout);
   }
   catch (...)
   {
@@ -1085,7 +852,8 @@ void ServiceImplementation::readContentList(T::ContentInfoList& contentList)
 
 
 
-void ServiceImplementation::updateVirtualFiles()
+
+void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFileMap)
 {
   FUNCTION_TRACE
   try
@@ -1093,17 +861,140 @@ void ServiceImplementation::updateVirtualFiles()
     if (!mVirtualContentEnabled)
       return;
 
-    printf("****************** UPDATE VIRTUAL FILES *********************\n");
+    std::vector<T::FileAndContent> fileAndContentList;
 
-    // If we are not using the content server cache implementation then it is faster
-    // to cache all content before processing.
-
-    T::ContentInfoList fullContentList;
-    if (mContentServer->getImplementationType() != ContentServer::Implementation::Cache)
+    uint c = 0;
+    for (auto it = gridFileMap.begin(); it != gridFileMap.end(); ++it)
     {
-      readContentList(fullContentList);
-      fullContentList.sort(T::ContentInfo::ComparisonMethod::file_message);
+      if (mShutdownRequested)
+        return;
+
+      auto virtualFilePtr = it->second;
+      if (virtualFilePtr->getFileId() == 0)
+      {
+        T::FileAndContent fc;
+        fc.mFileInfo.mName = virtualFilePtr->getFileName();
+        fc.mFileInfo.mProducerId = virtualFilePtr->getProducerId();
+        fc.mFileInfo.mGenerationId = virtualFilePtr->getGenerationId();
+        fc.mFileInfo.mSourceId = virtualFilePtr->getSourceId();
+        fc.mFileInfo.mFileType = T::FileType::Virtual;
+        fc.mFileInfo.mFlags = fc.mFileInfo.mFlags | (uint)T::FileInfoFlags::CONTENT_VIRTUAL;
+
+        std::size_t len = virtualFilePtr->getNumberOfMessages();
+        for (std::size_t t = 0; t<len; t++)
+        {
+          GRID::VirtualMessage *msg = (GRID::VirtualMessage*)virtualFilePtr->getMessageByIndex(t);
+          T::ContentInfo *contentInfo = msg->getContentInfo();
+          fc.mContentInfoList.addContentInfo(contentInfo->duplicate());
+        }
+
+        fileAndContentList.push_back(fc);
+
+        if (fileAndContentList.size() > 50000)
+        {
+          mContentServer->addFileInfoListWithContent(mServerSessionId,fileAndContentList);
+
+          for (auto ff = fileAndContentList.begin(); ff != fileAndContentList.end(); ++ff)
+          {
+            if (mShutdownRequested)
+              return;
+
+            if (ff->mFileInfo.mFileId > 0)
+            {
+              auto tt = gridFileMap.find(ff->mFileInfo.mName);
+              if (tt != gridFileMap.end())
+              {
+                auto virtualFilePtr = tt->second;
+                virtualFilePtr->setFileId(ff->mFileInfo.mFileId);
+
+                std::size_t fLen = virtualFilePtr->getNumberOfPhysicalGridFiles();
+                for (uint f=0; f<fLen; f++)
+                {
+                  GRID::GridFile_sptr fFile = virtualFilePtr->getPhysicalGridFileByIndex(f);
+                  fFile->addUser(ff->mFileInfo.mFileId);
+                }
+
+                mGridFileManager.addFile(virtualFilePtr);
+              }
+            }
+          }
+          fileAndContentList.clear();
+        }
+      }
+      else
+      {
+        std::size_t fLen = virtualFilePtr->getNumberOfPhysicalGridFiles();
+        for (uint f=0; f<fLen; f++)
+        {
+          GRID::GridFile_sptr fFile = virtualFilePtr->getPhysicalGridFileByIndex(f);
+          fFile->addUser(virtualFilePtr->getFileId());
+        }
+
+        mGridFileManager.addFile(virtualFilePtr);
+      }
+
+      c++;
+      if ((c % 10000) == 0)
+      {
+        printf("* Registering virtual files : %u\r",c);
+        fflush(stdout);
+      }
     }
+
+    if (fileAndContentList.size() > 0)
+    {
+      mContentServer->addFileInfoListWithContent(mServerSessionId,fileAndContentList);
+
+      for (auto ff = fileAndContentList.begin(); ff != fileAndContentList.end(); ++ff)
+      {
+        if (mShutdownRequested)
+          return;
+
+        if (ff->mFileInfo.mFileId > 0)
+        {
+          auto tt = gridFileMap.find(ff->mFileInfo.mName);
+          if (tt != gridFileMap.end())
+          {
+            auto virtualFilePtr = tt->second;
+            virtualFilePtr->setFileId(ff->mFileInfo.mFileId);
+
+            std::size_t fLen = virtualFilePtr->getNumberOfPhysicalGridFiles();
+            for (uint f=0; f<fLen; f++)
+            {
+              GRID::GridFile_sptr fFile = virtualFilePtr->getPhysicalGridFileByIndex(f);
+              fFile->addUser(ff->mFileInfo.mFileId);
+            }
+
+            mGridFileManager.addFile(virtualFilePtr);
+          }
+        }
+      }
+
+      fileAndContentList.clear();
+    }
+
+    printf("* Registering virtual files : %u\n",c);
+    fflush(stdout);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mVirtualContentEnabled)
+      return;
+
+    VirtualGridFilePtr_map gridFileMap;
 
     uint counter = 0;
     uint startFileId = 0;
@@ -1135,15 +1026,18 @@ void ServiceImplementation::updateVirtualFiles()
             startFileId = fileInfo->mFileId + 1;
 
           T::ContentInfoList contentInfoList;
-          if (mContentServer->getImplementationType() != ContentServer::Implementation::Cache)
+          if (mContentServer->getImplementationType() != ContentServer::Implementation::Cache || fullContentList.getLength() > 0)
             fullContentList.getContentInfoListByFileId(fileInfo->mFileId,contentInfoList);
           else
             mContentServer->getContentListByFileId(mServerSessionId,fileInfo->mFileId,contentInfoList);
 
-          mVirtualContentManager.addFile(*fileInfo,contentInfoList);
+          mVirtualContentManager.addFile(*fileInfo,contentInfoList,gridFileMap);
           counter++;
           if ((counter % 10000) == 0)
-            printf("Update virtual files : %u\n",counter);
+          {
+            printf("* Creating virtual files : %u\r",(uint)gridFileMap.size());
+            fflush(stdout);
+          }
         }
         catch (...)
         {
@@ -1152,7 +1046,10 @@ void ServiceImplementation::updateVirtualFiles()
         }
       }
     }
-    printf("** UPDATE VIRTUAL FILES  END (%u) **\n",counter);
+    printf("* Creating virtual files : %u\n",(uint)gridFileMap.size());
+    fflush(stdout);
+
+    registerVirtualFiles(gridFileMap);
   }
   catch (...)
   {
@@ -1260,12 +1157,12 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
         //mContentServer->getContentListByFileId(mServerSessionId,fileInfo.mFileId,tmpContentList);
         //fullContentList->getContentListByFileId(fileInfo.mFileId,tmpContentList);
         if (mVirtualContentEnabled)
-          mVirtualContentManager.addFile(fileInfo,currentContentList);
+          mVirtualContentManager.addFile(fileInfo,currentContentList,mGridFileMap);
       }
       else
       {
         if (mVirtualContentEnabled)
-          mVirtualContentManager.addFile(fileInfo,contentList);
+          mVirtualContentManager.addFile(fileInfo,contentList,mGridFileMap);
       }
 
     }
@@ -1316,7 +1213,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
         contentInfoList.addContentInfo(contentInfo);
       }
       if (mVirtualContentEnabled)
-        mVirtualContentManager.addFile(fileInfo,contentList);
+        mVirtualContentManager.addFile(fileInfo,contentList,mGridFileMap);
     }
   }
   catch (...)
@@ -1343,11 +1240,14 @@ void ServiceImplementation::fullUpdate()
     // to cache all content before processing.
 
     T::ContentInfoList fullContentList;
-    if (mContentServer->getImplementationType() != ContentServer::Implementation::Cache)
+    //if (mContentServer->getImplementationType() != ContentServer::Implementation::Cache)
     {
-      readContentList(fullContentList);
+      readContentList(fullContentList,true,true);
       fullContentList.sort(T::ContentInfo::ComparisonMethod::file_message);
     }
+
+    bool vContentEnabled = mVirtualContentEnabled;
+    mVirtualContentEnabled = false;
 
     T::EventInfo eventInfo;
 
@@ -1395,7 +1295,7 @@ void ServiceImplementation::fullUpdate()
             startFileId = fileInfo->mFileId + 1;
 
           T::ContentInfoList currentContentList;
-          if (mContentServer->getImplementationType() != ContentServer::Implementation::Cache)
+          if (mContentServer->getImplementationType() != ContentServer::Implementation::Cache || fullContentList.getLength() > 0)
             fullContentList.getContentInfoListByFileId(fileInfo->mFileId,currentContentList);
           else
             mContentServer->getContentListByFileId(mServerSessionId,fileInfo->mFileId,currentContentList);
@@ -1409,7 +1309,10 @@ void ServiceImplementation::fullUpdate()
 
           counter++;
           if ((counter % 10000) == 0)
-            printf("Add files : %u\n",counter);
+          {
+            printf("* Adding grid files : %u\r",counter);
+            fflush(stdout);
+          }
         }
         catch (...)
         {
@@ -1425,9 +1328,15 @@ void ServiceImplementation::fullUpdate()
       }
     }
 
-    printf("Add files end : %u\n",counter);
+    printf("* Adding grid files : %u\n",counter);
+    fflush(stdout);
 
+    mVirtualContentEnabled  = vContentEnabled;
     mGridFileManager.deleteFilesByCheckTime(checkTime);
+    mGridFileManager.deleteVirtualFiles();
+
+    updateVirtualFiles(fullContentList);
+
     mFullUpdateRequired = false;
   }
   catch (...)
@@ -1636,7 +1545,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo)
     int result = mContentServer->getFileInfoById(mServerSessionId,eventInfo.mId1,fileInfo);
     if (result != 0)
     {
-      printf("ERROR: getFileInfoById : %d\n",result);
+      printf("ERROR: getFileInfoById (%u): %d\n",eventInfo.mId1,result);
       return;
     }
 
@@ -1675,6 +1584,9 @@ void ServiceImplementation::event_fileDeleted(T::EventInfo& eventInfo)
   {
     //printf("EVENT[%llu]: filedDeleted(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
+    if ((T::FileType)eventInfo.mId2 == T::FileType::Virtual)
+      return; // The deleted file was virtual. No need to react.
+
     mGridFileManager.deleteFileById(eventInfo.mId1);
   }
   catch (...)
@@ -1693,6 +1605,9 @@ void ServiceImplementation::event_fileUpdated(T::EventInfo& eventInfo)
   try
   {
     //printf("EVENT[%llu]: filedUpdated(%u)\n",eventInfo.mEventId,eventInfo.mId1);
+
+    if ((T::FileType)eventInfo.mId2 == T::FileType::Virtual)
+      return; // The updated file was virtual. No need to react.
 
     GRID::GridFile_sptr storageFile = mGridFileManager.getFileByIdNoMapping(eventInfo.mId1);
     if (storageFile)
@@ -1717,7 +1632,7 @@ void ServiceImplementation::event_fileUpdated(T::EventInfo& eventInfo)
     int result = mContentServer->getFileInfoById(mServerSessionId,eventInfo.mId1,fileInfo);
     if (result != 0)
     {
-      printf("ERROR: getFileInfoById : %d\n",result);
+      printf("ERROR: getFileInfoById (%u): %d\n",eventInfo.mId1,result);
       return;
     }
 
@@ -2033,7 +1948,19 @@ void ServiceImplementation::event_updateVirtualContent(T::EventInfo& eventInfo)
   try
   {
     mGridFileManager.deleteVirtualFiles();
-    updateVirtualFiles();
+    sleep(5);
+
+    // If we are not using the content server cache implementation then it is faster
+    // to cache all content before processing.
+
+    T::ContentInfoList fullContentList;
+    if (mContentServer->getImplementationType() != ContentServer::Implementation::Cache)
+    {
+      readContentList(fullContentList,true,false);
+      fullContentList.sort(T::ContentInfo::ComparisonMethod::file_message);
+    }
+
+    updateVirtualFiles(fullContentList);
   }
   catch (...)
   {
@@ -2050,6 +1977,13 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
+    if (mGridFileMap.size() > 1000  ||  (mGridFileMap.size() > 0  &&  (mLastVirtualFileRegistration + 30) < time(0)))
+    {
+      registerVirtualFiles(mGridFileMap);
+      mLastVirtualFileRegistration = time(0);
+      mGridFileMap.clear();
+    }
+
     switch (eventInfo.mType)
     {
       case ContentServer::EventType::UNKNOWN:
@@ -2253,6 +2187,9 @@ void ServiceImplementation::processEvents()
   FUNCTION_TRACE
   try
   {
+    if (mShutdownRequested)
+      return;
+
     checkServerRegistration();
     mLuaFileCollection.checkUpdates(false);
 

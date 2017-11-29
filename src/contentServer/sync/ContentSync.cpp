@@ -774,6 +774,8 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
       }
     }
 
+    std::vector<T::FileAndContent> fileAndContentList;
+
     len = mSourceFileList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -799,25 +801,37 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
             T::GenerationInfo *targetGeneration = mTargetGenerationList.getGenerationInfoByName(sourceGeneration->mName);
             if (targetGeneration != NULL)
             {
-              T::FileInfo fileInfo(*sourceFile);
-              fileInfo.mProducerId = targetGeneration->mProducerId;
-              fileInfo.mGenerationId = targetGeneration->mGenerationId;
-              fileInfo.mSourceId = mTargetId;
-              fileInfo.mFileId = 0;
+              T::FileAndContent fc;
 
-              T::ContentInfoList contentInfoList;
-              mSourceContentList.getContentInfoListByFileId(sourceFile->mFileId,contentInfoList);
-              uint cLen = contentInfoList.getLength();
+              fc.mFileInfo = *sourceFile;
+              fc.mFileInfo.mProducerId = targetGeneration->mProducerId;
+              fc.mFileInfo.mGenerationId = targetGeneration->mGenerationId;
+              fc.mFileInfo.mSourceId = mTargetId;
+              fc.mFileInfo.mFileId = 0;
+
+              mSourceContentList.getContentInfoListByFileId(sourceFile->mFileId,fc.mContentInfoList);
+              uint cLen = fc.mContentInfoList.getLength();
               for (uint c=0; c<cLen; c++)
               {
-                T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(c);
+                T::ContentInfo *contentInfo = fc.mContentInfoList.getContentInfoByIndex(c);
                 contentInfo->mProducerId = targetGeneration->mProducerId;
                 contentInfo->mGenerationId = targetGeneration->mGenerationId;
                 contentInfo->mSourceId = mTargetId;
                 contentInfo->mFileId = 0;
               }
 
-              printf("- Add file %s\n",fileInfo.mName.c_str());
+              //printf("- Add file %s\n",fileInfo.mName.c_str());
+
+
+              fileAndContentList.push_back(fc);
+
+              if (fileAndContentList.size() > 50000)
+              {
+                targetInterface->addFileInfoListWithContent(mSessionId,fileAndContentList);
+                fileAndContentList.clear();
+              }
+
+              /*
               int result = targetInterface->addFileInfoWithContentList(mSessionId,fileInfo,contentInfoList);
               //result = targetInterface->addFileInfo(sessionId,fileInfo);
               if (result != 0)
@@ -827,6 +841,7 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
                 exception.addParameter("Result",getResultString(result));
                 throw exception;
               }
+              */
             }
           }
         }
@@ -838,6 +853,12 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
           }
         }
       }
+    }
+
+    if (fileAndContentList.size() > 0)
+    {
+      targetInterface->addFileInfoListWithContent(mSessionId,fileAndContentList);
+      fileAndContentList.clear();
     }
   }
   catch (...)

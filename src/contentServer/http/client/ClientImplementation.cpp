@@ -1410,6 +1410,71 @@ int ClientImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
 
 
 
+int ClientImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std::vector<T::FileAndContent>& fileAndContentList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    uint length = (uint)fileAndContentList.size();
+
+    request.addLine("method","_addFileInfoListWithContent");
+    request.addLine("sessionId",sessionId);
+    request.addLine("length",length);
+
+    char tmp[100];
+    for (uint f=0; f<length; f++)
+    {
+      sprintf(tmp,"fileInfo.%u",f);
+      request.addLine(tmp,fileAndContentList[f].mFileInfo.getCsv());
+
+      sprintf(tmp,"contentInfo.%u",f);
+
+      uint len = fileAndContentList[f].mContentInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::ContentInfo *info = fileAndContentList[f].mContentInfoList.getContentInfoByIndex(t);
+        request.addLine(tmp,info->getCsv());
+      }
+    }
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      char tmp[100];
+      for (uint f=0; f<length; f++)
+      {
+        sprintf(tmp,"fileInfo.%u",f);
+        fileAndContentList[f].mFileInfo.setCsv(response.getLineByKey(tmp));
+
+        sprintf(tmp,"contentInfo.%u",f);
+        string_vec lines;
+        uint len = response.getLinesByKey(tmp,lines);
+        for (uint t=0; t<len; t++)
+        {
+          T::ContentInfo *info = fileAndContentList[f].mContentInfoList.getContentInfoByIndex(t);
+          if (info!= NULL)
+            info->setCsv(lines[t]);
+        }
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
 {
   try

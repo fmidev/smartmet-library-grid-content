@@ -23,12 +23,14 @@ class FileInfoList
      void       operator=(FileInfoList& fileInfoList);
 
      void       addFileInfo(FileInfo *fileInfo);
+     void       addFileInfoList(FileInfoList& fileInfoList);
      void       clear();
      bool       deleteFileInfoById(uint fileId);
      uint       deleteFileInfoByGroupFlags(uint groupFlags);
      uint       deleteFileInfoByProducerId(uint producerId);
      uint       deleteFileInfoByGenerationId(uint generationId);
      bool       deleteFileInfoByIndex(uint index);
+     bool       deleteFileInfoByName(std::string filename);
      uint       deleteFileInfoBySourceId(uint sourceId);
      uint       deleteFileInfoByFileIdList(std::set<uint>& fileIdList);
      uint       deleteVirtualFiles();

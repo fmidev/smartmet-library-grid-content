@@ -19,9 +19,11 @@ class ContentInfoList
   public:
                       ContentInfoList();
                       ContentInfoList(ContentInfoList& contentInfoList);
+                      ContentInfoList(const ContentInfoList& contentInfoList);
      virtual          ~ContentInfoList();
 
      void             operator=(ContentInfoList& contentInfoList);
+     void             operator=(const ContentInfoList& contentInfoList);
 
      void             addContentInfo(ContentInfo *contentInfo);
      void             addContentInfoList(ContentInfoList& contentInfoList);
@@ -30,6 +32,7 @@ class ContentInfoList
 
      bool             containsSameForecastTimes();
 
+     uint             deleteContentInfo(ContentInfo& _contentInfo);
      uint             deleteContentInfoByFileId(uint fileId);
      uint             deleteContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex);
      uint             deleteContentInfoByGroupFlags(uint groupFlags);
@@ -55,11 +58,13 @@ class ContentInfoList
      uint             unregisterContentInfoByServerId(uint serverId);
      uint             unregisterContentInfoByServerAndFileId(uint serverId,uint fileId);
 
-     ContentInfo*     getContentInfoByIndex(uint index);
+     ContentInfo*     getContentInfoByIndex(uint index) const;
      ContentInfo*     getContentInfoByIndexNoCheck(uint index);
      ContentInfo*     getContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex);
      bool             getContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex,ContentInfo& contentInfo);
      ContentInfo*     getContentInfoByParameterLevelInfo(T::ParameterLevelInfo& levelInfo);
+     ContentInfo*     getContentInfoByFmiParameterNameAndGenerationId(uint generationId,std::string fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string forecastTime);
+
      void             getContentInfoListByParameterLevelInfo(T::ParameterLevelInfo& levelInfo,ContentInfoList& contentInfoList);
      void             getContentInfoList(uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
      void             getContentInfoListByGeometryId(T::GeometryId geometryId,ContentInfoList& contentInfoList);
@@ -100,6 +105,7 @@ class ContentInfoList
      void             getContentInfoListByServerId(uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
      void             getContentInfoListByServerAndFileId(uint serverId,uint fileId,ContentInfoList& contentInfoList);
      int              getClosestIndex(ContentInfo::ComparisonMethod comparisonMethod,ContentInfo& contentInfo);
+     int              getClosestIndexNoLock(ContentInfo::ComparisonMethod comparisonMethod,ContentInfo& contentInfo);
      void             getContentInfoListBySourceId(uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
 
      void             getContentGeometryIdList(std::set<T::GeometryId>& geometryIdList);
@@ -114,8 +120,8 @@ class ContentInfoList
      void             getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId,std::vector<T::ParamLevel>& paramLevelList);
      void             getParamLevelInfoListByFmiParameterId(T::ParamId fmiParameterId,ParameterLevelInfoList& parameterLevelInfoList);
 
-     uint             getLength();
-     uint             getSize();
+     uint             getLength()const;
+     uint             getSize() const;
      bool             getReleaseObjects();
      void             print(std::ostream& stream,uint level,uint optionFlags);
      void             lock();
@@ -130,7 +136,6 @@ class ContentInfoList
 
   protected:
 
-     int              getClosestIndexNoLock(ContentInfo::ComparisonMethod comparisonMethod,ContentInfo& contentInfo);
      void             increaseSize(uint newSize);
 
      ContentInfoPtr   *mArray;

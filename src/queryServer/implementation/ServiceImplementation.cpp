@@ -600,6 +600,7 @@ void ServiceImplementation::getGridValues(
 {
   try
   {
+    printf("#### getGridValues(%s,%d,%d)\n",parameterKey.c_str(),(int)paramLevelId,(int)paramLevel);
     if (coordinates.size() == 0)
     {
       SmartMet::Spine::Exception exception(BCP, "No coordinates defined!");
@@ -1454,9 +1455,11 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
         if (generationFlags == 0)
           generationFlags = query.mGenerationFlags;
 
-        //qParam->print(std::cout,0,0);
+        qParam->print(std::cout,0,0);
 
         getParameterStringInfo(qParam->mParam,paramName,paramLevelId,paramLevel,forecastType,forecastNumber,producerId,generationFlags);
+
+        printf("**** PARAM %s  => %d %d\n",qParam->mParam.c_str(),(int)paramLevelId,(int)paramLevel);
 
         if (paramName.substr(0,1) == "$")
           paramName = paramName.substr(1);

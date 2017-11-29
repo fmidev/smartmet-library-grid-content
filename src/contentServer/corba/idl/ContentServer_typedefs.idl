@@ -98,6 +98,17 @@ typedef sequence<CorbaFileInfo> CorbaFileInfoList;
 
 
 
+struct CorbaFileContent
+{
+  CorbaFileInfo        fileInfo;
+  CorbaContentInfoList contentInfoList;
+};
+
+typedef sequence<CorbaFileContent> CorbaFileContentList;
+
+
+
+
 struct CorbaEventInfo
 {
   unsigned long long eventId;

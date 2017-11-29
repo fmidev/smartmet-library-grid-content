@@ -991,6 +991,28 @@ int ServiceInterface::addFileInfoWithContentList(T::SessionId sessionId,T::FileI
 
 
 
+int ServiceInterface::addFileInfoListWithContent(T::SessionId sessionId,std::vector<T::FileAndContent>& fileAndContentList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _addFileInfoListWithContent(sessionId,fileAndContentList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,FileAndContent[%u]);result %d;time %f;",__FUNCTION__,sessionId,(uint)fileAndContentList.size(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::deleteFileInfoById(T::SessionId sessionId,uint fileId)
 {
   FUNCTION_TRACE
@@ -2894,6 +2916,15 @@ int ServiceInterface::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 
 
 int ServiceInterface::_addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
+
+
+
+
+int ServiceInterface::_addFileInfoListWithContent(T::SessionId sessionId,std::vector<T::FileAndContent>& fileAndContentList)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }

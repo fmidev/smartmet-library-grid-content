@@ -2605,6 +2605,97 @@ void ServerInterface::addFileInfoWithContentList(T::RequestMessage& request,T::R
 
 
 
+void ServerInterface::addFileInfoListWithContent(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint length = 0;
+    if (!request.getLineByKey("length",length))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: length");
+      return;
+    }
+
+    char msg[200];
+    char tmp[200];
+
+    std::vector<T::FileAndContent> fileAndContentList;
+
+    for (uint f=0; f<length; f++)
+    {
+      T::FileAndContent fc;
+
+      sprintf(tmp,"fileInfo.%u",f);
+      std::string csv;
+      if (!request.getLineByKey(tmp,csv))
+      {
+        response.addLine("result",(int)Result::MISSING_PARAMETER);
+        sprintf(msg,"Missing parameter: %s",tmp);
+        response.addLine("resultString",msg);
+        return;
+      }
+
+      fc.mFileInfo.setCsv(csv.c_str());
+
+      sprintf(tmp,"contentInfo.%u",f);
+
+      string_vec csvLines;
+      request.getLinesByKey(tmp,csvLines);
+
+      uint len = (uint)csvLines.size();
+      for (uint t=0; t<len; t++)
+      {
+        T::ContentInfo *info = new T::ContentInfo(csvLines[t].c_str());
+        fc.mContentInfoList.addContentInfo(info);
+      }
+
+      fileAndContentList.push_back(fc);
+    }
+
+    int result = mService->addFileInfoListWithContent(sessionId,fileAndContentList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      response.addLine("length",length);
+      for (uint f=0; f<length; f++)
+      {
+        sprintf(tmp,"fileInfo.%u",f);
+        response.addLine(tmp,fileAndContentList[f].mFileInfo.getCsv());
+
+        sprintf(tmp,"contentInfo.%u",f);
+
+        uint len = fileAndContentList[f].mContentInfoList.getLength();
+        for (uint t=0; t<len; t++)
+        {
+          T::ContentInfo *info = fileAndContentList[f].mContentInfoList.getContentInfoByIndex(t);
+          response.addLine(tmp,info->getCsv());
+        }
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
 void ServerInterface::deleteFileInfoById(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
