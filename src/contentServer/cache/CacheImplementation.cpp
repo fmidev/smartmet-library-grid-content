@@ -958,7 +958,7 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    std::set<std::string> tmpList;
+    //std::set<std::string> tmpList;
 
     uint pLen = mProducerInfoList.getLength();
     for (uint p=0; p<pLen; p++)
@@ -1010,7 +1010,7 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
           if (paramKey.length() > 0)
           {
             char tmp[200];
-            sprintf(tmp,"%s;%s;%d;%s;%d;%d;%05d;%d",
+            sprintf(tmp,"%s;%s;%d;%s;%d;%d;%05d;%d;D",
                 producerInfo->mName.c_str(),
                 paramKey.c_str(),
                 (int)T::ParamKeyType::FMI_NAME,
@@ -1020,13 +1020,13 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
                 (int)contentInfo->mParameterLevel,
                 (int)T::InterpolationMethod::Linear);
 
-            if (tmpList.find(std::string(tmp)) == tmpList.end())
-              tmpList.insert(std::string(tmp));
+            if (list.find(std::string(tmp)) == list.end())
+              list.insert(std::string(tmp));
           }
         }
       }
     }
-
+/*
     std::string prevPrefix;
     for (auto it=tmpList.begin(); it != tmpList.end(); ++it)
     {
@@ -1047,7 +1047,7 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
         }
       }
     }
-
+*/
     return Result::OK;
   }
   catch (...)
@@ -3915,12 +3915,12 @@ void CacheImplementation::readFileList()
 
 
     uint startFileId = 0;
-    uint len = 10000;
-    while (len == 10000)
+    uint len = 50000;
+    while (len > 0)
     {
       T::FileInfoList fileInfoList;
 
-      int result = mContentStorage->getFileInfoList(mSessionId,startFileId,10000,fileInfoList);
+      int result = mContentStorage->getFileInfoList(mSessionId,startFileId,50000,fileInfoList);
       if (result != 0)
       {
         Spine::Exception exception(BCP,"Cannot read the file list from the content storage!");
@@ -3960,12 +3960,12 @@ void CacheImplementation::readContentList()
 
     uint startFileId = 0;
     uint startMessageIndex = 0;
-    uint len = 10000;
+    uint len = 50000;
     while (len > 0)
     {
       T::ContentInfoList contentInfoList;
 
-      int result = mContentStorage->getContentList(mSessionId,startFileId,startMessageIndex,10000,contentInfoList);
+      int result = mContentStorage->getContentList(mSessionId,startFileId,startMessageIndex,50000,contentInfoList);
       if (result != 0)
       {
         Spine::Exception exception(BCP,"Cannot read the content list from the content storage!");
@@ -4981,6 +4981,16 @@ void CacheImplementation::event_updateVirtualContent(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+    {
+      if (mContentInfoListEnabled[t])
+        mContentInfoList[t].deleteVirtualContent();
+    }
+
+    mFileInfoListByName.deleteVirtualFiles();
+    mFileInfoList.deleteVirtualFiles();
   }
   catch (...)
   {

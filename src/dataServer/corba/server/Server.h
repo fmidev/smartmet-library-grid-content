@@ -32,7 +32,7 @@ class Server
     PortableServer::POA_var         mRootPoa;
     PortableServer::POA_var         mPoa;
     PortableServer::POAManager_var  mPman;
-    ServerInterface            mCorbaInterface;
+    ServerInterface                 mCorbaInterface;
     DataServer::ServiceInterface*   mServiceInterface;
     std::string                     mServiceIor;
     pthread_t                       mThread;

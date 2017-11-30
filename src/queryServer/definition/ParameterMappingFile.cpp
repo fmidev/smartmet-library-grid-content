@@ -94,6 +94,70 @@ void ParameterMappingFile::checkUpdates()
 
 
 
+uint ParameterMappingFile::getNumberOfMappings()
+{
+  try
+  {
+    return (uint)mMappingVector.size();
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+ParameterMapping* ParameterMappingFile::getParameterMappingByIndex(uint index)
+{
+  try
+  {
+    if (index < mMappingVector.size())
+      return &mMappingVector[index];
+
+    return NULL;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
+{
+  try
+  {
+    for (auto it = mMappingVector.begin(); it != mMappingVector.end(); ++it)
+    {
+      if (it->mProducerName == mapping.mProducerName  &&
+        it->mParameterName == mapping.mParameterName  &&
+        it->mParameterKeyType == mapping.mParameterKeyType &&
+        it->mParameterKey == mapping.mParameterKey &&
+        it->mParameterLevelIdType == mapping.mParameterLevelIdType &&
+        it->mParameterLevelId == mapping.mParameterLevelId &&
+        it->mParameterLevel == mapping.mParameterLevel)
+      {
+        return &(*it);
+      }
+    }
+    return NULL;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
 void ParameterMappingFile::getMappings(std::string producerName,std::string parameterName,bool onlySearchEnabled,ParameterMapping_vec& mappings)
 {
   try

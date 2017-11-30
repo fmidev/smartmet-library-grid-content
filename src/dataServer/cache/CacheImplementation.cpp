@@ -172,6 +172,25 @@ int CacheImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint me
 
 
 
+int CacheImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    if (mDataServer == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    return mDataServer->getGridFileCount(sessionId,count);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::ParamValue& value)
 {
   try

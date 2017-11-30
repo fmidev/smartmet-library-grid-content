@@ -22,15 +22,14 @@ namespace DataServer
 
 struct CacheValueRec
 {
-  uint          fileId;
-  //uint          messageIndex;
-  //double        x;
-  //double        y;
-  T::ParamValue value;
-  time_t        lastAccessTime;
+  uint           fileId;
+  T::ParamValue  value;
+  time_t         lastAccessTime;
 };
 
 typedef CacheValueRec* CacheValueRec_ptr;
+typedef std::map<std::size_t,CacheValueRec_ptr> CacheValueList;
+
 
 
 class PointValueCache
@@ -54,8 +53,7 @@ class PointValueCache
 
     std::size_t       mMaxSize;
     ModificationLock  mModificationLock;
-
-    std::map<std::size_t,CacheValueRec_ptr> mValueList;
+    CacheValueList    mValueList;
 };
 
 

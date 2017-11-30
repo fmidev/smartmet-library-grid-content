@@ -146,6 +146,28 @@ int ServiceInterface::getGridAttributeList(T::SessionId sessionId,uint fileId,ui
 
 
 
+int ServiceInterface::getGridFileCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getGridFileCount(sessionId,count);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,count,result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::ParamValue& value)
 {
   FUNCTION_TRACE
@@ -370,6 +392,15 @@ int ServiceInterface::_getGridData(T::SessionId sessionId,uint fileId,uint messa
 
 
 int ServiceInterface::_getGridAttributeList(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
+
+
+
+
+int ServiceInterface::_getGridFileCount(T::SessionId sessionId,uint& count)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }

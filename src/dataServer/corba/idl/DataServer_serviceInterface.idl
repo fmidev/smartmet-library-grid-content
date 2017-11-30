@@ -19,6 +19,7 @@ interface ServiceInterface
   long  getGridAttributeList(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,out CorbaAttributeList attributeList);
   long  getGridCoordinates(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,out CorbaGridCoordinates coordinates);
   long  getGridData(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,out CorbaGridData data);
+  long  getGridFileCount(in long long sessionId,out unsigned long count);
   long  getGridValueByPoint(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,in double x,in double y,in octet interpolationMethod,out CorbaParamValue value);
   long  getGridValueListByCircle(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,in double origoX,in double origoY,in double radius,out CorbaGridValueList valueList);
   long  getGridValueListByPointList(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,in CorbaCoordinateList pointList,in octet interpolationMethod,out CorbaGridValueList valueList);

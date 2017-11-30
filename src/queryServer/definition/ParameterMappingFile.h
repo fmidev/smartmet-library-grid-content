@@ -20,7 +20,10 @@ class ParameterMappingFile
 
     virtual void          init();
     virtual void          checkUpdates();
+    ParameterMapping*     getMapping(ParameterMapping& mapping);
     virtual void          getMappings(std::string producerName,std::string parameterName,bool onlySearchEnabled,ParameterMapping_vec& mappings);
+    uint                  getNumberOfMappings();
+    ParameterMapping*     getParameterMappingByIndex(uint index);
     void                  print(std::ostream& stream,uint level,uint optionFlags);
 
   protected:

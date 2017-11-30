@@ -197,6 +197,32 @@ int ClientImplementation::_getGridAttributeList(T::SessionId sessionId,uint file
 
 
 
+int ClientImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Spine::Exception(BCP, "The client is not initialized!");
+
+    ::CORBA::ULong corbaCount = 0;
+
+    int result = mService->getGridFileCount(sessionId, corbaCount);
+
+    if (result == 0)
+      count = (uint)corbaCount;
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::ParamValue& value)
 {
   try

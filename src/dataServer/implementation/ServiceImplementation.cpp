@@ -137,6 +137,23 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,std:
 
 
 
+void ServiceImplementation::enableVirtualContent(bool enabled)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mVirtualContentEnabled = enabled;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 void ServiceImplementation::addVirtualContentFactory(VirtualContentFactory *factory)
 {
   FUNCTION_TRACE
@@ -401,6 +418,22 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
 }
 
 
+
+
+
+int ServiceImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    count = (uint)mGridFileManager.getFileCount();
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
 
 
 
@@ -805,13 +838,13 @@ void ServiceImplementation::readContentList(T::ContentInfoList& contentList,bool
   {
     uint startFileId = 0;
     uint startMessageIndex = 0;
-    uint len = 10000;
+    uint len = 50000;
     uint counter = 0;
     while (len > 0)
     {
       T::ContentInfoList contentInfoList;
 
-      int result = mContentServer->getContentList(0,startFileId,startMessageIndex,10000,contentInfoList);
+      int result = mContentServer->getContentList(0,startFileId,startMessageIndex,50000,contentInfoList);
       if (result != 0)
       {
         Spine::Exception exception(BCP,"Cannot read the content list from the content storage!");
@@ -998,8 +1031,8 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
 
     uint counter = 0;
     uint startFileId = 0;
-    uint len = 10000;
-    while (len == 10000)
+    uint len = 50000;
+    while (len > 0)
     {
       if (mShutdownRequested)
         return;
@@ -1265,15 +1298,15 @@ void ServiceImplementation::fullUpdate()
     uint counter = 0;
     time_t checkTime = time(0);
     uint startFileId = 0;
-    uint len = 10000;
-    while (len == 10000)
+    uint len = 50000;
+    while (len > 0)
     {
       if (mShutdownRequested)
         return;
 
       T::FileInfoList fileInfoList;
 
-      int result = mContentServer->getFileInfoList(mServerSessionId,startFileId,10000,fileInfoList);
+      int result = mContentServer->getFileInfoList(mServerSessionId,startFileId,50000,fileInfoList);
       if (result != 0)
       {
         fprintf(stderr,"ERROR: Cannot get the file list from the content server!");
@@ -1977,7 +2010,7 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    if (mGridFileMap.size() > 1000  ||  (mGridFileMap.size() > 0  &&  (mLastVirtualFileRegistration + 30) < time(0)))
+    if (mGridFileMap.size() > 10000  ||  (mGridFileMap.size() > 0  &&  (mLastVirtualFileRegistration + 60) < time(0)))
     {
       registerVirtualFiles(mGridFileMap);
       mLastVirtualFileRegistration = time(0);
@@ -2195,7 +2228,6 @@ void ServiceImplementation::processEvents()
 
     if (mFullUpdateRequired)
     {
-      printf("** FULL UPDATE REQUIRED\n");
       fullUpdate();
       return;
     }

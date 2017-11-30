@@ -370,13 +370,6 @@ int RedisImplementation::_clear(T::SessionId sessionId)
 
     freeReplyObject(reply);
 
-    reply = (redisReply*)redisCommand(mContext,"DEL %seventCounter",mTablePrefix.c_str());
-    if (reply == NULL)
-    {
-      closeConnection();
-      return Result::PERMANENT_STORAGE_ERROR;
-    }
-
     reply = (redisReply*)redisCommand(mContext,"DEL %sevents",mTablePrefix.c_str());
     if (reply == NULL)
     {
@@ -1119,7 +1112,7 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
 
     uint pLen = producerInfoList.getLength();
 
-    std::set<std::string> tmpList;
+    //std::set<std::string> tmpList;
 
     for (uint p=0; p<pLen; p++)
     {
@@ -1173,7 +1166,7 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
           if (paramKey.length() > 0)
           {
             char tmp[200];
-            sprintf(tmp,"%s;%s;%d;%s;%d;%d;%05d;%d",
+            sprintf(tmp,"%s;%s;%d;%s;%d;%d;%05d;%d;D",
                 producerInfo->mName.c_str(),
                 paramKey.c_str(),
                 (int)T::ParamKeyType::FMI_NAME,
@@ -1183,14 +1176,14 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
                 (int)contentInfo->mParameterLevel,
                 (int)T::InterpolationMethod::Linear);
 
-            if (tmpList.find(std::string(tmp)) == tmpList.end())
-              tmpList.insert(std::string(tmp));
+            if (list.find(std::string(tmp)) == list.end())
+              list.insert(std::string(tmp));
           }
         }
       }
     }
 
-
+/*
     std::string prevPrefix;
     for (auto it=tmpList.begin(); it != tmpList.end(); ++it)
     {
@@ -1212,7 +1205,7 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
       }
     }
 
-
+*/
     return Result::OK;
   }
   catch (...)
