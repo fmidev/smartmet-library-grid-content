@@ -165,7 +165,7 @@ bool LuaFileCollection::getFunction(std::string& functionName,uint functionType,
 
 
 
-float LuaFileCollection::executeFunctionType1(std::string& function,std::vector<float>& parameters)
+float LuaFileCollection::executeFunctionCall1(std::string& function,std::vector<float>& parameters)
 {
   try
   {
@@ -176,7 +176,7 @@ float LuaFileCollection::executeFunctionType1(std::string& function,std::vector<
       uint type = it->getFunction(function,functionName);
       if (type == 1)
       {
-        return it->executeFunctionType1(functionName,parameters);
+        return it->executeFunctionCall1(functionName,parameters);
       }
     }
 
@@ -194,7 +194,7 @@ float LuaFileCollection::executeFunctionType1(std::string& function,std::vector<
 
 
 
-double LuaFileCollection::executeFunctionType1(std::string& function,std::vector<double>& parameters)
+double LuaFileCollection::executeFunctionCall1(std::string& function,std::vector<double>& parameters)
 {
   try
   {
@@ -205,7 +205,7 @@ double LuaFileCollection::executeFunctionType1(std::string& function,std::vector
       uint type = it->getFunction(function,functionName);
       if (type == 1)
       {
-        return it->executeFunctionType1(functionName,parameters);
+        return it->executeFunctionCall1(functionName,parameters);
       }
     }
 
@@ -223,7 +223,7 @@ double LuaFileCollection::executeFunctionType1(std::string& function,std::vector
 
 
 
-void LuaFileCollection::executeFunctionType2(std::string& function,std::vector<double>& inOutParameters)
+void LuaFileCollection::executeFunctionCall2(std::string& function,uint columns,uint rows,std::vector<double>& inOutParameters)
 {
   try
   {
@@ -234,7 +234,7 @@ void LuaFileCollection::executeFunctionType2(std::string& function,std::vector<d
       uint type = it->getFunction(function,functionName);
       if (type == 2)
       {
-        it->executeFunctionType2(functionName,inOutParameters);
+        it->executeFunctionCall2(functionName,columns,rows,inOutParameters);
         return;
       }
     }
@@ -253,7 +253,7 @@ void LuaFileCollection::executeFunctionType2(std::string& function,std::vector<d
 
 
 
-void LuaFileCollection::executeFunctionType2(std::string& function,std::vector<double>& inParameters,std::vector<double>& outParameters)
+void LuaFileCollection::executeFunctionCall2(std::string& function,uint columns,uint rows,std::vector<double>& inParameters,std::vector<double>& outParameters)
 {
   try
   {
@@ -264,7 +264,7 @@ void LuaFileCollection::executeFunctionType2(std::string& function,std::vector<d
       uint type = it->getFunction(function,functionName);
       if (type == 2)
       {
-        it->executeFunctionType2(functionName,inParameters,outParameters);
+        it->executeFunctionCall2(functionName,columns,rows,inParameters,outParameters);
         return;
       }
     }
@@ -283,7 +283,7 @@ void LuaFileCollection::executeFunctionType2(std::string& function,std::vector<d
 
 
 
-void LuaFileCollection::executeFunctionType2(std::string& function,std::vector<float>& inParameters,std::vector<float>& outParameters)
+void LuaFileCollection::executeFunctionCall2(std::string& function,uint columns,uint rows,std::vector<float>& inParameters,std::vector<float>& outParameters)
 {
   try
   {
@@ -294,7 +294,7 @@ void LuaFileCollection::executeFunctionType2(std::string& function,std::vector<f
       uint type = it->getFunction(function,functionName);
       if (type == 2)
       {
-        it->executeFunctionType2(functionName,inParameters,outParameters);
+        it->executeFunctionCall2(functionName,columns,rows,inParameters,outParameters);
         return;
       }
     }
@@ -313,7 +313,7 @@ void LuaFileCollection::executeFunctionType2(std::string& function,std::vector<f
 
 
 
-void LuaFileCollection::executeFunctionType2(std::string& function,std::vector<float>& inOutParameters)
+void LuaFileCollection::executeFunctionCall2(std::string& function,uint columns,uint rows,std::vector<float>& inOutParameters)
 {
   try
   {
@@ -324,7 +324,7 @@ void LuaFileCollection::executeFunctionType2(std::string& function,std::vector<f
       uint type = it->getFunction(function,functionName);
       if (type == 2)
       {
-        it->executeFunctionType2(functionName,inOutParameters);
+        it->executeFunctionCall2(functionName,columns,rows,inOutParameters);
         return;
       }
     }
@@ -343,7 +343,7 @@ void LuaFileCollection::executeFunctionType2(std::string& function,std::vector<f
 
 
 
-void LuaFileCollection::executeFunctionType3(std::string& function,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters)
+void LuaFileCollection::executeFunctionCall3(std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters)
 {
   try
   {
@@ -354,7 +354,7 @@ void LuaFileCollection::executeFunctionType3(std::string& function,std::vector<f
       uint type = it->getFunction(function,functionName);
       if (type == 3)
       {
-        it->executeFunctionType3(functionName,inParameters1,inParameters2,outParameters);
+        it->executeFunctionCall3(functionName,columns,rows,inParameters1,inParameters2,outParameters);
         return;
       }
     }
@@ -372,7 +372,8 @@ void LuaFileCollection::executeFunctionType3(std::string& function,std::vector<f
 
 
 
-void LuaFileCollection::executeFunctionType3(std::string& function,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters)
+
+void LuaFileCollection::executeFunctionCall3(std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters)
 {
   try
   {
@@ -383,7 +384,7 @@ void LuaFileCollection::executeFunctionType3(std::string& function,std::vector<d
       uint type = it->getFunction(function,functionName);
       if (type == 3)
       {
-        it->executeFunctionType3(functionName,inParameters1,inParameters2,outParameters);
+        it->executeFunctionCall3(functionName,columns,rows,inParameters1,inParameters2,outParameters);
         return;
       }
     }

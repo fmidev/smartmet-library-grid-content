@@ -63,7 +63,7 @@ void VirtualContentManager::init()
 
 
 
-void VirtualContentManager::addFile(T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList,VirtualGridFilePtr_map& gridFileMap)
+void VirtualContentManager::addFile(T::ProducerInfo& producerInfo,T::GenerationInfo& generationInfo,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList,VirtualGridFilePtr_map& gridFileMap)
 {
   FUNCTION_TRACE
   try
@@ -72,7 +72,7 @@ void VirtualContentManager::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
     //fileInfo.print(std::cout,0,0);
     for (auto it = mFactoryList.begin(); it != mFactoryList.end(); ++it)
     {
-      (*it)->addFile(fileInfo,contentInfoList,gridFileMap);
+      (*it)->addFile(producerInfo,generationInfo,fileInfo,contentInfoList,gridFileMap);
     }
   }
   catch (...)

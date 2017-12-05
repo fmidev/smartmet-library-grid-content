@@ -73,7 +73,8 @@ class ServiceInterface
                     ServiceInterface();
      virtual        ~ServiceInterface();
 
-     virtual void   setProcessingLog(Log *processingLogPointer);
+     virtual void   setDebugLog(Log *debugLog);
+     virtual void   setProcessingLog(Log *processingLogr);
      virtual void   shutdown();
 
      virtual int    executeQuery(T::SessionId sessionId,Query& query);
@@ -85,7 +86,8 @@ class ServiceInterface
      virtual int    _executeQuery(T::SessionId sessionId,Query& query);
      virtual int    _getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::GridPointValueList& valueList);
 
-     Log            *mProcessingLogPointer;
+     Log            *mDebugLog;
+     Log            *mProcessingLog;
 };
 
 

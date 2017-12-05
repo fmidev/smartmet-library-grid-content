@@ -61,6 +61,7 @@ CacheImplementation::CacheImplementation()
     mSaveDir = "/tmp";
     mReloadActivated = false;
     mContentDeleteCount = 0;
+    mFileDeleteCount = 0;
 
     mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
 
@@ -107,6 +108,7 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
   FUNCTION_TRACE
   try
   {
+    PRINT_DATA(mDebugLog,"* Init start\n");
     mStartTime = time(0);
     mSessionId = sessionId;
     mContentStorage = contentStorage;
@@ -180,6 +182,7 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
 
       mUpdateInProgress = false;
     }
+    PRINT_DATA(mDebugLog,"* Init end\n");
   }
   catch (...)
   {
@@ -3596,7 +3599,7 @@ int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
         T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(cInfo->mFileId);
         if (fileInfo == NULL)
         {
-          printf("**** INTEGRITY ERROR : File missing (%u)! *****\n",cInfo->mFileId);
+          PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : File missing (%u)! *****\n",cInfo->mFileId);
           cError = cInfo;
         }
 
@@ -3605,7 +3608,7 @@ int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
           T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(cInfo->mGenerationId);
           if (generationInfo == NULL)
           {
-            printf("**** INTEGRITY ERROR : Generation missing (%u)! *****\n",cInfo->mGenerationId);
+            PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Generation missing (%u)! *****\n",cInfo->mGenerationId);
             cError = cInfo;
           }
         }
@@ -3615,7 +3618,7 @@ int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
           T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(cInfo->mProducerId);
           if (producerInfo == NULL)
           {
-            printf("**** INTEGRITY ERROR : Producer missing (%u)! *****\n",cInfo->mProducerId);
+            PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Producer missing (%u)! *****\n",cInfo->mProducerId);
             cError = cInfo;
           }
         }
@@ -3853,7 +3856,9 @@ void CacheImplementation::readProducerList()
   FUNCTION_TRACE
   try
   {
-   if (mContentStorage == NULL)
+    PRINT_DATA(mDebugLog,"* Reading the producer list\n");
+
+    if (mContentStorage == NULL)
       return;
 
     mProducerInfoList.clear();
@@ -3880,6 +3885,8 @@ void CacheImplementation::readGenerationList()
   FUNCTION_TRACE
   try
   {
+    PRINT_DATA(mDebugLog,"* Reading the generation list\n");
+
     if (mContentStorage == NULL)
       return;
 
@@ -3907,6 +3914,8 @@ void CacheImplementation::readFileList()
   FUNCTION_TRACE
   try
   {
+    PRINT_DATA(mDebugLog,"* Reading the file list\n");
+
     if (mContentStorage == NULL)
       return;
 
@@ -3953,6 +3962,7 @@ void CacheImplementation::readContentList()
   FUNCTION_TRACE
   try
   {
+    PRINT_DATA(mDebugLog,"* Reading the content list\n");
     if (mContentStorage == NULL)
       return;
 
@@ -3997,6 +4007,7 @@ void CacheImplementation::readDataServerList()
   FUNCTION_TRACE
   try
   {
+   PRINT_DATA(mDebugLog,"* Reading the data server list\n");
    if (mContentStorage == NULL)
       return;
 
@@ -4026,6 +4037,7 @@ void CacheImplementation::event_clear(T::EventInfo& eventInfo)
   try
   {
     // printf("EVENT[%llu]: clear\n",eventInfo.mEventId);
+    PRINT_DATA(mDebugLog,"*** Clear event : Deleting all cached information!\n");
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
@@ -4366,7 +4378,9 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
             if (mFileInfoList.getFileInfoById(fileInfo->mFileId) == NULL)
             {
               mFileInfoList.addFileInfo(fileInfo);
-              mFileInfoListByName.addFileInfo(fileInfo);
+              if (mDelayedFileAddList.find(fileInfo->mFileId) == mDelayedFileAddList.end())
+                mDelayedFileAddList.insert(fileInfo->mFileId);
+              //mFileInfoListByName.addFileInfo(fileInfo);
             }
             else
             {
@@ -4407,7 +4421,10 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
       {
         T::FileInfo *fInfo = fileInfo.duplicate();
         mFileInfoList.addFileInfo(fInfo);
-        mFileInfoListByName.addFileInfo(fInfo);
+        if (mDelayedFileAddList.find(fileInfo.mFileId) == mDelayedFileAddList.end())
+          mDelayedFileAddList.insert(fileInfo.mFileId);
+        //mFileInfoListByName.addFileInfo(fInfo);
+
         if (fileInfo.mFlags & (uint)T::FileInfoFlags::CONTENT_PREDEFINED)
         {
           T::ContentInfoList contentInfoList;
@@ -4454,14 +4471,20 @@ void CacheImplementation::event_fileDeleted(T::EventInfo& eventInfo)
     T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(eventInfo.mId1);
     if (fileInfo != NULL)
     {
-      if (mDelayedContentDeleteList.find(fileInfo->mFileId) == mDelayedContentDeleteList.end())
-        mDelayedContentDeleteList.insert(fileInfo->mFileId);
+      mContentInfoList[0].markDeletedByFileId(fileInfo->mFileId);
+      mContentDeleteCount++;
+
+      //if (mDelayedContentDeleteList.find(fileInfo->mFileId) == mDelayedContentDeleteList.end())
+//        mDelayedContentDeleteList.insert(fileInfo->mFileId);
 
       //for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       //  mContentInfoList[t].deleteContentInfoByFileId(eventInfo.mId1);
 
-      mFileInfoListByName.deleteFileInfoById(eventInfo.mId1);
-      mFileInfoList.deleteFileInfoById(eventInfo.mId1);
+      mFileInfoList.markFileInfoDeletedById(eventInfo.mId1);
+      mFileDeleteCount++;
+
+      //mFileInfoListByName.deleteFileInfoById(eventInfo.mId1);
+      //mFileInfoList.deleteFileInfoById(eventInfo.mId1);
     }
   }
   catch (...)
@@ -4492,22 +4515,13 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
       {
         mContentDeleteCount += mContentInfoList[0].markDeletedByFileId(info->mFileId);
 
-        // ToDo: Deleting content one by one is quite slow. It would
-        // be smarter to mark content records as deleted instead, and
-        // remove them time to time.
-
-        //unsigned long long startTime = getTime();
 /*
         for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
         {
           if (mContentInfoListEnabled[t])
             mContentInfoList[t].deleteContentInfoByFileId(eventInfo.mId1);
         }
-
 */
-        //unsigned long long endTime = getTime();
-        //printf("DTIME : %f sec\n",(float)(endTime-startTime)/1000000);
-
         *info = fileInfo;
       }
       else
@@ -4522,8 +4536,6 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
         T::ContentInfoList contentInfoList;
         if (mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) == Result::OK)
         {
-          //unsigned long long startTime = getTime();
-
           uint len = contentInfoList.getLength();
           for (uint c=0; c<len; c++)
           {
@@ -4542,9 +4554,6 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
             }
 */
           }
-
-          //unsigned long long endTime = getTime();
-          //printf("ATIME : %f sec\n",(float)(endTime-startTime)/1000000);
         }
       }
     }
@@ -4867,10 +4876,6 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
           mContentInfoList[t].addContentInfo(cInfo);
       }
     }
-    else
-    {
-      printf("#### CONTENT NOT FOUND: %u:%u\n",eventInfo.mId1,eventInfo.mId2);
-    }
   }
   catch (...)
   {
@@ -4920,8 +4925,7 @@ void CacheImplementation::event_contentRegistered(T::EventInfo& eventInfo)
 
     if (eventInfo.mId3 < 1 ||  eventInfo.mId3 > 64)
     {
-      printf("%s:%d:%s: Invalid server id (%u)!\n",__FILE__,__LINE__,__FUNCTION__,eventInfo.mId3);
-      printf("Invalid server id %u\n",eventInfo.mId3);
+      PRINT_DATA(mDebugLog,"%s:%d:%s: Invalid server id (%u)!\n",__FILE__,__LINE__,__FUNCTION__,eventInfo.mId3);
       return;
     }
 
@@ -4934,10 +4938,6 @@ void CacheImplementation::event_contentRegistered(T::EventInfo& eventInfo)
     {
       info->mServerFlags = info->mServerFlags | sf;
       mContentCount = 0xFFFFFFFF;
-    }
-    else
-    {
-      printf("%s:%d:%s: Cannot find the content (%u:%u)!\n",__FILE__,__LINE__,__FUNCTION__,eventInfo.mId1,eventInfo.mId2);
     }
   }
   catch (...)
@@ -4955,6 +4955,7 @@ void CacheImplementation::event_deleteVirtualContent(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
+    PRINT_DATA(mDebugLog,"Delete virtual content event received\n");
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -4981,6 +4982,7 @@ void CacheImplementation::event_updateVirtualContent(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
+    PRINT_DATA(mDebugLog,"Update virtual content event received\n");
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -5181,7 +5183,7 @@ void CacheImplementation::processEvents(bool eventThread)
       {
 
         T::EventInfoList eventInfoList;
-        result = mContentStorage->getEventInfoList(mSessionId,0,mLastProcessedEventId+1,1000,eventInfoList);
+        result = mContentStorage->getEventInfoList(mSessionId,0,mLastProcessedEventId+1,50000,eventInfoList);
         if (result != 0)
         {
           //printf("ERROR: getEventInfoList : %d\n",result);
@@ -5189,24 +5191,16 @@ void CacheImplementation::processEvents(bool eventThread)
         }
 
         len = eventInfoList.getLength();
-        //printf("EVENT LIST %u\n",len);
 
         T::EventInfo *it = eventInfoList.getFirstEvent();
         while (it != NULL)
         {
-          // printf("Process event %llu (%u)\n",it->mEventId,(uint)it->mType);
-          //it->print(std::cout,2,0);
           processEvent(*it);
-          {
-            AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
-            //AutoThreadLock lock(&mEventLock);
-            T::EventInfo *event = it->duplicate();
-            event->mServerTime = mStartTime;
 
-            delayedEventInfoList.addEventInfo(event);
-            //mEventInfoList.addEventInfo(event);
-            mLastProcessedEventId = it->mEventId;
-          }
+          T::EventInfo *event = it->duplicate();
+          event->mServerTime = mStartTime;
+          delayedEventInfoList.addEventInfo(event);
+          mLastProcessedEventId = it->mEventId;
 
           it = it->nextItem;
 
@@ -5219,9 +5213,29 @@ void CacheImplementation::processEvents(bool eventThread)
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
+    if (mDelayedFileAddList.size() > 0)
+    {
+      PRINT_DATA(mDebugLog,"* Adding files that were waiting the addition : %u\n",(uint)mDelayedFileAddList.size());
+
+      T::FileInfoList list;
+      list.setReleaseObjects(false);
+
+      for (auto id = mDelayedFileAddList.begin(); id != mDelayedFileAddList.end(); ++id)
+      {
+        T::FileInfo *fInfo = mFileInfoList.getFileInfoById(*id);
+        if (fInfo != NULL &&  (fInfo->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) == 0)
+          list.addFileInfo(fInfo);
+      }
+
+      mFileInfoListByName.addFileInfoList(list);
+      mDelayedFileAddList.clear();
+      PRINT_DATA(mDebugLog,"  -- File addition ready\n");
+    }
+
+
     if (mDelayedContentAddList.size() > 0)
     {
-      //printf("**** CONTENT ADD TO WAIT %u\n",mDelayedContentAddList.getLength());
+      PRINT_DATA(mDebugLog,"* Adding content that was waiting the addition : %u\n",(uint)mDelayedContentAddList.size());
 
       T::ContentInfoList list;
       list.setReleaseObjects(false);
@@ -5239,9 +5253,13 @@ void CacheImplementation::processEvents(bool eventThread)
       for (int t=1; t<CONTENT_LIST_COUNT; t++)
       {
         if (mContentInfoListEnabled[t])
+        {
+          PRINT_DATA(mDebugLog,"  -- Adding content to content list %u\n",t);
           mContentInfoList[t].addContentInfoList(list);
+        }
       }
 
+      PRINT_DATA(mDebugLog,"  -- Content addition ready\n");
       mDelayedContentAddList.clear();
 
       //for (int t=0; t<CONTENT_LIST_COUNT; t++)
@@ -5249,9 +5267,12 @@ void CacheImplementation::processEvents(bool eventThread)
     }
 
 
+
+
+    /*
     if (mDelayedContentDeleteList.size() > 0)
     {
-      //printf("**** CONTENT DELETE TO WAIT %u\n",(uint)mDelayedContentDeleteList.size());
+      PRINT_DATA(mDebugLog,"* Deleting content that was waiting the deletion : %u\n",(uint)mDelayedContentDeleteList.size());
 
       for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       {
@@ -5259,19 +5280,29 @@ void CacheImplementation::processEvents(bool eventThread)
           mContentInfoList[t].deleteContentInfoByFileIdList(mDelayedContentDeleteList);
       }
 
+      PRINT_DATA(mDebugLog,"  -- Content deletion ready\n");
       mDelayedContentDeleteList.clear();
     }
+    */
 
-
-    if (mContentDeleteCount > 1000)
+    if (mFileDeleteCount > 0)
     {
+      PRINT_DATA(mDebugLog,"* Deleting files that were marked to be deleted : %u\n",mFileDeleteCount);
+
+      mFileInfoListByName.deleteMarkedFiles();
+      mFileInfoList.deleteMarkedFiles();
+      mFileDeleteCount = 0;
+    }
+
+    if (mContentDeleteCount > 0)
+    {
+      PRINT_DATA(mDebugLog,"* Deleting content that was marked to be deleted : %u\n",mContentDeleteCount);
       for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       {
         mContentInfoList[t].deleteMarkedContent();
       }
       mContentDeleteCount = 0;
     }
-
 
     T::EventInfo *it = delayedEventInfoList.getFirstEvent();
     while (it != NULL)

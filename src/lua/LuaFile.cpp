@@ -178,7 +178,7 @@ uint LuaFile::getFunction(std::string& functionName,std::string& function)
 
 
 
-float LuaFile::executeFunctionType1(std::string& function,std::vector<float>& parameters)
+float LuaFile::executeFunctionCall1(std::string& function,std::vector<float>& parameters)
 {
   try
   {
@@ -260,7 +260,7 @@ float LuaFile::executeFunctionType1(std::string& function,std::vector<float>& pa
 
 
 
-double LuaFile::executeFunctionType1(std::string& function,std::vector<double>& parameters)
+double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& parameters)
 {
   try
   {
@@ -342,7 +342,7 @@ double LuaFile::executeFunctionType1(std::string& function,std::vector<double>& 
 
 
 
-void LuaFile::executeFunctionType2(std::string& function,std::vector<double>& inParameters,std::vector<double>& outParameters)
+void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,std::vector<double>& inParameters,std::vector<double>& outParameters)
 {
   try
   {
@@ -372,8 +372,9 @@ void LuaFile::executeFunctionType2(std::string& function,std::vector<double>& in
     int pLen = (int)inParameters.size();
 
     lua_getglobal(L,a->second.mFunctionName.c_str());
-    //lua_pushstring(mLuaState,a->mFunctionName.c_str());
-    lua_pushinteger(L,pLen);
+    //lua_pushinteger(L,pLen);
+    lua_pushinteger(L,columns);
+    lua_pushinteger(L,rows);
 
     lua_newtable(L);
     for (int i = 0; i < pLen; i++)
@@ -382,7 +383,7 @@ void LuaFile::executeFunctionType2(std::string& function,std::vector<double>& in
       lua_rawseti(L,-2,i + 1);
     }
 
-    int res = lua_pcall(L, 2, LUA_MULTRET, 0);
+    int res = lua_pcall(L, 3, LUA_MULTRET, 0);
     if (res != 0)
     {
       // LUA ERROR
@@ -419,7 +420,7 @@ void LuaFile::executeFunctionType2(std::string& function,std::vector<double>& in
 
 
 
-void LuaFile::executeFunctionType2(std::string& function,std::vector<double>& inOutParameters)
+void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,std::vector<double>& inOutParameters)
 {
   try
   {
@@ -449,8 +450,9 @@ void LuaFile::executeFunctionType2(std::string& function,std::vector<double>& in
     int pLen = (int)inOutParameters.size();
 
     lua_getglobal(L,a->second.mFunctionName.c_str());
-    //lua_pushstring(mLuaState,a->mFunctionName.c_str());
-    lua_pushinteger(L,pLen);
+    //lua_pushinteger(L,pLen);
+    lua_pushinteger(L,columns);
+    lua_pushinteger(L,rows);
 
     lua_newtable(L);
     for (int i = 0; i < pLen; i++)
@@ -459,7 +461,7 @@ void LuaFile::executeFunctionType2(std::string& function,std::vector<double>& in
       lua_rawseti(L,-2,i + 1);
     }
 
-    int res = lua_pcall(L, 2, LUA_MULTRET, 0);
+    int res = lua_pcall(L, 3, LUA_MULTRET, 0);
     if (res != 0)
     {
       // LUA ERROR
@@ -494,7 +496,7 @@ void LuaFile::executeFunctionType2(std::string& function,std::vector<double>& in
 
 
 
-void LuaFile::executeFunctionType2(std::string& function,std::vector<float>& inParameters,std::vector<float>& outParameters)
+void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,std::vector<float>& inParameters,std::vector<float>& outParameters)
 {
   try
   {
@@ -526,8 +528,9 @@ void LuaFile::executeFunctionType2(std::string& function,std::vector<float>& inP
     int pLen = (int)inParameters.size();
 
     lua_getglobal(L,a->second.mFunctionName.c_str());
-    //lua_pushstring(mLuaState,a->mFunctionName.c_str());
-    lua_pushinteger(L,pLen);
+    //lua_pushinteger(L,pLen);
+    lua_pushinteger(L,columns);
+    lua_pushinteger(L,rows);
 
     lua_newtable(L);
     for (int i = 0; i < pLen; i++)
@@ -536,7 +539,7 @@ void LuaFile::executeFunctionType2(std::string& function,std::vector<float>& inP
       lua_rawseti(L,-2,i + 1);
     }
 
-    int res = lua_pcall(L, 2, LUA_MULTRET, 0);
+    int res = lua_pcall(L, 3, LUA_MULTRET, 0);
     ulonglong endTime = getTime();
     if (res != 0)
     {
@@ -575,7 +578,7 @@ void LuaFile::executeFunctionType2(std::string& function,std::vector<float>& inP
 
 
 
-void LuaFile::executeFunctionType2(std::string& function,std::vector<float>& inOutParameters)
+void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,std::vector<float>& inOutParameters)
 {
   try
   {
@@ -605,8 +608,9 @@ void LuaFile::executeFunctionType2(std::string& function,std::vector<float>& inO
     int pLen = (int)inOutParameters.size();
 
     lua_getglobal(L,a->second.mFunctionName.c_str());
-    //lua_pushstring(mLuaState,a->mFunctionName.c_str());
-    lua_pushinteger(L,pLen);
+    //lua_pushinteger(L,pLen);
+    lua_pushinteger(L,columns);
+    lua_pushinteger(L,rows);
 
     lua_newtable(L);
     for (int i = 0; i < pLen; i++)
@@ -615,7 +619,7 @@ void LuaFile::executeFunctionType2(std::string& function,std::vector<float>& inO
       lua_rawseti(L,-2,i + 1);
     }
 
-    int res = lua_pcall(L, 2, LUA_MULTRET, 0);
+    int res = lua_pcall(L, 3, LUA_MULTRET, 0);
     if (res != 0)
     {
       // LUA ERROR
@@ -650,7 +654,7 @@ void LuaFile::executeFunctionType2(std::string& function,std::vector<float>& inO
 
 
 
-void LuaFile::executeFunctionType3(std::string& function,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters)
+void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters)
 {
   try
   {
@@ -691,8 +695,9 @@ void LuaFile::executeFunctionType3(std::string& function,std::vector<float>& inP
     }
 
     lua_getglobal(L,a->second.mFunctionName.c_str());
-    //lua_pushstring(mLuaState,a->mFunctionName.c_str());
-    lua_pushinteger(L,pLen1);
+    //lua_pushinteger(L,pLen);
+    lua_pushinteger(L,columns);
+    lua_pushinteger(L,rows);
 
     lua_newtable(L);
     for (int i = 0; i < pLen1; i++)
@@ -708,7 +713,7 @@ void LuaFile::executeFunctionType3(std::string& function,std::vector<float>& inP
       lua_rawseti(L,-2,i + 1);
     }
 
-    int res = lua_pcall(L, 3, LUA_MULTRET, 0);
+    int res = lua_pcall(L, 4, LUA_MULTRET, 0);
     ulonglong endTime = getTime();
 
     if (res != 0)
@@ -747,7 +752,7 @@ void LuaFile::executeFunctionType3(std::string& function,std::vector<float>& inP
 
 
 
-void LuaFile::executeFunctionType3(std::string& function,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters)
+void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters)
 {
   try
   {
@@ -788,8 +793,9 @@ void LuaFile::executeFunctionType3(std::string& function,std::vector<double>& in
     }
 
     lua_getglobal(L,a->second.mFunctionName.c_str());
-    //lua_pushstring(mLuaState,a->mFunctionName.c_str());
-    lua_pushinteger(L,pLen1);
+    //lua_pushinteger(L,pLen);
+    lua_pushinteger(L,columns);
+    lua_pushinteger(L,rows);
 
     lua_newtable(L);
     for (int i = 0; i < pLen1; i++)
@@ -805,7 +811,7 @@ void LuaFile::executeFunctionType3(std::string& function,std::vector<double>& in
       lua_rawseti(L,-2,i + 1);
     }
 
-    int res = lua_pcall(L, 3, LUA_MULTRET, 0);
+    int res = lua_pcall(L, 4, LUA_MULTRET, 0);
     ulonglong endTime = getTime();
 
     if (res != 0)
@@ -843,7 +849,7 @@ void LuaFile::executeFunctionType3(std::string& function,std::vector<double>& in
 
 
 #if 0
-void LuaFile::executeFunctionType2(std::string& function,std::vector<float>& inParameters,std::vector<float>& outParameters)
+void LuaFile::executeFunctionCall2(std::string& function,std::vector<float>& inParameters,std::vector<float>& outParameters)
 {
   try
   {
@@ -856,7 +862,7 @@ void LuaFile::executeFunctionType2(std::string& function,std::vector<float>& inP
     for (auto it = inParameters.begin(); it != inParameters.end(); ++it)
       inParams.push_back(*it);
 
-    executeFunctionType2(function,inParams,outParams);
+    executeFunctionCall2(function,inParams,outParams);
 
     for (auto it = outParams.begin(); it != outParams.end(); ++it)
       outParameters.push_back(*it);

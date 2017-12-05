@@ -19,7 +19,8 @@ ServiceInterface::ServiceInterface()
   FUNCTION_TRACE
   try
   {
-    mProcessingLogPointer = NULL;
+    mDebugLog = NULL;
+    mProcessingLog = NULL;
   }
   catch (...)
   {
@@ -47,12 +48,29 @@ ServiceInterface::~ServiceInterface()
 
 
 
-void ServiceInterface::setProcessingLog(Log *processingLogPointer)
+void ServiceInterface::setProcessingLog(Log *processingLog)
 {
   FUNCTION_TRACE
   try
   {
-    mProcessingLogPointer = processingLogPointer;
+    mProcessingLog = processingLog;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void ServiceInterface::setDebugLog(Log *debugLog)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mDebugLog = debugLog;
   }
   catch (...)
   {
@@ -89,7 +107,7 @@ int ServiceInterface::getGridCoordinates(T::SessionId sessionId,uint fileId,uint
     int result = _getGridCoordinates(sessionId,fileId,messageIndex,coordinateType,coordinates);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -111,7 +129,7 @@ int ServiceInterface::getGridData(T::SessionId sessionId,uint fileId,uint messag
     int result = _getGridData(sessionId,fileId,messageIndex,data);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -133,7 +151,7 @@ int ServiceInterface::getGridAttributeList(T::SessionId sessionId,uint fileId,ui
     int result = _getGridAttributeList(sessionId,fileId,messageIndex,attributeList);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,Attribute[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,attributeList.getLength(),result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,Attribute[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,attributeList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -155,7 +173,7 @@ int ServiceInterface::getGridFileCount(T::SessionId sessionId,uint& count)
     int result = _getGridFileCount(sessionId,count);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,count,result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,count,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -177,7 +195,7 @@ int ServiceInterface::getGridValueByPoint(T::SessionId sessionId,uint fileId,uin
     int result = _getGridValueByPoint(sessionId,fileId,messageIndex,coordinateType,x,y,interpolationMethod,value);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,%f,%f,%u,%f);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,x,y,(uint)interpolationMethod,value,result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%f,%f,%u,%f);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,x,y,(uint)interpolationMethod,value,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -199,7 +217,7 @@ int ServiceInterface::getGridValueListByCircle(T::SessionId sessionId,uint fileI
     int result = _getGridValueListByCircle(sessionId,fileId,messageIndex,coordinateType,origoX,origoY,radius,valueList);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,%f,%f,%f,GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,origoX,origoY,radius,valueList.getLength(),result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%f,%f,%f,GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,origoX,origoY,radius,valueList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -221,7 +239,7 @@ int ServiceInterface::getGridValueListByPointList(T::SessionId sessionId,uint fi
     int result = _getGridValueListByPointList(sessionId,fileId,messageIndex,coordinateType,pointList,interpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,Point[%u],%u,GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,(uint)pointList.size(),(uint)interpolationMethod,valueList.getLength(),result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,Point[%u],%u,GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,(uint)pointList.size(),(uint)interpolationMethod,valueList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -243,7 +261,7 @@ int ServiceInterface::getGridValueListByPolygon(T::SessionId sessionId,uint file
     int result = _getGridValueListByPolygon(sessionId,fileId,messageIndex,coordinateType,polygonPoints,valueList);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,Point[%u],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,(uint)polygonPoints.size(),valueList.getLength(),result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,Point[%u],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,(uint)polygonPoints.size(),valueList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -265,7 +283,7 @@ int ServiceInterface::getGridValueListByPolygonPath(T::SessionId sessionId,uint 
     int result = _getGridValueListByPolygonPath(sessionId,fileId,messageIndex,coordinateType,polygonPath,valueList);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,Polygon[%u],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,(uint)polygonPath.size(),valueList.getLength(),result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,Polygon[%u],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,(uint)polygonPath.size(),valueList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -287,7 +305,7 @@ int ServiceInterface::getGridValueListByRectangle(T::SessionId sessionId,uint fi
     int result = _getGridValueListByRectangle(sessionId,fileId,messageIndex,coordinateType,x1,y1,x2,y2,valueList);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,%f,%f,%f,%f,GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,x1,y1,x2,y2,valueList.getLength(),result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%f,%f,%f,%f,GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,x1,y1,x2,y2,valueList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -309,7 +327,7 @@ int ServiceInterface::getGridValueVector(T::SessionId sessionId,uint fileId,uint
     int result = _getGridValueVector(sessionId,fileId,messageIndex,values);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,ParamValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)values.size(),result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,ParamValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)values.size(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -331,7 +349,7 @@ int ServiceInterface::getGridValueVectorByRectangle(T::SessionId sessionId,uint 
     int result = _getGridValueVectorByRectangle(sessionId,fileId,messageIndex,coordinateType,columns,rows,x,y,xStep,yStep,interpolationMethod,values);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,%u,%u,%u,%u,%u,%f,%f,%f,%f,%u,ParamValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,columns,rows,x,y,xStep,yStep,(uint)interpolationMethod,(uint)values.size(),result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%f,%f,%f,%f,%u,ParamValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,(uint)coordinateType,columns,rows,x,y,xStep,yStep,(uint)interpolationMethod,(uint)values.size(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -353,7 +371,7 @@ int ServiceInterface::getMultipleGridValues(T::SessionId sessionId,T::ValueRecor
     int result = _getMultipleGridValues(sessionId,valueRecordList);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,ValueRecord[%u]);result %d;time %f;",__FUNCTION__,sessionId,valueRecordList.getLength(),result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,ValueRecord[%u]);result %d;time %f;",__FUNCTION__,sessionId,valueRecordList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)

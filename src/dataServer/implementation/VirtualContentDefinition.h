@@ -12,16 +12,17 @@ namespace DataServer
 class VirtualContentDefinition
 {
   public:
-                  VirtualContentDefinition();
-                  VirtualContentDefinition(const VirtualContentDefinition& contentDefinition);
-    virtual       ~VirtualContentDefinition();
+                          VirtualContentDefinition();
+                          VirtualContentDefinition(const VirtualContentDefinition& contentDefinition);
+    virtual               ~VirtualContentDefinition();
 
-    void          print(std::ostream& stream,uint level,uint optionFlags);
+    void                  print(std::ostream& stream,uint level,uint optionFlags);
 
-    std::string   mTargetParameter;
-    string_vec    mSourceParameters;
-    std::string   mFunctionName;
-    std::string   mProducers;
+    std::string           mTargetParameter;
+    string_vec            mSourceParameters;
+    std::string           mFunctionName;
+    uint                  mFunctionCallMethod;
+    std::set<std::string> mProducerNameList;
 };
 
 

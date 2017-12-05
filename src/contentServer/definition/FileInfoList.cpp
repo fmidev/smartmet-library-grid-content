@@ -381,10 +381,38 @@ FileInfo* FileInfoList::getFileInfoById(uint fileId)
       return NULL;
 
     FileInfo *info = getFileInfoByIndexNoCheck(idx);
-    if (info != NULL  &&  info->mFileId == fileId)
+    if (info != NULL  &&  info->mFileId == fileId  &&  (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) == 0)
       return info;
 
     return NULL;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void FileInfoList::markFileInfoDeletedById(uint fileId)
+{
+  try
+  {
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    FileInfo search;
+    search.mFileId = fileId;
+    int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
+    if (idx < 0  ||  idx >= (int)getLength())
+      return;
+
+    FileInfo *info = getFileInfoByIndexNoCheck(idx);
+    if (info != NULL  &&  info->mFileId == fileId)
+    {
+      info->mFlags = info->mFlags | (uint)T::FileInfoFlags::FILE_DELETED;
+    }
   }
   catch (...)
   {
@@ -501,7 +529,7 @@ FileInfo* FileInfoList::getFileInfoByName(std::string filename)
       return NULL;
 
     FileInfo *info = getFileInfoByIndexNoCheck(idx);
-    if (info != NULL  &&  info->mName == filename)
+    if (info != NULL  &&  info->mName == filename  &&  (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) == 0)
       return info;
 
     return NULL;
@@ -531,6 +559,9 @@ FileInfo* FileInfoList::getFileInfoByIndex(uint index)
   {
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
     if (index > mLength)
+      return NULL;
+
+    if (mArray[index] == NULL || (mArray[index]->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) != 0)
       return NULL;
 
     return mArray[index];
@@ -567,7 +598,7 @@ void FileInfoList::getFileInfoList(uint startFileId,uint maxRecords,FileInfoList
     for (uint t=startIdx; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL  &&  info->mFileId >= startFileId)
+      if (info != NULL  &&  (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) == 0  &&  info->mFileId >= startFileId)
       {
         if (fileInfoList.getReleaseObjects())
           fileInfoList.addFileInfo(info->duplicate());
@@ -612,7 +643,7 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,
     for (uint t=startIdx; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL  &&  info->mFileId >= startFileId  &&  info->mProducerId == producerId)
+      if (info != NULL  &&  (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) == 0  &&  info->mFileId >= startFileId  &&  info->mProducerId == producerId)
       {
         if (fileInfoList.getReleaseObjects())
           fileInfoList.addFileInfo(info->duplicate());
@@ -657,7 +688,7 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFil
     for (uint t=startIdx; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL  &&  info->mFileId >= startFileId  &&  info->mGenerationId == generationId)
+      if (info != NULL  &&  (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) == 0  &&  info->mFileId >= startFileId  &&  info->mGenerationId == generationId)
       {
         if (fileInfoList.getReleaseObjects())
           fileInfoList.addFileInfo(info->duplicate());
@@ -702,7 +733,7 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,
     for (uint t=startIdx; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL  &&  info->mFileId >= startFileId  &&  (info->mGroupFlags & groupFlags) != 0)
+      if (info != NULL  &&  (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) == 0  &&  info->mFileId >= startFileId  &&  (info->mGroupFlags & groupFlags) != 0)
       {
         if (fileInfoList.getReleaseObjects())
           fileInfoList.addFileInfo(info->duplicate());
@@ -746,7 +777,7 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,uint
     for (uint t=startIdx; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL  &&  info->mFileId >= startFileId  &&  info->mSourceId == sourceId)
+      if (info != NULL  &&  (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) == 0  &&  info->mFileId >= startFileId  &&  info->mSourceId == sourceId)
       {
         if (fileInfoList.getReleaseObjects())
           fileInfoList.addFileInfo(info->duplicate());
@@ -777,7 +808,7 @@ uint FileInfoList::getFileInfoCountByProducerId(uint producerId)
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL)
+      if (info != NULL  &&  (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) == 0)
       {
         if (info->mProducerId == producerId)
           count++;
@@ -804,7 +835,7 @@ uint FileInfoList::getFileInfoCountByGenerationId(uint generationId)
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL)
+      if (info != NULL  &&  (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) == 0)
       {
         if (info->mGenerationId == generationId)
           count++;
@@ -831,7 +862,7 @@ uint FileInfoList::getFileInfoCountBySourceId(uint sourceId)
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL)
+      if (info != NULL  &&  (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) == 0)
       {
         if (info->mSourceId == sourceId)
           count++;
@@ -968,7 +999,7 @@ uint FileInfoList::deleteFileInfoByGroupFlags(uint groupFlags)
       mArray[t] = NULL;
       if (info != NULL)
       {
-        if ((info->mGroupFlags & groupFlags) != 0)
+        if ((info->mGroupFlags & groupFlags) != 0 || (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) != 0)
         {
           if (mReleaseObjects)
             delete info;
@@ -1006,7 +1037,47 @@ uint FileInfoList::deleteFileInfoByProducerId(uint producerId)
       mArray[t] = NULL;
       if (info != NULL)
       {
-        if (info->mProducerId == producerId)
+        if (info->mProducerId == producerId || (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) != 0)
+        {
+          mArray[t] = NULL;
+          if (mReleaseObjects)
+            delete info;
+          count++;
+        }
+        else
+        {
+          mArray[p] = info;
+          p++;
+        }
+      }
+    }
+    mLength = p;
+    return count;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+uint FileInfoList::deleteMarkedFiles()
+{
+  try
+  {
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    uint count = 0;
+    uint p = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      FileInfo *info = mArray[t];
+      mArray[t] = NULL;
+      if (info != NULL)
+      {
+        if (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED)
         {
           mArray[t] = NULL;
           if (mReleaseObjects)
@@ -1046,7 +1117,7 @@ uint FileInfoList::deleteFileInfoByGenerationId(uint generationId)
       mArray[t] = NULL;
       if (info != NULL)
       {
-        if (info->mGenerationId == generationId)
+        if (info->mGenerationId == generationId || (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) != 0)
         {
           if (mReleaseObjects)
             delete info;
@@ -1118,7 +1189,7 @@ uint FileInfoList::deleteFileInfoBySourceId(uint sourceId)
       mArray[t] = NULL;
       if (info != NULL)
       {
-        if (info->mSourceId == sourceId)
+        if (info->mSourceId == sourceId || (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) != 0)
         {
           mArray[t] = NULL;
           if (mReleaseObjects)
@@ -1158,7 +1229,7 @@ uint FileInfoList::deleteFileInfoByFileIdList(std::set<uint>& fileIdList)
       mArray[t] = NULL;
       if (info != NULL)
       {
-        if (fileIdList.find(info->mFileId) != fileIdList.end())
+        if (fileIdList.find(info->mFileId) != fileIdList.end() || (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) != 0)
         {
           mArray[t] = NULL;
           if (mReleaseObjects)
@@ -1198,7 +1269,7 @@ uint FileInfoList::deleteVirtualFiles()
       mArray[t] = NULL;
       if (info != NULL)
       {
-        if (info->mFileType == T::FileType::Virtual || (info->mFlags & (uint)T::FileInfoFlags::CONTENT_VIRTUAL) != 0)
+        if (info->mFileType == T::FileType::Virtual || (info->mFlags & (uint)T::FileInfoFlags::CONTENT_VIRTUAL) != 0  || (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) != 0)
         {
           mArray[t] = NULL;
           if (mReleaseObjects)

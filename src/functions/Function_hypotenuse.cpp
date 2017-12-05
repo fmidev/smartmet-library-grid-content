@@ -53,7 +53,7 @@ Function_hypotenuse::~Function_hypotenuse()
 
 
 
-float Function_hypotenuse::executeFunctionType1(std::vector<float>& parameters)
+float Function_hypotenuse::executeFunctionCall1(std::vector<float>& parameters)
 {
   throw Spine::Exception(BCP, "Not implemented!");
 }
@@ -62,7 +62,7 @@ float Function_hypotenuse::executeFunctionType1(std::vector<float>& parameters)
 
 
 
-double Function_hypotenuse::executeFunctionType1(std::vector<double>& parameters)
+double Function_hypotenuse::executeFunctionCall1(std::vector<double>& parameters)
 {
   throw Spine::Exception(BCP, "Not implemented!");
 }
@@ -71,7 +71,7 @@ double Function_hypotenuse::executeFunctionType1(std::vector<double>& parameters
 
 
 
-void Function_hypotenuse::executeFunctionType2(std::vector<double>& inOutParameters)
+void Function_hypotenuse::executeFunctionCall2(uint columns,uint rows,std::vector<double>& inOutParameters)
 {
   throw Spine::Exception(BCP, "Not implemented!");
 }
@@ -80,7 +80,7 @@ void Function_hypotenuse::executeFunctionType2(std::vector<double>& inOutParamet
 
 
 
-void Function_hypotenuse::executeFunctionType2(std::vector<double>& inParameters,std::vector<double>& outParameters)
+void Function_hypotenuse::executeFunctionCall2(uint columns,uint rows,std::vector<double>& inParameters,std::vector<double>& outParameters)
 {
   throw Spine::Exception(BCP, "Not implemented!");
 }
@@ -89,7 +89,7 @@ void Function_hypotenuse::executeFunctionType2(std::vector<double>& inParameters
 
 
 
-void Function_hypotenuse::executeFunctionType2(std::vector<float>& inOutParameters)
+void Function_hypotenuse::executeFunctionCall2(uint columns,uint rows,std::vector<float>& inOutParameters)
 {
   throw Spine::Exception(BCP, "Not implemented!");
 }
@@ -98,7 +98,7 @@ void Function_hypotenuse::executeFunctionType2(std::vector<float>& inOutParamete
 
 
 
-void Function_hypotenuse::executeFunctionType2(std::vector<float>& inParameters,std::vector<float>& outParameters)
+void Function_hypotenuse::executeFunctionCall2(uint columns,uint rows,std::vector<float>& inParameters,std::vector<float>& outParameters)
 {
   throw Spine::Exception(BCP, "Not implemented!");
 }
@@ -107,7 +107,7 @@ void Function_hypotenuse::executeFunctionType2(std::vector<float>& inParameters,
 
 
 
-void Function_hypotenuse::executeFunctionType3(std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters)
+void Function_hypotenuse::executeFunctionCall3(uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters)
 {
   try
   {
@@ -132,7 +132,7 @@ void Function_hypotenuse::executeFunctionType3(std::vector<float>& inParameters1
 
 
 
-void Function_hypotenuse::executeFunctionType3(std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters)
+void Function_hypotenuse::executeFunctionCall3(uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters)
 {
   uint len = inParameters1.size();
   outParameters.reserve(len);

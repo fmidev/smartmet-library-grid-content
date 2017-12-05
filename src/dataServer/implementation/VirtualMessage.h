@@ -25,7 +25,7 @@ class VirtualMessage : public Message
                                     VirtualMessage(std::vector<SourceMessage>& sourceMessages);
     virtual                         ~VirtualMessage();
 
-    virtual void                    setFunction(Functions::FunctionCollection *functionCollection,Lua::LuaFileCollection *luaFileCollection,std::string functionName);
+    virtual void                    setFunction(Functions::FunctionCollection *functionCollection,Lua::LuaFileCollection *luaFileCollection,std::string functionName,uint functionCallMethod);
 
     virtual void                    getAttributeList(std::string prefix,T::AttributeList& attributeList) const;
     virtual T::TimeString           getForecastTime() const;
@@ -88,23 +88,24 @@ class VirtualMessage : public Message
   protected:
 
     virtual void                    initMessagePtrs() const;
-    virtual double                  executeFunctionType1(std::vector<double>& parameters) const;
+    virtual double                  executeFunctionCall1(std::vector<double>& parameters) const;
 
-    virtual void                    executeFunctionType2(std::vector<float>& inOutParameters) const;
-    virtual void                    executeFunctionType2(std::vector<float>& inParameters,std::vector<float>& outParameters) const;
-    virtual void                    executeFunctionType2(std::vector<double>& inOutParameters) const;
-    virtual void                    executeFunctionType2(std::vector<double>& inParameters,std::vector<double>& outParameters) const;
-    virtual void                    executeFunctionType2(T::GridValueList& valueList) const;
+    virtual void                    executeFunctionCall2(std::vector<float>& inOutParameters) const;
+    virtual void                    executeFunctionCall2(std::vector<float>& inParameters,std::vector<float>& outParameters) const;
+    virtual void                    executeFunctionCall2(std::vector<double>& inOutParameters) const;
+    virtual void                    executeFunctionCall2(std::vector<double>& inParameters,std::vector<double>& outParameters) const;
+    virtual void                    executeFunctionCall2(T::GridValueList& valueList) const;
 
-    virtual void                    executeFunctionType3(std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters) const;
-    virtual void                    executeFunctionType3(std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters) const;
-    virtual void                    executeFunctionType3(T::GridValueList& inValueList1,T::GridValueList& inValueList2,T::GridValueList& outValueList) const;
+    virtual void                    executeFunctionCall3(std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters) const;
+    virtual void                    executeFunctionCall3(std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters) const;
+    virtual void                    executeFunctionCall3(T::GridValueList& inValueList1,T::GridValueList& inValueList2,T::GridValueList& outValueList) const;
 
     GRID::GridFile_sptr             mGridFile;
     mutable GRID::MessagePtr_vec    mMessageList;
     Functions::FunctionCollection*  mFunctionCollection;
     Lua::LuaFileCollection*         mLuaFileCollection;
     std::string                     mFunctionName;
+    uint                            mFunctionCallMethod;
     std::vector<SourceMessage>      mSourceMessages;
     T::ContentInfo                  mContentInfo;
 };

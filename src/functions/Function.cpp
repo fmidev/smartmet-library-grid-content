@@ -52,7 +52,7 @@ Function::~Function()
 
 
 
-float Function::executeFunctionType1(std::vector<float>& parameters)
+float Function::executeFunctionCall1(std::vector<float>& parameters)
 {
   throw Spine::Exception(BCP, "Not implemented!");
 }
@@ -61,7 +61,7 @@ float Function::executeFunctionType1(std::vector<float>& parameters)
 
 
 
-double Function::executeFunctionType1(std::vector<double>& parameters)
+double Function::executeFunctionCall1(std::vector<double>& parameters)
 {
   throw Spine::Exception(BCP, "Not implemented!");
 }
@@ -70,7 +70,7 @@ double Function::executeFunctionType1(std::vector<double>& parameters)
 
 
 
-void Function::executeFunctionType2(std::vector<double>& inOutParameters)
+void Function::executeFunctionCall2(uint columns,uint rows,std::vector<double>& inOutParameters)
 {
   throw Spine::Exception(BCP, "Not implemented!");
 }
@@ -79,7 +79,7 @@ void Function::executeFunctionType2(std::vector<double>& inOutParameters)
 
 
 
-void Function::executeFunctionType2(std::vector<double>& inParameters,std::vector<double>& outParameters)
+void Function::executeFunctionCall2(uint columns,uint rows,std::vector<double>& inParameters,std::vector<double>& outParameters)
 {
   throw Spine::Exception(BCP, "Not implemented!");
 }
@@ -88,7 +88,7 @@ void Function::executeFunctionType2(std::vector<double>& inParameters,std::vecto
 
 
 
-void Function::executeFunctionType2(std::vector<float>& inOutParameters)
+void Function::executeFunctionCall2(uint columns,uint rows,std::vector<float>& inOutParameters)
 {
   throw Spine::Exception(BCP, "Not implemented!");
 }
@@ -97,7 +97,7 @@ void Function::executeFunctionType2(std::vector<float>& inOutParameters)
 
 
 
-void Function::executeFunctionType2(std::vector<float>& inParameters,std::vector<float>& outParameters)
+void Function::executeFunctionCall2(uint columns,uint rows,std::vector<float>& inParameters,std::vector<float>& outParameters)
 {
   throw Spine::Exception(BCP, "Not implemented!");
 }
@@ -106,7 +106,7 @@ void Function::executeFunctionType2(std::vector<float>& inParameters,std::vector
 
 
 
-void Function::executeFunctionType3(std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters)
+void Function::executeFunctionCall3(uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters)
 {
   throw Spine::Exception(BCP, "Not implemented!");
 }
@@ -115,7 +115,7 @@ void Function::executeFunctionType3(std::vector<float>& inParameters1,std::vecto
 
 
 
-void Function::executeFunctionType3(std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters)
+void Function::executeFunctionCall3(uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters)
 {
   throw Spine::Exception(BCP, "Not implemented!");
 }

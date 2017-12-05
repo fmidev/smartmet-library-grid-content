@@ -1,4 +1,4 @@
-#include "Function_valueMultiply.h"
+#include "Function_multiply.h"
 #include <grid-files/common/GeneralFunctions.h>
 
 
@@ -8,7 +8,7 @@ namespace Functions
 {
 
 
-Function_valueMultiply::Function_valueMultiply(double multiplyer)
+Function_multiply::Function_multiply(double multiplyer)
 {
   try
   {
@@ -24,7 +24,7 @@ Function_valueMultiply::Function_valueMultiply(double multiplyer)
 
 
 
-Function_valueMultiply::Function_valueMultiply(const Function_valueMultiply& function)
+Function_multiply::Function_multiply(const Function_multiply& function)
 :Function(function)
 {
   try
@@ -40,7 +40,7 @@ Function_valueMultiply::Function_valueMultiply(const Function_valueMultiply& fun
 
 
 
-Function_valueMultiply::~Function_valueMultiply()
+Function_multiply::~Function_multiply()
 {
   try
   {
@@ -55,26 +55,7 @@ Function_valueMultiply::~Function_valueMultiply()
 
 
 
-float Function_valueMultiply::executeFunctionType1(std::vector<float>& parameters)
-{
-  try
-  {
-    if (parameters.size() == 1)
-      return parameters[0] * mMultiplyer;
-
-    throw Spine::Exception(BCP, "The parameters vector should contain only one value!");
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
-  }
-}
-
-
-
-
-
-double Function_valueMultiply::executeFunctionType1(std::vector<double>& parameters)
+float Function_multiply::executeFunctionCall1(std::vector<float>& parameters)
 {
   try
   {
@@ -93,7 +74,26 @@ double Function_valueMultiply::executeFunctionType1(std::vector<double>& paramet
 
 
 
-void Function_valueMultiply::executeFunctionType2(std::vector<double>& inOutParameters)
+double Function_multiply::executeFunctionCall1(std::vector<double>& parameters)
+{
+  try
+  {
+    if (parameters.size() == 1)
+      return parameters[0] * mMultiplyer;
+
+    throw Spine::Exception(BCP, "The parameters vector should contain only one value!");
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<double>& inOutParameters)
 {
   try
   {
@@ -113,7 +113,7 @@ void Function_valueMultiply::executeFunctionType2(std::vector<double>& inOutPara
 
 
 
-void Function_valueMultiply::executeFunctionType2(std::vector<double>& inParameters,std::vector<double>& outParameters)
+void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<double>& inParameters,std::vector<double>& outParameters)
 {
   try
   {
@@ -134,7 +134,7 @@ void Function_valueMultiply::executeFunctionType2(std::vector<double>& inParamet
 
 
 
-void Function_valueMultiply::executeFunctionType2(std::vector<float>& inParameters,std::vector<float>& outParameters)
+void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<float>& inParameters,std::vector<float>& outParameters)
 {
   try
   {
@@ -155,7 +155,7 @@ void Function_valueMultiply::executeFunctionType2(std::vector<float>& inParamete
 
 
 
-void Function_valueMultiply::executeFunctionType2(std::vector<float>& inOutParameters)
+void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<float>& inOutParameters)
 {
   try
   {
@@ -175,11 +175,54 @@ void Function_valueMultiply::executeFunctionType2(std::vector<float>& inOutParam
 
 
 
-Function* Function_valueMultiply::duplicate()
+void Function_multiply::executeFunctionCall3(uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters)
 {
   try
   {
-    return (Function*)new Function_valueMultiply(*this);
+    uint len = inParameters1.size();
+    outParameters.reserve(len);
+    for (uint t=0; t<len; t++)
+    {
+      double a = inParameters1[t];
+      double b = inParameters2[t];
+
+      float c = (float)a*b;
+      outParameters.push_back(c);
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+void Function_multiply::executeFunctionCall3(uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters)
+{
+  uint len = inParameters1.size();
+  outParameters.reserve(len);
+  for (uint t=0; t<len; t++)
+  {
+    double a = inParameters1[t];
+    double b = inParameters2[t];
+
+    double c = a*b;
+    outParameters.push_back(c);
+  }
+}
+
+
+
+
+
+Function* Function_multiply::duplicate()
+{
+  try
+  {
+    return (Function*)new Function_multiply(*this);
   }
   catch (...)
   {

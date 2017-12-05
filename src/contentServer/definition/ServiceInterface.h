@@ -47,7 +47,8 @@ class ServiceInterface
 
      Implementation getImplementationType();
 
-     virtual void   setProcessingLog(Log *processingLogPointer);
+     virtual void   setDebugLog(Log *debugLog);
+     virtual void   setProcessingLog(Log *processingLog);
      virtual void   shutdown();
 
      virtual int    clear(T::SessionId sessionId);
@@ -302,7 +303,8 @@ class ServiceInterface
      virtual int    _deleteVirtualContent(T::SessionId sessionId);
      virtual int    _updateVirtualContent(T::SessionId sessionId);
 
-     Log            *mProcessingLogPointer;
+     Log            *mDebugLog;
+     Log            *mProcessingLog;
      Implementation mImplementationType;
 };
 

@@ -25,7 +25,8 @@ class ServiceInterface
                     ServiceInterface();
      virtual        ~ServiceInterface();
 
-     virtual void   setProcessingLog(Log *processingLogPointer);
+     virtual void   setDebugLog(Log *debugLog);
+     virtual void   setProcessingLog(Log *processingLog);
      virtual void   shutdown();
 
      // ### Services for single grid
@@ -64,7 +65,8 @@ class ServiceInterface
 
      virtual int    _getMultipleGridValues(T::SessionId sessionId,T::ValueRecordList& valueRecordList);
 
-     Log            *mProcessingLogPointer;
+     Log            *mDebugLog;
+     Log            *mProcessingLog;
 };
 
 

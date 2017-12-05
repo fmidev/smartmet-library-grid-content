@@ -1141,11 +1141,11 @@ bool ServiceImplementation::parseFunction(QueryParameter& queryParam,std::string
 
 
 
-double ServiceImplementation::executeFunctionType1(std::string& function,std::vector<double>& parameters)
+double ServiceImplementation::executeFunctionCall1(std::string& function,std::vector<double>& parameters)
 {
   try
   {
-    return mLuaFileCollection.executeFunctionType1(function,parameters);
+    return mLuaFileCollection.executeFunctionCall1(function,parameters);
   }
   catch (...)
   {
@@ -1363,7 +1363,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
 
             if (qParam->mFunction.substr(0,1) != "@")
             {
-              double val = executeFunctionType1(qParam->mFunction,parameters);
+              double val = executeFunctionCall1(qParam->mFunction,parameters);
               pValues.mValueList.addGridValue(new T::GridValue(lastRec.mX,lastRec.mY,(T::ParamValue)val));
               pValues.mProducerId = producerId;
               pValues.mGenerationId = generationId;
@@ -1373,7 +1373,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
 
           if (areaCnt  &&  qParam->mFunction.substr(0,1) != "@")
           {
-            double val = executeFunctionType1(qParam->mFunction,extParameters);
+            double val = executeFunctionCall1(qParam->mFunction,extParameters);
             pValues.mValueList.addGridValue(new T::GridValue(-1000,-1000,(T::ParamValue)val));
           }
 
@@ -1381,7 +1381,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
           {
             //T::ParamValue val = executeAreaFunction(qParam->mFunction,areaParameters);
             std::string func = qParam->mFunction.substr(1);
-            double val = executeFunctionType1(func,areaParameters);
+            double val = executeFunctionCall1(func,areaParameters);
             pValues.mValueList.addGridValue(new T::GridValue(-1000,-1000,(T::ParamValue)val));
           }
 

@@ -8,13 +8,15 @@ namespace SmartMet
 namespace Functions
 {
 
+// The function multiplies each input parameter by the value 'multiplyer'.
 
-class Function_hypotenuse : public Function
+class Function_multiply : public Function
 {
   public:
-                      Function_hypotenuse();
-                      Function_hypotenuse(const Function_hypotenuse& function);
-    virtual           ~Function_hypotenuse();
+                      Function_multiply();
+                      Function_multiply(double multiplyer);
+                      Function_multiply(const Function_multiply& function);
+    virtual           ~Function_multiply();
 
     // Type 1: Takes one or several parameters, returns one value
     virtual float     executeFunctionCall1(std::vector<float>& parameters);
@@ -31,9 +33,11 @@ class Function_hypotenuse : public Function
     virtual void      executeFunctionCall3(uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters);
 
     virtual Function* duplicate();
-    virtual void      print(std::ostream& stream,uint level,uint optionFlags);
-};
 
+  protected:
+
+    double          mMultiplyer;
+};
 
 
 }  // namespace Functions

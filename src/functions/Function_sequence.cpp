@@ -76,7 +76,7 @@ void Function_sequence::addFunction(Function *function)
 
 
 
-float Function_sequence::executeFunctionType1(std::vector<float>& parameters)
+float Function_sequence::executeFunctionCall1(std::vector<float>& parameters)
 {
   try
   {
@@ -90,7 +90,7 @@ float Function_sequence::executeFunctionType1(std::vector<float>& parameters)
       std::vector<float> params;
       params.push_back(val);
 
-      val = (*it)->executeFunctionType1(params);
+      val = (*it)->executeFunctionCall1(params);
     }
     return val;
   }
@@ -104,7 +104,7 @@ float Function_sequence::executeFunctionType1(std::vector<float>& parameters)
 
 
 
-double Function_sequence::executeFunctionType1(std::vector<double>& parameters)
+double Function_sequence::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
   {
@@ -118,7 +118,7 @@ double Function_sequence::executeFunctionType1(std::vector<double>& parameters)
       std::vector<double> params;
       params.push_back(val);
 
-      val = (*it)->executeFunctionType1(params);
+      val = (*it)->executeFunctionCall1(params);
     }
     return val;
   }
@@ -131,13 +131,13 @@ double Function_sequence::executeFunctionType1(std::vector<double>& parameters)
 
 
 
-void Function_sequence::executeFunctionType2(std::vector<double>& inOutParameters)
+void Function_sequence::executeFunctionCall2(uint columns,uint rows,std::vector<double>& inOutParameters)
 {
   try
   {
     for (auto it = mFunctionList.begin(); it != mFunctionList.end(); ++it)
     {
-      (*it)->executeFunctionType2(inOutParameters);
+      (*it)->executeFunctionCall2(columns,rows,inOutParameters);
     }
   }
   catch (...)
@@ -150,14 +150,14 @@ void Function_sequence::executeFunctionType2(std::vector<double>& inOutParameter
 
 
 
-void Function_sequence::executeFunctionType2(std::vector<double>& inParameters,std::vector<double>& outParameters)
+void Function_sequence::executeFunctionCall2(uint columns,uint rows,std::vector<double>& inParameters,std::vector<double>& outParameters)
 {
   try
   {
     uint len = (uint)mFunctionList.size();
     if (len == 1)
     {
-      mFunctionList[0]->executeFunctionType2(inParameters,outParameters);
+      mFunctionList[0]->executeFunctionCall2(columns,rows,inParameters,outParameters);
       return;
     }
 
@@ -167,25 +167,25 @@ void Function_sequence::executeFunctionType2(std::vector<double>& inParameters,s
     for (uint t=0; t<len; t++)
     {
       if (t == 0)
-        mFunctionList[t]->executeFunctionType2(inParameters,tmpOut1);
+        mFunctionList[t]->executeFunctionCall2(columns,rows,inParameters,tmpOut1);
       else
       if (t == (len-1))
       {
         if (tmpOut1.size() > 0)
-          mFunctionList[t]->executeFunctionType2(tmpOut1,outParameters);
+          mFunctionList[t]->executeFunctionCall2(columns,rows,tmpOut1,outParameters);
         else
-          mFunctionList[t]->executeFunctionType2(tmpOut2,outParameters);
+          mFunctionList[t]->executeFunctionCall2(columns,rows,tmpOut2,outParameters);
       }
       else
       {
         if (tmpOut1.size() > 0)
         {
-          mFunctionList[t]->executeFunctionType2(tmpOut1,tmpOut2);
+          mFunctionList[t]->executeFunctionCall2(columns,rows,tmpOut1,tmpOut2);
           tmpOut1.clear();
         }
         else
         {
-          mFunctionList[t]->executeFunctionType2(tmpOut2,tmpOut1);
+          mFunctionList[t]->executeFunctionCall2(columns,rows,tmpOut2,tmpOut1);
           tmpOut2.clear();
         }
       }
@@ -201,14 +201,14 @@ void Function_sequence::executeFunctionType2(std::vector<double>& inParameters,s
 
 
 
-void Function_sequence::executeFunctionType2(std::vector<float>& inParameters,std::vector<float>& outParameters)
+void Function_sequence::executeFunctionCall2(uint columns,uint rows,std::vector<float>& inParameters,std::vector<float>& outParameters)
 {
   try
   {
     uint len = (uint)mFunctionList.size();
     if (len == 1)
     {
-      mFunctionList[0]->executeFunctionType2(inParameters,outParameters);
+      mFunctionList[0]->executeFunctionCall2(columns,rows,inParameters,outParameters);
       return;
     }
 
@@ -218,25 +218,25 @@ void Function_sequence::executeFunctionType2(std::vector<float>& inParameters,st
     for (uint t=0; t<len; t++)
     {
       if (t == 0)
-        mFunctionList[t]->executeFunctionType2(inParameters,tmpOut1);
+        mFunctionList[t]->executeFunctionCall2(columns,rows,inParameters,tmpOut1);
       else
       if (t == (len-1))
       {
         if (tmpOut1.size() > 0)
-          mFunctionList[t]->executeFunctionType2(tmpOut1,outParameters);
+          mFunctionList[t]->executeFunctionCall2(columns,rows,tmpOut1,outParameters);
         else
-          mFunctionList[t]->executeFunctionType2(tmpOut2,outParameters);
+          mFunctionList[t]->executeFunctionCall2(columns,rows,tmpOut2,outParameters);
       }
       else
       {
         if (tmpOut1.size() > 0)
         {
-          mFunctionList[t]->executeFunctionType2(tmpOut1,tmpOut2);
+          mFunctionList[t]->executeFunctionCall2(columns,rows,tmpOut1,tmpOut2);
           tmpOut1.clear();
         }
         else
         {
-          mFunctionList[t]->executeFunctionType2(tmpOut2,tmpOut1);
+          mFunctionList[t]->executeFunctionCall2(columns,rows,tmpOut2,tmpOut1);
           tmpOut2.clear();
         }
       }
@@ -252,13 +252,13 @@ void Function_sequence::executeFunctionType2(std::vector<float>& inParameters,st
 
 
 
-void Function_sequence::executeFunctionType2(std::vector<float>& inOutParameters)
+void Function_sequence::executeFunctionCall2(uint columns,uint rows,std::vector<float>& inOutParameters)
 {
   try
   {
     for (auto it = mFunctionList.begin(); it != mFunctionList.end(); ++it)
     {
-      (*it)->executeFunctionType2(inOutParameters);
+      (*it)->executeFunctionCall2(columns,rows,inOutParameters);
     }
   }
   catch (...)

@@ -28,11 +28,11 @@ class VirtualContentFactory
     void          setLuaFileCollection(Lua::LuaFileCollection *luaFileCollection);
     void          setFunctionCollection(Functions::FunctionCollection *functionCollection);
 
-    virtual void  addFile(T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList,VirtualGridFilePtr_map& gridFileMap);
+    virtual void  addFile(T::ProducerInfo& producerInfo,T::GenerationInfo& generationInfo,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList,VirtualGridFilePtr_map& gridFileMap);
 
   protected:
 
-    virtual void addContent(T::FileInfo& fileInfo,T::ContentInfo& contentInfo,VirtualGridFilePtr_map& gridFileMap);
+    virtual void addContent(T::ProducerInfo& producerInfo,T::GenerationInfo& generationInfo,T::FileInfo& fileInfo,T::ContentInfo& contentInfo,VirtualGridFilePtr_map& gridFileMap);
 
   protected:
 

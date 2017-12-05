@@ -34,6 +34,7 @@ class FileInfoList
      uint       deleteFileInfoBySourceId(uint sourceId);
      uint       deleteFileInfoByFileIdList(std::set<uint>& fileIdList);
      uint       deleteVirtualFiles();
+     uint       deleteMarkedFiles();
      int        getClosestIndex(FileInfo::ComparisonMethod comparisonMethod,FileInfo& fileInfo);
      int        getClosestIndexNoLock(FileInfo::ComparisonMethod comparisonMethod,FileInfo& fileInfo);
      FileInfo*  getFileInfoById(uint fileId);
@@ -51,6 +52,7 @@ class FileInfoList
      uint       getLength();
      bool       getReleaseObjects();
      void       increaseSize(uint newSize);
+     void       markFileInfoDeletedById(uint fileId);
      void       setComparisonMethod(FileInfo::ComparisonMethod comparisonMethod);
      void       setReleaseObjects(bool releaseObjects);
      void       sort(FileInfo::ComparisonMethod comparisonMethod);

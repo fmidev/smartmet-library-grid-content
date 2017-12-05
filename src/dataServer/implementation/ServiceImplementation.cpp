@@ -1,8 +1,8 @@
 #include "ServiceImplementation.h"
 #include "VirtualContentFactory_type1.h"
 #include "VirtualMessage.h"
-#include "functions/Function_valueAdd.h"
-#include "functions/Function_valueMultiply.h"
+#include "functions/Function_add.h"
+#include "functions/Function_multiply.h"
 #include "functions/Function_sequence.h"
 #include "functions/Function_hypotenuse.h"
 
@@ -112,13 +112,13 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,std:
     mGridFileManager.init(contentServer);
     mLuaFileCollection.init(luaFileNames);
 
-    mFunctionCollection.addFunction("K2C",new Functions::Function_valueAdd(-273.15));
+    mFunctionCollection.addFunction("K2C",new Functions::Function_add(-273.15));
 
     Functions::Function_sequence *k2f = new Functions::Function_sequence();
 
-    k2f->addFunction(new Functions::Function_valueAdd(-273.15));
-    k2f->addFunction(new Functions::Function_valueMultiply(1.8));
-    k2f->addFunction(new Functions::Function_valueAdd(32.0));
+    k2f->addFunction(new Functions::Function_add(-273.15));
+    k2f->addFunction(new Functions::Function_multiply(1.8));
+    k2f->addFunction(new Functions::Function_add(32.0));
 
     mFunctionCollection.addFunction("K2F",k2f);
 
@@ -277,7 +277,8 @@ int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,T::Valu
               exception.addParameter("FileId",std::to_string(rec->mFileId));
               exception.addParameter("MessageIndex",std::to_string(rec->mMessageIndex));
               rec->mResult = Result::UNEXPECTED_EXCEPTION;
-              exception.printError();
+              std::string st = exception.getStackTrace();
+              PRINT_DATA(mDebugLog,"%s",st.c_str());
             }
           }
           else
@@ -473,17 +474,11 @@ int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint file
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == NULL)
-      {
-        //printf("FILE NOT FOUND %u\n",fileId);
         return Result::FILE_NOT_FOUND;
-      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == NULL)
-      {
-        //printf("MESSAGE NOT FOUND %u:%u\n",fileId,messageIndex);
         return Result::MESSAGE_NOT_FOUND;
-      }
 
       message->getGridValueByPoint(coordinateType,x,y,interpolationMethod,value);
 
@@ -494,7 +489,8 @@ int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint file
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
        exception.addParameter("FileId",std::to_string(fileId));
        exception.addParameter("MessageIndex",std::to_string(messageIndex));
-       exception.printError();
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
     }
   }
@@ -531,7 +527,8 @@ int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,uint fileI
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
        exception.addParameter("FileId",std::to_string(fileId));
        exception.addParameter("MessageIndex",std::to_string(messageIndex));
-       exception.printError();
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
     }
   }
@@ -554,17 +551,11 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == NULL)
-      {
-        //printf("FILE NOT FOUND %u\n",fileId);
         return Result::FILE_NOT_FOUND;
-      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == NULL)
-      {
-        //printf("MESSAGE NOT FOUND %u:%u\n",fileId,messageIndex);
         return Result::MESSAGE_NOT_FOUND;
-      }
 
 
       message->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList);
@@ -575,7 +566,8 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
        exception.addParameter("FileId",std::to_string(fileId));
        exception.addParameter("MessageIndex",std::to_string(messageIndex));
-       exception.printError();
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
     }
   }
@@ -645,7 +637,8 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
        exception.addParameter("FileId",std::to_string(fileId));
        exception.addParameter("MessageIndex",std::to_string(messageIndex));
-       exception.printError();
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
     }
   }
@@ -668,17 +661,11 @@ int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,u
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == NULL)
-      {
-        //printf("FILE NOT FOUND %u\n",fileId);
         return Result::FILE_NOT_FOUND;
-      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == NULL)
-      {
-        //printf("MESSAGE NOT FOUND %u:%u\n",fileId,messageIndex);
         return Result::MESSAGE_NOT_FOUND;
-      }
 
       message->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList);
 
@@ -689,7 +676,8 @@ int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,u
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
        exception.addParameter("FileId",std::to_string(fileId));
        exception.addParameter("MessageIndex",std::to_string(messageIndex));
-       exception.printError();
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
     }
   }
@@ -698,6 +686,7 @@ int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,u
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
+
 
 
 
@@ -711,17 +700,11 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == NULL)
-      {
-        //printf("FILE NOT FOUND %u\n",fileId);
         return Result::FILE_NOT_FOUND;
-      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == NULL)
-      {
-        //printf("MESSAGE NOT FOUND %u:%u\n",fileId,messageIndex);
         return Result::MESSAGE_NOT_FOUND;
-      }
 
       message->getGridValueListByPolygon(coordinateType,polygonPoints,valueList);
       return Result::OK;
@@ -731,7 +714,8 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
        exception.addParameter("FileId",std::to_string(fileId));
        exception.addParameter("MessageIndex",std::to_string(messageIndex));
-       exception.printError();
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
     }
   }
@@ -754,17 +738,11 @@ int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == NULL)
-      {
-        //printf("FILE NOT FOUND %u\n",fileId);
         return Result::FILE_NOT_FOUND;
-      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == NULL)
-      {
-        //printf("MESSAGE NOT FOUND %u:%u\n",fileId,messageIndex);
         return Result::MESSAGE_NOT_FOUND;
-      }
 
       message->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList);
       return Result::OK;
@@ -774,7 +752,8 @@ int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
        exception.addParameter("FileId",std::to_string(fileId));
        exception.addParameter("MessageIndex",std::to_string(messageIndex));
-       exception.printError();
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
     }
   }
@@ -797,17 +776,11 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,u
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == NULL)
-      {
-        //printf("FILE NOT FOUND %u\n",fileId);
         return Result::FILE_NOT_FOUND;
-      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == NULL)
-      {
-        //printf("MESSAGE NOT FOUND %u:%u\n",fileId,messageIndex);
         return Result::MESSAGE_NOT_FOUND;
-      }
 
       message->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,valueList);
       return Result::OK;
@@ -817,7 +790,8 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,u
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
        exception.addParameter("FileId",std::to_string(fileId));
        exception.addParameter("MessageIndex",std::to_string(messageIndex));
-       exception.printError();
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
     }
   }
@@ -848,7 +822,7 @@ void ServiceImplementation::readContentList(T::ContentInfoList& contentList,bool
       if (result != 0)
       {
         Spine::Exception exception(BCP,"Cannot read the content list from the content storage!");
-        exception.addParameter("ServiceResult",getResultString(result));
+        exception.addParameter("ServiceResult",ContentServer::getResultString(result));
         throw exception;
       }
 
@@ -867,14 +841,10 @@ void ServiceImplementation::readContentList(T::ContentInfoList& contentList,bool
 
         counter++;
         if ((counter % 10000) == 0)
-        {
-          printf("* Caching content information : %u\r",counter);
-          fflush(stdout);
-        }
+          PRINT_DATA(mDebugLog,"* Caching content information : %u\n",counter);
       }
     }
-    printf("* Caching content information : %u\n",counter);
-    fflush(stdout);
+    PRINT_DATA(mDebugLog,"* Caching content information : %u\n",counter);
   }
   catch (...)
   {
@@ -969,7 +939,7 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
       c++;
       if ((c % 10000) == 0)
       {
-        printf("* Registering virtual files : %u\r",c);
+        PRINT_DATA(mDebugLog,"* Registering virtual files : %u\n",c);
         fflush(stdout);
       }
     }
@@ -1006,8 +976,7 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
       fileAndContentList.clear();
     }
 
-    printf("* Registering virtual files : %u\n",c);
-    fflush(stdout);
+    PRINT_DATA(mDebugLog,"* Registering virtual files : %u\n",c);
   }
   catch (...)
   {
@@ -1027,6 +996,26 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
     if (!mVirtualContentEnabled)
       return;
 
+    T::ProducerInfoList producerInfoList;
+    int result = mContentServer->getProducerInfoList(mServerSessionId,producerInfoList);
+    if (result != 0)
+    {
+      std::string cPos = CODE_LOCATION;
+      PRINT_DATA(mDebugLog,"%s: Cannot get the producer list from the content server!\n",cPos.c_str());
+      PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
+      return;
+    }
+
+    T::GenerationInfoList generationInfoList;
+    result = mContentServer->getGenerationInfoList(mServerSessionId,generationInfoList);
+    if (result != 0)
+    {
+      std::string cPos = CODE_LOCATION;
+      PRINT_DATA(mDebugLog,"%s: Cannot get the generation list from the content server!\n",cPos.c_str());
+      PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
+      return;
+    }
+
     VirtualGridFilePtr_map gridFileMap;
 
     uint counter = 0;
@@ -1039,10 +1028,12 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
 
       T::FileInfoList fileInfoList;
 
-      int result = mContentServer->getFileInfoList(mServerSessionId,startFileId,10000,fileInfoList);
+      result = mContentServer->getFileInfoList(mServerSessionId,startFileId,10000,fileInfoList);
       if (result != 0)
       {
-        fprintf(stderr,"ERROR: Cannot get the file list from the content server!");
+        std::string cPos = CODE_LOCATION;
+        PRINT_DATA(mDebugLog,"%s: Cannot get the file list from the content server!\n",cPos.c_str());
+        PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
         return;
       }
 
@@ -1064,23 +1055,39 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
           else
             mContentServer->getContentListByFileId(mServerSessionId,fileInfo->mFileId,contentInfoList);
 
-          mVirtualContentManager.addFile(*fileInfo,contentInfoList,gridFileMap);
+          T::ProducerInfo *producerInfo = producerInfoList.getProducerInfoById(fileInfo->mProducerId);
+          if (producerInfo != NULL)
+          {
+            T::GenerationInfo *generationInfo = generationInfoList.getGenerationInfoById(fileInfo->mGenerationId);
+            if (generationInfo != NULL)
+            {
+              mVirtualContentManager.addFile(*producerInfo,*generationInfo,*fileInfo,contentInfoList,gridFileMap);
+            }
+            else
+            {
+              std::string cPos = CODE_LOCATION;
+              PRINT_DATA(mDebugLog,"%s: Cannot find the generation (%u)!\n",cPos.c_str(),fileInfo->mGenerationId);
+            }
+          }
+          else
+          {
+            std::string cPos = CODE_LOCATION;
+            PRINT_DATA(mDebugLog,"%s: Cannot find the producer (%u)!\n",cPos.c_str(),fileInfo->mProducerId);
+          }
+
           counter++;
           if ((counter % 10000) == 0)
-          {
-            printf("* Creating virtual files : %u\r",(uint)gridFileMap.size());
-            fflush(stdout);
-          }
+            PRINT_DATA(mDebugLog,"* Creating virtual files : %u\n",(uint)gridFileMap.size());
         }
         catch (...)
         {
           SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
-          //exception.printError();
+          std::string st = exception.getStackTrace();
+          PRINT_DATA(mDebugLog,"%s",st.c_str());
         }
       }
     }
-    printf("* Creating virtual files : %u\n",(uint)gridFileMap.size());
-    fflush(stdout);
+    PRINT_DATA(mDebugLog,"* Creating virtual files : %u\n",(uint)gridFileMap.size());
 
     registerVirtualFiles(gridFileMap);
   }
@@ -1115,15 +1122,8 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
     }
     else
     {
-      //if ((fileInfo.mFileId % 1000) == 0)
-      //  fileInfo.print(std::cout,0,0);
-
       gridFile = new GRID::PhysicalGridFile();
-
-      //unsigned long long startTime = getTime();
       gridFile->setFileName(mDataDir + "/" + fileInfo.mName);
-      //unsigned long long endTime = getTime();
-      //printf("TIME : %f sec\n",(float)(endTime-startTime)/1000000);
 
       gridFile->setFileId(fileInfo.mFileId);
       gridFile->setGroupFlags(fileInfo.mGroupFlags);
@@ -1132,6 +1132,16 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
       gridFile->setSourceId(fileInfo.mSourceId);
     }
 
+    T::ProducerInfo producerInfo;
+    T::GenerationInfo generationInfo;
+
+    if (mVirtualContentEnabled)
+    {
+      mContentServer->getProducerInfoById(mServerSessionId,fileInfo.mProducerId,producerInfo);
+      mContentServer->getGenerationInfoById(mServerSessionId,fileInfo.mGenerationId,generationInfo);
+    }
+
+
     if (gridFile->getModificationTime() != 0)
     {
       if ((fileInfo.mFlags & (uint)T::FileInfoFlags::CONTENT_PREDEFINED) == 0)
@@ -1139,13 +1149,10 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
         // The content of the file is not predefined. However, some other data server might
         // have already registered the content.
 
-        //mContentServer->getContentListByFileId(mServerSessionId,fileInfo.mFileId,contentList);
-        //fullContentList->getContentListByFileId(fileInfo.mFileId,contentList);
-
         if (currentContentList.getLength() == 0)
         {
           // The content of the file is not registered. So, we need to read it.
-          printf("  -- read content %u\n",fileInfo.mFileId);
+
           gridFile->read(mDataDir + "/" + fileInfo.mName);
         }
       }
@@ -1159,7 +1166,6 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
     {
       // The grid file does not exist.
 
-      //printf("*** modification time is zero\n");
       if (!storageFile)
         delete gridFile;
 
@@ -1174,7 +1180,6 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
       // we can just register our server for the current content (if we have not already
       // registered. This is possible if the content server has been down).
 
-      //printf("*** REGISTER %u\n",fileInfo.mFileId);
       if (mServerId > 0  &&  mContentRegistrationEnabled)
       {
         unsigned long long sf = (1 << (mServerId-1));
@@ -1186,16 +1191,16 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
 
       if (contentInfoList.getLength() == 0)
       {
-        T::ContentInfoList tmpContentList;
+        //T::ContentInfoList tmpContentList;
         //mContentServer->getContentListByFileId(mServerSessionId,fileInfo.mFileId,tmpContentList);
         //fullContentList->getContentListByFileId(fileInfo.mFileId,tmpContentList);
         if (mVirtualContentEnabled)
-          mVirtualContentManager.addFile(fileInfo,currentContentList,mGridFileMap);
+          mVirtualContentManager.addFile(producerInfo,generationInfo,fileInfo,currentContentList,mGridFileMap);
       }
       else
       {
         if (mVirtualContentEnabled)
-          mVirtualContentManager.addFile(fileInfo,contentList,mGridFileMap);
+          mVirtualContentManager.addFile(producerInfo,generationInfo,fileInfo,contentList,mGridFileMap);
       }
 
     }
@@ -1246,7 +1251,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
         contentInfoList.addContentInfo(contentInfo);
       }
       if (mVirtualContentEnabled)
-        mVirtualContentManager.addFile(fileInfo,contentList,mGridFileMap);
+        mVirtualContentManager.addFile(producerInfo,generationInfo,fileInfo,contentList,mGridFileMap);
     }
   }
   catch (...)
@@ -1264,20 +1269,11 @@ void ServiceImplementation::fullUpdate()
   FUNCTION_TRACE
   try
   {
-    printf("****************** FULL UPDATE *********************\n");
-    // Remove all existing content registered for this server.
-
-    // mContentServer->unregisterContentList(mServerSessionId,mServerId,0);
-
-    // If we are not using the content server cache implementation then it is faster
-    // to cache all content before processing.
+    PRINT_DATA(mDebugLog,"****************** FULL UPDATE START *********************\n");
 
     T::ContentInfoList fullContentList;
-    //if (mContentServer->getImplementationType() != ContentServer::Implementation::Cache)
-    {
-      readContentList(fullContentList,true,true);
-      fullContentList.sort(T::ContentInfo::ComparisonMethod::file_message);
-    }
+    readContentList(fullContentList,true,true);
+    fullContentList.sort(T::ContentInfo::ComparisonMethod::file_message);
 
     bool vContentEnabled = mVirtualContentEnabled;
     mVirtualContentEnabled = false;
@@ -1292,7 +1288,6 @@ void ServiceImplementation::fullUpdate()
     }
     else
     {
-
     }
 
     uint counter = 0;
@@ -1305,11 +1300,12 @@ void ServiceImplementation::fullUpdate()
         return;
 
       T::FileInfoList fileInfoList;
-
       int result = mContentServer->getFileInfoList(mServerSessionId,startFileId,50000,fileInfoList);
       if (result != 0)
       {
-        fprintf(stderr,"ERROR: Cannot get the file list from the content server!");
+        std::string cPos = CODE_LOCATION;
+        PRINT_DATA(mDebugLog,"%s: Cannot get the file list from the content server!",cPos.c_str());
+        PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
         return;
       }
 
@@ -1342,15 +1338,13 @@ void ServiceImplementation::fullUpdate()
 
           counter++;
           if ((counter % 10000) == 0)
-          {
-            printf("* Adding grid files : %u\r",counter);
-            fflush(stdout);
-          }
+            PRINT_DATA(mDebugLog,"* Adding grid files : %u\n",counter);
         }
         catch (...)
         {
           SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
-          //exception.printError();
+          std::string st = exception.getStackTrace();
+          PRINT_DATA(mDebugLog,"%s",st.c_str());
         }
       }
 
@@ -1361,8 +1355,7 @@ void ServiceImplementation::fullUpdate()
       }
     }
 
-    printf("* Adding grid files : %u\n",counter);
-    fflush(stdout);
+    PRINT_DATA(mDebugLog,"* Adding grid files : %u\n",counter);
 
     mVirtualContentEnabled  = vContentEnabled;
     mGridFileManager.deleteFilesByCheckTime(checkTime);
@@ -1371,6 +1364,8 @@ void ServiceImplementation::fullUpdate()
     updateVirtualFiles(fullContentList);
 
     mFullUpdateRequired = false;
+
+    PRINT_DATA(mDebugLog,"******************* FULL UPDATE END **********************\n");
   }
   catch (...)
   {
@@ -1388,6 +1383,8 @@ void ServiceImplementation::event_clear(T::EventInfo& eventInfo)
   try
   {
     //printf("EVENT[%llu]: clear\n",eventInfo.mEventId);
+
+    PRINT_DATA(mDebugLog,"*** Clear event : All content files deleted ****\n");
     mGridFileManager.clear();
   }
   catch (...)
@@ -1578,7 +1575,9 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo)
     int result = mContentServer->getFileInfoById(mServerSessionId,eventInfo.mId1,fileInfo);
     if (result != 0)
     {
-      printf("ERROR: getFileInfoById (%u): %d\n",eventInfo.mId1,result);
+      std::string cPos = CODE_LOCATION;
+      PRINT_DATA(mDebugLog,"%s: Cannot get the file info (fileId=%u) from the content server\n",cPos.c_str(),eventInfo.mId1);
+      PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
       return;
     }
 
@@ -1586,7 +1585,9 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo)
     result = mContentServer->getContentListByFileId(mServerSessionId,fileInfo.mFileId,currentContentList);
     if (result != 0)
     {
-      printf("ERROR: getContentListByFileId : %d\n",result);
+      std::string cPos = CODE_LOCATION;
+      PRINT_DATA(mDebugLog,"%s: Cannot get the content list (fileId=%d) from the content server!\n",cPos.c_str(),fileInfo.mFileId);
+      PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
       return;
     }
 
@@ -1598,7 +1599,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo)
     }
 
     if ((fileInfo.mFileId % 1000) == 0)
-      printf("** fileAdded %u\n",(uint)mGridFileManager.getFileCount());
+      PRINT_DATA(mDebugLog,"** fileAdded %u\n",(uint)mGridFileManager.getFileCount());
   }
   catch (...)
   {
@@ -1665,7 +1666,9 @@ void ServiceImplementation::event_fileUpdated(T::EventInfo& eventInfo)
     int result = mContentServer->getFileInfoById(mServerSessionId,eventInfo.mId1,fileInfo);
     if (result != 0)
     {
-      printf("ERROR: getFileInfoById (%u): %d\n",eventInfo.mId1,result);
+      std::string cPos = CODE_LOCATION;
+      PRINT_DATA(mDebugLog,"%s: Cannot get the file info (fileId=%u) from the content server\n",cPos.c_str(),eventInfo.mId1);
+      PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
       return;
     }
 
@@ -1681,7 +1684,9 @@ void ServiceImplementation::event_fileUpdated(T::EventInfo& eventInfo)
       result = mContentServer->getContentListByFileId(mServerSessionId,fileInfo.mFileId,currentContentList);
       if (result != 0)
       {
-        printf("ERROR: getContentListByFileId : %d\n",result);
+        std::string cPos = CODE_LOCATION;
+        PRINT_DATA(mDebugLog,"%s: Cannot get the content list (fileId=%d) from the content server!\n",cPos.c_str(),fileInfo.mFileId);
+        PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
         return;
       }
     }
@@ -1893,7 +1898,7 @@ void ServiceImplementation::event_dataServerDeleted(T::EventInfo& eventInfo)
       // It seems that somebody has deleted the current server registration from
       // the content server.
 
-      printf("**** SHUTDOWN REQUIRED ****\n");
+      //printf("**** SHUTDOWN REQUIRED ****\n");
       mShutdownRequested = true;
     }
   }
@@ -1962,7 +1967,7 @@ void ServiceImplementation::event_deleteVirtualContent(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    printf("** DELETE VIRTUAL CONTENT **\n");
+    PRINT_DATA(mDebugLog,"* Delete virtual content\n");
     mGridFileManager.deleteVirtualFiles();
   }
   catch (...)
@@ -1980,6 +1985,7 @@ void ServiceImplementation::event_updateVirtualContent(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
+    PRINT_DATA(mDebugLog,"Update virtual content\n");
     mGridFileManager.deleteVirtualFiles();
     sleep(5);
 
@@ -2167,7 +2173,8 @@ void ServiceImplementation::checkServerRegistration()
         // It seems that the same server id is registered with different IOR. We should
         // shutdown immediately.
 
-        printf("***** Shutdown the server!\n");
+        PRINT_DATA(mDebugLog,"***** The same server is registered with different IOR. ********\n");
+        PRINT_DATA(mDebugLog,"***** Shutting down the server! ****\n");
         mShutdownRequested = true;
         return;
       }
@@ -2176,7 +2183,7 @@ void ServiceImplementation::checkServerRegistration()
     {
       if (result != ContentServer::DATA_NOT_FOUND)
       {
-        printf("ERROR: getDataServerInfoById : %d\n",result);
+        //printf("ERROR: getDataServerInfoById : %d\n",result);
         return;
       }
 
@@ -2200,7 +2207,7 @@ void ServiceImplementation::checkServerRegistration()
         }
 
         //printf("SERVER REGISTERED\n");
-        serverInfo.print(std::cout,0,0);
+        //serverInfo.print(std::cout,0,0);
 
         mFullUpdateRequired = true;
       }
@@ -2238,9 +2245,11 @@ void ServiceImplementation::processEvents()
     {
       if (eventInfo.mServerTime > mContentServerStartTime)
       {
-        printf("*** CONTENT SERVER START TIME CHANGED\n");
         if (mContentServerStartTime > 0)
+        {
+          PRINT_DATA(mDebugLog,"**** The content server was restarted! *****\n");
           fullUpdate();
+        }
 
         mContentServerStartTime = eventInfo.mServerTime;
         return;
@@ -2257,14 +2266,16 @@ void ServiceImplementation::processEvents()
       return;
     }
 
-    uint len = 1000;
+    uint len = 10000;
     while (len > 0)
     {
       T::EventInfoList eventInfoList;
-      result = mContentServer->getEventInfoList(mServerSessionId,mServerId,mLastProcessedEventId+1,1000,eventInfoList);
+      result = mContentServer->getEventInfoList(mServerSessionId,mServerId,mLastProcessedEventId+1,10000,eventInfoList);
       if (result != 0)
       {
-        //printf("ERROR: getEventInfoList : %d\n",result);
+        std::string cPos = CODE_LOCATION;
+        PRINT_DATA(mDebugLog,"%s : Cannot get the event info list from the content server!\n",cPos.c_str());
+        PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
         return;
       }
 
@@ -2308,7 +2319,8 @@ void ServiceImplementation::eventProcessingThread()
       catch (...)
       {
         SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
-        exception.printError();
+        std::string st = exception.getStackTrace();
+        PRINT_DATA(mDebugLog,"%s",st.c_str());
       }
 
       if (!mShutdownRequested)
@@ -2333,6 +2345,7 @@ void ServiceImplementation::shutdown()
   FUNCTION_TRACE
   try
   {
+    PRINT_DATA(mDebugLog,"*** SHUTDOWN ***\n");
     mShutdownRequested = true;
     while (mEventProcessingActive)
       sleep(1);

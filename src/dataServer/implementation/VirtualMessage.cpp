@@ -22,6 +22,7 @@ VirtualMessage::VirtualMessage(std::vector<SourceMessage>& sourceMessages)
     //mGridFile = gridFile;
     mSourceMessages = sourceMessages;
     mLuaFileCollection = NULL;
+    mFunctionCallMethod = 0;
   }
   catch (...)
   {
@@ -75,7 +76,7 @@ void VirtualMessage::initMessagePtrs() const
 
 
 
-void VirtualMessage::setFunction(Functions::FunctionCollection *functionCollection,Lua::LuaFileCollection *luaFileCollection,std::string functionName)
+void VirtualMessage::setFunction(Functions::FunctionCollection *functionCollection,Lua::LuaFileCollection *luaFileCollection,std::string functionName,uint functionCallMethod)
 {
   FUNCTION_TRACE
   try
@@ -83,6 +84,7 @@ void VirtualMessage::setFunction(Functions::FunctionCollection *functionCollecti
     mFunctionCollection = functionCollection;
     mLuaFileCollection = luaFileCollection;
     mFunctionName = functionName;
+    mFunctionCallMethod = functionCallMethod;
   }
   catch (...)
   {
@@ -542,16 +544,22 @@ void VirtualMessage::getGridValueByPoint(T::CoordinateType coordinateType,double
     mMessageList[0]->getGridValueByPoint(coordinateType,x,y,interpolationMethod,value1);
     inParameters1.push_back(value1);
 
-    switch (mMessageList.size())
+    switch (mFunctionCallMethod)
     {
-      case 1:
-        executeFunctionType2(inParameters1,outParameters);
+      case 2:
+        if (mMessageList.size() != 1)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
+
+        executeFunctionCall2(inParameters1,outParameters);
         break;
 
-      case 2:
+      case 3:
+        if (mMessageList.size() != 2)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+
         mMessageList[1]->getGridValueByPoint(coordinateType,x,y,interpolationMethod,value2);
         inParameters2.push_back(value2);
-        executeFunctionType3(inParameters1,inParameters2,outParameters);
+        executeFunctionCall3(inParameters1,inParameters2,outParameters);
         break;
     }
 
@@ -575,20 +583,26 @@ void VirtualMessage::getGridValueListByCircle(T::CoordinateType coordinateType,d
   {
     initMessagePtrs();
 
-    switch (mMessageList.size())
+    switch (mFunctionCallMethod)
     {
-      case 1:
+      case 2:
+        if (mMessageList.size() != 1)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
+
         mMessageList[0]->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList);
-        executeFunctionType2(valueList);
+        executeFunctionCall2(valueList);
         break;
 
-      case 2:
+      case 3:
       {
+        if (mMessageList.size() != 2)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+
         T::GridValueList valueList1;
         T::GridValueList valueList2;
         mMessageList[0]->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList1);
         mMessageList[1]->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList2);
-        executeFunctionType3(valueList1,valueList2,valueList);
+        executeFunctionCall3(valueList1,valueList2,valueList);
       }
       break;
     }
@@ -610,20 +624,26 @@ void VirtualMessage::getGridValueListByPointList(T::CoordinateType coordinateTyp
   {
     initMessagePtrs();
 
-    switch (mMessageList.size())
+    switch (mFunctionCallMethod)
     {
-      case 1:
+      case 2:
+        if (mMessageList.size() != 1)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
+
         mMessageList[0]->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList);
-        executeFunctionType2(valueList);
+        executeFunctionCall2(valueList);
         break;
 
-      case 2:
+      case 3:
       {
+        if (mMessageList.size() != 2)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+
         T::GridValueList valueList1;
         T::GridValueList valueList2;
         mMessageList[0]->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList1);
         mMessageList[1]->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList2);
-        executeFunctionType3(valueList1,valueList2,valueList);
+        executeFunctionCall3(valueList1,valueList2,valueList);
       }
       break;
     }
@@ -645,20 +665,26 @@ void VirtualMessage::getGridValueListByPolygon(T::CoordinateType coordinateType,
   {
     initMessagePtrs();
 
-    switch (mMessageList.size())
+    switch (mFunctionCallMethod)
     {
-      case 1:
+      case 2:
+        if (mMessageList.size() != 1)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
+
         mMessageList[0]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList);
-        executeFunctionType2(valueList);
+        executeFunctionCall2(valueList);
         break;
 
-      case 2:
+      case 3:
       {
+        if (mMessageList.size() != 2)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+
         T::GridValueList valueList1;
         T::GridValueList valueList2;
         mMessageList[0]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList1);
         mMessageList[1]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList2);
-        executeFunctionType3(valueList1,valueList2,valueList);
+        executeFunctionCall3(valueList1,valueList2,valueList);
       }
       break;
     }
@@ -680,20 +706,26 @@ void VirtualMessage::getGridValueListByPolygonPath(T::CoordinateType coordinateT
   {
     initMessagePtrs();
 
-    switch (mMessageList.size())
+    switch (mFunctionCallMethod)
     {
-      case 1:
+      case 2:
+        if (mMessageList.size() != 1)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
+
         mMessageList[0]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList);
-        executeFunctionType2(valueList);
+        executeFunctionCall2(valueList);
         break;
 
-      case 2:
+      case 3:
       {
+        if (mMessageList.size() != 2)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+
         T::GridValueList valueList1;
         T::GridValueList valueList2;
         mMessageList[0]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList1);
         mMessageList[1]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList2);
-        executeFunctionType3(valueList1,valueList2,valueList);
+        executeFunctionCall3(valueList1,valueList2,valueList);
       }
       break;
     }
@@ -715,20 +747,26 @@ void VirtualMessage::getGridValueListByRectangle(T::CoordinateType coordinateTyp
   {
     initMessagePtrs();
 
-    switch (mMessageList.size())
+    switch (mFunctionCallMethod)
     {
       case 1:
+        if (mMessageList.size() != 2)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
+
         mMessageList[0]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,valueList);
-        executeFunctionType2(valueList);
+        executeFunctionCall2(valueList);
         break;
 
-      case 2:
+      case 3:
       {
+        if (mMessageList.size() != 2)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+
         T::GridValueList valueList1;
         T::GridValueList valueList2;
         mMessageList[0]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,valueList1);
         mMessageList[1]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,valueList2);
-        executeFunctionType3(valueList1,valueList2,valueList);
+        executeFunctionCall3(valueList1,valueList2,valueList);
       }
       break;
     }
@@ -750,20 +788,26 @@ void VirtualMessage::getGridValueVector(T::ParamValue_vec& values) const
   {
     initMessagePtrs();
 
-    switch (mMessageList.size())
+    switch (mFunctionCallMethod)
     {
-      case 1:
+      case 2:
+        if (mMessageList.size() != 1)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
+
         mMessageList[0]->getGridValueVector(values);
-        executeFunctionType2(values);
+        executeFunctionCall2(values);
         break;
 
-      case 2:
+      case 3:
       {
+        if (mMessageList.size() != 2)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+
         T::ParamValue_vec values1;
         T::ParamValue_vec values2;
         mMessageList[0]->getGridValueVector(values1);
         mMessageList[1]->getGridValueVector(values2);
-        executeFunctionType3(values1,values2,values);
+        executeFunctionCall3(values1,values2,values);
       }
       break;
     }
@@ -785,20 +829,26 @@ void VirtualMessage::getGridOriginalValueVector(T::ParamValue_vec& values) const
   {
     initMessagePtrs();
 
-    switch (mMessageList.size())
+    switch (mFunctionCallMethod)
     {
-      case 1:
+      case 2:
+        if (mMessageList.size() != 1)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
+
         mMessageList[0]->getGridOriginalValueVector(values);
-        executeFunctionType2(values);
+        executeFunctionCall2(values);
         break;
 
-      case 2:
+      case 3:
       {
+        if (mMessageList.size() != 2)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+
         T::ParamValue_vec values1;
         T::ParamValue_vec values2;
         mMessageList[0]->getGridOriginalValueVector(values1);
         mMessageList[1]->getGridOriginalValueVector(values2);
-        executeFunctionType3(values1,values2,values);
+        executeFunctionCall3(values1,values2,values);
       }
       break;
     }
@@ -1101,7 +1151,7 @@ bool VirtualMessage::isGridGlobal() const
 
 
 
-double VirtualMessage::executeFunctionType1(std::vector<double>& parameters) const
+double VirtualMessage::executeFunctionCall1(std::vector<double>& parameters) const
 {
   FUNCTION_TRACE
   try
@@ -1120,12 +1170,12 @@ double VirtualMessage::executeFunctionType1(std::vector<double>& parameters) con
     auto function = mFunctionCollection->getFunction(functionName);
     if (function != NULL)
     {
-      return function->executeFunctionType1(parameters);
+      return function->executeFunctionCall1(parameters);
     }
 
     // Calling the LUA implementation of the function
 
-    return mLuaFileCollection->executeFunctionType1(functionName,parameters);
+    return mLuaFileCollection->executeFunctionCall1(functionName,parameters);
   }
   catch (...)
   {
@@ -1137,7 +1187,46 @@ double VirtualMessage::executeFunctionType1(std::vector<double>& parameters) con
 
 
 
-void VirtualMessage::executeFunctionType2(std::vector<double>& inOutParameters) const
+void VirtualMessage::executeFunctionCall2(std::vector<double>& inOutParameters) const
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mMessageList.size() != 1)
+    {
+      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 1)!");
+      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
+      throw exception;
+    }
+
+
+    std::string functionName = mFunctionName;
+    uint columns = (uint)getGridOriginalColumnCount();
+    uint rows = (uint)getGridOriginalRowCount();
+
+    // Trying to find C++ implementation of the function
+
+    auto function = mFunctionCollection->getFunction(functionName);
+    if (function != NULL)
+    {
+      return function->executeFunctionCall2(columns,rows,inOutParameters);
+    }
+
+    // Calling the LUA implementation of the function
+
+    return mLuaFileCollection->executeFunctionCall2(functionName,columns,rows,inOutParameters);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void VirtualMessage::executeFunctionCall2(std::vector<double>& inParameters,std::vector<double>& outParameters) const
 {
   FUNCTION_TRACE
   try
@@ -1150,18 +1239,20 @@ void VirtualMessage::executeFunctionType2(std::vector<double>& inOutParameters) 
     }
 
     std::string functionName = mFunctionName;
+    uint columns = (uint)getGridOriginalColumnCount();
+    uint rows = (uint)getGridOriginalRowCount();
 
     // Trying to find C++ implementation of the function
 
     auto function = mFunctionCollection->getFunction(functionName);
     if (function != NULL)
     {
-      return function->executeFunctionType2(inOutParameters);
+      return function->executeFunctionCall2(columns,rows,inParameters,outParameters);
     }
 
     // Calling the LUA implementation of the function
 
-    return mLuaFileCollection->executeFunctionType2(functionName,inOutParameters);
+    return mLuaFileCollection->executeFunctionCall2(functionName,columns,rows,inParameters,outParameters);
   }
   catch (...)
   {
@@ -1173,7 +1264,7 @@ void VirtualMessage::executeFunctionType2(std::vector<double>& inOutParameters) 
 
 
 
-void VirtualMessage::executeFunctionType2(std::vector<double>& inParameters,std::vector<double>& outParameters) const
+void VirtualMessage::executeFunctionCall2(std::vector<float>& inParameters,std::vector<float>& outParameters) const
 {
   FUNCTION_TRACE
   try
@@ -1186,18 +1277,20 @@ void VirtualMessage::executeFunctionType2(std::vector<double>& inParameters,std:
     }
 
     std::string functionName = mFunctionName;
+    uint columns = (uint)getGridOriginalColumnCount();
+    uint rows = (uint)getGridOriginalRowCount();
 
     // Trying to find C++ implementation of the function
 
     auto function = mFunctionCollection->getFunction(functionName);
     if (function != NULL)
     {
-      return function->executeFunctionType2(inParameters,outParameters);
+      return function->executeFunctionCall2(columns,rows,inParameters,outParameters);
     }
 
     // Calling the LUA implementation of the function
 
-    return mLuaFileCollection->executeFunctionType2(functionName,inParameters,outParameters);
+    return mLuaFileCollection->executeFunctionCall2(functionName,columns,rows,inParameters,outParameters);
   }
   catch (...)
   {
@@ -1209,7 +1302,7 @@ void VirtualMessage::executeFunctionType2(std::vector<double>& inParameters,std:
 
 
 
-void VirtualMessage::executeFunctionType2(std::vector<float>& inParameters,std::vector<float>& outParameters) const
+void VirtualMessage::executeFunctionCall2(std::vector<float>& inOutParameters) const
 {
   FUNCTION_TRACE
   try
@@ -1222,18 +1315,20 @@ void VirtualMessage::executeFunctionType2(std::vector<float>& inParameters,std::
     }
 
     std::string functionName = mFunctionName;
+    uint columns = (uint)getGridOriginalColumnCount();
+    uint rows = (uint)getGridOriginalRowCount();
 
     // Trying to find C++ implementation of the function
 
     auto function = mFunctionCollection->getFunction(functionName);
     if (function != NULL)
     {
-      return function->executeFunctionType2(inParameters,outParameters);
+      return function->executeFunctionCall2(columns,rows,inOutParameters);
     }
 
     // Calling the LUA implementation of the function
 
-    return mLuaFileCollection->executeFunctionType2(functionName,inParameters,outParameters);
+    return mLuaFileCollection->executeFunctionCall2(functionName,columns,rows,inOutParameters);
   }
   catch (...)
   {
@@ -1245,43 +1340,7 @@ void VirtualMessage::executeFunctionType2(std::vector<float>& inParameters,std::
 
 
 
-void VirtualMessage::executeFunctionType2(std::vector<float>& inOutParameters) const
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mMessageList.size() != 1)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 1)!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
-      throw exception;
-    }
-
-    std::string functionName = mFunctionName;
-
-    // Trying to find C++ implementation of the function
-
-    auto function = mFunctionCollection->getFunction(functionName);
-    if (function != NULL)
-    {
-      return function->executeFunctionType2(inOutParameters);
-    }
-
-    // Calling the LUA implementation of the function
-
-    return mLuaFileCollection->executeFunctionType2(functionName,inOutParameters);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
-}
-
-
-
-
-
-void VirtualMessage::executeFunctionType2(T::GridValueList& valueList) const
+void VirtualMessage::executeFunctionCall2(T::GridValueList& valueList) const
 {
   FUNCTION_TRACE
   try
@@ -1303,7 +1362,7 @@ void VirtualMessage::executeFunctionType2(T::GridValueList& valueList) const
       inParameters.push_back(value->mValue);
     }
 
-    executeFunctionType2(inParameters,outParameters);
+    executeFunctionCall2(inParameters,outParameters);
 
     if (outParameters.size() == inParameters.size())
     {
@@ -1324,7 +1383,7 @@ void VirtualMessage::executeFunctionType2(T::GridValueList& valueList) const
 
 
 
-void VirtualMessage::executeFunctionType3(std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters) const
+void VirtualMessage::executeFunctionCall3(std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters) const
 {
   FUNCTION_TRACE
   try
@@ -1337,18 +1396,20 @@ void VirtualMessage::executeFunctionType3(std::vector<float>& inParameters1,std:
     }
 
     std::string functionName = mFunctionName;
+    uint columns = (uint)getGridOriginalColumnCount();
+    uint rows = (uint)getGridOriginalRowCount();
 
     // Trying to find C++ implementation of the function
 
     auto function = mFunctionCollection->getFunction(functionName);
     if (function != NULL)
     {
-      return function->executeFunctionType3(inParameters1,inParameters2,outParameters);
+      return function->executeFunctionCall3(columns,rows,inParameters1,inParameters2,outParameters);
     }
 
     // Calling the LUA implementation of the function
 
-    return mLuaFileCollection->executeFunctionType3(functionName,inParameters1,inParameters2,outParameters);
+    return mLuaFileCollection->executeFunctionCall3(functionName,columns,rows,inParameters1,inParameters2,outParameters);
   }
   catch (...)
   {
@@ -1360,7 +1421,7 @@ void VirtualMessage::executeFunctionType3(std::vector<float>& inParameters1,std:
 
 
 
-void VirtualMessage::executeFunctionType3(std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters) const
+void VirtualMessage::executeFunctionCall3(std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters) const
 {
   FUNCTION_TRACE
   try
@@ -1373,18 +1434,20 @@ void VirtualMessage::executeFunctionType3(std::vector<double>& inParameters1,std
     }
 
     std::string functionName = mFunctionName;
+    uint columns = (uint)getGridOriginalColumnCount();
+    uint rows = (uint)getGridOriginalRowCount();
 
     // Trying to find C++ implementation of the function
 
     auto function = mFunctionCollection->getFunction(functionName);
     if (function != NULL)
     {
-      return function->executeFunctionType3(inParameters1,inParameters2,outParameters);
+      return function->executeFunctionCall3(columns,rows,inParameters1,inParameters2,outParameters);
     }
 
     // Calling the LUA implementation of the function
 
-    return mLuaFileCollection->executeFunctionType3(functionName,inParameters1,inParameters2,outParameters);
+    return mLuaFileCollection->executeFunctionCall3(functionName,columns,rows,inParameters1,inParameters2,outParameters);
   }
   catch (...)
   {
@@ -1396,7 +1459,7 @@ void VirtualMessage::executeFunctionType3(std::vector<double>& inParameters1,std
 
 
 
-void VirtualMessage::executeFunctionType3(T::GridValueList& inValueList1,T::GridValueList& inValueList2,T::GridValueList& outValueList) const
+void VirtualMessage::executeFunctionCall3(T::GridValueList& inValueList1,T::GridValueList& inValueList2,T::GridValueList& outValueList) const
 {
   FUNCTION_TRACE
   try
@@ -1432,7 +1495,7 @@ void VirtualMessage::executeFunctionType3(T::GridValueList& inValueList1,T::Grid
       inParameters2.push_back(value2->mValue);
     }
 
-    executeFunctionType3(inParameters1,inParameters2,outParameters);
+    executeFunctionCall3(inParameters1,inParameters2,outParameters);
 
     if (outParameters.size() == inParameters1.size())
     {

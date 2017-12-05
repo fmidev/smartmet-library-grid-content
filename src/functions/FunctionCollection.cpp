@@ -103,7 +103,7 @@ FunctionPtr FunctionCollection::getFunction(std::string& functionName)
 
 
 
-float FunctionCollection::executeFunctionType1(std::string& functionName,std::vector<float>& parameters)
+float FunctionCollection::executeFunctionCall1(std::string& functionName,std::vector<float>& parameters)
 {
   try
   {
@@ -115,7 +115,7 @@ float FunctionCollection::executeFunctionType1(std::string& functionName,std::ve
       throw exception;
     }
 
-    return function->executeFunctionType1(parameters);
+    return function->executeFunctionCall1(parameters);
   }
   catch (...)
   {
@@ -127,7 +127,7 @@ float FunctionCollection::executeFunctionType1(std::string& functionName,std::ve
 
 
 
-double FunctionCollection::executeFunctionType1(std::string& functionName,std::vector<double>& parameters)
+double FunctionCollection::executeFunctionCall1(std::string& functionName,std::vector<double>& parameters)
 {
   try
   {
@@ -139,7 +139,7 @@ double FunctionCollection::executeFunctionType1(std::string& functionName,std::v
       throw exception;
     }
 
-    return function->executeFunctionType1(parameters);
+    return function->executeFunctionCall1(parameters);
   }
   catch (...)
   {
@@ -151,7 +151,7 @@ double FunctionCollection::executeFunctionType1(std::string& functionName,std::v
 
 
 
-void FunctionCollection::executeFunctionType2(std::string& functionName,std::vector<double>& inOutParameters)
+void FunctionCollection::executeFunctionCall2(std::string& functionName,uint columns,uint rows,std::vector<double>& inOutParameters)
 {
   try
   {
@@ -163,7 +163,7 @@ void FunctionCollection::executeFunctionType2(std::string& functionName,std::vec
       throw exception;
     }
 
-    function->executeFunctionType2(inOutParameters);
+    function->executeFunctionCall2(columns,rows,inOutParameters);
   }
   catch (...)
   {
@@ -175,7 +175,7 @@ void FunctionCollection::executeFunctionType2(std::string& functionName,std::vec
 
 
 
-void FunctionCollection::executeFunctionType2(std::string& functionName,std::vector<double>& inParameters,std::vector<double>& outParameters)
+void FunctionCollection::executeFunctionCall2(std::string& functionName,uint columns,uint rows,std::vector<double>& inParameters,std::vector<double>& outParameters)
 {
   try
   {
@@ -187,7 +187,7 @@ void FunctionCollection::executeFunctionType2(std::string& functionName,std::vec
       throw exception;
     }
 
-    function->executeFunctionType2(inParameters,outParameters);
+    function->executeFunctionCall2(columns,rows,inParameters,outParameters);
   }
   catch (...)
   {
@@ -199,7 +199,7 @@ void FunctionCollection::executeFunctionType2(std::string& functionName,std::vec
 
 
 
-void FunctionCollection::executeFunctionType2(std::string& functionName,std::vector<float>& inOutParameters)
+void FunctionCollection::executeFunctionCall2(std::string& functionName,uint columns,uint rows,std::vector<float>& inOutParameters)
 {
   try
   {
@@ -211,7 +211,7 @@ void FunctionCollection::executeFunctionType2(std::string& functionName,std::vec
       throw exception;
     }
 
-    function->executeFunctionType2(inOutParameters);
+    function->executeFunctionCall2(columns,rows,inOutParameters);
   }
   catch (...)
   {
@@ -222,7 +222,7 @@ void FunctionCollection::executeFunctionType2(std::string& functionName,std::vec
 
 
 
-void FunctionCollection::executeFunctionType2(std::string& functionName,std::vector<float>& inParameters,std::vector<float>& outParameters)
+void FunctionCollection::executeFunctionCall2(std::string& functionName,uint columns,uint rows,std::vector<float>& inParameters,std::vector<float>& outParameters)
 {
   try
   {
@@ -234,7 +234,7 @@ void FunctionCollection::executeFunctionType2(std::string& functionName,std::vec
       throw exception;
     }
 
-    function->executeFunctionType2(inParameters,outParameters);
+    function->executeFunctionCall2(columns,rows,inParameters,outParameters);
   }
   catch (...)
   {
@@ -245,7 +245,7 @@ void FunctionCollection::executeFunctionType2(std::string& functionName,std::vec
 
 
 
-void FunctionCollection::executeFunctionType3(std::string& functionName,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters)
+void FunctionCollection::executeFunctionCall3(std::string& functionName,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters)
 {
   try
   {
@@ -257,7 +257,7 @@ void FunctionCollection::executeFunctionType3(std::string& functionName,std::vec
       throw exception;
     }
 
-    function->executeFunctionType3(inParameters1,inParameters2,outParameters);
+    function->executeFunctionCall3(columns,rows,inParameters1,inParameters2,outParameters);
   }
   catch (...)
   {
@@ -269,7 +269,7 @@ void FunctionCollection::executeFunctionType3(std::string& functionName,std::vec
 
 
 
-void FunctionCollection::executeFunctionType3(std::string& functionName,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters)
+void FunctionCollection::executeFunctionCall3(std::string& functionName,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters)
 {
   try
   {
@@ -281,7 +281,7 @@ void FunctionCollection::executeFunctionType3(std::string& functionName,std::vec
       throw exception;
     }
 
-    function->executeFunctionType3(inParameters1,inParameters2,outParameters);
+    function->executeFunctionCall3(columns,rows,inParameters1,inParameters2,outParameters);
   }
   catch (...)
   {

@@ -12,6 +12,7 @@ VirtualContentDefinition::VirtualContentDefinition()
 {
   try
   {
+    mFunctionCallMethod = 0;
   }
   catch (...)
   {
@@ -30,7 +31,8 @@ VirtualContentDefinition::VirtualContentDefinition(const VirtualContentDefinitio
     mTargetParameter = contentDefinition.mTargetParameter;
     mSourceParameters = contentDefinition.mSourceParameters;
     mFunctionName = contentDefinition.mFunctionName;
-    mProducers = contentDefinition.mProducers;
+    mFunctionCallMethod = contentDefinition.mFunctionCallMethod;
+    mProducerNameList = contentDefinition.mProducerNameList;
   }
   catch (...)
   {
@@ -70,8 +72,14 @@ void VirtualContentDefinition::print(std::ostream& stream,uint level,uint option
 
     stream << "\n";
 
-    stream << space(level) << "- mFunctionName = " << mFunctionName << "\n";
-    stream << space(level) << "- mProducers          = " << mProducers << "\n";
+    stream << space(level) << "- mFunctionName       = " << mFunctionName << "\n";
+    stream << space(level) << "- mFunctionCallMethod = " << mFunctionCallMethod << "\n";
+    stream << space(level) << "- mProducerNameList   = ";
+
+    for (auto it = mProducerNameList.begin(); it != mProducerNameList.end(); ++it)
+      stream << *it << " ";
+
+    stream << "\n";
   }
   catch (...)
   {

@@ -18,7 +18,8 @@ ServiceInterface::ServiceInterface()
   FUNCTION_TRACE
   try
   {
-    mProcessingLogPointer = NULL;
+    mDebugLog = NULL;
+    mProcessingLog = NULL;
   }
   catch (...)
   {
@@ -46,12 +47,29 @@ ServiceInterface::~ServiceInterface()
 
 
 
-void ServiceInterface::setProcessingLog(Log *processingLogPointer)
+void ServiceInterface::setDebugLog(Log *debugLog)
 {
   FUNCTION_TRACE
   try
   {
-    mProcessingLogPointer = processingLogPointer;
+    mDebugLog = debugLog;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void ServiceInterface::setProcessingLog(Log *processingLog)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mProcessingLog = processingLog;
   }
   catch (...)
   {
@@ -88,7 +106,7 @@ int ServiceInterface::executeQuery(T::SessionId sessionId,Query& query)
     int result = _executeQuery(sessionId,query);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,Query);result %d;time %f;",__FUNCTION__,sessionId,result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,Query);result %d;time %f;",__FUNCTION__,sessionId,result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -110,7 +128,7 @@ int ServiceInterface::getValuesByGridPoint(T::SessionId sessionId,T::ContentInfo
     int result = _getValuesByGridPoint(sessionId,contentInfoList,coordinateType,x,y,interpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLogPointer,"%s(%llu,ContentInfo[%u],%u,%f,%f,%u,GridPointValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,contentInfoList.getLength(),(uint)coordinateType,x,y,(uint)interpolationMethod,valueList.getLength(),result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,ContentInfo[%u],%u,%f,%f,%u,GridPointValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,contentInfoList.getLength(),(uint)coordinateType,x,y,(uint)interpolationMethod,valueList.getLength(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)

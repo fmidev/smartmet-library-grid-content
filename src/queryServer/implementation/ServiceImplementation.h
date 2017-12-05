@@ -57,7 +57,7 @@ class ServiceImplementation : public ServiceInterface
 
      void           checkConfigurationUpdates();
      bool           getAlias(std::string name,std::string& alias);
-     double         executeFunctionType1(std::string& function,std::vector<double>& parameters);
+     double         executeFunctionCall1(std::string& function,std::vector<double>& parameters);
      void           executeQueryFunctions(Query& query);
      int            executeTimeRangeQuery(Query& query);
      int            executeTimeStepQuery(Query& query);

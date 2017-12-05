@@ -95,7 +95,8 @@ typedef FileInfo* FileInfoPtr;
 enum class FileInfoFlags
 {
   CONTENT_PREDEFINED   = 1,
-  CONTENT_VIRTUAL      = 2
+  CONTENT_VIRTUAL      = 2,
+  FILE_DELETED         = 4
 };
 
 

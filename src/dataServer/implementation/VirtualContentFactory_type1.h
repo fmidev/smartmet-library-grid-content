@@ -19,13 +19,11 @@ class VirtualContentFactory_type1 : public VirtualContentFactory
     virtual     ~VirtualContentFactory_type1();
 
     void        init(std::string definitionFileName);
-    void        addFile(T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList,VirtualGridFilePtr_map& gridFileMap);
+    void        addFile(T::ProducerInfo& producerInfo,T::GenerationInfo& generationInfo,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList,VirtualGridFilePtr_map& gridFileMap);
 
   protected:
 
-    void        addContent(T::FileInfo& fileInfo,T::ContentInfo& contentInfo,VirtualGridFilePtr_map& gridFileMap);
-    bool        fileExists(const char *filename);
-    void        addFilename(const char *filename);
+    void        addContent(T::ProducerInfo& producerInfo,T::GenerationInfo& generationInfo,T::FileInfo& fileInfo,T::ContentInfo& contentInfo,VirtualGridFilePtr_map& gridFileMap);
 
   private:
 

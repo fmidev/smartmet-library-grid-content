@@ -66,7 +66,7 @@ void VirtualContentFactory_type1::init(std::string definitionFileName)
 
 
 
-void VirtualContentFactory_type1::addFile(T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList,VirtualGridFilePtr_map& gridFileMap)
+void VirtualContentFactory_type1::addFile(T::ProducerInfo& producerInfo,T::GenerationInfo& generationInfo,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList,VirtualGridFilePtr_map& gridFileMap)
 {
   FUNCTION_TRACE
   try
@@ -82,7 +82,7 @@ void VirtualContentFactory_type1::addFile(T::FileInfo& fileInfo,T::ContentInfoLi
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
-      addContent(fileInfo,*contentInfo,gridFileMap);
+      addContent(producerInfo,generationInfo,fileInfo,*contentInfo,gridFileMap);
     }
   }
   catch (...)
@@ -95,13 +95,13 @@ void VirtualContentFactory_type1::addFile(T::FileInfo& fileInfo,T::ContentInfoLi
 
 
 
-void VirtualContentFactory_type1::addContent(T::FileInfo& fileInfo,T::ContentInfo& contentInfo,VirtualGridFilePtr_map& gridFileMap)
+void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::GenerationInfo& generationInfo,T::FileInfo& fileInfo,T::ContentInfo& contentInfo,VirtualGridFilePtr_map& gridFileMap)
 {
   FUNCTION_TRACE
   try
   {
     VirtualContentDefinition_vec contentDefinitionList;
-    mContentDefinitionFile.getContentDefinitions(contentInfo.mFmiParameterName,contentDefinitionList);
+    mContentDefinitionFile.getContentDefinitions(contentInfo.mFmiParameterName,toLowerString(producerInfo.mName),contentDefinitionList);
 
     if (contentDefinitionList.size() > 0)
     {
@@ -120,7 +120,6 @@ void VirtualContentFactory_type1::addContent(T::FileInfo& fileInfo,T::ContentInf
         Identification::ParameterDefinition_fmi_cptr def = Identification::gribDef.mMessageIdentifier_fmi.getParameterDefByName(contentDef->mTargetParameter.c_str());
         if (def != NULL)
         {
-
           bool componentsFound = true;
           bool fileExists = false;
           uint virtualFileId = 0;
@@ -207,7 +206,7 @@ void VirtualContentFactory_type1::addContent(T::FileInfo& fileInfo,T::ContentInf
               virtualGridFile->addPhysicalGridFile(sm->first);
 
             GRID::VirtualMessage *virtualMessage = new GRID::VirtualMessage(sourceMessages);
-            virtualMessage->setFunction(mFunctionCollection,mLuaFileCollection,contentDef->mFunctionName);
+            virtualMessage->setFunction(mFunctionCollection,mLuaFileCollection,contentDef->mFunctionName,contentDef->mFunctionCallMethod);
 
             virtualGridFile->addMessage(virtualMessage);
 
