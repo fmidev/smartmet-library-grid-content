@@ -1,5 +1,6 @@
 #pragma once
 
+#include <grid-files/common/Coordinate.h>
 #include <grid-files/grid/Typedefs.h>
 
 
@@ -29,6 +30,10 @@ class Function
     // Type 3: Takes two vectors and returns one vector
     virtual void      executeFunctionCall3(uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters);
     virtual void      executeFunctionCall3(uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters);
+
+    // Type 4: Takes two data vectors and angle vector, returns one vector
+    virtual void      executeFunctionCall4(uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters);
+    virtual void      executeFunctionCall4(uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters);
 
     virtual Function* duplicate();
     virtual void      print(std::ostream& stream,uint level,uint optionFlags);

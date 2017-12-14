@@ -142,6 +142,20 @@ struct CorbaGenerationInfo
 typedef sequence<CorbaGenerationInfo> CorbaGenerationInfoList;
 
 
+
+struct CorbaForecastTime
+{
+  unsigned long  generationId;
+  unsigned long  geometryId;
+  short          forecastType;
+  short          forecastNumber;
+  string      	 forecastTime;
+  string      	 modificationTime;
+};
+
+typedef sequence<CorbaForecastTime> CorbaForecastTimeList;
+
+
 };
 };
 };

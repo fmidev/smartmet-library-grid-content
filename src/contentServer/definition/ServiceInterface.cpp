@@ -636,6 +636,28 @@ int ServiceInterface::deleteGenerationInfoByName(T::SessionId sessionId,std::str
 
 
 
+int ServiceInterface::deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<uint>& generationIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _deleteGenerationInfoListByIdList(sessionId,generationIdList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,generationId[%u]);result %d;time %f;",__FUNCTION__,sessionId,(uint)generationIdList.size(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId)
 {
   FUNCTION_TRACE
@@ -1174,6 +1196,28 @@ int ServiceInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Session
     unsigned long requestTime = getTime() - timeStart;
 
     PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%d,%d,%s);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime.c_str(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int ServiceInterface::deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _deleteFileInfoListByForecastTimeList(sessionId,forecastTimeList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,ForecastTime[%u]);result %d;time %f;",__FUNCTION__,sessionId,(uint)forecastTimeList.size(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -2790,6 +2834,15 @@ int ServiceInterface::_deleteGenerationInfoByName(T::SessionId sessionId,std::st
 
 
 
+int ServiceInterface::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<uint>& generationIdList)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
+
+
+
+
 int ServiceInterface::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
@@ -3007,6 +3060,15 @@ int ServiceInterface::_deleteFileInfoListByGenerationId(T::SessionId sessionId,u
 
 
 int ServiceInterface::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,std::string forecastTime)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
+
+
+
+
+int ServiceInterface::_deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }

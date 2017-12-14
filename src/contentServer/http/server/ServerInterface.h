@@ -50,6 +50,7 @@ class ServerInterface
     virtual void addGenerationInfo(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteGenerationInfoById(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteGenerationInfoByName(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void deleteGenerationInfoListByIdList(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteGenerationInfoListByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteGenerationInfoListByProducerName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteGenerationInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
@@ -72,6 +73,7 @@ class ServerInterface
     virtual void addFileInfoListWithContent(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteFileInfoById(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteFileInfoByName(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void deleteFileInfoListByForecastTimeList(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteFileInfoListByGroupFlags(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteFileInfoListByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteFileInfoListByProducerName(T::RequestMessage& request,T::ResponseMessage& response);

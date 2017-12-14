@@ -7,6 +7,7 @@
 #include "FileInfoList.h"
 #include "EventInfo.h"
 #include "EventInfoList.h"
+#include "ForecastTime.h"
 #include "ServerInfo.h"
 #include "ServerInfoList.h"
 #include "ProducerInfo.h"
@@ -78,6 +79,7 @@ class ServiceInterface
      virtual int    addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo);
      virtual int    deleteGenerationInfoById(T::SessionId sessionId,uint generationId);
      virtual int    deleteGenerationInfoByName(T::SessionId sessionId,std::string generationName);
+     virtual int    deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<uint>& generationIdList);
      virtual int    deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId);
      virtual int    deleteGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName);
      virtual int    deleteGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId);
@@ -105,6 +107,7 @@ class ServiceInterface
      virtual int    deleteFileInfoListByProducerName(T::SessionId sessionId,std::string producerName);
      virtual int    deleteFileInfoListByGenerationId(T::SessionId sessionId,uint generationId);
      virtual int    deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,std::string forecastTime);
+     virtual int    deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList);
      virtual int    deleteFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName);
      virtual int    deleteFileInfoListBySourceId(T::SessionId sessionId,uint sourceId);
      virtual int    deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<uint>& fileIdList);
@@ -205,6 +208,7 @@ class ServiceInterface
      virtual int    _addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo);
      virtual int    _deleteGenerationInfoById(T::SessionId sessionId,uint generationId);
      virtual int    _deleteGenerationInfoByName(T::SessionId sessionId,std::string generationName);
+     virtual int    _deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<uint>& generationIdList);
      virtual int    _deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId);
      virtual int    _deleteGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName);
      virtual int    _deleteGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId);
@@ -232,6 +236,7 @@ class ServiceInterface
      virtual int    _deleteFileInfoListByProducerName(T::SessionId sessionId,std::string producerName);
      virtual int    _deleteFileInfoListByGenerationId(T::SessionId sessionId,uint generationId);
      virtual int    _deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,std::string forecastTime);
+     virtual int    _deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList);
      virtual int    _deleteFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName);
      virtual int    _deleteFileInfoListBySourceId(T::SessionId sessionId,uint sourceId);
      virtual int    _deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<uint>& fileIdList);

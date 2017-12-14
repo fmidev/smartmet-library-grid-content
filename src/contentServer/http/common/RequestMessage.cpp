@@ -554,6 +554,23 @@ uint RequestMessage::getLinesByKey(const char *key,std::vector<std::string>& val
 
 
 
+void RequestMessage::deleteLineByIndex(uint index)
+{
+  try
+  {
+    if (index < (uint)mLines.size())
+      mLines.erase(mLines.begin() + index);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 void RequestMessage::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try

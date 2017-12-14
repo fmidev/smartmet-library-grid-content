@@ -863,6 +863,44 @@ uint ContentInfoList::deleteContentInfoByGenerationId(uint generationId)
 
 
 
+uint ContentInfoList::deleteContentInfoByGenerationIdList(std::set<uint>& generationIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    uint p = 0;
+    uint count = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      mArray[t] = NULL;
+      if (info != NULL  &&  (generationIdList.find(info->mGenerationId) != generationIdList.end()  ||  (info->mFlags & CONTENT_INFO_DELETED) != 0))
+      {
+        if (mReleaseObjects)
+          delete info;
+
+        count++;
+      }
+      else
+      {
+        mArray[p] = info;
+        p++;
+      }
+    }
+    mLength = p;
+    return count;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 uint ContentInfoList::deleteContentInfoByGenerationAndGeometry(uint generationId,T::GeometryId geometryId)
 {
   FUNCTION_TRACE
@@ -1511,7 +1549,7 @@ int ContentInfoList::getClosestIndexNoLock(ContentInfo::ComparisonMethod compari
     {
       if (mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
       {
-        while (mid < (int)mSize  &&  mArray[mid] != NULL  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
+        while (mid < (int)mLength  &&  mArray[mid] != NULL  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
           mid++;
 
         return mid-1;
@@ -1751,7 +1789,7 @@ void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex
   {
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
     {
-      printf("%s: Method not supported when records are not sorted by the fileId and the messageIndex fields!\n",__FUNCTION__);
+      std::cout << CODE_LOCATION << " : Method not supported when records are not sorted by the fileId and the messageIndex fields!\n";
       return;
     }
 
@@ -1799,7 +1837,7 @@ void ContentInfoList::getContentInfoListByGroupFlags(uint groupFlags,uint startF
   {
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
     {
-      printf("%s: Method not supported when records are not sorted by the fileId and the messageIndex fields!\n",__FUNCTION__);
+      std::cout << CODE_LOCATION << " : Method not supported when records are not sorted by the fileId and the messageIndex fields!\n";
       return;
     }
 
@@ -5493,7 +5531,7 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startF
   {
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
     {
-      printf("%s: Method not supported when records are not sorted by the fileId and the messageIndex fields!\n",__FUNCTION__);
+      std::cout << CODE_LOCATION << " : Method not supported when records are not sorted by the fileId and the messageIndex fields!\n";
       return;
     }
 
@@ -5538,7 +5576,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint generationId,uint st
   {
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
     {
-      printf("%s: Method not supported when records are not sorted by the fileId and the messageIndex fields!\n",__FUNCTION__);
+      std::cout << CODE_LOCATION << " : Method not supported when records are not sorted by the fileId and the messageIndex fields!\n";
       return;
     }
 
@@ -5583,7 +5621,7 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(uint generatio
   {
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
     {
-      printf("%s: Method not supported when records are not sorted by the fileId and the messageIndex fields!\n",__FUNCTION__);
+      std::cout << CODE_LOCATION << " : Method not supported when records are not sorted by the fileId and the messageIndex fields!\n";
       return;
     }
 
@@ -5657,7 +5695,7 @@ void ContentInfoList::getContentInfoListByServerId(uint serverId,uint startFileI
   {
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
     {
-      printf("%s: Method not supported when records are not sorted by the fileId and the messageIndex fields!\n",__FUNCTION__);
+      std::cout << CODE_LOCATION << " : Method not supported when records are not sorted by the fileId and the messageIndex fields!\n";
       return;
     }
 
@@ -5706,7 +5744,7 @@ void ContentInfoList::getContentInfoListBySourceId(uint sourceId,uint startFileI
   {
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
     {
-      printf("%s: Method not supported when records are not sorted by the fileId and the messageIndex fields!\n",__FUNCTION__);
+      std::cout << CODE_LOCATION << " : Method not supported when records are not sorted by the fileId and the messageIndex fields!\n";
       return;
     }
 

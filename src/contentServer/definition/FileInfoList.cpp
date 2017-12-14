@@ -491,7 +491,7 @@ int FileInfoList::getClosestIndexNoLock(FileInfo::ComparisonMethod comparisonMet
     {
       if (mArray[mid]->compare(comparisonMethod,&fileInfo) < 0)
       {
-        while (mid < (int)mSize  &&  mArray[mid] != NULL  &&   mArray[mid]->compare(comparisonMethod,&fileInfo) < 0)
+        while (mid < (int)mLength  &&  mArray[mid] != NULL  &&   mArray[mid]->compare(comparisonMethod,&fileInfo) < 0)
           mid++;
 
         return mid-1;
@@ -581,7 +581,7 @@ void FileInfoList::getFileInfoList(uint startFileId,uint maxRecords,FileInfoList
   {
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
     {
-      printf("%s : Not supported when the records are not ordered by the 'fileId' field!\n",__FUNCTION__);
+      std::cout << CODE_LOCATION << " : Not supported when the records are not ordered by the 'fileId' field!\n";
       return;
     }
 
@@ -626,7 +626,7 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,
   {
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
     {
-      printf("%s : Not supported when the records are not ordered by the 'fileId' field!\n",__FUNCTION__);
+      std::cout << CODE_LOCATION << " : Not supported when the records are not ordered by the 'fileId' field!\n";
       return;
     }
 
@@ -671,7 +671,7 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFil
   {
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
     {
-      printf("%s : Not supported when the records are not ordered by the 'fileId' field!\n",__FUNCTION__);
+      std::cout << CODE_LOCATION << " : Not supported when the records are not ordered by the 'fileId' field!\n";
       return;
     }
 
@@ -716,7 +716,7 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,
   {
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
     {
-      printf("%s : Not supported when the records are not ordered by the 'fileId' field!\n",__FUNCTION__);
+      std::cout << CODE_LOCATION << " : Not supported when the records are not ordered by the 'fileId' field!\n";
       return;
     }
 
@@ -760,7 +760,7 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,uint
   {
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
     {
-      printf("%s : Not supported when the records are not ordered by the 'fileId' field!\n",__FUNCTION__);
+      std::cout << CODE_LOCATION << " : Not supported when the records are not ordered by the 'fileId' field!\n";
       return;
     }
 
@@ -1118,6 +1118,45 @@ uint FileInfoList::deleteFileInfoByGenerationId(uint generationId)
       if (info != NULL)
       {
         if (info->mGenerationId == generationId || (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) != 0)
+        {
+          if (mReleaseObjects)
+            delete info;
+          count++;
+        }
+        else
+        {
+          mArray[p] = info;
+          p++;
+        }
+      }
+    }
+    mLength = p;
+    return count;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+uint FileInfoList::deleteFileInfoByGenerationIdList(std::set<uint>& generationIdList)
+{
+  try
+  {
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    uint count = 0;
+    uint p = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      FileInfo *info = mArray[t];
+      mArray[t] = NULL;
+      if (info != NULL)
+      {
+        if (generationIdList.find(info->mGenerationId) != generationIdList.end() || (info->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) != 0)
         {
           if (mReleaseObjects)
             delete info;

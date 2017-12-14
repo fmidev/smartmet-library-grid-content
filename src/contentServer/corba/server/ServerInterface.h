@@ -51,6 +51,7 @@ class ServerInterface : public POA_SmartMet::ContentServer::Corba::ServiceInterf
     ::CORBA::Long addGenerationInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaGenerationInfo& generationInfo);
     ::CORBA::Long deleteGenerationInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId);
     ::CORBA::Long deleteGenerationInfoByName(::CORBA::LongLong sessionId, const char* generationName);
+    ::CORBA::Long deleteGenerationInfoListByIdList(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaULongList& generationIdList);
     ::CORBA::Long deleteGenerationInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId);
     ::CORBA::Long deleteGenerationInfoListByProducerName(::CORBA::LongLong sessionId, const char* producerName);
     ::CORBA::Long deleteGenerationInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId);
@@ -77,6 +78,7 @@ class ServerInterface : public POA_SmartMet::ContentServer::Corba::ServiceInterf
     ::CORBA::Long deleteFileInfoListByProducerName(::CORBA::LongLong sessionId, const char* producerName);
     ::CORBA::Long deleteFileInfoListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId);
     ::CORBA::Long deleteFileInfoListByGenerationIdAndForecastTime(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, const char* forecastTime);
+    ::CORBA::Long deleteFileInfoListByForecastTimeList(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaForecastTimeList& forecastTimeList);
     ::CORBA::Long deleteFileInfoListByGenerationName(::CORBA::LongLong sessionId, const char* generationName);
     ::CORBA::Long deleteFileInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId);
     ::CORBA::Long deleteFileInfoListByFileIdList(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaULongList& fileIdList);

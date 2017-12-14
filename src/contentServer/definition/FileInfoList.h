@@ -29,6 +29,7 @@ class FileInfoList
      uint       deleteFileInfoByGroupFlags(uint groupFlags);
      uint       deleteFileInfoByProducerId(uint producerId);
      uint       deleteFileInfoByGenerationId(uint generationId);
+     uint       deleteFileInfoByGenerationIdList(std::set<uint>& generationIdList);
      bool       deleteFileInfoByIndex(uint index);
      bool       deleteFileInfoByName(std::string filename);
      uint       deleteFileInfoBySourceId(uint sourceId);

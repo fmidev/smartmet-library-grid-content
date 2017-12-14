@@ -854,6 +854,32 @@ int ClientImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std
 
 
 
+int ClientImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<uint>& generationIdList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaULongList_var corbaGenerationIdList = new ContentServer::Corba::CorbaULongList();
+    ContentServer::Corba::Converter::convert(generationIdList, corbaGenerationIdList);
+
+    int result = mService->deleteGenerationInfoListByIdList(sessionId, corbaGenerationIdList);
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId)
 {
   try
@@ -1518,6 +1544,33 @@ int ClientImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Se
       throw Spine::Exception(BCP, "The client is not initialized!");
 
     int result = mService->deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime.c_str());
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaForecastTimeList_var corbaForecastTimeList = new ContentServer::Corba::CorbaForecastTimeList();
+
+    ContentServer::Corba::Converter::convert(forecastTimeList, corbaForecastTimeList);
+
+    int result = mService->deleteFileInfoListByForecastTimeList(sessionId,corbaForecastTimeList);
 
     mLastAccessTime = time(0);
     return result;

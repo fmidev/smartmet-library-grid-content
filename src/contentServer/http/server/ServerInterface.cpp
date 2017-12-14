@@ -86,6 +86,7 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
     const char *method = methodStr.c_str();
 
     // printf("[%s]\n",method);
+    //request.print(std::cout,0,0);
 
     if (strcasecmp(method,"crash") == 0)
     {
@@ -231,6 +232,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"deleteGenerationInfoListByIdList") == 0)
+    {
+      deleteGenerationInfoListByIdList(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"deleteGenerationInfoListByProducerId") == 0)
     {
       deleteGenerationInfoListByProducerId(request,response);
@@ -339,6 +346,14 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"addFileInfoListWithContent") == 0)
+    {
+      //request.print(std::cout,0,0);
+      addFileInfoListWithContent(request,response);
+      //response.print(std::cout,0,0);
+      return;
+    }
+
     if (strcasecmp(method,"deleteFileInfoById") == 0)
     {
       deleteFileInfoById(request,response);
@@ -348,6 +363,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
     if (strcasecmp(method,"deleteFileInfoByName") == 0)
     {
       deleteFileInfoByName(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"deleteFileInfoListByForecastTimeList") == 0)
+    {
+      deleteFileInfoListByForecastTimeList(request,response);
       return;
     }
 
@@ -1764,6 +1785,47 @@ void ServerInterface::deleteGenerationInfoByName(T::RequestMessage& request,T::R
 
 
 
+void ServerInterface::deleteGenerationInfoListByIdList(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    string_vec csvLines;
+    if (request.getLinesByKey("generationId",csvLines) == 0)
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    std::set<uint> generationIdList;
+
+    for (auto it=csvLines.begin(); it!=csvLines.end(); ++it)
+    {
+      generationIdList.insert((uint)atoll(it->c_str()));
+    }
+
+    int result = mService->deleteGenerationInfoListByIdList(sessionId,generationIdList);
+    response.addLine("result",result);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 void ServerInterface::deleteGenerationInfoListByProducerId(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
@@ -2768,6 +2830,47 @@ void ServerInterface::deleteFileInfoByName(T::RequestMessage& request,T::Respons
   }
 }
 
+
+
+
+
+void ServerInterface::deleteFileInfoListByForecastTimeList(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    std::vector<std::string> csvLines;
+    request.getLinesByKey("forecastTime",csvLines);
+
+
+    std::vector<T::ForecastTime> forecastTimeList;
+    uint len = (uint)csvLines.size();
+    for (uint t=0; t<len; t++)
+    {
+      T::ForecastTime ft(csvLines[t].c_str());
+      forecastTimeList.push_back(ft);
+    }
+
+    int result = mService->deleteFileInfoListByForecastTimeList(sessionId,forecastTimeList);
+
+    response.addLine("result",result);
+
+    if (result != Result::OK)
+      response.addLine("resultString",getResultString(result));
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
 
 
 

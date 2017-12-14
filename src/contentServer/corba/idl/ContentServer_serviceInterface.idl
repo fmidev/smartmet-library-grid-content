@@ -43,6 +43,7 @@ interface ServiceInterface
   long  addGenerationInfo(in long long sessionId,inout CorbaGenerationInfo generationInfo);
   long  deleteGenerationInfoById(in long long sessionId,in unsigned long generationId);
   long  deleteGenerationInfoByName(in long long sessionId,in string generationName);
+  long  deleteGenerationInfoListByIdList(in long long sessionId,in CorbaULongList generationIdList);
   long  deleteGenerationInfoListByProducerId(in long long sessionId,in unsigned long producerId);
   long  deleteGenerationInfoListByProducerName(in long long sessionId,in string producerName);
   long  deleteGenerationInfoListBySourceId(in long long sessionId,in unsigned long sourceId);
@@ -70,6 +71,7 @@ interface ServiceInterface
   long  deleteFileInfoListByProducerName(in long long sessionId,in string producerName);
   long  deleteFileInfoListByGenerationId(in long long sessionId,in unsigned long generationId);
   long  deleteFileInfoListByGenerationIdAndForecastTime(in long long sessionId,in unsigned long generationId,in long  geometryId,in short forecastType,in short forecastNumber,in string forecastTime);
+  long  deleteFileInfoListByForecastTimeList(in long long sessionId,in CorbaForecastTimeList forecastTimeList);
   long  deleteFileInfoListByGenerationName(in long long sessionId,in string generationName);
   long  deleteFileInfoListBySourceId(in long long sessionId,in unsigned long sourceId);
   long  deleteFileInfoListByFileIdList(in long long sessionId,in CorbaULongList fileIdList);

@@ -5,6 +5,9 @@
 #include "functions/Function_multiply.h"
 #include "functions/Function_sequence.h"
 #include "functions/Function_hypotenuse.h"
+#include "functions/Function_windDir.h"
+#include "functions/Function_vectorU.h"
+#include "functions/Function_vectorV.h"
 
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/ShowFunction.h>
@@ -122,7 +125,10 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,std:
 
     mFunctionCollection.addFunction("K2F",k2f);
 
-    mFunctionCollection.addFunction("HYPOTENUSE",new Functions::Function_hypotenuse());
+    mFunctionCollection.addFunction("WIND_SPEED",new Functions::Function_hypotenuse());
+    mFunctionCollection.addFunction("WIND_DIR",new Functions::Function_windDir());
+    mFunctionCollection.addFunction("WIND_V",new Functions::Function_vectorV());
+    mFunctionCollection.addFunction("WIND_U",new Functions::Function_vectorU());
 
     checkServerRegistration();
     // fullUpdate();

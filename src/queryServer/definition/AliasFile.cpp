@@ -8,6 +8,21 @@ namespace QueryServer
 {
 
 
+AliasFile::AliasFile()
+{
+  try
+  {
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
 AliasFile::AliasFile(std::string filename)
 {
   try
@@ -65,6 +80,23 @@ void AliasFile::init()
 
     AutoThreadLock lock(&mThreadLock);
     loadFile();
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+void AliasFile::init(std::string filename)
+{
+  try
+  {
+    mFilename = filename;
+    init();
   }
   catch (...)
   {

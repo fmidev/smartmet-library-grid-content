@@ -38,8 +38,10 @@ class VirtualMessage : public Message
     virtual T::Dimensions_opt       getGridDimensions() const;
     virtual T::Hash                 getGridHash() const;
     virtual bool                    getGridLatLonCoordinatesByGridPoint(uint grid_i,uint grid_j,double& lat,double& lon) const;
+    virtual bool                    getGridLatLonCoordinatesByGridPosition(double grid_i,double grid_j,double& lat,double& lon) const;
     virtual bool                    getGridLatLonCoordinatesByOriginalCoordinates(double x,double y,double& lat,double& lon) const;
     virtual bool                    getGridOriginalCoordinatesByGridPoint(uint grid_i,uint grid_j,double& x,double& y) const;
+    virtual bool                    getGridOriginalCoordinatesByGridPosition(double grid_i,double grid_j,double& x,double& y) const;
     virtual bool                    getGridOriginalCoordinatesByLatLonCoordinates(double lat,double lon,double& x,double& y) const;
     virtual T::GridLayout           getGridLayout() const;
     virtual std::size_t             getGridOriginalColumnCount(std::size_t row) const;
@@ -77,6 +79,8 @@ class VirtualMessage : public Message
     virtual T::TimeString           getReferenceTime() const;
     virtual T::SpatialReference*    getSpatialReference() const;
     virtual std::string             getWKT() const;
+    virtual bool                    reverseXDirection() const;
+    virtual bool                    reverseYDirection() const;
 
     virtual void                    setContentInfo(T::ContentInfo& contentInfo);
     virtual T::ContentInfo*         getContentInfo();
@@ -99,6 +103,10 @@ class VirtualMessage : public Message
     virtual void                    executeFunctionCall3(std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters) const;
     virtual void                    executeFunctionCall3(std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters) const;
     virtual void                    executeFunctionCall3(T::GridValueList& inValueList1,T::GridValueList& inValueList2,T::GridValueList& outValueList) const;
+
+    virtual void                    executeFunctionCall4(std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters) const;
+    virtual void                    executeFunctionCall4(std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters) const;
+    virtual void                    executeFunctionCall4(T::CoordinateType coordinateType,T::GridValueList& inValueList1,T::GridValueList& inValueList2,T::GridValueList& outValueList) const;
 
     GRID::GridFile_sptr             mGridFile;
     mutable GRID::MessagePtr_vec    mMessageList;

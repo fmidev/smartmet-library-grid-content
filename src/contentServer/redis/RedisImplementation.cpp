@@ -1355,6 +1355,42 @@ int RedisImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std:
 
 
 
+int RedisImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<uint>& generationIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
+
+    deleteContentByGenerationIdList(generationIdList);
+    deleteFileListByGenerationIdList(generationIdList,false);
+
+    for (auto it = generationIdList.begin(); it != generationIdList.end(); ++it)
+    {
+      deleteGenerationById(*it,false,false);
+      addEvent(EventType::GENERATION_DELETED,*it,0,0,0);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int RedisImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId)
 {
   FUNCTION_TRACE
@@ -2495,6 +2531,51 @@ int RedisImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
+
+
+
+
+
+int RedisImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
+
+    T::ContentInfoList contentInfoList;
+    int result = getContentByForecastTimeList(forecastTimeList,contentInfoList);
+    uint len = contentInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
+      deleteContent(info->mFileId,info->mMessageIndex);
+
+      T::FileInfo fileInfo;
+      if (getFileById(info->mFileId,fileInfo) == Result::OK)
+      {
+        deleteFilename(fileInfo.mName);
+        deleteFileById(info->mFileId,false);
+        addEvent(EventType::FILE_DELETED,info->mFileId,(uint)fileInfo.mFileType,0,0);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
 
 
 
@@ -5544,6 +5625,39 @@ int RedisImplementation::deleteFileListByGenerationId(uint generationId,bool del
 
 
 
+int RedisImplementation::deleteFileListByGenerationIdList(std::set<uint>& generationIdList,bool deleteContent)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    if (deleteContent)
+      deleteContentByGenerationIdList(generationIdList);
+
+    T::FileInfoList fileInfoList;
+    getFileListByGenerationIdList(generationIdList,0,0xFFFFFFFF,fileInfoList);
+    uint len = fileInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::FileInfo *fileInfo = fileInfoList.getFileInfoByIndex(t);
+      deleteFilename(fileInfo->mName);
+      deleteFileById(fileInfo->mFileId,false);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int RedisImplementation::getFileById(uint fileId,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -5658,6 +5772,79 @@ int RedisImplementation::getFileListByGenerationId(uint generationId,uint startF
           {
             startFileId = fileInfo->mFileId + 1;
             if (fileInfo->mGenerationId == generationId)
+              fileInfoList.addFileInfo(fileInfo);
+            else
+              delete fileInfo;
+
+            if (fileInfoList.getLength() == maxRecords)
+            {
+              freeReplyObject(reply);
+              return Result::OK;
+            }
+          }
+          else
+          {
+            delete fileInfo;
+          }
+        }
+        freeReplyObject(reply);
+      }
+      else
+      {
+        freeReplyObject(reply);
+        return Result::OK;
+      }
+    }
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::getFileListByGenerationIdList(std::set<uint>& generationIdList,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    uint prevFileId = 0xFFFFFFFF;
+
+    while (startFileId != prevFileId)
+    {
+      prevFileId = startFileId;
+
+      redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sfiles %u %u LIMIT 0 10000",mTablePrefix.c_str(),startFileId,0xFFFFFFFF);
+      if (reply == NULL)
+      {
+        closeConnection();
+        return Result::PERMANENT_STORAGE_ERROR;
+      }
+
+      if (reply->type == REDIS_REPLY_ARRAY)
+      {
+        if (reply->elements == 0)
+        {
+          freeReplyObject(reply);
+          return Result::OK;
+        }
+
+        for (uint t = 0; t < reply->elements; t++)
+        {
+          T::FileInfo *fileInfo = new T::FileInfo();
+          fileInfo->setCsv(reply->element[t]->str);
+
+          if (fileInfo->mFileId >= startFileId)
+          {
+            startFileId = fileInfo->mFileId + 1;
+            if (generationIdList.find(fileInfo->mGenerationId) != generationIdList.end())
               fileInfoList.addFileInfo(fileInfo);
             else
               delete fileInfo;
@@ -6198,6 +6385,35 @@ int RedisImplementation::deleteContentByGenerationId(uint generationId)
 
 
 
+int RedisImplementation::deleteContentByGenerationIdList(std::set<uint>& generationIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::ContentInfoList contentInfoList;
+    getContentByGenerationIdList(generationIdList,0,0,0xFFFFFFFF,contentInfoList);
+    uint len = contentInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
+      deleteContent(contentInfo->mFileId,contentInfo->mMessageIndex);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int RedisImplementation::deleteContentByGroupFlags(uint groupFlags)
 {
   FUNCTION_TRACE
@@ -6515,6 +6731,83 @@ int RedisImplementation::getContentByGenerationId(uint generationId,uint startFi
             startMessageIndex = contentInfo->mMessageIndex + 1;
 
             if (contentInfo->mGenerationId == generationId)
+              contentInfoList.addContentInfo(contentInfo);
+            else
+              delete contentInfo;
+
+            if (contentInfoList.getLength() == maxRecords)
+            {
+              freeReplyObject(reply);
+              return Result::OK;
+            }
+          }
+          else
+          {
+            delete contentInfo;
+          }
+        }
+        freeReplyObject(reply);
+      }
+      else
+      {
+        freeReplyObject(reply);
+        return Result::OK;
+      }
+      startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+    }
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::getContentByGenerationIdList(std::set<uint>& generationIdList,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+    unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
+
+    while (startId != prevStartId)
+    {
+      prevStartId = startId;
+
+      redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF);
+      if (reply == NULL)
+      {
+        closeConnection();
+        return Result::PERMANENT_STORAGE_ERROR;
+      }
+
+      if (reply->elements == 0)
+      {
+        freeReplyObject(reply);
+        return Result::OK;
+      }
+
+      if (reply->type == REDIS_REPLY_ARRAY)
+      {
+        for (uint t = 0; t < reply->elements; t++)
+        {
+          T::ContentInfo *contentInfo = new T::ContentInfo();
+          contentInfo->setCsv(reply->element[t]->str);
+
+          if (contentInfo->mFileId > startFileId  ||  (contentInfo->mFileId == startFileId   &&  contentInfo->mMessageIndex >= startMessageIndex))
+          {
+            startFileId = contentInfo->mFileId;
+            startMessageIndex = contentInfo->mMessageIndex + 1;
+
+            if (generationIdList.find(contentInfo->mGenerationId) != generationIdList.end())
               contentInfoList.addContentInfo(contentInfo);
             else
               delete contentInfo;
@@ -6962,6 +7255,64 @@ int RedisImplementation::getContentByGenerationIdAndTimeRange(uint generationId,
 
         if (contentInfo->mGenerationId == generationId  &&  contentInfo->mForecastTime >= startTime  &&  contentInfo->mForecastTime <= endTime)
           contentInfoList.addContentInfo(contentInfo);
+        else
+          delete contentInfo;
+      }
+    }
+
+    freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int RedisImplementation::getContentByForecastTimeList(std::vector<T::ForecastTime>& forecastTimeList,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    std::set<std::string> searchList;
+
+    char tmp[200];
+    for (auto it = forecastTimeList.begin(); it != forecastTimeList.end(); ++it)
+    {
+      sprintf(tmp,"%d;%d;%d;%d;%s",it->mGenerationId,it->mGeometryId,it->mForecastType,it->mForecastNumber,it->mForecastTime.c_str());
+      std::string st = tmp;
+      if (searchList.find(st) == searchList.end())
+        searchList.insert(st);
+    }
+
+
+    redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF);
+    if (reply == NULL)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->type == REDIS_REPLY_ARRAY)
+    {
+      for (uint t = 0; t < reply->elements; t++)
+      {
+        T::ContentInfo *contentInfo = new T::ContentInfo();
+        contentInfo->setCsv(reply->element[t]->str);
+
+        sprintf(tmp,"%d;%d;%d;%d;%s",contentInfo->mGenerationId,contentInfo->mGeometryId,contentInfo->mForecastType,contentInfo->mForecastNumber,contentInfo->mForecastTime.c_str());
+        if (searchList.find(tmp) != searchList.end())
+        {
+          contentInfoList.addContentInfo(contentInfo);
+          // printf("-- delete %s %u\n",tmp,contentInfoList.getLength());
+        }
         else
           delete contentInfo;
       }

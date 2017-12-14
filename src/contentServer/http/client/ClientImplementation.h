@@ -52,6 +52,7 @@ class ClientImplementation : public ContentServer::ServiceInterface
      virtual int    _addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo);
      virtual int    _deleteGenerationInfoById(T::SessionId sessionId,uint generationId);
      virtual int    _deleteGenerationInfoByName(T::SessionId sessionId,std::string generationName);
+     virtual int    _deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<uint>& generationIdList);
      virtual int    _deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId);
      virtual int    _deleteGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName);
      virtual int    _deleteGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId);
@@ -74,6 +75,7 @@ class ClientImplementation : public ContentServer::ServiceInterface
      virtual int    _addFileInfoListWithContent(T::SessionId sessionId,std::vector<T::FileAndContent>& fileAndContentList);
      virtual int    _deleteFileInfoById(T::SessionId sessionId,uint fileId);
      virtual int    _deleteFileInfoByName(T::SessionId sessionId,std::string filename);
+     virtual int    _deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList);
      virtual int    _deleteFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags);
      virtual int    _deleteFileInfoListByProducerId(T::SessionId sessionId,uint producerId);
      virtual int    _deleteFileInfoListByProducerName(T::SessionId sessionId,std::string producerName);

@@ -13,6 +13,7 @@
 #include "contentServer/definition/ProducerInfoList.h"
 #include "contentServer/definition/GenerationInfo.h"
 #include "contentServer/definition/GenerationInfoList.h"
+#include "contentServer/definition/ForecastTime.h"
 
 #include "contentServer/corba/stubs/ContentServer_serviceInterface_SK.h"
 
@@ -88,6 +89,11 @@ class Converter
     static void   convert(std::vector<T::FileAndContent>& source,ContentServer::Corba::CorbaFileContentList& target);
     static void   convert(const ContentServer::Corba::CorbaFileContentList& source,std::vector<T::FileAndContent>& target);
 
+    static void   convert(T::ForecastTime& source,SmartMet::ContentServer::Corba::CorbaForecastTime& target);
+    static void   convert(const SmartMet::ContentServer::Corba::CorbaForecastTime& source,T::ForecastTime& target);
+
+    static void   convert(std::vector<T::ForecastTime>& source,SmartMet::ContentServer::Corba::CorbaForecastTimeList& target);
+    static void   convert(const SmartMet::ContentServer::Corba::CorbaForecastTimeList& source,std::vector<T::ForecastTime>& target);
 };
 
 

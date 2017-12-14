@@ -818,6 +818,37 @@ int ClientImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std
 
 
 
+int ClientImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<uint>& generationIdList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","deleteGenerationInfoListByIdList");
+    request.addLine("sessionId",sessionId);
+
+    for (auto it=generationIdList.begin(); it!=generationIdList.end(); ++it)
+      request.addLine("generationId",*it);
+
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+
+    return result;
+ }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId)
 {
   try
@@ -1418,7 +1449,7 @@ int ClientImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std
 
     uint length = (uint)fileAndContentList.size();
 
-    request.addLine("method","_addFileInfoListWithContent");
+    request.addLine("method","addFileInfoListWithContent");
     request.addLine("sessionId",sessionId);
     request.addLine("length",length);
 
@@ -1512,6 +1543,38 @@ int ClientImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::stri
     request.addLine("method","deleteFileInfoByName");
     request.addLine("sessionId",sessionId);
     request.addLine("filename",filename);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","deleteFileInfoListByForecastTimeList");
+    request.addLine("sessionId",sessionId);
+
+    for (auto it = forecastTimeList.begin();it != forecastTimeList.end();++it)
+    {
+      request.addLine("forecastTime",it->getCsv());
+    }
 
     T::ResponseMessage response;
 

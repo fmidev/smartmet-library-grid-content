@@ -731,6 +731,33 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::deleteGenerationInfoListByIdList(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaULongList& generationIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    std::set<uint> sGenerationIdList;
+    ContentServer::Corba::Converter::convert(generationIdList,sGenerationIdList);
+
+    int result = mService->deleteGenerationInfoListByIdList(sessionId,sGenerationIdList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::deleteGenerationInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId)
 {
   FUNCTION_TRACE
@@ -1432,6 +1459,33 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::deleteFileInfoListByForecastTimeList(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaForecastTimeList& forecastTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    std::vector<T::ForecastTime> sForecastTimeList;
+
+    ContentServer::Corba::Converter::convert(forecastTimeList,sForecastTimeList);
+
+    int result = mService->deleteFileInfoListByForecastTimeList(sessionId,sForecastTimeList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
 ::CORBA::Long ServerInterface::deleteFileInfoListByGenerationName(::CORBA::LongLong sessionId, const char* generationName)
 {
   FUNCTION_TRACE
@@ -1486,8 +1540,6 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
     std::set<uint> sFileIdList;
     ContentServer::Corba::Converter::convert(fileIdList,sFileIdList);
-
-    //sContentInfoList.print(std::cout,0,0);
 
     int result = mService->deleteFileInfoListByFileIdList(sessionId,sFileIdList);
 

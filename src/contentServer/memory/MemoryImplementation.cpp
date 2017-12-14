@@ -1130,6 +1130,40 @@ int MemoryImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std
 
 
 
+int MemoryImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<uint>& generationIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+      mContentInfoList[t].deleteContentInfoByGenerationIdList(generationIdList);
+
+    mFileInfoListByName.deleteFileInfoByGenerationIdList(generationIdList);
+    mFileInfoList.deleteFileInfoByGenerationIdList(generationIdList);
+
+    for (auto it = generationIdList.begin(); it != generationIdList.end(); ++it)
+    {
+      mGenerationInfoList.deleteGenerationInfoById(*it);
+      addEvent(EventType::GENERATION_DELETED,*it,0,0,0);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int MemoryImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId)
 {
   FUNCTION_TRACE
@@ -1150,8 +1184,6 @@ int MemoryImplementation::_deleteGenerationInfoListByProducerId(T::SessionId ses
 
     mFileInfoListByName.deleteFileInfoByProducerId(producerInfo->mProducerId);
     mFileInfoList.deleteFileInfoByProducerId(producerInfo->mProducerId);
-
-    mGenerationInfoList.deleteGenerationInfoListByProducerId(producerInfo->mProducerId);
 
     mGenerationInfoList.deleteGenerationInfoListByProducerId(producerInfo->mProducerId);
 

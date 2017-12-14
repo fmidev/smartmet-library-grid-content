@@ -14,11 +14,13 @@ namespace QueryServer
 class AliasFile
 {
   public:
+                  AliasFile();
                   AliasFile(std::string filename);
-                  AliasFile(const AliasFile& aliasList);
+                  AliasFile(const AliasFile& aliasFile);
     virtual       ~AliasFile();
 
     virtual void  init();
+    virtual void  init(std::string filename);
     virtual void  checkUpdates();
     virtual bool  getAlias(std::string& name,std::string& alias);
     virtual void  print(std::ostream& stream,uint level,uint optionFlags);

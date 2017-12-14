@@ -1129,6 +1129,28 @@ int CacheImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std:
 
 
 
+int CacheImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<uint>& generationIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == NULL)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->deleteGenerationInfoListByIdList(sessionId,generationIdList);
+    processEvents(false);
+    return result;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId)
 {
   FUNCTION_TRACE
@@ -1786,6 +1808,28 @@ int CacheImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime);
+    processEvents(false);
+    return result;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == NULL)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->deleteFileInfoListByForecastTimeList(sessionId,forecastTimeList);
     processEvents(false);
     return result;
   }
@@ -5213,6 +5257,26 @@ void CacheImplementation::processEvents(bool eventThread)
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
+    if (mFileDeleteCount > 0)
+    {
+      PRINT_DATA(mDebugLog,"* Deleting files that were marked to be deleted : %u\n",mFileDeleteCount);
+
+      mFileInfoListByName.deleteMarkedFiles();
+      mFileInfoList.deleteMarkedFiles();
+      mFileDeleteCount = 0;
+    }
+
+    if (mContentDeleteCount > 0)
+    {
+      PRINT_DATA(mDebugLog,"* Deleting content that was marked to be deleted : %u\n",mContentDeleteCount);
+      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+      {
+        mContentInfoList[t].deleteMarkedContent();
+      }
+      mContentDeleteCount = 0;
+    }
+
+
     if (mDelayedFileAddList.size() > 0)
     {
       PRINT_DATA(mDebugLog,"* Adding files that were waiting the addition : %u\n",(uint)mDelayedFileAddList.size());
@@ -5284,25 +5348,6 @@ void CacheImplementation::processEvents(bool eventThread)
       mDelayedContentDeleteList.clear();
     }
     */
-
-    if (mFileDeleteCount > 0)
-    {
-      PRINT_DATA(mDebugLog,"* Deleting files that were marked to be deleted : %u\n",mFileDeleteCount);
-
-      mFileInfoListByName.deleteMarkedFiles();
-      mFileInfoList.deleteMarkedFiles();
-      mFileDeleteCount = 0;
-    }
-
-    if (mContentDeleteCount > 0)
-    {
-      PRINT_DATA(mDebugLog,"* Deleting content that was marked to be deleted : %u\n",mContentDeleteCount);
-      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      {
-        mContentInfoList[t].deleteMarkedContent();
-      }
-      mContentDeleteCount = 0;
-    }
 
     T::EventInfo *it = delayedEventInfoList.getFirstEvent();
     while (it != NULL)

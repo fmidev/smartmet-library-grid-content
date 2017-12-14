@@ -38,6 +38,7 @@ class ContentInfoList
      uint             deleteContentInfoByGroupFlags(uint groupFlags);
      uint             deleteContentInfoByProducerId(uint producerId);
      uint             deleteContentInfoByGenerationId(uint generationId);
+     uint             deleteContentInfoByGenerationIdList(std::set<uint>& generationIdList);
      uint             deleteContentInfoByGenerationAndGeometry(uint generationId,T::GeometryId geometryId);
      uint             deleteContentInfoByGenerationGeometryAndStartTime(uint generationId,T::GeometryId geometryId,std::string startTime);
      uint             deleteContentInfoBySourceId(uint sourceId);

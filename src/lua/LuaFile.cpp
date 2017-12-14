@@ -684,7 +684,7 @@ void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,
     }
 
     int pLen1 = (int)inParameters1.size();
-    int pLen2 = (int)inParameters1.size();
+    int pLen2 = (int)inParameters2.size();
 
     if (pLen1 != pLen2)
     {
@@ -782,7 +782,7 @@ void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,
     }
 
     int pLen1 = (int)inParameters1.size();
-    int pLen2 = (int)inParameters1.size();
+    int pLen2 = (int)inParameters2.size();
 
     if (pLen1 != pLen2)
     {
@@ -848,31 +848,230 @@ void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,
 
 
 
-#if 0
-void LuaFile::executeFunctionCall2(std::string& function,std::vector<float>& inParameters,std::vector<float>& outParameters)
+
+
+void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters)
 {
   try
   {
-    std::vector<double> inParams;
-    std::vector<double> outParams;
+    ulonglong startTime = getTime();
 
-    inParams.reserve(inParameters.size());
-    outParams.reserve(inParameters.size());
+    lua_State *L = (lua_State*)mLuaState;
 
-    for (auto it = inParameters.begin(); it != inParameters.end(); ++it)
-      inParams.push_back(*it);
+    AutoThreadLock lock(&mThreadLock);
 
-    executeFunctionCall2(function,inParams,outParams);
+    auto a = mFunctions.find(toLowerString(function));
+    if (a == mFunctions.end())
+    {
+      Spine::Exception exception(BCP, "Unknown function!");
+      exception.addParameter("Function",function);
+      throw exception;
+    }
 
-    for (auto it = outParams.begin(); it != outParams.end(); ++it)
-      outParameters.push_back(*it);
+    if (a->second.mType != 4)
+    {
+      Spine::Exception exception(BCP, "Invalid function type!");
+      exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
+      exception.addDetail("That's because the current LUA function does not support the same parameters");
+      exception.addDetail("or the return values that this 'executeFunction' is using.");
+      exception.addParameter("LUA Function",function);
+      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+      throw exception;
+    }
+
+    int pLen1 = (int)inParameters1.size();
+    int pLen2 = (int)inParameters2.size();
+    int aLen = (int)angles.size();
+
+    if (pLen1 != pLen2)
+    {
+      Spine::Exception exception(BCP, "Input parameters should have the same number of values!");
+      exception.addParameter("NumOfValues(inParameters1)",std::to_string(pLen1));
+      exception.addParameter("NumOfValues(inParameters2)",std::to_string(pLen2));
+      throw exception;
+    }
+
+    if (pLen1 != aLen)
+    {
+      Spine::Exception exception(BCP, "There should be as many angles as grid values!");
+      exception.addParameter("NumOfValues",std::to_string(pLen1));
+      exception.addParameter("NumOfAngles",std::to_string(aLen));
+      throw exception;
+    }
+
+    lua_getglobal(L,a->second.mFunctionName.c_str());
+    //lua_pushinteger(L,pLen);
+    lua_pushinteger(L,columns);
+    lua_pushinteger(L,rows);
+
+    lua_newtable(L);
+    for (int i = 0; i < pLen1; i++)
+    {
+      lua_pushnumber(L,inParameters1[i]);
+      lua_rawseti(L,-2,i + 1);
+    }
+
+    lua_newtable(L);
+    for (int i = 0; i < pLen1; i++)
+    {
+      lua_pushnumber(L,inParameters2[i]);
+      lua_rawseti(L,-2,i + 1);
+    }
+
+    lua_newtable(L);
+    for (int i = 0; i < aLen; i++)
+    {
+      lua_pushnumber(L,angles[i]);
+      lua_rawseti(L,-2,i + 1);
+    }
+
+    int res = lua_pcall(L, 5, LUA_MULTRET, 0);
+    ulonglong endTime = getTime();
+
+    if (res != 0)
+    {
+      // LUA ERROR
+      Spine::Exception exception(BCP, "LUA call returns an error!");
+      exception.addParameter("LUA Function",function);
+      exception.addParameter("LUA message",lua_tostring(L, -1));
+      lua_pop(L, 1);
+      throw exception;
+    }
+    else
+    {
+      outParameters.reserve(pLen1);
+
+      for (int t=1; t<=pLen1; t++)
+      {
+        lua_pushnumber(L,t);
+        lua_gettable(L, -2);
+        float a = lua_tonumber(L, -1);
+        outParameters.push_back(a);
+        //printf("%d => %f\n",t,a);
+        lua_pop(L, 1);
+      }
+      lua_pop(L, 1);  // pop table from the stack
+    }
+    printf("** %s : %f sec\n",function.c_str(),(float)(endTime-startTime)/1000000);
   }
   catch (...)
   {
     throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
   }
 }
-#endif
+
+
+
+
+
+void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters)
+{
+  try
+  {
+    ulonglong startTime = getTime();
+
+    lua_State *L = (lua_State*)mLuaState;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    auto a = mFunctions.find(toLowerString(function));
+    if (a == mFunctions.end())
+    {
+      Spine::Exception exception(BCP, "Unknown function!");
+      exception.addParameter("Function",function);
+      throw exception;
+    }
+
+    if (a->second.mType != 4)
+    {
+      Spine::Exception exception(BCP, "Invalid function type!");
+      exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
+      exception.addDetail("That's because the current LUA function does not support the same parameters");
+      exception.addDetail("or the return values that this 'executeFunction' is using.");
+      exception.addParameter("LUA Function",function);
+      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+      throw exception;
+    }
+
+    int pLen1 = (int)inParameters1.size();
+    int pLen2 = (int)inParameters2.size();
+    int aLen = (int)angles.size();
+
+    if (pLen1 != pLen2)
+    {
+      Spine::Exception exception(BCP, "Input parameters should have the same number of values!");
+      exception.addParameter("NumOfValues(inParameters1)",std::to_string(pLen1));
+      exception.addParameter("NumOfValues(inParameters2)",std::to_string(pLen2));
+      throw exception;
+    }
+    if (pLen1 != aLen)
+    {
+      Spine::Exception exception(BCP, "There should be as many angles as grid values!");
+      exception.addParameter("NumOfValues",std::to_string(pLen1));
+      exception.addParameter("NumOfAngles",std::to_string(aLen));
+      throw exception;
+    }
+    lua_getglobal(L,a->second.mFunctionName.c_str());
+    //lua_pushinteger(L,pLen);
+    lua_pushinteger(L,columns);
+    lua_pushinteger(L,rows);
+
+    lua_newtable(L);
+    for (int i = 0; i < pLen1; i++)
+    {
+      lua_pushnumber(L,inParameters1[i]);
+      lua_rawseti(L,-2,i + 1);
+    }
+
+    lua_newtable(L);
+    for (int i = 0; i < pLen1; i++)
+    {
+      lua_pushnumber(L,inParameters2[i]);
+      lua_rawseti(L,-2,i + 1);
+    }
+
+    lua_newtable(L);
+    for (int i = 0; i < aLen; i++)
+    {
+      lua_pushnumber(L,angles[i]);
+      lua_rawseti(L,-2,i + 1);
+    }
+
+    int res = lua_pcall(L, 5, LUA_MULTRET, 0);
+    ulonglong endTime = getTime();
+
+    if (res != 0)
+    {
+      // LUA ERROR
+      Spine::Exception exception(BCP, "LUA call returns an error!");
+      exception.addParameter("LUA Function",function);
+      exception.addParameter("LUA message",lua_tostring(L, -1));
+      lua_pop(L, 1);
+      throw exception;
+    }
+    else
+    {
+      outParameters.reserve(pLen1);
+
+      for (int t=1; t<=pLen1; t++)
+      {
+        lua_pushnumber(L,t);
+        lua_gettable(L, -2);
+        double a = lua_tonumber(L, -1);
+        outParameters.push_back(a);
+        //printf("%d => %f\n",t,a);
+        lua_pop(L, 1);
+      }
+      lua_pop(L, 1);  // pop table from the stack
+    }
+    printf("** %s : %f sec\n",function.c_str(),(float)(endTime-startTime)/1000000);
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+  }
+}
+
 
 
 

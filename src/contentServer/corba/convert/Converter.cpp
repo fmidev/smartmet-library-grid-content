@@ -887,6 +887,91 @@ void Converter::convert(const ContentServer::Corba::CorbaFileContentList& source
 
 
 
+
+void Converter::convert(T::ForecastTime& source,SmartMet::ContentServer::Corba::CorbaForecastTime& target)
+{
+  try
+  {
+    target.generationId = source.mGenerationId;
+    target.geometryId = source.mGeometryId;
+    target.forecastType = source.mForecastType;
+    target.forecastNumber = source.mForecastNumber;
+    target.forecastTime = CORBA::string_dup(source.mForecastTime.c_str());
+    target.modificationTime = CORBA::string_dup(source.mModificationTime.c_str());
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void Converter::convert(const SmartMet::ContentServer::Corba::CorbaForecastTime& source,T::ForecastTime& target)
+{
+  try
+  {
+    target.mGenerationId = source.generationId;
+    target.mGeometryId = source.geometryId;
+    target.mForecastType = source.forecastType;
+    target.mForecastNumber = source.forecastNumber;
+    target.mForecastTime = source.forecastTime;
+    target.mModificationTime = source.modificationTime;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+void Converter::convert(std::vector<T::ForecastTime>& source,SmartMet::ContentServer::Corba::CorbaForecastTimeList& target)
+{
+  try
+  {
+    uint len = (uint)source.size();
+    target.length(len);
+    for (uint t = 0; t<len; t++)
+    {
+      ContentServer::Corba::CorbaForecastTime corbaObject;
+      convert(source[t],corbaObject);
+      target[t] = corbaObject;
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void Converter::convert(const SmartMet::ContentServer::Corba::CorbaForecastTimeList& source,std::vector<T::ForecastTime>& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      T::ForecastTime ft;
+      convert(source[t],ft);
+      target.push_back(ft);
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
 }
 }
 }

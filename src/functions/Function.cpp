@@ -37,6 +37,7 @@ Function::Function(const Function& function)
 
 
 
+
 Function::~Function()
 {
   try
@@ -119,6 +120,25 @@ void Function::executeFunctionCall3(uint columns,uint rows,std::vector<double>& 
 {
   throw Spine::Exception(BCP, "Not implemented!");
 }
+
+
+
+
+
+void Function::executeFunctionCall4(uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters)
+{
+  throw Spine::Exception(BCP, "Not implemented!");
+}
+
+
+
+
+
+void Function::executeFunctionCall4(uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters)
+{
+  throw Spine::Exception(BCP, "Not implemented!");
+}
+
 
 
 

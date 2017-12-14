@@ -44,6 +44,7 @@ class RequestMessage
      bool           getLineByKey(const char *key,unsigned long long& value);
      bool           getLineByKey(const char *key,long long& value);
      uint           getLinesByKey(const char *key,std::vector<std::string>& values);
+     void           deleteLineByIndex(uint index);
 
      void           print(std::ostream& stream,uint level,uint optionFlags);
 

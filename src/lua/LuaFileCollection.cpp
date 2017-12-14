@@ -402,6 +402,65 @@ void LuaFileCollection::executeFunctionCall3(std::string& function,uint columns,
 
 
 
+
+void LuaFileCollection::executeFunctionCall4(std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    {
+      std::string functionName;
+      uint type = it->getFunction(function,functionName);
+      if (type == 4)
+      {
+        it->executeFunctionCall4(functionName,columns,rows,inParameters1,inParameters2,angles,outParameters);
+        return;
+      }
+    }
+
+    Spine::Exception exception(BCP, "Unknown LUA function!");
+    exception.addParameter("Function",function);
+    throw exception;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+  }
+}
+
+
+
+
+
+void LuaFileCollection::executeFunctionCall4(std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    {
+      std::string functionName;
+      uint type = it->getFunction(function,functionName);
+      if (type == 4)
+      {
+        it->executeFunctionCall4(functionName,columns,rows,inParameters1,inParameters2,angles,outParameters);
+        return;
+      }
+    }
+
+    Spine::Exception exception(BCP, "Unknown LUA function!");
+    exception.addParameter("Function",function);
+    throw exception;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+  }
+}
+
+
+
 void LuaFileCollection::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try
