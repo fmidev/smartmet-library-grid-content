@@ -310,7 +310,7 @@ int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,T::Valu
 
 
 
-int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,T::GridCoordinates& coordinates)
+int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,T::GridCoordinates& coordinates)
 {
   FUNCTION_TRACE
   try
@@ -322,6 +322,30 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileI
     GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
     if (message == NULL)
       return Result::MESSAGE_NOT_FOUND;
+
+    if ((flags & DS_ORIGINAL_DATA) == 0)
+    {
+      // Virtual data accepted
+      uint virtualFileId = 0;
+      uint virtualMessageIndex = 0;
+      message->getVirtualMessage(virtualFileId,virtualMessageIndex);
+
+      if (virtualFileId > 0)
+      {
+        // We should use the virtual message instead of the original message.
+
+        GRID::GridFile_sptr gridFile2 = getGridFile(virtualFileId);
+        if (!gridFile2)
+          return Result::DATA_NOT_FOUND;
+
+        GRID::Message *message2 = gridFile2->getMessageByIndex(virtualMessageIndex);
+        if (message2 == NULL)
+          return Result::DATA_NOT_FOUND;
+
+        gridFile = gridFile2;
+        message = message2;
+      }
+    }
 
     coordinates.mProjection = (uint)message->getGridProjection();
     message->getGridProjectionAttributes("",coordinates.mProjectionAttributes);
@@ -364,7 +388,7 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileI
 
 
 
-int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint messageIndex,T::GridData& data)
+int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::GridData& data)
 {
   FUNCTION_TRACE
   try
@@ -376,6 +400,30 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
     GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
     if (message == NULL)
       return Result::DATA_NOT_FOUND;
+
+    if ((flags & DS_ORIGINAL_DATA) == 0)
+    {
+      // Virtual data accepted
+      uint virtualFileId = 0;
+      uint virtualMessageIndex = 0;
+      message->getVirtualMessage(virtualFileId,virtualMessageIndex);
+
+      if (virtualFileId > 0)
+      {
+        // We should use the virtual message instead of the original message.
+
+        GRID::GridFile_sptr gridFile2 = getGridFile(virtualFileId);
+        if (!gridFile2)
+          return Result::DATA_NOT_FOUND;
+
+        GRID::Message *message2 = gridFile2->getMessageByIndex(virtualMessageIndex);
+        if (message2 == NULL)
+          return Result::DATA_NOT_FOUND;
+
+        gridFile = gridFile2;
+        message = message2;
+      }
+    }
 
     data.mServerId = mServerId;
     data.mGroupFlags = gridFile->getGroupFlags();
@@ -444,7 +492,9 @@ int ServiceImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
 
 
 
-int ServiceImplementation::_getGridAttributeList(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList)
+
+
+int ServiceImplementation::_getGridAttributeList(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
@@ -456,6 +506,30 @@ int ServiceImplementation::_getGridAttributeList(T::SessionId sessionId,uint fil
     GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
     if (message == NULL)
       return Result::DATA_NOT_FOUND;
+
+    if ((flags & DS_ORIGINAL_DATA) == 0)
+    {
+      // Virtual data accepted
+      uint virtualFileId = 0;
+      uint virtualMessageIndex = 0;
+      message->getVirtualMessage(virtualFileId,virtualMessageIndex);
+
+      if (virtualFileId > 0)
+      {
+        // We should use the virtual message instead of the original message.
+
+        GRID::GridFile_sptr gridFile2 = getGridFile(virtualFileId);
+        if (!gridFile2)
+          return Result::DATA_NOT_FOUND;
+
+        GRID::Message *message2 = gridFile2->getMessageByIndex(virtualMessageIndex);
+        if (message2 == NULL)
+          return Result::DATA_NOT_FOUND;
+
+        gridFile = gridFile2;
+        message = message2;
+      }
+    }
 
     message->getAttributeList(std::string(""),attributeList);
 
@@ -471,7 +545,7 @@ int ServiceImplementation::_getGridAttributeList(T::SessionId sessionId,uint fil
 
 
 
-int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::ParamValue& value)
+int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::ParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -485,6 +559,30 @@ int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint file
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == NULL)
         return Result::MESSAGE_NOT_FOUND;
+
+      if ((flags & DS_ORIGINAL_DATA) == 0)
+      {
+        // Virtual data accepted
+        uint virtualFileId = 0;
+        uint virtualMessageIndex = 0;
+        message->getVirtualMessage(virtualFileId,virtualMessageIndex);
+
+        if (virtualFileId > 0)
+        {
+          // We should use the virtual message instead of the original message.
+
+          GRID::GridFile_sptr gridFile2 = getGridFile(virtualFileId);
+          if (!gridFile2)
+            return Result::DATA_NOT_FOUND;
+
+          GRID::Message *message2 = gridFile2->getMessageByIndex(virtualMessageIndex);
+          if (message2 == NULL)
+            return Result::DATA_NOT_FOUND;
+
+          gridFile = gridFile2;
+          message = message2;
+        }
+      }
 
       message->getGridValueByPoint(coordinateType,x,y,interpolationMethod,value);
 
@@ -510,7 +608,7 @@ int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint file
 
 
 
-int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& values)
+int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -524,6 +622,30 @@ int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,uint fileI
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == NULL)
         return Result::MESSAGE_NOT_FOUND;
+
+      if ((flags & DS_ORIGINAL_DATA) == 0)
+      {
+        // Virtual data accepted
+        uint virtualFileId = 0;
+        uint virtualMessageIndex = 0;
+        message->getVirtualMessage(virtualFileId,virtualMessageIndex);
+
+        if (virtualFileId > 0)
+        {
+          // We should use the virtual message instead of the original message.
+
+          GRID::GridFile_sptr gridFile2 = getGridFile(virtualFileId);
+          if (!gridFile2)
+            return Result::DATA_NOT_FOUND;
+
+          GRID::Message *message2 = gridFile2->getMessageByIndex(virtualMessageIndex);
+          if (message2 == NULL)
+            return Result::DATA_NOT_FOUND;
+
+          gridFile = gridFile2;
+          message = message2;
+        }
+      }
 
       message->getGridValueVector(values);
       return Result::OK;
@@ -548,7 +670,7 @@ int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,uint fileI
 
 
 
-int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double origoX,double origoY,double radius,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double origoX,double origoY,double radius,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -562,6 +684,30 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == NULL)
         return Result::MESSAGE_NOT_FOUND;
+
+      if ((flags & DS_ORIGINAL_DATA) == 0)
+      {
+        // Virtual data accepted
+        uint virtualFileId = 0;
+        uint virtualMessageIndex = 0;
+        message->getVirtualMessage(virtualFileId,virtualMessageIndex);
+
+        if (virtualFileId > 0)
+        {
+          // We should use the virtual message instead of the original message.
+
+          GRID::GridFile_sptr gridFile2 = getGridFile(virtualFileId);
+          if (!gridFile2)
+            return Result::DATA_NOT_FOUND;
+
+          GRID::Message *message2 = gridFile2->getMessageByIndex(virtualMessageIndex);
+          if (message2 == NULL)
+            return Result::DATA_NOT_FOUND;
+
+          gridFile = gridFile2;
+          message = message2;
+        }
+      }
 
 
       message->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList);
@@ -586,7 +732,7 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint
 
 
 
-int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,T::InterpolationMethod interpolationMethod,T::ParamValue_vec& values)
+int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,T::InterpolationMethod interpolationMethod,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -600,6 +746,30 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == NULL)
         return Result::MESSAGE_NOT_FOUND;
+
+      if ((flags & DS_ORIGINAL_DATA) == 0)
+      {
+        // Virtual data accepted
+        uint virtualFileId = 0;
+        uint virtualMessageIndex = 0;
+        message->getVirtualMessage(virtualFileId,virtualMessageIndex);
+
+        if (virtualFileId > 0)
+        {
+          // We should use the virtual message instead of the original message.
+
+          GRID::GridFile_sptr gridFile2 = getGridFile(virtualFileId);
+          if (!gridFile2)
+            return Result::DATA_NOT_FOUND;
+
+          GRID::Message *message2 = gridFile2->getMessageByIndex(virtualMessageIndex);
+          if (message2 == NULL)
+            return Result::DATA_NOT_FOUND;
+
+          gridFile = gridFile2;
+          message = message2;
+        }
+      }
 
       switch (coordinateType)
       {
@@ -658,7 +828,7 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
 
 
 
-int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,T::InterpolationMethod interpolationMethod,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,T::InterpolationMethod interpolationMethod,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -672,6 +842,30 @@ int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,u
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == NULL)
         return Result::MESSAGE_NOT_FOUND;
+
+      if ((flags & DS_ORIGINAL_DATA) == 0)
+      {
+        // Virtual data accepted
+        uint virtualFileId = 0;
+        uint virtualMessageIndex = 0;
+        message->getVirtualMessage(virtualFileId,virtualMessageIndex);
+
+        if (virtualFileId > 0)
+        {
+          // We should use the virtual message instead of the original message.
+
+          GRID::GridFile_sptr gridFile2 = getGridFile(virtualFileId);
+          if (!gridFile2)
+            return Result::DATA_NOT_FOUND;
+
+          GRID::Message *message2 = gridFile2->getMessageByIndex(virtualMessageIndex);
+          if (message2 == NULL)
+            return Result::DATA_NOT_FOUND;
+
+          gridFile = gridFile2;
+          message = message2;
+        }
+      }
 
       message->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList);
 
@@ -697,7 +891,7 @@ int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,u
 
 
 
-int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -711,6 +905,30 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == NULL)
         return Result::MESSAGE_NOT_FOUND;
+
+      if ((flags & DS_ORIGINAL_DATA) == 0)
+      {
+        // Virtual data accepted
+        uint virtualFileId = 0;
+        uint virtualMessageIndex = 0;
+        message->getVirtualMessage(virtualFileId,virtualMessageIndex);
+
+        if (virtualFileId > 0)
+        {
+          // We should use the virtual message instead of the original message.
+
+          GRID::GridFile_sptr gridFile2 = getGridFile(virtualFileId);
+          if (!gridFile2)
+            return Result::DATA_NOT_FOUND;
+
+          GRID::Message *message2 = gridFile2->getMessageByIndex(virtualMessageIndex);
+          if (message2 == NULL)
+            return Result::DATA_NOT_FOUND;
+
+          gridFile = gridFile2;
+          message = message2;
+        }
+      }
 
       message->getGridValueListByPolygon(coordinateType,polygonPoints,valueList);
       return Result::OK;
@@ -735,7 +953,7 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
 
 
 
-int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -749,6 +967,30 @@ int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == NULL)
         return Result::MESSAGE_NOT_FOUND;
+
+      if ((flags & DS_ORIGINAL_DATA) == 0)
+      {
+        // Virtual data accepted
+        uint virtualFileId = 0;
+        uint virtualMessageIndex = 0;
+        message->getVirtualMessage(virtualFileId,virtualMessageIndex);
+
+        if (virtualFileId > 0)
+        {
+          // We should use the virtual message instead of the original message.
+
+          GRID::GridFile_sptr gridFile2 = getGridFile(virtualFileId);
+          if (!gridFile2)
+            return Result::DATA_NOT_FOUND;
+
+          GRID::Message *message2 = gridFile2->getMessageByIndex(virtualMessageIndex);
+          if (message2 == NULL)
+            return Result::DATA_NOT_FOUND;
+
+          gridFile = gridFile2;
+          message = message2;
+        }
+      }
 
       message->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList);
       return Result::OK;
@@ -773,7 +1015,7 @@ int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId
 
 
 
-int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -787,6 +1029,30 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,u
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == NULL)
         return Result::MESSAGE_NOT_FOUND;
+
+      if ((flags & DS_ORIGINAL_DATA) == 0)
+      {
+        // Virtual data accepted
+        uint virtualFileId = 0;
+        uint virtualMessageIndex = 0;
+        message->getVirtualMessage(virtualFileId,virtualMessageIndex);
+
+        if (virtualFileId > 0)
+        {
+          // We should use the virtual message instead of the original message.
+
+          GRID::GridFile_sptr gridFile2 = getGridFile(virtualFileId);
+          if (!gridFile2)
+            return Result::DATA_NOT_FOUND;
+
+          GRID::Message *message2 = gridFile2->getMessageByIndex(virtualMessageIndex);
+          if (message2 == NULL)
+            return Result::DATA_NOT_FOUND;
+
+          gridFile = gridFile2;
+          message = message2;
+        }
+      }
 
       message->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,valueList);
       return Result::OK;
@@ -916,11 +1182,27 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
                 auto virtualFilePtr = tt->second;
                 virtualFilePtr->setFileId(ff->mFileInfo.mFileId);
 
+                //T::ContentInfo *cInfo = ff->mContentInfoList.getContentInfoByIndex(0);
+
                 std::size_t fLen = virtualFilePtr->getNumberOfPhysicalGridFiles();
                 for (uint f=0; f<fLen; f++)
                 {
                   GRID::GridFile_sptr fFile = virtualFilePtr->getPhysicalGridFileByIndex(f);
                   fFile->addUser(ff->mFileInfo.mFileId);
+/*
+                  if (cInfo != NULL)
+                  {
+                    std::size_t flen = fFile->getNumberOfMessages();
+                    for (std::size_t t = 0; t<flen; t++)
+                    {
+                      GRID::Message *msg = fFile->getMessageByIndex(t);
+                      if (msg != NULL  &&  msg->getFmiParameterName() == cInfo->mFmiParameterName)
+                      {
+                        msg->setVirtualMessage(ff->mFileInfo.mFileId,0);
+                      }
+                    }
+                  }
+                  */
                 }
 
                 mGridFileManager.addFile(virtualFilePtr);
@@ -932,11 +1214,26 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
       }
       else
       {
+        //GRID::Message *vmsg = virtualFilePtr->getMessageByIndex(0);
         std::size_t fLen = virtualFilePtr->getNumberOfPhysicalGridFiles();
         for (uint f=0; f<fLen; f++)
         {
           GRID::GridFile_sptr fFile = virtualFilePtr->getPhysicalGridFileByIndex(f);
           fFile->addUser(virtualFilePtr->getFileId());
+/*
+          if (vmsg != NULL)
+          {
+            std::size_t flen = fFile->getNumberOfMessages();
+            for (std::size_t t = 0; t<flen; t++)
+            {
+              GRID::Message *msg = fFile->getMessageByIndex(t);
+              if (msg != NULL  &&  msg->getFmiParameterName() == vmsg->getFmiParameterName())
+              {
+                msg->setVirtualMessage(virtualFilePtr->getFileId(),0);
+              }
+            }
+          }
+*/
         }
 
         mGridFileManager.addFile(virtualFilePtr);

@@ -101,7 +101,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
   try
   {
     VirtualContentDefinition_vec contentDefinitionList;
-    mContentDefinitionFile.getContentDefinitions(contentInfo.mFmiParameterName,toLowerString(producerInfo.mName),contentDefinitionList);
+    mContentDefinitionFile.getContentDefinitions(contentInfo.mFmiParameterName,toLowerString(producerInfo.mName),contentInfo.mGeometryId,contentDefinitionList);
 
     if (contentDefinitionList.size() > 0)
     {
@@ -117,7 +117,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
         //printf("***** AddContent %u\n",contentInfo.mFileId);
         //contentInfo.print(std::cout,0,0);
 
-        Identification::ParameterDefinition_fmi_cptr def = Identification::gribDef.mMessageIdentifier_fmi.getParameterDefByName(contentDef->mTargetParameter.c_str());
+        Identification::ParameterDefinition_fmi_cptr def = Identification::gribDef.mMessageIdentifier_fmi.getParameterDefByName(contentDef->mVirtualParameter.c_str());
         if (def != NULL)
         {
           bool componentsFound = true;
@@ -155,7 +155,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
               if (sourceParam == contentDef->mSourceParameters.begin())
               {
                 // Checking if the virtual file is already registered to the contentServer.
-                sprintf(filename,"VIRT-%s-%u-%u",contentDef->mTargetParameter.c_str(),cInfo->mFileId,cInfo->mMessageIndex);
+                sprintf(filename,"VIRT-%s-%u-%u",contentDef->mVirtualParameter.c_str(),cInfo->mFileId,cInfo->mMessageIndex);
 
                 if (gridFileMap.find(std::string(filename)) != gridFileMap.end())
                 {
@@ -205,8 +205,9 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
             for (auto sm = sourceMessages.begin(); sm != sourceMessages.end(); ++sm)
               virtualGridFile->addPhysicalGridFile(sm->first);
 
-            GRID::VirtualMessage *virtualMessage = new GRID::VirtualMessage(sourceMessages);
+            GRID::VirtualMessage *virtualMessage = new GRID::VirtualMessage(virtualGridFile,sourceMessages);
             virtualMessage->setFunction(mFunctionCollection,mLuaFileCollection,contentDef->mFunctionName,contentDef->mFunctionCallMethod);
+            virtualMessage->setOverrideParameter(contentDef->mOverrideParameter);
 
             virtualGridFile->addMessage(virtualMessage);
 
@@ -245,7 +246,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
         }
         else
         {
-          printf("UNKNOWN PARAMETER : %s\n",contentDef->mTargetParameter.c_str());
+          printf("UNKNOWN PARAMETER : %s\n",contentDef->mVirtualParameter.c_str());
         }
       }
     }

@@ -126,7 +126,7 @@ void VirtualContentDefinitionFile::checkUpdates()
 
 
 
-void VirtualContentDefinitionFile::getContentDefinitions(std::string sourceParamName,std::string producerName,VirtualContentDefinition_vec& definitions)
+void VirtualContentDefinitionFile::getContentDefinitions(std::string sourceParamName,std::string producerName,int geometryId,VirtualContentDefinition_vec& definitions)
 {
   try
   {
@@ -134,13 +134,16 @@ void VirtualContentDefinitionFile::getContentDefinitions(std::string sourceParam
 
     for (auto it = mContentDefList.begin(); it != mContentDefList.end(); ++it)
     {
-      if (it->mProducerNameList.size() == 0  ||  it->mProducerNameList.find(producerName) != it->mProducerNameList.end())
+      if (it->mGeometryId < 0 || it->mGeometryId == geometryId)
       {
-        for (auto sp = it->mSourceParameters.begin(); sp != it->mSourceParameters.end(); ++sp)
+        if (it->mProducerName.length() == 0  ||  strcasecmp(it->mProducerName.c_str(),producerName.c_str()) == 0)
         {
-          if (strcasecmp(sp->c_str(),sourceParamName.c_str()) == 0)
+          for (auto sp = it->mSourceParameters.begin(); sp != it->mSourceParameters.end(); ++sp)
           {
-            definitions.push_back(*it);
+            if (strcasecmp(sp->c_str(),sourceParamName.c_str()) == 0)
+            {
+              definitions.push_back(*it);
+            }
           }
         }
       }
@@ -179,15 +182,18 @@ void VirtualContentDefinitionFile::loadFile()
         std::vector<std::string> partList;
         splitString(st,';',partList);
 
-        if (partList.size() >= 5)
+        if (partList.size() >= 6)
         {
           VirtualContentDefinition rec;
 
-          rec.mTargetParameter = partList[0];
-          splitString(partList[1],',',rec.mSourceParameters);
-          rec.mFunctionName = partList[2];
-          rec.mFunctionCallMethod = atoi(partList[3].c_str());
-          splitString(toLowerString(partList[4]),',',rec.mProducerNameList);
+          rec.mVirtualParameter = partList[0];
+          rec.mOverrideParameter = partList[1];
+          splitString(partList[2],',',rec.mSourceParameters);
+          rec.mFunctionName = partList[3];
+          rec.mFunctionCallMethod = atoi(partList[4].c_str());
+          rec.mProducerName = partList[5];
+          if (partList[6].length() > 0)
+            rec.mGeometryId = atoi(partList[6].c_str());
 
           mContentDefList.push_back(rec);
         }

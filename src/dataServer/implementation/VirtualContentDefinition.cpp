@@ -13,6 +13,7 @@ VirtualContentDefinition::VirtualContentDefinition()
   try
   {
     mFunctionCallMethod = 0;
+    mGeometryId = -1;
   }
   catch (...)
   {
@@ -28,11 +29,13 @@ VirtualContentDefinition::VirtualContentDefinition(const VirtualContentDefinitio
 {
   try
   {
-    mTargetParameter = contentDefinition.mTargetParameter;
+    mVirtualParameter = contentDefinition.mVirtualParameter;
+    mOverrideParameter = contentDefinition.mOverrideParameter;
     mSourceParameters = contentDefinition.mSourceParameters;
     mFunctionName = contentDefinition.mFunctionName;
     mFunctionCallMethod = contentDefinition.mFunctionCallMethod;
-    mProducerNameList = contentDefinition.mProducerNameList;
+    mProducerName = contentDefinition.mProducerName;
+    mGeometryId = contentDefinition.mGeometryId;
   }
   catch (...)
   {
@@ -64,7 +67,8 @@ void VirtualContentDefinition::print(std::ostream& stream,uint level,uint option
   try
   {
     stream << space(level) << "VirtualContentDefinition\n";
-    stream << space(level) << "- mTargetParameter    = " << mTargetParameter << "\n";
+    stream << space(level) << "- mVirtualParameter   = " << mVirtualParameter << "\n";
+    stream << space(level) << "- mOverrideParameter  = " << mOverrideParameter << "\n";
     stream << space(level) << "- mSourceParameters   = ";
 
     for (auto it = mSourceParameters.begin(); it != mSourceParameters.end(); ++it)
@@ -74,12 +78,8 @@ void VirtualContentDefinition::print(std::ostream& stream,uint level,uint option
 
     stream << space(level) << "- mFunctionName       = " << mFunctionName << "\n";
     stream << space(level) << "- mFunctionCallMethod = " << mFunctionCallMethod << "\n";
-    stream << space(level) << "- mProducerNameList   = ";
-
-    for (auto it = mProducerNameList.begin(); it != mProducerNameList.end(); ++it)
-      stream << *it << " ";
-
-    stream << "\n";
+    stream << space(level) << "- mProducerName       = " << mProducerName << "\n";
+    stream << space(level) << "- mGeometryId         = " << mGeometryId << "\n";
   }
   catch (...)
   {

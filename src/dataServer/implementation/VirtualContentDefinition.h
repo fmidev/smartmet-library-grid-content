@@ -18,11 +18,13 @@ class VirtualContentDefinition
 
     void                  print(std::ostream& stream,uint level,uint optionFlags);
 
-    std::string           mTargetParameter;
+    std::string           mVirtualParameter;
+    std::string           mOverrideParameter;
     string_vec            mSourceParameters;
     std::string           mFunctionName;
     uint                  mFunctionCallMethod;
-    std::set<std::string> mProducerNameList;
+    std::string           mProducerName;
+    int                   mGeometryId;
 };
 
 

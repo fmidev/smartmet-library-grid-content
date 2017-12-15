@@ -90,7 +90,7 @@ void Function_vectorU::executeFunctionCall4(uint columns,uint rows,std::vector<f
       else
         d = c - (PI-a);
 
-      double val = hh * sin(d);
+      double val = hh * cos(d);
       outParameters.push_back(val);
     }
   }

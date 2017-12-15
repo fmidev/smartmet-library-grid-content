@@ -312,7 +312,13 @@ void GridFileManager::deleteVirtualFiles()
     for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
     {
       if (it->second->isVirtual())
+      {
         idList.push_back(it->first);
+      }
+      else
+      {
+        it->second->deleteUsers();
+      }
     }
 
     deleteFilesNoLock(idList,false);

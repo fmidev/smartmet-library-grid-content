@@ -288,6 +288,9 @@ void ServiceImplementation::getGridValues(
       throw exception;
     }
 
+
+    uint flags = 0;
+
     // Getting geometries that support support the given coordinates.
 
     std::set<T::GeometryId> geometryIdList;
@@ -352,8 +355,8 @@ void ServiceImplementation::getGridValues(
               {
                 PRINT_DATA(mDebugLog,"    * %s\n",(*gName).c_str());
 
-                uint flags = 1 << gCount;
-                if ((generationFlags & flags) != 0)
+                uint gflags = 1 << gCount;
+                if ((generationFlags & gflags) != 0)
                 {
                   T::GenerationInfo *generationInfo = generationInfoList.getGenerationInfoByName(*gName);
 
@@ -422,7 +425,7 @@ void ServiceImplementation::getGridValues(
                           {
                             if (!multipleOptions)
                             {
-                              int result = mDataServerPtr->getGridValueListByPointList(0,contentInfo->mFileId,contentInfo->mMessageIndex,T::CoordinateType::LATLON_COORDINATES,coordinates[0],pInfo->mInterpolationMethod,valueList.mValueList);
+                              int result = mDataServerPtr->getGridValueListByPointList(0,contentInfo->mFileId,contentInfo->mMessageIndex,flags,T::CoordinateType::LATLON_COORDINATES,coordinates[0],pInfo->mInterpolationMethod,valueList.mValueList);
                               if (result != 0)
                               {
                                 SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
@@ -438,7 +441,7 @@ void ServiceImplementation::getGridValues(
                           {
                             if (!multipleOptions)
                             {
-                              int result = mDataServerPtr->getGridValueListByPolygonPath(0,contentInfo->mFileId,contentInfo->mMessageIndex,T::CoordinateType::LATLON_COORDINATES,coordinates,valueList.mValueList);
+                              int result = mDataServerPtr->getGridValueListByPolygonPath(0,contentInfo->mFileId,contentInfo->mMessageIndex,flags,T::CoordinateType::LATLON_COORDINATES,coordinates,valueList.mValueList);
                               if (result != 0)
                               {
                                 SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
@@ -500,7 +503,7 @@ void ServiceImplementation::getGridValues(
                           {
                             if (!multipleOptions)
                             {
-                              result1 = mDataServerPtr->getGridValueListByPointList(0,contentInfo1->mFileId,contentInfo1->mMessageIndex,T::CoordinateType::LATLON_COORDINATES,coordinates[0],pInfo->mInterpolationMethod,list1);
+                              result1 = mDataServerPtr->getGridValueListByPointList(0,contentInfo1->mFileId,contentInfo1->mMessageIndex,flags,T::CoordinateType::LATLON_COORDINATES,coordinates[0],pInfo->mInterpolationMethod,list1);
                               if (result1 != 0)
                               {
                                 SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
@@ -511,7 +514,7 @@ void ServiceImplementation::getGridValues(
                                 //throw exception;
                               }
 
-                              result2 = mDataServerPtr->getGridValueListByPointList(0,contentInfo2->mFileId,contentInfo2->mMessageIndex,T::CoordinateType::LATLON_COORDINATES,coordinates[0],pInfo->mInterpolationMethod,list2);
+                              result2 = mDataServerPtr->getGridValueListByPointList(0,contentInfo2->mFileId,contentInfo2->mMessageIndex,flags,T::CoordinateType::LATLON_COORDINATES,coordinates[0],pInfo->mInterpolationMethod,list2);
                               if (result2 != 0)
                               {
                                 SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
@@ -527,7 +530,7 @@ void ServiceImplementation::getGridValues(
                           {
                             if (!multipleOptions)
                             {
-                              result1 = mDataServerPtr->getGridValueListByPolygonPath(0,contentInfo1->mFileId,contentInfo1->mMessageIndex,T::CoordinateType::LATLON_COORDINATES,coordinates,list1);
+                              result1 = mDataServerPtr->getGridValueListByPolygonPath(0,contentInfo1->mFileId,contentInfo1->mMessageIndex,flags,T::CoordinateType::LATLON_COORDINATES,coordinates,list1);
                               if (result1 != 0)
                               {
                                 SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
@@ -538,7 +541,7 @@ void ServiceImplementation::getGridValues(
                                 //throw exception;
                               }
 
-                              result2 = mDataServerPtr->getGridValueListByPolygonPath(0,contentInfo2->mFileId,contentInfo2->mMessageIndex,T::CoordinateType::LATLON_COORDINATES,coordinates,list2);
+                              result2 = mDataServerPtr->getGridValueListByPolygonPath(0,contentInfo2->mFileId,contentInfo2->mMessageIndex,flags,T::CoordinateType::LATLON_COORDINATES,coordinates,list2);
                               if (result2 != 0)
                               {
                                 SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
@@ -645,6 +648,8 @@ void ServiceImplementation::getGridValues(
       throw exception;
     }
 
+    uint flags = 0;
+
     // Getting geometries that support support the given coordinates.
 
     std::set<T::GeometryId> geometryIdList;
@@ -708,9 +713,9 @@ void ServiceImplementation::getGridValues(
               {
                 PRINT_DATA(mDebugLog,"    * %s\n",gName->c_str());
 
-                uint flags = 1 << gCount;
+                uint gflags = 1 << gCount;
 
-                if ((generationFlags & flags) != 0)
+                if ((generationFlags & gflags) != 0)
                 {
                   T::GenerationInfo *generationInfo = generationInfoList.getGenerationInfoByName(*gName);
 
@@ -777,7 +782,7 @@ void ServiceImplementation::getGridValues(
                         {
                           if (!multipleOptions)
                           {
-                            result = mDataServerPtr->getGridValueListByPointList(0,contentInfo->mFileId,contentInfo->mMessageIndex,T::CoordinateType::LATLON_COORDINATES,coordinates[0],pInfo->mInterpolationMethod,valList.mValueList);
+                            result = mDataServerPtr->getGridValueListByPointList(0,contentInfo->mFileId,contentInfo->mMessageIndex,flags,T::CoordinateType::LATLON_COORDINATES,coordinates[0],pInfo->mInterpolationMethod,valList.mValueList);
                             if (result != 0)
                             {
                               SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
@@ -794,7 +799,7 @@ void ServiceImplementation::getGridValues(
                         {
                           if (!multipleOptions)
                           {
-                            result = mDataServerPtr->getGridValueListByPolygonPath(0,contentInfo->mFileId,contentInfo->mMessageIndex,T::CoordinateType::LATLON_COORDINATES,coordinates,valList.mValueList);
+                            result = mDataServerPtr->getGridValueListByPolygonPath(0,contentInfo->mFileId,contentInfo->mMessageIndex,flags,T::CoordinateType::LATLON_COORDINATES,coordinates,valList.mValueList);
                             if (result != 0)
                             {
                               SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
@@ -1703,12 +1708,13 @@ int ServiceImplementation::_getValuesByGridPoint(T::SessionId sessionId,T::Conte
 {
   try
   {
+    uint flags = 0;
     uint len = contentInfoList.getLength();
     for (uint c=0; c<len; c++)
     {
       T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(c);
       T::ParamValue value = 0;
-      int res = mDataServerPtr->getGridValueByPoint(sessionId,contentInfo->mFileId,contentInfo->mMessageIndex,coordinateType,x,y,interpolationMethod,value);
+      int res = mDataServerPtr->getGridValueByPoint(sessionId,contentInfo->mFileId,contentInfo->mMessageIndex,flags,coordinateType,x,y,interpolationMethod,value);
       if (res == DataServer::Result::OK)
       {
         valueList.addGridPointValue(new T::GridPointValue(contentInfo->mFileId,contentInfo->mMessageIndex,x,y,contentInfo->mParameterLevel,contentInfo->mForecastTime,value));

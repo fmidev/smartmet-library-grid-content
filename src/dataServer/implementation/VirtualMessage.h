@@ -6,6 +6,7 @@
 
 #include <grid-files/grid/Message.h>
 #include <grid-files/grid/GridFile.h>
+#include <grid-files/grid/VirtualGridFile.h>
 
 
 namespace SmartMet
@@ -22,11 +23,13 @@ class VirtualMessage : public Message
 {
   public:
 
-                                    VirtualMessage(std::vector<SourceMessage>& sourceMessages);
+                                    VirtualMessage(GRID::VirtualGridFile *gridFile,std::vector<SourceMessage>& sourceMessages);
     virtual                         ~VirtualMessage();
 
     virtual void                    setFunction(Functions::FunctionCollection *functionCollection,Lua::LuaFileCollection *luaFileCollection,std::string functionName,uint functionCallMethod);
+    virtual void                    setOverrideParameter(std::string overrideParameter);
 
+    virtual uint                    getFileId() const;
     virtual void                    getAttributeList(std::string prefix,T::AttributeList& attributeList) const;
     virtual T::TimeString           getForecastTime() const;
     virtual short                   getForecastType() const;
@@ -108,10 +111,11 @@ class VirtualMessage : public Message
     virtual void                    executeFunctionCall4(std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters) const;
     virtual void                    executeFunctionCall4(T::CoordinateType coordinateType,T::GridValueList& inValueList1,T::GridValueList& inValueList2,T::GridValueList& outValueList) const;
 
-    GRID::GridFile_sptr             mGridFile;
+    GRID::VirtualGridFile*          mVirtualGridFile;
     mutable GRID::MessagePtr_vec    mMessageList;
     Functions::FunctionCollection*  mFunctionCollection;
     Lua::LuaFileCollection*         mLuaFileCollection;
+    std::string                     mOverrideParameter;
     std::string                     mFunctionName;
     uint                            mFunctionCallMethod;
     std::vector<SourceMessage>      mSourceMessages;

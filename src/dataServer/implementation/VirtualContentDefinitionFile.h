@@ -22,7 +22,7 @@ class VirtualContentDefinitionFile
     virtual void  init();
     virtual void  init(std::string filename);
     virtual void  checkUpdates();
-    virtual void  getContentDefinitions(std::string sourceParamName,std::string producerName,VirtualContentDefinition_vec& definitions);
+    virtual void  getContentDefinitions(std::string sourceParamName,std::string producerName,int geometryId,VirtualContentDefinition_vec& definitions);
     virtual void  print(std::ostream& stream,uint level,uint optionFlags);
 
   protected:

@@ -16,12 +16,12 @@ namespace GRID
 
 
 
-VirtualMessage::VirtualMessage(std::vector<SourceMessage>& sourceMessages)
+VirtualMessage::VirtualMessage(GRID::VirtualGridFile *gridFile,std::vector<SourceMessage>& sourceMessages)
 {
   FUNCTION_TRACE
   try
   {
-    //mGridFile = gridFile;
+    mVirtualGridFile = gridFile;
     mSourceMessages = sourceMessages;
     mLuaFileCollection = NULL;
     mFunctionCallMethod = 0;
@@ -67,6 +67,12 @@ void VirtualMessage::initMessagePtrs() const
     for (auto it = mSourceMessages.begin(); it != mSourceMessages.end(); ++it)
     {
       auto msg = it->first->getMessageByIndex(it->second);
+      if (strcasecmp(msg->getFmiParameterName().c_str(),mOverrideParameter.c_str()) == 0  &&  mOverrideParameter.length() > 0)
+      {
+        printf("SET VIRTUAL MESSAGE %u:%u %s\n",getFileId(),getMessageIndex(),msg->getFmiParameterName().c_str());
+        msg->setVirtualMessage(getFileId(),getMessageIndex());
+      }
+
       mMessageList.push_back(msg);
     }
   }
@@ -75,6 +81,8 @@ void VirtualMessage::initMessagePtrs() const
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
+
+
 
 
 
@@ -87,6 +95,42 @@ void VirtualMessage::setFunction(Functions::FunctionCollection *functionCollecti
     mLuaFileCollection = luaFileCollection;
     mFunctionName = functionName;
     mFunctionCallMethod = functionCallMethod;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void VirtualMessage::setOverrideParameter(std::string overrideParameter)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mOverrideParameter = overrideParameter;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+uint VirtualMessage::getFileId() const
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mVirtualGridFile != NULL)
+      return mVirtualGridFile->getFileId();
+
+    return 0;
   }
   catch (...)
   {
