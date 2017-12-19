@@ -182,18 +182,17 @@ void VirtualContentDefinitionFile::loadFile()
         std::vector<std::string> partList;
         splitString(st,';',partList);
 
-        if (partList.size() >= 6)
+        if (partList.size() >= 5)
         {
           VirtualContentDefinition rec;
 
           rec.mVirtualParameter = partList[0];
-          rec.mOverrideParameter = partList[1];
-          splitString(partList[2],',',rec.mSourceParameters);
-          rec.mFunctionName = partList[3];
-          rec.mFunctionCallMethod = atoi(partList[4].c_str());
-          rec.mProducerName = partList[5];
-          if (partList[6].length() > 0)
-            rec.mGeometryId = atoi(partList[6].c_str());
+          splitString(partList[1],',',rec.mSourceParameters);
+          rec.mFunctionName = partList[2];
+          rec.mFunctionCallMethod = atoi(partList[3].c_str());
+          rec.mProducerName = partList[4];
+          if (partList[5].length() > 0)
+            rec.mGeometryId = atoi(partList[5].c_str());
 
           mContentDefList.push_back(rec);
         }

@@ -18,14 +18,6 @@ namespace DataServer
 {
 
 
-enum RequestFlags
-{
-  DS_ORIGINAL_DATA    = 1     // If this flag is on then the request must return data from
-};                            // the original message. Otherwise, if the original message is
-                              // overridden by a virtual message then the virtual data is used.
-
-
-
 class ServiceInterface
 {
   public:

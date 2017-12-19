@@ -78,8 +78,6 @@ void LuaFileCollection::init()
   {
     AutoThreadLock lock(&mThreadLock);
 
-    printf("*** INIT LUA COLLECTION : %u\n",(uint)mFilenames.size());
-
     for (auto it = mFilenames.begin(); it != mFilenames.end(); ++it)
     {
       mLuaFileList.push_back(LuaFile(*it));

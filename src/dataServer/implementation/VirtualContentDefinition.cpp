@@ -30,7 +30,6 @@ VirtualContentDefinition::VirtualContentDefinition(const VirtualContentDefinitio
   try
   {
     mVirtualParameter = contentDefinition.mVirtualParameter;
-    mOverrideParameter = contentDefinition.mOverrideParameter;
     mSourceParameters = contentDefinition.mSourceParameters;
     mFunctionName = contentDefinition.mFunctionName;
     mFunctionCallMethod = contentDefinition.mFunctionCallMethod;
@@ -68,7 +67,6 @@ void VirtualContentDefinition::print(std::ostream& stream,uint level,uint option
   {
     stream << space(level) << "VirtualContentDefinition\n";
     stream << space(level) << "- mVirtualParameter   = " << mVirtualParameter << "\n";
-    stream << space(level) << "- mOverrideParameter  = " << mOverrideParameter << "\n";
     stream << space(level) << "- mSourceParameters   = ";
 
     for (auto it = mSourceParameters.begin(); it != mSourceParameters.end(); ++it)

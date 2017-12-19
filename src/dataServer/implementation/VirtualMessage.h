@@ -27,7 +27,6 @@ class VirtualMessage : public Message
     virtual                         ~VirtualMessage();
 
     virtual void                    setFunction(Functions::FunctionCollection *functionCollection,Lua::LuaFileCollection *luaFileCollection,std::string functionName,uint functionCallMethod);
-    virtual void                    setOverrideParameter(std::string overrideParameter);
 
     virtual uint                    getFileId() const;
     virtual void                    getAttributeList(std::string prefix,T::AttributeList& attributeList) const;
@@ -115,7 +114,6 @@ class VirtualMessage : public Message
     mutable GRID::MessagePtr_vec    mMessageList;
     Functions::FunctionCollection*  mFunctionCollection;
     Lua::LuaFileCollection*         mLuaFileCollection;
-    std::string                     mOverrideParameter;
     std::string                     mFunctionName;
     uint                            mFunctionCallMethod;
     std::vector<SourceMessage>      mSourceMessages;

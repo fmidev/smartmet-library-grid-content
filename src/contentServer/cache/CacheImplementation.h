@@ -218,7 +218,6 @@ class CacheImplementation : public ServiceInterface
      bool                   mContentInfoListEnabled[CONTENT_LIST_COUNT];
      std::set<ulonglong>    mDelayedContentAddList;
      std::set<uint>         mDelayedFileAddList;
-     //std::set<uint>         mDelayedContentDeleteList;
 
      time_t                 mStartTime;
      pthread_t              mThread;

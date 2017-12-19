@@ -1038,36 +1038,37 @@ void ServiceImplementation::getParameterStringInfo(std::string param,std::string
     if (c > 1)
     {
       if (field[1][0] != '\0')
-        paramLevelId = (T::ParamLevelId)atoi(field[1]);
+      {
+        T::ProducerInfo producerInfo;
+        if (mContentServerPtr->getProducerInfoByName(0,std::string(field[1]),producerInfo) == 0)
+          producerId = producerInfo.mProducerId;
+      }
     }
 
     if (c > 2)
     {
       if (field[2][0] != '\0')
-        paramLevel = atoi(field[2]);
+        paramLevelId = (T::ParamLevelId)atoi(field[2]);
     }
 
     if (c > 3)
     {
       if (field[3][0] != '\0')
-        forecastType = (T::ForecastType)atoi(field[3]);
+        paramLevel = atoi(field[3]);
     }
 
     if (c > 4)
     {
       if (field[4][0] != '\0')
-        forecastNumber = (T::ForecastNumber)atoi(field[4]);
+        forecastType = (T::ForecastType)atoi(field[4]);
     }
 
     if (c > 5)
     {
       if (field[5][0] != '\0')
-      {
-        T::ProducerInfo producerInfo;
-        if (mContentServerPtr->getProducerInfoByName(0,std::string(field[5]),producerInfo) == 0)
-          producerId = producerInfo.mProducerId;
-      }
+        forecastNumber = (T::ForecastNumber)atoi(field[5]);
     }
+
     if (c > 6)
     {
       if (field[6][0] != '\0')

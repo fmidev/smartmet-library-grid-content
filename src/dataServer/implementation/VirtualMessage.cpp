@@ -67,11 +67,13 @@ void VirtualMessage::initMessagePtrs() const
     for (auto it = mSourceMessages.begin(); it != mSourceMessages.end(); ++it)
     {
       auto msg = it->first->getMessageByIndex(it->second);
+      /*
       if (strcasecmp(msg->getFmiParameterName().c_str(),mOverrideParameter.c_str()) == 0  &&  mOverrideParameter.length() > 0)
       {
         printf("SET VIRTUAL MESSAGE %u:%u %s\n",getFileId(),getMessageIndex(),msg->getFmiParameterName().c_str());
         msg->setVirtualMessage(getFileId(),getMessageIndex());
       }
+      */
 
       mMessageList.push_back(msg);
     }
@@ -102,22 +104,6 @@ void VirtualMessage::setFunction(Functions::FunctionCollection *functionCollecti
   }
 }
 
-
-
-
-
-void VirtualMessage::setOverrideParameter(std::string overrideParameter)
-{
-  FUNCTION_TRACE
-  try
-  {
-    mOverrideParameter = overrideParameter;
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
-}
 
 
 

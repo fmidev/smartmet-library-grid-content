@@ -92,7 +92,6 @@ void LuaFile::init()
   {
     AutoThreadLock lock(&mThreadLock);
 
-    printf("*** LOAD LUA FILE : %s\n",mFilename.c_str());
     loadFile();
     for (int t=1; t<10; t++)
       loadFunctionList(t);
@@ -500,8 +499,6 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
 {
   try
   {
-    ulonglong startTime = getTime();
-
     lua_State *L = (lua_State*)mLuaState;
 
     AutoThreadLock lock(&mThreadLock);
@@ -540,7 +537,6 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
     }
 
     int res = lua_pcall(L, 3, LUA_MULTRET, 0);
-    ulonglong endTime = getTime();
     if (res != 0)
     {
       // LUA ERROR
@@ -566,7 +562,6 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
 
       lua_pop(L, 1);  // pop table from the stack
     }
-    printf("** %s : %f sec\n",function.c_str(),(float)(endTime-startTime)/1000000);
   }
   catch (...)
   {
@@ -658,8 +653,6 @@ void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,
 {
   try
   {
-    ulonglong startTime = getTime();
-
     lua_State *L = (lua_State*)mLuaState;
 
     AutoThreadLock lock(&mThreadLock);
@@ -714,7 +707,6 @@ void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,
     }
 
     int res = lua_pcall(L, 4, LUA_MULTRET, 0);
-    ulonglong endTime = getTime();
 
     if (res != 0)
     {
@@ -740,7 +732,6 @@ void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,
       }
       lua_pop(L, 1);  // pop table from the stack
     }
-    printf("** %s : %f sec\n",function.c_str(),(float)(endTime-startTime)/1000000);
   }
   catch (...)
   {
@@ -756,8 +747,6 @@ void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,
 {
   try
   {
-    ulonglong startTime = getTime();
-
     lua_State *L = (lua_State*)mLuaState;
 
     AutoThreadLock lock(&mThreadLock);
@@ -812,7 +801,6 @@ void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,
     }
 
     int res = lua_pcall(L, 4, LUA_MULTRET, 0);
-    ulonglong endTime = getTime();
 
     if (res != 0)
     {
@@ -838,7 +826,6 @@ void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,
       }
       lua_pop(L, 1);  // pop table from the stack
     }
-    printf("** %s : %f sec\n",function.c_str(),(float)(endTime-startTime)/1000000);
   }
   catch (...)
   {
@@ -854,8 +841,6 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
 {
   try
   {
-    ulonglong startTime = getTime();
-
     lua_State *L = (lua_State*)mLuaState;
 
     AutoThreadLock lock(&mThreadLock);
@@ -926,7 +911,6 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
     }
 
     int res = lua_pcall(L, 5, LUA_MULTRET, 0);
-    ulonglong endTime = getTime();
 
     if (res != 0)
     {
@@ -952,7 +936,6 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
       }
       lua_pop(L, 1);  // pop table from the stack
     }
-    printf("** %s : %f sec\n",function.c_str(),(float)(endTime-startTime)/1000000);
   }
   catch (...)
   {
@@ -968,8 +951,6 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
 {
   try
   {
-    ulonglong startTime = getTime();
-
     lua_State *L = (lua_State*)mLuaState;
 
     AutoThreadLock lock(&mThreadLock);
@@ -1038,7 +1019,6 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
     }
 
     int res = lua_pcall(L, 5, LUA_MULTRET, 0);
-    ulonglong endTime = getTime();
 
     if (res != 0)
     {
@@ -1064,7 +1044,6 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
       }
       lua_pop(L, 1);  // pop table from the stack
     }
-    printf("** %s : %f sec\n",function.c_str(),(float)(endTime-startTime)/1000000);
   }
   catch (...)
   {
@@ -1164,7 +1143,7 @@ void LuaFile::loadFunctionList(uint type)
           buf[c] = '\0';
           if (c > 0)
           {
-            printf("Function : [%s]\n",buf);
+            //printf("Function : [%s]\n",buf);
             mFunctions.insert(std::pair<std::string,LuaFunction>(toLowerString(std::string(buf)),LuaFunction(buf,type)));
           }
           c = 0;

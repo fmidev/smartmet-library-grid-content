@@ -117,8 +117,8 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
         //printf("***** AddContent %u\n",contentInfo.mFileId);
         //contentInfo.print(std::cout,0,0);
 
-        Identification::ParameterDefinition_fmi_cptr def = Identification::gribDef.mMessageIdentifier_fmi.getParameterDefByName(contentDef->mVirtualParameter.c_str());
-        if (def != NULL)
+        Identification::ParameterDefinition_fmi def;
+        if (Identification::gribDef.mMessageIdentifier_fmi.getParameterDefByName(contentDef->mVirtualParameter.c_str(),def))
         {
           bool componentsFound = true;
           bool fileExists = false;
@@ -207,7 +207,6 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
 
             GRID::VirtualMessage *virtualMessage = new GRID::VirtualMessage(virtualGridFile,sourceMessages);
             virtualMessage->setFunction(mFunctionCollection,mLuaFileCollection,contentDef->mFunctionName,contentDef->mFunctionCallMethod);
-            virtualMessage->setOverrideParameter(contentDef->mOverrideParameter);
 
             virtualGridFile->addMessage(virtualMessage);
 
@@ -220,19 +219,19 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
             newContentInfo->mGenerationId = contentInfo.mGenerationId;
             newContentInfo->mGroupFlags = contentInfo.mGroupFlags;
             newContentInfo->mForecastTime = contentInfo.mForecastTime;
-            newContentInfo->mFmiParameterId = def->mFmiParameterId;
-            newContentInfo->mFmiParameterName = def->mParameterName;
+            newContentInfo->mFmiParameterId = def.mFmiParameterId;
+            newContentInfo->mFmiParameterName = def.mParameterName;
             newContentInfo->mGribParameterId = "";
             newContentInfo->mCdmParameterId = "";
             newContentInfo->mCdmParameterName = "";
-            newContentInfo->mNewbaseParameterId = def->mNewbaseId;
+            newContentInfo->mNewbaseParameterId = def.mNewbaseId;
             newContentInfo->mNewbaseParameterName = "";
             newContentInfo->mFmiParameterLevelId = contentInfo.mFmiParameterLevelId;
             newContentInfo->mGrib1ParameterLevelId = contentInfo.mGrib1ParameterLevelId;
             newContentInfo->mGrib2ParameterLevelId = contentInfo.mGrib2ParameterLevelId;
             newContentInfo->mParameterLevel = contentInfo.mParameterLevel;
-            newContentInfo->mFmiParameterUnits = def->mParameterUnits;
-            newContentInfo->mGribParameterUnits = def->mParameterUnits;
+            newContentInfo->mFmiParameterUnits = def.mParameterUnits;
+            newContentInfo->mGribParameterUnits = def.mParameterUnits;
             newContentInfo->mForecastType = contentInfo.mForecastType;
             newContentInfo->mForecastNumber = contentInfo.mForecastNumber;
             newContentInfo->mServerFlags = contentInfo.mServerFlags;
