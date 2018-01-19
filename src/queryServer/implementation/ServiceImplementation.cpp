@@ -1,7 +1,7 @@
 #include "ServiceImplementation.h"
 #include <grid-files/common/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
-#include <grid-files/identification/GribDef.h>
+#include <grid-files/identification/GridDef.h>
 
 
 namespace SmartMet
@@ -49,7 +49,7 @@ ServiceImplementation::~ServiceImplementation()
 void ServiceImplementation::init(
     ContentServer::ServiceInterface *contentServerPtr,
     DataServer::ServiceInterface *dataServerPtr,
-    std::string gridConfigDirectory,
+    std::string gridConfigFile,
     string_vec& parameterMappingFiles,
     string_vec& aliasFiles,
     std::string producerFile,
@@ -61,8 +61,8 @@ void ServiceImplementation::init(
     mContentServerPtr = contentServerPtr;
     mDataServerPtr = dataServerPtr;
 
-    mGridConfigDirectory = gridConfigDirectory;
-    SmartMet::Identification::gribDef.init(mGridConfigDirectory.c_str());
+    mGridConfigFile = gridConfigFile;
+    SmartMet::Identification::gridDef.init(mGridConfigFile.c_str());
 
     mProducerFile = producerFile;
     loadProducerFile();
@@ -215,7 +215,7 @@ void ServiceImplementation::getGeometryIdListByCoordinates(QueryCoordinates& coo
       for (auto coordinate = cList->begin(); coordinate != cList->end(); ++coordinate)
       {
         std::set<T::GeometryId> idList;
-        Identification::gribDef.getGeometryIdListByLatLon(coordinate->y(),coordinate->x(),idList);
+        Identification::gridDef.getGeometryIdListByLatLon(coordinate->y(),coordinate->x(),idList);
 
         for (auto g = idList.begin(); g != idList.end(); ++g)
         {
@@ -288,7 +288,6 @@ void ServiceImplementation::getGridValues(
       throw exception;
     }
 
-
     uint flags = 0;
 
     // Getting geometries that support support the given coordinates.
@@ -328,10 +327,13 @@ void ServiceImplementation::getGridValues(
             throw exception;
           }
 
+          uint gLen = generationInfoList.getLength();
+          if (gLen == 0)
+            PRINT_DATA(mDebugLog,"    - No generations found for the current producer!\n");
+
           // Sorting generation names so that they are ordered according to the (origin)times.
 
           std::set<std::string> generationNameList;
-          uint gLen = generationInfoList.getLength();
           for (uint g=0; g<gLen; g++)
           {
             T::GenerationInfo *gInfo = generationInfoList.getGenerationInfoByIndex(g);
@@ -345,6 +347,9 @@ void ServiceImplementation::getGridValues(
             ParameterMapping_vec mappings;
             m->getMappings(producerInfo.mName,parameterKey,true,mappings);
 
+            if (mappings.size() == 0)
+              PRINT_DATA(mDebugLog,"    - No parameter mappings found (%s:%s)!\n",producerInfo.mName.c_str(),parameterKey.c_str());
+
             if (mappings.size() > 0)
             {
               uint gCount = 0;
@@ -356,7 +361,7 @@ void ServiceImplementation::getGridValues(
                 PRINT_DATA(mDebugLog,"    * %s\n",(*gName).c_str());
 
                 uint gflags = 1 << gCount;
-                if ((generationFlags & gflags) != 0)
+                if (generationFlags == 0 || (generationFlags & gflags) != 0)
                 {
                   T::GenerationInfo *generationInfo = generationInfoList.getGenerationInfoByName(*gName);
 
@@ -389,6 +394,7 @@ void ServiceImplementation::getGridValues(
                     if (multipleOptions)
                     {
                       PRINT_DATA(mDebugLog,"         + Content records contains multiple values with the same timestep\n");
+                      contentList.print(std::cout,0,0);
                     }
 
                     uint contentLen = contentList.getLength();
@@ -687,10 +693,14 @@ void ServiceImplementation::getGridValues(
             throw exception;
           }
 
+          uint gLen = generationInfoList.getLength();
+
+          if (gLen == 0)
+            PRINT_DATA(mDebugLog,"    - No generations found for the current producer!\n");
+
           // Sorting generation names so that they are ordered according to the (origin)times.
 
           std::set<std::string> generationNameList;
-          uint gLen = generationInfoList.getLength();
           for (uint g=0; g<gLen; g++)
           {
             T::GenerationInfo *gInfo = generationInfoList.getGenerationInfoByIndex(g);
@@ -704,18 +714,21 @@ void ServiceImplementation::getGridValues(
             ParameterMapping_vec mappings;
             m->getMappings(producerInfo.mName,parameterKey,true,mappings);
 
+            if (mappings.size() == 0)
+              PRINT_DATA(mDebugLog,"    - No parameter mappings found (%s:%s)!\n",producerInfo.mName.c_str(),parameterKey.c_str());
+
             if (mappings.size() > 0)
             {
               uint gCount = 0;
 
-              PRINT_DATA(mDebugLog,"  - Going through the generations from the newest to the oldest.\n");
+              PRINT_DATA(mDebugLog,"    - Going through the generations from the newest to the oldest.\n");
               for (auto gName = generationNameList.rbegin(); gName != generationNameList.rend(); gName++)
               {
                 PRINT_DATA(mDebugLog,"    * %s\n",gName->c_str());
 
                 uint gflags = 1 << gCount;
 
-                if ((generationFlags & gflags) != 0)
+                if (generationFlags == 0 || (generationFlags & gflags) != 0)
                 {
                   T::GenerationInfo *generationInfo = generationInfoList.getGenerationInfoByName(*gName);
 
@@ -750,6 +763,7 @@ void ServiceImplementation::getGridValues(
                     if (multipleOptions)
                     {
                       PRINT_DATA(mDebugLog,"         + Content records contains multiple values with the same timestep\n");
+                      contentList.print(std::cout,0,0);
                     }
 
                     std::string lastTime = startTime;

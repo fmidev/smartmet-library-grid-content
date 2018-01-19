@@ -28,7 +28,7 @@ class ServiceImplementation : public ServiceInterface
      virtual void   init(
                        ContentServer::ServiceInterface *contentServerPtr,
                        DataServer::ServiceInterface *dataServerPtr,
-                       std::string gridConfigDirectory,
+                       std::string gridConfigFile,
                        string_vec& parameterMappingFiles,
                        string_vec& aliasFiles,
                        std::string producerFile,
@@ -138,7 +138,7 @@ class ServiceImplementation : public ServiceInterface
 
      AliasFileCollection    mAliasFileCollection;
      uint                   mFunctionParamId;
-     std::string            mGridConfigDirectory;
+     std::string            mGridConfigFile;
      time_t                 mLastConfiguratonCheck;
      Lua::LuaFileCollection mLuaFileCollection;
      string_vec             mParameterMappingFiles;

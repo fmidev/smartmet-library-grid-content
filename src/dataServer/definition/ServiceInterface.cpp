@@ -387,7 +387,7 @@ int ServiceInterface::getMultipleGridValues(T::SessionId sessionId,T::ValueRecor
 // Notice : If you known the geometryId of the current grid, then you can fetch coordinates
 // much faster by using local definitions:
 //
-//    GRIB2::GridDef_ptr def = Identification::gribDef.getGrib2DefinitionByGeometryId(geometryId);
+//    GRIB2::GridDef_ptr def = Identification::gridDef.getGrib2DefinitionByGeometryId(geometryId);
 //    T::Coordinate_vec oridinalCoordinates = def->getGridCoordinates();
 //    T::Coordinate_vec latLonCoordinates = def->getGridLatLonCoordinates();
 

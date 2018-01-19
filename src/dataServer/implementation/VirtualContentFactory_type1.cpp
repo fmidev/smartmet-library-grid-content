@@ -3,7 +3,7 @@
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/common/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
-#include <grid-files/identification/GribDef.h>
+#include <grid-files/identification/GridDef.h>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -117,8 +117,8 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
         //printf("***** AddContent %u\n",contentInfo.mFileId);
         //contentInfo.print(std::cout,0,0);
 
-        Identification::ParameterDefinition_fmi def;
-        if (Identification::gribDef.mMessageIdentifier_fmi.getParameterDefByName(contentDef->mVirtualParameter.c_str(),def))
+        Identification::FmiParameterDef def;
+        if (Identification::gridDef.getFmiParameterDefByName(contentDef->mVirtualParameter.c_str(),def))
         {
           bool componentsFound = true;
           bool fileExists = false;
@@ -212,6 +212,9 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
 
             T::ContentInfo *newContentInfo = virtualMessage->getContentInfo();
 
+            Identification::NewbaseParameterDef newbaseDef;
+            Identification::gridDef.getNewbaseParameterDefByFmiId(def.mFmiParameterId,newbaseDef);
+
             newContentInfo->mFileId = 0;
             newContentInfo->mFileType = T::FileType::Virtual;
             newContentInfo->mMessageIndex = 0;
@@ -224,8 +227,8 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
             newContentInfo->mGribParameterId = "";
             newContentInfo->mCdmParameterId = "";
             newContentInfo->mCdmParameterName = "";
-            newContentInfo->mNewbaseParameterId = def.mNewbaseId;
-            newContentInfo->mNewbaseParameterName = "";
+            newContentInfo->mNewbaseParameterId = newbaseDef.mNewbaseParameterId;
+            newContentInfo->mNewbaseParameterName = newbaseDef.mParameterName;
             newContentInfo->mFmiParameterLevelId = contentInfo.mFmiParameterLevelId;
             newContentInfo->mGrib1ParameterLevelId = contentInfo.mGrib1ParameterLevelId;
             newContentInfo->mGrib2ParameterLevelId = contentInfo.mGrib2ParameterLevelId;

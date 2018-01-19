@@ -3207,7 +3207,7 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
 
         if (eventInfo->mType == EventType::FILE_ADDED)
         {
-          char buf[100000];
+          char buf[2000000];
           char *p = buf;
 
           T::FileInfo fileInfo;
@@ -3219,12 +3219,15 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
             getContentByFileId(eventInfo->mId1,contentInfoList);
 
             uint len = contentInfoList.getLength();
-            for (uint t=0; t<len; t++)
+            if (len < 10000)
             {
-              T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
-              p += sprintf(p,"%s\n",contentInfo->getCsv().c_str());
+              for (uint t=0; t<len; t++)
+              {
+                T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
+                p += sprintf(p,"%s\n",contentInfo->getCsv().c_str());
+              }
+              eventInfo->mNote = buf;
             }
-            eventInfo->mNote = buf;
           }
         }
 
@@ -7068,7 +7071,7 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
 
         if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
         {
-          if (info->mForecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+          if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
           {
             if (info->hasKey(parameterKeyType,parameterKey) &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
             {
@@ -7129,7 +7132,7 @@ int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,
         {
           if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
           {
-            if (info->mForecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
@@ -7193,7 +7196,7 @@ int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::P
         {
           if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
           {
-            if (info->mForecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
+            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
