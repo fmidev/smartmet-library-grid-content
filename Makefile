@@ -83,7 +83,7 @@ else
 	-I$(includedir) \
 	-I$(includedir)/smartmet \
 	-I$(includedir)/smartmet/grid-files \
-	-I /usr/include/lua5.3 \
+	-I /usr/include/lua \
 	$(pkg-config --cflags icu-i18n) \
 	$(CORBA_INCLUDE)
 
@@ -97,17 +97,11 @@ CFLAGS_PROFILE = $(DEFINES) $(FLAGS) $(FLAGS_PROFILE) -DNDEBUG -O2 -g -pg
 
 LIBS = -L$(libdir) \
 	-lsmartmet-grid-files \
-	-lhiredis \
 	-lboost_date_time \
-	-lboost_filesystem \
-	-lboost_thread \
-	-lboost_regex \
-	-lboost_system \
-	$(pkg-config --libs icu-i18n) \
-	-llua5.3 \
-	-lfmt \
-	-lctpp2 \
-	-lpthread -lrt \
+	-lhiredis \
+	-lcurl \
+	-llua \
+	-lpthread \
 	$(CORBA_LIBS)
 
 # What to install
@@ -148,14 +142,14 @@ vpath %.cpp src/ \
             src/dataServer \
 			src/dataServer/definition \
 			src/dataServer/cache \
-			src/dataServer/implementation \ 
+			src/dataServer/implementation \
 			src/queryServer/definition \
-			src/queryServer/implementation \ 
-			src/functions \ 
+			src/queryServer/implementation \
+			src/functions \
 			src/lua 
-			
+
 vpath %.h 	src/ \
-            src/contentServer \
+	src/contentServer \
 			src/contentServer/cache \
 			src/contentServer/definition \
 			src/contentServer/http \
@@ -168,10 +162,10 @@ vpath %.h 	src/ \
             src/dataServer \
 			src/dataServer/definition \
 			src/dataServer/cache \
-			src/dataServer/implementation \ 
+			src/dataServer/implementation \
 			src/queryServer/definition \
-			src/queryServer/implementation \ 
-			src/functions \ 
+			src/queryServer/implementation \
+			src/functions \
 			src/lua 
 
 vpath %.o obj
@@ -217,7 +211,7 @@ vpath %.cpp src/ \
 			src/queryServer/corba/server \
 			src/functions \
 			src/lua
-			
+
 vpath %.h 	src/ \
             src/contentServer \
 			src/contentServer/cache \
@@ -421,7 +415,7 @@ create_stubs:
 	cd src/contentServer/corba/stubs; $(MAKE) all;
 	cd src/dataServer/corba/stubs; $(MAKE) all;
 	cd src/queryServer/corba/stubs; $(MAKE) all;
-	
+
 delete_stubs:
 	cd src/contentServer/corba/stubs; $(MAKE) clean;
 	cd src/dataServer/corba/stubs; $(MAKE) clean;
