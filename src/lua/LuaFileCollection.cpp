@@ -140,6 +140,29 @@ void LuaFileCollection::checkUpdates(bool force)
 
 
 
+uint LuaFileCollection::getFunction(std::string& functionName,std::string& function)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    {
+      uint functionType = it->getFunction(functionName,function);
+      if (functionType != 0)
+        return functionType;
+    }
+    return 0;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "LUA function searching failed!", NULL);
+  }
+}
+
+
+
+
 bool LuaFileCollection::getFunction(std::string& functionName,uint functionType,std::string& function)
 {
   try
@@ -156,6 +179,64 @@ bool LuaFileCollection::getFunction(std::string& functionName,uint functionType,
   catch (...)
   {
     throw Spine::Exception(BCP, "LUA function searching failed!", NULL);
+  }
+}
+
+
+
+
+
+std::string LuaFileCollection::executeFunctionCall5(std::string& function,std::string language,std::vector<float>& parameters)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    {
+      std::string functionName;
+      uint type = it->getFunction(function,functionName);
+      if (type == 5)
+      {
+        return it->executeFunctionCall5(functionName,language,parameters);
+      }
+    }
+
+    Spine::Exception exception(BCP, "Unknown LUA function!");
+    exception.addParameter("Function",function);
+    throw exception;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+  }
+}
+
+
+
+
+
+std::string LuaFileCollection::executeFunctionCall5(std::string& function,std::string language,std::vector<double>& parameters)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    {
+      std::string functionName;
+      uint type = it->getFunction(function,functionName);
+      if (type == 5)
+      {
+        return it->executeFunctionCall5(functionName,language,parameters);
+      }
+    }
+
+    Spine::Exception exception(BCP, "Unknown LUA function!");
+    exception.addParameter("Function",function);
+    throw exception;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
   }
 }
 

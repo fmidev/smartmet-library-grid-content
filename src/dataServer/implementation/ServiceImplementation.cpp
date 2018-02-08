@@ -698,7 +698,7 @@ int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,u
 
 
 
-int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,double radius,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -713,7 +713,7 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
       if (message == NULL)
         return Result::MESSAGE_NOT_FOUND;
 
-      message->getGridValueListByPolygon(coordinateType,polygonPoints,valueList);
+      message->getGridValueListByPolygon(coordinateType,polygonPoints,radius,valueList);
       return Result::OK;
     }
     catch (...)
@@ -736,7 +736,7 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
 
 
 
-int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,double radius,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -751,7 +751,7 @@ int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId
       if (message == NULL)
         return Result::MESSAGE_NOT_FOUND;
 
-      message->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList);
+      message->getGridValueListByPolygonPath(coordinateType,polygonPath,radius,valueList);
       return Result::OK;
     }
     catch (...)
@@ -774,7 +774,7 @@ int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId
 
 
 
-int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,double radius,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -789,7 +789,12 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,u
       if (message == NULL)
         return Result::MESSAGE_NOT_FOUND;
 
-      message->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,valueList);
+
+      bool gridRectangle = false;
+      if ((flags & GRID_RECTANGLE_FLAG) != 0)
+        gridRectangle = true;
+
+      message->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,radius,gridRectangle,valueList);
       return Result::OK;
     }
     catch (...)

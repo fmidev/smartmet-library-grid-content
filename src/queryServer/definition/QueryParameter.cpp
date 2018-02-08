@@ -22,6 +22,7 @@ QueryParameter::QueryParameter()
     mInterpolationMethod = T::InterpolationMethod::Linear;
     mProducerId = 0;
     mGenerationFlags = 0;
+    mPrecision = 0;
     mTemporary = false;
   }
   catch (...)
@@ -52,7 +53,9 @@ QueryParameter::QueryParameter(const QueryParameter& queryParameter)
     mInterpolationMethod = queryParameter.mInterpolationMethod;
     mProducerId = queryParameter.mProducerId;
     mGenerationFlags = queryParameter.mGenerationFlags;
+    mAdditionalTimeList = queryParameter.mAdditionalTimeList;
     mValueList = queryParameter.mValueList;
+    mPrecision = queryParameter.mPrecision;
     mTemporary = queryParameter.mTemporary;
     mFunction = queryParameter.mFunction;
     mFunctionParams = queryParameter.mFunctionParams;
@@ -118,6 +121,7 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mProducerId           = " << mProducerId << "\n";
     stream << space(level) << "- mGenerationFlags      = " << mGenerationFlags << "\n";
     stream << space(level) << "- mTemporary            = " << (int)mTemporary << "\n";
+    stream << space(level) << "- mPrecision            = " << mPrecision << "\n";
     stream << space(level) << "- mFunction             = " << mFunction << "\n";
 
     stream << space(level) << "- mFunctionParams       = \n";
@@ -126,13 +130,19 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
       stream << space(level) << "   * " << it->first << ":" << it->second << "\n";
     }
 
-    stream << space(level) << "- mValueList            = \n";
+    stream << space(level) << "- mAdditionalTimeList   = \n";
+
+    for (auto it = mAdditionalTimeList.begin();  it != mAdditionalTimeList.end(); ++it)
+    {
+      stream << space(level) << "   * " << *it << "\n";
+    }
+
+    stream << space(level) << "- mValueList            = (" << mValueList.size() << " items)\n";
 
     for (auto it = mValueList.begin();  it != mValueList.end(); ++it)
     {
       it->print(stream,level+2,optionFlags);
     }
-
   }
   catch (...)
   {

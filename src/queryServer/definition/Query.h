@@ -37,9 +37,11 @@ class Query
     string_vec          mProducerNameList;
     string_vec          mForecastTimeList;
     QueryCoordinates    mCoordinateList;
+    double              mRadius;
     QueryParameter_vec  mQueryParameterList;
     std::string         mStartTime;
     std::string         mEndTime;
+    std::string         mLanguage;
     uint                mGenerationFlags;
     uint                mFlags;
 };

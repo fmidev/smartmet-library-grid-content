@@ -804,7 +804,7 @@ void VirtualMessage::getGridValueListByPointList(T::CoordinateType coordinateTyp
 
 
 
-void VirtualMessage::getGridValueListByPolygon(T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,T::GridValueList& valueList)
+void VirtualMessage::getGridValueListByPolygon(T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,double radius,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -817,7 +817,7 @@ void VirtualMessage::getGridValueListByPolygon(T::CoordinateType coordinateType,
         if (mMessageList.size() != 1)
           throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
 
-        mMessageList[0]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList);
+        mMessageList[0]->getGridValueListByPolygon(coordinateType,polygonPoints,radius,valueList);
         executeFunctionCall2(valueList);
         break;
 
@@ -828,8 +828,8 @@ void VirtualMessage::getGridValueListByPolygon(T::CoordinateType coordinateType,
 
         T::GridValueList valueList1;
         T::GridValueList valueList2;
-        mMessageList[0]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList1);
-        mMessageList[1]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList2);
+        mMessageList[0]->getGridValueListByPolygon(coordinateType,polygonPoints,radius,valueList1);
+        mMessageList[1]->getGridValueListByPolygon(coordinateType,polygonPoints,radius,valueList2);
         executeFunctionCall3(valueList1,valueList2,valueList);
       }
       break;
@@ -841,8 +841,8 @@ void VirtualMessage::getGridValueListByPolygon(T::CoordinateType coordinateType,
 
         T::GridValueList valueList1;
         T::GridValueList valueList2;
-        mMessageList[0]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList1);
-        mMessageList[1]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList2);
+        mMessageList[0]->getGridValueListByPolygon(coordinateType,polygonPoints,radius,valueList1);
+        mMessageList[1]->getGridValueListByPolygon(coordinateType,polygonPoints,radius,valueList2);
         executeFunctionCall4(coordinateType,valueList1,valueList2,valueList);
       }
       break;
@@ -858,7 +858,7 @@ void VirtualMessage::getGridValueListByPolygon(T::CoordinateType coordinateType,
 
 
 
-void VirtualMessage::getGridValueListByPolygonPath(T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,T::GridValueList& valueList)
+void VirtualMessage::getGridValueListByPolygonPath(T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,double radius,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -871,7 +871,7 @@ void VirtualMessage::getGridValueListByPolygonPath(T::CoordinateType coordinateT
         if (mMessageList.size() != 1)
           throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
 
-        mMessageList[0]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList);
+        mMessageList[0]->getGridValueListByPolygonPath(coordinateType,polygonPath,radius,valueList);
         executeFunctionCall2(valueList);
         break;
 
@@ -882,8 +882,8 @@ void VirtualMessage::getGridValueListByPolygonPath(T::CoordinateType coordinateT
 
         T::GridValueList valueList1;
         T::GridValueList valueList2;
-        mMessageList[0]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList1);
-        mMessageList[1]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList2);
+        mMessageList[0]->getGridValueListByPolygonPath(coordinateType,polygonPath,radius,valueList1);
+        mMessageList[1]->getGridValueListByPolygonPath(coordinateType,polygonPath,radius,valueList2);
         executeFunctionCall3(valueList1,valueList2,valueList);
       }
       break;
@@ -895,8 +895,8 @@ void VirtualMessage::getGridValueListByPolygonPath(T::CoordinateType coordinateT
 
         T::GridValueList valueList1;
         T::GridValueList valueList2;
-        mMessageList[0]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList1);
-        mMessageList[1]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList2);
+        mMessageList[0]->getGridValueListByPolygonPath(coordinateType,polygonPath,radius,valueList1);
+        mMessageList[1]->getGridValueListByPolygonPath(coordinateType,polygonPath,radius,valueList2);
         executeFunctionCall4(coordinateType,valueList1,valueList2,valueList);
       }
       break;
@@ -912,7 +912,7 @@ void VirtualMessage::getGridValueListByPolygonPath(T::CoordinateType coordinateT
 
 
 
-void VirtualMessage::getGridValueListByRectangle(T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,T::GridValueList& valueList)
+void VirtualMessage::getGridValueListByRectangle(T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,double radius,bool gridRectangle,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -925,7 +925,7 @@ void VirtualMessage::getGridValueListByRectangle(T::CoordinateType coordinateTyp
         if (mMessageList.size() != 2)
           throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
 
-        mMessageList[0]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,valueList);
+        mMessageList[0]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,radius,gridRectangle,valueList);
         executeFunctionCall2(valueList);
         break;
 
@@ -936,8 +936,8 @@ void VirtualMessage::getGridValueListByRectangle(T::CoordinateType coordinateTyp
 
         T::GridValueList valueList1;
         T::GridValueList valueList2;
-        mMessageList[0]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,valueList1);
-        mMessageList[1]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,valueList2);
+        mMessageList[0]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,radius,gridRectangle,valueList1);
+        mMessageList[1]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,radius,gridRectangle,valueList2);
         executeFunctionCall3(valueList1,valueList2,valueList);
       }
       break;
@@ -949,8 +949,8 @@ void VirtualMessage::getGridValueListByRectangle(T::CoordinateType coordinateTyp
 
         T::GridValueList valueList1;
         T::GridValueList valueList2;
-        mMessageList[0]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,valueList1);
-        mMessageList[1]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,valueList2);
+        mMessageList[0]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,radius,gridRectangle,valueList1);
+        mMessageList[1]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,radius,gridRectangle,valueList2);
         executeFunctionCall4(coordinateType,valueList1,valueList2,valueList);
       }
       break;

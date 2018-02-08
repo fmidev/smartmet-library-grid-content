@@ -36,9 +36,11 @@ class QueryParameter
     T::InterpolationMethod  mInterpolationMethod;
     uint                    mProducerId;
     uint                    mGenerationFlags;
+    int                     mPrecision;
     bool                    mTemporary;
     std::string             mFunction;
     FunctionParam_vec       mFunctionParams;
+    string_vec              mAdditionalTimeList;
     ParameterValues_vec     mValueList;
 };
 

@@ -36,6 +36,7 @@ struct CorbaGridValue
   double x;
   double y;
   double value;
+  string valueString;
 };
 
 typedef sequence<CorbaGridValue> CorbaGridValueList;
@@ -91,8 +92,10 @@ struct CorbaQueryParameter
   octet                    interpolationMethod;
   unsigned long            producerId;
   unsigned long            generationFlags;
+  long                     precision;
   string                   function;
   CorbaFunctionParamList   functionParams;
+  CorbaStringList          additionalTimeList;
   CorbaParameterValuesList valueList;
 };
 
@@ -119,7 +122,9 @@ struct CorbaQuery
   string                   endTime;
   CorbaStringList          forecastTimeList;
   CorbaQueryCoordinates    coordinateList;
+  double                   radius;
   CorbaQueryParameterList  queryParameterList;
+  string                   language;
   unsigned long            generationFlags;
   unsigned long            flags;
 };

@@ -2257,18 +2257,21 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
                     (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                     (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
@@ -2371,18 +2374,21 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                      prev = info;
-
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                      next = info;
-
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (contentInfoList.getReleaseObjects())
-                        contentInfoList.addContentInfo(info->duplicate());
-                      else
-                        contentInfoList.addContentInfo(info);
+                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                        prev = info;
+
+                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                        next = info;
+
+                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      {
+                        if (contentInfoList.getReleaseObjects())
+                          contentInfoList.addContentInfo(info->duplicate());
+                        else
+                          contentInfoList.addContentInfo(info);
+                      }
                     }
                   }
                 }
@@ -2484,18 +2490,21 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
                     (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                     (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
@@ -2624,18 +2633,21 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
                     (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                     (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
@@ -2738,18 +2750,21 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                      prev = info;
-
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                      next = info;
-
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (contentInfoList.getReleaseObjects())
-                        contentInfoList.addContentInfo(info->duplicate());
-                      else
-                        contentInfoList.addContentInfo(info);
+                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                        prev = info;
+
+                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                        next = info;
+
+                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      {
+                        if (contentInfoList.getReleaseObjects())
+                          contentInfoList.addContentInfo(info->duplicate());
+                        else
+                          contentInfoList.addContentInfo(info);
+                      }
                     }
                   }
                 }
@@ -2851,18 +2866,21 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
                     (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                     (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
@@ -2965,18 +2983,21 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
                     (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                     (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
@@ -3124,18 +3145,21 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                      prev = info;
-
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                      next = info;
-
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (contentInfoList.getReleaseObjects())
-                        contentInfoList.addContentInfo(info->duplicate());
-                      else
-                        contentInfoList.addContentInfo(info);
+                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                        prev = info;
+
+                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                        next = info;
+
+                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      {
+                        if (contentInfoList.getReleaseObjects())
+                          contentInfoList.addContentInfo(info->duplicate());
+                        else
+                          contentInfoList.addContentInfo(info);
+                      }
                     }
                   }
                 }
@@ -3237,18 +3261,21 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
                     (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                     (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
@@ -3349,18 +3376,21 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
                     (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                     (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
@@ -3463,18 +3493,21 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                      prev = info;
-
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                      next = info;
-
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (contentInfoList.getReleaseObjects())
-                        contentInfoList.addContentInfo(info->duplicate());
-                      else
-                        contentInfoList.addContentInfo(info);
+                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                        prev = info;
+
+                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                        next = info;
+
+                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      {
+                        if (contentInfoList.getReleaseObjects())
+                          contentInfoList.addContentInfo(info->duplicate());
+                        else
+                          contentInfoList.addContentInfo(info);
+                      }
                     }
                   }
                 }
@@ -3576,18 +3609,21 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
                     (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                     (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
@@ -3687,18 +3723,21 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
                     (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                     (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
@@ -3801,18 +3840,21 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                      prev = info;
-
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                      next = info;
-
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (contentInfoList.getReleaseObjects())
-                        contentInfoList.addContentInfo(info->duplicate());
-                      else
-                        contentInfoList.addContentInfo(info);
+                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                        prev = info;
+
+                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                        next = info;
+
+                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      {
+                        if (contentInfoList.getReleaseObjects())
+                          contentInfoList.addContentInfo(info->duplicate());
+                        else
+                          contentInfoList.addContentInfo(info);
+                      }
                     }
                   }
                 }
@@ -3914,18 +3956,21 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
                     (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                     (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
@@ -4026,18 +4071,21 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
                     (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                     (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
@@ -4140,18 +4188,21 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                      prev = info;
-
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                      next = info;
-
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (contentInfoList.getReleaseObjects())
-                        contentInfoList.addContentInfo(info->duplicate());
-                      else
-                        contentInfoList.addContentInfo(info);
+                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                        prev = info;
+
+                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                        next = info;
+
+                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      {
+                        if (contentInfoList.getReleaseObjects())
+                          contentInfoList.addContentInfo(info->duplicate());
+                        else
+                          contentInfoList.addContentInfo(info);
+                      }
                     }
                   }
                 }
@@ -4253,18 +4304,21 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
                     (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                     (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
@@ -4367,18 +4421,21 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
                     (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                     (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }
@@ -4481,18 +4538,21 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                      prev = info;
-
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                      next = info;
-
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (contentInfoList.getReleaseObjects())
-                        contentInfoList.addContentInfo(info->duplicate());
-                      else
-                        contentInfoList.addContentInfo(info);
+                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                        prev = info;
+
+                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                        next = info;
+
+                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      {
+                        if (contentInfoList.getReleaseObjects())
+                          contentInfoList.addContentInfo(info->duplicate());
+                        else
+                          contentInfoList.addContentInfo(info);
+                      }
                     }
                   }
                 }
@@ -4594,18 +4654,21 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
                     (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
                     (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
                 {
-                  if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
-                    prev = info;
-
-                  if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
-                    next = info;
-
-                  if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      prev = info;
+
+                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      next = info;
+
+                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    {
+                      if (contentInfoList.getReleaseObjects())
+                        contentInfoList.addContentInfo(info->duplicate());
+                      else
+                        contentInfoList.addContentInfo(info);
+                    }
                   }
                 }
               }

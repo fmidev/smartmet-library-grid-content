@@ -1166,7 +1166,7 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
           if (paramKey.length() > 0)
           {
             char tmp[200];
-            sprintf(tmp,"%s;%s;%d;%s;%d;%d;%05d;%d;D",
+            sprintf(tmp,"%s;%s;%d;%s;%d;%d;%05d;%d;E",
                 producerInfo->mName.c_str(),
                 paramKey.c_str(),
                 (int)T::ParamKeyType::FMI_NAME,
@@ -4649,7 +4649,9 @@ int RedisImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
 
     T::ContentInfoList contentInfoList;
     int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
+    printf("CONTENT LEN %u\n",contentInfoList.getLength());
     contentInfoList.getContentParamKeyListByGenerationId(generationId,parameterKeyType,paramKeyList);
+    printf("PARAMS %u\n",(uint)paramKeyList.size());
 
     return res;
   }

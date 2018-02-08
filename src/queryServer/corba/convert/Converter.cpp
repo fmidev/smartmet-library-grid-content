@@ -180,9 +180,10 @@ void Converter::convert(T::GridValue& source,QueryServer::Corba::CorbaGridValue&
 {
   try
   {
-    target.value = source.mValue;
     target.x = source.mX;
     target.y = source.mY;
+    target.value = source.mValue;
+    target.valueString  = CORBA::string_dup(source.mValueString.c_str());
   }
   catch (...)
   {
@@ -198,9 +199,10 @@ void Converter::convert(QueryServer::Corba::CorbaGridValue& source,T::GridValue&
 {
   try
   {
-    target.mValue = source.value;
     target.mX = source.x;
     target.mY = source.y;
+    target.mValue = source.value;
+    target.mValueString = source.valueString;
   }
   catch (...)
   {
@@ -462,9 +464,11 @@ void Converter::convert(QueryServer::Corba::CorbaQueryParameter& source,QuerySer
     target.mInterpolationMethod = (T::InterpolationMethod)source.interpolationMethod;
     target.mProducerId = source.producerId;
     target.mGenerationFlags = source.generationFlags;
+    target.mPrecision = source.precision;
     target.mFunction = source.function;
 
     convert(source.functionParams,target.mFunctionParams);
+    convert(source.additionalTimeList,target.mAdditionalTimeList);
     convert(source.valueList,target.mValueList);
   }
   catch (...)
@@ -495,9 +499,11 @@ void Converter::convert(QueryServer::QueryParameter& source,QueryServer::Corba::
     target.interpolationMethod = (::CORBA::Octet)source.mInterpolationMethod;
     target.producerId = source.mProducerId;
     target.generationFlags = source.mGenerationFlags;
+    target.precision = source.mPrecision;
     target.function = CORBA::string_dup(source.mFunction.c_str());
 
     convert(source.mFunctionParams,target.functionParams);
+    convert(source.mAdditionalTimeList,target.additionalTimeList);
     convert(source.mValueList,target.valueList);
   }
   catch (...)
@@ -693,7 +699,9 @@ void Converter::convert(QueryServer::Corba::CorbaQuery& source,QueryServer::Quer
     target.mEndTime = source.endTime;
     convert(source.forecastTimeList,target.mForecastTimeList);
     convert(source.coordinateList,target.mCoordinateList);
+    target.mRadius = source.radius;
     convert(source.queryParameterList,target.mQueryParameterList);
+    target.mLanguage = source.language;
     target.mGenerationFlags = source.generationFlags;
     target.mFlags = source.flags;
   }
@@ -716,7 +724,9 @@ void Converter::convert(QueryServer::Query& source,QueryServer::Corba::CorbaQuer
     target.endTime = CORBA::string_dup(source.mEndTime.c_str());
     convert(source.mForecastTimeList,target.forecastTimeList);
     convert(source.mCoordinateList,target.coordinateList);
+    target.radius = source.mRadius;
     convert(source.mQueryParameterList,target.queryParameterList);
+    target.language = CORBA::string_dup(source.mLanguage.c_str());
     target.generationFlags = source.mGenerationFlags;
     target.flags = source.mFlags;
   }

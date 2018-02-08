@@ -309,7 +309,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByPolygon(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::ULong flags, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& polygonPoints, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByPolygon(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::ULong flags, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& polygonPoints, ::CORBA::Double radius, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -324,7 +324,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByPolygon(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,sPolygonPoints,sValueList);
+    int result = mService->getGridValueListByPolygon(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,sPolygonPoints,radius,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -343,7 +343,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByPolygonPath(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::ULong flags, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaPolygonPath& polygonPath, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByPolygonPath(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::ULong flags, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaPolygonPath& polygonPath, ::CORBA::Double radius, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -358,7 +358,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByPolygonPath(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,sPolygonPath,sValueList);
+    int result = mService->getGridValueListByPolygonPath(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,sPolygonPath,radius,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -377,7 +377,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByRectangle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::ULong flags, ::CORBA::Octet coordinateType, ::CORBA::Double x1, ::CORBA::Double y1, ::CORBA::Double x2, ::CORBA::Double y2, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByRectangle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::ULong flags, ::CORBA::Octet coordinateType, ::CORBA::Double x1, ::CORBA::Double y1, ::CORBA::Double x2, ::CORBA::Double y2, ::CORBA::Double radius,SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -389,7 +389,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByRectangle(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,x1,y1,x2,y2,sValueList);
+    int result = mService->getGridValueListByRectangle(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,x1,y1,x2,y2,radius,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);

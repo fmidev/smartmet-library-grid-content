@@ -1013,7 +1013,7 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
           if (paramKey.length() > 0)
           {
             char tmp[200];
-            sprintf(tmp,"%s;%s;%d;%s;%d;%d;%05d;%d;D",
+            sprintf(tmp,"%s;%s;%d;%s;%d;%d;%05d;%d;E",
                 producerInfo->mName.c_str(),
                 paramKey.c_str(),
                 (int)T::ParamKeyType::FMI_NAME,

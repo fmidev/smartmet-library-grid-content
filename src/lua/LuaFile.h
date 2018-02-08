@@ -40,6 +40,9 @@ class LuaFile
     void            executeFunctionCall4(std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters);
     void            executeFunctionCall4(std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters);
 
+    std::string     executeFunctionCall5(std::string& function,std::string language,std::vector<float>& parameters);
+    std::string     executeFunctionCall5(std::string& function,std::string language,std::vector<double>& parameters);
+
     void            print(std::ostream& stream,uint level,uint optionFlags);
 
   protected:

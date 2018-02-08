@@ -24,7 +24,7 @@ std::string getResultString(int resultCode)
         return std::string("Requested data not found!");
 
       case Result::UNEXPECTED_EXCEPTION:
-        return std::string("Requested data not found!");
+        return std::string("Unexpected exception!");
 
       case Result::FILE_NOT_FOUND:
         return std::string("File not found!");

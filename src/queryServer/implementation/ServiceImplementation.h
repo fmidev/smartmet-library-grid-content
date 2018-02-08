@@ -58,7 +58,8 @@ class ServiceImplementation : public ServiceInterface
 
      void           checkConfigurationUpdates();
      bool           getAlias(std::string name,std::string& alias);
-     double         executeFunctionCall1(std::string& function,std::vector<double>& parameters);
+     //std::string    executeFunctionCall5(std::string& function,std::string language,std::vector<double>& parameters);
+     //double         executeFunctionCall1(std::string& function,std::vector<double>& parameters);
      void           executeQueryFunctions(Query& query);
      int            executeTimeRangeQuery(Query& query);
      int            executeTimeStepQuery(Query& query);
@@ -76,6 +77,7 @@ class ServiceImplementation : public ServiceInterface
                        bool timeMatchRequired,
                        QueryCoordinates& coordinates,
                        bool areaSearch,
+                       double radius,
                        ParameterValues& valueList);
 
      void           getGridValues(
@@ -91,6 +93,7 @@ class ServiceImplementation : public ServiceInterface
                        std::string endTime,
                        QueryCoordinates& coordinates,
                        bool areaSearch,
+                       double radius,
                        ParameterValues_vec& valueList);
 
      void           getParameterStringInfo(

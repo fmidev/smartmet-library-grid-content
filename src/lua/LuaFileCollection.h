@@ -20,6 +20,7 @@ class LuaFileCollection
     void            init(string_vec& filenames);
     void            checkUpdates(bool force);
     bool            getFunction(std::string& functionName,uint functionType,std::string& function);
+    uint            getFunction(std::string& functionName,std::string& function);
 
     // Type 1: Takes one or several parameters, returns one value
     float           executeFunctionCall1(std::string& function,std::vector<float>& parameters);
@@ -38,6 +39,10 @@ class LuaFileCollection
     // Type 4: Takes two data vectors and coordinate vector, returns one vector
     void            executeFunctionCall4(std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters);
     void            executeFunctionCall4(std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters);
+
+    // Type 5: Takes one or several parameters, returns one string value
+    std::string     executeFunctionCall5(std::string& function,std::string language,std::vector<float>& parameters);
+    std::string     executeFunctionCall5(std::string& function,std::string language,std::vector<double>& parameters);
 
     void            print(std::ostream& stream,uint level,uint optionFlags);
 
