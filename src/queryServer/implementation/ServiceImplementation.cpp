@@ -131,6 +131,13 @@ int ServiceImplementation::_executeQuery(T::SessionId sessionId,Query& query)
 
     //query.print(std::cout,0,0);
 
+    if (mDebugLog != NULL)
+    {
+      std::stringstream stream;
+      query.print(stream,0,0);
+      PRINT_DATA(mDebugLog,"%s",stream.str().c_str());
+    }
+
     int result = 0;
     if ((query.mFlags & QF_TIME_RANGE_QUERY) != 0)
       result = executeTimeRangeQuery(query);
@@ -138,6 +145,31 @@ int ServiceImplementation::_executeQuery(T::SessionId sessionId,Query& query)
       result = executeTimeStepQuery(query);
 
     return result;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+int ServiceImplementation::_getProducerList(T::SessionId sessionId,string_vec& producerList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::string prev;
+    for (auto it = mProducerList.begin(); it != mProducerList.end(); ++it)
+    {
+      if (it->first != prev)
+        producerList.push_back(it->first);
+
+      prev = it->first;
+    }
+    return QueryServer::Result::OK;
   }
   catch (...)
   {
@@ -276,15 +308,21 @@ void ServiceImplementation::getGridValues(
                         T::ForecastType forecastType,
                         T::ForecastNumber forecastNumber,
                         std::string forecastTime,
+                        std::string analysisTime,
                         bool timeMatchRequired,
                         QueryCoordinates& coordinates,
+                        std::set<T::GeometryId>& geometryIdList,
                         bool areaSearch,
+                        bool reverseGenerations,
                         double radius,
                         ParameterValues& valueList)
 {
   FUNCTION_TRACE
   try
   {
+    std::string startTime = forecastTime;
+    std::string endTime = forecastTime;
+
     PRINT_DATA(mDebugLog,"* getGridValues(%s:%d:%d:%d:%d:%u:%u,%s,%u)\n",
         parameterKey.c_str(),(int)paramLevelId,(int)paramLevel,(int)forecastType,(int)forecastNumber,
         producerId,generationFlags,forecastTime.c_str(),(uint)areaSearch);
@@ -308,11 +346,6 @@ void ServiceImplementation::getGridValues(
     }
 
     uint flags = 0;
-
-    // Getting geometries that support support the given coordinates.
-
-    std::set<T::GeometryId> geometryIdList;
-    getGeometryIdListByCoordinates(coordinates,geometryIdList);
 
     // Going through the producer list.
 
@@ -350,14 +383,10 @@ void ServiceImplementation::getGridValues(
           if (gLen == 0)
             PRINT_DATA(mDebugLog,"    - No generations found for the current producer!\n");
 
-          // Sorting generation names so that they are ordered according to the (origin)times.
+          // Sorting generation analysis times.
 
-          std::set<std::string> generationNameList;
-          for (uint g=0; g<gLen; g++)
-          {
-            T::GenerationInfo *gInfo = generationInfoList.getGenerationInfoByIndex(g);
-            generationNameList.insert(gInfo->mName);
-          }
+          std::vector<std::string> analysisTimes;
+          generationInfoList.getAnalysisTimes(analysisTimes,!reverseGenerations);
 
           // Going through all the parameter mapping files, until we find a match.
 
@@ -375,14 +404,23 @@ void ServiceImplementation::getGridValues(
 
               PRINT_DATA(mDebugLog,"  - Going through the generations from the newest to the oldest.\n");
 
-              for (auto gName = generationNameList.rbegin(); gName != generationNameList.rend(); gName++)
+              for (auto gTime = analysisTimes.begin(); gTime != analysisTimes.end(); ++gTime)
               {
-                PRINT_DATA(mDebugLog,"    * %s\n",(*gName).c_str());
+                PRINT_DATA(mDebugLog,"    * %s\n",gTime->c_str());
 
                 uint gflags = 1 << gCount;
+
+                bool generationValid = false;
+
                 if (generationFlags == 0 || (generationFlags & gflags) != 0)
+                  generationValid = true;
+
+                if (analysisTime.length() > 0  &&  analysisTime != *gTime)
+                  generationValid = false;
+
+                if (generationValid)
                 {
-                  T::GenerationInfo *generationInfo = generationInfoList.getGenerationInfoByName(*gName);
+                  T::GenerationInfo *generationInfo = generationInfoList.getGenerationInfoByAnalysisTime(*gTime);
 
                   PRINT_DATA(mDebugLog,"      - Going through the parameter mappings\n");
                   for (auto pInfo = mappings.begin(); pInfo != mappings.end(); ++pInfo)
@@ -517,11 +555,13 @@ void ServiceImplementation::getGridValues(
                         }
                         else
                         {
-                          SmartMet::Spine::Exception exception(BCP, "Unexpected result!");
-                          exception.addDetail("If there is only one content record in place then its forecast time should match to the requested forecast time.");
-                          exception.addParameter("Content ForecastTime",contentInfo->mForecastTime);
-                          exception.addParameter("Request ForecastTime",forecastTime);
-                          throw exception;
+                          // There is one content record in place, but its time does not match to
+                          // the requested forecast time. This is used for indicating that there
+                          // are content records available, but not for the requested time.
+                          // So, we should use this producer.
+
+                          producerId = producerInfo.mProducerId;
+                          valueList.mProducerId = producerId;
                         }
                       }
 
@@ -701,6 +741,13 @@ void ServiceImplementation::getGridValues(
                         }
                       }
                     }
+                    else
+                    {
+                      // No content found.
+
+                      T::ContentInfoList contentInfoList;
+                      mContentServerPtr->getContentListByParameterAndProducerId(0,producerInfo.mProducerId,pInfo->mParameterKeyType,pInfo->mParameterKey,pInfo->mParameterLevelIdType,pInfo->mParameterLevelId,pInfo->mParameterLevel,pInfo->mParameterLevel,forecastType,forecastNumber,producerGeometryId,startTime,endTime,0,contentInfoList);
+                    }
                   }
                 }
                 gCount++;
@@ -740,9 +787,14 @@ void ServiceImplementation::getGridValues(
                         T::ForecastNumber forecastNumber,
                         std::string startTime,
                         std::string endTime,
+                        std::string analysisTime,
                         QueryCoordinates& coordinates,
+                        std::set<T::GeometryId>& geometryIdList,
+                        bool ignoreStartTimeValue,
                         bool areaSearch,
+                        bool reverseGenerations,
                         double radius,
+                        uint maxValues,
                         ParameterValues_vec& valueList)
 {
   FUNCTION_TRACE
@@ -770,12 +822,11 @@ void ServiceImplementation::getGridValues(
       }
     }
 
+
+    std::string minStartTime = "30000101T000000";
+    std::string maxEndTime = "15000101T000000";
+
     uint flags = 0;
-
-    // Getting geometries that support support the given coordinates.
-
-    std::set<T::GeometryId> geometryIdList;
-    getGeometryIdListByCoordinates(coordinates,geometryIdList);
 
     // Going through the producer list.
 
@@ -814,14 +865,10 @@ void ServiceImplementation::getGridValues(
           if (gLen == 0)
             PRINT_DATA(mDebugLog,"    - No generations found for the current producer!\n");
 
-          // Sorting generation names so that they are ordered according to the (origin)times.
+          // Sorting generation analysis times.
 
-          std::set<std::string> generationNameList;
-          for (uint g=0; g<gLen; g++)
-          {
-            T::GenerationInfo *gInfo = generationInfoList.getGenerationInfoByIndex(g);
-            generationNameList.insert(gInfo->mName);
-          }
+          std::vector<std::string> analysisTimes;
+          generationInfoList.getAnalysisTimes(analysisTimes,!reverseGenerations);
 
           // Going through all the parameter mapping files, until we find a match.
 
@@ -837,16 +884,32 @@ void ServiceImplementation::getGridValues(
             {
               uint gCount = 0;
 
-              PRINT_DATA(mDebugLog,"    - Going through the generations from the newest to the oldest.\n");
-              for (auto gName = generationNameList.rbegin(); gName != generationNameList.rend(); gName++)
+              if (reverseGenerations)
               {
-                PRINT_DATA(mDebugLog,"    * %s\n",gName->c_str());
+                PRINT_DATA(mDebugLog,"    - Going through the generations from the oldest to the newest.\n");
+              }
+              else
+              {
+                PRINT_DATA(mDebugLog,"    - Going through the generations from the newest to the oldest.\n");
+              }
+
+              for (auto gTime = analysisTimes.begin(); gTime != analysisTimes.end(); ++gTime)
+              {
+                PRINT_DATA(mDebugLog,"    * %s\n",gTime->c_str());
 
                 uint gflags = 1 << gCount;
 
+                bool generationValid = false;
+
                 if (generationFlags == 0 || (generationFlags & gflags) != 0)
+                  generationValid = true;
+
+                if (analysisTime.length() > 0  &&  analysisTime != *gTime)
+                  generationValid = false;
+
+                if (generationValid)
                 {
-                  T::GenerationInfo *generationInfo = generationInfoList.getGenerationInfoByName(*gName);
+                  T::GenerationInfo *generationInfo = generationInfoList.getGenerationInfoByAnalysisTime(*gTime);
 
                   PRINT_DATA(mDebugLog,"      - Going through the parameter mappings\n");
                   for (auto pInfo = mappings.begin(); pInfo != mappings.end(); ++pInfo)
@@ -882,14 +945,22 @@ void ServiceImplementation::getGridValues(
                       contentList.print(std::cout,0,0);
                     }
 
-                    std::string lastTime = startTime;
+                    //std::string lastTime = startTime;
 
                     uint clen = contentList.getLength();
 
                     for (uint t=0; t<clen; t++)
                     {
                       T::ContentInfo *contentInfo = contentList.getContentInfoByIndex(t);
-                      if (contentInfo->mForecastTime >= startTime  &&  contentInfo->mForecastTime <= endTime)
+
+                      // Let's use this producer for now on for this parameter.
+                      producerId = contentInfo->mProducerId;
+
+                      //std::cout << contentInfo->mForecastTime << " < " << minStartTime  << "\n";
+                      //std::cout << contentInfo->mForecastTime << " > " << maxEndTime  << "\n";
+
+
+                      if (((contentInfo->mForecastTime == startTime  &&  !ignoreStartTimeValue) || (contentInfo->mForecastTime > startTime  &&  contentInfo->mForecastTime <= endTime))  &&  (contentInfo->mForecastTime < minStartTime  ||  contentInfo->mForecastTime > maxEndTime))
                       {
                         ParameterValues valList;
                         valList.mForecastTime = contentInfo->mForecastTime;
@@ -979,12 +1050,26 @@ void ServiceImplementation::getGridValues(
 
                         if (result == 0)
                         {
-                          if (contentInfo->mForecastTime > lastTime)
-                            lastTime = contentInfo->mForecastTime;
+                          if (contentInfo->mForecastTime < minStartTime)
+                          {
+                            minStartTime = contentInfo->mForecastTime;
+                            valueList.insert(valueList.begin(),valList);
+                          }
+
+                          if (contentInfo->mForecastTime > maxEndTime  &&  minStartTime != contentInfo->mForecastTime)
+                          {
+                            maxEndTime = contentInfo->mForecastTime;
+                            valueList.push_back(valList);
+                          }
+
+                          if (valueList.size() == maxValues)
+                            return;
+
+                          //if (contentInfo->mForecastTime > lastTime)
+                          //  lastTime = contentInfo->mForecastTime;
 
                           //printf("*** VALUES ****\n");
                           //valList.print(std::cout,0,0);
-                          valueList.push_back(valList);
                         }
                       }
 
@@ -1000,12 +1085,15 @@ void ServiceImplementation::getGridValues(
                       }
                     }
 
-                    if (lastTime >= endTime)
+                    if (minStartTime <= startTime  &&  maxEndTime >= endTime)
+                    {
                       if (!multipleOptions)
                         return;
+                    }
 
                     // We have not found content for the full time range, so we should continue to search.
 
+                    /*
                     if (lastTime > startTime)
                     {
                       if (!multipleOptions)
@@ -1014,6 +1102,7 @@ void ServiceImplementation::getGridValues(
                         startTime = toString(tt);
                       }
                     }
+                    */
                   }
                 }
                 else
@@ -1510,6 +1599,20 @@ void ServiceImplementation::updateQueryParameters(Query& query)
 
         getParameterStringInfo(qParam->mParam,qParam->mParameterKey,qParam->mParameterLevelId,qParam->mParameterLevel,qParam->mForecastType,qParam->mForecastNumber,qParam->mProducerId,qParam->mGenerationFlags);
 
+
+        if (qParam->mParameterKeyType == T::ParamKeyType::NEWBASE_ID)
+        {
+          Identification::NewbaseParameterDef paramDef;
+          if (Identification::gridDef.getNewbaseParameterDefById(qParam->mParameterKey,paramDef))
+          {
+            // std::cout << qParam->mSymbolicName << "  => " << alias << " ( " << qParam->mParam << " )\n";
+            PRINT_DATA(mDebugLog,"   + Newbase name: %s\n",paramDef.mParameterName.c_str());
+
+            qParam->mParam = paramDef.mParameterName;
+            //qParam->mParameterKeyType == T::ParamKeyType::NEWBASE_NAME;
+          }
+        }
+
         // If the parameter is a symbolic name (defined in the configuration file) then
         // we should use its definition.
 
@@ -1528,6 +1631,8 @@ void ServiceImplementation::updateQueryParameters(Query& query)
 
           updateRequired = true;
         }
+
+
 
         // If the parameter contains a function then we should parse it and make sure that
         // we fetch the required parameter values for it.
@@ -1724,13 +1829,31 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
     Producer_vec producers;
     getProducerList(query,producers);
 
+    // Getting geometries that support support the given coordinates.
+
+    std::set<T::GeometryId> geometryIdList;
+    getGeometryIdListByCoordinates(query.mCoordinateList,geometryIdList);
+
+
+    std::map<std::string,uint> parameterProducers;
+
     // Parsing parameters and functions in the query.
 
     updateQueryParameters(query);
 
+    bool ignoreStartTimeValue = false;
+    if ((query.mFlags & QF_START_TIME_NOT_INCLUDED) != 0)
+      ignoreStartTimeValue = true;
+
+
     bool areaQuery = false;
     if ((query.mFlags & QF_AREA_QUERY) != 0)
       areaQuery = true;
+
+    bool reverseGenerations = false;
+    if ((query.mFlags & QF_REVERSE_GENERATION_FLAGS) != 0)
+      reverseGenerations = true;
+
 
     // Fetching parameter data according to the given time range and the coordinate list. Notice
     // that the coordinate list can be used in two ways. It can 1) contain coordinate points
@@ -1767,7 +1890,28 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
         {
           if (qParam->mParameterKeyType != T::ParamKeyType::BUILD_IN)
           {
-            getGridValues(producers,producerId,generationFlags,paramName,paramLevelId,paramLevel,forecastType,forecastNumber,query.mStartTime,query.mEndTime,query.mCoordinateList,areaQuery,query.mRadius,qParam->mValueList);
+            std::string startTime = query.mStartTime;
+            std::string endTime = query.mEndTime;
+
+            if ((query.mFlags & QF_START_TIME_DATA) != 0)
+            {
+              startTime = "15000101T000000"; // Start time is the start time of the data
+              endTime = "30000101T000000"; // End time is the end time of the data
+            }
+
+            if (producerId == 0)
+            {
+              auto it = parameterProducers.find(paramName);
+              if (it != parameterProducers.end())
+                producerId = it->second;
+            }
+
+            getGridValues(producers,producerId,generationFlags,paramName,paramLevelId,paramLevel,forecastType,forecastNumber,startTime,endTime,query.mAnalysisTime,query.mCoordinateList,geometryIdList,ignoreStartTimeValue,areaQuery,reverseGenerations,query.mRadius,query.mMaxParameterValues,qParam->mValueList);
+
+            if (producerId == 0  &&  qParam->mValueList.size() > 0  &&  qParam->mValueList[0].mProducerId != 0)
+            {
+              parameterProducers.insert(std::pair<std::string,uint>(paramName,qParam->mValueList[0].mProducerId));
+            }
 
             if (qParam->mAdditionalTimeList.size() > 0)
             {
@@ -1775,7 +1919,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
               {
                 ParameterValues valueList;
                 if (qParam->mParameterKeyType != T::ParamKeyType::BUILD_IN)
-                  getGridValues(producers,producerId,generationFlags,paramName,paramLevelId,paramLevel,forecastType,forecastNumber,*fTime,false,query.mCoordinateList,areaQuery,query.mRadius,valueList);
+                  getGridValues(producers,producerId,generationFlags,paramName,paramLevelId,paramLevel,forecastType,forecastNumber,*fTime,query.mAnalysisTime,false,query.mCoordinateList,geometryIdList,areaQuery,reverseGenerations,query.mRadius,valueList);
 
                 if (valueList.mValueList.getLength() == 0)
                   valueList.mForecastTime = *fTime;
@@ -1824,7 +1968,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
     for (auto tt = timeList.begin(); tt != timeList.end(); ++tt)
     {
-      query.mForecastTimeList.push_back(*tt);
+      query.mForecastTimeList.insert(*tt);
 
       for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
       {
@@ -1880,6 +2024,11 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
     Producer_vec producers;
     getProducerList(query,producers);
 
+    std::set<T::GeometryId> geometryIdList;
+    getGeometryIdListByCoordinates(query.mCoordinateList,geometryIdList);
+
+    std::map<std::string,uint> parameterProducers;
+
     // Parsing parameters and functions in the query.
 
     updateQueryParameters(query);
@@ -1887,6 +2036,11 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
     bool areaQuery = false;
     if ((query.mFlags & QF_AREA_QUERY) != 0)
       areaQuery = true;
+
+    bool reverseGenerations = false;
+    if ((query.mFlags & QF_REVERSE_GENERATION_FLAGS) != 0)
+      reverseGenerations = true;
+
 
     // Fetching parameter data according to the given timesteps and the coordinate list. Notice
     // that the coordinate list can be used in two ways. It can 1) contain coordinate points
@@ -1899,7 +2053,6 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
     {
       timeList.insert(*fTime);
     }
-
 
     for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
     {
@@ -1931,8 +2084,22 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
           ParameterValues valueList;
           try
           {
+            if (producerId == 0)
+            {
+              auto it = parameterProducers.find(paramName);
+              if (it != parameterProducers.end())
+                producerId = it->second;
+            }
+
             if (qParam->mParameterKeyType != T::ParamKeyType::BUILD_IN)
-              getGridValues(producers,producerId,generationFlags,paramName,paramLevelId,paramLevel,forecastType,forecastNumber,*fTime,false,query.mCoordinateList,areaQuery,query.mRadius,valueList);
+            {
+              getGridValues(producers,producerId,generationFlags,paramName,paramLevelId,paramLevel,forecastType,forecastNumber,*fTime,query.mAnalysisTime,false,query.mCoordinateList,geometryIdList,areaQuery,reverseGenerations,query.mRadius,valueList);
+
+              if (producerId == 0  &&  valueList.mProducerId != 0)
+              {
+                parameterProducers.insert(std::pair<std::string,uint>(paramName,valueList.mProducerId));
+              }
+            }
           }
           catch (...)
           {
@@ -1972,7 +2139,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
     for (auto tt = timeList.begin(); tt != timeList.end(); ++tt)
     {
-      query.mForecastTimeList.push_back(*tt);
+      query.mForecastTimeList.insert(*tt);
 
       for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
       {

@@ -333,6 +333,8 @@ void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
     uint len1 = mLength;
     uint len2 = contentInfoList.getLength();
 
+    printf("Add content info list %llu  %u %u\n",(unsigned long long)this,len1,len2);
+
     if (mComparisonMethod == ContentInfo::ComparisonMethod::none)
     {
       if (mArray == NULL  ||  mLength == mSize  ||  (mLength + len2) > mSize)
@@ -825,6 +827,41 @@ uint ContentInfoList::deleteContentInfoByProducerId(uint producerId)
 
 
 
+void ContentInfoList::getLevelInfoList(T::LevelInfoList& levelInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    printf("LEN %u\n",mLength);
+    std::set<std::string> list;
+    char tmp[100];
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0)
+      {
+        sprintf(tmp,"%u;%d;%d;%d;%d",info->mProducerId,info->mFmiParameterLevelId,info->mGrib1ParameterLevelId,info->mGrib2ParameterLevelId,info->mParameterLevel);
+        if (list.find(tmp) == list.end())
+        {
+          printf("%s\n",tmp);
+          list.insert(std::string(tmp));
+          levelInfoList.addLevelInfo(new T::LevelInfo(info->mProducerId,info->mFmiParameterLevelId,info->mGrib1ParameterLevelId,info->mGrib2ParameterLevelId,info->mParameterLevel));
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 uint ContentInfoList::deleteContentInfoByGenerationId(uint generationId)
 {
   FUNCTION_TRACE
@@ -939,7 +976,7 @@ uint ContentInfoList::deleteContentInfoByGenerationAndGeometry(uint generationId
 
 
 
-uint ContentInfoList::deleteContentInfoByGenerationGeometryAndStartTime(uint generationId,T::GeometryId geometryId,std::string startTime)
+uint ContentInfoList::deleteContentInfoByGenerationGeometryAndForecastTime(uint generationId,T::GeometryId geometryId,std::string forecastTime)
 {
   FUNCTION_TRACE
   try
@@ -951,7 +988,7 @@ uint ContentInfoList::deleteContentInfoByGenerationGeometryAndStartTime(uint gen
     {
       ContentInfo *info = mArray[t];
       mArray[t] = NULL;
-      if (info != NULL  &&  ((info->mGenerationId == generationId  &&  info->mGeometryId == geometryId  &&  info->mForecastTime == startTime)  ||  (info->mFlags & CONTENT_INFO_DELETED) != 0))
+      if (info != NULL  &&  ((info->mGenerationId == generationId  &&  info->mGeometryId == geometryId  &&  info->mForecastTime == forecastTime)  ||  (info->mFlags & CONTENT_INFO_DELETED) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -2130,7 +2167,7 @@ void ContentInfoList::getContentInfoListByGeometryId(T::GeometryId geometryId,Co
 
 
 
-void ContentInfoList::getContentInfoListByStartTime(std::string startTime,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByForecastTime(std::string forecastTime,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2140,7 +2177,7 @@ void ContentInfoList::getContentInfoListByStartTime(std::string startTime,Conten
     if (mComparisonMethod == ContentInfo::ComparisonMethod::starttime_fmiId_fmiLevelId_level_file_message)
     {
       ContentInfo info;
-      info.mForecastTime = startTime;
+      info.mForecastTime = forecastTime;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
       uint t = 0;
       if (idx >= 0)
@@ -2151,10 +2188,10 @@ void ContentInfoList::getContentInfoListByStartTime(std::string startTime,Conten
         ContentInfo *info = mArray[t];
         if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0)
         {
-          if (info->mForecastTime > startTime)
+          if (info->mForecastTime > forecastTime)
             return;
 
-          if (info->mForecastTime == startTime)
+          if (info->mForecastTime == forecastTime)
           {
             if (contentInfoList.getReleaseObjects())
               contentInfoList.addContentInfo(info->duplicate());
@@ -2171,7 +2208,7 @@ void ContentInfoList::getContentInfoListByStartTime(std::string startTime,Conten
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mForecastTime == startTime)
+      if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mForecastTime == forecastTime)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -5177,7 +5214,7 @@ void ContentInfoList::getParamLevelInfoListByFmiParameterId(T::ParamId fmiParame
 
 
 
-void ContentInfoList::getStartTimeList(std::set<std::string>& startTimeList)
+void ContentInfoList::getForecastTimeList(std::set<std::string>& forecastTimeList)
 {
   FUNCTION_TRACE
   try
@@ -5190,9 +5227,9 @@ void ContentInfoList::getStartTimeList(std::set<std::string>& startTimeList)
       {
         if (info != NULL)
         {
-          if (startTimeList.find(info->mForecastTime) == startTimeList.end())
+          if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
           {
-            startTimeList.insert(info->mForecastTime);
+            forecastTimeList.insert(info->mForecastTime);
           }
         }
       }
@@ -5208,7 +5245,38 @@ void ContentInfoList::getStartTimeList(std::set<std::string>& startTimeList)
 
 
 
-void ContentInfoList::getStartTimeListByGenerationAndGeometry(uint generationId,T::GeometryId geometryId,std::set<std::string>& startTimeList)
+void ContentInfoList::getForecastTimeListByGenerationId(uint generationId,std::set<std::string>& forecastTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != NULL)
+      {
+        if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mGenerationId == generationId)
+        {
+          if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
+          {
+            forecastTimeList.insert(info->mForecastTime);
+          }
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getForecastTimeListByGenerationAndGeometry(uint generationId,T::GeometryId geometryId,std::set<std::string>& forecastTimeList)
 {
   FUNCTION_TRACE
   try
@@ -5221,9 +5289,40 @@ void ContentInfoList::getStartTimeListByGenerationAndGeometry(uint generationId,
       {
         if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)
         {
-          if (startTimeList.find(info->mForecastTime) == startTimeList.end())
+          if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
           {
-            startTimeList.insert(info->mForecastTime);
+            forecastTimeList.insert(info->mForecastTime);
+          }
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getForecastTimeListByProducerId(uint producerId,std::set<std::string>& forecastTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != NULL)
+      {
+        if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0  &&  info->mProducerId == producerId)
+        {
+          if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
+          {
+            forecastTimeList.insert(info->mForecastTime);
           }
         }
       }

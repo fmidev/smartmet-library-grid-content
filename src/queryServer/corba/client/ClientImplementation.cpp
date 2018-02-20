@@ -148,6 +148,32 @@ int ClientImplementation::_executeQuery(T::SessionId sessionId,Query& query)
 
 
 
+int ClientImplementation::_getProducerList(T::SessionId sessionId,string_vec& producerList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+
+    QueryServer::Corba::CorbaStringList_var corbaProducerList = new QueryServer::Corba::CorbaStringList();
+
+    int result = mService->getProducerList(sessionId, corbaProducerList);
+
+    if (result == 0)
+      QueryServer::Corba::Converter::convert(corbaProducerList,producerList);
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::GridPointValueList& valueList)
 {
   try

@@ -120,6 +120,7 @@ struct CorbaQuery
   CorbaStringList          producerNameList;
   string                   startTime;
   string                   endTime;
+  string                   analysisTime;
   CorbaStringList          forecastTimeList;
   CorbaQueryCoordinates    coordinateList;
   double                   radius;
@@ -127,6 +128,7 @@ struct CorbaQuery
   string                   language;
   unsigned long            generationFlags;
   unsigned long            flags;
+  unsigned long            maxParameterValues;
 };
 
 typedef sequence<CorbaQuery> CorbaQueryList;

@@ -3141,6 +3141,37 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getContentTimeListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::set<std::string> sContentTimeList;
+    ContentServer::Corba::CorbaStringList *corbaContentTimeList = new ContentServer::Corba::CorbaStringList();
+    contentTimeList = corbaContentTimeList;
+
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getContentTimeListByGenerationId(sessionId,generationId,sContentTimeList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sContentTimeList,*corbaContentTimeList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::getContentTimeListByGenerationAndGeometryId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList)
 {
   FUNCTION_TRACE
@@ -3154,6 +3185,37 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentTimeListByGenerationAndGeometryId(sessionId,generationId,geometryId,sContentTimeList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sContentTimeList,*corbaContentTimeList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getContentTimeListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::set<std::string> sContentTimeList;
+    ContentServer::Corba::CorbaStringList *corbaContentTimeList = new ContentServer::Corba::CorbaStringList();
+    contentTimeList = corbaContentTimeList;
+
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getContentTimeListByProducerId(sessionId,producerId,sContentTimeList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sContentTimeList,*corbaContentTimeList);
@@ -3187,6 +3249,37 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
     if (result == 0)
       count = (::CORBA::ULong)sCount;
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getLevelInfoList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaLevelInfoList_out levelInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::LevelInfoList sLevelInfoList;
+    ContentServer::Corba::CorbaLevelInfoList *corbaLevelInfoList = new ContentServer::Corba::CorbaLevelInfoList();
+    levelInfoList = corbaLevelInfoList;
+
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getLevelInfoList(sessionId,sLevelInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sLevelInfoList,*corbaLevelInfoList);
 
     return result;
   }

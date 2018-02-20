@@ -2108,12 +2108,12 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
     if (fileId > 0)
     {
       //printf("-- file update event\n");
-      addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,(uint)fileInfo.mFileType,0,0);
+      addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,(uint)fileInfo.mFileType,contentInfoList.getLength(),0);
     }
     else
     {
       //printf("-- file add event\n");
-      addEvent(EventType::FILE_ADDED,fileInfo.mFileId,(uint)fileInfo.mFileType,0,0);
+      addEvent(EventType::FILE_ADDED,fileInfo.mFileId,(uint)fileInfo.mFileType,contentInfoList.getLength(),0);
     }
 
     return Result::OK;
@@ -2245,12 +2245,12 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std:
       if (fileId > 0)
       {
         //printf("-- file update event\n");
-        addEvent(EventType::FILE_UPDATED,ff->mFileInfo.mFileId,(uint)ff->mFileInfo.mFileType,0,0);
+        addEvent(EventType::FILE_UPDATED,ff->mFileInfo.mFileId,(uint)ff->mFileInfo.mFileType,len,0);
       }
       else
       {
         //printf("-- file add event\n");
-        addEvent(EventType::FILE_ADDED,ff->mFileInfo.mFileId,(uint)ff->mFileInfo.mFileType,0,0);
+        addEvent(EventType::FILE_ADDED,ff->mFileInfo.mFileId,(uint)ff->mFileInfo.mFileType,len,0);
       }
     }
 
@@ -3205,7 +3205,7 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
         T::EventInfo *eventInfo = new T::EventInfo();
         eventInfo->setCsv(reply->element[t]->str);
 
-        if (eventInfo->mType == EventType::FILE_ADDED)
+        if (eventInfo->mType == EventType::FILE_ADDED  &&  eventInfo->mId3 > 0)
         {
           char buf[2000000];
           char *p = buf;
@@ -4429,6 +4429,22 @@ int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     int res = getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,contentList);
 
     contentList.getContentListByForecastTime(forecastTime,contentInfoList);
+
+    // If we cannot find any forecast time, lets add at least one
+    // time in order to show that there are other times available.
+
+    if (contentInfoList.getLength() == 0  &&  contentList.getLength() > 0)
+    {
+      T::ContentInfo *info = contentList.getContentInfoByIndex(0);
+      if (info != NULL)
+      {
+        if (contentInfoList.getReleaseObjects())
+          contentInfoList.addContentInfo(info->duplicate());
+        else
+          contentInfoList.addContentInfo(info);
+      }
+    }
+
     return res;
   }
   catch (...)
@@ -4663,6 +4679,41 @@ int RedisImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
 
 
 
+
+
+int RedisImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationById(generationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    T::ContentInfoList contentInfoList;
+    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
+    contentInfoList.getForecastTimeListByGenerationId(generationId,contentTimeList);
+
+    return res;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int RedisImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
@@ -4682,19 +4733,40 @@ int RedisImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
 
     T::ContentInfoList contentInfoList;
     int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
-    uint len = contentInfoList.getLength();
+    contentInfoList.getForecastTimeListByGenerationAndGeometry(generationId,geometryId,contentTimeList);
+    return res;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
 
-    for (uint t=0; t<len; t++)
-    {
-      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
-      if (info->mGenerationId == generationId)
-      {
-        if (contentTimeList.find(info->mForecastTime) == contentTimeList.end())
-        {
-          contentTimeList.insert(info->mForecastTime);
-        }
-      }
-    }
+
+
+
+
+int RedisImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::ProducerInfo producerInfo;
+    if (getProducerById(producerId,producerInfo) != Result::OK)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    T::ContentInfoList contentInfoList;
+    int res = getContentByProducerId(producerId,0,0,1000000,contentInfoList);
+    contentInfoList.getForecastTimeListByProducerId(producerId,contentTimeList);
+
     return res;
   }
   catch (...)
@@ -4768,6 +4840,30 @@ int RedisImplementation::_getContentCount(T::SessionId sessionId,uint& count)
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
+
+
+
+
+int RedisImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    T::ContentInfoList contentList;
+    getContent(0,0,10000000,contentList);
+
+    contentList.getLevelInfoList(levelInfoList);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
 
 
 

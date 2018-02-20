@@ -732,15 +732,33 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getContentTimeListByGenerationId") == 0)
+    {
+      getContentTimeListByGenerationId(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"getContentTimeListByGenerationAndGeometryId") == 0)
     {
       getContentTimeListByGenerationAndGeometryId(request,response);
       return;
     }
 
+    if (strcasecmp(method,"getContentTimeListByProducerId") == 0)
+    {
+      getContentTimeListByProducerId(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"getContentCount") == 0)
     {
       getContentCount(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getLevelInfoList") == 0)
+    {
+      getLevelInfoList(request,response);
       return;
     }
 
@@ -6665,6 +6683,55 @@ void ServerInterface::getContentParamKeyListByGenerationId(T::RequestMessage& re
 
 
 
+void ServerInterface::getContentTimeListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint generationId = 0;
+    if (!request.getLineByKey("generationId",generationId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+
+    std::set<std::string> contentTimeList;
+
+    int result = mService->getContentTimeListByGenerationId(sessionId,generationId,contentTimeList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      for (auto it=contentTimeList.begin(); it!=contentTimeList.end(); ++it)
+      {
+        response.addLine("contentTime",*it);
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 void ServerInterface::getContentTimeListByGenerationAndGeometryId(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
@@ -6721,6 +6788,55 @@ void ServerInterface::getContentTimeListByGenerationAndGeometryId(T::RequestMess
 
 
 
+void ServerInterface::getContentTimeListByProducerId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint producerId = 0;
+    if (!request.getLineByKey("producerId",producerId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: producerId");
+      return;
+    }
+
+
+    std::set<std::string> contentTimeList;
+
+    int result = mService->getContentTimeListByProducerId(sessionId,producerId,contentTimeList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      for (auto it=contentTimeList.begin(); it!=contentTimeList.end(); ++it)
+      {
+        response.addLine("contentTime",*it);
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 void ServerInterface::getContentCount(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
@@ -6753,6 +6869,51 @@ void ServerInterface::getContentCount(T::RequestMessage& request,T::ResponseMess
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
+
+
+
+
+
+void ServerInterface::getLevelInfoList(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    T::LevelInfoList levelInfoList;
+
+    int result = mService->getLevelInfoList(sessionId,levelInfoList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      uint len = levelInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::LevelInfo *info = levelInfoList.getLevelInfoByIndex(t);
+        if (t == 0)
+          response.addLine("levelInfoHeader",info->getCsvHeader());
+        response.addLine("levelInfo",info->getCsv());
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
 
 
 

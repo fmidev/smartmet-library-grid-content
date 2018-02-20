@@ -2508,6 +2508,28 @@ int ServiceInterface::getContentParamKeyListByGenerationId(T::SessionId sessionI
 
 
 
+int ServiceInterface::getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getContentTimeListByGenerationId(sessionId,generationId,contentTimeList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,time[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,(uint)contentTimeList.size(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
@@ -2518,6 +2540,28 @@ int ServiceInterface::getContentTimeListByGenerationAndGeometryId(T::SessionId s
     unsigned long requestTime = getTime() - timeStart;
 
     PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,time[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,(uint)contentTimeList.size(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getContentTimeListByProducerId(sessionId,producerId,contentTimeList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,time[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerId,(uint)contentTimeList.size(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
@@ -2569,6 +2613,29 @@ int ServiceInterface::getContentCount(T::SessionId sessionId,uint& count)
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
+
+
+
+
+
+int ServiceInterface::getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getLevelInfoList(sessionId,levelInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,LevelInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,levelInfoList.getLength(),result,(float)requestTime / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
 
 
 
@@ -3599,7 +3666,25 @@ int ServiceInterface::_getContentParamKeyListByGenerationId(T::SessionId session
 
 
 
+int ServiceInterface::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
+
+
+
+
 int ServiceInterface::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
+
+
+
+
+int ServiceInterface::_getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
@@ -3621,6 +3706,16 @@ int ServiceInterface::_getContentCount(T::SessionId sessionId,uint& count)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
+
+
+
+
+
+int ServiceInterface::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
 
 
 

@@ -78,12 +78,13 @@ class ServiceInterface
      virtual void   shutdown();
 
      virtual int    executeQuery(T::SessionId sessionId,Query& query);
-
+     virtual int    getProducerList(T::SessionId sessionId,string_vec& producerList);
      virtual int    getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::GridPointValueList& valueList);
 
   protected:
 
      virtual int    _executeQuery(T::SessionId sessionId,Query& query);
+     virtual int    _getProducerList(T::SessionId sessionId,string_vec& producerList);
      virtual int    _getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::GridPointValueList& valueList);
 
      Log            *mDebugLog;

@@ -140,8 +140,12 @@ class ServerInterface
     virtual void getContentGeometryIdListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentParamListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentParamKeyListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getContentTimeListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentTimeListByGenerationAndGeometryId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getContentTimeListByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentCount(T::RequestMessage& request,T::ResponseMessage& response);
+
+    virtual void getLevelInfoList(T::RequestMessage& request,T::ResponseMessage& response);
 
     virtual void deleteVirtualContent(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void updateVirtualContent(T::RequestMessage& request,T::ResponseMessage& response);

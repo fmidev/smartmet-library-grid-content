@@ -3829,6 +3829,80 @@ int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
 
 
 
+int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getContentTimeListByGenerationId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("generationId",generationId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      string_vec lines;
+      uint len = response.getLinesByKey("contentTime",lines);
+      for (uint t=0; t<len; t++)
+      {
+        contentTimeList.insert(lines[t]);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getContentTimeListByProducerId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("producerId",producerId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      string_vec lines;
+      uint len = response.getLinesByKey("contentTime",lines);
+      for (uint t=0; t<len; t++)
+      {
+        contentTimeList.insert(lines[t]);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 {
   try
@@ -3857,6 +3931,42 @@ int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 }
 
 
+
+
+
+int ClientImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getLevelInfoList");
+    request.addLine("sessionId",sessionId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = (int)response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      string_vec lines;
+      uint len = response.getLinesByKey("levelInfo",lines);
+      for (uint t=0; t<len; t++)
+      {
+        T::LevelInfo *info = new T::LevelInfo();
+        info->setCsv(lines[t]);
+        levelInfoList.addLevelInfo(info);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
 
 
 

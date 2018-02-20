@@ -452,6 +452,7 @@ void Converter::convert(T::GenerationInfo& source,ContentServer::Corba::CorbaGen
     target.producerId = source.mProducerId;
     target.name = CORBA::string_dup(source.mName.c_str());
     target.description = CORBA::string_dup(source.mDescription.c_str());
+    target.analysisTime = CORBA::string_dup(source.mAnalysisTime.c_str());
     target.status = (CORBA::Octet)source.mStatus;
     target.flags = source.mFlags;
     target.sourceId = source.mSourceId;
@@ -475,6 +476,7 @@ void Converter::convert(const ContentServer::Corba::CorbaGenerationInfo& source,
     target.mProducerId = source.producerId;
     target.mName = source.name;
     target.mDescription = source.description;
+    target.mAnalysisTime = source.analysisTime;
     target.mStatus = (T::GenerationStatus)source.status;
     target.mFlags = source.flags;
     target.mSourceId = source.sourceId;
@@ -969,6 +971,100 @@ void Converter::convert(const SmartMet::ContentServer::Corba::CorbaForecastTimeL
     throw Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
+
+
+
+
+
+
+
+void Converter::convert(T::LevelInfo& source,ContentServer::Corba::CorbaLevelInfo& target)
+{
+  try
+  {
+    target.producerId = source.mProducerId;
+    target.fmiParameterLevelId = source.mFmiParameterLevelId;
+    target.grib1ParameterLevelId = source.mGrib1ParameterLevelId;
+    target.grib2ParameterLevelId = source.mGrib2ParameterLevelId;
+    target.parameterLevel = source.mParameterLevel;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void Converter::convert(const ContentServer::Corba::CorbaLevelInfo& source,T::LevelInfo& target)
+{
+  try
+  {
+    target.mProducerId = source.producerId;
+    target.mFmiParameterLevelId = source.fmiParameterLevelId;
+    target.mGrib1ParameterLevelId = source.grib1ParameterLevelId;
+    target.mGrib2ParameterLevelId = source.grib2ParameterLevelId;
+    target.mParameterLevel = source.parameterLevel;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void Converter::convert(T::LevelInfoList& source,ContentServer::Corba::CorbaLevelInfoList& target)
+{
+  try
+  {
+    uint len = source.getLength();
+    target.length(len);
+    for (uint t=0; t<len; t++)
+    {
+      T::LevelInfo *info = source.getLevelInfoByIndex(t);
+      ContentServer::Corba::CorbaLevelInfo corbaObject;
+      convert(*info,corbaObject);
+      target[t] = corbaObject;
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void Converter::convert(const ContentServer::Corba::CorbaLevelInfoList& source,T::LevelInfoList& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      ContentServer::Corba::CorbaLevelInfo corbaObject = source[t];
+      T::LevelInfo *info = new T::LevelInfo();
+      convert(corbaObject,*info);
+      target.addLevelInfo(info);
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
 
 
 

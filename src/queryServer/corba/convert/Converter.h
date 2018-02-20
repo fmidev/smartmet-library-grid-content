@@ -25,6 +25,9 @@ class Converter
                   Converter();
     virtual       ~Converter();
 
+    static void   convert(string_set& source,QueryServer::Corba::CorbaStringList& target);
+    static void   convert(QueryServer::Corba::CorbaStringList& source,string_set& target);
+
     static void   convert(string_vec& source,QueryServer::Corba::CorbaStringList& target);
     static void   convert(QueryServer::Corba::CorbaStringList& source,string_vec& target);
 

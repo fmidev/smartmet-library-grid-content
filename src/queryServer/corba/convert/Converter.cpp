@@ -41,6 +41,49 @@ Converter::~Converter()
 
 
 
+void Converter::convert(string_set& source,QueryServer::Corba::CorbaStringList& target)
+{
+  try
+  {
+    uint len = (uint)source.size();
+    target.length(len);
+    uint t = 0;
+    for (auto it=source.begin(); it!=source.end(); ++it)
+    {
+      target[t] = CORBA::string_dup(it->c_str());
+      t++;
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+void Converter::convert(QueryServer::Corba::CorbaStringList& source,string_set& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      target.insert(std::string(source[t]));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 void Converter::convert(string_vec& source,QueryServer::Corba::CorbaStringList& target)
 {
   try
@@ -697,6 +740,7 @@ void Converter::convert(QueryServer::Corba::CorbaQuery& source,QueryServer::Quer
     convert(source.producerNameList,target.mProducerNameList);
     target.mStartTime = source.startTime;
     target.mEndTime = source.endTime;
+    target.mAnalysisTime = source.analysisTime;
     convert(source.forecastTimeList,target.mForecastTimeList);
     convert(source.coordinateList,target.mCoordinateList);
     target.mRadius = source.radius;
@@ -704,6 +748,7 @@ void Converter::convert(QueryServer::Corba::CorbaQuery& source,QueryServer::Quer
     target.mLanguage = source.language;
     target.mGenerationFlags = source.generationFlags;
     target.mFlags = source.flags;
+    target.mMaxParameterValues = source.maxParameterValues;
   }
   catch (...)
   {
@@ -722,6 +767,7 @@ void Converter::convert(QueryServer::Query& source,QueryServer::Corba::CorbaQuer
     convert(source.mProducerNameList,target.producerNameList);
     target.startTime = CORBA::string_dup(source.mStartTime.c_str());
     target.endTime = CORBA::string_dup(source.mEndTime.c_str());
+    target.analysisTime = CORBA::string_dup(source.mAnalysisTime.c_str());
     convert(source.mForecastTimeList,target.forecastTimeList);
     convert(source.mCoordinateList,target.coordinateList);
     target.radius = source.mRadius;
@@ -729,6 +775,7 @@ void Converter::convert(QueryServer::Query& source,QueryServer::Corba::CorbaQuer
     target.language = CORBA::string_dup(source.mLanguage.c_str());
     target.generationFlags = source.mGenerationFlags;
     target.flags = source.mFlags;
+    target.maxParameterValues = source.mMaxParameterValues;
   }
   catch (...)
   {

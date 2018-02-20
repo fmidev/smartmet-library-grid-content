@@ -134,6 +134,7 @@ struct CorbaGenerationInfo
   unsigned long      producerId;
   string             name;
   string             description;
+  string             analysisTime;
   octet              status;
   unsigned long      flags;
   unsigned long      sourceId;
@@ -154,6 +155,19 @@ struct CorbaForecastTime
 };
 
 typedef sequence<CorbaForecastTime> CorbaForecastTimeList;
+
+
+
+struct CorbaLevelInfo
+{
+  unsigned long producerId;
+  octet         fmiParameterLevelId;
+  octet         grib1ParameterLevelId;
+  octet         grib2ParameterLevelId;
+  long          parameterLevel;
+};
+
+typedef sequence<CorbaLevelInfo> CorbaLevelInfoList;
 
 
 };

@@ -17,6 +17,7 @@ Query::Query()
     mFlags = 0;
     mGenerationFlags = 0;
     mRadius = 0;
+    mMaxParameterValues = 1000000;
   }
   catch (...)
   {
@@ -35,6 +36,7 @@ Query::Query(Query& query)
     mProducerNameList = query.mProducerNameList;
     mStartTime = query.mStartTime;
     mEndTime = query.mEndTime;
+    mAnalysisTime = query.mAnalysisTime;
     mForecastTimeList = query.mForecastTimeList;
     mCoordinateList = query.mCoordinateList;
     mRadius = query.mRadius;
@@ -42,6 +44,7 @@ Query::Query(Query& query)
     mLanguage = query.mLanguage;
     mGenerationFlags = query.mGenerationFlags;
     mFlags = query.mFlags;
+    mMaxParameterValues = query.mMaxParameterValues;
   }
   catch (...)
   {
@@ -186,9 +189,11 @@ void Query::print(std::ostream& stream,uint level,uint optionFlags)
 
     stream << space(level) << "- mStartTime              = " << mStartTime << "\n";
     stream << space(level) << "- mEndTime                = " << mEndTime << "\n";
+    stream << space(level) << "- mAnalysisTime           = " << mAnalysisTime << "\n";
     stream << space(level) << "- mFlags                  = " << mFlags << "\n";
     stream << space(level) << "- mRadius                 = " << mRadius << "\n";
     stream << space(level) << "- mLanguage               = " << mLanguage << "\n";
+    stream << space(level) << "- mMaxParameterValues     = " << mMaxParameterValues << "\n";
 
     stream << space(level) << "- mGenerationFlags        = " << mGenerationFlags << "\n";
 

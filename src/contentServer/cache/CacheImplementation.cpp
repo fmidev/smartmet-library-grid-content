@@ -1013,15 +1013,14 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
           if (paramKey.length() > 0)
           {
             char tmp[200];
-            sprintf(tmp,"%s;%s;%d;%s;%d;%d;%05d;%d;E",
+            sprintf(tmp,"%s;%s;%d;%s;%d;%d;%05d",
                 producerInfo->mName.c_str(),
                 paramKey.c_str(),
                 (int)T::ParamKeyType::FMI_NAME,
                 contentInfo->mFmiParameterName.c_str(),
                 (int)T::ParamLevelIdType::FMI,
                 (int)contentInfo->mFmiParameterLevelId,
-                (int)contentInfo->mParameterLevel,
-                (int)T::InterpolationMethod::Linear);
+                (int)contentInfo->mParameterLevel);
 
             if (list.find(std::string(tmp)) == list.end())
               list.insert(std::string(tmp));
@@ -3196,6 +3195,7 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
           mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
           mContentInfoList[0].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+
         return Result::OK;
 
       case T::ParamKeyType::GRIB_ID:
@@ -3614,6 +3614,21 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     //contentList.print(std::cout,0,0);
     contentList.getContentListByForecastTime(forecastTime,contentInfoList);
 
+    // If we cannot find any forecast time, lets add at least one
+    // time in order to show that there are other times available.
+
+    if (contentInfoList.getLength() == 0  &&  contentList.getLength() > 0)
+    {
+      T::ContentInfo *info = contentList.getContentInfoByIndex(0);
+      if (info != NULL)
+      {
+        if (contentInfoList.getReleaseObjects())
+          contentInfoList.addContentInfo(info->duplicate());
+        else
+          contentInfoList.addContentInfo(info);
+      }
+    }
+
     return Result::OK;
   }
   catch (...)
@@ -3788,6 +3803,33 @@ int CacheImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
 
 
 
+int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getContentTimeListByGenerationId(sessionId,generationId,contentTimeList);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    mContentInfoList[0].getForecastTimeListByGenerationId(generationId,contentTimeList);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
@@ -3801,20 +3843,35 @@ int CacheImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    T::ContentInfoList contentInfoList;
-    mContentInfoList[0].getContentInfoListByGenerationAndGeometryId(generationId,geometryId,0,0,1000000,contentInfoList);
+    mContentInfoList[0].getForecastTimeListByGenerationAndGeometry(generationId,geometryId,contentTimeList);
 
-    contentInfoList.sort(T::ContentInfo::ComparisonMethod::generationId_starttime_file_message);
-    uint len = contentInfoList.getLength();
-    for (uint t=0; t<len; t++)
-    {
-      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
 
-      if (contentTimeList.find(info->mForecastTime) == contentTimeList.end())
-      {
-        contentTimeList.insert(info->mForecastTime);
-      }
-    }
+
+
+
+
+int CacheImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getContentTimeListByProducerId(sessionId,producerId,contentTimeList);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    mContentInfoList[0].getForecastTimeListByProducerId(producerId,contentTimeList);
+
     return Result::OK;
   }
   catch (...)
@@ -3839,6 +3896,30 @@ int CacheImplementation::_getContentCount(T::SessionId sessionId,uint& count)
       return Result::INVALID_SESSION;
 
     count = mContentInfoList[0].getLength();
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getLevelInfoList(sessionId,levelInfoList);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    mContentInfoList[0].getLevelInfoList(levelInfoList);
     return Result::OK;
   }
   catch (...)
@@ -4469,24 +4550,31 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
           mDelayedFileAddList.insert(fileInfo.mFileId);
         //mFileInfoListByName.addFileInfo(fInfo);
 
-        if (fileInfo.mFlags & (uint)T::FileInfoFlags::CONTENT_PREDEFINED)
+        if (eventInfo.mId3 > 0)
         {
-          T::ContentInfoList contentInfoList;
-          if (mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) == Result::OK)
+          if (fileInfo.mFlags & (uint)T::FileInfoFlags::CONTENT_PREDEFINED)
           {
-            uint len = contentInfoList.getLength();
-            for (uint c=0; c<len; c++)
+            T::ContentInfoList contentInfoList;
+            if (mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) == Result::OK)
             {
-              T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
-              T::ContentInfo *cInfo = info->duplicate();
+              uint len = contentInfoList.getLength();
+              for (uint c=0; c<len; c++)
+              {
+                T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
+                T::ContentInfo *oInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
+                if (oInfo == NULL  ||  (oInfo != NULL  &&  (oInfo->mFlags | CONTENT_INFO_DELETED) == 1))
+                {
+                  T::ContentInfo *cInfo = info->duplicate();
 
-              mContentInfoList[0].addContentInfo(cInfo);
-              ulonglong id = (((ulonglong)cInfo->mFileId) << 32) + cInfo->mMessageIndex;
-              if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
-                mDelayedContentAddList.insert(id);
+                  mContentInfoList[0].addContentInfo(cInfo);
+                  ulonglong id = (((ulonglong)cInfo->mFileId) << 32) + cInfo->mMessageIndex;
+                  if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
+                    mDelayedContentAddList.insert(id);
 
-              //for (int t=0; t<CONTENT_LIST_COUNT; t++)
-              //  mContentInfoList[t].addContentInfo(cInfo);
+                  //for (int t=0; t<CONTENT_LIST_COUNT; t++)
+                  //  mContentInfoList[t].addContentInfo(cInfo);
+                }
+              }
             }
           }
         }
@@ -4584,19 +4672,23 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
           for (uint c=0; c<len; c++)
           {
             T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
-            T::ContentInfo *cInfo = info->duplicate();
-
-            mContentInfoList[0].addContentInfo(cInfo);
-            ulonglong id = (((ulonglong)cInfo->mFileId) << 32) + cInfo->mMessageIndex;
-            if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
-              mDelayedContentAddList.insert(id);
-/*
-            for (int t=0; t<CONTENT_LIST_COUNT; t++)
+            T::ContentInfo *oInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
+            if (oInfo == NULL  ||  (oInfo != NULL  &&  (oInfo->mFlags | CONTENT_INFO_DELETED) == 1))
             {
-              if (mContentInfoListEnabled[t])
-                mContentInfoList[t].addContentInfo(cInfo);
+              T::ContentInfo *cInfo = info->duplicate();
+
+              mContentInfoList[0].addContentInfo(cInfo);
+              ulonglong id = (((ulonglong)cInfo->mFileId) << 32) + cInfo->mMessageIndex;
+              if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
+                mDelayedContentAddList.insert(id);
+  /*
+              for (int t=0; t<CONTENT_LIST_COUNT; t++)
+              {
+                if (mContentInfoListEnabled[t])
+                  mContentInfoList[t].addContentInfo(cInfo);
+              }
+  */
             }
-*/
           }
         }
       }
@@ -4908,6 +5000,13 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
+    T::ContentInfo *oInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
+    if (oInfo != NULL  &&  (oInfo->mFlags | CONTENT_INFO_DELETED) == 0)
+    {
+      // printf("ALREADY IN CACHE %u:%u\n",eventInfo.mId1,eventInfo.mId2);
+      return;  // The content info is already in the cache.
+    }
+
     T::ContentInfo contentInfo;
     if (mContentStorage->getContentInfo(mSessionId,eventInfo.mId1,eventInfo.mId2,contentInfo) == Result::OK)
     {
@@ -4917,7 +5016,9 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
       for (int t=0; t<CONTENT_LIST_COUNT; t++)
       {
         if (mContentInfoListEnabled[t])
+        {
           mContentInfoList[t].addContentInfo(cInfo);
+        }
       }
     }
   }
@@ -5310,7 +5411,7 @@ void CacheImplementation::processEvents(bool eventThread)
         uint messageIndex = *id & 0xFFFFFFFF;
 
         T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(fileId,messageIndex);
-        if (cInfo != NULL &&  (cInfo->mFlags & CONTENT_INFO_DELETED) == 0)
+        if (cInfo == NULL  ||  (cInfo != NULL &&  (cInfo->mFlags & CONTENT_INFO_DELETED) == 0))
           list.addContentInfo(cInfo);
       }
 
@@ -5319,6 +5420,7 @@ void CacheImplementation::processEvents(bool eventThread)
         if (mContentInfoListEnabled[t])
         {
           PRINT_DATA(mDebugLog,"  -- Adding content to content list %u\n",t);
+
           mContentInfoList[t].addContentInfoList(list);
         }
       }

@@ -296,6 +296,31 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByName(std::string generati
 
 
 
+GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(std::string analysisTime)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+    uint sz = getLength();
+    for (uint t=0; t<sz; t++)
+    {
+      GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
+      if (info != NULL  &&  strcasecmp(info->mAnalysisTime.c_str(),analysisTime.c_str()) == 0)
+        return info;
+    }
+    return NULL;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+
 void GenerationInfoList::getGenerationInfoListByProducerId(uint producerId,GenerationInfoList& generationInfoList)
 {
   try
@@ -429,6 +454,46 @@ uint GenerationInfoList::getLength()
   try
   {
     return (uint)mList.size();
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTimes,bool reverseOrder)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    std::set<std::string> newList;
+
+    uint sz = getLength();
+    for (uint t=0; t<sz; t++)
+    {
+      GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
+      newList.insert(info->mAnalysisTime);
+    }
+
+    if (!reverseOrder)
+    {
+      for (auto it = newList.begin(); it != newList.end(); ++it)
+      {
+        analysisTimes.push_back(*it);
+      }
+    }
+    else
+    {
+      for (auto it = newList.rbegin(); it != newList.rend(); ++it)
+      {
+        analysisTimes.push_back(*it);
+      }
+    }
   }
   catch (...)
   {

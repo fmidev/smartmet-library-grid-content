@@ -971,15 +971,14 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
           if (paramKey.length() > 0)
           {
             char tmp[200];
-            sprintf(tmp,"%s;%s;%d;%s;%d;%d;%05d;%d;E",
+            sprintf(tmp,"%s;%s;%d;%s;%d;%d;%05d",
                 producerInfo->mName.c_str(),
                 paramKey.c_str(),
                 (int)T::ParamKeyType::FMI_NAME,
                 contentInfo->mFmiParameterName.c_str(),
                 (int)T::ParamLevelIdType::FMI,
                 (int)contentInfo->mFmiParameterLevelId,
-                (int)contentInfo->mParameterLevel,
-                (int)T::InterpolationMethod::Linear);
+                (int)contentInfo->mParameterLevel);
 
             if (list.find(std::string(tmp)) == list.end())
               list.insert(std::string(tmp));
@@ -4015,6 +4014,21 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
     //contentList.print(std::cout,0,0);
     contentList.getContentListByForecastTime(forecastTime,contentInfoList);
 
+    // If we cannot find any forecast time, lets add at least one
+    // time in order to show that there are other times available.
+
+    if (contentInfoList.getLength() == 0  &&  contentList.getLength() > 0)
+    {
+      T::ContentInfo *info = contentList.getContentInfoByIndex(0);
+      if (info != NULL)
+      {
+        if (contentInfoList.getReleaseObjects())
+          contentInfoList.addContentInfo(info->duplicate());
+        else
+          contentInfoList.addContentInfo(info);
+      }
+    }
+
     return Result::OK;
   }
   catch (...)
@@ -4264,6 +4278,30 @@ int MemoryImplementation::_getContentParamKeyListByGenerationId(T::SessionId ses
 
 
 
+int MemoryImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    mContentInfoList[0].getForecastTimeListByGenerationId(generationId,contentTimeList);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int MemoryImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
@@ -4274,20 +4312,31 @@ int MemoryImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    T::ContentInfoList contentInfoList;
-    mContentInfoList[0].getContentInfoListByGenerationAndGeometryId(generationId,geometryId,0,0,1000000,contentInfoList);
+    mContentInfoList[0].getForecastTimeListByGenerationAndGeometry(generationId,geometryId,contentTimeList);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
 
-    contentInfoList.sort(T::ContentInfo::ComparisonMethod::generationId_starttime_file_message);
-    uint len = contentInfoList.getLength();
-    for (uint t=0; t<len; t++)
-    {
-      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
 
-      if (contentTimeList.find(info->mForecastTime) == contentTimeList.end())
-      {
-        contentTimeList.insert(info->mForecastTime);
-      }
-    }
+
+
+
+int MemoryImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    mContentInfoList[0].getForecastTimeListByProducerId(producerId,contentTimeList);
+
     return Result::OK;
   }
   catch (...)
@@ -4352,6 +4401,28 @@ int MemoryImplementation::_getContentCount(T::SessionId sessionId,uint& count)
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
+
+
+
+
+
+int MemoryImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    mContentInfoList[0].getLevelInfoList(levelInfoList);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
 
 
 

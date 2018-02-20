@@ -146,7 +146,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
               cInfo = contentList.getContentInfoByIndex(0);
             }
 
-            if (cInfo == NULL)
+            if (cInfo == NULL || (contentList.getLength() == 1  &&  cInfo->mForecastTime != contentInfo.mForecastTime))
             {
               componentsFound = false;
             }

@@ -41,6 +41,7 @@ class GenerationInfo
      uint             mProducerId;
      std::string      mName;
      std::string      mDescription;
+     std::string      mAnalysisTime;
      GenerationStatus mStatus;
      uint             mFlags;
      uint             mSourceId;

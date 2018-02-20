@@ -71,6 +71,12 @@ class Converter
     static void   convert(T::EventInfoList& source,ContentServer::Corba::CorbaEventInfoList& target);
     static void   convert(const ContentServer::Corba::CorbaEventInfoList& source,T::EventInfoList& target);
 
+    static void   convert(T::LevelInfo& source,ContentServer::Corba::CorbaLevelInfo& target);
+    static void   convert(const ContentServer::Corba::CorbaLevelInfo& source,T::LevelInfo& target);
+
+    static void   convert(T::LevelInfoList& source,ContentServer::Corba::CorbaLevelInfoList& target);
+    static void   convert(const ContentServer::Corba::CorbaLevelInfoList& source,T::LevelInfoList& target);
+
     static void   convert(string_vec& source,ContentServer::Corba::CorbaStringList& target);
     static void   convert(const ContentServer::Corba::CorbaStringList& source,string_vec& target);
 

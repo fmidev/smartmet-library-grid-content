@@ -43,6 +43,8 @@ class ServiceImplementation : public ServiceInterface
 
      virtual int    _executeQuery(T::SessionId sessionId,Query& query);
 
+     virtual int    _getProducerList(T::SessionId sessionId,string_vec& producerList);
+
      virtual int    _getValuesByGridPoint(
                        T::SessionId sessionId,
                        T::ContentInfoList& contentInfoList,
@@ -74,9 +76,12 @@ class ServiceImplementation : public ServiceInterface
                        T::ForecastType forecastType,
                        T::ForecastNumber forecastNumber,
                        std::string forecastTime,
+                       std::string analysisTime,
                        bool timeMatchRequired,
                        QueryCoordinates& coordinates,
+                       std::set<T::GeometryId>& geometryIdList,
                        bool areaSearch,
+                       bool reverseGenerations,
                        double radius,
                        ParameterValues& valueList);
 
@@ -91,9 +96,14 @@ class ServiceImplementation : public ServiceInterface
                        T::ForecastNumber forecastNumber,
                        std::string startTime,
                        std::string endTime,
+                       std::string analysisTime,
                        QueryCoordinates& coordinates,
+                       std::set<T::GeometryId>& geometryIdList,
+                       bool ignoreStartTimeValue,
                        bool areaSearch,
+                       bool reverseGenerations,
                        double radius,
+                       uint maxValues,
                        ParameterValues_vec& valueList);
 
      void           getParameterStringInfo(

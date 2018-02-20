@@ -3147,6 +3147,36 @@ int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId ses
 
 
 
+
+
+int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaStringList_var corbaContentTimeList;
+
+    int result = mService->getContentTimeListByGenerationId(sessionId,generationId,corbaContentTimeList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaContentTimeList,contentTimeList);
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   try
@@ -3157,6 +3187,34 @@ int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
     ContentServer::Corba::CorbaStringList_var corbaContentTimeList;
 
     int result = mService->getContentTimeListByGenerationAndGeometryId(sessionId,generationId,geometryId,corbaContentTimeList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaContentTimeList,contentTimeList);
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaStringList_var corbaContentTimeList;
+
+    int result = mService->getContentTimeListByProducerId(sessionId,producerId,corbaContentTimeList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentTimeList,contentTimeList);
@@ -3188,6 +3246,34 @@ int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 
     if (result == 0)
       count = (uint)corbaCount;
+
+    mLastAccessTime = time(0);
+    return result;
+  }
+  catch (...)
+  {
+    mLastErrorTime = time(0);
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaLevelInfoList_var corbaLevelInfoList;
+
+    int result = mService->getLevelInfoList(sessionId,corbaLevelInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaLevelInfoList, levelInfoList);
 
     mLastAccessTime = time(0);
     return result;

@@ -2,6 +2,7 @@
 
 #include "ContentInfo.h"
 #include "ParameterLevelInfoList.h"
+#include "LevelInfoList.h"
 
 #include <grid-files/common/ModificationLock.h>
 #include <vector>
@@ -40,7 +41,7 @@ class ContentInfoList
      uint             deleteContentInfoByGenerationId(uint generationId);
      uint             deleteContentInfoByGenerationIdList(std::set<uint>& generationIdList);
      uint             deleteContentInfoByGenerationAndGeometry(uint generationId,T::GeometryId geometryId);
-     uint             deleteContentInfoByGenerationGeometryAndStartTime(uint generationId,T::GeometryId geometryId,std::string startTime);
+     uint             deleteContentInfoByGenerationGeometryAndForecastTime(uint generationId,T::GeometryId geometryId,std::string forecastTime);
      uint             deleteContentInfoBySourceId(uint sourceId);
      uint             deleteContentInfoByFileIdList(std::set<uint>& fileIdList);
      uint             deleteMarkedContent();
@@ -71,7 +72,7 @@ class ContentInfoList
      void             getContentInfoListByGeometryId(T::GeometryId geometryId,ContentInfoList& contentInfoList);
      void             getContentInfoListByGroupFlags(uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
      void             getContentInfoListByFileId(uint fileId,ContentInfoList& contentInfoList);
-     void             getContentInfoListByStartTime(std::string startTime,ContentInfoList& contentInfoList);
+     void             getContentInfoListByForecastTime(std::string forecastTime,ContentInfoList& contentInfoList);
 
      void             getContentInfoListByGribParameterId(T::ParamId gribParameterId,ContentInfoList& contentInfoList);
      void             getContentInfoListByGribParameterId(T::ParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,ContentInfoList& contentInfoList);
@@ -100,7 +101,7 @@ class ContentInfoList
      void             getContentListByForecastTime(std::string forecastTime,T::ContentInfoList& contentInfoList);
 
      void             getContentInfoListByGenerationId(uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
-     void             getContentInfoListByGenerationId(uint generationId,std::string startTime,std::string endTime,ContentInfoList& contentInfoList);
+     void             getContentInfoListByGenerationId(uint generationId,std::string forecastTime,std::string endTime,ContentInfoList& contentInfoList);
      void             getContentInfoListByGenerationAndGeometryId(uint generationId,T::GeometryId geometryId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
      void             getContentInfoListByProducerId(uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
      void             getContentInfoListByServerId(uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
@@ -114,12 +115,16 @@ class ContentInfoList
      void             getContentParamKeyListByGenerationId(uint generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList);
      void             getGenerationIdListByGeometryId(T::GeometryId geometryId,std::set<uint>& generationIdList);
 
-     void             getStartTimeList(std::set<std::string>& startTimeList);
-     void             getStartTimeListByGenerationAndGeometry(uint generationId,T::GeometryId geometryId,std::set<std::string>& startTimeList);
-     //void             getStartTimeList(string_vec& startTimeList);
+     void             getForecastTimeList(std::set<std::string>& forecastTimeList);
+     void             getForecastTimeListByGenerationId(uint generationId,std::set<std::string>& forecastTimeList);
+     void             getForecastTimeListByGenerationAndGeometry(uint generationId,T::GeometryId geometryId,std::set<std::string>& forecastTimeList);
+     void             getForecastTimeListByProducerId(uint producerId,std::set<std::string>& forecastTimeList);
+     //void             getForecastTimeList(string_vec& forecastTimeList);
      void             getFmiParamLevelIdListByFmiParameterId(T::ParamId fmiParameterId,std::vector<T::ParamLevelId>& paramLevelIdList);
      void             getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId,std::vector<T::ParamLevel>& paramLevelList);
      void             getParamLevelInfoListByFmiParameterId(T::ParamId fmiParameterId,ParameterLevelInfoList& parameterLevelInfoList);
+
+     void             getLevelInfoList(T::LevelInfoList& levelInfoList);
 
      uint             getLength()const;
      uint             getSize() const;

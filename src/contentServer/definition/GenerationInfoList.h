@@ -26,10 +26,12 @@ class GenerationInfoList
      bool             deleteGenerationInfoById(uint generationId);
      void             deleteGenerationInfoListByProducerId(uint producerId);
      void             deleteGenerationInfoListBySourceId(uint producerId);
+     void             getAnalysisTimes(std::vector<std::string>& analysisTimes,bool reverseOrder);
      GenerationInfo*  getGenerationInfoById(uint generationId);
      GenerationInfo*  getGenerationInfoByIndex(uint index);
      GenerationInfo*  getGenerationInfoByIndexNoCheck(uint index);
      GenerationInfo*  getGenerationInfoByName(std::string generationName);
+     GenerationInfo*  getGenerationInfoByAnalysisTime(std::string analysisTime);
      void             getGenerationInfoListByProducerId(uint producerId,GenerationInfoList& generationInfoList);
      void             getGenerationInfoListBySourceId(uint sourceId,GenerationInfoList& generationInfoList);
      GenerationInfo*  getPrevGenerationInfoByProducerId(uint producerId,std::string nextGenerationName);

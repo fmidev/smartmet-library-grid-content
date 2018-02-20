@@ -136,9 +136,13 @@ interface ServiceInterface
   long  getContentGeometryIdListByGenerationId(in long long sessionId,in unsigned long generationId,out CorbaLongList geometryIdList);
   long  getContentParamListByGenerationId(in long long sessionId,in unsigned long generationId,out CorbaContentInfoList contentParamList);
   long  getContentParamKeyListByGenerationId(in long long sessionId,in unsigned long generationId,in octet parameterKeyType,out CorbaStringList paramKeyList);
+  long  getContentTimeListByGenerationId(in long long sessionId,in unsigned long generationId,out CorbaStringList contentTimeList);
   long  getContentTimeListByGenerationAndGeometryId(in long long sessionId,in unsigned long generationId,in long geometryId,out CorbaStringList contentTimeList);
+  long  getContentTimeListByProducerId(in long long sessionId,in unsigned long producerId,out CorbaStringList contentTimeList);
 
   long  getContentCount(in long long sessionId,out unsigned long count);
+
+  long  getLevelInfoList(in long long sessionId,out CorbaLevelInfoList levelInfoList);
 
   long  deleteVirtualContent(in long long sessionId);
   long  updateVirtualContent(in long long sessionId);

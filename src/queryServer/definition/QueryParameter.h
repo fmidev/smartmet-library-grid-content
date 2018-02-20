@@ -40,7 +40,7 @@ class QueryParameter
     bool                    mTemporary;
     std::string             mFunction;
     FunctionParam_vec       mFunctionParams;
-    string_vec              mAdditionalTimeList;
+    string_set              mAdditionalTimeList;
     ParameterValues_vec     mValueList;
 };
 

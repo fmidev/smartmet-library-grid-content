@@ -83,7 +83,7 @@ else
 	-I$(includedir) \
 	-I$(includedir)/smartmet \
 	-I$(includedir)/smartmet/grid-files \
-	-I /usr/include/lua \
+	-I /usr/include/lua5.3 \
 	$(pkg-config --cflags icu-i18n) \
 	$(CORBA_INCLUDE)
 
@@ -100,7 +100,7 @@ LIBS = -L$(libdir) \
 	-lboost_date_time \
 	-lhiredis \
 	-lcurl \
-	-llua \
+	-llua5.3 \
 	-lpthread \
 	$(CORBA_LIBS)
 
