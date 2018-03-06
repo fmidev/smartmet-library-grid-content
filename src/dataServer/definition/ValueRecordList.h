@@ -16,7 +16,7 @@ class ValueRecordList
   public:
                     ValueRecordList();
                     ValueRecordList(ValueRecordList& valueRecordList);
-                    ValueRecordList(ContentInfoList& contentInfoList,CoordinateType coordinateType,InterpolationMethod interpolationMethod,double x,double y);
+                    ValueRecordList(ContentInfoList& contentInfoList,CoordinateType coordinateType,T::AreaInterpolationMethod interpolationMethod,double x,double y);
      virtual        ~ValueRecordList();
 
      void           operator=(ValueRecordList& valueRecordList);

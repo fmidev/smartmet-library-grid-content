@@ -45,7 +45,7 @@ ValueRecordList::ValueRecordList(ValueRecordList& valueRecordList)
 
 
 
-ValueRecordList::ValueRecordList(ContentInfoList& contentInfoList,CoordinateType coordinateType,InterpolationMethod interpolationMethod,double x,double y)
+ValueRecordList::ValueRecordList(ContentInfoList& contentInfoList,CoordinateType coordinateType,T::AreaInterpolationMethod interpolationMethod,double x,double y)
 {
   try
   {
@@ -57,7 +57,7 @@ ValueRecordList::ValueRecordList(ContentInfoList& contentInfoList,CoordinateType
       rec->mFileId = contentInfo->mFileId;
       rec->mMessageIndex = contentInfo->mMessageIndex;
       rec->mCoordinateType = coordinateType;
-      rec->mInterpolationMethod = interpolationMethod;
+      rec->mAreaInterpolationMethod = interpolationMethod;
       rec->mX = x;
       rec->mY = y;
       mList.push_back(new ValueRecord(*rec));

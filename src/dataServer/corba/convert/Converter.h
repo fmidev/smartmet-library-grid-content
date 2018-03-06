@@ -60,6 +60,10 @@ class Converter
 
     static void   convert(std::vector<std::vector<T::Coordinate>>& source,SmartMet::DataServer::Corba::CorbaPolygonPath& target);
     static void   convert(const SmartMet::DataServer::Corba::CorbaPolygonPath& source,std::vector<std::vector<T::Coordinate>>& target);
+
+    static void   convert(double_vec& source,DataServer::Corba::CorbaDoubleList& target);
+    static void   convert(DataServer::Corba::CorbaDoubleList& source,double_vec& target);
+
 };
 
 

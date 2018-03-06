@@ -174,7 +174,7 @@ int ClientImplementation::_getProducerList(T::SessionId sessionId,string_vec& pr
 
 
 
-int ClientImplementation::_getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::GridPointValueList& valueList)
+int ClientImplementation::_getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,T::AreaInterpolationMethod interpolationMethod,T::GridPointValueList& valueList)
 {
   try
   {

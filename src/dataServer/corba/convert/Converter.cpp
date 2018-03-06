@@ -302,7 +302,7 @@ void Converter::convert(T::ValueRecord& source,DataServer::Corba::CorbaValueReco
     target.fileId = source.mFileId;
     target.messageIndex = source.mMessageIndex;
     target.coordinateType = (CORBA::Octet)source.mCoordinateType;
-    target.interpolationMethod = (CORBA::Octet)source.mInterpolationMethod;
+    target.areaInterpolationMethod = (CORBA::Octet)source.mAreaInterpolationMethod;
     target.x = source.mX;
     target.y = source.mY;
     target.value = source.mValue;
@@ -325,7 +325,7 @@ void Converter::convert(DataServer::Corba::CorbaValueRecord& source,T::ValueReco
     target.mFileId = source.fileId;
     target.mMessageIndex = source.messageIndex;
     target.mCoordinateType = (T::CoordinateType)source.coordinateType;
-    target.mInterpolationMethod = (T::InterpolationMethod)source.interpolationMethod;
+    target.mAreaInterpolationMethod = (T::AreaInterpolationMethod)source.areaInterpolationMethod;
     target.mX = source.x;
     target.mY = source.y;
     target.mValue = source.value;
@@ -640,6 +640,46 @@ void Converter::convert(const SmartMet::DataServer::Corba::CorbaPolygonPath& sou
   }
 }
 
+
+
+
+void Converter::convert(double_vec& source,DataServer::Corba::CorbaDoubleList& target)
+{
+  try
+  {
+    uint len = source.size();
+    target.length(len);
+    for (uint t=0; t<len; t++)
+    {
+      target[t] = source[t];
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void Converter::convert(DataServer::Corba::CorbaDoubleList& source,double_vec& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      target.push_back(source[t]);
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
 
 
 }

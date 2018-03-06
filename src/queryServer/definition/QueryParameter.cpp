@@ -19,7 +19,9 @@ QueryParameter::QueryParameter()
     mParameterLevel = 0;
     mForecastType = -1;
     mForecastNumber = -1;
-    mInterpolationMethod = T::InterpolationMethod::Linear;
+    mAreaInterpolationMethod = T::AreaInterpolationMethod::Undefined;
+    mTimeInterpolationMethod = T::TimeInterpolationMethod::Undefined;
+    mLevelInterpolationMethod = T::LevelInterpolationMethod::Undefined;
     mProducerId = 0;
     mGenerationFlags = 0;
     mPrecision = 0;
@@ -50,7 +52,9 @@ QueryParameter::QueryParameter(const QueryParameter& queryParameter)
     mParameterLevel = queryParameter.mParameterLevel;
     mForecastType = queryParameter.mForecastType;
     mForecastNumber = queryParameter.mForecastNumber;
-    mInterpolationMethod = queryParameter.mInterpolationMethod;
+    mAreaInterpolationMethod = queryParameter.mAreaInterpolationMethod;
+    mTimeInterpolationMethod = queryParameter.mTimeInterpolationMethod;
+    mLevelInterpolationMethod = queryParameter.mLevelInterpolationMethod;
     mProducerId = queryParameter.mProducerId;
     mGenerationFlags = queryParameter.mGenerationFlags;
     mAdditionalTimeList = queryParameter.mAdditionalTimeList;
@@ -106,38 +110,40 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
   try
   {
     stream << space(level) << "QueryParameter\n";
-    stream << space(level) << "- mId                   = " << mId << "\n";
-    stream << space(level) << "- mParam                = " << mParam << "\n";
-    stream << space(level) << "- mOrigParam            = " << mOrigParam << "\n";
-    stream << space(level) << "- mSymbolicName         = " << mSymbolicName << "\n";
-    stream << space(level) << "- mParameterKeyType     = " << (uint)mParameterKeyType << "\n";
-    stream << space(level) << "- mParameterKey         = " << mParameterKey << "\n";
-    stream << space(level) << "- mParameterLevelIdType = " << (uint)mParameterLevelIdType << "\n";
-    stream << space(level) << "- mParameterLevelId     = " << (int)mParameterLevelId << "\n";
-    stream << space(level) << "- mParameterLevel       = " << mParameterLevel << "\n";
-    stream << space(level) << "- mForecastType         = " << (int)mForecastType << "\n";
-    stream << space(level) << "- mForecastNumber       = " << (int)mForecastNumber << "\n";
-    stream << space(level) << "- mInterpolationMethod  = " << (uint)mInterpolationMethod << "\n";
-    stream << space(level) << "- mProducerId           = " << mProducerId << "\n";
-    stream << space(level) << "- mGenerationFlags      = " << mGenerationFlags << "\n";
-    stream << space(level) << "- mTemporary            = " << (int)mTemporary << "\n";
-    stream << space(level) << "- mPrecision            = " << mPrecision << "\n";
-    stream << space(level) << "- mFunction             = " << mFunction << "\n";
+    stream << space(level) << "- mId                       = " << mId << "\n";
+    stream << space(level) << "- mParam                    = " << mParam << "\n";
+    stream << space(level) << "- mOrigParam                = " << mOrigParam << "\n";
+    stream << space(level) << "- mSymbolicName             = " << mSymbolicName << "\n";
+    stream << space(level) << "- mParameterKeyType         = " << (uint)mParameterKeyType << "\n";
+    stream << space(level) << "- mParameterKey             = " << mParameterKey << "\n";
+    stream << space(level) << "- mParameterLevelIdType     = " << (uint)mParameterLevelIdType << "\n";
+    stream << space(level) << "- mParameterLevelId         = " << (int)mParameterLevelId << "\n";
+    stream << space(level) << "- mParameterLevel           = " << mParameterLevel << "\n";
+    stream << space(level) << "- mForecastType             = " << (int)mForecastType << "\n";
+    stream << space(level) << "- mForecastNumber           = " << (int)mForecastNumber << "\n";
+    stream << space(level) << "- mAreaInterpolationMethod      = " << (uint)mAreaInterpolationMethod << "\n";
+    stream << space(level) << "- mTimeInterpolationMethod  = " << (uint)mTimeInterpolationMethod << "\n";
+    stream << space(level) << "- mLevelInterpolationMethod = " << (uint)mLevelInterpolationMethod << "\n";
+    stream << space(level) << "- mProducerId               = " << mProducerId << "\n";
+    stream << space(level) << "- mGenerationFlags          = " << mGenerationFlags << "\n";
+    stream << space(level) << "- mTemporary                = " << (int)mTemporary << "\n";
+    stream << space(level) << "- mPrecision                = " << mPrecision << "\n";
+    stream << space(level) << "- mFunction                 = " << mFunction << "\n";
 
-    stream << space(level) << "- mFunctionParams       = \n";
+    stream << space(level) << "- mFunctionParams           = \n";
     for (auto it = mFunctionParams.begin();  it != mFunctionParams.end(); ++it)
     {
       stream << space(level) << "   * " << it->first << ":" << it->second << "\n";
     }
 
-    stream << space(level) << "- mAdditionalTimeList   = \n";
+    stream << space(level) << "- mAdditionalTimeList       = \n";
 
     for (auto it = mAdditionalTimeList.begin();  it != mAdditionalTimeList.end(); ++it)
     {
       stream << space(level) << "   * " << *it << "\n";
     }
 
-    stream << space(level) << "- mValueList            = (" << mValueList.size() << " items)\n";
+    stream << space(level) << "- mValueList                = (" << mValueList.size() << " items)\n";
 
     for (auto it = mValueList.begin();  it != mValueList.end(); ++it)
     {

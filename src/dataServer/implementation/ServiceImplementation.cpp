@@ -262,12 +262,12 @@ int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,T::Valu
               {
                 case T::CoordinateType::UNKNOWN:
                 case T::CoordinateType::LATLON_COORDINATES:
-                  rec->mValue = message->getGridValueByLatLonCoordinate(rec->mY,rec->mX,(T::InterpolationMethod)rec->mInterpolationMethod);
+                  rec->mValue = message->getGridValueByLatLonCoordinate(rec->mY,rec->mX,(T::AreaInterpolationMethod)rec->mAreaInterpolationMethod);
                   rec->mResult = 0;
                   break;
 
                 case T::CoordinateType::GRID_COORDINATES:
-                  rec->mValue = message->getGridValueByGridPoint(rec->mX,rec->mY,(T::InterpolationMethod)rec->mInterpolationMethod);
+                  rec->mValue = message->getGridValueByGridPoint(rec->mX,rec->mY,(T::AreaInterpolationMethod)rec->mAreaInterpolationMethod);
                   rec->mResult = 0;
                   break;
 
@@ -473,7 +473,7 @@ int ServiceImplementation::_getGridAttributeList(T::SessionId sessionId,uint fil
 
 
 
-int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::ParamValue& value)
+int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,T::AreaInterpolationMethod interpolationMethod,T::ParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -587,7 +587,7 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint
 
 
 
-int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,T::InterpolationMethod interpolationMethod,T::ParamValue_vec& values)
+int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,T::AreaInterpolationMethod interpolationMethod,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -659,7 +659,7 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
 
 
 
-int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,T::InterpolationMethod interpolationMethod,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,T::AreaInterpolationMethod interpolationMethod,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -698,7 +698,7 @@ int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,u
 
 
 
-int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,double radius,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -713,7 +713,7 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
       if (message == NULL)
         return Result::MESSAGE_NOT_FOUND;
 
-      message->getGridValueListByPolygon(coordinateType,polygonPoints,radius,valueList);
+      message->getGridValueListByPolygon(coordinateType,polygonPoints,valueList);
       return Result::OK;
     }
     catch (...)
@@ -736,7 +736,7 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
 
 
 
-int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,double radius,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -751,7 +751,7 @@ int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId
       if (message == NULL)
         return Result::MESSAGE_NOT_FOUND;
 
-      message->getGridValueListByPolygonPath(coordinateType,polygonPath,radius,valueList);
+      message->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList);
       return Result::OK;
     }
     catch (...)
@@ -774,7 +774,7 @@ int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId
 
 
 
-int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,double radius,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -794,7 +794,46 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,u
       if ((flags & GRID_RECTANGLE_FLAG) != 0)
         gridRectangle = true;
 
-      message->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,radius,gridRectangle,valueList);
+      message->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,gridRectangle,valueList);
+      return Result::OK;
+    }
+    catch (...)
+    {
+       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+       exception.addParameter("FileId",std::to_string(fileId));
+       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+int ServiceImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,uint vectorType,double_vec& valueVector)
+{
+  FUNCTION_TRACE
+  try
+  {
+    try
+    {
+      GRID::GridFile_sptr gridFile = getGridFile(fileId);
+      if (gridFile == NULL)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
+      if (message == NULL)
+        return Result::MESSAGE_NOT_FOUND;
+
+      message->getGridValueVectorByPoint(coordinateType,x,y,vectorType,valueVector);
+
       return Result::OK;
     }
     catch (...)

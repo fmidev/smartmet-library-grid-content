@@ -197,6 +197,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
       throw exception;
@@ -222,6 +223,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
     {
       // LUA ERROR
       Spine::Exception exception(BCP, "LUA call returns an error!");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring((lua_State*)mLuaState, -1));
       lua_pop((lua_State*)mLuaState, 1);
@@ -241,6 +243,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
       if (message != "OK")
       {
         Spine::Exception exception(BCP, "LUA function call returns an error!");
+        exception.addParameter("LUA File",mFilename);
         exception.addParameter("LUA Function",function);
         exception.addParameter("Error Message",message.c_str());
         throw exception;
@@ -280,6 +283,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
       throw exception;
@@ -305,6 +309,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
     {
       // LUA ERROR
       Spine::Exception exception(BCP, "LUA call returns an error!");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring((lua_State*)mLuaState, -1));
       lua_pop((lua_State*)mLuaState, 1);
@@ -324,6 +329,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
       if (message != "OK")
       {
         Spine::Exception exception(BCP, "LUA function call returns an error!");
+        exception.addParameter("LUA File",mFilename);
         exception.addParameter("LUA Function",function);
         exception.addParameter("Error Message",message.c_str());
         throw exception;
@@ -363,6 +369,7 @@ float LuaFile::executeFunctionCall1(std::string& function,std::vector<float>& pa
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
       throw exception;
@@ -388,6 +395,7 @@ float LuaFile::executeFunctionCall1(std::string& function,std::vector<float>& pa
     {
       // LUA ERROR
       Spine::Exception exception(BCP, "LUA call returns an error!");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring((lua_State*)mLuaState, -1));
       lua_pop((lua_State*)mLuaState, 1);
@@ -406,6 +414,7 @@ float LuaFile::executeFunctionCall1(std::string& function,std::vector<float>& pa
       if (message != "OK")
       {
         Spine::Exception exception(BCP, "LUA function call returns an error!");
+        exception.addParameter("LUA File",mFilename);
         exception.addParameter("LUA Function",function);
         exception.addParameter("Error Message",message.c_str());
         throw exception;
@@ -445,6 +454,7 @@ double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& 
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
       throw exception;
@@ -470,6 +480,7 @@ double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& 
     {
       // LUA ERROR
       Spine::Exception exception(BCP, "LUA call returns an error!");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring((lua_State*)mLuaState, -1));
       lua_pop((lua_State*)mLuaState, 1);
@@ -488,6 +499,7 @@ double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& 
       if (message != "OK")
       {
         Spine::Exception exception(BCP, "LUA function call returns an error!");
+        exception.addParameter("LUA File",mFilename);
         exception.addParameter("LUA Function",function);
         exception.addParameter("Error Message",message.c_str());
         throw exception;
@@ -529,6 +541,7 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
       throw exception;
@@ -553,6 +566,7 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
     {
       // LUA ERROR
       Spine::Exception exception(BCP, "LUA call returns an error!");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
       lua_pop(L, 1);
@@ -607,6 +621,7 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
       throw exception;
@@ -631,6 +646,7 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
     {
       // LUA ERROR
       Spine::Exception exception(BCP, "LUA call returns an error!");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
       lua_pop(L, 1);
@@ -683,6 +699,7 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
       throw exception;
@@ -707,6 +724,7 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
     {
       // LUA ERROR
       Spine::Exception exception(BCP, "LUA call returns an error!");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
       lua_pop(L, 1);
@@ -761,6 +779,7 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
       throw exception;
@@ -785,6 +804,7 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
     {
       // LUA ERROR
       Spine::Exception exception(BCP, "LUA call returns an error!");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
       lua_pop(L, 1);
@@ -837,6 +857,7 @@ void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
       throw exception;
@@ -878,6 +899,7 @@ void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,
     {
       // LUA ERROR
       Spine::Exception exception(BCP, "LUA call returns an error!");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
       lua_pop(L, 1);
@@ -931,6 +953,7 @@ void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
       throw exception;
@@ -972,6 +995,7 @@ void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,
     {
       // LUA ERROR
       Spine::Exception exception(BCP, "LUA call returns an error!");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
       lua_pop(L, 1);
@@ -1025,6 +1049,7 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
       throw exception;
@@ -1082,6 +1107,7 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
     {
       // LUA ERROR
       Spine::Exception exception(BCP, "LUA call returns an error!");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
       lua_pop(L, 1);
@@ -1135,6 +1161,7 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
       throw exception;
@@ -1190,6 +1217,7 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
     {
       // LUA ERROR
       Spine::Exception exception(BCP, "LUA call returns an error!");
+      exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
       lua_pop(L, 1);

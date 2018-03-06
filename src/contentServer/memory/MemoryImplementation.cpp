@@ -2738,7 +2738,7 @@ int MemoryImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoL
       T::ContentInfo contentInfo;
       if (mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex) != NULL)
       {
-        printf("-- content already added %u:%u\n",info->mFileId,info->mMessageIndex);
+        // printf("-- content already added %u:%u\n",info->mFileId,info->mMessageIndex);
       }
       else
       {

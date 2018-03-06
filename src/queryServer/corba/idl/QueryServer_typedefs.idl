@@ -89,7 +89,9 @@ struct CorbaQueryParameter
   long                     parameterLevel;
   short                    forecastType;
   short                    forecastNumber;
-  octet                    interpolationMethod;
+  octet                    areaInterpolationMethod;
+  octet                    timeInterpolationMethod;
+  octet                    levelInterpolationMethod;
   unsigned long            producerId;
   unsigned long            generationFlags;
   long                     precision;

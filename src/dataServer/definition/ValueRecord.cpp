@@ -17,7 +17,7 @@ ValueRecord::ValueRecord()
     mFileId = 0;
     mMessageIndex = 0;
     mCoordinateType = T::CoordinateType::UNKNOWN;
-    mInterpolationMethod = T::InterpolationMethod::Linear;
+    mAreaInterpolationMethod = T::AreaInterpolationMethod::Linear;
     mX = 0;
     mY = 0;
     mValue = 0;
@@ -40,7 +40,7 @@ ValueRecord::ValueRecord(ValueRecord& valueRecord)
     mFileId = valueRecord.mFileId;
     mMessageIndex = valueRecord.mMessageIndex;
     mCoordinateType = valueRecord.mCoordinateType;
-    mInterpolationMethod = valueRecord.mInterpolationMethod;
+    mAreaInterpolationMethod = valueRecord.mAreaInterpolationMethod;
     mX = valueRecord.mX;
     mY = valueRecord.mY;
     mValue = valueRecord.mValue;
@@ -78,7 +78,7 @@ void ValueRecord::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mFileId              = " << mFileId << "\n";
     stream << space(level) << "- mMessageIndex        = " << mMessageIndex << "\n";
     stream << space(level) << "- mCoordinateType      = " << (int)mCoordinateType << "\n";
-    stream << space(level) << "- mInterpolationMethod = " << (int)mInterpolationMethod << "\n";
+    stream << space(level) << "- mAreaInterpolationMethod = " << (int)mAreaInterpolationMethod << "\n";
     stream << space(level) << "- mX                   = " << mX << "\n";
     stream << space(level) << "- mY                   = " << mY << "\n";
     stream << space(level) << "- mValue               = " << mValue << "\n";

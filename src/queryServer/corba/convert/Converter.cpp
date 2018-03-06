@@ -504,7 +504,9 @@ void Converter::convert(QueryServer::Corba::CorbaQueryParameter& source,QuerySer
     target.mParameterLevel = source.parameterLevel;
     target.mForecastType = source.forecastType;
     target.mForecastNumber = source.forecastNumber;
-    target.mInterpolationMethod = (T::InterpolationMethod)source.interpolationMethod;
+    target.mAreaInterpolationMethod = (T::AreaInterpolationMethod)source.areaInterpolationMethod;
+    target.mTimeInterpolationMethod = (T::TimeInterpolationMethod)source.timeInterpolationMethod;
+    target.mLevelInterpolationMethod = (T::LevelInterpolationMethod)source.levelInterpolationMethod;
     target.mProducerId = source.producerId;
     target.mGenerationFlags = source.generationFlags;
     target.mPrecision = source.precision;
@@ -539,7 +541,9 @@ void Converter::convert(QueryServer::QueryParameter& source,QueryServer::Corba::
     target.parameterLevel = source.mParameterLevel;
     target.forecastType = source.mForecastType;
     target.forecastNumber = source.mForecastNumber;
-    target.interpolationMethod = (::CORBA::Octet)source.mInterpolationMethod;
+    target.areaInterpolationMethod = (::CORBA::Octet)source.mAreaInterpolationMethod;
+    target.timeInterpolationMethod = (::CORBA::Octet)source.mTimeInterpolationMethod;
+    target.levelInterpolationMethod = (::CORBA::Octet)source.mLevelInterpolationMethod;
     target.producerId = source.mProducerId;
     target.generationFlags = source.mGenerationFlags;
     target.precision = source.mPrecision;

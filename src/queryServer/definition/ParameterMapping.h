@@ -25,7 +25,7 @@ class ParameterMapping
     T::ParamLevelIdType     mParameterLevelIdType;
     T::ParamLevelId         mParameterLevelId;
     T::ParamLevel           mParameterLevel;
-    T::InterpolationMethod  mInterpolationMethod;
+    T::AreaInterpolationMethod  mAreaInterpolationMethod;
     bool                    mSearchEnabled;
 };
 

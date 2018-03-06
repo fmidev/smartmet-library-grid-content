@@ -51,7 +51,7 @@ class ServiceImplementation : public ServiceInterface
                        T::CoordinateType coordinateType,
                        double x,
                        double y,
-                       T::InterpolationMethod interpolationMethod,
+                       T::AreaInterpolationMethod interpolationMethod,
                        T::GridPointValueList& valueList);
 
   private:
@@ -75,6 +75,7 @@ class ServiceImplementation : public ServiceInterface
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
                        T::ForecastNumber forecastNumber,
+                       T::AreaInterpolationMethod interpolationMethod,
                        std::string forecastTime,
                        std::string analysisTime,
                        bool timeMatchRequired,
@@ -94,6 +95,7 @@ class ServiceImplementation : public ServiceInterface
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
                        T::ForecastNumber forecastNumber,
+                       T::AreaInterpolationMethod interpolationMethod,
                        std::string startTime,
                        std::string endTime,
                        std::string analysisTime,
@@ -114,7 +116,8 @@ class ServiceImplementation : public ServiceInterface
                        T::ForecastType& forecastType,
                        T::ForecastNumber& forecastNumber,
                        uint& producerId,
-                       uint& generationFlags);
+                       uint& generationFlags,
+                       T::AreaInterpolationMethod& interpolationMethod);
 
      bool           getFunctionParams(
                        std::string functionParamsStr,

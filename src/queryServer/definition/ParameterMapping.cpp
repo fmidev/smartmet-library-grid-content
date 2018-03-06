@@ -16,7 +16,7 @@ ParameterMapping::ParameterMapping()
     mParameterKeyType = T::ParamKeyType::FMI_ID;
     mParameterLevelId = 0;
     mParameterLevel = 0;
-    mInterpolationMethod = T::InterpolationMethod::Linear;
+    mAreaInterpolationMethod = T::AreaInterpolationMethod::Linear;
     mSearchEnabled = false;
   }
   catch (...)
@@ -40,7 +40,7 @@ ParameterMapping::ParameterMapping(const ParameterMapping& mapping)
     mParameterLevelIdType = mapping.mParameterLevelIdType;
     mParameterLevelId = mapping.mParameterLevelId;
     mParameterLevel = mapping.mParameterLevel;
-    mInterpolationMethod = mapping.mInterpolationMethod;
+    mAreaInterpolationMethod = mapping.mAreaInterpolationMethod;
     mSearchEnabled = mapping.mSearchEnabled;
   }
   catch (...)
@@ -80,7 +80,7 @@ void ParameterMapping::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mParameterLevelIdType = " << (int)mParameterLevelIdType << "\n";
     stream << space(level) << "- mParameterLevelId     = " << (int)mParameterLevelId << "\n";
     stream << space(level) << "- mParameterLevel       = " << mParameterLevel << "\n";
-    stream << space(level) << "- mInterpolationMethod  = " << (int)mInterpolationMethod << "\n";
+    stream << space(level) << "- mAreaInterpolationMethod  = " << (int)mAreaInterpolationMethod << "\n";
     stream << space(level) << "- mSearchEnabled        = " << mSearchEnabled << "\n";
   }
   catch (...)

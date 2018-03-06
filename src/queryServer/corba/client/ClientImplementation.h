@@ -24,7 +24,7 @@ class ClientImplementation : public QueryServer::ServiceInterface
 
      virtual int    _executeQuery(T::SessionId sessionId,Query& query);
      virtual int    _getProducerList(T::SessionId sessionId,string_vec& producerList);
-     virtual int    _getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::GridPointValueList& valueList);
+     virtual int    _getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,T::AreaInterpolationMethod interpolationMethod,T::GridPointValueList& valueList);
 
   private:
 

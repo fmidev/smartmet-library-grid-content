@@ -15,33 +15,35 @@ typedef std::vector<FunctionParam> FunctionParam_vec;
 class QueryParameter
 {
   public:
-                            QueryParameter();
-                            QueryParameter(const QueryParameter& queryParameter);
-    virtual                 ~QueryParameter();
+                                QueryParameter();
+                                QueryParameter(const QueryParameter& queryParameter);
+    virtual                     ~QueryParameter();
 
-    QueryParameter*         duplicate();
-    void                    print(std::ostream& stream,uint level,uint optionFlags);
+    QueryParameter*             duplicate();
+    void                        print(std::ostream& stream,uint level,uint optionFlags);
 
-    uint                    mId;
-    std::string             mParam;
-    std::string             mOrigParam;
-    std::string             mSymbolicName;
-    T::ParamKeyType         mParameterKeyType;
-    T::ParamId              mParameterKey;
-    T::ParamLevelIdType     mParameterLevelIdType;
-    T::ParamLevelId         mParameterLevelId;
-    T::ParamLevel           mParameterLevel;
-    T::ForecastType         mForecastType;
-    T::ForecastNumber       mForecastNumber;
-    T::InterpolationMethod  mInterpolationMethod;
-    uint                    mProducerId;
-    uint                    mGenerationFlags;
-    int                     mPrecision;
-    bool                    mTemporary;
-    std::string             mFunction;
-    FunctionParam_vec       mFunctionParams;
-    string_set              mAdditionalTimeList;
-    ParameterValues_vec     mValueList;
+    uint                        mId;
+    std::string                 mParam;
+    std::string                 mOrigParam;
+    std::string                 mSymbolicName;
+    T::ParamKeyType             mParameterKeyType;
+    T::ParamId                  mParameterKey;
+    T::ParamLevelIdType         mParameterLevelIdType;
+    T::ParamLevelId             mParameterLevelId;
+    T::ParamLevel               mParameterLevel;
+    T::ForecastType             mForecastType;
+    T::ForecastNumber           mForecastNumber;
+    T::AreaInterpolationMethod      mAreaInterpolationMethod;
+    T::TimeInterpolationMethod  mTimeInterpolationMethod;
+    T::LevelInterpolationMethod mLevelInterpolationMethod;
+    uint                        mProducerId;
+    uint                        mGenerationFlags;
+    int                         mPrecision;
+    bool                        mTemporary;
+    std::string                 mFunction;
+    FunctionParam_vec           mFunctionParams;
+    string_set                  mAdditionalTimeList;
+    ParameterValues_vec         mValueList;
 };
 
 

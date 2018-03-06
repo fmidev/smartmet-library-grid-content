@@ -16,6 +16,7 @@ typedef unsigned long long CorbaParamId;
 typedef float CorbaParamValue;
 
 typedef sequence<CorbaParamValue> CorbaParamValueList;
+typedef sequence<double> CorbaDoubleList;
 
 
 
@@ -34,7 +35,7 @@ struct CorbaValueRecord
   unsigned long    fileId;
   unsigned long    messageIndex;
   octet            coordinateType;
-  octet            interpolationMethod;
+  octet            areaInterpolationMethod;
   double           x;
   double           y;
   CorbaParamValue  value;
@@ -64,6 +65,7 @@ struct CorbaGridValue
 };
 
 typedef sequence<CorbaGridValue> CorbaGridValueList;
+
 
 
 

@@ -224,7 +224,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     T::ParamValue sValue = 0;
-    int result = mService->getGridValueByPoint(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,x,y,(T::InterpolationMethod)interpolationMethod,sValue);
+    int result = mService->getGridValueByPoint(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,x,y,(T::AreaInterpolationMethod)interpolationMethod,sValue);
 
     if (result == 0)
       value = sValue;
@@ -289,7 +289,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByPointList(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,sPointList,(T::InterpolationMethod)interpolationMethod,sValueList);
+    int result = mService->getGridValueListByPointList(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,sPointList,(T::AreaInterpolationMethod)interpolationMethod,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -309,7 +309,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByPolygon(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::ULong flags, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& polygonPoints, ::CORBA::Double radius, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByPolygon(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::ULong flags, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& polygonPoints, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -324,7 +324,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByPolygon(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,sPolygonPoints,radius,sValueList);
+    int result = mService->getGridValueListByPolygon(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,sPolygonPoints,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -343,7 +343,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByPolygonPath(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::ULong flags, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaPolygonPath& polygonPath, ::CORBA::Double radius, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByPolygonPath(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::ULong flags, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaPolygonPath& polygonPath, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -358,7 +358,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByPolygonPath(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,sPolygonPath,radius,sValueList);
+    int result = mService->getGridValueListByPolygonPath(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,sPolygonPath,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -377,7 +377,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByRectangle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::ULong flags, ::CORBA::Octet coordinateType, ::CORBA::Double x1, ::CORBA::Double y1, ::CORBA::Double x2, ::CORBA::Double y2, ::CORBA::Double radius,SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByRectangle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::ULong flags, ::CORBA::Octet coordinateType, ::CORBA::Double x1, ::CORBA::Double y1, ::CORBA::Double x2, ::CORBA::Double y2, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -389,7 +389,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByRectangle(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,x1,y1,x2,y2,radius,sValueList);
+    int result = mService->getGridValueListByRectangle(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,x1,y1,x2,y2,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -450,10 +450,41 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueVectorByRectangle(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,columns,rows,x,y,xStep,yStep,(T::InterpolationMethod)interpolationMethod,sValues);
+    int result = mService->getGridValueVectorByRectangle(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,columns,rows,x,y,xStep,yStep,(T::AreaInterpolationMethod)interpolationMethod,sValues);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValues,*corbaValues);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getGridValueVectorByPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::ULong flags, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::ULong vectorType, SmartMet::DataServer::Corba::CorbaDoubleList_out valueVector)
+{
+  FUNCTION_TRACE
+  try
+  {
+    double_vec sValueVector;
+    DataServer::Corba::CorbaDoubleList *corbaValueVector = new DataServer::Corba::CorbaDoubleList();
+    valueVector = corbaValueVector;
+
+    if (mService == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getGridValueVectorByPoint(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,x,y,vectorType,sValueVector);
+
+    if (result == 0)
+      DataServer::Corba::Converter::convert(sValueVector,*corbaValueVector);
 
     return result;
   }

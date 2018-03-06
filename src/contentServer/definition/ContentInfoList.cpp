@@ -333,7 +333,7 @@ void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
     uint len1 = mLength;
     uint len2 = contentInfoList.getLength();
 
-    printf("Add content info list %llu  %u %u\n",(unsigned long long)this,len1,len2);
+    // printf("Add content info list %llu  %u %u\n",(unsigned long long)this,len1,len2);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::none)
     {
@@ -834,7 +834,6 @@ void ContentInfoList::getLevelInfoList(T::LevelInfoList& levelInfoList)
   {
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    printf("LEN %u\n",mLength);
     std::set<std::string> list;
     char tmp[100];
     for (uint t=0; t<mLength; t++)
@@ -845,7 +844,6 @@ void ContentInfoList::getLevelInfoList(T::LevelInfoList& levelInfoList)
         sprintf(tmp,"%u;%d;%d;%d;%d",info->mProducerId,info->mFmiParameterLevelId,info->mGrib1ParameterLevelId,info->mGrib2ParameterLevelId,info->mParameterLevel);
         if (list.find(tmp) == list.end())
         {
-          printf("%s\n",tmp);
           list.insert(std::string(tmp));
           levelInfoList.addLevelInfo(new T::LevelInfo(info->mProducerId,info->mFmiParameterLevelId,info->mGrib1ParameterLevelId,info->mGrib2ParameterLevelId,info->mParameterLevel));
         }

@@ -142,7 +142,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
 
     ContentServer::Corba::Converter::convert(contentInfoList,sContentInfoList);
 
-    int result = mService->getValuesByGridPoint(sessionId,sContentInfoList,(T::CoordinateType)coordinateType,x,y,(T::InterpolationMethod)interpolationMethod,sValueList);
+    int result = mService->getValuesByGridPoint(sessionId,sContentInfoList,(T::CoordinateType)coordinateType,x,y,(T::AreaInterpolationMethod)interpolationMethod,sValueList);
     if (result == 0)
       QueryServer::Corba::Converter::convert(sValueList,*valueList);
 

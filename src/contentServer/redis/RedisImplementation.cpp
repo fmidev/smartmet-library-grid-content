@@ -1174,7 +1174,7 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
                 (int)T::ParamLevelIdType::FMI,
                 (int)contentInfo->mFmiParameterLevelId,
                 (int)contentInfo->mParameterLevel,
-                (int)T::InterpolationMethod::Linear);
+                (int)T::AreaInterpolationMethod::Linear);
 
             if (list.find(std::string(tmp)) == list.end())
               list.insert(std::string(tmp));
@@ -3371,7 +3371,7 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
       T::ContentInfo contentInfo;
       if (getContent(info->mFileId,info->mMessageIndex,contentInfo) == Result::OK)
       {
-        printf("-- content already added %u\n",info->mFileId);
+        // printf("-- content already added %u\n",info->mFileId);
       }
       else
       {
@@ -3396,7 +3396,7 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
         if (generationInfo.mGenerationId != fileInfo.mGenerationId)
           return Result::GENERATION_AND_FILE_DO_NOT_MATCH;
 
-        printf("-- add content %u\n",info->mFileId);
+        // printf("-- add content %u\n",info->mFileId);
         unsigned long long id = ((unsigned long long)info->mFileId << 32) + info->mMessageIndex;
 
         redisReply *reply = (redisReply*)redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,info->getCsv().c_str());
@@ -3766,7 +3766,7 @@ int RedisImplementation::_registerContentList(T::SessionId sessionId,uint server
       T::ContentInfo contentInfo;
       if (getContent(info->mFileId,info->mMessageIndex,contentInfo) == Result::OK)
       {
-        printf("Register content %u\n",info->mFileId);
+        // printf("Register content %u\n",info->mFileId);
 
         if (serverId > 0  &&  (info->mServerFlags & sf) == 0)
         {
@@ -3798,7 +3798,7 @@ int RedisImplementation::_registerContentList(T::SessionId sessionId,uint server
         if (generationInfo.mGenerationId != fileInfo.mGenerationId)
           return Result::GENERATION_AND_FILE_DO_NOT_MATCH;
 
-        printf("Add content %u\n",info->mFileId);
+        // printf("Add content %u\n",info->mFileId);
         unsigned long long id = ((unsigned long long)info->mFileId << 32) + info->mMessageIndex;
         info->mServerFlags = sf;
 
@@ -4665,9 +4665,7 @@ int RedisImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
 
     T::ContentInfoList contentInfoList;
     int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
-    printf("CONTENT LEN %u\n",contentInfoList.getLength());
     contentInfoList.getContentParamKeyListByGenerationId(generationId,parameterKeyType,paramKeyList);
-    printf("PARAMS %u\n",(uint)paramKeyList.size());
 
     return res;
   }

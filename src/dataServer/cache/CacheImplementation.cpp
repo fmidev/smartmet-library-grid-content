@@ -191,7 +191,7 @@ int CacheImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
 
 
 
-int CacheImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,T::InterpolationMethod interpolationMethod,T::ParamValue& value)
+int CacheImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,T::AreaInterpolationMethod interpolationMethod,T::ParamValue& value)
 {
   try
   {
@@ -260,7 +260,7 @@ int CacheImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint f
 
 
 
-int CacheImplementation::_getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,T::InterpolationMethod interpolationMethod,T::GridValueList& valueList)
+int CacheImplementation::_getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,T::AreaInterpolationMethod interpolationMethod,T::GridValueList& valueList)
 {
   try
   {
@@ -279,14 +279,14 @@ int CacheImplementation::_getGridValueListByPointList(T::SessionId sessionId,uin
 
 
 
-int CacheImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,double radius,T::GridValueList& valueList)
+int CacheImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,T::GridValueList& valueList)
 {
   try
   {
     if (mDataServer == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    return mDataServer->getGridValueListByPolygon(sessionId,fileId,messageIndex,flags,coordinateType,polygonPoints,radius,valueList);
+    return mDataServer->getGridValueListByPolygon(sessionId,fileId,messageIndex,flags,coordinateType,polygonPoints,valueList);
   }
   catch (...)
   {
@@ -298,14 +298,14 @@ int CacheImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint 
 
 
 
-int CacheImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,double radius,T::GridValueList& valueList)
+int CacheImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,T::GridValueList& valueList)
 {
   try
   {
     if (mDataServer == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    return mDataServer->getGridValueListByPolygonPath(sessionId,fileId,messageIndex,flags,coordinateType,polygonPath,radius,valueList);
+    return mDataServer->getGridValueListByPolygonPath(sessionId,fileId,messageIndex,flags,coordinateType,polygonPath,valueList);
   }
   catch (...)
   {
@@ -317,14 +317,14 @@ int CacheImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,u
 
 
 
-int CacheImplementation::_getGridValueListByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,double radius,T::GridValueList& valueList)
+int CacheImplementation::_getGridValueListByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,T::GridValueList& valueList)
 {
   try
   {
     if (mDataServer == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    return mDataServer->getGridValueListByRectangle(sessionId,fileId,messageIndex,flags,coordinateType,x1,y1,x2,y2,radius,valueList);
+    return mDataServer->getGridValueListByRectangle(sessionId,fileId,messageIndex,flags,coordinateType,x1,y1,x2,y2,valueList);
   }
   catch (...)
   {
@@ -355,7 +355,7 @@ int CacheImplementation::_getGridValueVector(T::SessionId sessionId,uint fileId,
 
 
 
-int CacheImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,T::InterpolationMethod interpolationMethod,T::ParamValue_vec& values)
+int CacheImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,T::AreaInterpolationMethod interpolationMethod,T::ParamValue_vec& values)
 {
   try
   {
@@ -370,6 +370,24 @@ int CacheImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,u
   }
 }
 
+
+
+
+
+int CacheImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,uint vectorType,double_vec& valueVector)
+{
+  try
+  {
+    if (mDataServer == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    return mDataServer->getGridValueVectorByPoint(sessionId,fileId,messageIndex,flags,coordinateType,x,y,vectorType,valueVector);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
 
 
 }
