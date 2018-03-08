@@ -69,6 +69,7 @@ struct CorbaParameterValues
   long               parameterLevel;
   short              forecastType;
   short              forecastNumber;
+  unsigned long      flags;
   CorbaGridValueList valueList;
 };
 
@@ -95,9 +96,11 @@ struct CorbaQueryParameter
   unsigned long            producerId;
   unsigned long            generationFlags;
   long                     precision;
+  unsigned long            timestepsBefore;
+  unsigned long            timestepsAfter;
+  unsigned long            timestepSizeInMinutes;
   string                   function;
   CorbaFunctionParamList   functionParams;
-  CorbaStringList          additionalTimeList;
   CorbaParameterValuesList valueList;
 };
 
@@ -124,6 +127,7 @@ struct CorbaQuery
   string                   endTime;
   string                   analysisTime;
   CorbaStringList          forecastTimeList;
+  octet                    searchType;
   CorbaQueryCoordinates    coordinateList;
   double                   radius;
   CorbaQueryParameterList  queryParameterList;

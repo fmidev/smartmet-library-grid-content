@@ -16,6 +16,7 @@ Query::Query()
   {
     mFlags = 0;
     mGenerationFlags = 0;
+    mSearchType = QST_POINT;
     mRadius = 0;
     mMaxParameterValues = 1000000;
   }
@@ -38,6 +39,7 @@ Query::Query(Query& query)
     mEndTime = query.mEndTime;
     mAnalysisTime = query.mAnalysisTime;
     mForecastTimeList = query.mForecastTimeList;
+    mSearchType = query.mSearchType;
     mCoordinateList = query.mCoordinateList;
     mRadius = query.mRadius;
     mQueryParameterList = query.mQueryParameterList;
@@ -191,6 +193,7 @@ void Query::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mEndTime                = " << mEndTime << "\n";
     stream << space(level) << "- mAnalysisTime           = " << mAnalysisTime << "\n";
     stream << space(level) << "- mFlags                  = " << mFlags << "\n";
+    stream << space(level) << "- mSearchType             = " << (int)mSearchType << "\n";
     stream << space(level) << "- mRadius                 = " << mRadius << "\n";
     stream << space(level) << "- mLanguage               = " << mLanguage << "\n";
     stream << space(level) << "- mMaxParameterValues     = " << mMaxParameterValues << "\n";
@@ -205,17 +208,18 @@ void Query::print(std::ostream& stream,uint level,uint optionFlags)
     for (auto it = mProducerNameList.begin(); it != mProducerNameList.end(); ++it)
       stream << space(level) << "   * " << *it << "\n";
 
+    stream << space(level) << "- mPolygonPath            = \n";
+    for (auto cList = mCoordinateList.begin(); cList != mCoordinateList.end(); ++cList)
+    {
+      stream << space(level) << "  - mCoordinateList       = \n";
+      for (auto it = cList->begin(); it != cList->end(); ++it)
+        stream << space(level) << "     * " << it->x() << "," << it->y() << "\n";
+    }
+
     stream << space(level) << "- mQueryParameterListList = \n";
     for (auto it = mQueryParameterList.begin(); it != mQueryParameterList.end(); ++it)
       it->print(stream,level+2,optionFlags);
 
-    stream << space(level) << "- mPolygonPath            = \n";
-    for (auto cList = mCoordinateList.begin(); cList != mCoordinateList.end(); ++cList)
-    {
-      stream << space(level) << "  - mCoordinateList         = \n";
-      for (auto it = cList->begin(); it != cList->end(); ++it)
-        stream << space(level) << "     * " << it->x() << "," << it->y() << "\n";
-    }
   }
   catch (...)
   {

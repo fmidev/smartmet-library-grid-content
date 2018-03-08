@@ -33,7 +33,7 @@ class QueryParameter
     T::ParamLevel               mParameterLevel;
     T::ForecastType             mForecastType;
     T::ForecastNumber           mForecastNumber;
-    T::AreaInterpolationMethod      mAreaInterpolationMethod;
+    T::AreaInterpolationMethod  mAreaInterpolationMethod;
     T::TimeInterpolationMethod  mTimeInterpolationMethod;
     T::LevelInterpolationMethod mLevelInterpolationMethod;
     uint                        mProducerId;
@@ -42,7 +42,9 @@ class QueryParameter
     bool                        mTemporary;
     std::string                 mFunction;
     FunctionParam_vec           mFunctionParams;
-    string_set                  mAdditionalTimeList;
+    uint                        mTimestepsBefore;
+    uint                        mTimestepsAfter;
+    uint                        mTimestepSizeInMinutes;
     ParameterValues_vec         mValueList;
 };
 

@@ -20,6 +20,7 @@ class ParameterMappingFile
 
     virtual void          init();
     virtual void          checkUpdates();
+    std::string           getFilename();
     ParameterMapping*     getMapping(ParameterMapping& mapping);
     virtual void          getMappings(std::string producerName,std::string parameterName,bool onlySearchEnabled,ParameterMapping_vec& mappings);
     uint                  getNumberOfMappings();

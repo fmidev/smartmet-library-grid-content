@@ -25,6 +25,9 @@ QueryParameter::QueryParameter()
     mProducerId = 0;
     mGenerationFlags = 0;
     mPrecision = 0;
+    mTimestepsBefore = 0;
+    mTimestepsAfter = 0;
+    mTimestepSizeInMinutes = 0;
     mTemporary = false;
   }
   catch (...)
@@ -57,7 +60,9 @@ QueryParameter::QueryParameter(const QueryParameter& queryParameter)
     mLevelInterpolationMethod = queryParameter.mLevelInterpolationMethod;
     mProducerId = queryParameter.mProducerId;
     mGenerationFlags = queryParameter.mGenerationFlags;
-    mAdditionalTimeList = queryParameter.mAdditionalTimeList;
+    mTimestepsBefore = queryParameter.mTimestepsBefore;
+    mTimestepsAfter = queryParameter.mTimestepsAfter;
+    mTimestepSizeInMinutes = queryParameter.mTimestepSizeInMinutes;
     mValueList = queryParameter.mValueList;
     mPrecision = queryParameter.mPrecision;
     mTemporary = queryParameter.mTemporary;
@@ -121,11 +126,14 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mParameterLevel           = " << mParameterLevel << "\n";
     stream << space(level) << "- mForecastType             = " << (int)mForecastType << "\n";
     stream << space(level) << "- mForecastNumber           = " << (int)mForecastNumber << "\n";
-    stream << space(level) << "- mAreaInterpolationMethod      = " << (uint)mAreaInterpolationMethod << "\n";
+    stream << space(level) << "- mAreaInterpolationMethod  = " << (uint)mAreaInterpolationMethod << "\n";
     stream << space(level) << "- mTimeInterpolationMethod  = " << (uint)mTimeInterpolationMethod << "\n";
     stream << space(level) << "- mLevelInterpolationMethod = " << (uint)mLevelInterpolationMethod << "\n";
     stream << space(level) << "- mProducerId               = " << mProducerId << "\n";
     stream << space(level) << "- mGenerationFlags          = " << mGenerationFlags << "\n";
+    stream << space(level) << "- mTimestepsBefore          = " << mTimestepsBefore << "\n";
+    stream << space(level) << "- mTimestepsAfter           = " << mTimestepsAfter << "\n";
+    stream << space(level) << "- mTimestepSizeInMinutes    = " << mTimestepSizeInMinutes << "\n";
     stream << space(level) << "- mTemporary                = " << (int)mTemporary << "\n";
     stream << space(level) << "- mPrecision                = " << mPrecision << "\n";
     stream << space(level) << "- mFunction                 = " << mFunction << "\n";
@@ -134,13 +142,6 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     for (auto it = mFunctionParams.begin();  it != mFunctionParams.end(); ++it)
     {
       stream << space(level) << "   * " << it->first << ":" << it->second << "\n";
-    }
-
-    stream << space(level) << "- mAdditionalTimeList       = \n";
-
-    for (auto it = mAdditionalTimeList.begin();  it != mAdditionalTimeList.end(); ++it)
-    {
-      stream << space(level) << "   * " << *it << "\n";
     }
 
     stream << space(level) << "- mValueList                = (" << mValueList.size() << " items)\n";

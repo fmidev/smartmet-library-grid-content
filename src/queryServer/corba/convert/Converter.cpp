@@ -320,6 +320,7 @@ void Converter::convert(QueryServer::Corba::CorbaParameterValues& source,QuerySe
     target.mParameterLevel = source.parameterLevel;
     target.mForecastType = source.forecastType;
     target.mForecastNumber = source.forecastNumber;
+    target.mFlags = source.flags;
 
     convert(source.valueList,target.mValueList);
   }
@@ -348,6 +349,7 @@ void Converter::convert(QueryServer::ParameterValues& source,QueryServer::Corba:
     target.parameterLevel = source.mParameterLevel;
     target.forecastType = source.mForecastType;
     target.forecastNumber = source.mForecastNumber;
+    target.flags = source.mFlags;
 
     convert(source.mValueList,target.valueList);
   }
@@ -511,9 +513,11 @@ void Converter::convert(QueryServer::Corba::CorbaQueryParameter& source,QuerySer
     target.mGenerationFlags = source.generationFlags;
     target.mPrecision = source.precision;
     target.mFunction = source.function;
+    target.mTimestepsBefore = source.timestepsBefore;
+    target.mTimestepsAfter = source.timestepsAfter;
+    target.mTimestepSizeInMinutes = source.timestepSizeInMinutes;
 
     convert(source.functionParams,target.mFunctionParams);
-    convert(source.additionalTimeList,target.mAdditionalTimeList);
     convert(source.valueList,target.mValueList);
   }
   catch (...)
@@ -548,9 +552,11 @@ void Converter::convert(QueryServer::QueryParameter& source,QueryServer::Corba::
     target.generationFlags = source.mGenerationFlags;
     target.precision = source.mPrecision;
     target.function = CORBA::string_dup(source.mFunction.c_str());
+    target.timestepsBefore = source.mTimestepsBefore;
+    target.timestepsAfter = source.mTimestepsAfter;
+    target.timestepSizeInMinutes = source.mTimestepSizeInMinutes;
 
     convert(source.mFunctionParams,target.functionParams);
-    convert(source.mAdditionalTimeList,target.additionalTimeList);
     convert(source.mValueList,target.valueList);
   }
   catch (...)
@@ -746,6 +752,7 @@ void Converter::convert(QueryServer::Corba::CorbaQuery& source,QueryServer::Quer
     target.mEndTime = source.endTime;
     target.mAnalysisTime = source.analysisTime;
     convert(source.forecastTimeList,target.mForecastTimeList);
+    target.mSearchType = (QueryServer::QuerySearchType)source.searchType;
     convert(source.coordinateList,target.mCoordinateList);
     target.mRadius = source.radius;
     convert(source.queryParameterList,target.mQueryParameterList);
@@ -773,6 +780,7 @@ void Converter::convert(QueryServer::Query& source,QueryServer::Corba::CorbaQuer
     target.endTime = CORBA::string_dup(source.mEndTime.c_str());
     target.analysisTime = CORBA::string_dup(source.mAnalysisTime.c_str());
     convert(source.mForecastTimeList,target.forecastTimeList);
+    target.searchType = (::CORBA::Octet)source.mSearchType;
     convert(source.mCoordinateList,target.coordinateList);
     target.radius = source.mRadius;
     convert(source.mQueryParameterList,target.queryParameterList);

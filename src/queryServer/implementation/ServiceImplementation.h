@@ -51,7 +51,7 @@ class ServiceImplementation : public ServiceInterface
                        T::CoordinateType coordinateType,
                        double x,
                        double y,
-                       T::AreaInterpolationMethod interpolationMethod,
+                       T::AreaInterpolationMethod areaInterpolationMethod,
                        T::GridPointValueList& valueList);
 
   private:
@@ -60,8 +60,6 @@ class ServiceImplementation : public ServiceInterface
 
      void           checkConfigurationUpdates();
      bool           getAlias(std::string name,std::string& alias);
-     //std::string    executeFunctionCall5(std::string& function,std::string language,std::vector<double>& parameters);
-     //double         executeFunctionCall1(std::string& function,std::vector<double>& parameters);
      void           executeQueryFunctions(Query& query);
      int            executeTimeRangeQuery(Query& query);
      int            executeTimeStepQuery(Query& query);
@@ -75,13 +73,15 @@ class ServiceImplementation : public ServiceInterface
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
                        T::ForecastNumber forecastNumber,
-                       T::AreaInterpolationMethod interpolationMethod,
+                       T::AreaInterpolationMethod areaInterpolationMethod,
+                       T::TimeInterpolationMethod timeInterpolationMethod,
+                       T::LevelInterpolationMethod levelInterpolationMethod,
                        std::string forecastTime,
                        std::string analysisTime,
-                       bool timeMatchRequired,
+                       QuerySearchType searchType,
                        QueryCoordinates& coordinates,
                        std::set<T::GeometryId>& geometryIdList,
-                       bool areaSearch,
+                       bool timeMatchRequired,
                        bool reverseGenerations,
                        double radius,
                        ParameterValues& valueList);
@@ -95,14 +95,16 @@ class ServiceImplementation : public ServiceInterface
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
                        T::ForecastNumber forecastNumber,
-                       T::AreaInterpolationMethod interpolationMethod,
+                       T::AreaInterpolationMethod areaInterpolationMethod,
+                       T::TimeInterpolationMethod timeInterpolationMethod,
+                       T::LevelInterpolationMethod levelInterpolationMethod,
                        std::string startTime,
                        std::string endTime,
                        std::string analysisTime,
+                       QuerySearchType searchType,
                        QueryCoordinates& coordinates,
                        std::set<T::GeometryId>& geometryIdList,
                        bool ignoreStartTimeValue,
-                       bool areaSearch,
                        bool reverseGenerations,
                        double radius,
                        uint maxValues,
@@ -117,7 +119,9 @@ class ServiceImplementation : public ServiceInterface
                        T::ForecastNumber& forecastNumber,
                        uint& producerId,
                        uint& generationFlags,
-                       T::AreaInterpolationMethod& interpolationMethod);
+                       T::AreaInterpolationMethod& areaInterpolationMethod,
+                       T::TimeInterpolationMethod& timeInterpolationMethod,
+                       T::LevelInterpolationMethod& levelInterpolationMethod);
 
      bool           getFunctionParams(
                        std::string functionParamsStr,

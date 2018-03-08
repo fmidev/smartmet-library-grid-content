@@ -12,21 +12,24 @@ namespace QueryServer
 class ParameterMapping
 {
   public:
-                            ParameterMapping();
-                            ParameterMapping(const ParameterMapping& mapping);
-    virtual                 ~ParameterMapping();
+                                ParameterMapping();
+                                ParameterMapping(const ParameterMapping& mapping);
+    virtual                     ~ParameterMapping();
 
-    void                    print(std::ostream& stream,uint level,uint optionFlags);
+    void                        print(std::ostream& stream,uint level,uint optionFlags);
 
-    std::string             mProducerName;
-    std::string             mParameterName;
-    T::ParamKeyType         mParameterKeyType;
-    T::ParamId              mParameterKey;
-    T::ParamLevelIdType     mParameterLevelIdType;
-    T::ParamLevelId         mParameterLevelId;
-    T::ParamLevel           mParameterLevel;
+    std::string                 mProducerName;
+    std::string                 mParameterName;
+    T::ParamKeyType             mParameterKeyType;
+    T::ParamId                  mParameterKey;
+    T::ParamLevelIdType         mParameterLevelIdType;
+    T::ParamLevelId             mParameterLevelId;
+    T::ParamLevel               mParameterLevel;
     T::AreaInterpolationMethod  mAreaInterpolationMethod;
-    bool                    mSearchEnabled;
+    T::TimeInterpolationMethod  mTimeInterpolationMethod;
+    T::LevelInterpolationMethod mLevelInterpolationMethod;
+    bool                        mSearchEnabled;
+    std::string                 mConversionFunction;
 };
 
 

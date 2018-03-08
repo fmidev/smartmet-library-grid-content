@@ -94,6 +94,22 @@ void ParameterMappingFile::checkUpdates()
 
 
 
+std::string ParameterMappingFile::getFilename()
+{
+  try
+  {
+    return mFilename;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
 uint ParameterMappingFile::getNumberOfMappings()
 {
   try
@@ -233,7 +249,7 @@ void ParameterMappingFile::loadFile()
           }
         }
 
-        if (c > 8)
+        if (c > 11)
         {
           ParameterMapping rec;
 
@@ -261,10 +277,19 @@ void ParameterMappingFile::loadFile()
           if (field[7][0] != '\0')
             rec.mAreaInterpolationMethod = (T::AreaInterpolationMethod)atoi(field[7]);
 
-          if (field[8][0] == 'E')
+          if (field[8][0] != '\0')
+            rec.mTimeInterpolationMethod = (T::TimeInterpolationMethod)atoi(field[8]);
+
+          if (field[9][0] != '\0')
+            rec.mLevelInterpolationMethod = (T::LevelInterpolationMethod)atoi(field[9]);
+
+          if (field[10][0] == 'E')
             rec.mSearchEnabled = true;
           else
             rec.mSearchEnabled = false;
+
+          if (field[11][0] != '\0')
+            rec.mConversionFunction = field[11];
 
           //rec.print(std::cout,0,0);
           mMappingVector.push_back(rec);

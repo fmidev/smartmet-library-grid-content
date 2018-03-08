@@ -21,6 +21,7 @@ ParameterValues::ParameterValues()
     mParameterLevel = 0;
     mForecastType = -1;
     mForecastNumber = -1;
+    mFlags = 0;
   }
   catch (...)
   {
@@ -47,6 +48,7 @@ ParameterValues::ParameterValues(const ParameterValues& parameterValues)
     mParameterLevel = parameterValues.mParameterLevel;
     mForecastType = parameterValues.mForecastType;
     mForecastNumber = parameterValues.mForecastNumber;
+    mFlags = parameterValues.mFlags;
 
     mValueList = parameterValues.mValueList;
   }
@@ -90,6 +92,7 @@ void ParameterValues::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mParameterLevel       = " << mParameterLevel << "\n";
     stream << space(level) << "- mForecastType         = " << mForecastType << "\n";
     stream << space(level) << "- mForecastNumber       = " << mForecastNumber << "\n";
+    stream << space(level) << "- mFlags                = " << mFlags << "\n";
     stream << space(level) << "- mValueList            = (" << mValueList.getLength() << " records)\n";
 
     uint len = mValueList.getLength();

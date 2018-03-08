@@ -10,6 +10,14 @@ namespace SmartMet
 namespace QueryServer
 {
 
+// Flags
+
+enum QueryParameterValuesFlags
+{
+  QPF_ADDITIONAL_VALUE    = 1 << 0,   // Value is added in order to fill missing times
+  QPF_AGGREGATION_VALUE   = 1 << 1   // Value is added for aggregation purposes
+};
+
 
 class ParameterValues
 {
@@ -32,7 +40,7 @@ class ParameterValues
     T::ParamLevel           mParameterLevel;
     T::ForecastType         mForecastType;
     T::ForecastNumber       mForecastNumber;
-
+    uint                    mFlags;
     T::GridValueList        mValueList;
 };
 
