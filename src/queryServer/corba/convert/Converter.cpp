@@ -516,6 +516,7 @@ void Converter::convert(QueryServer::Corba::CorbaQueryParameter& source,QuerySer
     target.mTimestepsBefore = source.timestepsBefore;
     target.mTimestepsAfter = source.timestepsAfter;
     target.mTimestepSizeInMinutes = source.timestepSizeInMinutes;
+    target.mFlags = source.flags;
 
     convert(source.functionParams,target.mFunctionParams);
     convert(source.valueList,target.mValueList);
@@ -555,6 +556,7 @@ void Converter::convert(QueryServer::QueryParameter& source,QueryServer::Corba::
     target.timestepsBefore = source.mTimestepsBefore;
     target.timestepsAfter = source.mTimestepsAfter;
     target.timestepSizeInMinutes = source.mTimestepSizeInMinutes;
+    target.flags = source.mFlags;
 
     convert(source.mFunctionParams,target.functionParams);
     convert(source.mValueList,target.valueList);

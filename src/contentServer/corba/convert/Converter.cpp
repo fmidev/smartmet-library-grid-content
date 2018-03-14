@@ -983,6 +983,7 @@ void Converter::convert(T::LevelInfo& source,ContentServer::Corba::CorbaLevelInf
   try
   {
     target.producerId = source.mProducerId;
+    target.fmiParameterName = CORBA::string_dup(source.mFmiParameterName.c_str());
     target.fmiParameterLevelId = source.mFmiParameterLevelId;
     target.grib1ParameterLevelId = source.mGrib1ParameterLevelId;
     target.grib2ParameterLevelId = source.mGrib2ParameterLevelId;
@@ -1003,6 +1004,7 @@ void Converter::convert(const ContentServer::Corba::CorbaLevelInfo& source,T::Le
   try
   {
     target.mProducerId = source.producerId;
+    target.mFmiParameterName = source.fmiParameterName;
     target.mFmiParameterLevelId = source.fmiParameterLevelId;
     target.mGrib1ParameterLevelId = source.grib1ParameterLevelId;
     target.mGrib2ParameterLevelId = source.grib2ParameterLevelId;

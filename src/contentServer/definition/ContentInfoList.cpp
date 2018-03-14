@@ -841,11 +841,11 @@ void ContentInfoList::getLevelInfoList(T::LevelInfoList& levelInfoList)
       ContentInfo *info = mArray[t];
       if (info != NULL  &&  (info->mFlags & CONTENT_INFO_DELETED) == 0)
       {
-        sprintf(tmp,"%u;%d;%d;%d;%d",info->mProducerId,info->mFmiParameterLevelId,info->mGrib1ParameterLevelId,info->mGrib2ParameterLevelId,info->mParameterLevel);
+        sprintf(tmp,"%u;%s;%d;%d;%d;%d",info->mProducerId,info->mFmiParameterName.c_str(),info->mFmiParameterLevelId,info->mGrib1ParameterLevelId,info->mGrib2ParameterLevelId,info->mParameterLevel);
         if (list.find(tmp) == list.end())
         {
           list.insert(std::string(tmp));
-          levelInfoList.addLevelInfo(new T::LevelInfo(info->mProducerId,info->mFmiParameterLevelId,info->mGrib1ParameterLevelId,info->mGrib2ParameterLevelId,info->mParameterLevel));
+          levelInfoList.addLevelInfo(new T::LevelInfo(info->mProducerId,info->mFmiParameterName,info->mFmiParameterLevelId,info->mGrib1ParameterLevelId,info->mGrib2ParameterLevelId,info->mParameterLevel));
         }
       }
     }

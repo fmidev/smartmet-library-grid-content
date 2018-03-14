@@ -99,6 +99,7 @@ struct CorbaQueryParameter
   unsigned long            timestepsBefore;
   unsigned long            timestepsAfter;
   unsigned long            timestepSizeInMinutes;
+  unsigned long      	   flags;
   string                   function;
   CorbaFunctionParamList   functionParams;
   CorbaParameterValuesList valueList;

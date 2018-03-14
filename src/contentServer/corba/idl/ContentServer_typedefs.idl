@@ -161,6 +161,7 @@ typedef sequence<CorbaForecastTime> CorbaForecastTimeList;
 struct CorbaLevelInfo
 {
   unsigned long producerId;
+  string        fmiParameterName;
   octet         fmiParameterLevelId;
   octet         grib1ParameterLevelId;
   octet         grib2ParameterLevelId;

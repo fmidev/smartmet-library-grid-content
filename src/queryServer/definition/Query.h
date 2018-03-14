@@ -14,10 +14,10 @@ typedef std::vector<Coordinate_vec> QueryCoordinates;
 
 enum QueryFlags
 {
-  QF_TIME_RANGE_QUERY          = 1 << 0,
-  QF_START_TIME_DATA           = 1 << 1,
-  QF_REVERSE_GENERATION_FLAGS  = 1 << 2,
-  QF_START_TIME_NOT_INCLUDED   = 1 << 3
+  QF_TIME_RANGE_QUERY                       = 1 << 0,
+  QF_START_TIME_DATA                        = 1 << 1,
+  QF_REVERSE_GENERATION_FLAGS               = 1 << 2,
+  QF_START_TIME_NOT_INCLUDED                = 1 << 3
 };
 
 

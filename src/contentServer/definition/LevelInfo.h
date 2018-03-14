@@ -14,7 +14,7 @@ class LevelInfo
   public:
                           LevelInfo();
                           LevelInfo(LevelInfo& levelInfo);
-                          LevelInfo(uint producerId,T::ParamLevelId fmiParameterLevelId,T::ParamLevelId grib1ParameterLevelId,T::ParamLevelId grib2ParameterLevelId,T::ParamLevel parameterLevel);
+                          LevelInfo(uint producerId,std::string fmiParameterName,T::ParamLevelId fmiParameterLevelId,T::ParamLevelId grib1ParameterLevelId,T::ParamLevelId grib2ParameterLevelId,T::ParamLevel parameterLevel);
      virtual              ~LevelInfo();
 
      std::string          getCsv();
@@ -27,6 +27,7 @@ class LevelInfo
      void                 print(std::ostream& stream,uint level,uint optionFlags);
 
      uint                 mProducerId;
+     std::string          mFmiParameterName;
      T::ParamLevelId      mFmiParameterLevelId;
      T::ParamLevelId      mGrib1ParameterLevelId;
      T::ParamLevelId      mGrib2ParameterLevelId;

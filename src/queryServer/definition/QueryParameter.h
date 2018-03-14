@@ -8,9 +8,16 @@ namespace SmartMet
 namespace QueryServer
 {
 
-
 typedef std::pair<uint,std::string> FunctionParam;
 typedef std::vector<FunctionParam> FunctionParam_vec;
+
+enum QueryParameterFlags
+{
+  QPF_PRESSURE_LEVEL_INTERPOLATION_ENABLED   = 1 << 0,
+  QPF_HEIGHT_LEVEL_INTERPOLATION_ENABLED     = 1 << 1
+};
+
+
 
 class QueryParameter
 {
@@ -45,6 +52,7 @@ class QueryParameter
     uint                        mTimestepsBefore;
     uint                        mTimestepsAfter;
     uint                        mTimestepSizeInMinutes;
+    uint                        mFlags;
     ParameterValues_vec         mValueList;
 };
 

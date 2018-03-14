@@ -33,6 +33,7 @@ LevelInfo::LevelInfo(LevelInfo& levelInfo)
   try
   {
     mProducerId = levelInfo.mProducerId;
+    mFmiParameterName = levelInfo.mFmiParameterName;
     mFmiParameterLevelId = levelInfo.mFmiParameterLevelId;
     mGrib1ParameterLevelId = levelInfo.mGrib1ParameterLevelId;
     mGrib2ParameterLevelId = levelInfo.mGrib2ParameterLevelId;
@@ -48,11 +49,12 @@ LevelInfo::LevelInfo(LevelInfo& levelInfo)
 
 
 
-LevelInfo::LevelInfo(uint producerId,T::ParamLevelId fmiParameterLevelId,T::ParamLevelId grib1ParameterLevelId,T::ParamLevelId grib2ParameterLevelId,T::ParamLevel parameterLevel)
+LevelInfo::LevelInfo(uint producerId,std::string fmiParameterName,T::ParamLevelId fmiParameterLevelId,T::ParamLevelId grib1ParameterLevelId,T::ParamLevelId grib2ParameterLevelId,T::ParamLevel parameterLevel)
 {
   try
   {
     mProducerId = producerId;
+    mFmiParameterName = fmiParameterName;
     mFmiParameterLevelId = fmiParameterLevelId;
     mGrib1ParameterLevelId = grib1ParameterLevelId;
     mGrib2ParameterLevelId = grib2ParameterLevelId;
@@ -91,6 +93,7 @@ void LevelInfo::operator=(LevelInfo& levelInfo)
       return;
 
     mProducerId = levelInfo.mProducerId;
+    mFmiParameterName = levelInfo.mFmiParameterName;
     mFmiParameterLevelId = levelInfo.mFmiParameterLevelId;
     mGrib1ParameterLevelId = levelInfo.mGrib1ParameterLevelId;
     mGrib2ParameterLevelId = levelInfo.mGrib2ParameterLevelId;
@@ -133,7 +136,7 @@ std::string LevelInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "producerId;fmiParameterLevelId;grib1ParameterLevelId;grib2ParameterLevelId;parameterLevel";
+    std::string header = "producerId;fmiParameterName;fmiParameterLevelId;grib1ParameterLevelId;grib2ParameterLevelId;parameterLevel";
     return header;
   }
   catch (...)
@@ -172,13 +175,14 @@ void LevelInfo::setCsv(const char *csv)
       }
     }
 
-    if (c >= 5)
+    if (c >= 6)
     {
       mProducerId = atoll(field[0]);
-      mFmiParameterLevelId = atoll(field[1]);
-      mGrib1ParameterLevelId = atoll(field[2]);
-      mGrib2ParameterLevelId = atoll(field[3]);
-      mParameterLevel = atoll(field[4]);
+      mFmiParameterName = field[1];
+      mFmiParameterLevelId = atoll(field[2]);
+      mGrib1ParameterLevelId = atoll(field[3]);
+      mGrib2ParameterLevelId = atoll(field[4]);
+      mParameterLevel = atoll(field[5]);
     }
   }
   catch (...)
@@ -228,6 +232,7 @@ void LevelInfo::print(std::ostream& stream,uint level,uint optionFlags)
   {
     stream << space(level) << "LevelInfo\n";
     stream << space(level) << "- mProducerId            = " << mProducerId << "\n";
+    stream << space(level) << "- mFmiParameterName      = " << mFmiParameterName << "\n";
     stream << space(level) << "- mFmiParameterLevelId   = " << (int)mFmiParameterLevelId << "\n";
     stream << space(level) << "- mGrib1ParameterLevelId = " << (int)mGrib1ParameterLevelId << "\n";
     stream << space(level) << "- mGrib2ParameterLevelId = " << (int)mGrib2ParameterLevelId << "\n";

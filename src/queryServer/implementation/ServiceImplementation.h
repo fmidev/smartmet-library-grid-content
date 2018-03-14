@@ -14,9 +14,11 @@ namespace QueryServer
 {
 
 typedef std::vector<std::pair<std::string,T::GeometryId>> Producer_vec;
-typedef ContentServer::ServiceInterface*                  ContentServer_ptr;
-typedef DataServer::ServiceInterface*                     DataServer_ptr;
-
+typedef ContentServer::ServiceInterface* ContentServer_ptr;
+typedef DataServer::ServiceInterface* DataServer_ptr;
+typedef std::pair<int,double> LevelHeight;
+typedef std::vector<LevelHeight> LevelHeight_vec;
+typedef std::vector<std::pair<std::string,LevelHeight_vec>> LevelHeightCache;
 
 
 class ServiceImplementation : public ServiceInterface
@@ -73,6 +75,7 @@ class ServiceImplementation : public ServiceInterface
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
                        T::ForecastNumber forecastNumber,
+                       uint parameterFlags,
                        T::AreaInterpolationMethod areaInterpolationMethod,
                        T::TimeInterpolationMethod timeInterpolationMethod,
                        T::LevelInterpolationMethod levelInterpolationMethod,
@@ -95,6 +98,7 @@ class ServiceImplementation : public ServiceInterface
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
                        T::ForecastNumber forecastNumber,
+                       uint parameterFlags,
                        T::AreaInterpolationMethod areaInterpolationMethod,
                        T::TimeInterpolationMethod timeInterpolationMethod,
                        T::LevelInterpolationMethod levelInterpolationMethod,
@@ -152,6 +156,104 @@ class ServiceImplementation : public ServiceInterface
 
      void           updateQueryParameters(Query& query);
 
+     bool           conversionFunction(std::string& conversionFunction,std::string& function,std::vector<std::string>& functionParams);
+     void           executeConversion(std::string& function,std::vector<std::string>& functionParams,T::GridValueList& valueList);
+
+     void           timeInterpolation(
+                       T::TimeInterpolationMethod timeInterpolationMethod,
+                       std::string forecastTimeStr,
+                       std::string forecastTimeStr1,
+                       std::string forecastTimeStr2,
+                       T::GridValueList& list1,
+                       T::GridValueList& list2,
+                       T::GridValueList& valueList);
+
+     void           levelInterpolation(
+                       T::LevelInterpolationMethod levelInterpolationMethod,
+                       double level,
+                       double level1,
+                       double level2,
+                       ParameterValues& parameterValues1,
+                       ParameterValues& parameterValues2,
+                       ParameterValues& valueList);
+
+
+     bool           getPolygonValues(
+                       T::ProducerInfo& producerInfo,
+                       T::GeometryId producerGeometryId,
+                       uint& generationId,
+                       ParameterMapping pInfo,
+                       std::string forecastTime,
+                       T::ParamLevelId paramLevelId,
+                       T::ParamLevel paramLevel,
+                       T::ForecastType forecastType,
+                       T::ForecastNumber forecastNumber,
+                       uint parameterFlags,
+                       T::TimeInterpolationMethod timeInterpolationMethod,
+                       T::LevelInterpolationMethod levelInterpolationMethod,
+                       QueryCoordinates& coordinates,
+                       uint& newProducerId,
+                       ParameterValues& valueList);
+
+     bool           getCircleValues(
+                       T::ProducerInfo& producerInfo,
+                       T::GeometryId producerGeometryId,
+                       uint& generationId,
+                       ParameterMapping pInfo,
+                       std::string forecastTime,
+                       T::ParamLevelId paramLevelId,
+                       T::ParamLevel paramLevel,
+                       T::ForecastType forecastType,
+                       T::ForecastNumber forecastNumber,
+                       uint parameterFlags,
+                       T::TimeInterpolationMethod timeInterpolationMethod,
+                       T::LevelInterpolationMethod levelInterpolationMethod,
+                       double x,
+                       double y,
+                       double radius,
+                       uint& newProducerId,
+                       ParameterValues& valueList);
+
+     bool           getPointValues(
+                       T::ProducerInfo& producerInfo,
+                       T::GeometryId producerGeometryId,
+                       uint& generationId,
+                       ParameterMapping pInfo,
+                       std::string forecastTime,
+                       T::ParamLevelId paramLevelId,
+                       T::ParamLevel paramLevel,
+                       T::ForecastType forecastType,
+                       T::ForecastNumber forecastNumber,
+                       uint parameterFlags,
+                       T::AreaInterpolationMethod areaInterpolationMethod,
+                       T::TimeInterpolationMethod timeInterpolationMethod,
+                       T::LevelInterpolationMethod levelInterpolationMethod,
+                       QueryCoordinates& coordinates,
+                       uint& newProducerId,
+                       ParameterValues& valueList);
+
+     bool           getSpecialValues(
+                       T::ProducerInfo& producerInfo,
+                       T::GeometryId producerGeometryId,
+                       uint& generationId,
+                       ParameterMapping pInfo,
+                       std::string forecastTime,
+                       T::ParamLevelId paramLevelId,
+                       T::ParamLevel paramLevel,
+                       T::ForecastType forecastType,
+                       T::ForecastNumber forecastNumber,
+                       uint parameterFlags,
+                       T::AreaInterpolationMethod areaInterpolationMethod,
+                       T::TimeInterpolationMethod timeInterpolationMethod,
+                       T::LevelInterpolationMethod levelInterpolationMethod,
+                       double x,
+                       double y,
+                       uint& newProducerId,
+                       ParameterValues& valueList);
+
+     bool           getPressureLevelsAndHeights(T::ProducerInfo& producerInfo,uint generationId,std::string forecastTime,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,double x,double y,int height,int& lowerPressure,int& higherPressure,double& lowerHeight,double& higherHeight);
+
+
   private:
 
      // Private attributes
@@ -171,6 +273,8 @@ class ServiceImplementation : public ServiceInterface
      ContentServer_ptr      mContentServerPtr;
      DataServer_ptr         mDataServerPtr;
      uint                   mCheckInterval;
+     LevelHeightCache       mLevelHeightCache;
+     ThreadLock             mCacheThreadLock;
 };
 
 

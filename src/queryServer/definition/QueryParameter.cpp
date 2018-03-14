@@ -29,6 +29,7 @@ QueryParameter::QueryParameter()
     mTimestepsAfter = 0;
     mTimestepSizeInMinutes = 0;
     mTemporary = false;
+    mFlags = 0;
   }
   catch (...)
   {
@@ -68,6 +69,7 @@ QueryParameter::QueryParameter(const QueryParameter& queryParameter)
     mTemporary = queryParameter.mTemporary;
     mFunction = queryParameter.mFunction;
     mFunctionParams = queryParameter.mFunctionParams;
+    mFlags = queryParameter.mFlags;
   }
   catch (...)
   {
@@ -137,6 +139,7 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mTemporary                = " << (int)mTemporary << "\n";
     stream << space(level) << "- mPrecision                = " << mPrecision << "\n";
     stream << space(level) << "- mFunction                 = " << mFunction << "\n";
+    stream << space(level) << "- mFlags                    = " << mFlags << "\n";
 
     stream << space(level) << "- mFunctionParams           = \n";
     for (auto it = mFunctionParams.begin();  it != mFunctionParams.end(); ++it)
