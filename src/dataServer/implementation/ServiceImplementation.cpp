@@ -262,12 +262,12 @@ int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,T::Valu
               {
                 case T::CoordinateType::UNKNOWN:
                 case T::CoordinateType::LATLON_COORDINATES:
-                  rec->mValue = message->getGridValueByLatLonCoordinate(rec->mY,rec->mX,(T::AreaInterpolationMethod)rec->mAreaInterpolationMethod);
+                  rec->mValue = message->getGridValueByLatLonCoordinate(rec->mY,rec->mX,(short)rec->mAreaInterpolationMethod);
                   rec->mResult = 0;
                   break;
 
                 case T::CoordinateType::GRID_COORDINATES:
-                  rec->mValue = message->getGridValueByGridPoint(rec->mX,rec->mY,(T::AreaInterpolationMethod)rec->mAreaInterpolationMethod);
+                  rec->mValue = message->getGridValueByGridPoint(rec->mX,rec->mY,(short)rec->mAreaInterpolationMethod);
                   rec->mResult = 0;
                   break;
 
@@ -473,7 +473,7 @@ int ServiceImplementation::_getGridAttributeList(T::SessionId sessionId,uint fil
 
 
 
-int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,T::AreaInterpolationMethod interpolationMethod,T::ParamValue& value)
+int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::ParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -587,7 +587,7 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint
 
 
 
-int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,T::AreaInterpolationMethod interpolationMethod,T::ParamValue_vec& values)
+int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,short interpolationMethod,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -659,7 +659,7 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
 
 
 
-int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,T::AreaInterpolationMethod interpolationMethod,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short interpolationMethod,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try

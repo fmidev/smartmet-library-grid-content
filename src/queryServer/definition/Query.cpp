@@ -18,6 +18,8 @@ Query::Query()
     mGenerationFlags = 0;
     mSearchType = QST_POINT;
     mRadius = 0;
+    mDem = 0;
+    mCoverType = 0;
     mMaxParameterValues = 1000000;
   }
   catch (...)
@@ -42,6 +44,8 @@ Query::Query(Query& query)
     mSearchType = query.mSearchType;
     mCoordinateList = query.mCoordinateList;
     mRadius = query.mRadius;
+    mDem = query.mDem;
+    mCoverType = query.mCoverType;
     mQueryParameterList = query.mQueryParameterList;
     mLanguage = query.mLanguage;
     mGenerationFlags = query.mGenerationFlags;
@@ -195,6 +199,8 @@ void Query::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mFlags                  = " << mFlags << "\n";
     stream << space(level) << "- mSearchType             = " << (int)mSearchType << "\n";
     stream << space(level) << "- mRadius                 = " << mRadius << "\n";
+    stream << space(level) << "- mDem                    = " << mDem << "\n";
+    stream << space(level) << "- mCoverType              = " << mCoverType << "\n";
     stream << space(level) << "- mLanguage               = " << mLanguage << "\n";
     stream << space(level) << "- mMaxParameterValues     = " << mMaxParameterValues << "\n";
 

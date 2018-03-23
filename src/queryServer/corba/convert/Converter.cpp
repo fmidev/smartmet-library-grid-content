@@ -506,9 +506,9 @@ void Converter::convert(QueryServer::Corba::CorbaQueryParameter& source,QuerySer
     target.mParameterLevel = source.parameterLevel;
     target.mForecastType = source.forecastType;
     target.mForecastNumber = source.forecastNumber;
-    target.mAreaInterpolationMethod = (T::AreaInterpolationMethod)source.areaInterpolationMethod;
-    target.mTimeInterpolationMethod = (T::TimeInterpolationMethod)source.timeInterpolationMethod;
-    target.mLevelInterpolationMethod = (T::LevelInterpolationMethod)source.levelInterpolationMethod;
+    target.mAreaInterpolationMethod = (short)source.areaInterpolationMethod;
+    target.mTimeInterpolationMethod = (short)source.timeInterpolationMethod;
+    target.mLevelInterpolationMethod = (short)source.levelInterpolationMethod;
     target.mProducerId = source.producerId;
     target.mGenerationFlags = source.generationFlags;
     target.mPrecision = source.precision;
@@ -546,9 +546,9 @@ void Converter::convert(QueryServer::QueryParameter& source,QueryServer::Corba::
     target.parameterLevel = source.mParameterLevel;
     target.forecastType = source.mForecastType;
     target.forecastNumber = source.mForecastNumber;
-    target.areaInterpolationMethod = (::CORBA::Octet)source.mAreaInterpolationMethod;
-    target.timeInterpolationMethod = (::CORBA::Octet)source.mTimeInterpolationMethod;
-    target.levelInterpolationMethod = (::CORBA::Octet)source.mLevelInterpolationMethod;
+    target.areaInterpolationMethod = (::CORBA::Short)source.mAreaInterpolationMethod;
+    target.timeInterpolationMethod = (::CORBA::Short)source.mTimeInterpolationMethod;
+    target.levelInterpolationMethod = (::CORBA::Short)source.mLevelInterpolationMethod;
     target.producerId = source.mProducerId;
     target.generationFlags = source.mGenerationFlags;
     target.precision = source.mPrecision;
@@ -757,6 +757,8 @@ void Converter::convert(QueryServer::Corba::CorbaQuery& source,QueryServer::Quer
     target.mSearchType = (QueryServer::QuerySearchType)source.searchType;
     convert(source.coordinateList,target.mCoordinateList);
     target.mRadius = source.radius;
+    target.mDem = source.dem;
+    target.mCoverType = source.coverType;
     convert(source.queryParameterList,target.mQueryParameterList);
     target.mLanguage = source.language;
     target.mGenerationFlags = source.generationFlags;
@@ -785,6 +787,8 @@ void Converter::convert(QueryServer::Query& source,QueryServer::Corba::CorbaQuer
     target.searchType = (::CORBA::Octet)source.mSearchType;
     convert(source.mCoordinateList,target.coordinateList);
     target.radius = source.mRadius;
+    target.dem = source.mDem;
+    target.coverType = source.mCoverType;
     convert(source.mQueryParameterList,target.queryParameterList);
     target.language = CORBA::string_dup(source.mLanguage.c_str());
     target.generationFlags = source.mGenerationFlags;

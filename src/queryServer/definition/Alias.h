@@ -24,6 +24,7 @@ class Alias
 
 
 typedef std::map<std::string,Alias> Alias_map;
+typedef std::vector<Alias> Alias_vec;
 
 
 }  // namespace QueryServer

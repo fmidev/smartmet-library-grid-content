@@ -126,7 +126,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getValuesByGridPoint(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaContentInfoList& contentInfoList, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Octet interpolationMethod, SmartMet::QueryServer::Corba::CorbaGridPointValueList_out valueList)
+::CORBA::Long ServerInterface::getValuesByGridPoint(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaContentInfoList& contentInfoList, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short interpolationMethod, SmartMet::QueryServer::Corba::CorbaGridPointValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -142,7 +142,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
 
     ContentServer::Corba::Converter::convert(contentInfoList,sContentInfoList);
 
-    int result = mService->getValuesByGridPoint(sessionId,sContentInfoList,(T::CoordinateType)coordinateType,x,y,(T::AreaInterpolationMethod)interpolationMethod,sValueList);
+    int result = mService->getValuesByGridPoint(sessionId,sContentInfoList,(T::CoordinateType)coordinateType,x,y,(short)interpolationMethod,sValueList);
     if (result == 0)
       QueryServer::Corba::Converter::convert(sValueList,*valueList);
 

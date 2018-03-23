@@ -22,7 +22,7 @@ class ValueRecord
     uint                        mFileId;
     uint                        mMessageIndex;
     CoordinateType              mCoordinateType;
-    T::AreaInterpolationMethod  mAreaInterpolationMethod;
+    short  mAreaInterpolationMethod;
     double                      mX;
     double                      mY;
     T::ParamValue               mValue;

@@ -275,13 +275,13 @@ void ParameterMappingFile::loadFile()
             rec.mParameterLevel = (T::ParamLevel)atoi(field[6]);
 
           if (field[7][0] != '\0')
-            rec.mAreaInterpolationMethod = (T::AreaInterpolationMethod)atoi(field[7]);
+            rec.mAreaInterpolationMethod = (short)atoi(field[7]);
 
           if (field[8][0] != '\0')
-            rec.mTimeInterpolationMethod = (T::TimeInterpolationMethod)atoi(field[8]);
+            rec.mTimeInterpolationMethod = (short)atoi(field[8]);
 
           if (field[9][0] != '\0')
-            rec.mLevelInterpolationMethod = (T::LevelInterpolationMethod)atoi(field[9]);
+            rec.mLevelInterpolationMethod = (short)atoi(field[9]);
 
           if (field[10][0] == 'E')
             rec.mSearchEnabled = true;

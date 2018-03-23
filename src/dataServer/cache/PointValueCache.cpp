@@ -40,7 +40,7 @@ PointValueCache::~PointValueCache()
 
 
 
-void PointValueCache::addValue(uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,T::AreaInterpolationMethod interpolationMethod,T::ParamValue value)
+void PointValueCache::addValue(uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::ParamValue value)
 {
   try
   {
@@ -82,7 +82,7 @@ void PointValueCache::addValue(uint fileId,uint messageIndex,uint flags,T::Coord
 
 
 
-bool PointValueCache::getValue(uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,T::AreaInterpolationMethod interpolationMethod,T::ParamValue& value)
+bool PointValueCache::getValue(uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::ParamValue& value)
 {
   try
   {
@@ -131,7 +131,7 @@ void PointValueCache::clear()
 
 
 
-void PointValueCache::deleteValue(uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,T::AreaInterpolationMethod interpolationMethod)
+void PointValueCache::deleteValue(uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,short interpolationMethod)
 {
   try
   {
@@ -236,7 +236,7 @@ void PointValueCache::deleteValuesByAge(uint maxAge)
 
 
 
-std::size_t PointValueCache::getKey(uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,T::AreaInterpolationMethod interpolationMethod)
+std::size_t PointValueCache::getKey(uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,short interpolationMethod)
 {
   try
   {

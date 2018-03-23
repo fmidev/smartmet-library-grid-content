@@ -302,7 +302,7 @@ void Converter::convert(T::ValueRecord& source,DataServer::Corba::CorbaValueReco
     target.fileId = source.mFileId;
     target.messageIndex = source.mMessageIndex;
     target.coordinateType = (CORBA::Octet)source.mCoordinateType;
-    target.areaInterpolationMethod = (CORBA::Octet)source.mAreaInterpolationMethod;
+    target.areaInterpolationMethod = (CORBA::Short)source.mAreaInterpolationMethod;
     target.x = source.mX;
     target.y = source.mY;
     target.value = source.mValue;
@@ -325,7 +325,7 @@ void Converter::convert(DataServer::Corba::CorbaValueRecord& source,T::ValueReco
     target.mFileId = source.fileId;
     target.mMessageIndex = source.messageIndex;
     target.mCoordinateType = (T::CoordinateType)source.coordinateType;
-    target.mAreaInterpolationMethod = (T::AreaInterpolationMethod)source.areaInterpolationMethod;
+    target.mAreaInterpolationMethod = (short)source.areaInterpolationMethod;
     target.mX = source.x;
     target.mY = source.y;
     target.mValue = source.value;

@@ -21,8 +21,10 @@ class AliasFile
 
     virtual void  init();
     virtual void  init(std::string filename);
+    virtual void  init(std::string filename,bool duplicatesAllowed);
     virtual void  checkUpdates();
     virtual bool  getAlias(std::string& name,std::string& alias);
+    virtual void  getAliasList(std::string& name,std::vector<std::string>& aliasList);
     virtual void  print(std::ostream& stream,uint level,uint optionFlags);
 
   protected:
@@ -32,7 +34,9 @@ class AliasFile
     std::string   mFilename;
     time_t        mLastModified;
     Alias_map     mAliasList;
+    Alias_vec     mAliasVector;
     ThreadLock    mThreadLock;
+    bool          mDuplicatesAllowed;
 };
 
 

@@ -25,9 +25,9 @@ class ParameterMapping
     T::ParamLevelIdType         mParameterLevelIdType;
     T::ParamLevelId             mParameterLevelId;
     T::ParamLevel               mParameterLevel;
-    T::AreaInterpolationMethod  mAreaInterpolationMethod;
-    T::TimeInterpolationMethod  mTimeInterpolationMethod;
-    T::LevelInterpolationMethod mLevelInterpolationMethod;
+    short                       mAreaInterpolationMethod;
+    short                       mTimeInterpolationMethod;
+    short                       mLevelInterpolationMethod;
     bool                        mSearchEnabled;
     std::string                 mConversionFunction;
 };

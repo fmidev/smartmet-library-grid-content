@@ -141,7 +141,7 @@ int ServiceInterface::getProducerList(T::SessionId sessionId,string_vec& produce
 
 
 
-int ServiceInterface::getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,T::AreaInterpolationMethod interpolationMethod,T::GridPointValueList& valueList)
+int ServiceInterface::getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::GridPointValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -181,7 +181,7 @@ int ServiceInterface::_getProducerList(T::SessionId sessionId,string_vec& produc
 
 
 
-int ServiceInterface::_getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,T::AreaInterpolationMethod interpolationMethod,T::GridPointValueList& valueList)
+int ServiceInterface::_getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::GridPointValueList& valueList)
 {
   throw Spine::Exception(BCP,exception_implementation_required);
 }

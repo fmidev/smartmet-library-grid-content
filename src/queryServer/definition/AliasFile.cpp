@@ -12,6 +12,7 @@ AliasFile::AliasFile()
 {
   try
   {
+    mDuplicatesAllowed = false;
   }
   catch (...)
   {
@@ -28,6 +29,7 @@ AliasFile::AliasFile(std::string filename)
   try
   {
     mFilename = filename;
+    mDuplicatesAllowed = false;
   }
   catch (...)
   {
@@ -45,6 +47,7 @@ AliasFile::AliasFile(const AliasFile& aliasFile)
   {
     mFilename = aliasFile.mFilename;
     mAliasList = aliasFile.mAliasList;
+    mDuplicatesAllowed  = aliasFile.mDuplicatesAllowed;
   }
   catch (...)
   {
@@ -108,6 +111,24 @@ void AliasFile::init(std::string filename)
 
 
 
+void AliasFile::init(std::string filename,bool duplicatesAllowed)
+{
+  try
+  {
+    mDuplicatesAllowed  = duplicatesAllowed;
+    mFilename = filename;
+    init();
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
 void AliasFile::checkUpdates()
 {
   try
@@ -134,13 +155,58 @@ bool AliasFile::getAlias(std::string& name,std::string& alias)
   {
     AutoThreadLock lock(&mThreadLock);
 
-    auto a = mAliasList.find(toLowerString(name));
-    if (a != mAliasList.end())
+    if (!mDuplicatesAllowed)
     {
-      alias = a->second.mAliasString;
-      return true;
+      auto a = mAliasList.find(toLowerString(name));
+      if (a != mAliasList.end())
+      {
+        alias = a->second.mAliasString;
+        return true;
+      }
+      return false;
+    }
+
+    for (auto it = mAliasVector.begin(); it != mAliasVector.end(); ++it)
+    {
+      if (strcasecmp(it->mName.c_str(),name.c_str()) == 0)
+      {
+        alias = it->mAliasString;
+        return true;
+      }
     }
     return false;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+void AliasFile::getAliasList(std::string& name,std::vector<std::string>& aliasList)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!mDuplicatesAllowed)
+    {
+      auto a = mAliasList.find(toLowerString(name));
+      if (a != mAliasList.end())
+      {
+        aliasList.push_back(a->second.mAliasString);
+      }
+      return;
+    }
+
+    for (auto it = mAliasVector.begin(); it != mAliasVector.end(); ++it)
+    {
+      if (strcasecmp(it->mName.c_str(),name.c_str()) == 0)
+        aliasList.push_back(it->mAliasString);
+    }
   }
   catch (...)
   {
@@ -198,16 +264,24 @@ void AliasFile::loadFile()
 
             if (rec.mName.length() > 0  &&  rec.mAliasString.length() > 0)
             {
-              auto alias = mAliasList.find(toLowerString(rec.mName));
-              if (alias != mAliasList.end())
+              if (!mDuplicatesAllowed)
               {
-                printf("### ALIAS '%s' ALREADY DEFINED (%s:%u)!\n",rec.mName.c_str(),mFilename.c_str(),lineCount);
-                //rec.print(std::cout,0,0);
+                auto alias = mAliasList.find(toLowerString(rec.mName));
+                if (alias != mAliasList.end())
+                {
+                  std::cout << "#### ALIAS '" << rec.mName << "' ALREADY DEFINED (" << mFilename << ":" << lineCount << ")\n";
+                  std::cout << "  " << CODE_LOCATION << "\n\n";
+                  //rec.print(std::cout,0,0);
+                }
+                else
+                {
+                  //rec.print(std::cout,0,0);
+                  mAliasList.insert(std::pair<std::string,Alias>(toLowerString(rec.mName),rec));
+                }
               }
               else
               {
-                //rec.print(std::cout,0,0);
-                mAliasList.insert(std::pair<std::string,Alias>(toLowerString(rec.mName),rec));
+                mAliasVector.push_back(rec);
               }
             }
           }
@@ -234,9 +308,10 @@ void AliasFile::print(std::ostream& stream,uint level,uint optionFlags)
   {
     stream << space(level) << "AliasFileCollection\n";
     for (auto it = mAliasList.begin(); it != mAliasList.end(); ++it)
-    {
       it->second.print(stream,level+1,optionFlags);
-    }
+
+    for (auto it = mAliasVector.begin(); it != mAliasVector.end(); ++it)
+      it->print(stream,level+1,optionFlags);
   }
   catch (...)
   {

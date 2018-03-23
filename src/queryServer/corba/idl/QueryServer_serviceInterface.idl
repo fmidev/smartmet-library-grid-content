@@ -19,7 +19,7 @@ interface ServiceInterface
 {
   long  executeQuery(in long long sessionId,inout CorbaQuery query);
   long  getProducerList(in long long sessionId,out CorbaStringList producerList);
-  long  getValuesByGridPoint(in long long sessionId,in ContentServer::Corba::CorbaContentInfoList contentInfoList,in octet coordinateType,in double x,in double y,in octet interpolationMethod,out CorbaGridPointValueList valueList);
+  long  getValuesByGridPoint(in long long sessionId,in ContentServer::Corba::CorbaContentInfoList contentInfoList,in octet coordinateType,in double x,in double y,in short interpolationMethod,out CorbaGridPointValueList valueList);
 };  
 
 

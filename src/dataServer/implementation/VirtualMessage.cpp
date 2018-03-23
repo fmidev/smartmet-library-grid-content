@@ -631,7 +631,7 @@ bool VirtualMessage::reverseYDirection() const
 
 
 
-void VirtualMessage::getGridValueByPoint(T::CoordinateType coordinateType,double x,double y,T::AreaInterpolationMethod interpolationMethod,T::ParamValue& value)
+void VirtualMessage::getGridValueByPoint(T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::ParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -750,7 +750,7 @@ void VirtualMessage::getGridValueListByCircle(T::CoordinateType coordinateType,d
 
 
 
-void VirtualMessage::getGridValueListByPointList(T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,T::AreaInterpolationMethod interpolationMethod,T::GridValueList& valueList)
+void VirtualMessage::getGridValueListByPointList(T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short interpolationMethod,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -1177,7 +1177,7 @@ T::ParamValue VirtualMessage::getGridValueByGridPoint(uint grid_i,uint grid_j) c
 
 
 
-T::ParamValue VirtualMessage::getGridValueByGridPoint(double grid_i,double grid_j,T::AreaInterpolationMethod interpolationMethod) const
+T::ParamValue VirtualMessage::getGridValueByGridPoint(double grid_i,double grid_j,short interpolationMethod) const
 {
   FUNCTION_TRACE
   try
@@ -1231,7 +1231,7 @@ T::ParamValue VirtualMessage::getGridValueByGridPoint_linearInterpolation(double
 
 
 
-T::ParamValue VirtualMessage::getGridValueByLatLonCoordinate(double lat,double lon,T::AreaInterpolationMethod interpolationMethod) const
+T::ParamValue VirtualMessage::getGridValueByLatLonCoordinate(double lat,double lon,short interpolationMethod) const
 {
   FUNCTION_TRACE
   try

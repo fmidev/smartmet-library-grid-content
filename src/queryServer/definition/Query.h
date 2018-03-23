@@ -25,7 +25,8 @@ enum QuerySearchType
 {
   QST_POINT   = 0,
   QST_POLYGON = 1,
-  QST_PATH    = 2
+  QST_PATH    = 2,
+  QST_CIRCLE  = 3
 };
 
 
@@ -49,6 +50,8 @@ class Query
     QuerySearchType     mSearchType;
     QueryCoordinates    mCoordinateList;
     double              mRadius;
+    double              mDem;
+    ushort              mCoverType;
     QueryParameter_vec  mQueryParameterList;
     std::string         mStartTime;
     std::string         mEndTime;

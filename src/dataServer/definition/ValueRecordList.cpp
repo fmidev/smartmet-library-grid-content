@@ -45,7 +45,7 @@ ValueRecordList::ValueRecordList(ValueRecordList& valueRecordList)
 
 
 
-ValueRecordList::ValueRecordList(ContentInfoList& contentInfoList,CoordinateType coordinateType,T::AreaInterpolationMethod interpolationMethod,double x,double y)
+ValueRecordList::ValueRecordList(ContentInfoList& contentInfoList,CoordinateType coordinateType,short interpolationMethod,double x,double y)
 {
   try
   {

@@ -177,178 +177,6 @@ uint LuaFile::getFunction(std::string& functionName,std::string& function)
 
 
 
-std::string LuaFile::executeFunctionCall5(std::string& function,std::string language,std::vector<float>& parameters)
-{
-  try
-  {
-    AutoThreadLock lock(&mThreadLock);
-
-    auto a = mFunctions.find(toLowerString(function));
-    if (a == mFunctions.end())
-    {
-      Spine::Exception exception(BCP, "Unknown function!");
-      exception.addParameter("Function",function);
-      throw exception;
-    }
-
-    if (a->second.mType != 5)
-    {
-      Spine::Exception exception(BCP, "Invalid function type!");
-      exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
-      exception.addDetail("That's because the current LUA function does not support the same parameters");
-      exception.addDetail("or the return values that this 'executeFunction' is using.");
-      exception.addParameter("LUA File",mFilename);
-      exception.addParameter("LUA Function",function);
-      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
-      throw exception;
-    }
-
-
-    int pLen = (int)parameters.size();
-
-    lua_getglobal((lua_State*)mLuaState,a->second.mFunctionName.c_str());
-
-    lua_pushstring((lua_State*)mLuaState,language.c_str());
-    lua_pushinteger((lua_State*)mLuaState,pLen);
-
-    lua_newtable((lua_State*)mLuaState);
-    for (int i = 0; i < pLen; i++)
-    {
-      lua_pushnumber((lua_State*)mLuaState,parameters[i]);
-      lua_rawseti((lua_State*)mLuaState,-2,i + 1);
-    }
-
-    int res = lua_pcall((lua_State*)mLuaState, 3, 2, 0);
-    if (res != 0)
-    {
-      // LUA ERROR
-      Spine::Exception exception(BCP, "LUA call returns an error!");
-      exception.addParameter("LUA File",mFilename);
-      exception.addParameter("LUA Function",function);
-      exception.addParameter("LUA message",lua_tostring((lua_State*)mLuaState, -1));
-      lua_pop((lua_State*)mLuaState, 1);
-      throw exception;
-    }
-    else
-    {
-      size_t len = 0;
-      const char* cstr = lua_tolstring((lua_State*)mLuaState, -1, &len);
-      std::string message(cstr, len);
-      lua_pop((lua_State*)mLuaState, 1);  /* pop returned value */
-
-      const char* vstr = lua_tolstring((lua_State*)mLuaState, -1, &len);
-      std::string value(vstr, len);
-      lua_pop((lua_State*)mLuaState, 1);  /* pop returned value */
-
-      if (message != "OK")
-      {
-        Spine::Exception exception(BCP, "LUA function call returns an error!");
-        exception.addParameter("LUA File",mFilename);
-        exception.addParameter("LUA Function",function);
-        exception.addParameter("Error Message",message.c_str());
-        throw exception;
-      }
-
-      return value;
-    }
-    return std::string("");
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
-  }
-}
-
-
-
-
-
-std::string LuaFile::executeFunctionCall5(std::string& function,std::string language,std::vector<double>& parameters)
-{
-  try
-  {
-    AutoThreadLock lock(&mThreadLock);
-
-    auto a = mFunctions.find(toLowerString(function));
-    if (a == mFunctions.end())
-    {
-      Spine::Exception exception(BCP, "Unknown function!");
-      exception.addParameter("Function",function);
-      throw exception;
-    }
-
-    if (a->second.mType != 5)
-    {
-      Spine::Exception exception(BCP, "Invalid function type!");
-      exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
-      exception.addDetail("That's because the current LUA function does not support the same parameters");
-      exception.addDetail("or the return values that this 'executeFunction' is using.");
-      exception.addParameter("LUA File",mFilename);
-      exception.addParameter("LUA Function",function);
-      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
-      throw exception;
-    }
-
-
-    int pLen = (int)parameters.size();
-
-    lua_getglobal((lua_State*)mLuaState,a->second.mFunctionName.c_str());
-
-    lua_pushstring((lua_State*)mLuaState,language.c_str());
-    lua_pushinteger((lua_State*)mLuaState,pLen);
-
-    lua_newtable((lua_State*)mLuaState);
-    for (int i = 0; i < pLen; i++)
-    {
-      lua_pushnumber((lua_State*)mLuaState,parameters[i]);
-      lua_rawseti((lua_State*)mLuaState,-2,i + 1);
-    }
-
-    int res = lua_pcall((lua_State*)mLuaState, 3, 2, 0);
-    if (res != 0)
-    {
-      // LUA ERROR
-      Spine::Exception exception(BCP, "LUA call returns an error!");
-      exception.addParameter("LUA File",mFilename);
-      exception.addParameter("LUA Function",function);
-      exception.addParameter("LUA message",lua_tostring((lua_State*)mLuaState, -1));
-      lua_pop((lua_State*)mLuaState, 1);
-      throw exception;
-    }
-    else
-    {
-      size_t len = 0;
-      const char* cstr = lua_tolstring((lua_State*)mLuaState, -1, &len);
-      std::string message(cstr, len);
-      lua_pop((lua_State*)mLuaState, 1);  /* pop returned value */
-
-      const char* vstr = lua_tolstring((lua_State*)mLuaState, -1, &len);
-      std::string value(vstr, len);
-      lua_pop((lua_State*)mLuaState, 1);  /* pop returned value */
-
-      if (message != "OK")
-      {
-        Spine::Exception exception(BCP, "LUA function call returns an error!");
-        exception.addParameter("LUA File",mFilename);
-        exception.addParameter("LUA Function",function);
-        exception.addParameter("Error Message",message.c_str());
-        throw exception;
-      }
-
-      return value;
-    }
-    return std::string("");
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
-  }
-}
-
-
-
-
-
 float LuaFile::executeFunctionCall1(std::string& function,std::vector<float>& parameters)
 {
   try
@@ -1245,6 +1073,404 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
   }
 }
 
+
+
+
+
+std::string LuaFile::executeFunctionCall5(std::string& function,std::string language,std::vector<float>& parameters)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    auto a = mFunctions.find(toLowerString(function));
+    if (a == mFunctions.end())
+    {
+      Spine::Exception exception(BCP, "Unknown function!");
+      exception.addParameter("Function",function);
+      throw exception;
+    }
+
+    if (a->second.mType != 5)
+    {
+      Spine::Exception exception(BCP, "Invalid function type!");
+      exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
+      exception.addDetail("That's because the current LUA function does not support the same parameters");
+      exception.addDetail("or the return values that this 'executeFunction' is using.");
+      exception.addParameter("LUA File",mFilename);
+      exception.addParameter("LUA Function",function);
+      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+      throw exception;
+    }
+
+
+    int pLen = (int)parameters.size();
+
+    lua_getglobal((lua_State*)mLuaState,a->second.mFunctionName.c_str());
+
+    lua_pushstring((lua_State*)mLuaState,language.c_str());
+    lua_pushinteger((lua_State*)mLuaState,pLen);
+
+    lua_newtable((lua_State*)mLuaState);
+    for (int i = 0; i < pLen; i++)
+    {
+      lua_pushnumber((lua_State*)mLuaState,parameters[i]);
+      lua_rawseti((lua_State*)mLuaState,-2,i + 1);
+    }
+
+    int res = lua_pcall((lua_State*)mLuaState, 3, 2, 0);
+    if (res != 0)
+    {
+      // LUA ERROR
+      Spine::Exception exception(BCP, "LUA call returns an error!");
+      exception.addParameter("LUA File",mFilename);
+      exception.addParameter("LUA Function",function);
+      exception.addParameter("LUA message",lua_tostring((lua_State*)mLuaState, -1));
+      lua_pop((lua_State*)mLuaState, 1);
+      throw exception;
+    }
+    else
+    {
+      size_t len = 0;
+      const char* cstr = lua_tolstring((lua_State*)mLuaState, -1, &len);
+      std::string message(cstr, len);
+      lua_pop((lua_State*)mLuaState, 1);  /* pop returned value */
+
+      const char* vstr = lua_tolstring((lua_State*)mLuaState, -1, &len);
+      std::string value(vstr, len);
+      lua_pop((lua_State*)mLuaState, 1);  /* pop returned value */
+
+      if (message != "OK")
+      {
+        Spine::Exception exception(BCP, "LUA function call returns an error!");
+        exception.addParameter("LUA File",mFilename);
+        exception.addParameter("LUA Function",function);
+        exception.addParameter("Error Message",message.c_str());
+        throw exception;
+      }
+
+      return value;
+    }
+    return std::string("");
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+  }
+}
+
+
+
+
+
+std::string LuaFile::executeFunctionCall5(std::string& function,std::string language,std::vector<double>& parameters)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    auto a = mFunctions.find(toLowerString(function));
+    if (a == mFunctions.end())
+    {
+      Spine::Exception exception(BCP, "Unknown function!");
+      exception.addParameter("Function",function);
+      throw exception;
+    }
+
+    if (a->second.mType != 5)
+    {
+      Spine::Exception exception(BCP, "Invalid function type!");
+      exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
+      exception.addDetail("That's because the current LUA function does not support the same parameters");
+      exception.addDetail("or the return values that this 'executeFunction' is using.");
+      exception.addParameter("LUA File",mFilename);
+      exception.addParameter("LUA Function",function);
+      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+      throw exception;
+    }
+
+
+    int pLen = (int)parameters.size();
+
+    lua_getglobal((lua_State*)mLuaState,a->second.mFunctionName.c_str());
+
+    lua_pushstring((lua_State*)mLuaState,language.c_str());
+    lua_pushinteger((lua_State*)mLuaState,pLen);
+
+    lua_newtable((lua_State*)mLuaState);
+    for (int i = 0; i < pLen; i++)
+    {
+      lua_pushnumber((lua_State*)mLuaState,parameters[i]);
+      lua_rawseti((lua_State*)mLuaState,-2,i + 1);
+    }
+
+    int res = lua_pcall((lua_State*)mLuaState, 3, 2, 0);
+    if (res != 0)
+    {
+      // LUA ERROR
+      Spine::Exception exception(BCP, "LUA call returns an error!");
+      exception.addParameter("LUA File",mFilename);
+      exception.addParameter("LUA Function",function);
+      exception.addParameter("LUA message",lua_tostring((lua_State*)mLuaState, -1));
+      lua_pop((lua_State*)mLuaState, 1);
+      throw exception;
+    }
+    else
+    {
+      size_t len = 0;
+      const char* cstr = lua_tolstring((lua_State*)mLuaState, -1, &len);
+      std::string message(cstr, len);
+      lua_pop((lua_State*)mLuaState, 1);  /* pop returned value */
+
+      const char* vstr = lua_tolstring((lua_State*)mLuaState, -1, &len);
+      std::string value(vstr, len);
+      lua_pop((lua_State*)mLuaState, 1);  /* pop returned value */
+
+      if (message != "OK")
+      {
+        Spine::Exception exception(BCP, "LUA function call returns an error!");
+        exception.addParameter("LUA File",mFilename);
+        exception.addParameter("LUA Function",function);
+        exception.addParameter("Error Message",message.c_str());
+        throw exception;
+      }
+
+      return value;
+    }
+    return std::string("");
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+  }
+}
+
+
+
+
+
+double LuaFile::executeFunctionCall6(
+                  std::string& function,
+                  short interpolationMethod,
+                  std::string& producerName,
+                  uint producerId,
+                  uint generationId,
+                  std::string& analysisTime,
+                  std::string& forecastTime,
+                  std::string& parameterName,
+                  T::ParamKeyType parameterKeyType,
+                  std::string& parameterKey,
+                  T::ParamLevelIdType parameterLevelIdType,
+                  short parameterLevelId,
+                  int parameterLevel,
+                  short forecastType,
+                  short forecastNumber,
+                  double longitude,
+                  double latitude,
+                  double dem,
+                  short coverType,
+                  double x,
+                  double y,
+                  double val_bl,
+                  double val_br,
+                  double val_tr,
+                  double val_tl)
+{
+  try
+  {
+    try
+    {
+      AutoThreadLock lock(&mThreadLock);
+
+      auto a = mFunctions.find(toLowerString(function));
+      if (a == mFunctions.end())
+      {
+        Spine::Exception exception(BCP, "Unknown function!");
+        exception.addParameter("Function",function);
+        throw exception;
+      }
+
+      if (a->second.mType != 6)
+      {
+        Spine::Exception exception(BCP, "Invalid function type!");
+        exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
+        exception.addDetail("That's because the current LUA function does not support the same parameters");
+        exception.addDetail("or the return values that this 'executeFunction' is using.");
+        exception.addParameter("LUA File",mFilename);
+        exception.addParameter("LUA Function",function);
+        exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+        throw exception;
+      }
+
+
+      lua_getglobal((lua_State*)mLuaState,a->second.mFunctionName.c_str());
+
+      //lua_pushstring(mLuaState,a->mFunctionName.c_str());
+      //lua_pushinteger((lua_State*)mLuaState,pLen);
+
+      lua_pushstring((lua_State*)mLuaState,producerName.c_str());
+      lua_pushinteger((lua_State*)mLuaState,producerId);
+      lua_pushinteger((lua_State*)mLuaState,generationId);
+      lua_pushstring((lua_State*)mLuaState,analysisTime.c_str());
+      lua_pushstring((lua_State*)mLuaState,forecastTime.c_str());
+      lua_pushstring((lua_State*)mLuaState,parameterName.c_str());
+      lua_pushinteger((lua_State*)mLuaState,(int)parameterKeyType);
+      lua_pushstring((lua_State*)mLuaState,parameterKey.c_str());
+      lua_pushinteger((lua_State*)mLuaState,(int)parameterLevelIdType);
+      lua_pushinteger((lua_State*)mLuaState,parameterLevelId);
+      lua_pushinteger((lua_State*)mLuaState,parameterLevel);
+      lua_pushinteger((lua_State*)mLuaState,forecastType);
+      lua_pushinteger((lua_State*)mLuaState,forecastNumber);
+      lua_pushnumber((lua_State*)mLuaState,longitude);
+      lua_pushnumber((lua_State*)mLuaState,latitude);
+      lua_pushnumber((lua_State*)mLuaState,dem);
+      lua_pushinteger((lua_State*)mLuaState,coverType);
+      lua_pushnumber((lua_State*)mLuaState,x);
+      lua_pushnumber((lua_State*)mLuaState,y);
+      lua_pushnumber((lua_State*)mLuaState,val_bl);
+      lua_pushnumber((lua_State*)mLuaState,val_br);
+      lua_pushnumber((lua_State*)mLuaState,val_tr);
+      lua_pushnumber((lua_State*)mLuaState,val_tl);
+      lua_pushinteger((lua_State*)mLuaState,interpolationMethod);
+
+
+      int res = lua_pcall((lua_State*)mLuaState, 24, 2, 0);
+      if (res != 0)
+      {
+        // LUA ERROR
+        Spine::Exception exception(BCP, "LUA call returns an error!");
+        exception.addParameter("LUA File",mFilename);
+        exception.addParameter("LUA Function",function);
+        exception.addParameter("LUA message",lua_tostring((lua_State*)mLuaState, -1));
+        lua_pop((lua_State*)mLuaState, 1);
+        throw exception;
+      }
+      else
+      {
+        size_t len = 0;
+        const char* cstr = lua_tolstring((lua_State*)mLuaState, -1, &len);
+        std::string message(cstr, len);
+        lua_pop((lua_State*)mLuaState, 1);  /* pop returned value */
+
+        double value = lua_tonumber((lua_State*)mLuaState,-1);
+        lua_pop((lua_State*)mLuaState, 1);  /* pop returned value */
+
+        if (message != "OK")
+        {
+          Spine::Exception exception(BCP, "LUA function call returns an error!");
+          exception.addParameter("LUA File",mFilename);
+          exception.addParameter("LUA Function",function);
+          exception.addParameter("Error Message",message.c_str());
+          throw exception;
+        }
+
+        return value;
+      }
+      return 0;
+    }
+    catch (...)
+    {
+      throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+std::string LuaFile::executeFunctionCall7(
+                  std::string& function,
+                  std::string& producerName,
+                  std::string& parameterName,
+                  T::ParamKeyType parameterKeyType,
+                  std::string& parameterKey,
+                  T::ParamLevelIdType parameterLevelIdType,
+                  short parameterLevelId,
+                  int parameterLevel,
+                  short forecastType,
+                  short forecastNumber,
+                  short interpolationMethod)
+{
+  try
+  {
+    try
+    {
+      AutoThreadLock lock(&mThreadLock);
+
+      auto a = mFunctions.find(toLowerString(function));
+      if (a == mFunctions.end())
+      {
+        Spine::Exception exception(BCP, "Unknown function!");
+        exception.addParameter("Function",function);
+        throw exception;
+      }
+
+      if (a->second.mType != 7)
+      {
+        Spine::Exception exception(BCP, "Invalid function type!");
+        exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
+        exception.addDetail("That's because the current LUA function does not support the same parameters");
+        exception.addDetail("or the return values that this 'executeFunction' is using.");
+        exception.addParameter("LUA File",mFilename);
+        exception.addParameter("LUA Function",function);
+        exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+        throw exception;
+      }
+
+
+      lua_getglobal((lua_State*)mLuaState,a->second.mFunctionName.c_str());
+
+      //lua_pushstring(mLuaState,a->mFunctionName.c_str());
+      //lua_pushinteger((lua_State*)mLuaState,pLen);
+
+      lua_pushstring((lua_State*)mLuaState,producerName.c_str());
+      lua_pushstring((lua_State*)mLuaState,parameterName.c_str());
+      lua_pushinteger((lua_State*)mLuaState,(int)parameterKeyType);
+      lua_pushstring((lua_State*)mLuaState,parameterKey.c_str());
+      lua_pushinteger((lua_State*)mLuaState,(int)parameterLevelIdType);
+      lua_pushinteger((lua_State*)mLuaState,parameterLevelId);
+      lua_pushinteger((lua_State*)mLuaState,parameterLevel);
+      lua_pushinteger((lua_State*)mLuaState,forecastType);
+      lua_pushinteger((lua_State*)mLuaState,forecastNumber);
+      lua_pushinteger((lua_State*)mLuaState,interpolationMethod);
+
+      int res = lua_pcall((lua_State*)mLuaState, 10, 1, 0);
+      if (res != 0)
+      {
+        // LUA ERROR
+        Spine::Exception exception(BCP, "LUA call returns an error!");
+        exception.addParameter("LUA File",mFilename);
+        exception.addParameter("LUA Function",function);
+        exception.addParameter("LUA message",lua_tostring((lua_State*)mLuaState, -1));
+        lua_pop((lua_State*)mLuaState, 1);
+        throw exception;
+      }
+      else
+      {
+        size_t len = 0;
+        const char* cstr = lua_tolstring((lua_State*)mLuaState, -1, &len);
+        std::string value(cstr, len);
+        lua_pop((lua_State*)mLuaState, 1);  /* pop returned value */
+
+        return value;
+      }
+      return 0;
+    }
+    catch (...)
+    {
+      throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
 
 
 

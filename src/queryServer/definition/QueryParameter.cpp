@@ -128,9 +128,9 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mParameterLevel           = " << mParameterLevel << "\n";
     stream << space(level) << "- mForecastType             = " << (int)mForecastType << "\n";
     stream << space(level) << "- mForecastNumber           = " << (int)mForecastNumber << "\n";
-    stream << space(level) << "- mAreaInterpolationMethod  = " << (uint)mAreaInterpolationMethod << "\n";
-    stream << space(level) << "- mTimeInterpolationMethod  = " << (uint)mTimeInterpolationMethod << "\n";
-    stream << space(level) << "- mLevelInterpolationMethod = " << (uint)mLevelInterpolationMethod << "\n";
+    stream << space(level) << "- mAreaInterpolationMethod  = " << mAreaInterpolationMethod << "\n";
+    stream << space(level) << "- mTimeInterpolationMethod  = " << mTimeInterpolationMethod << "\n";
+    stream << space(level) << "- mLevelInterpolationMethod = " << mLevelInterpolationMethod << "\n";
     stream << space(level) << "- mProducerId               = " << mProducerId << "\n";
     stream << space(level) << "- mGenerationFlags          = " << mGenerationFlags << "\n";
     stream << space(level) << "- mTimestepsBefore          = " << mTimestepsBefore << "\n";
