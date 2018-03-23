@@ -542,63 +542,6 @@ void LuaFileCollection::executeFunctionCall4(std::string& function,uint columns,
 
 
 
-double LuaFileCollection::executeFunctionCall6(
-                  std::string& function,
-                  short interpolationMethod,
-                  std::string& producerName,
-                  uint producerId,
-                  uint generationId,
-                  std::string& analysisTime,
-                  std::string& forecastTime,
-                  std::string& parameterName,
-                  T::ParamKeyType parameterKeyType,
-                  std::string& parameterKey,
-                  T::ParamLevelIdType parameterLevelIdType,
-                  short parameterLevelId,
-                  int parameterLevel,
-                  short forecastType,
-                  short forecastNumber,
-                  double longitude,
-                  double latitude,
-                  double dem,
-                  short coverType,
-                  double x,
-                  double y,
-                  double val_bl,
-                  double val_br,
-                  double val_tr,
-                  double val_tl)
-{
-  try
-  {
-    AutoThreadLock lock(&mThreadLock);
-    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
-    {
-      std::string functionName;
-      uint type = it->getFunction(function,functionName);
-      if (type == 6)
-      {
-        return it->executeFunctionCall6(functionName,interpolationMethod,producerName,producerId,
-            generationId,analysisTime,forecastTime,parameterName,parameterKeyType,parameterKey,
-            parameterLevelIdType,parameterLevelId,parameterLevel,forecastType,forecastNumber,
-            longitude,latitude,dem,coverType,x,y,val_bl,val_br,val_tr,val_tl);
-      }
-    }
-
-    Spine::Exception exception(BCP, "Unknown LUA function!");
-    exception.addParameter("Function",function);
-    throw exception;
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
-  }
-}
-
-
-
-
-
 std::string LuaFileCollection::executeFunctionCall7(
                   std::string& function,
                   std::string& producerName,

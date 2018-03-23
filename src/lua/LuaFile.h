@@ -45,33 +45,6 @@ class LuaFile
     std::string     executeFunctionCall5(std::string& function,std::string language,std::vector<double>& parameters);
 
 
-    double          executeFunctionCall6(
-                      std::string& function,
-                      short interpolationMethod,
-                      std::string& producerName,
-                      uint producerId,
-                      uint generationId,
-                      std::string& analysisTime,
-                      std::string& forecastTime,
-                      std::string& parameterName,
-                      T::ParamKeyType parameterKeyType,
-                      std::string& parameterKey,
-                      T::ParamLevelIdType parameterLevelIdType,
-                      short parameterLevelId,
-                      int parameterLevel,
-                      short forecastType,
-                      short forecastNumber,
-                      double longitude,
-                      double latitude,
-                      double dem,
-                      short coverType,
-                      double x,
-                      double y,
-                      double val_bl,
-                      double val_br,
-                      double val_tr,
-                      double val_tl);
-
     std::string     executeFunctionCall7(
                       std::string& function,
                       std::string& producerName,
