@@ -13,7 +13,8 @@ enum Result
   OK                                          =  0,
   NOT_IMPLEMENTED                             = -1,
   DATA_NOT_FOUND                              = -2,
-  UNEXPECTED_EXCEPTION                        = -3
+  UNEXPECTED_EXCEPTION                        = -3,
+  NO_PRODUCERS_FOUND                          = -100
 };
 
 

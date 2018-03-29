@@ -1005,6 +1005,9 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
     Producer_vec producers;
     getProducerList(query,producers);
 
+    if (producers.size() == 0)
+      return Result::NO_PRODUCERS_FOUND;
+
     // Getting geometries that support support the given coordinates.
 
     std::set<T::GeometryId> geometryIdList;
@@ -1198,6 +1201,9 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
     Producer_vec producers;
     getProducerList(query,producers);
+
+    if (producers.size() == 0)
+      return Result::NO_PRODUCERS_FOUND;
 
     std::set<T::GeometryId> geometryIdList;
     getGeometryIdListByCoordinates(query.mCoordinateList,geometryIdList);
@@ -1557,7 +1563,7 @@ void ServiceImplementation::levelInterpolation(short levelInterpolationMethod,do
 {
   try
   {
-    // std::cout << "LEVEL INTERPOLATION " << level1 << " " << level << " " << level2 << "\n";
+    std::cout << "LEVEL INTERPOLATION " << level1 << " " << level << " " << level2 << "   METHOD " << levelInterpolationMethod << "\n";
 
     // parameterValues1.print(std::cout,0,0);
     // parameterValues2.print(std::cout,0,0);
@@ -1934,30 +1940,42 @@ bool ServiceImplementation::getPointValues(
   FUNCTION_TRACE
   try
   {
+    bool climatologyParam = false;
+    if ((pInfo.mGroupFlags &&  QueryServer::ParameterMapping::GroupFlags::climatology) != 0)
+      climatologyParam = true;
+
     std::string startTime = forecastTime;
     std::string endTime = forecastTime;
-    //if (areaInterpolationMethod == T::AreaInterpolationMethod::Undefined)
-    //  areaInterpolationMethod = pInfo.mAreaInterpolationMethod;
 
     uint flags = 0;
 
     std::string function;
     std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction,function,functionParams);
-/*
-    if (paramLevelId > 0 || paramLevel != 0)
-    {
-      pInfo.mParameterLevelId = paramLevelId;
-      pInfo.mParameterLevel = paramLevel;
-    }
 
-    PRINT_DATA(mDebugLog,"         + %s:%d:%d:%d:%d:%d\n",pInfo.mParameterKey.c_str(),
-      (int)pInfo.mParameterLevelId,(int)pInfo.mParameterLevel,
-      (int)forecastType,(int)forecastNumber,);
-*/
+    std::string fTime = forecastTime;
 
     T::ContentInfoList contentList;
-    int result = mContentServerPtr->getContentListByParameterGenerationIdAndForecastTime(0,generationId,pInfo.mParameterKeyType,pInfo.mParameterKey,pInfo.mParameterLevelIdType,paramLevelId,paramLevel,forecastType,forecastNumber,producerGeometryId,forecastTime,contentList);
+    if (climatologyParam)
+    {
+      T::ContentInfoList contentList2;
+      int result = mContentServerPtr->getContentListByParameterAndGenerationId(0,generationId,pInfo.mParameterKeyType,pInfo.mParameterKey,T::ParamLevelIdType::IGNORE,-1,0,0,forecastType,forecastNumber,producerGeometryId,"19000101T000000","30000101T000000",0,contentList2);
+      if (result != 0)
+      {
+        SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
+        exception.addParameter("Service","getContentListByParameterAndGenerationId");
+        exception.addParameter("Message",ContentServer::getResultString(result));
+        throw exception;
+      }
+
+      if (contentList2.getLength() == 0)
+        return false;
+
+      T::ContentInfo *cInfo = contentList2.getContentInfoByIndex(0);
+      fTime = cInfo->mForecastTime.substr(0,4) + forecastTime.substr(4);
+    }
+
+    int result = mContentServerPtr->getContentListByParameterGenerationIdAndForecastTime(0,generationId,pInfo.mParameterKeyType,pInfo.mParameterKey,pInfo.mParameterLevelIdType,paramLevelId,paramLevel,forecastType,forecastNumber,producerGeometryId,fTime,contentList);
     if (result != 0)
     {
       SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
@@ -1965,6 +1983,7 @@ bool ServiceImplementation::getPointValues(
       exception.addParameter("Message",ContentServer::getResultString(result));
       throw exception;
     }
+
 
     PRINT_DATA(mDebugLog,"         + Found %u content records\n",contentList.getLength());
 
@@ -2004,7 +2023,6 @@ bool ServiceImplementation::getPointValues(
       }
 
       uint contentLen = contentList.getLength();
-      //printf("CONTENT LEN = %s %s %u\n",producerInfo.mName.c_str(),pInfo.mParameterKey.c_str(),contentLen);
       if (contentLen > 0)
       {
         // It seems that there is some content available for other levels.
@@ -2070,8 +2088,6 @@ bool ServiceImplementation::getPointValues(
           // We found lower and upper levels. Let's fetch data from the both levels and count
           // new values by interpolating.
 
-          // std::cout << "**** LEVELS " << lowerLevel << " " << higherLevel << "\n";
-
           ParameterValues parameterValues1;
           ParameterValues parameterValues2;
 
@@ -2131,10 +2147,12 @@ bool ServiceImplementation::getPointValues(
     valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
     valueList.mParameterLevelId = paramLevelId;
 
+    //contentList.print(std::cout,0,0);
+
     if (contentLen == 1)
     {
       T::ContentInfo *contentInfo = contentList.getContentInfoByIndex(0);
-      if (contentInfo->mForecastTime == forecastTime)
+      if (contentInfo->mForecastTime == fTime)
       {
         // We found a grid which forecast time is exactly the same as the requested forecast time.
 
@@ -2183,7 +2201,7 @@ bool ServiceImplementation::getPointValues(
     {
       T::ContentInfo *contentInfo1 = contentList.getContentInfoByIndex(0);
       T::ContentInfo *contentInfo2 = contentList.getContentInfoByIndex(1);
-      if (!(contentInfo1->mForecastTime < forecastTime  &&  contentInfo2->mForecastTime > forecastTime))
+      if (!(contentInfo1->mForecastTime < fTime  &&  contentInfo2->mForecastTime > fTime))
       {
         SmartMet::Spine::Exception exception(BCP, "Unexpected result!");
         exception.addDetail("The given forecast time should been between the found content times.");
@@ -2286,17 +2304,6 @@ bool ServiceImplementation::getCircleValues(
     std::string function;
     std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction,function,functionParams);
-/*
-    if (paramLevelId > 0 || paramLevel != 0)
-    {
-      pInfo.mParameterLevelId = paramLevelId;
-      pInfo.mParameterLevel = paramLevel;
-    }
-    PRINT_DATA(mDebugLog,"         + %s:%d:%d:%d:%d\n",pInfo.mParameterKey.c_str(),
-      (int)pInfo.mParameterLevelId,(int)pInfo.mParameterLevel,
-      (int)forecastType,(int)forecastNumber);
-
-*/
 
     T::ContentInfoList contentList;
     int result = mContentServerPtr->getContentListByParameterGenerationIdAndForecastTime(0,generationId,pInfo.mParameterKeyType,pInfo.mParameterKey,pInfo.mParameterLevelIdType,paramLevelId,paramLevel,forecastType,forecastNumber,producerGeometryId,forecastTime,contentList);
@@ -2620,17 +2627,6 @@ bool ServiceImplementation::getPolygonValues(
     std::string function;
     std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction,function,functionParams);
-/*
-    if (paramLevelId > 0 || paramLevel != 0)
-    {
-      pInfo.mParameterLevelId = paramLevelId;
-      pInfo.mParameterLevel = paramLevel;
-    }
-
-    PRINT_DATA(mDebugLog,"         + %s:%d:%d:%d:%d\n",pInfo.mParameterKey.c_str(),
-      (int)pInfo.mParameterLevelId,(int)pInfo.mParameterLevel,
-      (int)forecastType,(int)forecastNumber);
-*/
 
     T::ContentInfoList contentList;
     int result = mContentServerPtr->getContentListByParameterGenerationIdAndForecastTime(0,generationId,pInfo.mParameterKeyType,pInfo.mParameterKey,pInfo.mParameterLevelIdType,paramLevelId,paramLevel,forecastType,forecastNumber,producerGeometryId,forecastTime,contentList);
@@ -2870,6 +2866,7 @@ void ServiceImplementation::getGridValues(
     std::string startTime = forecastTime;
     std::string endTime = forecastTime;
 
+
     // Going through the producer list.
 
     for (auto it = producers.begin(); it != producers.end(); ++it)
@@ -3001,8 +2998,8 @@ void ServiceImplementation::getGridValues(
 
                       if ((int)areaInterpolation >= T::AreaInterpolationMethod::External  &&  coordinates.size() == 1  &&  coordinates[0].size() == 1)
                       {
-                        double x = coordinates[0][0].x();
-                        double y = coordinates[0][0].y();
+                        //double x = coordinates[0][0].x();
+                        //double y = coordinates[0][0].y();
 
                         ParameterValues valList;
                         ParameterValues geopHeightList;

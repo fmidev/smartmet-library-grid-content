@@ -28,9 +28,19 @@ class ParameterMapping
     short                       mAreaInterpolationMethod;
     short                       mTimeInterpolationMethod;
     short                       mLevelInterpolationMethod;
+    uint                        mGroupFlags;
     bool                        mSearchEnabled;
     std::string                 mConversionFunction;
+
+
+    class GroupFlags
+    {
+      public:
+        static const uint       climatology = 1 << 0;
+    };
 };
+
+
 
 
 

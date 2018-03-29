@@ -15,6 +15,9 @@ namespace DataServer
 {
 
 
+typedef std::list<std::pair<uint,uint>> PreloadList;
+
+
 
 class ServiceImplementation : public ServiceInterface
 {
@@ -115,6 +118,7 @@ class ServiceImplementation : public ServiceInterface
      pthread_t            mThread;
      time_t               mContentServerStartTime;
      GridFileManager      mGridFileManager;
+     PreloadList          mPrealoadList;
 
      VirtualContentManager            mVirtualContentManager;
      ContentServer::ServiceInterface* mContentServer;

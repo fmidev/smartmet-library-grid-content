@@ -1535,7 +1535,7 @@ int ContentInfoList::getClosestIndexNoLock(ContentInfo::ComparisonMethod compari
   {
     FUNCTION_TRACE
     if (mArray == NULL  ||  mLength == 0)
-          return 0;
+      return 0;
 
     if (comparisonMethod != mComparisonMethod)
     {
@@ -3120,9 +3120,9 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(ui
           info.mFmiParameterName == cInfo->mFmiParameterName &&
           info.mFmiParameterLevelId == cInfo->mFmiParameterLevelId &&
           info.mParameterLevel == cInfo->mParameterLevel &&
-          info.mForecastType == cInfo->mForecastType &&
-          info.mForecastNumber == cInfo->mForecastNumber &&
-          info.mGeometryId == cInfo->mGeometryId)
+          (info.mForecastType < 0 || info.mForecastType == cInfo->mForecastType) &&
+          (info.mForecastNumber < 0 || info.mForecastNumber == cInfo->mForecastNumber) &&
+          (info.mGeometryId < 0 || info.mGeometryId == cInfo->mGeometryId))
         return cInfo;
     }
 

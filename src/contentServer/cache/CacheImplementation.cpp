@@ -1013,14 +1013,22 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
           if (paramKey.length() > 0)
           {
             char tmp[200];
-            sprintf(tmp,"%s;%s;%d;%s;%d;%d;%05d",
+            char *p = tmp;
+            p += sprintf(p,"%s;%s;%d;%s;%d;%d;%05d;%d;%d",
                 producerInfo->mName.c_str(),
                 paramKey.c_str(),
                 (int)T::ParamKeyType::FMI_NAME,
                 contentInfo->mFmiParameterName.c_str(),
                 (int)T::ParamLevelIdType::FMI,
                 (int)contentInfo->mFmiParameterLevelId,
-                (int)contentInfo->mParameterLevel);
+                (int)contentInfo->mParameterLevel,
+                (int)contentInfo->mForecastType,
+                (int)contentInfo->mForecastNumber);
+
+            if ((contentInfo->mFlags & CONTENT_INFO_PRELOAD) != 0)
+              p += sprintf(p,";1");
+            else
+              p += sprintf(p,";0");
 
             if (list.find(std::string(tmp)) == list.end())
               list.insert(std::string(tmp));
@@ -3562,11 +3570,12 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
             contentInfoList.addContentInfo(cInfo->duplicate());
             return Result::OK;
           }
-
           mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         }
         else
+        {
           mContentInfoList[0].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+        }
         break;
 
       case T::ParamKeyType::GRIB_ID:

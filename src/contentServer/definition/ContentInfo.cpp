@@ -403,13 +403,13 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         if (res != 0)
           return res;
         res = uint_compare(mForecastType,contentInfo->mForecastType);
-        if (res != 0)
+        if (res != 0  && contentInfo->mForecastType >= 0)
           return res;
         res = uint_compare(mForecastNumber,contentInfo->mForecastNumber);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mForecastNumber >= 0)
           return res;
         res = uint_compare(mGeometryId,contentInfo->mGeometryId);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mGeometryId >= 0)
           return res;
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
@@ -430,13 +430,13 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         if (res != 0)
           return res;
         res = uint_compare(mForecastType,contentInfo->mForecastType);
-        if (res != 0)
+        if (res != 0  && contentInfo->mForecastType >= 0)
           return res;
         res = uint_compare(mForecastNumber,contentInfo->mForecastNumber);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mForecastNumber >= 0)
           return res;
         res = uint_compare(mGeometryId,contentInfo->mGeometryId);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mGeometryId >= 0)
           return res;
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
@@ -457,13 +457,13 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         if (res != 0)
           return res;
         res = uint_compare(mForecastType,contentInfo->mForecastType);
-        if (res != 0)
+        if (res != 0  && contentInfo->mForecastType >= 0)
           return res;
         res = uint_compare(mForecastNumber,contentInfo->mForecastNumber);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mForecastNumber >= 0)
           return res;
         res = uint_compare(mGeometryId,contentInfo->mGeometryId);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mGeometryId >= 0)
           return res;
         res = uint64_compare((uint)mFmiParameterLevelId,(uint)contentInfo->mFmiParameterLevelId);
         if (res != 0)
@@ -488,13 +488,13 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         if (res != 0)
           return res;
         res = uint_compare(mForecastType,contentInfo->mForecastType);
-        if (res != 0)
+        if (res != 0  && contentInfo->mForecastType >= 0)
           return res;
         res = uint_compare(mForecastNumber,contentInfo->mForecastNumber);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mForecastNumber >= 0)
           return res;
         res = uint_compare(mGeometryId,contentInfo->mGeometryId);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mGeometryId >= 0)
           return res;
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
@@ -515,13 +515,13 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         if (res != 0)
           return res;
         res = uint_compare(mForecastType,contentInfo->mForecastType);
-        if (res != 0)
+        if (res != 0  && contentInfo->mForecastType >= 0)
           return res;
         res = uint_compare(mForecastNumber,contentInfo->mForecastNumber);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mForecastNumber >= 0)
           return res;
         res = uint_compare(mGeometryId,contentInfo->mGeometryId);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mGeometryId >= 0)
           return res;
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
@@ -542,13 +542,13 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         if (res != 0)
           return res;
         res = uint_compare(mForecastType,contentInfo->mForecastType);
-        if (res != 0)
+        if (res != 0  && contentInfo->mForecastType >= 0)
           return res;
         res = uint_compare(mForecastNumber,contentInfo->mForecastNumber);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mForecastNumber >= 0)
           return res;
         res = uint_compare(mGeometryId,contentInfo->mGeometryId);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mGeometryId >= 0)
           return res;
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
@@ -569,13 +569,13 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         if (res != 0)
           return res;
         res = uint_compare(mForecastType,contentInfo->mForecastType);
-        if (res != 0)
+        if (res != 0  && contentInfo->mForecastType >= 0)
           return res;
         res = uint_compare(mForecastNumber,contentInfo->mForecastNumber);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mForecastNumber >= 0)
           return res;
         res = uint_compare(mGeometryId,contentInfo->mGeometryId);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mGeometryId >= 0)
           return res;
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
@@ -617,16 +617,16 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         if (res != 0)
           return res;
         res = uint_compare(mForecastType,contentInfo->mForecastType);
-        if (res != 0)
+        if (res != 0  && contentInfo->mForecastType >= 0)
           return res;
         res = uint_compare(mForecastNumber,contentInfo->mForecastNumber);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mForecastNumber >= 0)
           return res;
         res = strcasecmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         if (res != 0)
           return res;
         res = uint_compare(mGeometryId,contentInfo->mGeometryId);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mGeometryId >= 0)
           return res;
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
@@ -647,13 +647,13 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         if (res != 0)
           return res;
         res = uint_compare(mForecastType,contentInfo->mForecastType);
-        if (res != 0)
+        if (res != 0  && contentInfo->mForecastType >= 0)
           return res;
         res = uint_compare(mForecastNumber,contentInfo->mForecastNumber);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mForecastNumber >= 0)
           return res;
         res = uint_compare(mGeometryId,contentInfo->mGeometryId);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mGeometryId >= 0)
           return res;
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
@@ -674,13 +674,13 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         if (res != 0)
           return res;
         res = uint_compare(mForecastType,contentInfo->mForecastType);
-        if (res != 0)
+        if (res != 0  && contentInfo->mForecastType >= 0)
           return res;
         res = uint_compare(mForecastNumber,contentInfo->mForecastNumber);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mForecastNumber >= 0)
           return res;
         res = uint_compare(mGeometryId,contentInfo->mGeometryId);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mGeometryId >= 0)
           return res;
         res = uint_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
@@ -710,13 +710,13 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         if (res != 0)
           return res;
         res = uint_compare(mForecastType,contentInfo->mForecastType);
-        if (res != 0)
+        if (res != 0  && contentInfo->mForecastType >= 0)
           return res;
         res = uint_compare(mForecastNumber,contentInfo->mForecastNumber);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mForecastNumber >= 0)
           return res;
         res = uint_compare(mGeometryId,contentInfo->mGeometryId);
-        if (res != 0)
+        if (res != 0  &&  contentInfo->mGeometryId >= 0)
           return res;
         res = strcasecmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         if (res != 0)

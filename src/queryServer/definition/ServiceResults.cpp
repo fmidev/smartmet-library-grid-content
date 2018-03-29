@@ -26,6 +26,8 @@ std::string getResultString(int resultCode)
       case Result::UNEXPECTED_EXCEPTION:
         return std::string("Unexpected exception!");
 
+      case Result::NO_PRODUCERS_FOUND:
+        return std::string("No producers found!");
     }
 
     return std::string("Unknown result code : ") + std::to_string((int)resultCode);

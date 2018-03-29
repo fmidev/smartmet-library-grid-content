@@ -249,7 +249,7 @@ void ParameterMappingFile::loadFile()
           }
         }
 
-        if (c > 11)
+        if (c > 12)
         {
           ParameterMapping rec;
 
@@ -283,13 +283,16 @@ void ParameterMappingFile::loadFile()
           if (field[9][0] != '\0')
             rec.mLevelInterpolationMethod = (short)atoi(field[9]);
 
-          if (field[10][0] == 'E')
+          if (field[10][0] != '\0')
+            rec.mGroupFlags = atoi(field[10]);
+
+          if (field[11][0] == 'E')
             rec.mSearchEnabled = true;
           else
             rec.mSearchEnabled = false;
 
-          if (field[11][0] != '\0')
-            rec.mConversionFunction = field[11];
+          if (field[12][0] != '\0')
+            rec.mConversionFunction = field[12];
 
           //rec.print(std::cout,0,0);
           mMappingVector.push_back(rec);

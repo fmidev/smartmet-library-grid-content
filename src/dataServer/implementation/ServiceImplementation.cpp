@@ -44,8 +44,6 @@ static void* ServiceImplementation_eventProcessingThread(void *arg)
 
 
 
-
-
 ServiceImplementation::ServiceImplementation()
 {
   FUNCTION_TRACE
@@ -1227,6 +1225,31 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
 
     if ((fileInfo.mFlags & (uint)T::FileInfoFlags::CONTENT_PREDEFINED) != 0  ||  contentList.getLength() > 0)
     {
+      uint cLen = currentContentList.getLength();
+      GRID::GridFile_sptr gFile;
+      for (uint t=0; t<cLen; t++)
+      {
+        T::ContentInfo *info = currentContentList.getContentInfoByIndex(t);
+        if ((info->mFlags & CONTENT_INFO_PRELOAD) != 0)
+          mPrealoadList.push_back(std::pair<uint,uint>(info->mFileId,info->mMessageIndex));
+        /*
+        {
+          printf("PRELOAD %s\n",info->mFmiParameterName.c_str());
+
+          if (!gFile)
+            gFile = getGridFile(fileInfo.mFileId);
+
+          if (gFile)
+          {
+            printf("** PRELOAD %s\n",info->mFmiParameterName.c_str());
+            GRID::Message *message = gFile->getMessageByIndex(info->mMessageIndex);
+            if (message != NULL)
+              message->getGridValueByGridPoint(0,0);
+          }
+        }
+          */
+      }
+
       // The content of the file is predefined or registered by another server. So,
       // we can just register our server for the current content (if we have not already
       // registered. This is possible if the content server has been down).
@@ -1239,6 +1262,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
         if (info == NULL  ||  (info->mServerFlags & sf) == 0)
           mContentServer->registerContentListByFileId(mServerSessionId,mServerId,fileInfo.mFileId);
       }
+
 
       if (contentInfoList.getLength() == 0)
       {
@@ -1253,7 +1277,6 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
         if (mVirtualContentEnabled)
           mVirtualContentManager.addFile(producerInfo,generationInfo,fileInfo,contentList,mGridFileMap);
       }
-
     }
     else
     {
@@ -2289,6 +2312,26 @@ void ServiceImplementation::processEvents()
       fullUpdate();
       return;
     }
+
+    uint preloadCount = 0;
+    while (!mPrealoadList.empty()  &&  preloadCount < 20)
+    {
+      auto it = mPrealoadList.front();
+      printf("PRELOAD %u:%u\n",it.first,it.second);
+
+      auto gFile = getGridFile(it.first);
+      if (gFile)
+      {
+        GRID::Message *message = gFile->getMessageByIndex(it.second);
+        if (message != NULL)
+          message->getGridValueByGridPoint(0,0);
+      }
+
+      mPrealoadList.pop_front();
+      preloadCount++;
+    }
+
+
 
     T::EventInfo eventInfo;
     int result = mContentServer->getLastEventInfo(mServerSessionId,mServerId,eventInfo);
