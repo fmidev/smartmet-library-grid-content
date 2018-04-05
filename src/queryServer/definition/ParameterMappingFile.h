@@ -10,21 +10,23 @@ namespace SmartMet
 namespace QueryServer
 {
 
+typedef std::map<std::string,ParameterMapping_vec> MappingSearch;
 
 class ParameterMappingFile
 {
   public:
                           ParameterMappingFile(std::string filename);
-                          ParameterMappingFile(const ParameterMappingFile& mappingList);
+                          ParameterMappingFile(const ParameterMappingFile& mappingFile);
     virtual               ~ParameterMappingFile();
 
     virtual void          init();
-    virtual void          checkUpdates();
+    virtual bool          checkUpdates();
     std::string           getFilename();
     ParameterMapping*     getMapping(ParameterMapping& mapping);
     virtual void          getMappings(std::string producerName,std::string parameterName,bool onlySearchEnabled,ParameterMapping_vec& mappings);
+    virtual void          getMappings(std::string producerName,std::string parameterName,T::ParamLevelIdType levelIdType,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings);
     uint                  getNumberOfMappings();
-    ParameterMapping*     getParameterMappingByIndex(uint index);
+    //ParameterMapping*     getParameterMappingByIndex(uint index);
     void                  print(std::ostream& stream,uint level,uint optionFlags);
 
   protected:
@@ -33,7 +35,8 @@ class ParameterMappingFile
 
     std::string           mFilename;
     time_t                mLastModified;
-    ParameterMapping_vec  mMappingVector;
+    MappingSearch         mMappingSearch;
+    //ParameterMapping_vec  mMappingVector;
     ThreadLock            mThreadLock;
 };
 

@@ -24,12 +24,12 @@ ParameterMappingFile::ParameterMappingFile(std::string filename)
 
 
 
-ParameterMappingFile::ParameterMappingFile(const ParameterMappingFile& mappingList)
+ParameterMappingFile::ParameterMappingFile(const ParameterMappingFile& mappingFile)
 {
   try
   {
-    mFilename = mappingList.mFilename;
-    mMappingVector = mappingList.mMappingVector;
+    mFilename = mappingFile.mFilename;
+    mMappingSearch = mappingFile.mMappingSearch;
   }
   catch (...)
   {
@@ -73,7 +73,7 @@ void ParameterMappingFile::init()
 
 
 
-void ParameterMappingFile::checkUpdates()
+bool ParameterMappingFile::checkUpdates()
 {
   try
   {
@@ -82,7 +82,11 @@ void ParameterMappingFile::checkUpdates()
     time_t tt = getFileModificationTime(mFilename.c_str());
 
     if (tt != mLastModified  &&  (tt+3) < time(0))
+    {
       loadFile();
+      return true;
+    }
+    return false;
   }
   catch (...)
   {
@@ -114,7 +118,13 @@ uint ParameterMappingFile::getNumberOfMappings()
 {
   try
   {
-    return (uint)mMappingVector.size();
+    AutoThreadLock lock(&mThreadLock);
+    uint cnt = 0;
+    for (auto it = mMappingSearch.begin(); it != mMappingSearch.end(); ++it)
+    {
+      cnt = cnt + (uint)it->second.size();
+    }
+    return cnt;
   }
   catch (...)
   {
@@ -125,7 +135,7 @@ uint ParameterMappingFile::getNumberOfMappings()
 
 
 
-
+/*
 ParameterMapping* ParameterMappingFile::getParameterMappingByIndex(uint index)
 {
   try
@@ -140,7 +150,7 @@ ParameterMapping* ParameterMappingFile::getParameterMappingByIndex(uint index)
     throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
-
+*/
 
 
 
@@ -149,7 +159,15 @@ ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
 {
   try
   {
-    for (auto it = mMappingVector.begin(); it != mMappingVector.end(); ++it)
+    AutoThreadLock lock(&mThreadLock);
+
+    std::string key = toLowerString(mapping.mProducerName + ":" + mapping.mParameterName);
+
+    auto s = mMappingSearch.find(key);
+    if (s == mMappingSearch.end())
+      return NULL;
+
+    for (auto it = s->second.begin(); it != s->second.end(); ++it)
     {
       if (it->mProducerName == mapping.mProducerName  &&
         it->mParameterName == mapping.mParameterName  &&
@@ -180,18 +198,65 @@ void ParameterMappingFile::getMappings(std::string producerName,std::string para
   {
     AutoThreadLock lock(&mThreadLock);
 
-    for (auto it = mMappingVector.begin(); it != mMappingVector.end(); ++it)
+    std::string key = toLowerString(producerName + ":" + parameterName);
+
+    auto s = mMappingSearch.find(key);
+    if (s == mMappingSearch.end())
+      return;
+
+    for (auto it = s->second.begin(); it != s->second.end(); ++it)
     {
-      if (it->mProducerName == producerName  &&  strcasecmp(it->mParameterName.c_str(),parameterName.c_str()) == 0)
+      if (onlySearchEnabled)
       {
-        if (onlySearchEnabled)
-        {
-          if (it->mSearchEnabled)
-            mappings.push_back(*it);
-        }
-        else
-        {
+        if (it->mSearchEnabled)
           mappings.push_back(*it);
+      }
+      else
+      {
+        mappings.push_back(*it);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+void ParameterMappingFile::getMappings(std::string producerName,std::string parameterName,T::ParamLevelIdType levelIdType,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    std::string key = toLowerString(producerName + ":" + parameterName);
+
+    auto s = mMappingSearch.find(key);
+    if (s == mMappingSearch.end())
+      return;
+
+    for (auto it = s->second.begin(); it != s->second.end(); ++it)
+    {
+      if (levelIdType == T::ParamLevelIdType::ANY || levelIdType == T::ParamLevelIdType::IGNORE ||  it->mParameterLevelIdType == levelIdType)
+      {
+        if (levelIdType == T::ParamLevelIdType::IGNORE || levelId == 0 || it->mParameterLevelId == levelId)
+        {
+          if (levelIdType == T::ParamLevelIdType::IGNORE || it->mParameterLevel == level)
+          {
+            if (onlySearchEnabled)
+            {
+              if (it->mSearchEnabled)
+                mappings.push_back(*it);
+            }
+            else
+            {
+              mappings.push_back(*it);
+            }
+          }
         }
       }
     }
@@ -218,7 +283,7 @@ void ParameterMappingFile::loadFile()
       throw exception;
     }
 
-    mMappingVector.clear();
+    mMappingSearch.clear();
 
     char st[1000];
 
@@ -295,7 +360,21 @@ void ParameterMappingFile::loadFile()
             rec.mConversionFunction = field[12];
 
           //rec.print(std::cout,0,0);
-          mMappingVector.push_back(rec);
+
+          std::string key = toLowerString(rec.mProducerName + ":" + rec.mParameterName);
+
+          auto s = mMappingSearch.find(key);
+          if (s != mMappingSearch.end())
+          {
+            s->second.push_back(rec);
+          }
+          else
+          {
+            ParameterMapping_vec vec;
+            vec.push_back(rec);
+            mMappingSearch.insert(std::pair<std::string,ParameterMapping_vec>(key,vec));
+          }
+
         }
       }
     }

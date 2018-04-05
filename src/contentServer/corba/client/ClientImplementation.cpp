@@ -2732,7 +2732,7 @@ int ClientImplementation::_getContentListByServerId(T::SessionId sessionId, uint
 
 
 
-int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -2741,7 +2741,7 @@ int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,u
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
-    int result = mService->getContentListByGenerationId(sessionId, generationId, startFileId, startMessageIndex, maxRecords, corbaContentInfoList);
+    int result = mService->getContentListByGenerationId(sessionId, generationId, startFileId, startMessageIndex, maxRecords, requestFlags,corbaContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);

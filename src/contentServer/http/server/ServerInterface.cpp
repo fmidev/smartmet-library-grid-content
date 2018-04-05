@@ -5342,9 +5342,17 @@ void ServerInterface::getContentListByGenerationId(T::RequestMessage& request,T:
       return;
     }
 
+    uint requestFlags = 0;
+    if (!request.getLineByKey("requestFlags",requestFlags))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: requestFlags");
+      return;
+    }
+
     T::ContentInfoList contentInfoList;
 
-    int result = mService->getContentListByGenerationId(sessionId,generationId,startFileId,startMessageIndex,maxRecords,contentInfoList);
+    int result = mService->getContentListByGenerationId(sessionId,generationId,startFileId,startMessageIndex,maxRecords,requestFlags,contentInfoList);
 
     response.addLine("result",result);
     if (result == Result::OK)

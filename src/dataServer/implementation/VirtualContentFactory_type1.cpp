@@ -238,7 +238,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
             newContentInfo->mForecastType = contentInfo.mForecastType;
             newContentInfo->mForecastNumber = contentInfo.mForecastNumber;
             newContentInfo->mServerFlags = contentInfo.mServerFlags;
-            newContentInfo->mFlags = CONTENT_INFO_VIRTUAL;
+            newContentInfo->mFlags = T::ContentInfo::Flags::VirtualContent;
             newContentInfo->mSourceId = contentInfo.mSourceId;
             newContentInfo->mGeometryId = contentInfo.mGeometryId;
             newContentInfo->mModificationTime = contentInfo.mModificationTime;

@@ -35,6 +35,16 @@ class FileInfo
       fileName = 2  // Comparison according to the file name
     };
 
+
+    class Flags
+    {
+      public:
+        static const uint PredefinedContent    = 1;
+        static const uint VirtualContent       = 2;
+        static const uint DeletedFile          = 4;
+    };
+
+
   public:
                         FileInfo();
                         FileInfo(FileInfo& fileInfo);
@@ -92,12 +102,6 @@ typedef FileInfo* FileInfoPtr;
 
 
 
-enum class FileInfoFlags
-{
-  CONTENT_PREDEFINED   = 1,
-  CONTENT_VIRTUAL      = 2,
-  FILE_DELETED         = 4
-};
 
 
 }

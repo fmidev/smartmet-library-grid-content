@@ -122,7 +122,8 @@ void LuaFile::init(std::string filename)
 
 
 
-void LuaFile::checkUpdates()
+
+bool LuaFile::checkUpdates()
 {
   try
   {
@@ -141,7 +142,10 @@ void LuaFile::checkUpdates()
       loadFile();
       for (int t=1; t<10; t++)
         loadFunctionList(t);
+
+      return true;
     }
+    return false;
   }
   catch (...)
   {

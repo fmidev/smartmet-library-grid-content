@@ -20,7 +20,7 @@ class LuaFile
 
     void            init();
     void            init(std::string filename);
-    void            checkUpdates();
+    bool            checkUpdates();
     uint            getFunction(std::string& functionName,std::string& function);
 
     // Type 1: Takes one or several parameters, returns one value

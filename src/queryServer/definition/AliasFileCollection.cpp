@@ -119,10 +119,11 @@ void AliasFileCollection::init(string_vec& filenames)
 
 
 
-void AliasFileCollection::checkUpdates(bool force)
+bool AliasFileCollection::checkUpdates(bool force)
 {
   try
   {
+    bool result = false;
     AutoThreadLock lock(&mThreadLock);
 
     time_t tt = time(0);
@@ -130,10 +131,12 @@ void AliasFileCollection::checkUpdates(bool force)
     {
       for (auto it = mAliasFileList.begin(); it != mAliasFileList.end(); ++it)
       {
-        it->checkUpdates();
+        if (it->checkUpdates())
+          result = true;
       }
       mLastCheck = tt;
     }
+    return result;
   }
   catch (...)
   {

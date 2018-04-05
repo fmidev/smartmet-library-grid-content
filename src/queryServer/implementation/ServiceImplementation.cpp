@@ -421,6 +421,84 @@ bool ServiceImplementation::getFunctionParams(std::string functionParamsStr,Func
 
 
 
+void ServiceImplementation::getParameterMappings(std::string producerName,std::string parameterName,bool onlySearchEnabled,ParameterMapping_vec& mappings)
+{
+  try
+  {
+    std::string key = producerName + ":" + parameterName + ":" + std::to_string((int)onlySearchEnabled);
+
+    AutoThreadLock lock(&mParameterMappingCacheThreadLock);
+
+    for (auto it = mParameterMappingCache.begin(); it != mParameterMappingCache.end(); ++it)
+    {
+      if (it->first == key)
+      {
+        mappings = it->second;
+        //printf("Cache match %s %s %d %d\n",key.c_str(),it->first.c_str(),(int)mappings.size(),mParameterMappingCache.size());
+        return;
+      }
+    }
+
+
+    for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
+    {
+      m->getMappings(producerName,parameterName,onlySearchEnabled,mappings);
+    }
+
+    mParameterMappingCache.push_front(std::pair<std::string,ParameterMapping_vec>(key,mappings));
+    //printf("Cache add %s %d\n",key.c_str(),mParameterMappingCache.size());
+    if (mParameterMappingCache.size() > 20)
+      mParameterMappingCache.pop_back();
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::getParameterMappings(std::string producerName,std::string parameterName,T::ParamLevelIdType levelIdType,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings)
+{
+  try
+  {
+    std::string key = producerName + ":" + parameterName + ":" + std::to_string((int)levelIdType) + ":" + std::to_string((int)levelId) + ":" + std::to_string((int)level) + ":" + std::to_string((int)onlySearchEnabled);
+
+    AutoThreadLock lock(&mParameterMappingCacheThreadLock);
+
+    for (auto it = mParameterMappingCache.begin(); it != mParameterMappingCache.end(); ++it)
+    {
+      if (it->first == key)
+      {
+        mappings = it->second;
+        //printf("Cache match %s %s %d %d\n",key.c_str(),it->first.c_str(),(int)mappings.size(),mParameterMappingCache.size());
+        return;
+      }
+    }
+
+    for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
+    {
+      m->getMappings(producerName,parameterName,levelIdType,levelId,level,onlySearchEnabled,mappings);
+    }
+
+    mParameterMappingCache.push_front(std::pair<std::string,ParameterMapping_vec>(key,mappings));
+    //printf("Cache add %s %d\n",key.c_str(),mParameterMappingCache.size());
+
+    if (mParameterMappingCache.size() > 20)
+      mParameterMappingCache.pop_back();
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+
+
+
+
 void ServiceImplementation::getParameterStringInfo(std::string param,std::string& key,T::ParamLevelId& paramLevelId,T::ParamLevel& paramLevel,T::ForecastType& forecastType,T::ForecastNumber& forecastNumber,uint& producerId,uint& generationFlags,short& areaInterpolationMethod,short& timeInterpolationMethod,short& levelInterpolationMethod)
 
 {
@@ -655,7 +733,11 @@ void ServiceImplementation::checkConfigurationUpdates()
 
       for (auto it = mParameterMappings.begin(); it != mParameterMappings.end(); ++it)
       {
-        it->checkUpdates();
+        if (it->checkUpdates())
+        {
+          AutoThreadLock lock(&mParameterMappingCacheThreadLock);
+          mParameterMappingCache.clear();
+        }
       }
     }
 
@@ -1080,14 +1162,21 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
             if (qParam->mTimestepsBefore > 0)
             {
-              time_t ss = utcTimeToTimeT(startTime) - ((qParam->mTimestepsBefore+1) * qParam->mTimestepSizeInMinutes * 60);
-              startTime = utcTimeFromTimeT(ss);
+              auto ss = boost::posix_time::from_iso_string(startTime) - boost::posix_time::seconds(((qParam->mTimestepsBefore+1) * qParam->mTimestepSizeInMinutes * 60));
+              startTime = to_iso_string(ss);
+
+              //time_t ss = utcTimeToTimeT(startTime) - ((qParam->mTimestepsBefore+1) * qParam->mTimestepSizeInMinutes * 60);
+              //startTime = utcTimeFromTimeT(ss);
             }
 
             if (qParam->mTimestepsAfter > 0)
             {
-              time_t ss = utcTimeToTimeT(endTime) + (qParam->mTimestepsAfter * qParam->mTimestepSizeInMinutes * 60);
-              endTime = utcTimeFromTimeT(ss);
+              auto ss = boost::posix_time::from_iso_string(endTime) - boost::posix_time::seconds((qParam->mTimestepsAfter * qParam->mTimestepSizeInMinutes * 60));
+              endTime = to_iso_string(ss);
+
+              // time_t ss = utcTimeToTimeT(endTime) + (qParam->mTimestepsAfter * qParam->mTimestepSizeInMinutes * 60);
+              // endTime = utcTimeFromTimeT(ss);
+
             }
 
             if ((query.mFlags & QF_START_TIME_DATA) != 0)
@@ -1271,12 +1360,14 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
           {
             if (qParam->mTimestepsBefore > 0)
             {
-              time_t ss = utcTimeToTimeT(*fTime) - ((qParam->mTimestepsBefore+1) * qParam->mTimestepSizeInMinutes * 60);
+              //time_t ss = utcTimeToTimeT(*fTime) - ((qParam->mTimestepsBefore+1) * qParam->mTimestepSizeInMinutes * 60);
+              auto ss = boost::posix_time::from_iso_string(*fTime) - boost::posix_time::seconds(((qParam->mTimestepsBefore+1) * qParam->mTimestepSizeInMinutes * 60));
 
               for (uint t=0; t<qParam->mTimestepsBefore; t++)
               {
-                ss = ss + (qParam->mTimestepSizeInMinutes * 60);
-                std::string str = utcTimeFromTimeT(ss);
+                ss = ss + boost::posix_time::seconds(qParam->mTimestepSizeInMinutes * 60);
+                std::string str = boost::posix_time::to_iso_string(ss);
+                //std::string str = utcTimeFromTimeT(ss);
                 if (forecastTimeList.find(str) == forecastTimeList.end())
                 {
                   additionalTimeList.insert(str);
@@ -1287,12 +1378,14 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
             if (qParam->mTimestepsAfter > 0)
             {
-              time_t ss = utcTimeToTimeT(*fTime);
+              //time_t ss = utcTimeToTimeT(*fTime);
+              auto ss = boost::posix_time::from_iso_string(*fTime);
 
               for (uint t=0; t<qParam->mTimestepsAfter; t++)
               {
-                ss = ss + (qParam->mTimestepSizeInMinutes * 60);
-                std::string str = utcTimeFromTimeT(ss);
+                ss = ss + boost::posix_time::seconds(qParam->mTimestepSizeInMinutes * 60);
+                //std::string str = utcTimeFromTimeT(ss);
+                std::string str = boost::posix_time::to_iso_string(ss);
                 if (forecastTimeList.find(str) == forecastTimeList.end())
                 {
                   additionalTimeList.insert(str);
@@ -1708,17 +1801,18 @@ bool ServiceImplementation::getSpecialValues(
 
     PRINT_DATA(mDebugLog,"         + Found %u content records\n",contentList.getLength());
 
+    if (mDebugLog != NULL)
+    {
+      std::stringstream stream;
+      contentList.print(stream,0,4);
+      PRINT_DATA(mDebugLog,"%s",stream.str().c_str());
+    }
+
     uint contentLen = contentList.getLength();
     bool multipleValues = contentList.containsSameForecastTimes();
     if (multipleValues)
     {
       PRINT_DATA(mDebugLog,"         + Content records contains multiple values with the same timestep\n");
-      if (mDebugLog != NULL)
-      {
-        std::stringstream stream;
-        contentList.print(stream,0,4);
-        PRINT_DATA(mDebugLog,"%s",stream.str().c_str());
-      }
       return false;
     }
 
@@ -1987,17 +2081,18 @@ bool ServiceImplementation::getPointValues(
 
     PRINT_DATA(mDebugLog,"         + Found %u content records\n",contentList.getLength());
 
+    if (mDebugLog != NULL)
+    {
+      std::stringstream stream;
+      contentList.print(stream,0,4);
+      PRINT_DATA(mDebugLog,"%s",stream.str().c_str());
+    }
+
     uint contentLen = contentList.getLength();
     bool multipleValues = contentList.containsSameForecastTimes();
     if (multipleValues)
     {
       PRINT_DATA(mDebugLog,"         + Content records contains multiple values with the same timestep\n");
-      if (mDebugLog != NULL)
-      {
-        std::stringstream stream;
-        contentList.print(stream,0,4);
-        PRINT_DATA(mDebugLog,"%s",stream.str().c_str());
-      }
       return false;
     }
 
@@ -2317,17 +2412,18 @@ bool ServiceImplementation::getCircleValues(
 
     PRINT_DATA(mDebugLog,"         + Found %u content records\n",contentList.getLength());
 
+    if (mDebugLog != NULL)
+    {
+      std::stringstream stream;
+      contentList.print(stream,0,4);
+      PRINT_DATA(mDebugLog,"%s",stream.str().c_str());
+    }
+
     uint contentLen = contentList.getLength();
     bool multipleValues = contentList.containsSameForecastTimes();
     if (multipleValues)
     {
       PRINT_DATA(mDebugLog,"         + Content records contains multiple values with the same timestep\n");
-      if (mDebugLog != NULL)
-      {
-        std::stringstream stream;
-        contentList.print(stream,0,4);
-        PRINT_DATA(mDebugLog,"%s",stream.str().c_str());
-      }
       return false;
     }
 
@@ -2640,17 +2736,18 @@ bool ServiceImplementation::getPolygonValues(
 
     PRINT_DATA(mDebugLog,"         + Found %u content records\n",contentList.getLength());
 
+    if (mDebugLog != NULL)
+    {
+      std::stringstream stream;
+      contentList.print(stream,0,4);
+      PRINT_DATA(mDebugLog,"%s",stream.str().c_str());
+    }
+
     uint contentLen = contentList.getLength();
     bool multipleValues = contentList.containsSameForecastTimes();
     if (multipleValues)
     {
       PRINT_DATA(mDebugLog,"         + Content records contains multiple values with the same timestep\n");
-      if (mDebugLog != NULL)
-      {
-        std::stringstream stream;
-        contentList.print(stream,0,4);
-        PRINT_DATA(mDebugLog,"%s",stream.str().c_str());
-      }
       return false;
     }
 
@@ -2910,17 +3007,29 @@ void ServiceImplementation::getGridValues(
 
           // Going through all the parameter mapping files, until we find a match.
 
-          for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
+          //for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
           {
             ParameterMapping_vec mappings;
-            m->getMappings(producerInfo.mName,parameterKey,true,mappings);
+            if (paramLevelId > 0 ||  paramLevel > 0)
+              getParameterMappings(producerInfo.mName,parameterKey,T::ParamLevelIdType::ANY,paramLevelId,paramLevel,false,mappings);
+            else
+              getParameterMappings(producerInfo.mName,parameterKey,true,mappings);
 
-            if (mappings.size() == 0)
-              PRINT_DATA(mDebugLog,"    - Parameter mappings '%s:%s' not found from the file '%s'!\n",producerInfo.mName.c_str(),parameterKey.c_str(),m->getFilename().c_str());
+       /*
+            ParameterMapping_vec mappings;
+
+            if (paramLevelId > 0 ||  paramLevel > 0)
+              m->getMappings(producerInfo.mName,parameterKey,T::ParamLevelIdType::ANY,paramLevelId,paramLevel,false,mappings);
+            else
+              m->getMappings(producerInfo.mName,parameterKey,true,mappings);
+
+             if (mappings.size() == 0)
+               PRINT_DATA(mDebugLog,"    - Parameter mappings '%s:%s' not found from the file '%s'!\n",producerInfo.mName.c_str(),parameterKey.c_str(),m->getFilename().c_str());
+        */
 
             if (mappings.size() > 0)
             {
-              PRINT_DATA(mDebugLog,"    - Parameter mappings '%s:%s' found from the file '%s'!\n",producerInfo.mName.c_str(),parameterKey.c_str(),m->getFilename().c_str());
+              //PRINT_DATA(mDebugLog,"    - Parameter mappings '%s:%s' found from the file '%s'!\n",producerInfo.mName.c_str(),parameterKey.c_str(),m->getFilename().c_str());
 
               uint gCount = 0;
 
@@ -2969,12 +3078,11 @@ void ServiceImplementation::getGridValues(
                     T::ParamLevelId pLevelId = pInfo->mParameterLevelId;
                     T::ParamLevel pLevel = pInfo->mParameterLevel;
 
-                    if (paramLevelId > 0 || paramLevel != 0)
-                    {
+                    if (paramLevelId > 0)
                       pLevelId = paramLevelId;
-                      pLevel = paramLevel;
-                    }
 
+                    if (paramLevel != 0)
+                      pLevel = paramLevel;
 
                     if (searchType == QST_POLYGON)
                     {
@@ -3383,17 +3491,27 @@ void ServiceImplementation::getGridValues(
 
           // Going through all the parameter mapping files, until we find a match.
 
-          for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
+//          for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
           {
             ParameterMapping_vec mappings;
-            m->getMappings(producerInfo.mName,parameterKey,true,mappings);
+            if (paramLevelId > 0 ||  paramLevel > 0)
+              getParameterMappings(producerInfo.mName,parameterKey,T::ParamLevelIdType::ANY,paramLevelId,paramLevel,false,mappings);
+            else
+              getParameterMappings(producerInfo.mName,parameterKey,true,mappings);
+/*
+            ParameterMapping_vec mappings;
+
+            if (paramLevelId > 0 ||  paramLevel > 0)
+              m->getMappings(producerInfo.mName,parameterKey,T::ParamLevelIdType::ANY,paramLevelId,paramLevel,false,mappings);
+            else
+              m->getMappings(producerInfo.mName,parameterKey,true,mappings);
 
             if (mappings.size() == 0)
               PRINT_DATA(mDebugLog,"    - Parameter mappings '%s:%s' not found from the file '%s'!\n",producerInfo.mName.c_str(),parameterKey.c_str(),m->getFilename().c_str());
-
+*/
             if (mappings.size() > 0)
             {
-              PRINT_DATA(mDebugLog,"    - Parameter mappings '%s:%s' found from the file '%s'!\n",producerInfo.mName.c_str(),parameterKey.c_str(),m->getFilename().c_str());
+//              PRINT_DATA(mDebugLog,"    - Parameter mappings '%s:%s' found from the file '%s'!\n",producerInfo.mName.c_str(),parameterKey.c_str(),m->getFilename().c_str());
 
               uint gCount = 0;
 

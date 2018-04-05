@@ -129,7 +129,7 @@ void AliasFile::init(std::string filename,bool duplicatesAllowed)
 
 
 
-void AliasFile::checkUpdates()
+bool AliasFile::checkUpdates()
 {
   try
   {
@@ -138,7 +138,11 @@ void AliasFile::checkUpdates()
     time_t tt = getFileModificationTime(mFilename.c_str());
 
     if (tt != mLastModified  &&  (tt+3) < time(0))
+    {
       loadFile();
+      return true;
+    }
+    return false;
   }
   catch (...)
   {

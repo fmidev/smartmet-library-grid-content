@@ -3178,7 +3178,7 @@ int ClientImplementation::_getContentListByServerId(T::SessionId sessionId,uint 
 
 
 
-int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3190,6 +3190,7 @@ int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,u
     request.addLine("startFileId",startFileId);
     request.addLine("startMessageIndex",startMessageIndex);
     request.addLine("maxRecords",maxRecords);
+    request.addLine("requestFlags",requestFlags);
 
     T::ResponseMessage response;
 

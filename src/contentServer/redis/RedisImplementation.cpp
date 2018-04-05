@@ -1112,7 +1112,7 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
 
     uint pLen = producerInfoList.getLength();
 
-    //std::set<std::string> tmpList;
+    std::set<std::string> tmpList;
 
     for (uint p=0; p<pLen; p++)
     {
@@ -1178,13 +1178,17 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
                 (int)contentInfo->mForecastType,
                 (int)contentInfo->mForecastNumber);
 
-            if ((contentInfo->mFlags & CONTENT_INFO_PRELOAD) != 0)
-              p += sprintf(p,";1");
-            else
-              p += sprintf(p,";0");
+            if (tmpList.find(std::string(tmp)) == tmpList.end())
+            {
+              tmpList.insert(std::string(tmp));
 
-            if (list.find(std::string(tmp)) == list.end())
+              if ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
+                p += sprintf(p,";1");
+              else
+                p += sprintf(p,";0");
+
               list.insert(std::string(tmp));
+            }
           }
         }
       }
@@ -2031,7 +2035,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
       }
 
       fileInfo.mFileId = (uint)reply->integer;
-      fileInfo.mFlags = fileInfo.mFlags | (uint)T::FileInfoFlags::CONTENT_PREDEFINED;
+      fileInfo.mFlags = fileInfo.mFlags | T::FileInfo::Flags::PredefinedContent;
       freeReplyObject(reply);
 
       // ### Adding the file information into the database.
@@ -2068,7 +2072,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
         info->mProducerId = fileInfo.mProducerId;
         info->mGenerationId = fileInfo.mGenerationId;
         info->mGroupFlags = fileInfo.mGroupFlags;
-        info->mFlags = info->mFlags | (uint)T::FileInfoFlags::CONTENT_PREDEFINED;
+        info->mFlags = info->mFlags | T::FileInfo::Flags::PredefinedContent;
 
         // ### Creating a key for the content.
 
@@ -2168,7 +2172,7 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std:
         }
 
         ff->mFileInfo.mFileId = (uint)reply->integer;
-        ff->mFileInfo.mFlags = ff->mFileInfo.mFlags | (uint)T::FileInfoFlags::CONTENT_PREDEFINED;
+        ff->mFileInfo.mFlags = ff->mFileInfo.mFlags | T::FileInfo::Flags::PredefinedContent;
         freeReplyObject(reply);
 
         // ### Adding the file information into the database.
@@ -2205,7 +2209,7 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std:
           info->mProducerId = ff->mFileInfo.mProducerId;
           info->mGenerationId = ff->mFileInfo.mGenerationId;
           info->mGroupFlags = ff->mFileInfo.mGroupFlags;
-          info->mFlags = info->mFlags | (uint)T::FileInfoFlags::CONTENT_PREDEFINED;
+          info->mFlags = info->mFlags | T::FileInfo::Flags::PredefinedContent;
 
           // ### Creating a key for the content.
 
@@ -4136,7 +4140,7 @@ int RedisImplementation::_getContentListByServerId(T::SessionId sessionId,uint s
 
 
 
-int RedisImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -6281,7 +6285,7 @@ int RedisImplementation::getVirtualFiles(uint startFileId,uint maxRecords,T::Fil
           if (fileInfo->mFileId >= startFileId)
           {
             startFileId = fileInfo->mFileId + 1;
-            if (fileInfo->mFileType == T::FileType::Virtual || (fileInfo->mFlags & (uint)T::FileInfoFlags::CONTENT_VIRTUAL) != 0)
+            if (fileInfo->mFileType == T::FileType::Virtual || (fileInfo->mFlags & T::FileInfo::Flags::VirtualContent) != 0)
               fileInfoList.addFileInfo(fileInfo);
             else
               delete fileInfo;
@@ -7044,7 +7048,7 @@ int RedisImplementation::getVirtualContent(uint startFileId,uint startMessageInd
             startFileId = contentInfo->mFileId;
             startMessageIndex = contentInfo->mMessageIndex + 1;
 
-            if (contentInfo->mFileType == T::FileType::Virtual ||  (contentInfo->mFlags & CONTENT_INFO_VIRTUAL) != 0)
+            if (contentInfo->mFileType == T::FileType::Virtual ||  (contentInfo->mFlags & T::ContentInfo::Flags::VirtualContent) != 0)
               contentInfoList.addContentInfo(contentInfo);
             else
               delete contentInfo;

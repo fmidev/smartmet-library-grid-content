@@ -20,6 +20,9 @@ typedef std::pair<int,double> LevelHeight;
 typedef std::vector<LevelHeight> LevelHeight_vec;
 typedef std::vector<std::pair<std::string,LevelHeight_vec>> LevelHeightCache;
 
+typedef std::pair<std::string,ParameterMapping_vec> ParameterMappingCacheRec;
+typedef std::list<ParameterMappingCacheRec> ParameterMappingCache;
+
 
 class ServiceImplementation : public ServiceInterface
 {
@@ -130,6 +133,21 @@ class ServiceImplementation : public ServiceInterface
                        short& areaInterpolationMethod,
                        short& timeInterpolationMethod,
                        short& levelInterpolationMethod);
+
+     void          getParameterMappings(
+                       std::string producerName,
+                       std::string parameterName,
+                       bool onlySearchEnabled,
+                       ParameterMapping_vec& mappings);
+
+     void          getParameterMappings(
+                       std::string producerName,
+                       std::string parameterName,
+                       T::ParamLevelIdType levelIdType,
+                       T::ParamLevelId levelId,
+                       T::ParamLevel level,
+                       bool onlySearchEnabled,
+                       ParameterMapping_vec& mappings);
 
      bool           getFunctionParams(
                        std::string functionParamsStr,
@@ -269,6 +287,7 @@ class ServiceImplementation : public ServiceInterface
      Lua::LuaFileCollection mLuaFileCollection;
      string_vec             mParameterMappingFiles;
      ParamMappingFile_vec   mParameterMappings;
+     ParameterMappingCache  mParameterMappingCache;
      std::string            mProducerFile;
      time_t                 mProducerFileModificationTime;
      Producer_vec           mProducerList;
@@ -279,6 +298,7 @@ class ServiceImplementation : public ServiceInterface
      uint                   mCheckInterval;
      LevelHeightCache       mLevelHeightCache;
      ThreadLock             mCacheThreadLock;
+     ThreadLock             mParameterMappingCacheThreadLock;
 };
 
 

@@ -74,7 +74,7 @@ CacheImplementation::CacheImplementation()
     for (int t=1; t<CONTENT_LIST_COUNT; t++)
     {
       mContentInfoList[t].setReleaseObjects(false);
-      mContentInfoListEnabled[t] = true;
+      mContentInfoListEnabled[t] = false;
     }
   }
   catch (...)
@@ -768,51 +768,51 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
     {
       case T::ParamKeyType::FMI_ID:
         if (mContentInfoListEnabled[1])
-          mContentInfoList[1].getContentInfoListByFmiParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+          mContentInfoList[1].getContentInfoListByFmiParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByFmiParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+          mContentInfoList[0].getContentInfoListByFmiParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyType::FMI_NAME:
         if (mContentInfoListEnabled[2])
-          mContentInfoList[2].getContentInfoListByFmiParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+          mContentInfoList[2].getContentInfoListByFmiParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByFmiParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+          mContentInfoList[0].getContentInfoListByFmiParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyType::GRIB_ID:
         if (mContentInfoListEnabled[3])
-          mContentInfoList[3].getContentInfoListByGribParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+          mContentInfoList[3].getContentInfoListByGribParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByGribParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+          mContentInfoList[0].getContentInfoListByGribParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyType::NEWBASE_ID:
         if (mContentInfoListEnabled[4])
-          mContentInfoList[4].getContentInfoListByNewbaseParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+          mContentInfoList[4].getContentInfoListByNewbaseParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByNewbaseParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+          mContentInfoList[0].getContentInfoListByNewbaseParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyType::NEWBASE_NAME:
         if (mContentInfoListEnabled[5])
-          mContentInfoList[5].getContentInfoListByNewbaseParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+          mContentInfoList[5].getContentInfoListByNewbaseParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByNewbaseParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+          mContentInfoList[0].getContentInfoListByNewbaseParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyType::CDM_ID:
         if (mContentInfoListEnabled[6])
-          mContentInfoList[6].getContentInfoListByCdmParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+          mContentInfoList[6].getContentInfoListByCdmParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByCdmParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+          mContentInfoList[0].getContentInfoListByCdmParameterId(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyType::CDM_NAME:
         if (mContentInfoListEnabled[7])
-          mContentInfoList[7].getContentInfoListByCdmParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+          mContentInfoList[7].getContentInfoListByCdmParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByCdmParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-1,0,-1,startTime,endTime,0,contentInfoList);
+          mContentInfoList[0].getContentInfoListByCdmParameterName(parameterKey,T::ParamLevelIdType::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyType::BUILD_IN:
@@ -961,7 +961,7 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    //std::set<std::string> tmpList;
+    std::set<std::string> tmpList;
 
     uint pLen = mProducerInfoList.getLength();
     for (uint p=0; p<pLen; p++)
@@ -1025,13 +1025,17 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
                 (int)contentInfo->mForecastType,
                 (int)contentInfo->mForecastNumber);
 
-            if ((contentInfo->mFlags & CONTENT_INFO_PRELOAD) != 0)
-              p += sprintf(p,";1");
-            else
-              p += sprintf(p,";0");
+            if (tmpList.find(std::string(tmp)) == tmpList.end())
+            {
+              tmpList.insert(std::string(tmp));
 
-            if (list.find(std::string(tmp)) == list.end())
+              if ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
+                p += sprintf(p,";1");
+              else
+                p += sprintf(p,";0");
+
               list.insert(std::string(tmp));
+            }
           }
         }
       }
@@ -2946,20 +2950,25 @@ int CacheImplementation::_getContentListByProducerName(T::SessionId sessionId,st
 
 
 
-int CacheImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     if (mUpdateInProgress)
-      return mContentStorage->getContentListByGenerationId(sessionId,generationId,startFileId,startMessageIndex,maxRecords,contentInfoList);
+      return mContentStorage->getContentListByGenerationId(sessionId,generationId,startFileId,startMessageIndex,maxRecords,requestFlags,contentInfoList);
 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    mContentInfoList[0].getContentInfoListByGenerationId(generationId,startFileId,startMessageIndex,maxRecords,contentInfoList);
+
+    if (requestFlags < CONTENT_LIST_COUNT  &&  mContentInfoListEnabled[requestFlags])
+      mContentInfoList[requestFlags].getContentInfoListByGenerationId(generationId,startFileId,startMessageIndex,maxRecords,contentInfoList);
+    else
+      mContentInfoList[0].getContentInfoListByGenerationId(generationId,startFileId,startMessageIndex,maxRecords,contentInfoList);
+
     return Result::OK;
   }
   catch (...)
@@ -3570,10 +3579,12 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
             contentInfoList.addContentInfo(cInfo->duplicate());
             return Result::OK;
           }
-          mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+          //mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+          mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentList);
         }
         else
         {
+          //printf("Not sorted\n");
           mContentInfoList[0].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         }
         break;
@@ -4561,7 +4572,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
 
         if (eventInfo.mId3 > 0)
         {
-          if (fileInfo.mFlags & (uint)T::FileInfoFlags::CONTENT_PREDEFINED)
+          if ((fileInfo.mFlags & T::FileInfo::Flags::PredefinedContent) != 0)
           {
             T::ContentInfoList contentInfoList;
             if (mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) == Result::OK)
@@ -4571,7 +4582,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
               {
                 T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
                 T::ContentInfo *oInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
-                if (oInfo == NULL  ||  (oInfo != NULL  &&  (oInfo->mFlags | CONTENT_INFO_DELETED) == 1))
+                if (oInfo == NULL  ||  (oInfo != NULL  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
                 {
                   T::ContentInfo *cInfo = info->duplicate();
 
@@ -4672,7 +4683,7 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
         mFileInfoListByName.addFileInfo(fInfo);
       }
 
-      if (fileInfo.mFlags & (uint)T::FileInfoFlags::CONTENT_PREDEFINED)
+      if ((fileInfo.mFlags & T::FileInfo::Flags::PredefinedContent) != 0)
       {
         T::ContentInfoList contentInfoList;
         if (mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) == Result::OK)
@@ -4682,7 +4693,7 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
           {
             T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
             T::ContentInfo *oInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
-            if (oInfo == NULL  ||  (oInfo != NULL  &&  (oInfo->mFlags | CONTENT_INFO_DELETED) == 1))
+            if (oInfo == NULL  ||  (oInfo != NULL  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
             {
               T::ContentInfo *cInfo = info->duplicate();
 
@@ -5010,7 +5021,7 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ContentInfo *oInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
-    if (oInfo != NULL  &&  (oInfo->mFlags | CONTENT_INFO_DELETED) == 0)
+    if (oInfo != NULL  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
     {
       // printf("ALREADY IN CACHE %u:%u\n",eventInfo.mId1,eventInfo.mId2);
       return;  // The content info is already in the cache.
@@ -5394,10 +5405,12 @@ void CacheImplementation::processEvents(bool eventThread)
       T::FileInfoList list;
       list.setReleaseObjects(false);
 
+      AutoWriteLock lock(mFileInfoList.getModificationLockPtr(),__FILE__,__LINE__);
+
       for (auto id = mDelayedFileAddList.begin(); id != mDelayedFileAddList.end(); ++id)
       {
-        T::FileInfo *fInfo = mFileInfoList.getFileInfoById(*id);
-        if (fInfo != NULL &&  (fInfo->mFlags & (uint)T::FileInfoFlags::FILE_DELETED) == 0)
+        T::FileInfo *fInfo = mFileInfoList.getFileInfoByIdNoLock(*id);
+        if (fInfo != NULL &&  (fInfo->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
           list.addFileInfo(fInfo);
       }
 
@@ -5414,13 +5427,18 @@ void CacheImplementation::processEvents(bool eventThread)
       T::ContentInfoList list;
       list.setReleaseObjects(false);
 
+      // We have to lock the content list 0 for the whole operation, because
+      // other content lists are using the same pointers.
+
+      AutoWriteLock lock(mContentInfoList[0].getModificationLockPtr(),__FILE__,__LINE__);
+
       for (auto id = mDelayedContentAddList.begin(); id != mDelayedContentAddList.end(); ++id)
       {
         uint fileId = (*id >> 32) & 0xFFFFFFFF;
         uint messageIndex = *id & 0xFFFFFFFF;
 
-        T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(fileId,messageIndex);
-        if (cInfo == NULL  ||  (cInfo != NULL &&  (cInfo->mFlags & CONTENT_INFO_DELETED) == 0))
+        T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndexNoLock(fileId,messageIndex);
+        if (cInfo != NULL &&  (cInfo->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
           list.addContentInfo(cInfo);
       }
 
@@ -5428,7 +5446,7 @@ void CacheImplementation::processEvents(bool eventThread)
       {
         if (mContentInfoListEnabled[t])
         {
-          PRINT_DATA(mDebugLog,"  -- Adding content to content list %u\n",t);
+          PRINT_DATA(mDebugLog,"  -- Adding content to content list %u (%u + %u)\n",t,mContentInfoList[t].getLength(),list.getLength());
 
           mContentInfoList[t].addContentInfoList(list);
         }

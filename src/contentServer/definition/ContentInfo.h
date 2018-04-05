@@ -9,13 +9,6 @@ namespace SmartMet
 namespace T
 {
 
-
-#define CONTENT_INFO_PREDEFINED  0x00000001
-#define CONTENT_INFO_VIRTUAL     0x00000002
-#define CONTENT_INFO_PRELOAD     0x00000004
-#define CONTENT_INFO_DELETED     0x80000000
-
-
 class ContentInfo
 {
   public:
@@ -83,6 +76,16 @@ class ContentInfo
      uint               mSourceId;
      T::GeometryId      mGeometryId;
      std::string        mModificationTime;
+
+
+     class Flags
+     {
+       public:
+          static const uint VirtualContent          = 0x00000002;
+          static const uint PreloadRequired         = 0x00000004;
+          static const uint DeletedContent          = 0x80000000;
+     };
+
 };
 
 

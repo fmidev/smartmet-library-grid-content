@@ -38,6 +38,7 @@ class ServiceImplementation : public ServiceInterface
      virtual void   shutdown();
 
      virtual void   addVirtualContentFactory(VirtualContentFactory *factory);
+     virtual void   enableContentPreload(bool enabled);
      virtual void   enableVirtualContent(bool enabled);
      virtual void   eventProcessingThread();
 
@@ -109,6 +110,7 @@ class ServiceImplementation : public ServiceInterface
      bool                 mEventProcessingActive;
      bool                 mContentRegistrationEnabled;
      bool                 mVirtualContentEnabled;
+     bool                 mContentPreloadEnabled;
 
      T::SessionId         mServerSessionId;
      uint                 mServerId;

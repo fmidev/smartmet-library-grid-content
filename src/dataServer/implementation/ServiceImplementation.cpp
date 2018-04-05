@@ -61,6 +61,7 @@ ServiceImplementation::ServiceImplementation()
     mVirtualContentEnabled = true;
     mContentServerStartTime = 0;
     mLastVirtualFileRegistration = 0;
+    mContentPreloadEnabled = true;
   }
   catch (...)
   {
@@ -147,6 +148,23 @@ void ServiceImplementation::enableVirtualContent(bool enabled)
   try
   {
     mVirtualContentEnabled = enabled;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::enableContentPreload(bool enabled)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mContentPreloadEnabled = enabled;
   }
   catch (...)
   {
@@ -930,7 +948,7 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
         fc.mFileInfo.mGenerationId = virtualFilePtr->getGenerationId();
         fc.mFileInfo.mSourceId = virtualFilePtr->getSourceId();
         fc.mFileInfo.mFileType = T::FileType::Virtual;
-        fc.mFileInfo.mFlags = fc.mFileInfo.mFlags | (uint)T::FileInfoFlags::CONTENT_VIRTUAL;
+        fc.mFileInfo.mFlags = fc.mFileInfo.mFlags | T::FileInfo::Flags::VirtualContent;
 
         std::size_t len = virtualFilePtr->getNumberOfMessages();
         for (std::size_t t = 0; t<len; t++)
@@ -1155,7 +1173,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
   FUNCTION_TRACE
   try
   {
-    if ((fileInfo.mFlags & (uint)T::FileInfoFlags::CONTENT_VIRTUAL) != 0)
+    if ((fileInfo.mFlags & T::FileInfo::Flags::VirtualContent) != 0)
       return;
 
     time_t checkTime = time(0);
@@ -1193,7 +1211,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
 
     if (gridFile->getModificationTime() != 0)
     {
-      if ((fileInfo.mFlags & (uint)T::FileInfoFlags::CONTENT_PREDEFINED) == 0)
+      if ((fileInfo.mFlags & T::FileInfo::Flags::PredefinedContent) == 0)
       {
         // The content of the file is not predefined. However, some other data server might
         // have already registered the content.
@@ -1223,14 +1241,14 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
 
     gridFile->setCheckTime(checkTime);
 
-    if ((fileInfo.mFlags & (uint)T::FileInfoFlags::CONTENT_PREDEFINED) != 0  ||  contentList.getLength() > 0)
+    if ((fileInfo.mFlags & T::FileInfo::Flags::PredefinedContent) != 0  ||  contentList.getLength() > 0)
     {
       uint cLen = currentContentList.getLength();
       GRID::GridFile_sptr gFile;
       for (uint t=0; t<cLen; t++)
       {
         T::ContentInfo *info = currentContentList.getContentInfoByIndex(t);
-        if ((info->mFlags & CONTENT_INFO_PRELOAD) != 0)
+        if (mContentPreloadEnabled && (info->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
           mPrealoadList.push_back(std::pair<uint,uint>(info->mFileId,info->mMessageIndex));
         /*
         {
@@ -1749,7 +1767,7 @@ void ServiceImplementation::event_fileUpdated(T::EventInfo& eventInfo)
     T::ContentInfoList currentContentList;
 
     // If the content list is not predefined the we should remove it and replace it with a new list.
-    if ((fileInfo.mFlags & (uint)T::FileInfoFlags::CONTENT_PREDEFINED) == 0)
+    if ((fileInfo.mFlags & T::FileInfo::Flags::PredefinedContent) == 0)
     {
       mContentServer->deleteContentListByFileId(mServerSessionId,eventInfo.mId1);
     }
@@ -2314,7 +2332,7 @@ void ServiceImplementation::processEvents()
     }
 
     uint preloadCount = 0;
-    while (!mPrealoadList.empty()  &&  preloadCount < 20)
+    while (mContentPreloadEnabled  &&  !mPrealoadList.empty()  &&  preloadCount < 20)
     {
       auto it = mPrealoadList.front();
       printf("PRELOAD %u:%u\n",it.first,it.second);

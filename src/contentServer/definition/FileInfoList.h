@@ -39,6 +39,7 @@ class FileInfoList
      int        getClosestIndex(FileInfo::ComparisonMethod comparisonMethod,FileInfo& fileInfo);
      int        getClosestIndexNoLock(FileInfo::ComparisonMethod comparisonMethod,FileInfo& fileInfo);
      FileInfo*  getFileInfoById(uint fileId);
+     FileInfo*  getFileInfoByIdNoLock(uint fileId);
      FileInfo*  getFileInfoByName(std::string filename);
      FileInfo*  getFileInfoByIndex(uint index);
      FileInfo*  getFileInfoByIndexNoCheck(uint index);
@@ -63,6 +64,8 @@ class FileInfoList
 
      void       writeToFile(std::string filename);
      void       writeToFile(std::string filename,const char *filemode);
+
+     ModificationLock*  getModificationLockPtr();
 
   protected:
 

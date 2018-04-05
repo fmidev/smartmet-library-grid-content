@@ -114,10 +114,11 @@ void LuaFileCollection::init(string_vec& filenames)
 
 
 
-void LuaFileCollection::checkUpdates(bool force)
+bool LuaFileCollection::checkUpdates(bool force)
 {
   try
   {
+    bool result = false;
     AutoThreadLock lock(&mThreadLock);
 
     time_t tt = time(0);
@@ -125,10 +126,12 @@ void LuaFileCollection::checkUpdates(bool force)
     {
       for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
       {
-        it->checkUpdates();
+        if (it->checkUpdates())
+          result = true;
       }
       mLastCheck = tt;
     }
+    return result;
   }
   catch (...)
   {
