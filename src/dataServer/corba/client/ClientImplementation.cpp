@@ -10,6 +10,40 @@ namespace DataServer
 namespace Corba
 {
 
+#define CATCH_EXCEPTION \
+  catch (CORBA::TRANSIENT&)\
+  {\
+    Spine::Exception exception(BCP, "Caught system exception TRANSIENT -- unable to connect the server!");\
+    throw exception;\
+  }\
+  catch (CORBA::SystemException& ex)\
+  {\
+    char msg[500];\
+    sprintf(msg, "Caught a CORBA::%s\n", ex._name());\
+    Spine::Exception exception(BCP, msg);\
+    throw exception;\
+  }\
+  catch (CORBA::Exception& ex)\
+  {\
+    char msg[500];\
+    sprintf(msg, "Exception CORBA::%s\n", ex._name());\
+    Spine::Exception exception(BCP, msg);\
+    throw exception;\
+  }\
+  catch (omniORB::fatalException& fe)\
+  {\
+    char msg[500];\
+    sprintf(msg, "Caught omniORB::fatalException:%s\n", fe.errmsg());\
+    Spine::Exception exception(BCP, msg);\
+    throw exception;\
+  }\
+  catch (...)\
+  {\
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);\
+  }
+
+
+
 
 ClientImplementation::ClientImplementation()
 {
@@ -48,71 +82,28 @@ void ClientImplementation::init(std::string serviceIor)
 {
   try
   {
-    try
+    mServiceIor = serviceIor;
+
+    int argc = 2;
+    char *argv[] = { const_cast<char*>("-ORBgiopMaxMsgSize"),const_cast<char*>("250000000") };
+    CORBA::ORB_var orb = CORBA::ORB_init(argc,argv);
+
+    CORBA::Object_var obj;
+    obj = orb->string_to_object(serviceIor.c_str());
+
+    mService = DataServer::Corba::ServiceInterface::_narrow(obj);
+
+    if (CORBA::is_nil(mService))
     {
-      mServiceIor = serviceIor;
-
-      int argc = 2;
-      char *argv[] =
-      { const_cast<char*>("-ORBgiopMaxMsgSize"),const_cast<char*>("250000000") };
-      CORBA::ORB_var orb = CORBA::ORB_init(argc,argv);
-
-      CORBA::Object_var obj;
-      obj = orb->string_to_object(serviceIor.c_str());
-
-      mService = DataServer::Corba::ServiceInterface::_narrow(obj);
-
-      if (CORBA::is_nil(mService))
-      {
-        SmartMet::Spine::Exception exception(BCP,"Can't narrow reference to type DataServer::Corba::ServiceInterace (or it was nil)!");
-        throw exception;
-      }
-
-      omniORB::setClientCallTimeout(3600000);
-
-      mInitialized = true;
-    }
-    catch (CORBA::TRANSIENT&)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Caught system exception TRANSIENT -- unable to contact the server!");
+      SmartMet::Spine::Exception exception(BCP,"Can't narrow reference to type DataServer::Corba::ServiceInterace (or it was nil)!");
       throw exception;
     }
-    catch (CORBA::SystemException& ex)
-    {
-      char msg[500];
-      sprintf(msg,"Caught a CORBA::%s\n",ex._name());
-      SmartMet::Spine::Exception exception(BCP,msg);
-      throw exception;
-    }
-    catch (CORBA::Exception& ex)
-    {
-      char msg[500];
-      sprintf(msg,"Exception CORBA::%s\n",ex._name());
-      SmartMet::Spine::Exception exception(BCP,msg);
-      throw exception;
-    }
-    catch (omniORB::fatalException& fe)
-    {
-      char msg[500];
-      sprintf(msg,"Caught omniORB::fatalException:%s\n",fe.errmsg());
-      SmartMet::Spine::Exception exception(BCP,msg);
-      throw exception;
-    }
-    catch (SmartMet::Spine::Exception& e)
-    {
-      SmartMet::Spine::Exception exception(BCP,exception_operation_failed,&e);
-      throw exception;
-    }
-    catch (...)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Unexpected exception!",NULL);
-      throw exception;
-    }
+
+    omniORB::setClientCallTimeout(3600000);
+
+    mInitialized = true;
   }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -135,10 +126,7 @@ int ClientImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileId
 
     return result;
   }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -161,10 +149,7 @@ int ClientImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint m
 
     return result;
   }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -187,10 +172,7 @@ int ClientImplementation::_getGridAttributeList(T::SessionId sessionId,uint file
 
     return result;
   }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -213,10 +195,7 @@ int ClientImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
 
     return result;
   }
-  catch (...)
-  {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -239,10 +218,7 @@ int ClientImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileI
 
     return result;
   }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -266,10 +242,7 @@ int ClientImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint 
 
     return result;
   }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -296,10 +269,7 @@ int ClientImplementation::_getGridValueListByPointList(T::SessionId sessionId,ui
 
     return result;
   }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -326,10 +296,7 @@ int ClientImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint
 
     return result;
   }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -356,10 +323,7 @@ int ClientImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,
 
     return result;
   }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -382,10 +346,7 @@ int ClientImplementation::_getGridValueListByRectangle(T::SessionId sessionId,ui
 
     return result;
   }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -408,10 +369,7 @@ int ClientImplementation::_getGridValueVector(T::SessionId sessionId,uint fileId
 
     return result;
   }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -434,10 +392,7 @@ int ClientImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,
 
     return result;
   }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -461,11 +416,9 @@ int ClientImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,uint
 
     return result;
   }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
+  CATCH_EXCEPTION
 }
+
 
 
 
@@ -487,10 +440,7 @@ int ClientImplementation::_getMultipleGridValues(T::SessionId sessionId,T::Value
 
     return result;
   }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 

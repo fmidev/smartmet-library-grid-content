@@ -47,6 +47,7 @@ CacheImplementation::CacheImplementation()
 
     mContentStorage = NULL;
     mContentStorageStartTime = 0;
+    mContentSortingFlags = 0;
     mStartTime = 0;
     mSessionId = 0;
     mShutdownRequested = false;
@@ -62,6 +63,7 @@ CacheImplementation::CacheImplementation()
     mReloadActivated = false;
     mContentDeleteCount = 0;
     mFileDeleteCount = 0;
+    mDelayedContentAdditionTime = 0;
 
     mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
 
@@ -103,7 +105,7 @@ CacheImplementation::~CacheImplementation()
 
 
 
-void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentStorage)
+void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentStorage,uint contentSortingFlags)
 {
   FUNCTION_TRACE
   try
@@ -112,6 +114,7 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
     mStartTime = time(0);
     mSessionId = sessionId;
     mContentStorage = contentStorage;
+    mContentSortingFlags = contentSortingFlags;
 
     if (mContentStorage != NULL)
     {
@@ -141,18 +144,18 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
       mFileInfoListByName.sort(T::FileInfo::ComparisonMethod::fileName);
 
       mContentInfoListEnabled[0] = true;
+
       mContentInfoListEnabled[1] = true;
-      mContentInfoListEnabled[2] = true;
-      mContentInfoListEnabled[3] = false;
-      mContentInfoListEnabled[4] = false;
-      mContentInfoListEnabled[5] = true;
-      mContentInfoListEnabled[6] = false;
-      mContentInfoListEnabled[7] = false;
 
       readContentList();
 
       for (int t=1; t<CONTENT_LIST_COUNT; t++)
       {
+        if ((mContentSortingFlags & (1 << t)) != 0)
+          mContentInfoListEnabled[t] = true;
+        else
+          mContentInfoListEnabled[t] = false;
+
         if (mContentInfoListEnabled[t])
           mContentInfoList[t] = mContentInfoList[0];
       }
@@ -5397,8 +5400,9 @@ void CacheImplementation::processEvents(bool eventThread)
       mContentDeleteCount = 0;
     }
 
+    time_t timeNow = time(0);
 
-    if (mDelayedFileAddList.size() > 0)
+    if (mDelayedFileAddList.size() > 20000 || (mDelayedFileAddList.size() > 20000  &&  (timeNow - mDelayedFileAdditionTime)  > 10))
     {
       PRINT_DATA(mDebugLog,"* Adding files that were waiting the addition : %u\n",(uint)mDelayedFileAddList.size());
 
@@ -5417,10 +5421,13 @@ void CacheImplementation::processEvents(bool eventThread)
       mFileInfoListByName.addFileInfoList(list);
       mDelayedFileAddList.clear();
       PRINT_DATA(mDebugLog,"  -- File addition ready\n");
+
+      mDelayedFileAdditionTime = time(0);
+      timeNow = time(0);
     }
 
 
-    if (mDelayedContentAddList.size() > 0)
+    if (mDelayedContentAddList.size() > 20000 || (mDelayedContentAddList.size() > 0  &&  (timeNow - mDelayedContentAdditionTime)  > 10))
     {
       PRINT_DATA(mDebugLog,"* Adding content that was waiting the addition : %u\n",(uint)mDelayedContentAddList.size());
 
@@ -5452,8 +5459,10 @@ void CacheImplementation::processEvents(bool eventThread)
         }
       }
 
-      PRINT_DATA(mDebugLog,"  -- Content addition ready\n");
       mDelayedContentAddList.clear();
+
+      PRINT_DATA(mDebugLog,"  -- Content addition ready\n");
+      mDelayedContentAdditionTime = time(0);
 
       //for (int t=0; t<CONTENT_LIST_COUNT; t++)
       //  printf("contentList[%u] = %u\n",t,mContentInfoList[t].getLength());

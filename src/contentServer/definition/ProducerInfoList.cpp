@@ -310,6 +310,42 @@ uint ProducerInfoList::getLength()
 
 
 
+void ProducerInfoList::sortByName()
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    std::vector<ProducerInfo*>  newList;
+    std::set<std::string> nameList;
+
+    for (auto it = mList.begin(); it != mList.end(); ++it)
+    {
+      nameList.insert((*it)->mName);
+    }
+
+    for (auto n = nameList.begin(); n != nameList.end(); ++n)
+    {
+      for (auto it = mList.begin(); it != mList.end(); ++it)
+      {
+        if ((*it)->mName == *n)
+        {
+          newList.push_back(*it);
+        }
+      }
+    }
+    mList = newList;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 void ProducerInfoList::lock()
 {
   try

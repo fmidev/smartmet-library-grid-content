@@ -12,6 +12,45 @@ namespace Corba
 {
 
 
+#define CATCH_EXCEPTION \
+  catch (CORBA::TRANSIENT&)\
+  {\
+    mLastErrorTime = time(0);\
+    Spine::Exception exception(BCP, "Caught system exception TRANSIENT -- unable to connect the server!");\
+    throw exception;\
+  }\
+  catch (CORBA::SystemException& ex)\
+  {\
+    mLastErrorTime = time(0);\
+    char msg[500];\
+    sprintf(msg, "Caught a CORBA::%s\n", ex._name());\
+    Spine::Exception exception(BCP, msg);\
+    throw exception;\
+  }\
+  catch (CORBA::Exception& ex)\
+  {\
+    mLastErrorTime = time(0);\
+    char msg[500];\
+    sprintf(msg, "Exception CORBA::%s\n", ex._name());\
+    Spine::Exception exception(BCP, msg);\
+    throw exception;\
+  }\
+  catch (omniORB::fatalException& fe)\
+  {\
+    mLastErrorTime = time(0);\
+    char msg[500];\
+    sprintf(msg, "Caught omniORB::fatalException:%s\n", fe.errmsg());\
+    Spine::Exception exception(BCP, msg);\
+    throw exception;\
+  }\
+  catch (...)\
+  {\
+    mLastErrorTime = time(0);\
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);\
+  }
+
+
+
 ClientImplementation::ClientImplementation()
 {
   try
@@ -51,72 +90,29 @@ void ClientImplementation::init(std::string serviceIor)
 {
   try
   {
-    try
+    mServiceIor = serviceIor;
+
+    int argc = 2;
+    char *argv[] = { const_cast<char*>("-ORBgiopMaxMsgSize"), const_cast<char*>("250000000") };
+    CORBA::ORB_var orb = CORBA::ORB_init(argc, argv);
+
+    CORBA::Object_var obj;
+    obj = orb->string_to_object(serviceIor.c_str());
+
+    mService = ContentServer::Corba::ServiceInterface::_narrow(obj);
+
+    if (CORBA::is_nil(mService))
     {
-      mServiceIor = serviceIor;
-
-      int argc = 2;
-      char *argv[] =
-      { const_cast<char*>("-ORBgiopMaxMsgSize"), const_cast<char*>("250000000") };
-      CORBA::ORB_var orb = CORBA::ORB_init(argc, argv);
-
-      CORBA::Object_var obj;
-      obj = orb->string_to_object(serviceIor.c_str());
-
-      mService = ContentServer::Corba::ServiceInterface::_narrow(obj);
-
-      if (CORBA::is_nil(mService))
-      {
-        Spine::Exception exception(BCP, "Can't narrow reference to type ContentServer::Corba::ServiceInterace (or it was nil)!");
-        throw exception;
-      }
-
-      omniORB::setClientCallTimeout(3600000);
-
-      mId = stringToId(serviceIor.c_str(),100);
-      mInitialized = true;
-    }
-    catch (CORBA::TRANSIENT&)
-    {
-      Spine::Exception exception(BCP, "Caught system exception TRANSIENT -- unable to contact the server!");
+      Spine::Exception exception(BCP, "Can't narrow reference to type ContentServer::Corba::ServiceInterace (or it was nil)!");
       throw exception;
     }
-    catch (CORBA::SystemException& ex)
-    {
-      char msg[500];
-      sprintf(msg, "Caught a CORBA::%s\n", ex._name());
-      Spine::Exception exception(BCP, msg);
-      throw exception;
-    }
-    catch (CORBA::Exception& ex)
-    {
-      char msg[500];
-      sprintf(msg, "Exception CORBA::%s\n", ex._name());
-      Spine::Exception exception(BCP, msg);
-      throw exception;
-    }
-    catch (omniORB::fatalException& fe)
-    {
-      char msg[500];
-      sprintf(msg, "Caught omniORB::fatalException:%s\n", fe.errmsg());
-      Spine::Exception exception(BCP, msg);
-      throw exception;
-    }
-    catch (Spine::Exception& e)
-    {
-      Spine::Exception exception(BCP, exception_operation_failed, &e);
-      throw exception;
-    }
-    catch (...)
-    {
-      Spine::Exception exception(BCP, "Unexpected exception!", NULL);
-      throw exception;
-    }
+
+    omniORB::setClientCallTimeout(3600000);
+
+    mId = stringToId(serviceIor.c_str(),100);
+    mInitialized = true;
   }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -231,11 +227,7 @@ int ClientImplementation::_clear(T::SessionId sessionId)
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -254,11 +246,7 @@ int ClientImplementation::_reload(T::SessionId sessionId)
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -283,11 +271,7 @@ int ClientImplementation::_addDataServerInfo(T::SessionId sessionId, T::ServerIn
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -306,11 +290,7 @@ int ClientImplementation::_deleteDataServerInfoById(T::SessionId sessionId, uint
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -334,11 +314,7 @@ int ClientImplementation::_getDataServerInfoById(T::SessionId sessionId, uint se
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -362,11 +338,7 @@ int ClientImplementation::_getDataServerInfoByName(T::SessionId sessionId, std::
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -390,11 +362,7 @@ int ClientImplementation::_getDataServerInfoByIor(T::SessionId sessionId, std::s
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -418,11 +386,7 @@ int ClientImplementation::_getDataServerInfoList(T::SessionId sessionId, T::Serv
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -446,11 +410,7 @@ int ClientImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& c
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -475,11 +435,7 @@ int ClientImplementation::_addProducerInfo(T::SessionId sessionId, T::ProducerIn
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -498,11 +454,7 @@ int ClientImplementation::_deleteProducerInfoById(T::SessionId sessionId, uint p
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -521,11 +473,7 @@ int ClientImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -544,11 +492,7 @@ int ClientImplementation::_deleteProducerInfoListBySourceId(T::SessionId session
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -572,11 +516,7 @@ int ClientImplementation::_getProducerInfoById(T::SessionId sessionId, uint prod
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -600,11 +540,7 @@ int ClientImplementation::_getProducerInfoByName(T::SessionId sessionId, std::st
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -628,11 +564,7 @@ int ClientImplementation::_getProducerInfoList(T::SessionId sessionId, T::Produc
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -656,11 +588,7 @@ int ClientImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -684,11 +612,7 @@ int ClientImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -712,11 +636,7 @@ int ClientImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& cou
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -740,11 +660,7 @@ int ClientImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -768,11 +684,7 @@ int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -797,11 +709,7 @@ int ClientImplementation::_addGenerationInfo(T::SessionId sessionId, T::Generati
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -820,11 +728,7 @@ int ClientImplementation::_deleteGenerationInfoById(T::SessionId sessionId, uint
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -843,11 +747,7 @@ int ClientImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -869,11 +769,7 @@ int ClientImplementation::_deleteGenerationInfoListByIdList(T::SessionId session
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -892,11 +788,7 @@ int ClientImplementation::_deleteGenerationInfoListByProducerId(T::SessionId ses
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -915,11 +807,7 @@ int ClientImplementation::_deleteGenerationInfoListByProducerName(T::SessionId s
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -938,11 +826,7 @@ int ClientImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessi
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -966,11 +850,7 @@ int ClientImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessi
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -993,11 +873,7 @@ int ClientImplementation::_getGenerationInfoById(T::SessionId sessionId, uint ge
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1021,11 +897,7 @@ int ClientImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::s
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1049,11 +921,7 @@ int ClientImplementation::_getGenerationInfoList(T::SessionId sessionId, T::Gene
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1077,11 +945,7 @@ int ClientImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1105,11 +969,7 @@ int ClientImplementation::_getGenerationInfoListByProducerId(T::SessionId sessio
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1133,11 +993,7 @@ int ClientImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1161,11 +1017,7 @@ int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionI
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1189,11 +1041,7 @@ int ClientImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::Session
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1217,11 +1065,7 @@ int ClientImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessi
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1245,11 +1089,7 @@ int ClientImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& c
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1268,11 +1108,7 @@ int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,ui
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1291,11 +1127,7 @@ int ClientImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1320,11 +1152,7 @@ int ClientImplementation::_addFileInfo(T::SessionId sessionId, T::FileInfo& file
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1355,11 +1183,7 @@ int ClientImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1387,11 +1211,7 @@ int ClientImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1410,11 +1230,7 @@ int ClientImplementation::_deleteFileInfoById(T::SessionId sessionId, uint fileI
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1433,11 +1249,7 @@ int ClientImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::stri
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1456,11 +1268,7 @@ int ClientImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1479,11 +1287,7 @@ int ClientImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1502,11 +1306,7 @@ int ClientImplementation::_deleteFileInfoListByProducerName(T::SessionId session
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1525,11 +1325,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationId(T::SessionId session
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1548,11 +1344,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Se
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1575,11 +1367,7 @@ int ClientImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId ses
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1598,11 +1386,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessi
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1621,11 +1405,7 @@ int ClientImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId, 
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1647,11 +1427,7 @@ int ClientImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1674,11 +1450,7 @@ int ClientImplementation::_getFileInfoById(T::SessionId sessionId, uint fileId, 
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1702,11 +1474,7 @@ int ClientImplementation::_getFileInfoByName(T::SessionId sessionId,std::string 
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1730,11 +1498,7 @@ int ClientImplementation::_getFileInfoList(T::SessionId sessionId, uint startFil
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1758,11 +1522,7 @@ int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId, u
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1786,11 +1546,7 @@ int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1814,11 +1570,7 @@ int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1842,11 +1594,7 @@ int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1870,11 +1618,7 @@ int ClientImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId, u
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1898,11 +1642,7 @@ int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId, uin
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1926,11 +1666,7 @@ int ClientImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1954,11 +1690,7 @@ int ClientImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,u
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -1982,11 +1714,7 @@ int ClientImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2010,11 +1738,7 @@ int ClientImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uin
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2039,12 +1763,10 @@ int ClientImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eve
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
+
+
 
 
 
@@ -2071,11 +1793,7 @@ int ClientImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2105,11 +1823,7 @@ int ClientImplementation::_getEventInfoList(T::SessionId sessionId, uint request
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2133,11 +1847,7 @@ int ClientImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2162,11 +1872,7 @@ int ClientImplementation::_addContentInfo(T::SessionId sessionId, T::ContentInfo
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2191,11 +1897,7 @@ int ClientImplementation::_addContentList(T::SessionId sessionId, T::ContentInfo
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2214,11 +1916,7 @@ int ClientImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2237,11 +1935,7 @@ int ClientImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2260,11 +1954,7 @@ int ClientImplementation::_deleteContentListByFileName(T::SessionId sessionId,st
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2283,11 +1973,7 @@ int ClientImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2306,11 +1992,7 @@ int ClientImplementation::_deleteContentListByProducerId(T::SessionId sessionId,
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2329,11 +2011,7 @@ int ClientImplementation::_deleteContentListByProducerName(T::SessionId sessionI
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2351,11 +2029,7 @@ int ClientImplementation::_deleteContentListByGenerationId(T::SessionId sessionI
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2374,11 +2048,7 @@ int ClientImplementation::_deleteContentListByGenerationName(T::SessionId sessio
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2397,11 +2067,7 @@ int ClientImplementation::_deleteContentListBySourceId(T::SessionId sessionId, u
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2426,11 +2092,7 @@ int ClientImplementation::_registerContentList(T::SessionId sessionId,uint serve
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2449,11 +2111,7 @@ int ClientImplementation::_registerContentListByFileId(T::SessionId sessionId, u
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2472,11 +2130,7 @@ int ClientImplementation::_unregisterContentList(T::SessionId sessionId, uint se
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2495,11 +2149,7 @@ int ClientImplementation::_unregisterContentListByFileId(T::SessionId sessionId,
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2523,11 +2173,7 @@ int ClientImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uin
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2551,11 +2197,7 @@ int ClientImplementation::_getContentList(T::SessionId sessionId, uint startFile
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2579,11 +2221,7 @@ int ClientImplementation::_getContentListByFileId(T::SessionId sessionId, uint f
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2607,11 +2245,7 @@ int ClientImplementation::_getContentListByFileName(T::SessionId sessionId,std::
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2634,11 +2268,7 @@ int ClientImplementation::_getContentListByGroupFlags(T::SessionId sessionId, ui
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2662,11 +2292,7 @@ int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId, ui
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2690,11 +2316,7 @@ int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,s
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2721,11 +2343,7 @@ int ClientImplementation::_getContentListByServerId(T::SessionId sessionId, uint
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2749,11 +2367,7 @@ int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,u
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2777,11 +2391,7 @@ int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2805,11 +2415,7 @@ int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2833,11 +2439,7 @@ int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2861,11 +2463,7 @@ int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId, uint
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2889,11 +2487,7 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2917,11 +2511,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2945,11 +2535,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -2972,12 +2558,9 @@ int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId s
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
+
 
 
 
@@ -2999,11 +2582,7 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -3027,11 +2606,7 @@ int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -3055,11 +2630,7 @@ int ClientImplementation::_getContentListOfInvalidIntegrity(T::SessionId session
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -3083,11 +2654,7 @@ int ClientImplementation::_getContentGeometryIdListByGenerationId(T::SessionId s
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -3110,11 +2677,7 @@ int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessio
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -3138,11 +2701,7 @@ int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId ses
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -3166,11 +2725,7 @@ int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId session
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -3194,11 +2749,7 @@ int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -3222,11 +2773,7 @@ int ClientImplementation::_getContentTimeListByProducerId(T::SessionId sessionId
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -3250,11 +2797,7 @@ int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -3278,11 +2821,7 @@ int ClientImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoL
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -3301,11 +2840,7 @@ int ClientImplementation::_deleteVirtualContent(T::SessionId sessionId)
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -3324,11 +2859,7 @@ int ClientImplementation::_updateVirtualContent(T::SessionId sessionId)
     mLastAccessTime = time(0);
     return result;
   }
-  catch (...)
-  {
-    mLastErrorTime = time(0);
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 

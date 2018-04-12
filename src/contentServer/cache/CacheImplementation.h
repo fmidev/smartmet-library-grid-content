@@ -21,7 +21,7 @@ class CacheImplementation : public ServiceInterface
                     CacheImplementation();
     virtual         ~CacheImplementation();
 
-    virtual void    init(T::SessionId sessionId,ServiceInterface *contentStorage);
+    virtual void    init(T::SessionId sessionId,ServiceInterface *contentStorage,uint contentSortingFlags);
     virtual void    startEventProcessing();
     virtual void    shutdown();
 
@@ -227,8 +227,11 @@ class CacheImplementation : public ServiceInterface
     ModificationLock       mModificationLock;
     ServiceInterface*      mContentStorage;
     time_t                 mContentStorageStartTime;
+    time_t                 mDelayedFileAdditionTime;
+    time_t                 mDelayedContentAdditionTime;
     bool                   mSaveEnabled;
     std::string            mSaveDir;
+    uint                   mContentSortingFlags;
     uint                   mDataServerCount;
     uint                   mProducerCount;
     uint                   mGenerationCount;

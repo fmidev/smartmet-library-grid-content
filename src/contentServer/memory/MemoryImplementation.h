@@ -21,7 +21,7 @@ class MemoryImplementation : public ServiceInterface
                     MemoryImplementation();
      virtual        ~MemoryImplementation();
 
-     virtual void   init();
+     virtual void   init(bool dataLoadEnabled,bool dataSaveEnabled,std::string dataDir,uint dataSaveInterval,uint contentSortingFlags);
      virtual void   shutdown();
 
    protected:
@@ -76,6 +76,7 @@ class MemoryImplementation : public ServiceInterface
      virtual int    _addFileInfoListWithContent(T::SessionId sessionId,std::vector<T::FileAndContent>& fileAndContentList);
      virtual int    _deleteFileInfoById(T::SessionId sessionId,uint fileId);
      virtual int    _deleteFileInfoByName(T::SessionId sessionId,std::string filename);
+     virtual int    _deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList);
      virtual int    _deleteFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags);
      virtual int    _deleteFileInfoListByProducerId(T::SessionId sessionId,uint producerId);
      virtual int    _deleteFileInfoListByProducerName(T::SessionId sessionId,std::string producerName);
@@ -160,6 +161,7 @@ class MemoryImplementation : public ServiceInterface
 
      virtual bool   isSessionValid(T::SessionId sessionId);
      T::EventId     addEvent(EventType eventType,uint id1,uint id2,uint id3,unsigned long long flags);
+     virtual void   saveData();
 
      virtual void   readContentList();
      virtual void   readFileList();
@@ -186,8 +188,18 @@ class MemoryImplementation : public ServiceInterface
      ThreadLock             mEventProcessingLock;
      ModificationLock       mModificationLock;
 
-     bool                   mSaveEnabled;
-     std::string            mSaveDir;
+     bool                   mDataLoadEnabled;
+     bool                   mDataSaveEnabled;
+     std::string            mDataDir;
+     time_t                 mLastSaveTime;
+     uint                   mDataSaveInterval;
+     uint                   mContentSortingFlags;
+
+     uint                   mDataServerCount;
+     uint                   mProducerCount;
+     uint                   mGenerationCount;
+     uint                   mFileCount;
+     uint                   mContentCount;
 
      uint                   mMaxProducerId;
      uint                   mMaxGenerationId;

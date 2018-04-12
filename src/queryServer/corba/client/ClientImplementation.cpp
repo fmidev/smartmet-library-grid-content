@@ -12,6 +12,40 @@ namespace QueryServer
 namespace Corba
 {
 
+#define CATCH_EXCEPTION \
+  catch (CORBA::TRANSIENT&)\
+  {\
+    Spine::Exception exception(BCP, "Caught system exception TRANSIENT -- unable to connect the server!");\
+    throw exception;\
+  }\
+  catch (CORBA::SystemException& ex)\
+  {\
+    char msg[500];\
+    sprintf(msg, "Caught a CORBA::%s\n", ex._name());\
+    Spine::Exception exception(BCP, msg);\
+    throw exception;\
+  }\
+  catch (CORBA::Exception& ex)\
+  {\
+    char msg[500];\
+    sprintf(msg, "Exception CORBA::%s\n", ex._name());\
+    Spine::Exception exception(BCP, msg);\
+    throw exception;\
+  }\
+  catch (omniORB::fatalException& fe)\
+  {\
+    char msg[500];\
+    sprintf(msg, "Caught omniORB::fatalException:%s\n", fe.errmsg());\
+    Spine::Exception exception(BCP, msg);\
+    throw exception;\
+  }\
+  catch (...)\
+  {\
+    throw Spine::Exception(BCP, exception_operation_failed, NULL);\
+  }
+
+
+
 
 ClientImplementation::ClientImplementation()
 {
@@ -50,71 +84,28 @@ void ClientImplementation::init(std::string serviceIor)
 {
   try
   {
-    try
+    mServiceIor = serviceIor;
+
+    int argc = 2;
+    char *argv[] = { const_cast<char*>("-ORBgiopMaxMsgSize"), const_cast<char*>("250000000") };
+    CORBA::ORB_var orb = CORBA::ORB_init(argc, argv);
+
+    CORBA::Object_var obj;
+    obj = orb->string_to_object(serviceIor.c_str());
+
+    mService = QueryServer::Corba::ServiceInterface::_narrow(obj);
+
+    if (CORBA::is_nil(mService))
     {
-      mServiceIor = serviceIor;
-
-      int argc = 2;
-      char *argv[] =
-      { const_cast<char*>("-ORBgiopMaxMsgSize"), const_cast<char*>("250000000") };
-      CORBA::ORB_var orb = CORBA::ORB_init(argc, argv);
-
-      CORBA::Object_var obj;
-      obj = orb->string_to_object(serviceIor.c_str());
-
-      mService = QueryServer::Corba::ServiceInterface::_narrow(obj);
-
-      if (CORBA::is_nil(mService))
-      {
-        SmartMet::Spine::Exception exception(BCP, "Can't narrow reference to type QueryServer::Corba::ServiceInterace (or it was nil)!");
-        throw exception;
-      }
-
-      omniORB::setClientCallTimeout(3600000);
-
-      mInitialized = true;
-    }
-    catch (CORBA::TRANSIENT&)
-    {
-      SmartMet::Spine::Exception exception(BCP, "Caught system exception TRANSIENT -- unable to contact the server!");
+      SmartMet::Spine::Exception exception(BCP, "Can't narrow reference to type QueryServer::Corba::ServiceInterace (or it was nil)!");
       throw exception;
     }
-    catch (CORBA::SystemException& ex)
-    {
-      char msg[500];
-      sprintf(msg, "Caught a CORBA::%s\n", ex._name());
-      SmartMet::Spine::Exception exception(BCP, msg);
-      throw exception;
-    }
-    catch (CORBA::Exception& ex)
-    {
-      char msg[500];
-      sprintf(msg, "Exception CORBA::%s\n", ex._name());
-      SmartMet::Spine::Exception exception(BCP, msg);
-      throw exception;
-    }
-    catch (omniORB::fatalException& fe)
-    {
-      char msg[500];
-      sprintf(msg, "Caught omniORB::fatalException:%s\n", fe.errmsg());
-      SmartMet::Spine::Exception exception(BCP, msg);
-      throw exception;
-    }
-    catch (SmartMet::Spine::Exception& e)
-    {
-      SmartMet::Spine::Exception exception(BCP, exception_operation_failed, &e);
-      throw exception;
-    }
-    catch (...)
-    {
-      SmartMet::Spine::Exception exception(BCP, "Unexpected exception!", NULL);
-      throw exception;
-    }
+
+    omniORB::setClientCallTimeout(3600000);
+
+    mInitialized = true;
   }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -138,10 +129,7 @@ int ClientImplementation::_executeQuery(T::SessionId sessionId,Query& query)
 
     return result;
   }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -164,10 +152,7 @@ int ClientImplementation::_getProducerList(T::SessionId sessionId,string_vec& pr
 
     return result;
   }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 
@@ -195,10 +180,7 @@ int ClientImplementation::_getValuesByGridPoint(T::SessionId sessionId,T::Conten
 
     return result;
   }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, NULL);
-  }
+  CATCH_EXCEPTION
 }
 
 

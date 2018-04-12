@@ -31,6 +31,7 @@ class ProducerInfoList
      ProducerInfo*  getProducerInfoByIndexNoCheck(uint index);
      void           getProducerInfoListBySourceId(uint sourceId,ProducerInfoList& producerInfoList);
      uint           getLength();
+     void           sortByName();
      void           lock();
      void           unlock();
      void           print(std::ostream& stream,uint level,uint optionFlags);
