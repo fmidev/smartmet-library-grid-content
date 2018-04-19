@@ -3270,9 +3270,9 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
                     if (info->mForecastTime == forecastTime)
                     {
                       if (contentInfoList.getReleaseObjects())
-                        contentInfoList.addContentInfo(prev->duplicate());
+                        contentInfoList.addContentInfo(info->duplicate());
                       else
-                        contentInfoList.addContentInfo(prev);
+                        contentInfoList.addContentInfo(info);
                     }
                   }
                 }

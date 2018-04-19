@@ -44,7 +44,9 @@ class LuaFileCollection
     std::string     executeFunctionCall5(std::string& function,std::string language,std::vector<float>& parameters);
     std::string     executeFunctionCall5(std::string& function,std::string language,std::vector<double>& parameters);
 
-    std::string     executeFunctionCall7(
+    std::string     executeFunctionCall6(std::string& function,std::vector<std::string>& params);
+
+    std::string     executeFunctionCall6(
                       std::string& function,
                       std::string& producerName,
                       std::string& parameterName,

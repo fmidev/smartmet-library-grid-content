@@ -24,9 +24,9 @@ MemoryImplementation::MemoryImplementation()
     mImplementationType = Implementation::Memory;
     mStartTime = time(0);
 
-    mDataLoadEnabled = false;
-    mDataSaveEnabled = false;
-    mDataSaveInterval = 60;
+    mContentLoadEnabled = false;
+    mContentSaveEnabled = false;
+    mContentSaveInterval = 60;
     mContentSortingFlags = 0;
 
     mMaxProducerId = 0;
@@ -87,15 +87,15 @@ MemoryImplementation::~MemoryImplementation()
 
 
 
-void MemoryImplementation::init(bool dataLoadEnabled,bool dataSaveEnabled,std::string dataDir,uint dataSaveInterval,uint contentSortingFlags)
+void MemoryImplementation::init(bool contentLoadEnabled,bool contentSaveEnabled,std::string contentDir,uint contentSaveInterval,uint contentSortingFlags)
 {
   FUNCTION_TRACE
   try
   {
-    mDataLoadEnabled = dataLoadEnabled;
-    mDataSaveEnabled = dataSaveEnabled;
-    mDataDir = dataDir;
-    mDataSaveInterval = dataSaveInterval;
+    mContentLoadEnabled = contentLoadEnabled;
+    mContentSaveEnabled = contentSaveEnabled;
+    mContentDir = contentDir;
+    mContentSaveInterval = contentSaveInterval;
     mContentSortingFlags = contentSortingFlags;
 
     readDataServerList();
@@ -4596,12 +4596,12 @@ void MemoryImplementation::readProducerList()
   {
     mProducerInfoList.clear();
 
-    if (!mDataLoadEnabled)
+    if (!mContentLoadEnabled)
       return;
 
     char filename[200];
 
-    sprintf(filename,"%s/producers.csv",mDataDir.c_str());
+    sprintf(filename,"%s/producers.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"r");
     if (file == NULL)
       return;
@@ -4645,12 +4645,12 @@ void MemoryImplementation::readGenerationList()
   {
     mGenerationInfoList.clear();
 
-    if (!mDataLoadEnabled)
+    if (!mContentLoadEnabled)
       return;
 
     char filename[200];
 
-    sprintf(filename,"%s/generations.csv",mDataDir.c_str());
+    sprintf(filename,"%s/generations.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"r");
     if (file == NULL)
       return;
@@ -4693,12 +4693,12 @@ void MemoryImplementation::readFileList()
   {
     mFileInfoList.clear();
 
-    if (!mDataLoadEnabled)
+    if (!mContentLoadEnabled)
       return;
 
     char filename[200];
 
-    sprintf(filename,"%s/files.csv",mDataDir.c_str());
+    sprintf(filename,"%s/files.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"r");
     if (file == NULL)
       return;
@@ -4741,12 +4741,12 @@ void MemoryImplementation::readContentList()
   {
     mContentInfoList[0].clear();
 
-    if (!mDataLoadEnabled)
+    if (!mContentLoadEnabled)
       return;
 
     char filename[200];
 
-    sprintf(filename,"%s/content.csv",mDataDir.c_str());
+    sprintf(filename,"%s/content.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"r");
     if (file == NULL)
       return;
@@ -4785,12 +4785,12 @@ void MemoryImplementation::readDataServerList()
   {
     mDataServerInfoList.clear();
 
-    if (!mDataLoadEnabled)
+    if (!mContentLoadEnabled)
       return;
 
     char filename[200];
 
-    sprintf(filename,"%s/dataServers.csv",mDataDir.c_str());
+    sprintf(filename,"%s/dataServers.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"r");
     if (file == NULL)
       return;
@@ -4828,26 +4828,26 @@ void MemoryImplementation::saveData()
   FUNCTION_TRACE
   try
   {
-    if (mDataSaveEnabled)
+    if (mContentSaveEnabled)
     {
-      if ((time(0)-mLastSaveTime) >= mDataSaveInterval)
+      if ((time(0)-mLastSaveTime) >= mContentSaveInterval)
       {
         mLastSaveTime = time(0);
 
         if (mDataServerCount != mDataServerInfoList.getLength())
-          mDataServerInfoList.writeToFile(mDataDir + "/dataServers.csv");
+          mDataServerInfoList.writeToFile(mContentDir + "/dataServers.csv");
 
         if (mProducerCount != mProducerInfoList.getLength())
-          mProducerInfoList.writeToFile(mDataDir + "/producers.csv");
+          mProducerInfoList.writeToFile(mContentDir + "/producers.csv");
 
         if (mGenerationCount != mGenerationInfoList.getLength())
-          mGenerationInfoList.writeToFile(mDataDir + "/generations.csv");
+          mGenerationInfoList.writeToFile(mContentDir + "/generations.csv");
 
         if (mFileCount != mFileInfoList.getLength())
-          mFileInfoList.writeToFile(mDataDir + "/files.csv");
+          mFileInfoList.writeToFile(mContentDir + "/files.csv");
 
         if (mContentCount != mContentInfoList[0].getLength())
-          mContentInfoList[0].writeToFile(mDataDir + "/content.csv");
+          mContentInfoList[0].writeToFile(mContentDir + "/content.csv");
 
         mDataServerCount = mDataServerInfoList.getLength();
         mProducerCount = mProducerInfoList.getLength();

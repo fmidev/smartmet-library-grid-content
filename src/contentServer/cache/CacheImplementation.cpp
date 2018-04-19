@@ -3839,7 +3839,16 @@ int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    mContentInfoList[0].getForecastTimeListByGenerationId(generationId,contentTimeList);
+    auto it = mContentTimeCache.find(generationId);
+    if (it == mContentTimeCache.end())
+    {
+      mContentInfoList[0].getForecastTimeListByGenerationId(generationId,contentTimeList);
+      mContentTimeCache.insert(std::pair<uint,std::set<std::string>>(generationId,contentTimeList));
+    }
+    else
+    {
+      contentTimeList = it->second;
+    }
 
     return Result::OK;
   }
@@ -4189,6 +4198,8 @@ void CacheImplementation::event_clear(T::EventInfo& eventInfo)
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
+    mContentTimeCache.clear();
+
     mFileInfoListByName.clear();
     mFileInfoList.clear();
     mProducerInfoList.clear();
@@ -4396,6 +4407,10 @@ void CacheImplementation::event_generationDeleted(T::EventInfo& eventInfo)
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
+    auto it = mContentTimeCache.find(eventInfo.mId1);
+    if (it != mContentTimeCache.end())
+      mContentTimeCache.erase(eventInfo.mId1);
+
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
     {
       if (mContentInfoListEnabled[t])
@@ -4523,6 +4538,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
           {
             T::FileInfo *fileInfo = new T::FileInfo();
             fileInfo->setCsv(s);
+
             if (mFileInfoList.getFileInfoById(fileInfo->mFileId) == NULL)
             {
               mFileInfoList.addFileInfo(fileInfo);
@@ -4541,6 +4557,13 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
             contentInfo->setCsv(s);
             if (mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(contentInfo->mFileId,contentInfo->mMessageIndex) == NULL)
             {
+              auto it = mContentTimeCache.find(contentInfo->mGenerationId);
+              if (it != mContentTimeCache.end())
+              {
+                if (it->second.find(contentInfo->mForecastTime) == it->second.end())
+                  it->second.insert(contentInfo->mForecastTime);
+              }
+
               mContentInfoList[0].addContentInfo(contentInfo);
               ulonglong id = (((ulonglong)contentInfo->mFileId) << 32) + contentInfo->mMessageIndex;
               if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
@@ -4588,6 +4611,13 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
                 if (oInfo == NULL  ||  (oInfo != NULL  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
                 {
                   T::ContentInfo *cInfo = info->duplicate();
+
+                  auto it = mContentTimeCache.find(cInfo->mGenerationId);
+                  if (it != mContentTimeCache.end())
+                  {
+                    if (it->second.find(cInfo->mForecastTime) == it->second.end())
+                      it->second.insert(cInfo->mForecastTime);
+                  }
 
                   mContentInfoList[0].addContentInfo(cInfo);
                   ulonglong id = (((ulonglong)cInfo->mFileId) << 32) + cInfo->mMessageIndex;
@@ -5468,6 +5498,14 @@ void CacheImplementation::processEvents(bool eventThread)
       //  printf("contentList[%u] = %u\n",t,mContentInfoList[t].getLength());
     }
 
+
+    for (auto it = mContentTimeCache.begin();  it != mContentTimeCache.end(); ++it)
+    {
+      if (mGenerationInfoList.getGenerationInfoById(it->first) == NULL)
+      {
+        mContentTimeCache.erase(it->first);
+      }
+    }
 
 
 

@@ -7,12 +7,16 @@
 
 
 
+
+
 namespace SmartMet
 {
 namespace ContentServer
 {
 
 #define CONTENT_LIST_COUNT 8
+
+typedef std::map<uint,std::set<std::string>> ContentTimeCache;
 
 
 class CacheImplementation : public ServiceInterface
@@ -239,6 +243,7 @@ class CacheImplementation : public ServiceInterface
     uint                   mContentCount;
     uint                   mContentDeleteCount;
     uint                   mFileDeleteCount;
+    ContentTimeCache       mContentTimeCache;
 };
 
 

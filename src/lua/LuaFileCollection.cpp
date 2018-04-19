@@ -545,7 +545,36 @@ void LuaFileCollection::executeFunctionCall4(std::string& function,uint columns,
 
 
 
-std::string LuaFileCollection::executeFunctionCall7(
+std::string LuaFileCollection::executeFunctionCall6(std::string& function,std::vector<std::string>& params)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    {
+      std::string functionName;
+      uint type = it->getFunction(function,functionName);
+      if (type == 6)
+      {
+        return it->executeFunctionCall6(functionName,params);
+      }
+    }
+
+    Spine::Exception exception(BCP, "Unknown LUA function!");
+    exception.addParameter("Function",function);
+    throw exception;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+  }
+}
+
+
+
+
+
+std::string LuaFileCollection::executeFunctionCall6(
                   std::string& function,
                   std::string& producerName,
                   std::string& parameterName,
@@ -565,9 +594,9 @@ std::string LuaFileCollection::executeFunctionCall7(
     {
       std::string functionName;
       uint type = it->getFunction(function,functionName);
-      if (type == 7)
+      if (type == 6)
       {
-        return it->executeFunctionCall7(functionName,producerName,
+        return it->executeFunctionCall6(functionName,producerName,
             parameterName,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,
             parameterLevel,forecastType,forecastNumber,interpolationMethod);
       }

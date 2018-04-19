@@ -920,7 +920,6 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
             for (auto it = qParam->mFunctionParams.begin(); it != qParam->mFunctionParams.end(); ++it)
             {
               double a = atof(it->second.c_str());
-              printf(".. param [%s] => %f\n",it->second.c_str(),a);
               QueryParameter *q = query.getQueryParameterPtr(it->first);
               std::vector<double> valueList;
               if (q != NULL)
@@ -957,8 +956,8 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
                   }
                   else
                   {
-                    printf("NoValue[%u] %u\n",tCount,v);
-                    q->mValueList[tCount].mValueList.print(std::cout,0,0);
+                    //printf("NoValue[%u] %u\n",tCount,v);
+                    //q->mValueList[tCount].mValueList.print(std::cout,0,0);
                     a = ParamValueMissing;
                   }
                 }
@@ -970,7 +969,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
 
               if (valueList.size() == 0)
               {
-                printf("** PUSH %f\n",a);
+                //printf("** PUSH %f\n",a);
                 parameters.push_back(a);
                 areaParameters.push_back(a);
 
@@ -981,7 +980,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
               {
                 for (auto aa = valueList.begin(); aa != valueList.end(); ++aa)
                 {
-                  printf("-- PUSH %f\n",*aa);
+                  //printf("-- PUSH %f\n",*aa);
                   parameters.push_back(*aa);
                   areaParameters.push_back(*aa);
 
@@ -997,7 +996,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
             {
               std::string function;
               uint type = mLuaFileCollection.getFunction(qParam->mFunction,function);
-              printf("CALL %s\n",function.c_str());
+              //printf("CALL %s\n",function.c_str());
               switch (type)
               {
                 case 1:
@@ -1656,7 +1655,7 @@ void ServiceImplementation::levelInterpolation(short levelInterpolationMethod,do
 {
   try
   {
-    std::cout << "LEVEL INTERPOLATION " << level1 << " " << level << " " << level2 << "   METHOD " << levelInterpolationMethod << "\n";
+    //std::cout << "LEVEL INTERPOLATION " << level1 << " " << level << " " << level2 << "   METHOD " << levelInterpolationMethod << "\n";
 
     // parameterValues1.print(std::cout,0,0);
     // parameterValues2.print(std::cout,0,0);
@@ -3027,6 +3026,10 @@ void ServiceImplementation::getGridValues(
                PRINT_DATA(mDebugLog,"    - Parameter mappings '%s:%s' not found from the file '%s'!\n",producerInfo.mName.c_str(),parameterKey.c_str(),m->getFilename().c_str());
         */
 
+            if (mappings.size() == 0)
+              PRINT_DATA(mDebugLog,"    - No parameter mappings '%s:%s:%d:%d' found!\n",producerInfo.mName.c_str(),parameterKey.c_str(),(int)paramLevelId,(int)paramLevel);
+
+
             if (mappings.size() > 0)
             {
               //PRINT_DATA(mDebugLog,"    - Parameter mappings '%s:%s' found from the file '%s'!\n",producerInfo.mName.c_str(),parameterKey.c_str(),m->getFilename().c_str());
@@ -3117,7 +3120,7 @@ void ServiceImplementation::getGridValues(
                         std::string infoFunction = "getAreaInterpolationInfo";
                         std::string interpolationFunction;
 
-                        std::string paramList = mLuaFileCollection.executeFunctionCall7(
+                        std::string paramList = mLuaFileCollection.executeFunctionCall6(
                             infoFunction,
                             producerInfo.mName,
                             pInfo->mParameterName,
@@ -3147,7 +3150,7 @@ void ServiceImplementation::getGridValues(
                         std::vector<double> constParams;
                         std::vector<ParameterValues> valueListVec;
 
-                        std::cout << "LUA_PARAMETERS : " << paramList << "\n";
+                        //std::cout << "LUA_PARAMETERS : " << paramList << "\n";
 
                         std::vector<std::string> paramVec;
                         splitString(paramList,';',paramVec);
@@ -3174,7 +3177,7 @@ void ServiceImplementation::getGridValues(
                           double a_dem = dem;
                           ushort a_coverType = coverType;
 
-                          std::cout << "* PARAM " << *param << "\n";
+                          //std::cout << "* PARAM " << *param << "\n";
                           std::vector<std::string> paramParts;
                           splitString(*param,':',paramParts);
 
@@ -3281,8 +3284,14 @@ void ServiceImplementation::getGridValues(
                             }
                           }
                           double val = mLuaFileCollection.executeFunctionCall1(interpolationFunction,params);
-                          printf("#### VALUE [%f]\n",val);
+                          //printf("#### VALUE [%f]\n",val);
                           valueList.mValueList.addGridValue(new T::GridValue(vx,vy,(T::ParamValue)val));
+
+                          std::string function;
+                          std::vector<std::string> functionParams;
+                          bool conversionByFunction = conversionFunction(pInfo->mConversionFunction,function,functionParams);
+                          if (conversionByFunction)
+                            executeConversion(function,functionParams,valueList.mValueList);
                         }
 
                         return;

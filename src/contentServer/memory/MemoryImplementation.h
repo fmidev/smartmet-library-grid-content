@@ -21,7 +21,7 @@ class MemoryImplementation : public ServiceInterface
                     MemoryImplementation();
      virtual        ~MemoryImplementation();
 
-     virtual void   init(bool dataLoadEnabled,bool dataSaveEnabled,std::string dataDir,uint dataSaveInterval,uint contentSortingFlags);
+     virtual void   init(bool contentLoadEnabled,bool contentSaveEnabled,std::string contentDir,uint contentSaveInterval,uint contentSortingFlags);
      virtual void   shutdown();
 
    protected:
@@ -188,11 +188,11 @@ class MemoryImplementation : public ServiceInterface
      ThreadLock             mEventProcessingLock;
      ModificationLock       mModificationLock;
 
-     bool                   mDataLoadEnabled;
-     bool                   mDataSaveEnabled;
-     std::string            mDataDir;
+     bool                   mContentLoadEnabled;
+     bool                   mContentSaveEnabled;
+     std::string            mContentDir;
      time_t                 mLastSaveTime;
-     uint                   mDataSaveInterval;
+     uint                   mContentSaveInterval;
      uint                   mContentSortingFlags;
 
      uint                   mDataServerCount;
