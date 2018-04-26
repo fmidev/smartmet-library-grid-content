@@ -129,7 +129,7 @@ int ServiceInterface::getGridData(T::SessionId sessionId,uint fileId,uint messag
     int result = _getGridData(sessionId,fileId,messageIndex,flags,data);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,flags,result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,flags,(uint)data.mValues.size(),result,(float)requestTime / 1000000);
     return result;
   }
   catch (...)
