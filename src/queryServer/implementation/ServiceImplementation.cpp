@@ -3206,7 +3206,7 @@ void ServiceImplementation::getGridValues(
                               std::vector<std::string> pv;
                               splitString(paramParts[1],',',pv);
 
-                              if (pv.size() == 6)
+                              if (pv.size() == 8)
                               {
                                 if (!pv[0].empty())
                                   a_parameterKey = pv[0];
@@ -3226,12 +3226,37 @@ void ServiceImplementation::getGridValues(
                                 if (!pv[5].empty())
                                   a_areaInterpolationMethod = atoi(pv[5].c_str());
 
+                                if (!pv[6].empty()  &&  atoi(pv[6].c_str()) == 1)
+                                {
+                                  T::ContentInfoList contentList;
+                                  if (mContentServerPtr->getContentListByParameterAndGenerationId(0,generationInfo->mGenerationId,T::ParamKeyType::FMI_NAME,a_parameterKey,T::ParamLevelIdType::FMI,a_paramLevel,a_paramLevel,a_paramLevel,a_forecastType,a_forecastNumber,-1,"19000101T000000","30000101T000000",0,contentList) == 0)
+                                  {
+                                    if (contentList.getLength() > 0)
+                                    {
+                                      contentList.print(std::cout,0,0);
+                                      T::ContentInfo *cInfo = contentList.getContentInfoByIndex(0);
+                                      a_forecastTime = cInfo->mForecastTime;
+                                    }
+                                  }
+                                }
+
+                                if (!pv[7].empty()  &&  atoi(pv[7].c_str()) == 1)
+                                  a_producerId = 0;
+
+                                // We should search data only from similar geometries. Otherwise
+                                // the size and location of the grid cells are different.
+
+                                std::set<T::GeometryId> geomIdList;
+                                geomIdList.insert(producerGeometryId);
+
                                 ParameterValues valList;
-                                getGridValues(producers,geometryIdList,a_producerId,a_analysisTime,a_generationFlags,a_reverseGenerations,
+                                getGridValues(producers,geomIdList,a_producerId,a_analysisTime,a_generationFlags,a_reverseGenerations,
                                     a_parameterKey,a_paramLevelId,a_paramLevel,a_forecastType,a_forecastNumber,a_parameterFlags,
                                     a_areaInterpolationMethod,a_timeInterpolationMethod,a_levelInterpolationMethod,a_forecastTime,
                                     a_timeMatchRequired,a_searchType,coordinates,a_radius,a_dem,a_coverType,valList);
 
+                                //printf("PARAM : %s  %d\n",a_parameterKey.c_str(),(int)valList.mValueList.getLength());
+                                //valList.mValueList.print(std::cout,0,0);
                                 valueList.mFlags = valList.mFlags;
                                 valueListVec.push_back(valList);
                               }

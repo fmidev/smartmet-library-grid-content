@@ -33,6 +33,8 @@ Server::Server(const char *address,const char *port)
 {
   try
   {
+    mAddress = address;
+    mPort = port;
     mServiceInterface = NULL;
     int orb_argc = 4;
     char addr[100];
@@ -57,6 +59,7 @@ Server::Server(const char *address,const char *port)
 
       mPoa = mRootPoa->create_POA("my poa", mPman, pl);
     }
+
     catch(CORBA::SystemException& ex)
     {
       char msg[1000];
