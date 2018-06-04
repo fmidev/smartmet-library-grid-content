@@ -1,7 +1,6 @@
 #pragma once
 
-#include "contentServer/definition/ServiceInterface.h"
-
+#include "../definition/ServiceInterface.h"
 
 
 namespace SmartMet

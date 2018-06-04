@@ -1,7 +1,8 @@
 #pragma once
 
-#include "queryServer/definition/ServiceInterface.h"
-#include "queryServer/corba/server/ServerInterface.h"
+#include "ServerInterface.h"
+#include "../../definition/ServiceInterface.h"
+
 #include <pthread.h>
 
 

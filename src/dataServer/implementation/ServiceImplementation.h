@@ -2,8 +2,8 @@
 
 #include "GridFileManager.h"
 #include "VirtualContentManager.h"
-#include "dataServer/definition/ServiceInterface.h"
-#include "lua/LuaFileCollection.h"
+#include "../definition/ServiceInterface.h"
+#include "../../lua/LuaFileCollection.h"
 
 #include <grid-files/common/AttributeList.h>
 #include <pthread.h>

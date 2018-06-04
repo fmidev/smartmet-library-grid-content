@@ -1,6 +1,6 @@
 #pragma once
 
-#include "dataServer/definition/ServiceInterface.h"
+#include "../definition/ServiceInterface.h"
 #include "PointValueCache.h"
 
 

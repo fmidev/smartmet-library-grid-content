@@ -1,5 +1,6 @@
 #include "VirtualContentFactory_type1.h"
 #include "VirtualMessage.h"
+
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/common/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>

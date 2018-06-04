@@ -1,21 +1,21 @@
 #pragma once
 
-#include "contentServer/definition/ContentInfo.h"
-#include "contentServer/definition/ContentInfoList.h"
-#include "contentServer/definition/FileInfo.h"
-#include "contentServer/definition/FileAndContent.h"
-#include "contentServer/definition/FileInfoList.h"
-#include "contentServer/definition/EventInfo.h"
-#include "contentServer/definition/EventInfoList.h"
-#include "contentServer/definition/ServerInfo.h"
-#include "contentServer/definition/ServerInfoList.h"
-#include "contentServer/definition/ProducerInfo.h"
-#include "contentServer/definition/ProducerInfoList.h"
-#include "contentServer/definition/GenerationInfo.h"
-#include "contentServer/definition/GenerationInfoList.h"
-#include "contentServer/definition/ForecastTime.h"
+#include "../../definition/ContentInfo.h"
+#include "../../definition/ContentInfoList.h"
+#include "../../definition/FileInfo.h"
+#include "../../definition/FileAndContent.h"
+#include "../../definition/FileInfoList.h"
+#include "../../definition/EventInfo.h"
+#include "../../definition/EventInfoList.h"
+#include "../../definition/ServerInfo.h"
+#include "../../definition/ServerInfoList.h"
+#include "../../definition/ProducerInfo.h"
+#include "../../definition/ProducerInfoList.h"
+#include "../../definition/GenerationInfo.h"
+#include "../../definition/GenerationInfoList.h"
+#include "../../definition/ForecastTime.h"
 
-#include "contentServer/corba/stubs/ContentServer_serviceInterface_SK.h"
+#include "../stubs/ContentServer_serviceInterface_SK.h"
 
 #include <set>
 

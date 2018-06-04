@@ -1,5 +1,6 @@
 #include "ClientImplementation.h"
-#include "dataServer/corba/convert/Converter.h"
+#include "../convert/Converter.h"
+
 #include <grid-files/common/Exception.h>
 
 

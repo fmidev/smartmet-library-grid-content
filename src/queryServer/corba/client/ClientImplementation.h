@@ -1,7 +1,7 @@
 #pragma once
 
-#include "queryServer/definition/ServiceInterface.h"
-#include "queryServer/corba/stubs/QueryServer_serviceInterface_SK.h"
+#include "../../definition/ServiceInterface.h"
+#include "../stubs/QueryServer_serviceInterface_SK.h"
 
 
 namespace SmartMet

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ValueRecord.h"
-#include "contentServer/definition/ContentInfoList.h"
+#include "../../contentServer/definition/ContentInfoList.h"
 #include <vector>
 
 

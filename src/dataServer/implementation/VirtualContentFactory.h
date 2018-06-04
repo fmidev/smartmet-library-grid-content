@@ -1,9 +1,9 @@
 #pragma once
 
-#include "contentServer/definition/ServiceInterface.h"
-#include "lua/LuaFileCollection.h"
-#include "functions/FunctionCollection.h"
 #include "GridFileManager.h"
+#include "../../contentServer/definition/ServiceInterface.h"
+#include "../../lua/LuaFileCollection.h"
+#include "../../functions/FunctionCollection.h"
 
 #include <grid-files/grid/VirtualGridFile.h>
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "dataServer/definition/GridData.h"
-#include "dataServer/definition/GridCoordinates.h"
-#include "dataServer/definition/ValueRecordList.h"
-#include "dataServer/corba/stubs/DataServer_serviceInterface_SK.h"
+#include "../../definition/GridData.h"
+#include "../../definition/GridCoordinates.h"
+#include "../../definition/ValueRecordList.h"
+#include "../../corba/stubs/DataServer_serviceInterface_SK.h"
 
 #include <grid-files/common/AttributeList.h>
 #include <grid-files/grid/GridValueList.h>

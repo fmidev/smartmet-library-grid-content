@@ -1,5 +1,5 @@
 #include "Converter.h"
-#include "dataServer/corba/stubs/DataServer_serviceInterface_SK.h"
+#include "../stubs/DataServer_serviceInterface_SK.h"
 
 
 

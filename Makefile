@@ -82,7 +82,6 @@ else
  INCLUDES = \
 	-I$(includedir) \
 	-I$(includedir)/smartmet \
-	-I$(includedir)/smartmet/grid-files \
 	-I /usr/include/lua5.3 \
 	$(pkg-config --cflags icu-i18n) \
 	$(CORBA_INCLUDE)

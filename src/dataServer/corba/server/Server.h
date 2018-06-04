@@ -1,7 +1,7 @@
 #pragma once
 
-#include "dataServer/definition/ServiceInterface.h"
-#include "dataServer/corba/server/ServerInterface.h"
+#include "../../definition/ServiceInterface.h"
+#include "../server/ServerInterface.h"
 #include <pthread.h>
 
 

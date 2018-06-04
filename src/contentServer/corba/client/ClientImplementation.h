@@ -1,7 +1,7 @@
 #pragma once
 
-#include "contentServer/definition/ServiceInterface.h"
-#include "contentServer/corba/stubs/ContentServer_serviceInterface_SK.h"
+#include "../../definition/ServiceInterface.h"
+#include "../stubs/ContentServer_serviceInterface_SK.h"
 
 
 

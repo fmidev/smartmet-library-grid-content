@@ -1,6 +1,7 @@
 #pragma once
 
-#include "contentServer/definition/ServiceInterface.h"
+#include "../definition/ServiceInterface.h"
+
 #include <hiredis/hiredis.h>
 #include <pthread.h>
 

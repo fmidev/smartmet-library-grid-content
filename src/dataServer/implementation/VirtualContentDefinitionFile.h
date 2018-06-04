@@ -1,8 +1,9 @@
 #pragma once
 
+#include "VirtualContentDefinition.h"
+
 #include <grid-files/grid/Typedefs.h>
 #include <grid-files/common/AutoThreadLock.h>
-#include "VirtualContentDefinition.h"
 
 
 namespace SmartMet

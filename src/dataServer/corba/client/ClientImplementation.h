@@ -1,7 +1,7 @@
 #pragma once
 
-#include "dataServer/definition/ServiceInterface.h"
-#include "dataServer/corba/stubs/DataServer_serviceInterface_SK.h"
+#include "../../definition/ServiceInterface.h"
+#include "../stubs/DataServer_serviceInterface_SK.h"
 
 
 namespace SmartMet

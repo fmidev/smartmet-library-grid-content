@@ -1,5 +1,5 @@
 #include "ServerInterface.h"
-#include "contentServer/corba/convert/Converter.h"
+#include "../convert/Converter.h"
 
 #include <grid-files/common/Exception.h>
 #include <grid-files/common/ShowFunction.h>

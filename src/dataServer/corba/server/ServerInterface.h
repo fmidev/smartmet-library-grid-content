@@ -1,7 +1,7 @@
 #pragma once
 
-#include "dataServer/definition/ServiceInterface.h"
-#include "DataServer_serviceInterface_SK.h"
+#include "../../definition/ServiceInterface.h"
+#include "../stubs/DataServer_serviceInterface_SK.h"
 
 
 // This file contains the actual implementation of the CORBA server interface. Every time

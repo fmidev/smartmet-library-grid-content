@@ -1,7 +1,8 @@
 #pragma once
 
-#include "contentServer/corba/server/ServerInterface.h"
-#include "contentServer/definition/ServiceInterface.h"
+#include "../server/ServerInterface.h"
+#include "../../definition/ServiceInterface.h"
+
 #include <pthread.h>
 
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "contentServer/definition/ServiceInterface.h"
+#include "../definition/ServiceInterface.h"
 
 #include <grid-files/common/ModificationLock.h>
 #include <pthread.h>

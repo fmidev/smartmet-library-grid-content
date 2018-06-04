@@ -4,7 +4,7 @@
 #include "GridData.h"
 #include "GridCoordinates.h"
 #include "ServiceResults.h"
-#include "contentServer/definition/ServiceInterface.h"
+#include "../../contentServer/definition/ServiceInterface.h"
 
 #include <grid-files/grid/Typedefs.h>
 #include <grid-files/common/AttributeList.h>

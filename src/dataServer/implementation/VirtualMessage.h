@@ -1,8 +1,8 @@
 #pragma once
 
-#include "lua/LuaFileCollection.h"
-#include "functions/FunctionCollection.h"
-#include "contentServer/definition/ContentInfo.h"
+#include "../../lua/LuaFileCollection.h"
+#include "../../functions/FunctionCollection.h"
+#include "../../contentServer/definition/ContentInfo.h"
 
 #include <grid-files/grid/Message.h>
 #include <grid-files/grid/GridFile.h>

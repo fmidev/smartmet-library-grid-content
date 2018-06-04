@@ -1,11 +1,11 @@
 #pragma once
 
-#include "queryServer/definition/ServiceInterface.h"
-#include "queryServer/definition/AliasFileCollection.h"
-#include "queryServer/definition/ParameterMappingFile.h"
-#include "dataServer/definition/ServiceInterface.h"
-#include "contentServer/definition/ServiceInterface.h"
-#include "lua/LuaFileCollection.h"
+#include "../definition/ServiceInterface.h"
+#include "../definition/AliasFileCollection.h"
+#include "../definition/ParameterMappingFile.h"
+#include "../../dataServer/definition/ServiceInterface.h"
+#include "../../contentServer/definition/ServiceInterface.h"
+#include "../../lua/LuaFileCollection.h"
 
 
 namespace SmartMet
