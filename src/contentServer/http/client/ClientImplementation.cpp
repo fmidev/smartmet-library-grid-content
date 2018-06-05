@@ -695,7 +695,7 @@ int ClientImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId
 
 
 
-int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::set<std::string>& list)
+int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
   try
   {
@@ -703,7 +703,8 @@ int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
 
     request.addLine("method","getProducerParameterList");
     request.addLine("sessionId",sessionId);
-    request.addLine("parameterKeyType",(int)parameterKeyType);
+    request.addLine("sourceParameterKeyType",(int)sourceParameterKeyType);
+    request.addLine("targetParameterKeyType",(int)targetParameterKeyType);
 
     T::ResponseMessage response;
 

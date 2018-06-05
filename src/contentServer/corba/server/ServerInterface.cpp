@@ -627,7 +627,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getProducerParameterList(::CORBA::LongLong sessionId, ::CORBA::Octet parameterKeyType, SmartMet::ContentServer::Corba::CorbaStringList_out list)
+::CORBA::Long ServerInterface::getProducerParameterList(::CORBA::LongLong sessionId, ::CORBA::Octet sourceParameterKeyType, ::CORBA::Octet targetParameterKeyType, SmartMet::ContentServer::Corba::CorbaStringList_out list)
 {
   FUNCTION_TRACE
   try
@@ -639,7 +639,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getProducerParameterList(sessionId,(T::ParamKeyType)parameterKeyType,sList);
+    int result = mService->getProducerParameterList(sessionId,(T::ParamKeyType)sourceParameterKeyType,(T::ParamKeyType)targetParameterKeyType,sList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sList,*corbaList);

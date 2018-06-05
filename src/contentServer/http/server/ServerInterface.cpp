@@ -1645,17 +1645,25 @@ void ServerInterface::getProducerParameterList(T::RequestMessage& request,T::Res
       return;
     }
 
-    int parameterKeyType = 0;
-    if (!request.getLineByKey("parameterKeyType",parameterKeyType))
+    int sourceParameterKeyType = 0;
+    if (!request.getLineByKey("sourceParameterKeyType",sourceParameterKeyType))
     {
       response.addLine("result",(int)Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: parameterKeyType");
+      response.addLine("resultString","Missing parameter: sourceParameterKeyType");
+      return;
+    }
+
+    int targetParameterKeyType = 0;
+    if (!request.getLineByKey("targetParameterKeyType",targetParameterKeyType))
+    {
+      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: targetParameterKeyType");
       return;
     }
 
     std::set<std::string> list;
 
-    int result = mService->getProducerParameterList(sessionId,(T::ParamKeyType)parameterKeyType,list);
+    int result = mService->getProducerParameterList(sessionId,(T::ParamKeyType)sourceParameterKeyType,(T::ParamKeyType)targetParameterKeyType,list);
 
     response.addLine("result",result);
     if (result == Result::OK)

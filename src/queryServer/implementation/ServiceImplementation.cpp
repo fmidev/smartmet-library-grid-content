@@ -2245,9 +2245,13 @@ bool ServiceImplementation::getPointValues(
 
     if (contentLen == 1)
     {
+      PRINT_DATA(mDebugLog,"         + OK 1\n");
+
       T::ContentInfo *contentInfo = contentList.getContentInfoByIndex(0);
       if (contentInfo->mForecastTime == fTime)
       {
+        PRINT_DATA(mDebugLog,"         + OK 2\n");
+
         // We found a grid which forecast time is exactly the same as the requested forecast time.
 
         valueList.mForecastTime = forecastTime;
@@ -2280,6 +2284,8 @@ bool ServiceImplementation::getPointValues(
       }
       else
       {
+        PRINT_DATA(mDebugLog,"         + OK 3\n");
+
         // There is one content record in place, but its time does not match to
         // the requested forecast time. This is used for indicating that there
         // are content records available, but not for the requested time.
@@ -2293,10 +2299,13 @@ bool ServiceImplementation::getPointValues(
 
     if (contentLen == 2)
     {
+      PRINT_DATA(mDebugLog,"         + OK 4\n");
+
       T::ContentInfo *contentInfo1 = contentList.getContentInfoByIndex(0);
       T::ContentInfo *contentInfo2 = contentList.getContentInfoByIndex(1);
       if (!(contentInfo1->mForecastTime < fTime  &&  contentInfo2->mForecastTime > fTime))
       {
+        PRINT_DATA(mDebugLog,"         + OK 5\n");
         SmartMet::Spine::Exception exception(BCP, "Unexpected result!");
         exception.addDetail("The given forecast time should been between the found content times.");
         exception.addParameter("Content 1 ForecastTime",contentInfo1->mForecastTime);
@@ -2309,6 +2318,7 @@ bool ServiceImplementation::getPointValues(
       // are before and after the current forecast time. This means that we should do
       // some time interpolation.
 
+      PRINT_DATA(mDebugLog,"         + OK 6\n");
       valueList.mForecastTime = forecastTime;
       valueList.mProducerId = contentInfo1->mProducerId;
       valueList.mGenerationId = contentInfo1->mGenerationId;
@@ -2321,7 +2331,10 @@ bool ServiceImplementation::getPointValues(
       else
         valueList.mParameterLevelId = pInfo.mParameterLevelId;
 
+
       // Fetching data from the grids.
+
+      PRINT_DATA(mDebugLog,"         + OK 7\n");
 
       T::GridValueList list1;
       int result1 = mDataServerPtr->getGridValueListByPointList(0,contentInfo1->mFileId,contentInfo1->mMessageIndex,flags,T::CoordinateType::LATLON_COORDINATES,coordinates[0],areaInterpolationMethod,list1);
@@ -2335,6 +2348,7 @@ bool ServiceImplementation::getPointValues(
         //throw exception;
       }
 
+      PRINT_DATA(mDebugLog,"         + OK 8\n");
       T::GridValueList list2;
       int result2 = mDataServerPtr->getGridValueListByPointList(0,contentInfo2->mFileId,contentInfo2->mMessageIndex,flags,T::CoordinateType::LATLON_COORDINATES,coordinates[0],areaInterpolationMethod,list2);
       if (result2 != 0)
@@ -2347,16 +2361,21 @@ bool ServiceImplementation::getPointValues(
         //throw exception;
       }
 
+      PRINT_DATA(mDebugLog,"         + OK 10\n");
       if (result1 == 0  &&  result2 == 0)
       {
+        PRINT_DATA(mDebugLog,"         + OK 11\n");
         timeInterpolation(timeInterpolationMethod,forecastTime,contentInfo1->mForecastTime,contentInfo2->mForecastTime,list1,list2,valueList.mValueList);
 
         if (conversionByFunction)
           executeConversion(function,functionParams,valueList.mValueList);
 
+        PRINT_DATA(mDebugLog,"         + OK 12\n");
+
         return true;
       }
     }
+    PRINT_DATA(mDebugLog,"         + OK 13\n");
     return false;
   }
   catch (...)

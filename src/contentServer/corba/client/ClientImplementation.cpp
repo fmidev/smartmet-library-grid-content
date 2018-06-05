@@ -667,7 +667,7 @@ int ClientImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId
 
 
 
-int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::set<std::string>& list)
+int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
   try
   {
@@ -676,7 +676,7 @@ int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
 
     ContentServer::Corba::CorbaStringList_var corbaList;
 
-    int result = mService->getProducerParameterList(sessionId,(CORBA::Octet)parameterKeyType,corbaList);
+    int result = mService->getProducerParameterList(sessionId,(CORBA::Octet)sourceParameterKeyType,(CORBA::Octet)targetParameterKeyType,corbaList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaList,list);

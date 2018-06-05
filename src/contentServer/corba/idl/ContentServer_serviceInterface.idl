@@ -38,7 +38,7 @@ interface ServiceInterface
   long  getProducerInfoListBySourceId(in long long sessionId,in unsigned long sourceId,out CorbaProducerInfoList producerInfoList);
   long  getProducerInfoCount(in long long sessionId,out unsigned long count);
   long  getProducerNameAndGeometryList(in long long sessionId,out CorbaStringList list);
-  long  getProducerParameterList(in long long sessionId,in octet parameterKeyType,out CorbaStringList list);
+  long  getProducerParameterList(in long long sessionId,in octet sourceParameterKeyType,in octet targetParameterKeyType,out CorbaStringList list);
 
   long  addGenerationInfo(in long long sessionId,inout CorbaGenerationInfo generationInfo);
   long  deleteGenerationInfoById(in long long sessionId,in unsigned long generationId);

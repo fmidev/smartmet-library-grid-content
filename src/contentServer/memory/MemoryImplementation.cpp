@@ -927,7 +927,7 @@ int MemoryImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId
 
 
 
-int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::set<std::string>& list)
+int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
   FUNCTION_TRACE
   try
@@ -947,38 +947,41 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
       for (uint t=0; t<len; t++)
       {
         T::ContentInfo *contentInfo = mContentInfoList[0].getContentInfoByIndex(t);
-        std::string paramKey;
+        std::string sourceParamKey;
+        std::string targetParamKey;
+        T::ParamLevelIdType paramLevelIdType = T::ParamLevelIdType::FMI;
+        T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
 
         if (producerInfo->mProducerId == contentInfo->mProducerId)
         {
-          switch (parameterKeyType)
+          switch (sourceParameterKeyType)
           {
             case T::ParamKeyType::FMI_ID:
-              paramKey = contentInfo->mFmiParameterId;
+              sourceParamKey = contentInfo->mFmiParameterId;
               break;
 
             case T::ParamKeyType::FMI_NAME:
-              paramKey = contentInfo->mFmiParameterName;
+              sourceParamKey = contentInfo->mFmiParameterName;
               break;
 
             case T::ParamKeyType::GRIB_ID:
-              paramKey = contentInfo->mGribParameterId;
+              sourceParamKey = contentInfo->mGribParameterId;
               break;
 
             case T::ParamKeyType::NEWBASE_ID:
-              paramKey = contentInfo->mNewbaseParameterId;
+              sourceParamKey = contentInfo->mNewbaseParameterId;
               break;
 
             case T::ParamKeyType::NEWBASE_NAME:
-              paramKey = contentInfo->mNewbaseParameterName;
+              sourceParamKey = contentInfo->mNewbaseParameterName;
               break;
 
             case T::ParamKeyType::CDM_ID:
-              paramKey = contentInfo->mCdmParameterId;
+              sourceParamKey = contentInfo->mCdmParameterId;
               break;
 
             case T::ParamKeyType::CDM_NAME:
-              paramKey = contentInfo->mCdmParameterName;
+              sourceParamKey = contentInfo->mCdmParameterName;
               break;
 
             default:
@@ -986,17 +989,51 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
           }
 
 
-          if (paramKey.length() > 0)
+          switch (targetParameterKeyType)
+          {
+            case T::ParamKeyType::FMI_ID:
+              targetParamKey = contentInfo->mFmiParameterId;
+              break;
+
+            case T::ParamKeyType::FMI_NAME:
+              targetParamKey = contentInfo->mFmiParameterName;
+              break;
+
+            case T::ParamKeyType::GRIB_ID:
+              targetParamKey = contentInfo->mGribParameterId;
+              break;
+
+            case T::ParamKeyType::NEWBASE_ID:
+              targetParamKey = contentInfo->mNewbaseParameterId;
+              break;
+
+            case T::ParamKeyType::NEWBASE_NAME:
+              targetParamKey = contentInfo->mNewbaseParameterName;
+              break;
+
+            case T::ParamKeyType::CDM_ID:
+              targetParamKey = contentInfo->mCdmParameterId;
+              break;
+
+            case T::ParamKeyType::CDM_NAME:
+              targetParamKey = contentInfo->mCdmParameterName;
+              break;
+
+            default:
+              break;
+          }
+
+          if (sourceParamKey.length() > 0  &&  targetParamKey.length() > 0)
           {
             char tmp[200];
             char *p = tmp;
             p += sprintf(p,"%s;%s;%d;%s;%d;%d;%05d;%d;%d",
                 producerInfo->mName.c_str(),
-                paramKey.c_str(),
-                (int)T::ParamKeyType::FMI_NAME,
-                contentInfo->mFmiParameterName.c_str(),
-                (int)T::ParamLevelIdType::FMI,
-                (int)contentInfo->mFmiParameterLevelId,
+                sourceParamKey.c_str(),
+                (int)targetParameterKeyType,
+                targetParamKey.c_str(),
+                (int)paramLevelIdType,
+                (int)paramLevelId,
                 (int)contentInfo->mParameterLevel,
                 (int)contentInfo->mForecastType,
                 (int)contentInfo->mForecastNumber);
