@@ -646,6 +646,35 @@ void FileInfoList::getFileInfoList(uint startFileId,uint maxRecords,FileInfoList
 
 
 
+void FileInfoList::getFileInfoListByProducerId(uint producerId,FileInfoList& fileInfoList)
+{
+  try
+  {
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    uint sz = getLength();
+
+    for (uint t=0; t<sz; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != NULL  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mProducerId == producerId)
+      {
+        if (fileInfoList.getReleaseObjects())
+          fileInfoList.addFileInfo(info->duplicate());
+        else
+          fileInfoList.addFileInfo(info);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList)
 {
   try
@@ -678,6 +707,35 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,
 
         if (fileInfoList.getLength() == maxRecords)
           return;
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void FileInfoList::getFileInfoListByGenerationId(uint generationId,FileInfoList& fileInfoList)
+{
+  try
+  {
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    uint sz = getLength();
+
+    for (uint t=0; t<sz; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != NULL  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mGenerationId == generationId)
+      {
+        if (fileInfoList.getReleaseObjects())
+          fileInfoList.addFileInfo(info->duplicate());
+        else
+          fileInfoList.addFileInfo(info);
       }
     }
   }
@@ -736,6 +794,35 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFil
 
 
 
+void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,FileInfoList& fileInfoList)
+{
+  try
+  {
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    uint sz = getLength();
+
+    for (uint t=0; t<sz; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != NULL  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  (info->mGroupFlags & groupFlags) != 0)
+      {
+        if (fileInfoList.getReleaseObjects())
+          fileInfoList.addFileInfo(info->duplicate());
+        else
+          fileInfoList.addFileInfo(info);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,uint maxRecords,FileInfoList& fileInfoList)
 {
   try
@@ -776,6 +863,36 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
   }
 }
+
+
+
+
+
+void FileInfoList::getFileInfoListBySourceId(uint sourceId,FileInfoList& fileInfoList)
+{
+  try
+  {
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    uint sz = getLength();
+
+    for (uint t=0; t<sz; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != NULL  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mSourceId == sourceId)
+      {
+        if (fileInfoList.getReleaseObjects())
+          fileInfoList.addFileInfo(info->duplicate());
+        else
+          fileInfoList.addFileInfo(info);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
 
 
 

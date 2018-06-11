@@ -47,9 +47,13 @@ class FileInfoList
      uint       getFileInfoCountByGenerationId(uint generationId);
      uint       getFileInfoCountBySourceId(uint sourceId);
      void       getFileInfoList(uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
+     void       getFileInfoListByGroupFlags(uint groupFlags,FileInfoList& fileInfoList);
      void       getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
+     void       getFileInfoListByProducerId(uint producerId,FileInfoList& fileInfoList);
      void       getFileInfoListByProducerId(uint producerId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
+     void       getFileInfoListByGenerationId(uint generationId,FileInfoList& fileInfoList);
      void       getFileInfoListByGenerationId(uint generationId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
+     void       getFileInfoListBySourceId(uint sourceId,FileInfoList& fileInfoList);
      void       getFileInfoListBySourceId(uint sourceId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
      uint       getLength();
      bool       getReleaseObjects();
