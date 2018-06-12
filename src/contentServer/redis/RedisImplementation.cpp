@@ -6784,7 +6784,7 @@ int RedisImplementation::getGenerationTimeAndGeometryList(std::set<std::string>&
           contentInfo.setCsv(reply->element[t]->str);
 
           char st[200];
-          sprintf(st,"%u;%u;%d;%d;%s;%s;",contentInfo.mGenerationId,contentInfo.mGeometryId,contentInfo.mForecastType,contentInfo.mForecastNumber,contentInfo.mForecastTime.c_str(),contentInfo.mModificationTime.c_str());
+          sprintf(st,"%u;%u;%u;%d;%d;%s;%s;",contentInfo.mSourceId,contentInfo.mGenerationId,contentInfo.mGeometryId,contentInfo.mForecastType,contentInfo.mForecastNumber,contentInfo.mForecastTime.c_str(),contentInfo.mModificationTime.c_str());
           std::string str = st;
 
           if (list.find(str) == list.end())

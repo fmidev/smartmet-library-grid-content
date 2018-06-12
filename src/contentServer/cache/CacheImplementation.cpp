@@ -1287,7 +1287,7 @@ int CacheImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
     {
       T::ContentInfo *info = mContentInfoList[0].getContentInfoByIndex(t);
       char st[200];
-      sprintf(st,"%u;%u;%d;%d;%s;%s;",info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->mForecastTime.c_str(),info->mModificationTime.c_str());
+      sprintf(st,"%u;%u;%u;%d;%d;%s;%s;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->mForecastTime.c_str(),info->mModificationTime.c_str());
       std::string str = st;
 
 
