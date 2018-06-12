@@ -43,6 +43,7 @@ FileInfo::FileInfo(FileInfo& fileInfo)
     mGroupFlags = fileInfo.mGroupFlags;
     mFlags = fileInfo.mFlags;
     mSourceId = fileInfo.mSourceId;
+    mModificationTime = fileInfo.mModificationTime;
   }
   catch (...)
   {
@@ -66,6 +67,7 @@ FileInfo::FileInfo(const FileInfo& fileInfo)
     mGroupFlags = fileInfo.mGroupFlags;
     mFlags = fileInfo.mFlags;
     mSourceId = fileInfo.mSourceId;
+    mModificationTime = fileInfo.mModificationTime;
   }
   catch (...)
   {
@@ -145,6 +147,7 @@ void FileInfo::operator=(FileInfo& fileInfo)
     mGroupFlags = fileInfo.mGroupFlags;
     mFlags = fileInfo.mFlags;
     mSourceId = fileInfo.mSourceId;
+    mModificationTime = fileInfo.mModificationTime;
   }
   catch (...)
   {
@@ -171,6 +174,7 @@ void FileInfo::operator=(const FileInfo& fileInfo)
     mGroupFlags = fileInfo.mGroupFlags;
     mFlags = fileInfo.mFlags;
     mSourceId = fileInfo.mSourceId;
+    mModificationTime = fileInfo.mModificationTime;
   }
   catch (...)
   {
@@ -186,7 +190,7 @@ std::string FileInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%s;%u;%u;%u;%u;%u",
+    sprintf(st,"%u;%u;%s;%u;%u;%u;%u;%u;%s",
         mFileId,
         (uint)mFileType,
         mName.c_str(),
@@ -194,7 +198,8 @@ std::string FileInfo::getCsv()
         mGenerationId,
         mGroupFlags,
         mFlags,
-        mSourceId);
+        mSourceId,
+        mModificationTime.c_str());
 
     return std::string(st);
   }
@@ -212,7 +217,7 @@ std::string FileInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "fileId;fileType;name;producerId;generationId;groupFlags;flags;sourceId";
+    std::string header = "fileId;fileType;name;producerId;generationId;groupFlags;flags;sourceId;modificationTime";
     return header;
   }
   catch (...)
@@ -261,6 +266,8 @@ void FileInfo::setCsv(const char *csv)
       mGroupFlags = (uint)atoll(field[5]);
       mFlags = (uint)atoll(field[6]);
       mSourceId = (uint)atoll(field[7]);
+      if (c >= 8)
+        mModificationTime = field[8];
     }
   }
   catch (...)
@@ -340,14 +347,15 @@ void FileInfo::print(std::ostream& stream,uint level,uint optionFlags)
   try
   {
     stream << space(level) << "FileInfo\n";
-    stream << space(level) << "- mFileId       = " << mFileId << "\n";
-    stream << space(level) << "- mFileType     = " << (uint)mFileType << "\n";
-    stream << space(level) << "- mName         = " << mName << "\n";
-    stream << space(level) << "- mProducerId   = " << mProducerId << "\n";
-    stream << space(level) << "- mGenerationId = " << mGenerationId << "\n";
-    stream << space(level) << "- mGroupFlags   = " << mGroupFlags << "\n";
-    stream << space(level) << "- mFlags        = " << mFlags << "\n";
-    stream << space(level) << "- mSourceId     = " << mSourceId << "\n";
+    stream << space(level) << "- mFileId           = " << mFileId << "\n";
+    stream << space(level) << "- mFileType         = " << (uint)mFileType << "\n";
+    stream << space(level) << "- mName             = " << mName << "\n";
+    stream << space(level) << "- mProducerId       = " << mProducerId << "\n";
+    stream << space(level) << "- mGenerationId     = " << mGenerationId << "\n";
+    stream << space(level) << "- mGroupFlags       = " << mGroupFlags << "\n";
+    stream << space(level) << "- mFlags            = " << mFlags << "\n";
+    stream << space(level) << "- mSourceId         = " << mSourceId << "\n";
+    stream << space(level) << "- mModificationTime = " << mModificationTime << "\n";
   }
   catch (...)
   {

@@ -39,12 +39,12 @@ struct CorbaContentInfo
   octet              fmiParameterLevelId;
   octet              grib1ParameterLevelId;
   octet              grib2ParameterLevelId;
-  long      		 parameterLevel;
+  long               parameterLevel;
   string             fmiParameterUnits;
   string             gribParameterUnits;
   unsigned long      flags;
   unsigned long      sourceId;
-  long      		 geometryId;
+  long               geometryId;
   string             modificationTime;
 };
 
@@ -91,6 +91,7 @@ struct CorbaFileInfo
   string             name;
   unsigned long      flags;
   unsigned long      sourceId;
+  string             modificationTime;
 };
 
 typedef sequence<CorbaFileInfo> CorbaFileInfoList;

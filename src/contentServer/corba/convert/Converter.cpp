@@ -185,6 +185,7 @@ void Converter::convert(T::FileInfo& source,ContentServer::Corba::CorbaFileInfo&
     target.name = CORBA::string_dup(source.mName.c_str());
     target.flags = source.mFlags;
     target.sourceId = source.mSourceId;
+    target.modificationTime = CORBA::string_dup(source.mModificationTime.c_str());
   }
   catch (...)
   {
@@ -208,6 +209,7 @@ void Converter::convert(const ContentServer::Corba::CorbaFileInfo& source,T::Fil
     target.mName = source.name;
     target.mFlags = source.flags;
     target.mSourceId = source.sourceId;
+    target.mModificationTime = source.modificationTime;
   }
   catch (...)
   {

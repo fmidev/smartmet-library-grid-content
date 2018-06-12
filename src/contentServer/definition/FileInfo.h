@@ -95,6 +95,8 @@ class FileInfo
      uint               mFlags;
 
      uint               mSourceId;
+
+     std::string        mModificationTime;
 };
 
 
