@@ -26,8 +26,9 @@ class ContentInfoList
      void               operator=(ContentInfoList& contentInfoList);
      void               operator=(const ContentInfoList& contentInfoList);
 
-     void               addContentInfo(ContentInfo *contentInfo);
+     ContentInfo*       addContentInfo(ContentInfo *contentInfo);
      void               addContentInfoList(ContentInfoList& contentInfoList);
+     void               addContentInfoListNoLock(ContentInfoList& contentInfoList);
 
      void               clear();
 
@@ -129,6 +130,7 @@ class ContentInfoList
 
      uint               getLength()const;
      ModificationLock*  getModificationLockPtr();
+     void               setModificationLockPtr(ModificationLock* modificationLockPtr);
 
      uint               getSize() const;
      bool               getReleaseObjects();
@@ -151,6 +153,7 @@ class ContentInfoList
      uint               mSize;
      uint               mLength;
      ModificationLock   mModificationLock;
+     ModificationLock*  mModificationLockPtr;
      bool               mReleaseObjects;
 
      ContentInfo::ComparisonMethod mComparisonMethod;

@@ -2,6 +2,9 @@
 #include <grid-files/common/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/AutoThreadLock.h>
+#include <grid-files/common/ShowFunction.h>
+
+#define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
 
 namespace SmartMet
@@ -12,6 +15,7 @@ namespace T
 
 GenerationInfoList::GenerationInfoList()
 {
+  FUNCTION_TRACE
   try
   {
   }
@@ -27,6 +31,7 @@ GenerationInfoList::GenerationInfoList()
 
 GenerationInfoList::GenerationInfoList(GenerationInfoList& generationInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     generationInfoList.lock();
@@ -52,6 +57,7 @@ GenerationInfoList::GenerationInfoList(GenerationInfoList& generationInfoList)
 
 GenerationInfoList::~GenerationInfoList()
 {
+  FUNCTION_TRACE
   try
   {
     clear();
@@ -68,6 +74,7 @@ GenerationInfoList::~GenerationInfoList()
 
 void GenerationInfoList::operator=(GenerationInfoList& generationInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     if (&generationInfoList == this)
@@ -96,6 +103,7 @@ void GenerationInfoList::operator=(GenerationInfoList& generationInfoList)
 
 void GenerationInfoList::addGenerationInfo(GenerationInfo *generationInfo)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -113,6 +121,7 @@ void GenerationInfoList::addGenerationInfo(GenerationInfo *generationInfo)
 
 void GenerationInfoList::clear()
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -134,6 +143,7 @@ void GenerationInfoList::clear()
 
 bool GenerationInfoList::deleteGenerationInfoById(uint generationId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -162,6 +172,7 @@ bool GenerationInfoList::deleteGenerationInfoById(uint generationId)
 
 void GenerationInfoList::deleteGenerationInfoListByProducerId(uint producerId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -187,6 +198,7 @@ void GenerationInfoList::deleteGenerationInfoListByProducerId(uint producerId)
 
 GenerationInfo* GenerationInfoList::getGenerationInfoById(uint generationId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -211,6 +223,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoById(uint generationId)
 
 void GenerationInfoList::deleteGenerationInfoListBySourceId(uint sourceId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -237,6 +250,7 @@ void GenerationInfoList::deleteGenerationInfoListBySourceId(uint sourceId)
 
 GenerationInfo* GenerationInfoList::getGenerationInfoByIndex(uint index)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -257,6 +271,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByIndex(uint index)
 
 GenerationInfo* GenerationInfoList::getGenerationInfoByIndexNoCheck(uint index)
 {
+  FUNCTION_TRACE
   try
   {
     return mList.at(index);
@@ -273,6 +288,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByIndexNoCheck(uint index)
 
 GenerationInfo* GenerationInfoList::getGenerationInfoByName(std::string generationName)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -298,6 +314,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByName(std::string generati
 
 GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(std::string analysisTime)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -323,6 +340,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(std::string 
 
 void GenerationInfoList::getGenerationInfoListByProducerId(uint producerId,GenerationInfoList& generationInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -345,6 +363,7 @@ void GenerationInfoList::getGenerationInfoListByProducerId(uint producerId,Gener
 
 GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(uint producerId,T::GenerationStatus generationStatus)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -373,6 +392,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(u
 
 GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(uint producerId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -401,6 +421,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(uint produ
 
 GenerationInfo*  GenerationInfoList::getPrevGenerationInfoByProducerId(uint producerId,std::string nextGenerationName)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -429,6 +450,7 @@ GenerationInfo*  GenerationInfoList::getPrevGenerationInfoByProducerId(uint prod
 
 void GenerationInfoList::getGenerationInfoListBySourceId(uint sourceId,GenerationInfoList& generationInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -451,6 +473,7 @@ void GenerationInfoList::getGenerationInfoListBySourceId(uint sourceId,Generatio
 
 uint GenerationInfoList::getLength()
 {
+  FUNCTION_TRACE
   try
   {
     return (uint)mList.size();
@@ -467,6 +490,7 @@ uint GenerationInfoList::getLength()
 
 void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTimes,bool reverseOrder)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -507,6 +531,7 @@ void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTime
 
 void GenerationInfoList::lock()
 {
+  FUNCTION_TRACE
   try
   {
     return mThreadLock.lock();
@@ -523,6 +548,7 @@ void GenerationInfoList::lock()
 
 void GenerationInfoList::unlock()
 {
+  FUNCTION_TRACE
   try
   {
     return mThreadLock.unlock();
@@ -539,6 +565,7 @@ void GenerationInfoList::unlock()
 
 void GenerationInfoList::writeToFile(std::string filename)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -571,6 +598,7 @@ void GenerationInfoList::writeToFile(std::string filename)
 
 void GenerationInfoList::print(std::ostream& stream,uint level,uint optionFlags)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);

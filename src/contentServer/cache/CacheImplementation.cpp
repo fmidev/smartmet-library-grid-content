@@ -70,11 +70,17 @@ CacheImplementation::CacheImplementation()
     mFileInfoListByName.setReleaseObjects(false);
     mFileInfoListByName.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
 
+    mFileInfoList.setModificationLockPtr(&mFileModificationLock);
+    mFileInfoListByName.setModificationLockPtr(&mFileModificationLock);
+
     mContentInfoList[0].setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
     mContentInfoListEnabled[0] = true;
 
+    mContentInfoList[0].setModificationLockPtr(&mContentModificationLock);
+
     for (int t=1; t<CONTENT_LIST_COUNT; t++)
     {
+      mContentInfoList[t].setModificationLockPtr(&mContentModificationLock);
       mContentInfoList[t].setReleaseObjects(false);
       mContentInfoListEnabled[t] = false;
     }
@@ -159,7 +165,6 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
         if (mContentInfoListEnabled[t])
           mContentInfoList[t] = mContentInfoList[0];
       }
-
       mContentInfoList[0].sort(T::ContentInfo::ComparisonMethod::file_message);
 
       if (mContentInfoListEnabled[1])
@@ -4184,7 +4189,9 @@ void CacheImplementation::readContentList()
         startFileId = contentInfo->mFileId;
         startMessageIndex = contentInfo->mMessageIndex + 1;
 
-        mContentInfoList[0].addContentInfo(contentInfo->duplicate());
+        T::ContentInfo *newContentInfo = contentInfo->duplicate();
+        if (mContentInfoList[0].addContentInfo(newContentInfo) != newContentInfo)
+          delete newContentInfo;
       }
     }
   }
@@ -4601,13 +4608,18 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
                   it->second.insert(contentInfo->mForecastTime);
               }
 
-              mContentInfoList[0].addContentInfo(contentInfo);
-              ulonglong id = (((ulonglong)contentInfo->mFileId) << 32) + contentInfo->mMessageIndex;
-              if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
-                mDelayedContentAddList.insert(id);
-
-//              for (int t=0; t<1 /*CONTENT_LIST_COUNT*/; t++)
-//                mContentInfoList[t].addContentInfo(contentInfo);
+              if (mContentInfoList[0].addContentInfo(contentInfo) == contentInfo)
+              {
+                // Addition ok
+                ulonglong id = (((ulonglong)contentInfo->mFileId) << 32) + contentInfo->mMessageIndex;
+                if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
+                  mDelayedContentAddList.insert(id);
+              }
+              else
+              {
+                // Additon failed. The content probably exists
+                delete contentInfo;
+              }
             }
             else
             {
@@ -4647,22 +4659,34 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
                 T::ContentInfo *oInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
                 if (oInfo == NULL  ||  (oInfo != NULL  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
                 {
-                  T::ContentInfo *cInfo = info->duplicate();
-
-                  auto it = mContentTimeCache.find(cInfo->mGenerationId);
-                  if (it != mContentTimeCache.end())
+                  if (oInfo != NULL  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
                   {
-                    if (it->second.find(cInfo->mForecastTime) == it->second.end())
-                      it->second.insert(cInfo->mForecastTime);
+                    // We should remove the old content before the addition
                   }
+                  else
+                  {
+                    T::ContentInfo *cInfo = info->duplicate();
 
-                  mContentInfoList[0].addContentInfo(cInfo);
-                  ulonglong id = (((ulonglong)cInfo->mFileId) << 32) + cInfo->mMessageIndex;
-                  if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
-                    mDelayedContentAddList.insert(id);
+                    auto it = mContentTimeCache.find(cInfo->mGenerationId);
+                    if (it != mContentTimeCache.end())
+                    {
+                      if (it->second.find(cInfo->mForecastTime) == it->second.end())
+                        it->second.insert(cInfo->mForecastTime);
+                    }
 
-                  //for (int t=0; t<CONTENT_LIST_COUNT; t++)
-                  //  mContentInfoList[t].addContentInfo(cInfo);
+                    if (mContentInfoList[0].addContentInfo(cInfo) == cInfo)
+                    {
+                      // Addition ok
+                      ulonglong id = (((ulonglong)cInfo->mFileId) << 32) + cInfo->mMessageIndex;
+                      if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
+                        mDelayedContentAddList.insert(id);
+                    }
+                    else
+                    {
+                      // Addition failed
+                      delete cInfo;
+                    }
+                  }
                 }
               }
             }
@@ -4765,19 +4789,27 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
             T::ContentInfo *oInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
             if (oInfo == NULL  ||  (oInfo != NULL  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
             {
-              T::ContentInfo *cInfo = info->duplicate();
-
-              mContentInfoList[0].addContentInfo(cInfo);
-              ulonglong id = (((ulonglong)cInfo->mFileId) << 32) + cInfo->mMessageIndex;
-              if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
-                mDelayedContentAddList.insert(id);
-  /*
-              for (int t=0; t<CONTENT_LIST_COUNT; t++)
+              if (oInfo != NULL  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
               {
-                if (mContentInfoListEnabled[t])
-                  mContentInfoList[t].addContentInfo(cInfo);
+                // We should remove the old content before the addition
               }
-  */
+              else
+              {
+                T::ContentInfo *cInfo = info->duplicate();
+
+                if (mContentInfoList[0].addContentInfo(cInfo) == cInfo)
+                {
+                  // Addition ok
+                  ulonglong id = (((ulonglong)cInfo->mFileId) << 32) + cInfo->mMessageIndex;
+                  if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
+                    mDelayedContentAddList.insert(id);
+                }
+                else
+                {
+                  // Addtion failed
+                  delete cInfo;
+                }
+              }
             }
           }
         }
@@ -5103,11 +5135,18 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
       //contentInfo.print(std::cout,0,0);
       T::ContentInfo *cInfo = contentInfo.duplicate();
 
-      for (int t=0; t<CONTENT_LIST_COUNT; t++)
+      T::ContentInfo *aInfo = mContentInfoList[0].addContentInfo(cInfo);
+      if (aInfo != cInfo)
+      {
+        // Addition failed. The content probably exists
+        delete cInfo;
+      }
+
+      for (int t=1; t<CONTENT_LIST_COUNT; t++)
       {
         if (mContentInfoListEnabled[t])
         {
-          mContentInfoList[t].addContentInfo(cInfo);
+          mContentInfoList[t].addContentInfo(aInfo);
         }
       }
     }
@@ -5476,7 +5515,7 @@ void CacheImplementation::processEvents(bool eventThread)
       T::FileInfoList list;
       list.setReleaseObjects(false);
 
-      AutoWriteLock lock(mFileInfoList.getModificationLockPtr(),__FILE__,__LINE__);
+      AutoWriteLock lock(&mFileModificationLock,__FILE__,__LINE__);
 
       for (auto id = mDelayedFileAddList.begin(); id != mDelayedFileAddList.end(); ++id)
       {
@@ -5485,7 +5524,7 @@ void CacheImplementation::processEvents(bool eventThread)
           list.addFileInfo(fInfo);
       }
 
-      mFileInfoListByName.addFileInfoList(list);
+      mFileInfoListByName.addFileInfoListNoLock(list);
       mDelayedFileAddList.clear();
       PRINT_DATA(mDebugLog,"  -- File addition ready\n");
 
@@ -5504,7 +5543,7 @@ void CacheImplementation::processEvents(bool eventThread)
       // We have to lock the content list 0 for the whole operation, because
       // other content lists are using the same pointers.
 
-      AutoWriteLock lock(mContentInfoList[0].getModificationLockPtr(),__FILE__,__LINE__);
+      AutoWriteLock lock(&mContentModificationLock,__FILE__,__LINE__);
 
       for (auto id = mDelayedContentAddList.begin(); id != mDelayedContentAddList.end(); ++id)
       {
@@ -5522,7 +5561,7 @@ void CacheImplementation::processEvents(bool eventThread)
         {
           PRINT_DATA(mDebugLog,"  -- Adding content to content list %u (%u + %u)\n",t,mContentInfoList[t].getLength(),list.getLength());
 
-          mContentInfoList[t].addContentInfoList(list);
+          mContentInfoList[t].addContentInfoListNoLock(list);
         }
       }
 
@@ -5615,7 +5654,7 @@ void CacheImplementation::eventProcessingThread()
 
 void CacheImplementation::saveData()
 {
-  FUNCTION_TRACE
+  //FUNCTION_TRACE
   try
   {
     if (mSaveEnabled)

@@ -2,6 +2,9 @@
 #include <grid-files/common/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/AutoThreadLock.h>
+#include <grid-files/common/ShowFunction.h>
+
+#define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
 
 namespace SmartMet
@@ -12,6 +15,7 @@ namespace T
 
 EventInfoList::EventInfoList()
 {
+  FUNCTION_TRACE
   try
   {
     mMaxLength = 3000000;
@@ -31,6 +35,7 @@ EventInfoList::EventInfoList()
 
 EventInfoList::EventInfoList(EventInfoList& eventInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     eventInfoList.lock();
@@ -60,6 +65,7 @@ EventInfoList::EventInfoList(EventInfoList& eventInfoList)
 
 EventInfoList::~EventInfoList()
 {
+  FUNCTION_TRACE
   try
   {
     clear();
@@ -75,6 +81,7 @@ EventInfoList::~EventInfoList()
 
 void EventInfoList::operator=(EventInfoList& eventInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     if (&eventInfoList == this)
@@ -106,6 +113,7 @@ void EventInfoList::operator=(EventInfoList& eventInfoList)
 
 EventInfo* EventInfoList::getFirstEvent()
 {
+  FUNCTION_TRACE
   try
   {
     return firstItem;
@@ -121,6 +129,7 @@ EventInfo* EventInfoList::getFirstEvent()
 
 EventInfo* EventInfoList::getLastEvent()
 {
+  FUNCTION_TRACE
   try
   {
     return lastItem;
@@ -136,6 +145,7 @@ EventInfo* EventInfoList::getLastEvent()
 
 void EventInfoList::addEventInfo(EventInfo *dataEventInfo)
 {
+  FUNCTION_TRACE
   try
   {
     while (mLength > mMaxLength)
@@ -171,6 +181,7 @@ void EventInfoList::addEventInfo(EventInfo *dataEventInfo)
 
 void EventInfoList::addEventInfoToBegin(EventInfo *dataEventInfo)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -203,6 +214,7 @@ void EventInfoList::addEventInfoToBegin(EventInfo *dataEventInfo)
 
 void EventInfoList::deleteFirstEvent()
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -232,6 +244,7 @@ void EventInfoList::deleteFirstEvent()
 
 void EventInfoList::deleteLastEvent()
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -259,6 +272,7 @@ void EventInfoList::deleteLastEvent()
 
 void EventInfoList::clear()
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -286,6 +300,7 @@ void EventInfoList::clear()
 
 uint EventInfoList::getLength()
 {
+  FUNCTION_TRACE
   try
   {
     return mLength;
@@ -302,6 +317,7 @@ uint EventInfoList::getLength()
 
 uint EventInfoList::getMaxLength()
 {
+  FUNCTION_TRACE
   try
   {
     return mMaxLength;
@@ -318,6 +334,7 @@ uint EventInfoList::getMaxLength()
 
 EventInfo* EventInfoList::getEventInfo(unsigned long long eventId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -345,6 +362,7 @@ EventInfo* EventInfoList::getEventInfo(unsigned long long eventId)
 
 void EventInfoList::getEventInfoList(T::EventId startEventId,uint maxRecords,T::EventInfoList& eventInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -385,6 +403,7 @@ void EventInfoList::getEventInfoList(T::EventId startEventId,uint maxRecords,T::
 
 void EventInfoList::setMaxLength(uint maxLength)
 {
+  FUNCTION_TRACE
   try
   {
     mMaxLength = maxLength;
@@ -405,6 +424,7 @@ void EventInfoList::setMaxLength(uint maxLength)
 
 void EventInfoList::lock()
 {
+  FUNCTION_TRACE
   try
   {
     return mThreadLock.lock();
@@ -421,6 +441,7 @@ void EventInfoList::lock()
 
 void EventInfoList::unlock()
 {
+  FUNCTION_TRACE
   try
   {
     return mThreadLock.unlock();
@@ -437,6 +458,7 @@ void EventInfoList::unlock()
 
 void EventInfoList::writeToFile(std::string filename)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -469,6 +491,7 @@ void EventInfoList::writeToFile(std::string filename)
 
 void EventInfoList::print(std::ostream& stream,uint level,uint optionFlags)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
