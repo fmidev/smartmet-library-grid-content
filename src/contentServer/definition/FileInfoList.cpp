@@ -5,6 +5,9 @@
 #include <grid-files/common/AutoWriteLock.h>
 #include <grid-files/common/AutoReadLock.h>
 #include <grid-files/common/AutoThreadLock.h>
+#include <grid-files/common/ShowFunction.h>
+
+#define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
 
 namespace SmartMet
@@ -36,8 +39,10 @@ int fileInfo_compare(const void *_val1,const void *_val2)
 
 FileInfoList::FileInfoList()
 {
+  FUNCTION_TRACE
   try
   {
+    mModificationLockPtr = &mModificationLock;
     mComparisonMethod = FileInfo::ComparisonMethod::none;
     mReleaseObjects = true;
     mSize = 100;
@@ -61,10 +66,15 @@ FileInfoList::FileInfoList()
 
 FileInfoList::FileInfoList(FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
+    mModificationLockPtr = &mModificationLock;
     mReleaseObjects = true;
-    fileInfoList.lock();
+
+    if (fileInfoList.getModificationLockPtr() != mModificationLockPtr)
+      fileInfoList.lock();
+
     mSize = fileInfoList.mSize;
     mLength = fileInfoList.mLength;
     mArray = new FileInfoPtr[mSize];
@@ -77,7 +87,9 @@ FileInfoList::FileInfoList(FileInfoList& fileInfoList)
         mArray[t] = NULL;
     }
     mComparisonMethod = fileInfoList.mComparisonMethod;
-    fileInfoList.unlock();
+
+    if (fileInfoList.getModificationLockPtr() != mModificationLockPtr)
+      fileInfoList.unlock();
   }
   catch (...)
   {
@@ -92,6 +104,7 @@ FileInfoList::FileInfoList(FileInfoList& fileInfoList)
 
 FileInfoList::~FileInfoList()
 {
+  FUNCTION_TRACE
   try
   {
     clear();
@@ -108,6 +121,7 @@ FileInfoList::~FileInfoList()
 
 void FileInfoList::operator=(FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     if (&fileInfoList == this)
@@ -115,9 +129,11 @@ void FileInfoList::operator=(FileInfoList& fileInfoList)
 
     clear();
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
-    fileInfoList.lock();
+    if (fileInfoList.getModificationLockPtr() != mModificationLockPtr)
+      fileInfoList.lock();
+
     mSize = fileInfoList.mSize;
     mLength = fileInfoList.mLength;
     mArray = new FileInfoPtr[mSize];
@@ -130,7 +146,9 @@ void FileInfoList::operator=(FileInfoList& fileInfoList)
         mArray[t] = info;
     }
     mComparisonMethod = fileInfoList.mComparisonMethod;
-    fileInfoList.unlock();
+
+    if (fileInfoList.getModificationLockPtr() != mModificationLockPtr)
+      fileInfoList.unlock();
   }
   catch (...)
   {
@@ -145,6 +163,7 @@ void FileInfoList::operator=(FileInfoList& fileInfoList)
 
 void FileInfoList::addFileInfo(FileInfo *fileInfo)
 {
+  FUNCTION_TRACE
   try
   {
     if (mArray == NULL  ||  mLength == mSize)
@@ -152,7 +171,7 @@ void FileInfoList::addFileInfo(FileInfo *fileInfo)
       increaseSize(mSize + mSize/5 + 10);
     }
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == FileInfo::ComparisonMethod::none)
     {
@@ -193,9 +212,27 @@ void FileInfoList::addFileInfo(FileInfo *fileInfo)
 
 void FileInfoList::addFileInfoList(FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    addFileInfoListNoLock(fileInfoList);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void FileInfoList::addFileInfoListNoLock(FileInfoList& fileInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     uint len1 = mLength;
     uint len2 = fileInfoList.getLength();
 
@@ -289,9 +326,10 @@ void FileInfoList::addFileInfoList(FileInfoList& fileInfoList)
 
 void FileInfoList::clear()
 {
+  FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     if (mArray != NULL)
     {
       for (uint t=0; t<mLength; t++)
@@ -325,9 +363,10 @@ void FileInfoList::clear()
 
 void FileInfoList::increaseSize(uint newSize)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     if (mArray == NULL)
     {
       mSize = newSize;
@@ -370,9 +409,10 @@ void FileInfoList::increaseSize(uint newSize)
 
 FileInfo* FileInfoList::getFileInfoById(uint fileId)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     FileInfo search;
     search.mFileId = fileId;
@@ -398,6 +438,7 @@ FileInfo* FileInfoList::getFileInfoById(uint fileId)
 
 FileInfo* FileInfoList::getFileInfoByIdNoLock(uint fileId)
 {
+  FUNCTION_TRACE
   try
   {
     FileInfo search;
@@ -424,9 +465,10 @@ FileInfo* FileInfoList::getFileInfoByIdNoLock(uint fileId)
 
 void FileInfoList::markFileInfoDeletedById(uint fileId)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     FileInfo search;
     search.mFileId = fileId;
@@ -452,9 +494,10 @@ void FileInfoList::markFileInfoDeletedById(uint fileId)
 
 int FileInfoList::getClosestIndex(FileInfo::ComparisonMethod comparisonMethod,FileInfo& fileInfo)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     return getClosestIndexNoLock(comparisonMethod,fileInfo);
   }
   catch (...)
@@ -469,6 +512,7 @@ int FileInfoList::getClosestIndex(FileInfo::ComparisonMethod comparisonMethod,Fi
 
 int FileInfoList::getClosestIndexNoLock(FileInfo::ComparisonMethod comparisonMethod,FileInfo& fileInfo)
 {
+  FUNCTION_TRACE
   try
   {
     if (mArray == NULL  ||  mLength == 0)
@@ -544,9 +588,10 @@ int FileInfoList::getClosestIndexNoLock(FileInfo::ComparisonMethod comparisonMet
 
 FileInfo* FileInfoList::getFileInfoByName(std::string filename)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     FileInfo search;
     search.mName = filename;
@@ -581,9 +626,10 @@ FileInfo* FileInfoList::getFileInfoByName(std::string filename)
 
 FileInfo* FileInfoList::getFileInfoByIndex(uint index)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     if (index > mLength)
       return NULL;
 
@@ -603,6 +649,7 @@ FileInfo* FileInfoList::getFileInfoByIndex(uint index)
 
 void FileInfoList::getFileInfoList(uint startFileId,uint maxRecords,FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
@@ -611,7 +658,7 @@ void FileInfoList::getFileInfoList(uint startFileId,uint maxRecords,FileInfoList
       return;
     }
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint startIdx = 0;
     uint sz = getLength();
 
@@ -648,9 +695,10 @@ void FileInfoList::getFileInfoList(uint startFileId,uint maxRecords,FileInfoList
 
 void FileInfoList::getFileInfoListByProducerId(uint producerId,FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint sz = getLength();
 
     for (uint t=0; t<sz; t++)
@@ -677,6 +725,7 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,FileInfoList& fil
 
 void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
@@ -685,7 +734,7 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,
       return;
     }
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint startIdx = 0;
     uint sz = getLength();
 
@@ -722,9 +771,10 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,
 
 void FileInfoList::getFileInfoListByGenerationId(uint generationId,FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint sz = getLength();
 
     for (uint t=0; t<sz; t++)
@@ -751,6 +801,7 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,FileInfoList&
 
 void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
@@ -759,7 +810,7 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFil
       return;
     }
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint startIdx = 0;
     uint sz = getLength();
 
@@ -796,9 +847,10 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFil
 
 void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint sz = getLength();
 
     for (uint t=0; t<sz; t++)
@@ -825,6 +877,7 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,FileInfoList& fil
 
 void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,uint maxRecords,FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
@@ -833,7 +886,7 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,
       return;
     }
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint startIdx = 0;
     uint sz = getLength();
 
@@ -870,9 +923,10 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,
 
 void FileInfoList::getFileInfoListBySourceId(uint sourceId,FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint sz = getLength();
 
     for (uint t=0; t<sz; t++)
@@ -899,6 +953,7 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,FileInfoList& fileInf
 
 void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
@@ -907,7 +962,7 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,uint
       return;
     }
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint startIdx = 0;
     uint sz = getLength();
 
@@ -944,9 +999,10 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,uint
 
 uint FileInfoList::getFileInfoCountByProducerId(uint producerId)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -971,9 +1027,10 @@ uint FileInfoList::getFileInfoCountByProducerId(uint producerId)
 
 uint FileInfoList::getFileInfoCountByGenerationId(uint generationId)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -998,9 +1055,10 @@ uint FileInfoList::getFileInfoCountByGenerationId(uint generationId)
 
 uint FileInfoList::getFileInfoCountBySourceId(uint sourceId)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -1025,6 +1083,7 @@ uint FileInfoList::getFileInfoCountBySourceId(uint sourceId)
 
 FileInfo* FileInfoList::getFileInfoByIndexNoCheck(uint index)
 {
+  FUNCTION_TRACE
   try
   {
     return mArray[index];
@@ -1040,6 +1099,7 @@ FileInfo* FileInfoList::getFileInfoByIndexNoCheck(uint index)
 
 uint FileInfoList::getLength()
 {
+  FUNCTION_TRACE
   try
   {
     return mLength;
@@ -1056,9 +1116,10 @@ uint FileInfoList::getLength()
 
 bool FileInfoList::deleteFileInfoById(uint fileId)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     FileInfo search;
     search.mFileId = fileId;
@@ -1094,9 +1155,10 @@ bool FileInfoList::deleteFileInfoById(uint fileId)
 
 bool FileInfoList::deleteFileInfoByName(std::string filename)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     FileInfo search;
     search.mName = filename;
@@ -1131,9 +1193,10 @@ bool FileInfoList::deleteFileInfoByName(std::string filename)
 
 uint FileInfoList::deleteFileInfoByGroupFlags(uint groupFlags)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1169,9 +1232,10 @@ uint FileInfoList::deleteFileInfoByGroupFlags(uint groupFlags)
 
 uint FileInfoList::deleteFileInfoByProducerId(uint producerId)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1209,9 +1273,10 @@ uint FileInfoList::deleteFileInfoByProducerId(uint producerId)
 
 uint FileInfoList::deleteMarkedFiles()
 {
+  FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1249,9 +1314,10 @@ uint FileInfoList::deleteMarkedFiles()
 
 uint FileInfoList::deleteFileInfoByGenerationId(uint generationId)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1288,9 +1354,10 @@ uint FileInfoList::deleteFileInfoByGenerationId(uint generationId)
 
 uint FileInfoList::deleteFileInfoByGenerationIdList(std::set<uint>& generationIdList)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1327,9 +1394,10 @@ uint FileInfoList::deleteFileInfoByGenerationIdList(std::set<uint>& generationId
 
 bool FileInfoList::deleteFileInfoByIndex(uint index)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (index >= mLength)
       return false;
@@ -1360,9 +1428,10 @@ bool FileInfoList::deleteFileInfoByIndex(uint index)
 
 uint FileInfoList::deleteFileInfoBySourceId(uint sourceId)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1400,9 +1469,10 @@ uint FileInfoList::deleteFileInfoBySourceId(uint sourceId)
 
 uint FileInfoList::deleteFileInfoByFileIdList(std::set<uint>& fileIdList)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1440,9 +1510,10 @@ uint FileInfoList::deleteFileInfoByFileIdList(std::set<uint>& fileIdList)
 
 uint FileInfoList::deleteVirtualFiles()
 {
+  FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1478,11 +1549,32 @@ uint FileInfoList::deleteVirtualFiles()
 
 
 
-ModificationLock* FileInfoList::getModificationLockPtr()
+void FileInfoList::setModificationLockPtr(ModificationLock* modificationLockPtr)
 {
+  FUNCTION_TRACE
   try
   {
-    return &mModificationLock;
+    if (modificationLockPtr != NULL)
+      mModificationLockPtr = modificationLockPtr;
+    else
+      mModificationLockPtr = &mModificationLock;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+ModificationLock* FileInfoList::getModificationLockPtr()
+{
+  FUNCTION_TRACE
+  try
+  {
+    return mModificationLockPtr;
   }
   catch (...)
   {
@@ -1496,9 +1588,10 @@ ModificationLock* FileInfoList::getModificationLockPtr()
 
 void FileInfoList::lock()
 {
+  FUNCTION_TRACE
   try
   {
-    return mModificationLock.lock();
+    return mModificationLockPtr->lock();
   }
   catch (...)
   {
@@ -1512,9 +1605,10 @@ void FileInfoList::lock()
 
 void FileInfoList::unlock()
 {
+  FUNCTION_TRACE
   try
   {
-    return mModificationLock.unlock();
+    return mModificationLockPtr->unlock();
   }
   catch (...)
   {
@@ -1528,6 +1622,7 @@ void FileInfoList::unlock()
 
 bool FileInfoList::getReleaseObjects()
 {
+  FUNCTION_TRACE
   try
   {
     return mReleaseObjects;
@@ -1543,6 +1638,7 @@ bool FileInfoList::getReleaseObjects()
 
 void FileInfoList::setReleaseObjects(bool releaseObjects)
 {
+  FUNCTION_TRACE
   try
   {
     mReleaseObjects = releaseObjects;
@@ -1559,9 +1655,10 @@ void FileInfoList::setReleaseObjects(bool releaseObjects)
 
 void FileInfoList::setComparisonMethod(FileInfo::ComparisonMethod comparisonMethod)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     mComparisonMethod = comparisonMethod;
     if (mLength == 0)
       return;
@@ -1582,9 +1679,10 @@ void FileInfoList::setComparisonMethod(FileInfo::ComparisonMethod comparisonMeth
 
 void FileInfoList::sort(FileInfo::ComparisonMethod comparisonMethod)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     mComparisonMethod = comparisonMethod;
 
     AutoThreadLock globalLock(&FileInfoList_sortLock);
@@ -1605,6 +1703,7 @@ void FileInfoList::sort(FileInfo::ComparisonMethod comparisonMethod)
 
 void FileInfoList::writeToFile(std::string filename)
 {
+  FUNCTION_TRACE
   try
   {
     writeToFile(filename,"w");
@@ -1621,9 +1720,10 @@ void FileInfoList::writeToFile(std::string filename)
 
 void FileInfoList::writeToFile(std::string filename,const char *filemode)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     FILE *file = fopen(filename.c_str(),filemode);
     if (file == NULL)
@@ -1651,9 +1751,10 @@ void FileInfoList::writeToFile(std::string filename,const char *filemode)
 
 void FileInfoList::print(std::ostream& stream,uint level,uint optionFlags)
 {
+  FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     stream << space(level) << "FileInfoList\n";
     for (uint t=0; t<mLength; t++)

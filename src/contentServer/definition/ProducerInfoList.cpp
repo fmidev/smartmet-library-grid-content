@@ -2,6 +2,9 @@
 #include <grid-files/common/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/AutoThreadLock.h>
+#include <grid-files/common/ShowFunction.h>
+
+#define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
 
 namespace SmartMet
@@ -12,6 +15,7 @@ namespace T
 
 ProducerInfoList::ProducerInfoList()
 {
+  FUNCTION_TRACE
   try
   {
   }
@@ -27,6 +31,7 @@ ProducerInfoList::ProducerInfoList()
 
 ProducerInfoList::ProducerInfoList(ProducerInfoList& producerInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     producerInfoList.lock();
@@ -52,6 +57,7 @@ ProducerInfoList::ProducerInfoList(ProducerInfoList& producerInfoList)
 
 ProducerInfoList::~ProducerInfoList()
 {
+  FUNCTION_TRACE
   try
   {
     clear();
@@ -68,6 +74,7 @@ ProducerInfoList::~ProducerInfoList()
 
 void ProducerInfoList::operator=(ProducerInfoList& producerInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     if (&producerInfoList == this)
@@ -96,6 +103,7 @@ void ProducerInfoList::operator=(ProducerInfoList& producerInfoList)
 
 void ProducerInfoList::addProducerInfo(ProducerInfo *producerInfo)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -113,6 +121,7 @@ void ProducerInfoList::addProducerInfo(ProducerInfo *producerInfo)
 
 void ProducerInfoList::clear()
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -134,6 +143,7 @@ void ProducerInfoList::clear()
 
 bool ProducerInfoList::deleteProducerInfoById(uint producerId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -162,6 +172,7 @@ bool ProducerInfoList::deleteProducerInfoById(uint producerId)
 
 void ProducerInfoList::deleteProducerInfoListBySourceId(uint sourceId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -188,6 +199,7 @@ void ProducerInfoList::deleteProducerInfoListBySourceId(uint sourceId)
 
 ProducerInfo* ProducerInfoList::getProducerInfoById(uint producerId)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -212,6 +224,7 @@ ProducerInfo* ProducerInfoList::getProducerInfoById(uint producerId)
 
 ProducerInfo* ProducerInfoList::getProducerInfoByName(std::string producerName)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -236,6 +249,7 @@ ProducerInfo* ProducerInfoList::getProducerInfoByName(std::string producerName)
 
 ProducerInfo* ProducerInfoList::getProducerInfoByIndex(uint index)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -256,6 +270,7 @@ ProducerInfo* ProducerInfoList::getProducerInfoByIndex(uint index)
 
 ProducerInfo* ProducerInfoList::getProducerInfoByIndexNoCheck(uint index)
 {
+  FUNCTION_TRACE
   try
   {
     return mList.at(index);
@@ -272,6 +287,7 @@ ProducerInfo* ProducerInfoList::getProducerInfoByIndexNoCheck(uint index)
 
 void ProducerInfoList::getProducerInfoListBySourceId(uint sourceId,ProducerInfoList& producerInfoList)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -296,6 +312,7 @@ void ProducerInfoList::getProducerInfoListBySourceId(uint sourceId,ProducerInfoL
 
 uint ProducerInfoList::getLength()
 {
+  FUNCTION_TRACE
   try
   {
     return (uint)mList.size();
@@ -312,6 +329,7 @@ uint ProducerInfoList::getLength()
 
 void ProducerInfoList::sortByName()
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -348,6 +366,7 @@ void ProducerInfoList::sortByName()
 
 void ProducerInfoList::lock()
 {
+  FUNCTION_TRACE
   try
   {
     return mThreadLock.lock();
@@ -364,6 +383,7 @@ void ProducerInfoList::lock()
 
 void ProducerInfoList::unlock()
 {
+  FUNCTION_TRACE
   try
   {
     return mThreadLock.unlock();
@@ -380,6 +400,7 @@ void ProducerInfoList::unlock()
 
 void ProducerInfoList::writeToFile(std::string filename)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);
@@ -411,6 +432,7 @@ void ProducerInfoList::writeToFile(std::string filename)
 
 void ProducerInfoList::print(std::ostream& stream,uint level,uint optionFlags)
 {
+  FUNCTION_TRACE
   try
   {
     AutoThreadLock lock(&mThreadLock);

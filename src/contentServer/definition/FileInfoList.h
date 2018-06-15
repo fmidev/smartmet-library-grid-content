@@ -24,6 +24,7 @@ class FileInfoList
 
      void       addFileInfo(FileInfo *fileInfo);
      void       addFileInfoList(FileInfoList& fileInfoList);
+     void       addFileInfoListNoLock(FileInfoList& fileInfoList);
      void       clear();
      bool       deleteFileInfoById(uint fileId);
      uint       deleteFileInfoByGroupFlags(uint groupFlags);
@@ -70,6 +71,7 @@ class FileInfoList
      void       writeToFile(std::string filename,const char *filemode);
 
      ModificationLock*  getModificationLockPtr();
+     void               setModificationLockPtr(ModificationLock* modificationLockPtr);
 
   protected:
 
@@ -78,6 +80,7 @@ class FileInfoList
      uint                       mLength;
      bool                       mReleaseObjects;
      ModificationLock           mModificationLock;
+     ModificationLock*          mModificationLockPtr;
      FileInfo::ComparisonMethod mComparisonMethod;
 };
 

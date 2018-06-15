@@ -14,6 +14,7 @@
 
 namespace SmartMet
 {
+
 namespace T
 {
 
@@ -44,6 +45,7 @@ ContentInfoList::ContentInfoList()
   FUNCTION_TRACE
   try
   {
+    mModificationLockPtr = &mModificationLock;
     mReleaseObjects = true;
     mComparisonMethod = ContentInfo::ComparisonMethod::none;
     mSize = 100;
@@ -70,7 +72,9 @@ ContentInfoList::ContentInfoList(ContentInfoList& contentInfoList)
   FUNCTION_TRACE
   try
   {
-    contentInfoList.lock();
+    mModificationLockPtr = &mModificationLock;
+    if (contentInfoList.getModificationLockPtr() != mModificationLockPtr)
+      contentInfoList.lock();
 
     mReleaseObjects = true;
     mArray = NULL;
@@ -94,7 +98,8 @@ ContentInfoList::ContentInfoList(ContentInfoList& contentInfoList)
         }
       }
     }
-    contentInfoList.unlock();
+    if (contentInfoList.getModificationLockPtr() != mModificationLockPtr)
+      contentInfoList.unlock();
   }
   catch (...)
   {
@@ -112,6 +117,7 @@ ContentInfoList::ContentInfoList(const ContentInfoList& contentInfoList)
   FUNCTION_TRACE
   try
   {
+    mModificationLockPtr = &mModificationLock;
     //contentInfoList.lock();
 
     mReleaseObjects = true;
@@ -176,8 +182,11 @@ void ContentInfoList::operator=(ContentInfoList& contentInfoList)
 
     clear();
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
-    contentInfoList.lock();
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+
+    if (contentInfoList.getModificationLockPtr() != mModificationLockPtr)
+      contentInfoList.lock();
+
     mArray = NULL;
     mSize = contentInfoList.getSize();
     mLength = contentInfoList.getLength();
@@ -202,7 +211,8 @@ void ContentInfoList::operator=(ContentInfoList& contentInfoList)
         }
       }
     }
-    contentInfoList.unlock();
+    if (contentInfoList.getModificationLockPtr() != mModificationLockPtr)
+      contentInfoList.unlock();
   }
   catch (...)
   {
@@ -225,7 +235,7 @@ void ContentInfoList::operator=(const ContentInfoList& contentInfoList)
 
     clear();
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     //contentInfoList.lock();
     mArray = NULL;
     mSize = contentInfoList.getSize();
@@ -264,12 +274,12 @@ void ContentInfoList::operator=(const ContentInfoList& contentInfoList)
 
 
 
-void ContentInfoList::addContentInfo(ContentInfo *contentInfo)
+ContentInfo* ContentInfoList::addContentInfo(ContentInfo *contentInfo)
 {
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mArray == NULL  ||  mLength == mSize)
     {
@@ -280,20 +290,17 @@ void ContentInfoList::addContentInfo(ContentInfo *contentInfo)
     {
       mArray[mLength] = contentInfo;
       mLength++;
-      return;
+      return contentInfo;
     }
 
     int idx = getClosestIndexNoLock(mComparisonMethod,*contentInfo);
 
     if (idx < (int)mLength  &&  mArray[idx] != NULL  &&   mArray[idx]->compare(mComparisonMethod,contentInfo) == 0)
     {
-      // If content with the same id exists, then we should replace it.
+      // If content with the same id exists, we should not add the new contet, because other contentLists might point
+      // the existing content record;
 
-      if (mReleaseObjects)
-        delete mArray[idx];
-
-      mArray[idx] = contentInfo;
-      return;
+      return mArray[idx];
     }
 
     while (idx < (int)mLength  &&  mArray[idx] != NULL  &&   mArray[idx]->compare(mComparisonMethod,contentInfo) < 0)
@@ -305,7 +312,7 @@ void ContentInfoList::addContentInfo(ContentInfo *contentInfo)
     {
       mArray[mLength] = contentInfo;
       mLength++;
-      return;
+      return contentInfo;
     }
 
     if (idx < (int)mLength)
@@ -313,6 +320,7 @@ void ContentInfoList::addContentInfo(ContentInfo *contentInfo)
 
     mArray[idx] = contentInfo;
     mLength++;
+    return contentInfo;
   }
   catch (...)
   {
@@ -329,7 +337,24 @@ void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    addContentInfoListNoLock(contentInfoList);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
+void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     uint len1 = mLength;
     uint len2 = contentInfoList.getLength();
 
@@ -356,12 +381,14 @@ void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
       return;
     }
 
-    uint newSize = len1 + len2;
-    ContentInfoPtr *newArray = new ContentInfoPtr[newSize+100];
+    uint newSize = len1 + len2 + 100;
+    ContentInfoPtr *newArray = new ContentInfoPtr[newSize];
     uint a = 0;
     uint b = 0;
 
     contentInfoList.sort(mComparisonMethod);
+
+    uint cnt = 0;
 
     for (uint t=0; t<newSize; t++)
     {
@@ -374,9 +401,15 @@ void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
       if (b < len2)
         cInfo2 = contentInfoList.getContentInfoByIndex(b);
 
+      if (cInfo1 == NULL  &&  cInfo2 == NULL)
+      {
+        newArray[t] = NULL;
+      }
+      else
       if (cInfo1 != NULL  &&  cInfo2 == NULL)
       {
         newArray[t] = cInfo1;
+        cnt++;
         a++;
       }
       else
@@ -386,12 +419,15 @@ void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
           newArray[t] = cInfo2->duplicate();
         else
           newArray[t] = cInfo2;
+
+        cnt++;
         b++;
       }
       else
       if (cInfo1 != NULL  &&  cInfo2 != NULL)
       {
-        if (cInfo1->compare(mComparisonMethod,cInfo2) <= 0)
+        //if (cInfo1->compare(mComparisonMethod,cInfo2) <= 0)
+        if (cInfo2->compare(mComparisonMethod,cInfo1) > 0)
         {
           newArray[t] = cInfo1;
           a++;
@@ -405,11 +441,12 @@ void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
 
           b++;
         }
+        cnt++;
       }
     }
 
-    mSize = newSize+100;
-    mLength = newSize;
+    mSize = newSize;
+    mLength = cnt;
 
     delete mArray;
     mArray = newArray;
@@ -475,7 +512,7 @@ void ContentInfoList::clear()
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     if (mArray != NULL)
     {
       for (uint t=0; t<mSize; t++)
@@ -510,7 +547,7 @@ bool ContentInfoList::containsSameForecastTimes()
   {
     std::set<std::string> timeList;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     for (uint t=0; t<mLength; t++)
     {
@@ -541,7 +578,7 @@ uint ContentInfoList::deleteContentInfoByFileId(uint fileId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     uint p = 0;
     uint count = 0;
@@ -580,7 +617,7 @@ uint ContentInfoList::deleteMarkedContent()
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     uint p = 0;
     uint count = 0;
@@ -619,7 +656,7 @@ uint ContentInfoList::markDeletedByFileId(uint fileId)
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     uint cnt = 0;
     if (mComparisonMethod == ContentInfo::ComparisonMethod::file_message)
@@ -671,7 +708,7 @@ uint ContentInfoList::deleteContentInfo(ContentInfo& contentInfo)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     int idx = getClosestIndexNoLock(mComparisonMethod,contentInfo);
 
@@ -719,7 +756,7 @@ uint ContentInfoList::deleteContentInfoByFileIdAndMessageIndex(uint fileId,uint 
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     uint p = 0;
     uint count = 0;
@@ -757,7 +794,7 @@ uint ContentInfoList::deleteContentInfoByGroupFlags(uint groupFlags)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint p = 0;
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -768,6 +805,7 @@ uint ContentInfoList::deleteContentInfoByGroupFlags(uint groupFlags)
       {
         if (mReleaseObjects)
           delete info;
+
         count++;
       }
       else
@@ -794,7 +832,7 @@ uint ContentInfoList::deleteContentInfoByProducerId(uint producerId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint p = 0;
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -832,7 +870,7 @@ void ContentInfoList::getLevelInfoList(T::LevelInfoList& levelInfoList)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     std::set<std::string> list;
     char tmp[100];
@@ -865,7 +903,7 @@ uint ContentInfoList::deleteContentInfoByGenerationId(uint generationId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint p = 0;
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -903,7 +941,7 @@ uint ContentInfoList::deleteContentInfoByGenerationIdList(std::set<uint>& genera
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint p = 0;
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -941,7 +979,7 @@ uint ContentInfoList::deleteContentInfoByGenerationAndGeometry(uint generationId
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint p = 0;
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -979,7 +1017,7 @@ uint ContentInfoList::deleteContentInfoByGenerationGeometryAndForecastTime(uint 
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint p = 0;
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -1017,7 +1055,7 @@ uint ContentInfoList::deleteContentInfoBySourceId(uint sourceId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint p = 0;
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -1055,7 +1093,7 @@ uint ContentInfoList::deleteContentInfoByFileIdList(std::set<uint>& fileIdList)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint p = 0;
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -1093,7 +1131,7 @@ uint ContentInfoList::deleteVirtualContent()
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint p = 0;
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -1104,6 +1142,7 @@ uint ContentInfoList::deleteVirtualContent()
       {
         if (mReleaseObjects)
           delete info;
+
         count++;
       }
       else
@@ -1130,7 +1169,7 @@ void ContentInfoList::keepContentInfoByGeometryIdList(std::set<T::GeometryId>& g
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint p = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -1164,7 +1203,7 @@ void ContentInfoList::keepContentInfoByGeometryId(T::GeometryId geometryId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint p = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -1198,7 +1237,7 @@ void ContentInfoList::keepContentInfoByGroupFlags(uint groupFlags)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint p = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -1232,7 +1271,7 @@ void ContentInfoList::keepContentInfoByProducerId(uint producerId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint p = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -1266,7 +1305,7 @@ void ContentInfoList::keepContentInfoByGenerationId(uint generationId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint p = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -1300,7 +1339,7 @@ void ContentInfoList::keepContentInfoBySourceId(uint sourceId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint p = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -1337,7 +1376,7 @@ uint ContentInfoList::registerContentInfoByServerAndFileId(uint serverId,uint fi
     if (serverId >= 1  &&  serverId <= 64)
       sf = (unsigned long long)1 << (serverId-1);
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     ContentInfo contentInfo;
     contentInfo.mFileId = fileId;
@@ -1383,7 +1422,7 @@ uint ContentInfoList::unregisterContentInfoByServerId(uint serverId)
     if (serverId >= 1  &&  serverId <= 64)
       sf = (unsigned long long)1 << (serverId-1);
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -1415,7 +1454,7 @@ uint ContentInfoList::unregisterContentInfoByServerAndFileId(uint serverId,uint 
     if (serverId >= 1  &&  serverId <= 64)
       sf = (unsigned long long)1 << (serverId-1);
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     ContentInfo contentInfo;
     contentInfo.mFileId = fileId;
@@ -1460,7 +1499,7 @@ void ContentInfoList::getContentListByForecastTime(std::string forecastTime,T::C
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     ContentInfo *prevInfo = NULL;
     ContentInfo *nextInfo = NULL;
@@ -1513,10 +1552,10 @@ void ContentInfoList::getContentListByForecastTime(std::string forecastTime,T::C
 
 int ContentInfoList::getClosestIndex(ContentInfo::ComparisonMethod comparisonMethod,ContentInfo& contentInfo)
 {
-  FUNCTION_TRACE
+  //FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     return getClosestIndexNoLock(comparisonMethod,contentInfo);
   }
   catch (...)
@@ -1531,9 +1570,9 @@ int ContentInfoList::getClosestIndex(ContentInfo::ComparisonMethod comparisonMet
 
 int ContentInfoList::getClosestIndexNoLock(ContentInfo::ComparisonMethod comparisonMethod,ContentInfo& contentInfo)
 {
+  //FUNCTION_TRACE
   try
   {
-    FUNCTION_TRACE
     if (mArray == NULL  ||  mLength == 0)
       return 0;
 
@@ -1611,10 +1650,10 @@ int ContentInfoList::getClosestIndexNoLock(ContentInfo::ComparisonMethod compari
 
 ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex)
 {
-  FUNCTION_TRACE
+  //FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     ContentInfo contentInfo;
     contentInfo.mFileId = fileId;
     contentInfo.mMessageIndex = messageIndex;
@@ -1641,7 +1680,7 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,
 
 ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndexNoLock(uint fileId,uint messageIndex)
 {
-  FUNCTION_TRACE
+  //FUNCTION_TRACE
   try
   {
     ContentInfo contentInfo;
@@ -1670,10 +1709,10 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndexNoLock(uint f
 
 bool ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex,ContentInfo& contentInfo)
 {
-  FUNCTION_TRACE
+  //FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     ContentInfo contentInfo;
     contentInfo.mFileId = fileId;
     contentInfo.mMessageIndex = messageIndex;
@@ -1704,10 +1743,10 @@ bool ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,uint mes
 
 ContentInfo* ContentInfoList::getContentInfoByIndex(uint index) const
 {
-  FUNCTION_TRACE
+  //FUNCTION_TRACE
   try
   {
-    //AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    //AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     if (index >= mLength)
       return NULL;
 
@@ -1725,7 +1764,7 @@ ContentInfo* ContentInfoList::getContentInfoByIndex(uint index) const
 
 ContentInfo* ContentInfoList::getContentInfoByIndexNoCheck(uint index)
 {
-  FUNCTION_TRACE
+  //FUNCTION_TRACE
   try
   {
     return mArray[index];
@@ -1745,7 +1784,7 @@ ContentInfo* ContentInfoList::getContentInfoByParameterLevelInfo(T::ParameterLev
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     for (uint t=0; t<mLength; t++)
     {
@@ -1791,7 +1830,7 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelIn
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     for (uint t=0; t<mLength; t++)
     {
@@ -1873,7 +1912,7 @@ void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex
       return;
     }
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
     contentInfo.mMessageIndex = startMessageIndex;
@@ -1937,7 +1976,7 @@ void ContentInfoList::getContentInfoListByGroupFlags(uint groupFlags,uint startF
       return;
     }
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
     contentInfo.mMessageIndex = startMessageIndex;
@@ -1982,7 +2021,7 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint generationId,T::
   {
     paramKeyList.clear();
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     for (uint t=0; t<mLength; t++)
     {
@@ -2050,7 +2089,7 @@ void ContentInfoList::getContentGeometryIdListByGenerationId(uint generationId,s
   {
     geometryIdList.clear();
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -2081,7 +2120,7 @@ void ContentInfoList::getContentGeometryIdList(std::set<T::GeometryId>& geometry
   {
     geometryIdList.clear();
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -2112,7 +2151,7 @@ void ContentInfoList::getGenerationIdListByGeometryId(T::GeometryId geometryId,s
   {
     generationIdList.clear();
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -2141,7 +2180,7 @@ void ContentInfoList::getContentInfoListByFileId(uint fileId,ContentInfoList& co
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::file_message)
     {
@@ -2202,7 +2241,7 @@ void ContentInfoList::getContentInfoListByGeometryId(T::GeometryId geometryId,Co
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     for (uint t=0; t<mLength; t++)
     {
@@ -2231,7 +2270,7 @@ void ContentInfoList::getContentInfoListByForecastTime(std::string forecastTime,
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::starttime_fmiId_fmiLevelId_level_file_message)
     {
@@ -2290,7 +2329,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -2318,7 +2357,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::gribId_level_starttime_file_message)
     {
@@ -2433,7 +2472,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::gribId_level_starttime_file_message)
     {
@@ -2551,7 +2590,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::gribId_level_starttime_file_message)
     {
@@ -2666,7 +2705,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -2694,7 +2733,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiId_level_starttime_file_message)
     {
@@ -2809,7 +2848,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiId_level_starttime_file_message)
     {
@@ -2927,7 +2966,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiId_level_starttime_file_message)
     {
@@ -3041,7 +3080,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiName_level_starttime_file_message)
     {
@@ -3158,7 +3197,7 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(ui
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     ContentInfo info;
     info.mGenerationId = generationId;
@@ -3218,7 +3257,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiName_level_starttime_file_message)
     {
@@ -3339,7 +3378,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiName_level_starttime_file_message)
     {
@@ -3457,7 +3496,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiName_level_starttime_file_message)
     {
@@ -3572,7 +3611,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseId_level_starttime_file_message)
     {
@@ -3687,7 +3726,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseId_level_starttime_file_message)
     {
@@ -3805,7 +3844,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseId_level_starttime_file_message)
     {
@@ -3919,7 +3958,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseName_level_starttime_file_message)
     {
@@ -4034,7 +4073,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseName_level_starttime_file_message)
     {
@@ -4152,7 +4191,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseName_level_starttime_file_message)
     {
@@ -4267,7 +4306,7 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmId_level_starttime_file_message)
     {
@@ -4382,7 +4421,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmId_level_starttime_file_message)
     {
@@ -4500,7 +4539,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmId_level_starttime_file_message)
     {
@@ -4617,7 +4656,7 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmName_level_starttime_file_message)
     {
@@ -4732,7 +4771,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmName_level_starttime_file_message)
     {
@@ -4850,7 +4889,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmName_level_starttime_file_message)
     {
@@ -4987,7 +5026,7 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startF
       return;
     }
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
     contentInfo.mMessageIndex = startMessageIndex;
@@ -5048,7 +5087,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint generationId,uint st
       return;
     }
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
     contentInfo.mMessageIndex = startMessageIndex;
@@ -5109,7 +5148,7 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(uint generatio
       return;
     }
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
     contentInfo.mMessageIndex = startMessageIndex;
@@ -5148,7 +5187,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint generationId,std::st
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     for (uint t=0; t<mLength; t++)
     {
@@ -5204,7 +5243,7 @@ void ContentInfoList::getContentInfoListByServerId(uint serverId,uint startFileI
     }
 
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
     contentInfo.mMessageIndex = startMessageIndex;
@@ -5265,7 +5304,7 @@ void ContentInfoList::getContentInfoListBySourceId(uint sourceId,uint startFileI
     }
 
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
     contentInfo.mMessageIndex = startMessageIndex;
@@ -5308,7 +5347,7 @@ void ContentInfoList::getContentInfoListByServerAndFileId(uint serverId,uint fil
     if (serverId >= 1  &&  serverId <= 64)
       sf = (unsigned long long)1 << (serverId-1);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::file_message)
     {
@@ -5364,7 +5403,7 @@ void ContentInfoList::getFmiParamLevelIdListByFmiParameterId(T::ParamId fmiParam
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -5413,7 +5452,7 @@ void ContentInfoList::getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -5461,7 +5500,7 @@ void ContentInfoList::getParamLevelInfoListByFmiParameterId(T::ParamId fmiParame
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -5493,7 +5532,7 @@ void ContentInfoList::getForecastTimeList(std::set<std::string>& forecastTimeLis
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -5524,7 +5563,7 @@ void ContentInfoList::getForecastTimeListByGenerationId(uint generationId,std::s
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -5555,7 +5594,7 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(uint generation
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -5586,7 +5625,7 @@ void ContentInfoList::getForecastTimeListByProducerId(uint producerId,std::set<s
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -5629,12 +5668,32 @@ uint ContentInfoList::getLength() const
 
 
 
+void ContentInfoList::setModificationLockPtr(ModificationLock* modificationLockPtr)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (modificationLockPtr != NULL)
+      mModificationLockPtr = modificationLockPtr;
+    else
+      mModificationLockPtr = &mModificationLock;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 ModificationLock*  ContentInfoList::getModificationLockPtr()
 {
   FUNCTION_TRACE
   try
   {
-    return &mModificationLock;
+    return mModificationLockPtr;
   }
   catch (...)
   {
@@ -5668,7 +5727,7 @@ void ContentInfoList::lock()
   FUNCTION_TRACE
   try
   {
-    return mModificationLock.lock();
+    return mModificationLockPtr->lock();
   }
   catch (...)
   {
@@ -5684,7 +5743,7 @@ void ContentInfoList::unlock()
   FUNCTION_TRACE
   try
   {
-    return mModificationLock.unlock();
+    return mModificationLockPtr->unlock();
   }
   catch (...)
   {
@@ -5735,7 +5794,7 @@ void ContentInfoList::setComparisonMethod(ContentInfo::ComparisonMethod comparis
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     mComparisonMethod = comparisonMethod;
     if (mLength == 0)
       return;
@@ -5758,7 +5817,7 @@ void ContentInfoList::sort(ContentInfo::ComparisonMethod comparisonMethod)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     mComparisonMethod = comparisonMethod;
 
     AutoThreadLock globalLock(&ContentInfoList_sortLock);
@@ -5798,7 +5857,7 @@ void ContentInfoList::writeToFile(std::string filename,const char *filemode)
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     FILE *file = fopen(filename.c_str(),filemode);
     if (file == NULL)
@@ -5832,7 +5891,7 @@ void ContentInfoList::print(std::ostream& stream,uint level,uint optionFlags)
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     stream << space(level) << "ContentInfoList\n";
     for (uint t=0; t<mLength; t++)
     {
