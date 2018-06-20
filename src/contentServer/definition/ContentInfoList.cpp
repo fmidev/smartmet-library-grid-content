@@ -2037,8 +2037,25 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint generationId,T::
             break;
 
           case T::ParamKeyType::FMI_NAME:
-            if (info->mFmiParameterName > " "  &&  paramKeyList.find(info->mFmiParameterName) == paramKeyList.end())
-              paramKeyList.insert(info->mFmiParameterName);
+            if (info->mFmiParameterName > " ")
+            {
+              if (paramKeyList.find(info->mFmiParameterName) == paramKeyList.end())
+                paramKeyList.insert(info->mFmiParameterName);
+            }
+            else
+            if (info->mNewbaseParameterId > " ")
+            {
+              std::string id = "NB-" + info->mNewbaseParameterId;
+              if (paramKeyList.find(id) == paramKeyList.end())
+                paramKeyList.insert(id);
+            }
+            else
+            if (info->mGribParameterId > " ")
+            {
+              std::string id = "GRIB-" + info->mGribParameterId;
+              if (paramKeyList.find(id) == paramKeyList.end())
+                paramKeyList.insert(id);
+            }
             break;
 
           case T::ParamKeyType::GRIB_ID:

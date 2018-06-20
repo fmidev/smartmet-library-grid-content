@@ -3243,6 +3243,25 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
     if (generationInfo == NULL)
       return Result::UNKNOWN_GENERATION_ID;
 
+    char st[100];
+    strcpy(st,parameterKey.c_str());
+
+    if (parameterKeyType == T::ParamKeyType::FMI_NAME)
+    {
+      if (strncasecmp(st,"GRIB-",5) == 0)
+      {
+        parameterKeyType = T::ParamKeyType::GRIB_ID;
+        parameterKey = st+5;
+      }
+      else
+      if (strncasecmp(st,"NB-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyType::NEWBASE_ID;
+        parameterKey = st+3;
+      }
+    }
+
+
     switch (parameterKeyType)
     {
       case T::ParamKeyType::FMI_ID:
