@@ -39,7 +39,7 @@ else
   CORBA_INCLUDE = -Isrc/contentServer/corba/stubs \
                   -Isrc/dataServer/corba/stubs \
                   -Isrc/queryServer/corba/stubs
-  CORBA_LIBS = -lomniORB4 -lomnithread  
+  CORBA_LIBS = -lomniORB4 -lomnithread
 endif
 
 
@@ -82,7 +82,7 @@ else
  INCLUDES = \
 	-I$(includedir) \
 	-I$(includedir)/smartmet \
-	-I /usr/include/lua5.3 \
+	-I /usr/include/lua \
 	$(pkg-config --cflags icu-i18n) \
 	$(CORBA_INCLUDE)
 
@@ -99,7 +99,7 @@ LIBS = -L$(libdir) \
 	-lboost_date_time \
 	-lhiredis \
 	-lcurl \
-	-llua5.3 \
+	-llua \
 	-lpthread \
 	$(CORBA_LIBS)
 
@@ -145,7 +145,7 @@ vpath %.cpp src/ \
 			src/queryServer/definition \
 			src/queryServer/implementation \
 			src/functions \
-			src/lua 
+			src/lua
 
 vpath %.h 	src/ \
 	src/contentServer \
@@ -165,7 +165,7 @@ vpath %.h 	src/ \
 			src/queryServer/definition \
 			src/queryServer/implementation \
 			src/functions \
-			src/lua 
+			src/lua
 
 vpath %.o obj
 
@@ -267,26 +267,26 @@ INCLUDES := -Isrc $(INCLUDES)
 all:
 ifneq ($(CORBA), disabled)
 	$(MAKE) create_stubs;
-endif	
-	$(MAKE) obj_and_lib; 
+endif
+	$(MAKE) obj_and_lib;
 
 debug:
 ifneq ($(CORBA), disabled)
 	$(MAKE) create_stubs;
-endif	
-	$(MAKE) obj_and_lib; 
+endif
+	$(MAKE) obj_and_lib;
 
 release:
 ifneq ($(CORBA), disabled)
 	$(MAKE) create_stubs;
-endif	
-	$(MAKE) obj_and_lib; 
+endif
+	$(MAKE) obj_and_lib;
 
 profile:
 ifneq ($(CORBA), disabled)
 	$(MAKE) create_stubs;
-endif	
-	$(MAKE) obj_and_lib; 
+endif
+	$(MAKE) obj_and_lib;
 
 obj_and_lib: objdir $(LIBFILE)
 
@@ -327,7 +327,7 @@ install:
 	@cp src/contentServer/definition/*.h $(includedir)/$(INCDIR)/contentServer/definition
 	@cp src/contentServer/http/client/*.h $(includedir)/$(INCDIR)/contentServer/http/client
 	@cp src/contentServer/http/common/*.h $(includedir)/$(INCDIR)/contentServer/http/common
-	@cp src/contentServer/http/server/*.h $(includedir)/$(INCDIR)/contentServer/http/server	
+	@cp src/contentServer/http/server/*.h $(includedir)/$(INCDIR)/contentServer/http/server
 	@cp src/contentServer/memory/*.h $(includedir)/$(INCDIR)/contentServer/memory
 	@cp src/contentServer/redis/*.h $(includedir)/$(INCDIR)/contentServer/redis
 	@cp src/contentServer/sync/*.h $(includedir)/$(INCDIR)/contentServer/sync
@@ -366,7 +366,7 @@ ifneq ($(CORBA), disabled)
 	@cp src/queryServer/corba/convert/*.h $(includedir)/$(INCDIR)/queryServer/corba/convert
 	@cp src/queryServer/corba/stubs/*.h $(includedir)/$(INCDIR)/queryServer/corba/stubs
 	@cp src/queryServer/corba/server/*.h $(includedir)/$(INCDIR)/queryServer/corba/server
-endif	
+endif
 	@mkdir -p $(libdir)
 	$(INSTALL_PROG) $(LIBFILE) $(libdir)/$(LIBFILE)
 
@@ -408,7 +408,7 @@ ifneq ($(CORBA), disabled)
 	@mkdir -p obj/queryServer/corba/convert
 	@mkdir -p obj/queryServer/corba/stubs
 	@mkdir -p obj/queryServer/corba/server
-endif			  
+endif
 
 create_stubs:
 	cd src/contentServer/corba/stubs; $(MAKE) all;
