@@ -1,7 +1,7 @@
 #pragma once
 
-#include "queryServer/definition/ServiceInterface.h"
-#include "QueryServer_serviceInterface_SK.h"
+#include "../../definition/ServiceInterface.h"
+#include "../stubs/QueryServer_serviceInterface_SK.h"
 
 
 // This file contains the actual implementation of the CORBA server interface. Every time

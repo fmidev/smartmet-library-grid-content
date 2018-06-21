@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../server/ServerInterface.h"
+#include "ServerInterface.h"
 #include "../../definition/ServiceInterface.h"
 
 #include <pthread.h>

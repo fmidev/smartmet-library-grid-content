@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../definition/ServiceInterface.h"
-#include "../server/ServerInterface.h"
+#include "ServerInterface.h"
 #include <pthread.h>
 
 
