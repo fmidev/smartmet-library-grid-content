@@ -566,6 +566,44 @@ int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,uint fileI
 
 
 
+int ServiceImplementation::_getGridValueVectorByCoordinateList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,short interpolationMethod,T::ParamValue_vec& values)
+{
+  FUNCTION_TRACE
+  try
+  {
+    try
+    {
+      GRID::GridFile_sptr gridFile = getGridFile(fileId);
+      if (gridFile == NULL)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
+      if (message == NULL)
+        return Result::MESSAGE_NOT_FOUND;
+
+      message->getGridValueVectorByCoordinateList(coordinateType,coordinates,interpolationMethod,values);
+      return Result::OK;
+    }
+    catch (...)
+    {
+       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+       exception.addParameter("FileId",std::to_string(fileId));
+       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double origoX,double origoY,double radius,T::GridValueList& valueList)
 {
   FUNCTION_TRACE

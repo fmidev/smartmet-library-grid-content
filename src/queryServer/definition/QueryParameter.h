@@ -40,9 +40,9 @@ class QueryParameter
     T::ParamLevel               mParameterLevel;
     T::ForecastType             mForecastType;
     T::ForecastNumber           mForecastNumber;
-    short  mAreaInterpolationMethod;
-    short  mTimeInterpolationMethod;
-    short mLevelInterpolationMethod;
+    short                       mAreaInterpolationMethod;
+    short                       mTimeInterpolationMethod;
+    short                       mLevelInterpolationMethod;
     uint                        mProducerId;
     uint                        mGenerationFlags;
     int                         mPrecision;

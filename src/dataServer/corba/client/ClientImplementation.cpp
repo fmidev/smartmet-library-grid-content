@@ -212,7 +212,7 @@ int ClientImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileI
 
     SmartMet::DataServer::Corba::CorbaParamValue corbaValue;
 
-    int result = mService->getGridValueByPoint(sessionId,fileId,messageIndex,flags,(CORBA::Octet)coordinateType,x,y,(CORBA::Octet)interpolationMethod,corbaValue);
+    int result = mService->getGridValueByPoint(sessionId,fileId,messageIndex,flags,(CORBA::Octet)coordinateType,x,y,(CORBA::Short)interpolationMethod,corbaValue);
 
     if (result == 0)
       value = (T::ParamValue)corbaValue;
@@ -263,7 +263,7 @@ int ClientImplementation::_getGridValueListByPointList(T::SessionId sessionId,ui
     DataServer::Corba::Converter::convert(pointList,corbaPointList);
 
 
-    int result = mService->getGridValueListByPointList(sessionId,fileId,messageIndex,flags,coordinateType,corbaPointList,(::CORBA::Octet)interpolationMethod,corbaGridValueList);
+    int result = mService->getGridValueListByPointList(sessionId,fileId,messageIndex,flags,coordinateType,corbaPointList,(::CORBA::Short)interpolationMethod,corbaGridValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
@@ -377,6 +377,32 @@ int ClientImplementation::_getGridValueVector(T::SessionId sessionId,uint fileId
 
 
 
+int ClientImplementation::_getGridValueVectorByCoordinateList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,short interpolationMethod,T::ParamValue_vec& values)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaValues;
+    DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
+
+    DataServer::Corba::Converter::convert(coordinates,corbaCoordinates);
+
+    int result = mService->getGridValueVectorByCoordinateList(sessionId,fileId,messageIndex,(::CORBA::Octet)coordinateType,corbaCoordinates,(::CORBA::Short)interpolationMethod,corbaValues);
+
+    if (result == 0)
+      DataServer::Corba::Converter::convert(corbaValues,values);
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
 int ClientImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,short interpolationMethod,T::ParamValue_vec& values)
 {
   try
@@ -386,7 +412,7 @@ int ClientImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
 
-    int result = mService->getGridValueVectorByRectangle(sessionId,fileId,messageIndex,flags,(CORBA::Octet)coordinateType,columns,rows,x,y,xStep,yStep,(CORBA::Octet)interpolationMethod,corbaValues);
+    int result = mService->getGridValueVectorByRectangle(sessionId,fileId,messageIndex,flags,(CORBA::Octet)coordinateType,columns,rows,x,y,xStep,yStep,(CORBA::Short)interpolationMethod,corbaValues);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaValues,values);

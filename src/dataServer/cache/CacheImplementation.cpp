@@ -103,6 +103,8 @@ int CacheImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileId,
 {
   try
   {
+    // ToDo : Implement caching functionality
+
     if (mDataServer == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
@@ -226,6 +228,8 @@ int CacheImplementation::_getMultipleGridValues(T::SessionId sessionId,T::ValueR
 {
   try
   {
+    // ToDo : Implement caching functionality
+
     if (mDataServer == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
@@ -245,6 +249,8 @@ int CacheImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint f
 {
   try
   {
+    // ToDo : Implement caching functionality
+
     if (mDataServer == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
@@ -264,6 +270,8 @@ int CacheImplementation::_getGridValueListByPointList(T::SessionId sessionId,uin
 {
   try
   {
+    // ToDo : Implement caching functionality
+
     if (mDataServer == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
@@ -283,6 +291,8 @@ int CacheImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint 
 {
   try
   {
+    // ToDo : Implement caching functionality
+
     if (mDataServer == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
@@ -302,6 +312,8 @@ int CacheImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,u
 {
   try
   {
+    // ToDo : Implement caching functionality
+
     if (mDataServer == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
@@ -321,6 +333,8 @@ int CacheImplementation::_getGridValueListByRectangle(T::SessionId sessionId,uin
 {
   try
   {
+    // ToDo : Implement caching functionality
+
     if (mDataServer == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
@@ -340,6 +354,8 @@ int CacheImplementation::_getGridValueVector(T::SessionId sessionId,uint fileId,
 {
   try
   {
+    // ToDo : Implement caching functionality
+
     if (mDataServer == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
@@ -355,10 +371,33 @@ int CacheImplementation::_getGridValueVector(T::SessionId sessionId,uint fileId,
 
 
 
+int CacheImplementation::_getGridValueVectorByCoordinateList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,short interpolationMethod,T::ParamValue_vec& values)
+{
+  try
+  {
+    // ToDo : Implement caching functionality
+
+    if (mDataServer == NULL)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    return mDataServer->getGridValueVectorByCoordinateList(sessionId,fileId,messageIndex,coordinateType,coordinates,interpolationMethod,values);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,short interpolationMethod,T::ParamValue_vec& values)
 {
   try
   {
+    // ToDo : Implement caching functionality
+
     if (mDataServer == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
@@ -378,6 +417,8 @@ int CacheImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,uint 
 {
   try
   {
+    // ToDo : Implement caching functionality
+
     if (mDataServer == NULL)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
