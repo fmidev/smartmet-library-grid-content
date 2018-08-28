@@ -63,7 +63,7 @@ MemoryImplementation::MemoryImplementation()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -79,7 +79,7 @@ MemoryImplementation::~MemoryImplementation()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -150,7 +150,7 @@ void MemoryImplementation::init(bool contentLoadEnabled,bool contentSaveEnabled,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -168,7 +168,7 @@ void MemoryImplementation::shutdown()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -185,7 +185,7 @@ bool MemoryImplementation::isSessionValid(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -217,7 +217,7 @@ int MemoryImplementation::_clear(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -299,7 +299,7 @@ int MemoryImplementation::_reload(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -321,17 +321,17 @@ int MemoryImplementation::_addDataServerInfo(T::SessionId sessionId,T::ServerInf
       return Result::INVALID_SERVER_ID;
 
     T::ServerInfo *info = mDataServerInfoList.getServerInfoById(serverInfo.mServerId);
-    if (info != NULL)
+    if (info != nullptr)
       return Result::SERVER_ID_ALREADY_REGISTERED;
 
     info = mDataServerInfoList.getServerInfoByName(serverInfo.mName);
-    if (info != NULL)
+    if (info != nullptr)
       return Result::SERVER_NAME_ALREADY_REGISTERED;
 
     if (serverInfo.mServerIor.length() > 0)
     {
       info = mDataServerInfoList.getServerInfoByIor(serverInfo.mServerIor);
-      if (info != NULL)
+      if (info != nullptr)
         return Result::SERVER_IOR_ALREADY_REGISTERED;
     }
 
@@ -343,7 +343,7 @@ int MemoryImplementation::_addDataServerInfo(T::SessionId sessionId,T::ServerInf
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -362,7 +362,7 @@ int MemoryImplementation::_deleteDataServerInfoById(T::SessionId sessionId,uint 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ServerInfo* serverInfo = mDataServerInfoList.getServerInfoById(serverId);
-    if (serverInfo == NULL)
+    if (serverInfo == nullptr)
       return Result::UNKNOWN_SERVER_ID;
 
     mDataServerInfoList.deleteServerInfoById(serverId);
@@ -373,7 +373,7 @@ int MemoryImplementation::_deleteDataServerInfoById(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -392,7 +392,7 @@ int MemoryImplementation::_getDataServerInfoById(T::SessionId sessionId,uint ser
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ServerInfo *info = mDataServerInfoList.getServerInfoById(serverId);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     serverInfo = *info;
@@ -400,7 +400,7 @@ int MemoryImplementation::_getDataServerInfoById(T::SessionId sessionId,uint ser
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -419,7 +419,7 @@ int MemoryImplementation::_getDataServerInfoByName(T::SessionId sessionId,std::s
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ServerInfo *info = mDataServerInfoList.getServerInfoByName(serverName);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     serverInfo = *info;
@@ -427,7 +427,7 @@ int MemoryImplementation::_getDataServerInfoByName(T::SessionId sessionId,std::s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -446,7 +446,7 @@ int MemoryImplementation::_getDataServerInfoByIor(T::SessionId sessionId,std::st
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ServerInfo *info = mDataServerInfoList.getServerInfoByIor(serverIor);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     serverInfo = *info;
@@ -454,7 +454,7 @@ int MemoryImplementation::_getDataServerInfoByIor(T::SessionId sessionId,std::st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -477,7 +477,7 @@ int MemoryImplementation::_getDataServerInfoList(T::SessionId sessionId,T::Serve
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -498,7 +498,7 @@ int MemoryImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& c
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -517,7 +517,7 @@ int MemoryImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInf
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *info = mProducerInfoList.getProducerInfoByName(producerInfo.mName);
-    if (info != NULL)
+    if (info != nullptr)
       return Result::PRODUCER_NAME_ALREADY_REGISTERED;
 
     if (producerInfo.mProducerId == 0)
@@ -529,7 +529,7 @@ int MemoryImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInf
     else
     {
       T::ProducerInfo *info = mProducerInfoList.getProducerInfoById(producerInfo.mProducerId);
-      if (info != NULL)
+      if (info != nullptr)
         return Result::PRODUCER_ID_ALREADY_REGISTERED;
 
       mProducerInfoList.addProducerInfo(producerInfo.duplicate());
@@ -541,7 +541,7 @@ int MemoryImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInf
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -560,7 +560,7 @@ int MemoryImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint pr
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *info = mProducerInfoList.getProducerInfoById(producerId);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -579,7 +579,7 @@ int MemoryImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint pr
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -598,7 +598,7 @@ int MemoryImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *info = mProducerInfoList.getProducerInfoByName(producerName);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -617,7 +617,7 @@ int MemoryImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -651,7 +651,7 @@ int MemoryImplementation::_deleteProducerInfoListBySourceId(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -670,7 +670,7 @@ int MemoryImplementation::_getProducerInfoById(T::SessionId sessionId,uint produ
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *info = mProducerInfoList.getProducerInfoById(producerId);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     producerInfo = *info;
@@ -678,7 +678,7 @@ int MemoryImplementation::_getProducerInfoById(T::SessionId sessionId,uint produ
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -697,7 +697,7 @@ int MemoryImplementation::_getProducerInfoByName(T::SessionId sessionId,std::str
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *info = mProducerInfoList.getProducerInfoByName(producerName);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     producerInfo = *info;
@@ -705,7 +705,7 @@ int MemoryImplementation::_getProducerInfoByName(T::SessionId sessionId,std::str
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -728,7 +728,7 @@ int MemoryImplementation::_getProducerInfoList(T::SessionId sessionId,T::Produce
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -821,7 +821,7 @@ int MemoryImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
         producerIdList.insert(info->mProducerId);
 
         T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(info->mProducerId);
-        if (producerInfo != NULL)
+        if (producerInfo != nullptr)
           producerInfoList.addProducerInfo(producerInfo->duplicate());
       }
     }
@@ -830,7 +830,7 @@ int MemoryImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -854,7 +854,7 @@ int MemoryImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -875,7 +875,7 @@ int MemoryImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& cou
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -919,7 +919,7 @@ int MemoryImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1057,7 +1057,7 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1076,11 +1076,11 @@ int MemoryImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generatio
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(generationInfo.mProducerId);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoByName(generationInfo.mName);
-    if (info != NULL)
+    if (info != nullptr)
       return Result::GENERATION_NAME_ALREADY_REGISTERED;
 
     mMaxGenerationId++;
@@ -1094,7 +1094,7 @@ int MemoryImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generatio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1113,7 +1113,7 @@ int MemoryImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(generationId);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -1130,7 +1130,7 @@ int MemoryImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1149,7 +1149,7 @@ int MemoryImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoByName(generationName);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -1166,7 +1166,7 @@ int MemoryImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1200,7 +1200,7 @@ int MemoryImplementation::_deleteGenerationInfoListByIdList(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1219,7 +1219,7 @@ int MemoryImplementation::_deleteGenerationInfoListByProducerId(T::SessionId ses
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
 
@@ -1237,7 +1237,7 @@ int MemoryImplementation::_deleteGenerationInfoListByProducerId(T::SessionId ses
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1256,7 +1256,7 @@ int MemoryImplementation::_deleteGenerationInfoListByProducerName(T::SessionId s
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
 
@@ -1276,7 +1276,7 @@ int MemoryImplementation::_deleteGenerationInfoListByProducerName(T::SessionId s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1308,7 +1308,7 @@ int MemoryImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1327,7 +1327,7 @@ int MemoryImplementation::_getGenerationInfoById(T::SessionId sessionId,uint gen
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(generationId);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     generationInfo = *info;
@@ -1335,7 +1335,7 @@ int MemoryImplementation::_getGenerationInfoById(T::SessionId sessionId,uint gen
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1354,7 +1354,7 @@ int MemoryImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::s
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoByName(generationName);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     generationInfo = *info;
@@ -1362,7 +1362,7 @@ int MemoryImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1385,7 +1385,7 @@ int MemoryImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Gener
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1410,7 +1410,7 @@ int MemoryImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
     for (auto it=idList.begin(); it!=idList.end(); ++it)
     {
       T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(*it);
-      if (generationInfo != NULL)
+      if (generationInfo != nullptr)
         generationInfoList.addGenerationInfo(generationInfo->duplicate());
     }
 
@@ -1418,7 +1418,7 @@ int MemoryImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1437,7 +1437,7 @@ int MemoryImplementation::_getGenerationInfoListByProducerId(T::SessionId sessio
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     mGenerationInfoList.getGenerationInfoListByProducerId(producerId,generationInfoList);
@@ -1445,7 +1445,7 @@ int MemoryImplementation::_getGenerationInfoListByProducerId(T::SessionId sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1464,7 +1464,7 @@ int MemoryImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
     mGenerationInfoList.getGenerationInfoListByProducerId(producerInfo->mProducerId,generationInfoList);
@@ -1472,7 +1472,7 @@ int MemoryImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1495,7 +1495,7 @@ int MemoryImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1514,12 +1514,12 @@ int MemoryImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::Session
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
 
     T::GenerationInfo *info = mGenerationInfoList.getLastGenerationInfoByProducerIdAndStatus(producerId,generationStatus);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     generationInfo = *info;
@@ -1527,7 +1527,7 @@ int MemoryImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::Session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1545,11 +1545,11 @@ int MemoryImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessi
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     T::GenerationInfo *info = mGenerationInfoList.getLastGenerationInfoByProducerIdAndStatus(producerInfo->mProducerId,generationStatus);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     generationInfo = *info;
@@ -1557,7 +1557,7 @@ int MemoryImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1577,7 +1577,7 @@ int MemoryImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& c
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1596,7 +1596,7 @@ int MemoryImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,ui
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
     generationInfo->mStatus = status;
@@ -1607,7 +1607,7 @@ int MemoryImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1626,7 +1626,7 @@ int MemoryImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
     generationInfo->mStatus = status;
@@ -1637,7 +1637,7 @@ int MemoryImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1656,11 +1656,11 @@ int MemoryImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileI
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(fileInfo.mProducerId);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     T::GenerationInfo* generationInfo = mGenerationInfoList.getGenerationInfoById(fileInfo.mGenerationId);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
     if (producerInfo->mProducerId != generationInfo->mProducerId)
@@ -1669,7 +1669,7 @@ int MemoryImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileI
     // ### Checking if the filename already exists in the database.
 
     T::FileInfo *info = mFileInfoListByName.getFileInfoByName(fileInfo.mName);
-    if (info != NULL)
+    if (info != nullptr)
     {
       // ### File with the same name already exists. Let's return
       // ### the current file-id.
@@ -1703,7 +1703,7 @@ int MemoryImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1722,11 +1722,11 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(fileInfo.mProducerId);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     T::GenerationInfo* generationInfo = mGenerationInfoList.getGenerationInfoById(fileInfo.mGenerationId);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
     if (producerInfo->mProducerId != generationInfo->mProducerId)
@@ -1736,7 +1736,7 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
     // ### Checking if the filename already exists in the database.
 
     T::FileInfo *info = mFileInfoListByName.getFileInfoByName(fileInfo.mName);
-    if (info != NULL)
+    if (info != nullptr)
     {
       //printf("** File exists %s\n",fileInfo.mName.c_str());
       // ### File with the same name already exists. Let's return
@@ -1771,7 +1771,7 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
-      if (info != NULL)
+      if (info != nullptr)
       {
         T::ContentInfo *cInfo = info->duplicate();
         // ### Making sure that content data matches the file data.
@@ -1808,7 +1808,7 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1835,11 +1835,11 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std
     for (auto ff = fileAndContentList.begin(); ff != fileAndContentList.end(); ++ff)
     {
       T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(ff->mFileInfo.mProducerId);
-      if (producerInfo == NULL)
+      if (producerInfo == nullptr)
         return Result::UNKNOWN_PRODUCER_ID;
 
       T::GenerationInfo* generationInfo = mGenerationInfoList.getGenerationInfoById(ff->mFileInfo.mGenerationId);
-      if (generationInfo == NULL)
+      if (generationInfo == nullptr)
         return Result::UNKNOWN_GENERATION_ID;
 
       if (producerInfo->mProducerId != generationInfo->mProducerId)
@@ -1852,7 +1852,7 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std
       // ### Checking if the filename already exists in the database.
 
       T::FileInfo *info = mFileInfoListByName.getFileInfoByName(ff->mFileInfo.mName);
-      if (info != NULL)
+      if (info != nullptr)
       {
         //printf("** File exists %s\n",fileInfo.mName.c_str());
         // ### File with the same name already exists. Let's return
@@ -1889,7 +1889,7 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std
       for (uint t=0; t<len; t++)
       {
         T::ContentInfo *info = ff->mContentInfoList.getContentInfoByIndex(t);
-        if (info != NULL)
+        if (info != nullptr)
         {
           T::ContentInfo *cInfo = info->duplicate();
           // ### Making sure that content data matches the file data.
@@ -1933,7 +1933,7 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1951,7 +1951,7 @@ int MemoryImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(fileId);
-    if (fileInfo == NULL)
+    if (fileInfo == nullptr)
       return Result::UNKNOWN_FILE_ID;
 
     auto fType = fileInfo->mFileType;
@@ -1967,7 +1967,7 @@ int MemoryImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1986,7 +1986,7 @@ int MemoryImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::stri
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::FileInfo *fileInfo = mFileInfoList.getFileInfoByName(filename);
-    if (fileInfo == NULL)
+    if (fileInfo == nullptr)
       return Result::UNKNOWN_FILE_NAME;
 
     T::FileInfo fInfo(*fileInfo);
@@ -2003,7 +2003,7 @@ int MemoryImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::stri
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2035,11 +2035,11 @@ int MemoryImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId ses
             info->mForecastTime == fTime->mForecastTime)
         {
           T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
-          if (cInfo != NULL)
+          if (cInfo != nullptr)
             cInfo->mFlags = cInfo->mFlags | T::ContentInfo::Flags::DeletedContent;
 
           T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(info->mFileId);
-          if (fileInfo != NULL)
+          if (fileInfo != nullptr)
           {
             fileInfo->mFlags = fileInfo->mFlags | T::FileInfo::Flags::DeletedFile;
             addEvent(EventType::FILE_DELETED,fileInfo->mFileId,(uint)fileInfo->mFileType,0,0);
@@ -2058,7 +2058,7 @@ int MemoryImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId ses
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2088,7 +2088,7 @@ int MemoryImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2107,7 +2107,7 @@ int MemoryImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -2122,7 +2122,7 @@ int MemoryImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2141,7 +2141,7 @@ int MemoryImplementation::_deleteFileInfoListByProducerName(T::SessionId session
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -2156,7 +2156,7 @@ int MemoryImplementation::_deleteFileInfoListByProducerName(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2175,7 +2175,7 @@ int MemoryImplementation::_deleteFileInfoListByGenerationId(T::SessionId session
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -2190,7 +2190,7 @@ int MemoryImplementation::_deleteFileInfoListByGenerationId(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2209,7 +2209,7 @@ int MemoryImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Se
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
 
@@ -2223,11 +2223,11 @@ int MemoryImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Se
       if (info->mGeometryId == geometryId  &&  info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber)
       {
         T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
-        if (cInfo != NULL)
+        if (cInfo != nullptr)
           cInfo->mFlags = cInfo->mFlags | T::ContentInfo::Flags::DeletedContent;
 
         T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(info->mFileId);
-        if (fileInfo != NULL)
+        if (fileInfo != nullptr)
         {
           fileInfo->mFlags = fileInfo->mFlags | T::FileInfo::Flags::DeletedFile;
           addEvent(EventType::FILE_DELETED,fileInfo->mFileId,(uint)fileInfo->mFileType,0,0);
@@ -2245,7 +2245,7 @@ int MemoryImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Se
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2263,7 +2263,7 @@ int MemoryImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessi
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -2278,7 +2278,7 @@ int MemoryImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2308,7 +2308,7 @@ int MemoryImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2341,7 +2341,7 @@ int MemoryImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2360,7 +2360,7 @@ int MemoryImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T:
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::FileInfo *info = mFileInfoList.getFileInfoById(fileId);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     fileInfo = *info;
@@ -2368,7 +2368,7 @@ int MemoryImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2387,7 +2387,7 @@ int MemoryImplementation::_getFileInfoByName(T::SessionId sessionId,std::string 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::FileInfo *info = mFileInfoListByName.getFileInfoByName(filename);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     fileInfo = *info;
@@ -2395,7 +2395,7 @@ int MemoryImplementation::_getFileInfoByName(T::SessionId sessionId,std::string 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2418,7 +2418,7 @@ int MemoryImplementation::_getFileInfoList(T::SessionId sessionId,uint startFile
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2437,7 +2437,7 @@ int MemoryImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,ui
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     mFileInfoList.getFileInfoListByProducerId(producerId,startFileId,maxRecords,fileInfoList);
@@ -2445,7 +2445,7 @@ int MemoryImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2464,7 +2464,7 @@ int MemoryImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
     mFileInfoList.getFileInfoListByProducerId(producerInfo->mProducerId,startFileId,maxRecords,fileInfoList);
@@ -2472,7 +2472,7 @@ int MemoryImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2491,7 +2491,7 @@ int MemoryImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
     mFileInfoList.getFileInfoListByGenerationId(generationId,startFileId,maxRecords,fileInfoList);
@@ -2499,7 +2499,7 @@ int MemoryImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2518,7 +2518,7 @@ int MemoryImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
     mFileInfoList.getFileInfoListByGenerationId(generationInfo->mGenerationId,startFileId,maxRecords,fileInfoList);
@@ -2526,7 +2526,7 @@ int MemoryImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2548,7 +2548,7 @@ int MemoryImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2571,7 +2571,7 @@ int MemoryImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2592,7 +2592,7 @@ int MemoryImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2613,7 +2613,7 @@ int MemoryImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2634,7 +2634,7 @@ int MemoryImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2655,7 +2655,7 @@ int MemoryImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2678,7 +2678,7 @@ int MemoryImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eve
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2699,12 +2699,12 @@ int MemoryImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
     if (requestingServerId != 0)
     {
       T::ServerInfo *info = mDataServerInfoList.getServerInfoById(requestingServerId);
-      if (info != NULL)
+      if (info != nullptr)
         info->mLastCall = time(0);
     }
 
     T::EventInfo *lastEvent = mEventInfoList.getLastEvent();
-    if (lastEvent == NULL)
+    if (lastEvent == nullptr)
       return Result::DATA_NOT_FOUND;
 
     eventInfo = *lastEvent;
@@ -2714,7 +2714,7 @@ int MemoryImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2735,7 +2735,7 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
     if (requestingServerId != 0)
     {
       T::ServerInfo *info = mDataServerInfoList.getServerInfoById(requestingServerId);
-      if (info != NULL)
+      if (info != nullptr)
         info->mLastCall = time(0);
     }
 
@@ -2744,7 +2744,7 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2765,7 +2765,7 @@ int MemoryImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2784,15 +2784,15 @@ int MemoryImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo&
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(contentInfo.mProducerId);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(contentInfo.mGenerationId);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
     T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(contentInfo.mFileId);
-    if (fileInfo == NULL)
+    if (fileInfo == nullptr)
       return Result::UNKNOWN_FILE_ID;
 
     if (producerInfo->mProducerId != generationInfo->mProducerId)
@@ -2806,7 +2806,7 @@ int MemoryImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo&
 
 
     T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(contentInfo.mFileId,contentInfo.mMessageIndex);
-    if (cInfo != NULL)
+    if (cInfo != nullptr)
       return Result::CONTENT_ALREADY_EXISTS;
 
     cInfo = contentInfo.duplicate();
@@ -2822,7 +2822,7 @@ int MemoryImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo&
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2845,22 +2845,22 @@ int MemoryImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoL
     {
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
       T::ContentInfo contentInfo;
-      if (mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex) != NULL)
+      if (mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex) != nullptr)
       {
         // printf("-- content already added %u:%u\n",info->mFileId,info->mMessageIndex);
       }
       else
       {
         T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(info->mProducerId);
-        if (producerInfo == NULL)
+        if (producerInfo == nullptr)
           return Result::UNKNOWN_PRODUCER_ID;
 
         T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(info->mGenerationId);
-        if (generationInfo == NULL)
+        if (generationInfo == nullptr)
           return Result::UNKNOWN_GENERATION_ID;
 
         T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(info->mFileId);
-        if (fileInfo == NULL)
+        if (fileInfo == nullptr)
           return Result::UNKNOWN_FILE_ID;
 
         if (producerInfo->mProducerId != generationInfo->mProducerId)
@@ -2889,7 +2889,7 @@ int MemoryImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoL
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2908,7 +2908,7 @@ int MemoryImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(fileId,messageIndex);
-    if (cInfo == NULL)
+    if (cInfo == nullptr)
       return Result::UNKNOWN_CONTENT;
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -2921,7 +2921,7 @@ int MemoryImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2940,7 +2940,7 @@ int MemoryImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(fileId);
-    if (fileInfo == NULL)
+    if (fileInfo == nullptr)
       return Result::UNKNOWN_FILE_ID;
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -2952,7 +2952,7 @@ int MemoryImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2971,7 +2971,7 @@ int MemoryImplementation::_deleteContentListByFileName(T::SessionId sessionId,st
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::FileInfo *fileInfo = mFileInfoList.getFileInfoByName(filename);
-    if (fileInfo == NULL)
+    if (fileInfo == nullptr)
       return Result::UNKNOWN_FILE_NAME;
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -2983,7 +2983,7 @@ int MemoryImplementation::_deleteContentListByFileName(T::SessionId sessionId,st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3010,7 +3010,7 @@ int MemoryImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3029,7 +3029,7 @@ int MemoryImplementation::_deleteContentListByProducerId(T::SessionId sessionId,
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -3041,7 +3041,7 @@ int MemoryImplementation::_deleteContentListByProducerId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3060,7 +3060,7 @@ int MemoryImplementation::_deleteContentListByProducerName(T::SessionId sessionI
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -3072,7 +3072,7 @@ int MemoryImplementation::_deleteContentListByProducerName(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3091,7 +3091,7 @@ int MemoryImplementation::_deleteContentListByGenerationId(T::SessionId sessionI
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -3103,7 +3103,7 @@ int MemoryImplementation::_deleteContentListByGenerationId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3122,7 +3122,7 @@ int MemoryImplementation::_deleteContentListByGenerationName(T::SessionId sessio
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -3134,7 +3134,7 @@ int MemoryImplementation::_deleteContentListByGenerationName(T::SessionId sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3161,7 +3161,7 @@ int MemoryImplementation::_deleteContentListBySourceId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3204,11 +3204,11 @@ int MemoryImplementation::_registerContentList(T::SessionId sessionId,uint serve
       else
       {
         T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(info->mProducerId);
-        if (producerInfo == NULL)
+        if (producerInfo == nullptr)
           return Result::UNKNOWN_PRODUCER_ID;
 
         T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(info->mGenerationId);
-        if (generationInfo == NULL)
+        if (generationInfo == nullptr)
           return Result::UNKNOWN_GENERATION_ID;
 
         T::FileInfo fileInfo;
@@ -3229,7 +3229,7 @@ int MemoryImplementation::_registerContentList(T::SessionId sessionId,uint serve
         info->mServerFlags = sf;
 
         redisReply *reply = (redisReply*)redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,info->getCsv().c_str());
-        if (reply == NULL)
+        if (reply == nullptr)
         {
           closeConnection();
           return Result::PERMANENT_STORAGE_ERROR;
@@ -3245,7 +3245,7 @@ int MemoryImplementation::_registerContentList(T::SessionId sessionId,uint serve
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3284,7 +3284,7 @@ int MemoryImplementation::_registerContentListByFileId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3312,7 +3312,7 @@ int MemoryImplementation::_unregisterContentList(T::SessionId sessionId,uint ser
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3354,7 +3354,7 @@ int MemoryImplementation::_unregisterContentListByFileId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3373,7 +3373,7 @@ int MemoryImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uin
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(fileId,messageIndex);
-    if (cInfo != NULL)
+    if (cInfo != nullptr)
     {
       contentInfo = *cInfo;
       return Result::OK;
@@ -3383,7 +3383,7 @@ int MemoryImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3406,7 +3406,7 @@ int MemoryImplementation::_getContentList(T::SessionId sessionId,uint startFileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3429,7 +3429,7 @@ int MemoryImplementation::_getContentListByFileId(T::SessionId sessionId,uint fi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3448,7 +3448,7 @@ int MemoryImplementation::_getContentListByFileName(T::SessionId sessionId,std::
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::FileInfo *fileInfo = mFileInfoListByName.getFileInfoByName(filename);
-    if (fileInfo == NULL)
+    if (fileInfo == nullptr)
       return Result::UNKNOWN_FILE_NAME;
 
     mContentInfoList[0].getContentInfoListByFileId(fileInfo->mFileId,contentInfoList);
@@ -3456,7 +3456,7 @@ int MemoryImplementation::_getContentListByFileName(T::SessionId sessionId,std::
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3479,7 +3479,7 @@ int MemoryImplementation::_getContentListByGroupFlags(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3498,7 +3498,7 @@ int MemoryImplementation::_getContentListByProducerId(T::SessionId sessionId,uin
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     mContentInfoList[0].getContentInfoListByProducerId(producerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
@@ -3506,7 +3506,7 @@ int MemoryImplementation::_getContentListByProducerId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3525,7 +3525,7 @@ int MemoryImplementation::_getContentListByProducerName(T::SessionId sessionId,s
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
     mContentInfoList[0].getContentInfoListByProducerId(producerInfo->mProducerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
@@ -3533,7 +3533,7 @@ int MemoryImplementation::_getContentListByProducerName(T::SessionId sessionId,s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3552,7 +3552,7 @@ int MemoryImplementation::_getContentListByServerId(T::SessionId sessionId,uint 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ServerInfo *info = mDataServerInfoList.getServerInfoById(serverId);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::UNKNOWN_SERVER_ID;
 
     mContentInfoList[0].getContentInfoListByServerId(serverId,startFileId,startMessageIndex,maxRecords,contentInfoList);
@@ -3560,7 +3560,7 @@ int MemoryImplementation::_getContentListByServerId(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3583,7 +3583,7 @@ int MemoryImplementation::_getContentListByGenerationId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3602,7 +3602,7 @@ int MemoryImplementation::_getContentListByGenerationName(T::SessionId sessionId
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
     mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mGenerationId,startFileId,startMessageIndex,maxRecords,contentInfoList);
@@ -3610,7 +3610,7 @@ int MemoryImplementation::_getContentListByGenerationName(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3633,7 +3633,7 @@ int MemoryImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3652,7 +3652,7 @@ int MemoryImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
     mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mGenerationId,startTime,endTime,contentInfoList);
@@ -3660,7 +3660,7 @@ int MemoryImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3683,7 +3683,7 @@ int MemoryImplementation::_getContentListBySourceId(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3764,7 +3764,7 @@ int MemoryImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3783,7 +3783,7 @@ int MemoryImplementation::_getContentListByParameterAndGenerationId(T::SessionId
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
     switch (parameterKeyType)
@@ -3849,7 +3849,7 @@ int MemoryImplementation::_getContentListByParameterAndGenerationId(T::SessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3868,7 +3868,7 @@ int MemoryImplementation::_getContentListByParameterAndGenerationName(T::Session
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
     switch (parameterKeyType)
@@ -3933,7 +3933,7 @@ int MemoryImplementation::_getContentListByParameterAndGenerationName(T::Session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3952,7 +3952,7 @@ int MemoryImplementation::_getContentListByParameterAndProducerId(T::SessionId s
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     switch (parameterKeyType)
@@ -4017,7 +4017,7 @@ int MemoryImplementation::_getContentListByParameterAndProducerId(T::SessionId s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4036,7 +4036,7 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
 /*
@@ -4068,7 +4068,7 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
         if (mContentInfoListEnabled[2])
         {
           T::ContentInfo *cInfo = mContentInfoList[2].getContentInfoByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
-          if (cInfo != NULL)
+          if (cInfo != nullptr)
           {
             contentInfoList.addContentInfo(cInfo->duplicate());
             return Result::OK;
@@ -4134,7 +4134,7 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
     if (contentInfoList.getLength() == 0  &&  contentList.getLength() > 0)
     {
       T::ContentInfo *info = contentList.getContentInfoByIndex(0);
-      if (info != NULL)
+      if (info != nullptr)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -4147,7 +4147,7 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4166,7 +4166,7 @@ int MemoryImplementation::_getContentListByParameterAndProducerName(T::SessionId
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
     switch (parameterKeyType)
@@ -4231,7 +4231,7 @@ int MemoryImplementation::_getContentListByParameterAndProducerName(T::SessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4253,37 +4253,37 @@ int MemoryImplementation::_getContentListOfInvalidIntegrity(T::SessionId session
     for (uint c=0; c<cLen; c++)
     {
       T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByIndex(c);
-      T::ContentInfo *cError = NULL;
-      if (cInfo != NULL)
+      T::ContentInfo *cError = nullptr;
+      if (cInfo != nullptr)
       {
         T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(cInfo->mFileId);
-        if (fileInfo == NULL)
+        if (fileInfo == nullptr)
         {
           printf("**** INTEGRITY ERROR : File missing (%u)! *****\n",cInfo->mFileId);
           cError = cInfo;
         }
 
-        if (cError == NULL)
+        if (cError == nullptr)
         {
           T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(cInfo->mGenerationId);
-          if (generationInfo == NULL)
+          if (generationInfo == nullptr)
           {
             printf("**** INTEGRITY ERROR : Generation missing (%u)! *****\n",cInfo->mGenerationId);
             cError = cInfo;
           }
         }
 
-        if (cError == NULL)
+        if (cError == nullptr)
         {
           T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(cInfo->mProducerId);
-          if (producerInfo == NULL)
+          if (producerInfo == nullptr)
           {
             printf("**** INTEGRITY ERROR : Producer missing (%u)! *****\n",cInfo->mProducerId);
             cError = cInfo;
           }
         }
 
-        if (cError != NULL)
+        if (cError != nullptr)
           contentInfoList.addContentInfo(cError->duplicate());
       }
     }
@@ -4291,7 +4291,7 @@ int MemoryImplementation::_getContentListOfInvalidIntegrity(T::SessionId session
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4314,7 +4314,7 @@ int MemoryImplementation::_getContentGeometryIdListByGenerationId(T::SessionId s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4336,13 +4336,13 @@ int MemoryImplementation::_getContentParamListByGenerationId(T::SessionId sessio
     mContentInfoList[0].getContentInfoListByGenerationId(generationId,0,0,1000000,contentInfoList);
     contentInfoList.sort(T::ContentInfo::ComparisonMethod::fmiName_fmiLevelId_level_starttime_file_message);
     uint len = contentInfoList.getLength();
-    T::ContentInfo *prev = NULL;
-    T::ContentInfo *currentInfo = NULL;
+    T::ContentInfo *prev = nullptr;
+    T::ContentInfo *currentInfo = nullptr;
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
 
-      if (prev == NULL ||
+      if (prev == nullptr ||
           info->mFmiParameterName != prev->mFmiParameterName ||
           info->mFmiParameterLevelId != prev->mFmiParameterLevelId ||
           info->mParameterLevel != prev->mParameterLevel ||
@@ -4364,7 +4364,7 @@ int MemoryImplementation::_getContentParamListByGenerationId(T::SessionId sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4387,7 +4387,7 @@ int MemoryImplementation::_getContentParamKeyListByGenerationId(T::SessionId ses
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4411,7 +4411,7 @@ int MemoryImplementation::_getContentTimeListByGenerationId(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4434,7 +4434,7 @@ int MemoryImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4458,7 +4458,7 @@ int MemoryImplementation::_getContentTimeListByProducerId(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4493,7 +4493,7 @@ int MemoryImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4514,7 +4514,7 @@ int MemoryImplementation::_getContentCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4535,7 +4535,7 @@ int MemoryImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoL
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4565,7 +4565,7 @@ int MemoryImplementation::_deleteVirtualContent(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4595,7 +4595,7 @@ int MemoryImplementation::_updateVirtualContent(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4619,7 +4619,7 @@ T::EventId MemoryImplementation::addEvent(EventType eventType,uint id1,uint id2,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4640,17 +4640,17 @@ void MemoryImplementation::readProducerList()
 
     sprintf(filename,"%s/producers.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"r");
-    if (file == NULL)
+    if (file == nullptr)
       return;
 
     char st[1000];
 
     while (!feof(file))
     {
-      if (fgets(st,1000,file) != NULL  &&  st[0] != '#')
+      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
       {
         char *p = strstr(st,"\n");
-        if (p != NULL)
+        if (p != nullptr)
           *p = '\0';
 
         T::ProducerInfo *rec = new T::ProducerInfo();
@@ -4667,7 +4667,7 @@ void MemoryImplementation::readProducerList()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4689,17 +4689,17 @@ void MemoryImplementation::readGenerationList()
 
     sprintf(filename,"%s/generations.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"r");
-    if (file == NULL)
+    if (file == nullptr)
       return;
 
     char st[1000];
 
     while (!feof(file))
     {
-      if (fgets(st,1000,file) != NULL  &&  st[0] != '#')
+      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
       {
         char *p = strstr(st,"\n");
-        if (p != NULL)
+        if (p != nullptr)
           *p = '\0';
 
         T::GenerationInfo *rec = new T::GenerationInfo();
@@ -4715,7 +4715,7 @@ void MemoryImplementation::readGenerationList()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4737,17 +4737,17 @@ void MemoryImplementation::readFileList()
 
     sprintf(filename,"%s/files.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"r");
-    if (file == NULL)
+    if (file == nullptr)
       return;
 
     char st[1000];
 
     while (!feof(file))
     {
-      if (fgets(st,1000,file) != NULL  &&  st[0] != '#')
+      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
       {
         char *p = strstr(st,"\n");
-        if (p != NULL)
+        if (p != nullptr)
           *p = '\0';
 
         T::FileInfo *rec = new T::FileInfo();
@@ -4763,7 +4763,7 @@ void MemoryImplementation::readFileList()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4785,17 +4785,17 @@ void MemoryImplementation::readContentList()
 
     sprintf(filename,"%s/content.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"r");
-    if (file == NULL)
+    if (file == nullptr)
       return;
 
     char st[1000];
 
     while (!feof(file))
     {
-      if (fgets(st,1000,file) != NULL  &&  st[0] != '#')
+      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
       {
         char *p = strstr(st,"\n");
-        if (p != NULL)
+        if (p != nullptr)
           *p = '\0';
 
         T::ContentInfo *rec = new T::ContentInfo();
@@ -4807,7 +4807,7 @@ void MemoryImplementation::readContentList()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4829,17 +4829,17 @@ void MemoryImplementation::readDataServerList()
 
     sprintf(filename,"%s/dataServers.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"r");
-    if (file == NULL)
+    if (file == nullptr)
       return;
 
     char st[1000];
 
     while (!feof(file))
     {
-      if (fgets(st,1000,file) != NULL  &&  st[0] != '#')
+      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
       {
         char *p = strstr(st,"\n");
-        if (p != NULL)
+        if (p != nullptr)
           *p = '\0';
 
         T::ServerInfo *rec = new T::ServerInfo();
@@ -4851,7 +4851,7 @@ void MemoryImplementation::readDataServerList()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4896,7 +4896,7 @@ void MemoryImplementation::saveData()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

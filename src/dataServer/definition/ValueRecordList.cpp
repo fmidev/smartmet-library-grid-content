@@ -16,7 +16,7 @@ ValueRecordList::ValueRecordList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -31,13 +31,13 @@ ValueRecordList::ValueRecordList(ValueRecordList& valueRecordList)
     for (uint t=0; t<sz; t++)
     {
       ValueRecord *rec = valueRecordList.getValueRecordByIndex(t);
-      if (rec != NULL)
+      if (rec != nullptr)
         mList.push_back(new ValueRecord(*rec));
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -65,7 +65,7 @@ ValueRecordList::ValueRecordList(ContentInfoList& contentInfoList,CoordinateType
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -81,7 +81,7 @@ ValueRecordList::~ValueRecordList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -97,13 +97,13 @@ void ValueRecordList::operator=(ValueRecordList& valueRecordList)
     for (uint t=0; t<sz; t++)
     {
       ValueRecord *rec = valueRecordList.getValueRecordByIndex(t);
-      if (rec != NULL)
+      if (rec != nullptr)
         mList.push_back(new ValueRecord(*rec));
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -118,7 +118,7 @@ void ValueRecordList::addValueRecord(ValueRecord *valueRecord)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -134,14 +134,14 @@ void ValueRecordList::clear()
     for (uint t=0; t<sz; t++)
     {
       ValueRecord *rec = mList[t];
-      if (rec != NULL)
+      if (rec != nullptr)
         delete rec;
     }
     mList.clear();
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -154,13 +154,13 @@ ValueRecord* ValueRecordList::getValueRecordByIndex(uint index)
   try
   {
     if (index >= (uint)mList.size())
-      return NULL;
+      return nullptr;
 
     return mList[index];
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -175,7 +175,7 @@ uint ValueRecordList::getLength()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -194,13 +194,13 @@ void ValueRecordList::print(std::ostream& stream,uint level,uint optionFlags)
     for (uint t=0; t<sz; t++)
     {
       ValueRecord *rec = mList[t];
-      if (rec != NULL)
+      if (rec != nullptr)
         rec->print(stream,level+2,optionFlags);
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

@@ -27,7 +27,7 @@ ContentInfo::ComparisonMethod contentInfo_comparisonMethod = ContentInfo::Compar
 
 int contentInfo_compare(const void *_val1,const void *_val2)
 {
-  if (_val1 != NULL  &&  _val2 != NULL)
+  if (_val1 != nullptr  &&  _val2 != nullptr)
   {
     ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
     ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
@@ -54,12 +54,12 @@ ContentInfoList::ContentInfoList()
 
     for (uint t=0; t<100; t++)
     {
-      mArray[t] = NULL;
+      mArray[t] = nullptr;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -77,7 +77,7 @@ ContentInfoList::ContentInfoList(ContentInfoList& contentInfoList)
       contentInfoList.lock();
 
     mReleaseObjects = true;
-    mArray = NULL;
+    mArray = nullptr;
     mSize = contentInfoList.getSize();
     mLength = contentInfoList.getLength();
     mComparisonMethod = contentInfoList.mComparisonMethod;
@@ -88,13 +88,13 @@ ContentInfoList::ContentInfoList(ContentInfoList& contentInfoList)
       for (uint t=0; t<mSize; t++)
       {
         ContentInfo *info = contentInfoList.getContentInfoByIndexNoCheck(t);
-        if (info != NULL)
+        if (info != nullptr)
         {
           mArray[t] = info->duplicate();
         }
         else
         {
-          mArray[t] = NULL;
+          mArray[t] = nullptr;
         }
       }
     }
@@ -104,7 +104,7 @@ ContentInfoList::ContentInfoList(ContentInfoList& contentInfoList)
   catch (...)
   {
     contentInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -121,7 +121,7 @@ ContentInfoList::ContentInfoList(const ContentInfoList& contentInfoList)
     //contentInfoList.lock();
 
     mReleaseObjects = true;
-    mArray = NULL;
+    mArray = nullptr;
     mSize = contentInfoList.getSize();
     mLength = contentInfoList.getLength();
     mComparisonMethod = contentInfoList.mComparisonMethod;
@@ -132,13 +132,13 @@ ContentInfoList::ContentInfoList(const ContentInfoList& contentInfoList)
       for (uint t=0; t<mSize; t++)
       {
         ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
-        if (info != NULL)
+        if (info != nullptr)
         {
           mArray[t] = info->duplicate();
         }
         else
         {
-          mArray[t] = NULL;
+          mArray[t] = nullptr;
         }
       }
     }
@@ -147,7 +147,7 @@ ContentInfoList::ContentInfoList(const ContentInfoList& contentInfoList)
   catch (...)
   {
     //contentInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -164,7 +164,7 @@ ContentInfoList::~ContentInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -187,7 +187,7 @@ void ContentInfoList::operator=(ContentInfoList& contentInfoList)
     if (contentInfoList.getModificationLockPtr() != mModificationLockPtr)
       contentInfoList.lock();
 
-    mArray = NULL;
+    mArray = nullptr;
     mSize = contentInfoList.getSize();
     mLength = contentInfoList.getLength();
     mComparisonMethod = contentInfoList.mComparisonMethod;
@@ -198,7 +198,7 @@ void ContentInfoList::operator=(ContentInfoList& contentInfoList)
       for (uint t=0; t<mSize; t++)
       {
         ContentInfo *info = contentInfoList.getContentInfoByIndexNoCheck(t);
-        if (info != NULL)
+        if (info != nullptr)
         {
           if (mReleaseObjects)
             mArray[t] = info->duplicate();
@@ -207,7 +207,7 @@ void ContentInfoList::operator=(ContentInfoList& contentInfoList)
         }
         else
         {
-          mArray[t] = NULL;
+          mArray[t] = nullptr;
         }
       }
     }
@@ -217,7 +217,7 @@ void ContentInfoList::operator=(ContentInfoList& contentInfoList)
   catch (...)
   {
     contentInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -237,7 +237,7 @@ void ContentInfoList::operator=(const ContentInfoList& contentInfoList)
 
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     //contentInfoList.lock();
-    mArray = NULL;
+    mArray = nullptr;
     mSize = contentInfoList.getSize();
     mLength = contentInfoList.getLength();
     mComparisonMethod = contentInfoList.mComparisonMethod;
@@ -248,7 +248,7 @@ void ContentInfoList::operator=(const ContentInfoList& contentInfoList)
       for (uint t=0; t<mSize; t++)
       {
         ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
-        if (info != NULL)
+        if (info != nullptr)
         {
           if (mReleaseObjects)
             mArray[t] = info->duplicate();
@@ -257,7 +257,7 @@ void ContentInfoList::operator=(const ContentInfoList& contentInfoList)
         }
         else
         {
-          mArray[t] = NULL;
+          mArray[t] = nullptr;
         }
       }
     }
@@ -266,7 +266,7 @@ void ContentInfoList::operator=(const ContentInfoList& contentInfoList)
   catch (...)
   {
     //contentInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -281,7 +281,7 @@ ContentInfo* ContentInfoList::addContentInfo(ContentInfo *contentInfo)
   {
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
-    if (mArray == NULL  ||  mLength == mSize)
+    if (mArray == nullptr  ||  mLength == mSize)
     {
       increaseSize(mSize + mSize/5 + 10);
     }
@@ -295,7 +295,7 @@ ContentInfo* ContentInfoList::addContentInfo(ContentInfo *contentInfo)
 
     int idx = getClosestIndexNoLock(mComparisonMethod,*contentInfo);
 
-    if (idx < (int)mLength  &&  mArray[idx] != NULL  &&   mArray[idx]->compare(mComparisonMethod,contentInfo) == 0)
+    if (idx < (int)mLength  &&  mArray[idx] != nullptr  &&   mArray[idx]->compare(mComparisonMethod,contentInfo) == 0)
     {
       // If content with the same id exists, we should not add the new contet, because other contentLists might point
       // the existing content record;
@@ -303,7 +303,7 @@ ContentInfo* ContentInfoList::addContentInfo(ContentInfo *contentInfo)
       return mArray[idx];
     }
 
-    while (idx < (int)mLength  &&  mArray[idx] != NULL  &&   mArray[idx]->compare(mComparisonMethod,contentInfo) < 0)
+    while (idx < (int)mLength  &&  mArray[idx] != nullptr  &&   mArray[idx]->compare(mComparisonMethod,contentInfo) < 0)
     {
       idx++;
     }
@@ -324,7 +324,7 @@ ContentInfo* ContentInfoList::addContentInfo(ContentInfo *contentInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -342,7 +342,7 @@ void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -362,7 +362,7 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::none)
     {
-      if (mArray == NULL  ||  mLength == mSize  ||  (mLength + len2) > mSize)
+      if (mArray == nullptr  ||  mLength == mSize  ||  (mLength + len2) > mSize)
       {
         increaseSize(len1 + len2 + mSize/5);
       }
@@ -392,8 +392,8 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
 
     for (uint t=0; t<newSize; t++)
     {
-      ContentInfo *cInfo1 = NULL;
-      ContentInfo *cInfo2 = NULL;
+      ContentInfo *cInfo1 = nullptr;
+      ContentInfo *cInfo2 = nullptr;
 
       if (a < len1)
         cInfo1 = mArray[a];
@@ -401,19 +401,19 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
       if (b < len2)
         cInfo2 = contentInfoList.getContentInfoByIndex(b);
 
-      if (cInfo1 == NULL  &&  cInfo2 == NULL)
+      if (cInfo1 == nullptr  &&  cInfo2 == nullptr)
       {
-        newArray[t] = NULL;
+        newArray[t] = nullptr;
       }
       else
-      if (cInfo1 != NULL  &&  cInfo2 == NULL)
+      if (cInfo1 != nullptr  &&  cInfo2 == nullptr)
       {
         newArray[t] = cInfo1;
         cnt++;
         a++;
       }
       else
-      if (cInfo1 == NULL  &&  cInfo2 != NULL)
+      if (cInfo1 == nullptr  &&  cInfo2 != nullptr)
       {
         if (mReleaseObjects)
           newArray[t] = cInfo2->duplicate();
@@ -424,7 +424,7 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
         b++;
       }
       else
-      if (cInfo1 != NULL  &&  cInfo2 != NULL)
+      if (cInfo1 != nullptr  &&  cInfo2 != nullptr)
       {
         //if (cInfo1->compare(mComparisonMethod,cInfo2) <= 0)
         if (cInfo2->compare(mComparisonMethod,cInfo1) > 0)
@@ -453,7 +453,7 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -467,7 +467,7 @@ void ContentInfoList::increaseSize(uint newSize)
   try
   {
 //    printf("SET SIZE %u => %u\n",mSize,newSize);
-    if (mArray == NULL)
+    if (mArray == nullptr)
     {
       mSize = newSize;
       mLength = 0;
@@ -475,7 +475,7 @@ void ContentInfoList::increaseSize(uint newSize)
 
       for (uint t=0; t<mSize; t++)
       {
-        mArray[t] = NULL;
+        mArray[t] = nullptr;
       }
       return;
     }
@@ -489,7 +489,7 @@ void ContentInfoList::increaseSize(uint newSize)
       }
       else
       {
-        newArray[t] = NULL;
+        newArray[t] = nullptr;
       }
     }
 
@@ -499,7 +499,7 @@ void ContentInfoList::increaseSize(uint newSize)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -513,26 +513,26 @@ void ContentInfoList::clear()
   try
   {
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
-    if (mArray != NULL)
+    if (mArray != nullptr)
     {
       for (uint t=0; t<mSize; t++)
       {
-        if (mArray[t] != NULL  &&  mReleaseObjects)
+        if (mArray[t] != nullptr  &&  mReleaseObjects)
           delete mArray[t];
 
-        mArray[t] = NULL;
+        mArray[t] = nullptr;
       }
 
       delete mArray;
     }
 
-    mArray = NULL;
+    mArray = nullptr;
     mSize = 0;
     mLength = 0;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -552,7 +552,7 @@ bool ContentInfoList::containsSameForecastTimes()
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
         if (timeList.find(info->mForecastTime) != timeList.end())
           return true;
@@ -565,7 +565,7 @@ bool ContentInfoList::containsSameForecastTimes()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -585,8 +585,8 @@ uint ContentInfoList::deleteContentInfoByFileId(uint fileId)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL  &&  (info->mFileId == fileId  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
+      mArray[t] = nullptr;
+      if (info != nullptr  &&  (info->mFileId == fileId  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -604,7 +604,7 @@ uint ContentInfoList::deleteContentInfoByFileId(uint fileId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -624,8 +624,8 @@ uint ContentInfoList::deleteMarkedContent()
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
+      mArray[t] = nullptr;
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
       {
         if (mReleaseObjects)
           delete info;
@@ -643,7 +643,7 @@ uint ContentInfoList::deleteMarkedContent()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -672,7 +672,7 @@ uint ContentInfoList::markDeletedByFileId(uint fileId)
       while (t < mLength)
       {
         ContentInfo *info = mArray[t];
-        if (info != NULL)
+        if (info != nullptr)
         {
           if (info->mFileId > fileId)
             return cnt;
@@ -695,7 +695,7 @@ uint ContentInfoList::markDeletedByFileId(uint fileId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -713,7 +713,7 @@ uint ContentInfoList::deleteContentInfo(ContentInfo& contentInfo)
     int idx = getClosestIndexNoLock(mComparisonMethod,contentInfo);
 
     uint startP = 0;
-    if (idx >= 0  &&  idx < (int)mLength  &&  mArray[idx] != NULL  &&
+    if (idx >= 0  &&  idx < (int)mLength  &&  mArray[idx] != nullptr  &&
         mArray[idx]->mFileId == contentInfo.mFileId  &&  mArray[idx]->mMessageIndex == contentInfo.mMessageIndex)
     {
       startP = (uint)idx;
@@ -724,8 +724,8 @@ uint ContentInfoList::deleteContentInfo(ContentInfo& contentInfo)
     for (uint t=startP; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL  &&  ((info->mFileId == contentInfo.mFileId  &&  info->mMessageIndex == contentInfo.mMessageIndex)  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
+      mArray[t] = nullptr;
+      if (info != nullptr  &&  ((info->mFileId == contentInfo.mFileId  &&  info->mMessageIndex == contentInfo.mMessageIndex)  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -743,7 +743,7 @@ uint ContentInfoList::deleteContentInfo(ContentInfo& contentInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -763,8 +763,8 @@ uint ContentInfoList::deleteContentInfoByFileIdAndMessageIndex(uint fileId,uint 
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL  &&  ((info->mFileId == fileId  &&  info->mMessageIndex == messageIndex)  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
+      mArray[t] = nullptr;
+      if (info != nullptr  &&  ((info->mFileId == fileId  &&  info->mMessageIndex == messageIndex)  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -782,7 +782,7 @@ uint ContentInfoList::deleteContentInfoByFileIdAndMessageIndex(uint fileId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -800,8 +800,8 @@ uint ContentInfoList::deleteContentInfoByGroupFlags(uint groupFlags)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL  &&  ((info->mGroupFlags & groupFlags) != 0  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
+      mArray[t] = nullptr;
+      if (info != nullptr  &&  ((info->mGroupFlags & groupFlags) != 0  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -819,7 +819,7 @@ uint ContentInfoList::deleteContentInfoByGroupFlags(uint groupFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -838,8 +838,8 @@ uint ContentInfoList::deleteContentInfoByProducerId(uint producerId)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL  &&  (info->mProducerId == producerId  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
+      mArray[t] = nullptr;
+      if (info != nullptr  &&  (info->mProducerId == producerId  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -857,7 +857,7 @@ uint ContentInfoList::deleteContentInfoByProducerId(uint producerId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -877,7 +877,7 @@ void ContentInfoList::getLevelInfoList(T::LevelInfoList& levelInfoList)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
         sprintf(tmp,"%u;%s;%d;%d;%d;%d",info->mProducerId,info->mFmiParameterName.c_str(),info->mFmiParameterLevelId,info->mGrib1ParameterLevelId,info->mGrib2ParameterLevelId,info->mParameterLevel);
         if (list.find(tmp) == list.end())
@@ -890,7 +890,7 @@ void ContentInfoList::getLevelInfoList(T::LevelInfoList& levelInfoList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -909,8 +909,8 @@ uint ContentInfoList::deleteContentInfoByGenerationId(uint generationId)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL  &&  (info->mGenerationId == generationId  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
+      mArray[t] = nullptr;
+      if (info != nullptr  &&  (info->mGenerationId == generationId  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -928,7 +928,7 @@ uint ContentInfoList::deleteContentInfoByGenerationId(uint generationId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -947,8 +947,8 @@ uint ContentInfoList::deleteContentInfoByGenerationIdList(std::set<uint>& genera
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL  &&  (generationIdList.find(info->mGenerationId) != generationIdList.end()  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
+      mArray[t] = nullptr;
+      if (info != nullptr  &&  (generationIdList.find(info->mGenerationId) != generationIdList.end()  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -966,7 +966,7 @@ uint ContentInfoList::deleteContentInfoByGenerationIdList(std::set<uint>& genera
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -985,8 +985,8 @@ uint ContentInfoList::deleteContentInfoByGenerationAndGeometry(uint generationId
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL  &&  ((info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
+      mArray[t] = nullptr;
+      if (info != nullptr  &&  ((info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -1004,7 +1004,7 @@ uint ContentInfoList::deleteContentInfoByGenerationAndGeometry(uint generationId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1023,8 +1023,8 @@ uint ContentInfoList::deleteContentInfoByGenerationGeometryAndForecastTime(uint 
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL  &&  ((info->mGenerationId == generationId  &&  info->mGeometryId == geometryId  &&  info->mForecastTime == forecastTime)  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
+      mArray[t] = nullptr;
+      if (info != nullptr  &&  ((info->mGenerationId == generationId  &&  info->mGeometryId == geometryId  &&  info->mForecastTime == forecastTime)  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -1042,7 +1042,7 @@ uint ContentInfoList::deleteContentInfoByGenerationGeometryAndForecastTime(uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1061,8 +1061,8 @@ uint ContentInfoList::deleteContentInfoBySourceId(uint sourceId)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL &&  (info->mSourceId == sourceId  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
+      mArray[t] = nullptr;
+      if (info != nullptr &&  (info->mSourceId == sourceId  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -1080,7 +1080,7 @@ uint ContentInfoList::deleteContentInfoBySourceId(uint sourceId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1099,8 +1099,8 @@ uint ContentInfoList::deleteContentInfoByFileIdList(std::set<uint>& fileIdList)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL  &&  (fileIdList.find(info->mFileId) != fileIdList.end()  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
+      mArray[t] = nullptr;
+      if (info != nullptr  &&  (fileIdList.find(info->mFileId) != fileIdList.end()  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -1118,7 +1118,7 @@ uint ContentInfoList::deleteContentInfoByFileIdList(std::set<uint>& fileIdList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1137,8 +1137,8 @@ uint ContentInfoList::deleteVirtualContent()
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL  &&  (info->mFileType == T::FileType::Virtual  ||  (info->mFlags & T::ContentInfo::Flags::VirtualContent) != 0))
+      mArray[t] = nullptr;
+      if (info != nullptr  &&  (info->mFileType == T::FileType::Virtual  ||  (info->mFlags & T::ContentInfo::Flags::VirtualContent) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -1156,7 +1156,7 @@ uint ContentInfoList::deleteVirtualContent()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1174,8 +1174,8 @@ void ContentInfoList::keepContentInfoByGeometryIdList(std::set<T::GeometryId>& g
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL &&  ((info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0  ||  geometryIdList.find(info->mGeometryId) == geometryIdList.end()))
+      mArray[t] = nullptr;
+      if (info != nullptr &&  ((info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0  ||  geometryIdList.find(info->mGeometryId) == geometryIdList.end()))
       {
         if (mReleaseObjects)
           delete info;
@@ -1190,7 +1190,7 @@ void ContentInfoList::keepContentInfoByGeometryIdList(std::set<T::GeometryId>& g
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1208,8 +1208,8 @@ void ContentInfoList::keepContentInfoByGeometryId(T::GeometryId geometryId)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL &&  ((info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0 ||  info->mGeometryId != geometryId))
+      mArray[t] = nullptr;
+      if (info != nullptr &&  ((info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0 ||  info->mGeometryId != geometryId))
       {
         if (mReleaseObjects)
           delete info;
@@ -1224,7 +1224,7 @@ void ContentInfoList::keepContentInfoByGeometryId(T::GeometryId geometryId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1242,8 +1242,8 @@ void ContentInfoList::keepContentInfoByGroupFlags(uint groupFlags)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL  && ((info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0 || (info->mGroupFlags & groupFlags) == 0))
+      mArray[t] = nullptr;
+      if (info != nullptr  && ((info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0 || (info->mGroupFlags & groupFlags) == 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -1258,7 +1258,7 @@ void ContentInfoList::keepContentInfoByGroupFlags(uint groupFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1276,8 +1276,8 @@ void ContentInfoList::keepContentInfoByProducerId(uint producerId)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL  &&  ((info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0 || info->mProducerId != producerId))
+      mArray[t] = nullptr;
+      if (info != nullptr  &&  ((info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0 || info->mProducerId != producerId))
       {
         if (mReleaseObjects)
           delete info;
@@ -1292,7 +1292,7 @@ void ContentInfoList::keepContentInfoByProducerId(uint producerId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1310,8 +1310,8 @@ void ContentInfoList::keepContentInfoByGenerationId(uint generationId)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL  &&  ((info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0 || info->mGenerationId != generationId))
+      mArray[t] = nullptr;
+      if (info != nullptr  &&  ((info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0 || info->mGenerationId != generationId))
       {
         if (mReleaseObjects)
           delete info;
@@ -1326,7 +1326,7 @@ void ContentInfoList::keepContentInfoByGenerationId(uint generationId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1344,8 +1344,8 @@ void ContentInfoList::keepContentInfoBySourceId(uint sourceId)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL  &&  ((info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0 ||  info->mSourceId != sourceId))
+      mArray[t] = nullptr;
+      if (info != nullptr  &&  ((info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0 ||  info->mSourceId != sourceId))
       {
         if (mReleaseObjects)
           delete info;
@@ -1360,7 +1360,7 @@ void ContentInfoList::keepContentInfoBySourceId(uint sourceId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1390,7 +1390,7 @@ uint ContentInfoList::registerContentInfoByServerAndFileId(uint serverId,uint fi
     for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  info->mFileId == fileId)
+      if (info != nullptr  &&  info->mFileId == fileId)
       {
         info->mServerFlags = info->mServerFlags | sf;
         count++;
@@ -1405,7 +1405,7 @@ uint ContentInfoList::registerContentInfoByServerAndFileId(uint serverId,uint fi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1427,7 +1427,7 @@ uint ContentInfoList::unregisterContentInfoByServerId(uint serverId)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mServerFlags & sf) != 0)
+      if (info != nullptr  &&  (info->mServerFlags & sf) != 0)
       {
         info->mServerFlags = info->mServerFlags - sf;
         count++;
@@ -1437,7 +1437,7 @@ uint ContentInfoList::unregisterContentInfoByServerId(uint serverId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1468,7 +1468,7 @@ uint ContentInfoList::unregisterContentInfoByServerAndFileId(uint serverId,uint 
     for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  info->mFileId == fileId)
+      if (info != nullptr  &&  info->mFileId == fileId)
       {
         if ((info->mServerFlags & sf) != 0)
         {
@@ -1486,7 +1486,7 @@ uint ContentInfoList::unregisterContentInfoByServerAndFileId(uint serverId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1501,36 +1501,36 @@ void ContentInfoList::getContentListByForecastTime(std::string forecastTime,T::C
   {
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
-    ContentInfo *prevInfo = NULL;
-    ContentInfo *nextInfo = NULL;
+    ContentInfo *prevInfo = nullptr;
+    ContentInfo *nextInfo = nullptr;
 
 
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
         if (info->mForecastTime <= forecastTime)
         {
-          if (prevInfo == NULL  ||  info->mForecastTime > prevInfo->mForecastTime)
+          if (prevInfo == nullptr  ||  info->mForecastTime > prevInfo->mForecastTime)
             prevInfo = info;
         }
         else
         {
-          if (nextInfo == NULL  ||  info->mForecastTime < nextInfo->mForecastTime)
+          if (nextInfo == nullptr  ||  info->mForecastTime < nextInfo->mForecastTime)
             nextInfo = info;
         }
       }
     }
 
-    if (prevInfo != NULL  &&  (nextInfo != NULL  ||  prevInfo->mForecastTime == forecastTime))
+    if (prevInfo != nullptr  &&  (nextInfo != nullptr  ||  prevInfo->mForecastTime == forecastTime))
     {
       if (contentInfoList.getReleaseObjects())
         contentInfoList.addContentInfo(prevInfo->duplicate());
       else
         contentInfoList.addContentInfo(prevInfo);
 
-      if (nextInfo != NULL  &&  prevInfo->mForecastTime != forecastTime)
+      if (nextInfo != nullptr  &&  prevInfo->mForecastTime != forecastTime)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(nextInfo->duplicate());
@@ -1541,7 +1541,7 @@ void ContentInfoList::getContentListByForecastTime(std::string forecastTime,T::C
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1560,7 +1560,7 @@ int ContentInfoList::getClosestIndex(ContentInfo::ComparisonMethod comparisonMet
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1573,14 +1573,14 @@ int ContentInfoList::getClosestIndexNoLock(ContentInfo::ComparisonMethod compari
   //FUNCTION_TRACE
   try
   {
-    if (mArray == NULL  ||  mLength == 0)
+    if (mArray == nullptr  ||  mLength == 0)
       return 0;
 
     if (comparisonMethod != mComparisonMethod)
     {
       for (uint t=0; t<mLength; t++)
       {
-        if (mArray[t] != NULL)
+        if (mArray[t] != nullptr)
         {
           int res = mArray[t]->compare(comparisonMethod,&contentInfo);
           if (res == 0)
@@ -1600,14 +1600,14 @@ int ContentInfoList::getClosestIndexNoLock(ContentInfo::ComparisonMethod compari
     {
       mid = (low + high) / 2;
 
-      if (mArray[mid] == NULL)
+      if (mArray[mid] == nullptr)
         return 0;
 
       int res = mArray[mid]->compare(comparisonMethod,&contentInfo);
 
       if (res == 0)
       {
-        while (mid > 0  &&  mArray[mid-1] != NULL  &&  mArray[mid-1]->compare(comparisonMethod,&contentInfo) == 0)
+        while (mid > 0  &&  mArray[mid-1] != nullptr  &&  mArray[mid-1]->compare(comparisonMethod,&contentInfo) == 0)
           mid--;
 
         return mid;
@@ -1623,14 +1623,14 @@ int ContentInfoList::getClosestIndexNoLock(ContentInfo::ComparisonMethod compari
     {
       if (mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
       {
-        while (mid < (int)mLength  &&  mArray[mid] != NULL  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
+        while (mid < (int)mLength  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
           mid++;
 
         return mid-1;
       }
       else
       {
-        while (mid > 0  &&  mArray[mid] != NULL  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) > 0)
+        while (mid > 0  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) > 0)
           mid--;
 
         return mid;
@@ -1640,7 +1640,7 @@ int ContentInfoList::getClosestIndexNoLock(ContentInfo::ComparisonMethod compari
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1660,17 +1660,17 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,
 
     int idx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
     if (idx < 0  ||  (uint)idx >= mLength)
-      return NULL;
+      return nullptr;
 
     T::ContentInfo *info = mArray[idx];
-    if (info != NULL &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFileId == fileId  &&  info->mMessageIndex == messageIndex)
+    if (info != nullptr &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFileId == fileId  &&  info->mMessageIndex == messageIndex)
       return mArray[idx];
 
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1689,17 +1689,17 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndexNoLock(uint f
 
     int idx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
     if (idx < 0  ||  (uint)idx >= mLength)
-      return NULL;
+      return nullptr;
 
     T::ContentInfo *info = mArray[idx];
-    if (info != NULL &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFileId == fileId  &&  info->mMessageIndex == messageIndex)
+    if (info != nullptr &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFileId == fileId  &&  info->mMessageIndex == messageIndex)
       return mArray[idx];
 
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1719,10 +1719,10 @@ bool ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,uint mes
 
     int idx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
     if (idx < 0 ||  (uint)idx >= mLength)
-      return NULL;
+      return false;
 
     T::ContentInfo *info = mArray[idx];
-    if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFileId == fileId  &&  info->mMessageIndex == messageIndex  )
+    if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFileId == fileId  &&  info->mMessageIndex == messageIndex  )
     {
       contentInfo = *info;
       return true;
@@ -1732,7 +1732,7 @@ bool ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,uint mes
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1748,13 +1748,13 @@ ContentInfo* ContentInfoList::getContentInfoByIndex(uint index) const
   {
     //AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     if (index >= mLength)
-      return NULL;
+      return nullptr;
 
     return mArray[index];
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1771,7 +1771,7 @@ ContentInfo* ContentInfoList::getContentInfoByIndexNoCheck(uint index)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1789,7 +1789,7 @@ ContentInfo* ContentInfoList::getContentInfoByParameterLevelInfo(T::ParameterLev
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mParameterLevel == levelInfo.mLevel)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mParameterLevel == levelInfo.mLevel)
       {
         if ((levelInfo.mParameterKeyType == T::ParamKeyType::FMI_ID  &&  info->mFmiParameterId == levelInfo.mParameterKey) ||
             (levelInfo.mParameterKeyType == T::ParamKeyType::FMI_NAME  &&  info->mFmiParameterName == levelInfo.mParameterKey) ||
@@ -1813,11 +1813,11 @@ ContentInfo* ContentInfoList::getContentInfoByParameterLevelInfo(T::ParameterLev
         }
       }
     }
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1835,7 +1835,7 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelIn
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mParameterLevel == levelInfo.mLevel)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mParameterLevel == levelInfo.mLevel)
       {
         if ((levelInfo.mParameterKeyType == T::ParamKeyType::FMI_ID  &&  info->mFmiParameterId == levelInfo.mParameterKey) ||
             (levelInfo.mParameterKeyType == T::ParamKeyType::FMI_NAME  &&  info->mFmiParameterName == levelInfo.mParameterKey) ||
@@ -1877,7 +1877,7 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelIn
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1898,7 +1898,7 @@ void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex
       for (uint t=startFileId; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
-        if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           if (contentInfoList.getReleaseObjects())
             contentInfoList.addContentInfo(info->duplicate());
@@ -1924,7 +1924,7 @@ void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex
     for (uint t=(uint)startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
         if (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex))
         {
@@ -1941,7 +1941,7 @@ void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1962,7 +1962,7 @@ void ContentInfoList::getContentInfoListByGroupFlags(uint groupFlags,uint startF
       for (uint t=startFileId; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
-        if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (info->mGroupFlags & groupFlags) != 0)
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (info->mGroupFlags & groupFlags) != 0)
         {
           if (contentInfoList.getReleaseObjects())
             contentInfoList.addContentInfo(info->duplicate());
@@ -1989,7 +1989,7 @@ void ContentInfoList::getContentInfoListByGroupFlags(uint groupFlags,uint startF
     {
       ContentInfo *info = mArray[t];
 
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
         if ((info->mGroupFlags & groupFlags) != 0  &&  (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
         {
@@ -2006,7 +2006,7 @@ void ContentInfoList::getContentInfoListByGroupFlags(uint groupFlags,uint startF
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2027,7 +2027,7 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint generationId,T::
     {
       ContentInfo *info = mArray[t];
 
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId)
       {
         switch (parameterKeyType)
         {
@@ -2091,7 +2091,7 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint generationId,T::
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2111,7 +2111,7 @@ void ContentInfoList::getContentGeometryIdListByGenerationId(uint generationId,s
     {
       ContentInfo *info = mArray[t];
 
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId)
       {
         if (geometryIdList.find(info->mGeometryId) == geometryIdList.end())
         {
@@ -2122,7 +2122,7 @@ void ContentInfoList::getContentGeometryIdListByGenerationId(uint generationId,s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2142,7 +2142,7 @@ void ContentInfoList::getContentGeometryIdList(std::set<T::GeometryId>& geometry
     {
       ContentInfo *info = mArray[t];
 
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
         if (geometryIdList.find(info->mGeometryId) == geometryIdList.end())
         {
@@ -2153,7 +2153,7 @@ void ContentInfoList::getContentGeometryIdList(std::set<T::GeometryId>& geometry
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2173,7 +2173,7 @@ void ContentInfoList::getGenerationIdListByGeometryId(T::GeometryId geometryId,s
     {
       ContentInfo *info = mArray[t];
 
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGeometryId == geometryId)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGeometryId == geometryId)
       {
         if (generationIdList.find(info->mGenerationId) == generationIdList.end())
         {
@@ -2184,7 +2184,7 @@ void ContentInfoList::getGenerationIdListByGeometryId(T::GeometryId geometryId,s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2212,7 +2212,7 @@ void ContentInfoList::getContentInfoListByFileId(uint fileId,ContentInfoList& co
       while (t < mLength)
       {
         ContentInfo *info = mArray[t];
-        if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           if (info->mFileId > fileId)
             return;
@@ -2234,7 +2234,7 @@ void ContentInfoList::getContentInfoListByFileId(uint fileId,ContentInfoList& co
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFileId == fileId)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFileId == fileId)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -2245,7 +2245,7 @@ void ContentInfoList::getContentInfoListByFileId(uint fileId,ContentInfoList& co
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2263,7 +2263,7 @@ void ContentInfoList::getContentInfoListByGeometryId(T::GeometryId geometryId,Co
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGeometryId == geometryId)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGeometryId == geometryId)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -2274,7 +2274,7 @@ void ContentInfoList::getContentInfoListByGeometryId(T::GeometryId geometryId,Co
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2301,7 +2301,7 @@ void ContentInfoList::getContentInfoListByForecastTime(std::string forecastTime,
       while (t < mLength)
       {
         ContentInfo *info = mArray[t];
-        if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           if (info->mForecastTime > forecastTime)
             return;
@@ -2323,7 +2323,7 @@ void ContentInfoList::getContentInfoListByForecastTime(std::string forecastTime,
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mForecastTime == forecastTime)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mForecastTime == forecastTime)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -2334,7 +2334,7 @@ void ContentInfoList::getContentInfoListByForecastTime(std::string forecastTime,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2350,7 +2350,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGribParameterId == gribParameterId)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGribParameterId == gribParameterId)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -2361,7 +2361,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2385,15 +2385,15 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),gribParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),gribParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -2411,10 +2411,10 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
                 {
                   if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                       next = info;
 
                     if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -2441,7 +2441,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -2451,7 +2451,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  && (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  && (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -2476,7 +2476,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2500,15 +2500,15 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),gribParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),gribParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -2528,10 +2528,10 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
                   {
                     if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                         next = info;
 
                       if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -2559,7 +2559,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  && (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0 &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  && (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0 &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -2569,7 +2569,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  && (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  && (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -2594,7 +2594,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2618,15 +2618,15 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),gribParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),gribParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -2644,10 +2644,10 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
                 {
                   if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                       next = info;
 
                     if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -2674,7 +2674,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -2684,7 +2684,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -2709,7 +2709,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2726,7 +2726,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFmiParameterId == fmiParameterId)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFmiParameterId == fmiParameterId)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -2737,7 +2737,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2761,15 +2761,15 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -2787,10 +2787,10 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
                 {
                   if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                       next = info;
 
                     if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -2817,7 +2817,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
           // We need to add the previous entry before the start time.
 
@@ -2827,7 +2827,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -2852,7 +2852,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2876,15 +2876,15 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -2904,10 +2904,10 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
                   {
                     if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                         next = info;
 
                       if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -2935,7 +2935,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -2945,7 +2945,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -2970,7 +2970,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2994,15 +2994,15 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -3020,10 +3020,10 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
                 {
                   if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                       next = info;
 
                     if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -3050,7 +3050,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -3060,7 +3060,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -3085,7 +3085,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3108,17 +3108,17 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
       //printf("INDEX %u %s %u\n",idx,mArray[t]->mFmiParameterName.c_str(),mArray[t]->mParameterLevel);
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -3137,10 +3137,10 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
                 {
                   if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                       next = info;
 
                     if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -3167,7 +3167,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -3177,7 +3177,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -3202,7 +3202,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3239,7 +3239,7 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(ui
     int idx = getClosestIndexNoLock(mComparisonMethod,info);
     for (int t=0; t < 2; t++)
     {
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr)
       {
         ContentInfo *cInfo = mArray[idx];
 
@@ -3257,11 +3257,11 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(ui
       }
     }
 
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3286,15 +3286,15 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
       //info.mParameterLevel = level;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -3312,12 +3312,12 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
                 {
                   if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || info->mParameterLevel == level)
                   {
-                    if (info->mForecastTime < forecastTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTime < forecastTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                     {
                       prev = info;
                     }
 
-                    if (info->mForecastTime > forecastTime  &&  next == NULL)
+                    if (info->mForecastTime > forecastTime  &&  next == nullptr)
                     {
                       next = info;
                       t = mLength;
@@ -3347,7 +3347,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
       if (contentInfoList.getLength() > 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
         // We need to add the previous entry before the start time.
 
@@ -3357,7 +3357,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
         // We need to add the next entry after the end time.
 
@@ -3382,7 +3382,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3406,15 +3406,15 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -3434,10 +3434,10 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
                   {
                     if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                         next = info;
 
                       if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -3465,7 +3465,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -3475,7 +3475,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -3500,7 +3500,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3524,15 +3524,15 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -3550,10 +3550,10 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
                 {
                   if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                       next = info;
 
                     if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -3580,7 +3580,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -3590,7 +3590,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -3615,7 +3615,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3639,15 +3639,15 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -3665,10 +3665,10 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
                 {
                   if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                       next = info;
 
                     if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -3695,7 +3695,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -3705,7 +3705,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -3730,7 +3730,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3754,15 +3754,15 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -3782,10 +3782,10 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
                   {
                     if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                         next = info;
 
                       if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -3813,7 +3813,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -3823,7 +3823,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -3848,7 +3848,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3872,15 +3872,15 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -3898,10 +3898,10 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
                 {
                   if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                       next = info;
 
                     if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -3928,7 +3928,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -3938,7 +3938,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -3963,7 +3963,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3986,15 +3986,15 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -4012,10 +4012,10 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
                 {
                   if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                       next = info;
 
                     if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -4042,7 +4042,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -4052,7 +4052,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -4077,7 +4077,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4101,15 +4101,15 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
+      if ((uint)idx < mLength &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -4129,10 +4129,10 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
                   {
                     if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                         next = info;
 
                       if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -4160,7 +4160,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -4170,7 +4170,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -4195,7 +4195,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4219,15 +4219,15 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -4245,10 +4245,10 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
                 {
                   if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                       next = info;
 
                     if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -4275,7 +4275,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -4285,7 +4285,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -4310,7 +4310,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4334,15 +4334,15 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -4360,10 +4360,10 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
                 {
                   if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                       next = info;
 
                     if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -4390,7 +4390,7 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -4400,7 +4400,7 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -4425,7 +4425,7 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4449,15 +4449,15 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -4477,10 +4477,10 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
                   {
                     if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                         next = info;
 
                       if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -4508,7 +4508,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -4518,7 +4518,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -4543,7 +4543,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4567,15 +4567,15 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -4593,10 +4593,10 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
                 {
                   if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                       next = info;
 
                     if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -4623,7 +4623,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time. Notice that this must be
         // done in all requested levels.
@@ -4634,7 +4634,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time. Notice that this must be
         // done in all requested levels.
@@ -4660,7 +4660,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4684,15 +4684,15 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -4710,10 +4710,10 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
                 {
                   if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                       next = info;
 
                     if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -4740,7 +4740,7 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -4750,7 +4750,7 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -4775,7 +4775,7 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4799,15 +4799,15 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -4827,10 +4827,10 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
                   {
                     if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                         next = info;
 
                       if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -4858,7 +4858,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -4868,7 +4868,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -4893,7 +4893,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4917,15 +4917,15 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != NULL  &&  strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
+      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
         idx++;
 
       uint t = (uint)idx;
 
-      ContentInfo *prev = NULL;
-      ContentInfo *next = NULL;
+      ContentInfo *prev = nullptr;
+      ContentInfo *next = nullptr;
 
-      while (t < mLength  &&  mArray[t] != NULL)
+      while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -4943,10 +4943,10 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
                 {
                   if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == NULL || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == NULL || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
                       next = info;
 
                     if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
@@ -4973,7 +4973,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -4983,7 +4983,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != NULL  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -5008,7 +5008,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5029,7 +5029,7 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startF
       for (uint t=startFileId; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
-        if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId)
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId)
         {
           if (contentInfoList.getReleaseObjects())
             contentInfoList.addContentInfo(info->duplicate());
@@ -5055,7 +5055,7 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startF
     for (uint t=(uint)startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -5069,7 +5069,7 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startF
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5090,7 +5090,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint generationId,uint st
       for (uint t=startFileId; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
-        if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId)
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId)
         {
           if (contentInfoList.getReleaseObjects())
             contentInfoList.addContentInfo(info->duplicate());
@@ -5116,7 +5116,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint generationId,uint st
     for (uint t=(uint)startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -5130,7 +5130,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint generationId,uint st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5151,7 +5151,7 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(uint generatio
       for (uint t=startFileId; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
-        if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)
         {
           if (contentInfoList.getReleaseObjects())
             contentInfoList.addContentInfo(info->duplicate());
@@ -5177,7 +5177,7 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(uint generatio
     for (uint t=(uint)startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -5191,7 +5191,7 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(uint generatio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5209,7 +5209,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint generationId,std::st
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -5220,7 +5220,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint generationId,std::st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5245,7 +5245,7 @@ void ContentInfoList::getContentInfoListByServerId(uint serverId,uint startFileI
       for (uint t=startFileId; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
-        if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (info->mServerFlags & sf) != 0)
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (info->mServerFlags & sf) != 0)
         {
           if (contentInfoList.getReleaseObjects())
             contentInfoList.addContentInfo(info->duplicate());
@@ -5272,7 +5272,7 @@ void ContentInfoList::getContentInfoListByServerId(uint serverId,uint startFileI
     for (uint t=(uint)startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (info->mServerFlags & sf) != 0 && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (info->mServerFlags & sf) != 0 && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -5286,7 +5286,7 @@ void ContentInfoList::getContentInfoListByServerId(uint serverId,uint startFileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5307,7 +5307,7 @@ void ContentInfoList::getContentInfoListBySourceId(uint sourceId,uint startFileI
       for (uint t=startFileId; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
-        if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mSourceId == sourceId)
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mSourceId == sourceId)
         {
           if (contentInfoList.getReleaseObjects())
             contentInfoList.addContentInfo(info->duplicate());
@@ -5333,7 +5333,7 @@ void ContentInfoList::getContentInfoListBySourceId(uint sourceId,uint startFileI
     for (uint t=(uint)startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mSourceId == sourceId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mSourceId == sourceId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -5347,7 +5347,7 @@ void ContentInfoList::getContentInfoListBySourceId(uint sourceId,uint startFileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5378,10 +5378,10 @@ void ContentInfoList::getContentInfoListByServerAndFileId(uint serverId,uint fil
       for (uint t=(uint)startIdx; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
-        if (info != NULL  &&  info->mFileId > fileId)
+        if (info != nullptr  &&  info->mFileId > fileId)
           return;
 
-        if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFileId == fileId  &&  (info->mServerFlags & sf) != 0)
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFileId == fileId  &&  (info->mServerFlags & sf) != 0)
         {
           if (contentInfoList.getReleaseObjects())
             contentInfoList.addContentInfo(info->duplicate());
@@ -5396,7 +5396,7 @@ void ContentInfoList::getContentInfoListByServerAndFileId(uint serverId,uint fil
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFileId == fileId  &&  (info->mServerFlags & sf) != 0)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFileId == fileId  &&  (info->mServerFlags & sf) != 0)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -5407,7 +5407,7 @@ void ContentInfoList::getContentInfoListByServerAndFileId(uint serverId,uint fil
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5424,7 +5424,7 @@ void ContentInfoList::getFmiParamLevelIdListByFmiParameterId(T::ParamId fmiParam
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
         uint vLen = (uint)paramLevelIdList.size();
         uint c = 0;
@@ -5455,7 +5455,7 @@ void ContentInfoList::getFmiParamLevelIdListByFmiParameterId(T::ParamId fmiParam
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5473,7 +5473,7 @@ void ContentInfoList::getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
         uint vLen = (uint)paramLevelList.size();
         uint c = 0;
@@ -5504,7 +5504,7 @@ void ContentInfoList::getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5521,12 +5521,12 @@ void ContentInfoList::getParamLevelInfoListByFmiParameterId(T::ParamId fmiParame
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFmiParameterId == fmiParameterId)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFmiParameterId == fmiParameterId)
       {
         ParameterLevelInfo *pInfo = parameterLevelInfoList.getParameterLevelInfo(T::ParamKeyType::FMI_ID,
             info->mFmiParameterId,T::ParamLevelIdType::FMI,info->mFmiParameterLevelId,info->mParameterLevel);
 
-        if (pInfo == NULL)
+        if (pInfo == nullptr)
         {
           pInfo = new ParameterLevelInfo(T::ParamKeyType::FMI_ID,info->mFmiParameterId,T::ParamLevelIdType::FMI,info->mFmiParameterLevelId,info->mParameterLevel);
           parameterLevelInfoList.addParameterLevelInfo(pInfo);
@@ -5536,7 +5536,7 @@ void ContentInfoList::getParamLevelInfoListByFmiParameterId(T::ParamId fmiParame
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5553,9 +5553,9 @@ void ContentInfoList::getForecastTimeList(std::set<std::string>& forecastTimeLis
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
-        if (info != NULL)
+        if (info != nullptr)
         {
           if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
           {
@@ -5567,7 +5567,7 @@ void ContentInfoList::getForecastTimeList(std::set<std::string>& forecastTimeLis
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5584,9 +5584,9 @@ void ContentInfoList::getForecastTimeListByGenerationId(uint generationId,std::s
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL)
+      if (info != nullptr)
       {
-        if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId)
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId)
         {
           if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
           {
@@ -5598,7 +5598,7 @@ void ContentInfoList::getForecastTimeListByGenerationId(uint generationId,std::s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5615,9 +5615,9 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(uint generation
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL)
+      if (info != nullptr)
       {
-        if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)
         {
           if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
           {
@@ -5629,7 +5629,7 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(uint generation
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5646,9 +5646,9 @@ void ContentInfoList::getForecastTimeListByProducerId(uint producerId,std::set<s
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL)
+      if (info != nullptr)
       {
-        if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId)
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId)
         {
           if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
           {
@@ -5660,7 +5660,7 @@ void ContentInfoList::getForecastTimeListByProducerId(uint producerId,std::set<s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5677,7 +5677,7 @@ uint ContentInfoList::getLength() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5690,14 +5690,14 @@ void ContentInfoList::setModificationLockPtr(ModificationLock* modificationLockP
   FUNCTION_TRACE
   try
   {
-    if (modificationLockPtr != NULL)
+    if (modificationLockPtr != nullptr)
       mModificationLockPtr = modificationLockPtr;
     else
       mModificationLockPtr = &mModificationLock;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5714,7 +5714,7 @@ ModificationLock*  ContentInfoList::getModificationLockPtr()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5731,7 +5731,7 @@ uint ContentInfoList::getSize() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5748,7 +5748,7 @@ void ContentInfoList::lock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5764,7 +5764,7 @@ void ContentInfoList::unlock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5781,7 +5781,7 @@ bool ContentInfoList::getReleaseObjects()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5798,7 +5798,7 @@ void ContentInfoList::setReleaseObjects(bool releaseObjects)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5822,7 +5822,7 @@ void ContentInfoList::setComparisonMethod(ContentInfo::ComparisonMethod comparis
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5844,7 +5844,7 @@ void ContentInfoList::sort(ContentInfo::ComparisonMethod comparisonMethod)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5861,7 +5861,7 @@ void ContentInfoList::writeToFile(std::string filename)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5877,7 +5877,7 @@ void ContentInfoList::writeToFile(std::string filename,const char *filemode)
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     FILE *file = fopen(filename.c_str(),filemode);
-    if (file == NULL)
+    if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot create the file!");
       exception.addParameter("Filename",filename);
@@ -5887,7 +5887,7 @@ void ContentInfoList::writeToFile(std::string filename,const char *filemode)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         fprintf(file,"%s\n",info->getCsv().c_str());
     }
 
@@ -5895,7 +5895,7 @@ void ContentInfoList::writeToFile(std::string filename,const char *filemode)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5913,13 +5913,13 @@ void ContentInfoList::print(std::ostream& stream,uint level,uint optionFlags)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         info->print(stream,level+1,optionFlags);
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

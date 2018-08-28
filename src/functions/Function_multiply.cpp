@@ -16,7 +16,7 @@ Function_multiply::Function_multiply(double multiplyer)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -33,7 +33,7 @@ Function_multiply::Function_multiply(const Function_multiply& function)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -47,7 +47,7 @@ Function_multiply::~Function_multiply()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -66,7 +66,7 @@ float Function_multiply::executeFunctionCall1(std::vector<float>& parameters)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -85,7 +85,7 @@ double Function_multiply::executeFunctionCall1(std::vector<double>& parameters)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -105,7 +105,7 @@ void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -126,7 +126,7 @@ void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -147,7 +147,7 @@ void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -167,7 +167,7 @@ void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -192,7 +192,7 @@ void Function_multiply::executeFunctionCall3(uint columns,uint rows,std::vector<
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -226,7 +226,7 @@ Function* Function_multiply::duplicate()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

@@ -20,8 +20,8 @@ ServiceImplementation::ServiceImplementation()
   FUNCTION_TRACE
   try
   {
-    mContentServerPtr = NULL;
-    mDataServerPtr = NULL;
+    mContentServerPtr = nullptr;
+    mDataServerPtr = nullptr;
     mFunctionParamId = 0;
     mProducerFileModificationTime = 0;
     mLastConfiguratonCheck = 0;
@@ -29,7 +29,7 @@ ServiceImplementation::ServiceImplementation()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -45,7 +45,7 @@ ServiceImplementation::~ServiceImplementation()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -95,7 +95,7 @@ void ServiceImplementation::init(
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -112,7 +112,7 @@ void ServiceImplementation::shutdown()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -132,7 +132,7 @@ int ServiceImplementation::_executeQuery(T::SessionId sessionId,Query& query)
 
     //query.print(std::cout,0,0);
 
-    if (mDebugLog != NULL)
+    if (mDebugLog != nullptr)
     {
       std::stringstream stream;
       query.print(stream,0,0);
@@ -146,7 +146,7 @@ int ServiceImplementation::_executeQuery(T::SessionId sessionId,Query& query)
     else
       result = executeTimeStepQuery(query);
 
-    if (mDebugLog != NULL)
+    if (mDebugLog != nullptr)
     {
       PRINT_DATA(mDebugLog,"\n############################### QUERY EXECUTION END ###################\n\n");
     }
@@ -155,7 +155,7 @@ int ServiceImplementation::_executeQuery(T::SessionId sessionId,Query& query)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -180,7 +180,7 @@ int ServiceImplementation::_getProducerList(T::SessionId sessionId,string_vec& p
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -194,7 +194,7 @@ void ServiceImplementation::loadProducerFile()
   try
   {
     FILE *file = fopen(mProducerFile.c_str(),"r");
-    if (file == NULL)
+    if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot open the producer file!");
       exception.addParameter("Filename",mProducerFile);
@@ -207,7 +207,7 @@ void ServiceImplementation::loadProducerFile()
 
     while (!feof(file))
     {
-      if (fgets(st,1000,file) != NULL  &&  st[0] != '#')
+      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
       {
         bool ind = false;
         char *field[100];
@@ -244,7 +244,7 @@ void ServiceImplementation::loadProducerFile()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -297,7 +297,7 @@ void ServiceImplementation::getGeometryIdListByCoordinates(QueryCoordinates& coo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -354,7 +354,7 @@ bool ServiceImplementation::getParameterFunctionInfo(std::string paramStr,std::s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -413,7 +413,7 @@ bool ServiceImplementation::getFunctionParams(std::string functionParamsStr,Func
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -452,7 +452,7 @@ void ServiceImplementation::getParameterMappings(std::string producerName,std::s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -491,7 +491,7 @@ void ServiceImplementation::getParameterMappings(std::string producerName,std::s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -600,7 +600,7 @@ void ServiceImplementation::getParameterStringInfo(std::string param,std::string
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -617,7 +617,7 @@ bool ServiceImplementation::getAlias(std::string name,std::string& alias)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -706,7 +706,7 @@ bool ServiceImplementation::parseFunction(QueryParameter& queryParam,std::string
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP, "Parsing failed!", NULL);
+    SmartMet::Spine::Exception exception(BCP, "Parsing failed!", nullptr);
     exception.addParameter("ParamStr",paramStr);
     throw exception;
   }
@@ -747,7 +747,7 @@ void ServiceImplementation::checkConfigurationUpdates()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -790,7 +790,7 @@ void ServiceImplementation::getProducerList(Query& query,Producer_vec& producers
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -879,7 +879,7 @@ void ServiceImplementation::updateQueryParameters(Query& query)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -922,7 +922,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
               double a = atof(it->second.c_str());
               QueryParameter *q = query.getQueryParameterPtr(it->first);
               std::vector<double> valueList;
-              if (q != NULL)
+              if (q != nullptr)
               {
                 if (tCount < (uint)q->mValueList.size())
                 {
@@ -934,7 +934,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
                   }
 
                   T::GridValue *rec = q->mValueList[tCount].mValueList.getGridValueByIndex(v);
-                  if (rec != NULL)
+                  if (rec != nullptr)
                   {
                     if (/*qParam->mAreaInterpolationMethod == T::AreaInterpolationMethod::External  &&*/  rec->mValueString.length() > 0)
                     {
@@ -1054,7 +1054,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
       }
     }
 
-    if (mDebugLog != NULL)
+    if (mDebugLog != nullptr)
     {
       std::stringstream stream;
       query.print(stream,0,0);
@@ -1068,7 +1068,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -1100,7 +1100,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
     updateQueryParameters(query);
 
-    if (mDebugLog != NULL)
+    if (mDebugLog != nullptr)
     {
       std::stringstream stream;
       query.print(stream,0,0);
@@ -1201,7 +1201,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
         }
         catch (...)
         {
-          SmartMet::Spine::Exception exception(BCP, "Operation failed!", NULL);
+          SmartMet::Spine::Exception exception(BCP, "Operation failed!", nullptr);
           exception.printError();
         }
       }
@@ -1272,7 +1272,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -1302,7 +1302,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
     updateQueryParameters(query);
 
-    if (mDebugLog != NULL)
+    if (mDebugLog != nullptr)
     {
       std::stringstream stream;
       query.print(stream,0,0);
@@ -1419,7 +1419,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
           }
           catch (...)
           {
-            SmartMet::Spine::Exception exception(BCP, "Operation failed!", NULL);
+            SmartMet::Spine::Exception exception(BCP, "Operation failed!", nullptr);
             exception.printError();
           }
 
@@ -1504,7 +1504,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -1537,7 +1537,7 @@ int ServiceImplementation::_getValuesByGridPoint(T::SessionId sessionId,T::Conte
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1562,7 +1562,7 @@ bool ServiceImplementation::conversionFunction(std::string& conversionFunction,s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -1578,7 +1578,7 @@ void ServiceImplementation::executeConversion(std::string& function,std::vector<
     for (uint i=0; i<vLen; i++)
     {
       T::GridValue *gv = valueList.getGridValueByIndex(i);
-      if (gv != NULL)
+      if (gv != nullptr)
       {
         std::vector<double> parameters;
         for (auto fp = functionParams.begin(); fp != functionParams.end(); ++fp)
@@ -1594,7 +1594,7 @@ void ServiceImplementation::executeConversion(std::string& function,std::vector<
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -1643,7 +1643,7 @@ void ServiceImplementation::timeInterpolation(short timeInterpolationMethod,std:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -1737,7 +1737,7 @@ void ServiceImplementation::levelInterpolation(short levelInterpolationMethod,do
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -1800,7 +1800,7 @@ bool ServiceImplementation::getSpecialValues(
 
     PRINT_DATA(mDebugLog,"         + Found %u content records\n",contentList.getLength());
 
-    if (mDebugLog != NULL)
+    if (mDebugLog != nullptr)
     {
       std::stringstream stream;
       contentList.print(stream,0,4);
@@ -2004,7 +2004,7 @@ bool ServiceImplementation::getSpecialValues(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -2080,7 +2080,7 @@ bool ServiceImplementation::getPointValues(
 
     PRINT_DATA(mDebugLog,"         + Found %u content records\n",contentList.getLength());
 
-    if (mDebugLog != NULL)
+    if (mDebugLog != nullptr)
     {
       std::stringstream stream;
       contentList.print(stream,0,4);
@@ -2362,7 +2362,7 @@ bool ServiceImplementation::getPointValues(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -2412,7 +2412,7 @@ bool ServiceImplementation::getCircleValues(
 
     PRINT_DATA(mDebugLog,"         + Found %u content records\n",contentList.getLength());
 
-    if (mDebugLog != NULL)
+    if (mDebugLog != nullptr)
     {
       std::stringstream stream;
       contentList.print(stream,0,4);
@@ -2688,7 +2688,7 @@ bool ServiceImplementation::getCircleValues(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -2736,7 +2736,7 @@ bool ServiceImplementation::getPolygonValues(
 
     PRINT_DATA(mDebugLog,"         + Found %u content records\n",contentList.getLength());
 
-    if (mDebugLog != NULL)
+    if (mDebugLog != nullptr)
     {
       std::stringstream stream;
       contentList.print(stream,0,4);
@@ -2879,7 +2879,7 @@ bool ServiceImplementation::getPolygonValues(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -2915,7 +2915,7 @@ void ServiceImplementation::getGridValues(
   FUNCTION_TRACE
   try
   {
-    if (mDebugLog != NULL)
+    if (mDebugLog != nullptr)
     {
       PRINT_DATA(mDebugLog,"\nMETHOD getGridValues()\n");
       PRINT_DATA(mDebugLog,"  - producers                : %u items\n",(uint)producers.size());
@@ -3060,7 +3060,7 @@ void ServiceImplementation::getGridValues(
                   PRINT_DATA(mDebugLog,"      - Going through the parameter mappings\n");
                   for (auto pInfo = mappings.begin(); pInfo != mappings.end(); ++pInfo)
                   {
-                    if (mDebugLog != NULL)
+                    if (mDebugLog != nullptr)
                     {
                       std::stringstream stream;
                       pInfo->print(stream,5,0);
@@ -3392,7 +3392,7 @@ void ServiceImplementation::getGridValues(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -3430,7 +3430,7 @@ void ServiceImplementation::getGridValues(
   FUNCTION_TRACE
   try
   {
-    if (mDebugLog != NULL)
+    if (mDebugLog != nullptr)
     {
       PRINT_DATA(mDebugLog,"\nMETHOD getGridValues()\n");
       PRINT_DATA(mDebugLog,"  - producers                : %u items\n",(uint)producers.size());
@@ -3642,7 +3642,7 @@ void ServiceImplementation::getGridValues(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -3773,7 +3773,7 @@ bool ServiceImplementation::getPressureLevelsAndHeights(T::ProducerInfo& produce
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

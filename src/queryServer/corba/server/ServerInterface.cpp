@@ -22,11 +22,11 @@ ServerInterface::ServerInterface()
   FUNCTION_TRACE
   try
   {
-    mService = NULL;
+    mService = nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -42,7 +42,7 @@ ServerInterface::~ServerInterface()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -59,7 +59,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -72,7 +72,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     QueryServer::Query sQuery;
@@ -86,7 +86,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -101,7 +101,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     string_vec sProducerList;
@@ -117,7 +117,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     //exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -131,7 +131,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     T::GridPointValueList sValueList;
@@ -150,7 +150,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     //exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }

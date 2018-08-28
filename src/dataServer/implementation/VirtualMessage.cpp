@@ -23,12 +23,12 @@ VirtualMessage::VirtualMessage(GRID::VirtualGridFile *gridFile,std::vector<Sourc
   {
     mVirtualGridFile = gridFile;
     mSourceMessages = sourceMessages;
-    mLuaFileCollection = NULL;
+    mLuaFileCollection = nullptr;
     mFunctionCallMethod = 0;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -44,7 +44,7 @@ VirtualMessage::~VirtualMessage()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -80,7 +80,7 @@ void VirtualMessage::initMessagePtrs() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -100,7 +100,7 @@ void VirtualMessage::setFunction(Functions::FunctionCollection *functionCollecti
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -113,14 +113,14 @@ uint VirtualMessage::getFileId() const
   FUNCTION_TRACE
   try
   {
-    if (mVirtualGridFile != NULL)
+    if (mVirtualGridFile != nullptr)
       return mVirtualGridFile->getFileId();
 
     return 0;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -138,7 +138,7 @@ void VirtualMessage::getAttributeList(std::string prefix,T::AttributeList& attri
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -156,7 +156,7 @@ T::TimeString VirtualMessage::getForecastTime() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -174,7 +174,7 @@ short VirtualMessage::getForecastType() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -191,7 +191,7 @@ short VirtualMessage::getForecastNumber() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -209,7 +209,7 @@ T::GeometryId VirtualMessage::getGridGeometryId() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -227,7 +227,7 @@ T::Coordinate_vec VirtualMessage::getGridCoordinates() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -245,7 +245,7 @@ T::Coordinate_vec VirtualMessage::getGridLatLonCoordinates() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -253,7 +253,7 @@ T::Coordinate_vec VirtualMessage::getGridLatLonCoordinates() const
 
 
 
-T::Dimensions_opt VirtualMessage::getGridDimensions() const
+T::Dimensions VirtualMessage::getGridDimensions() const
 {
   FUNCTION_TRACE
   try
@@ -263,7 +263,7 @@ T::Dimensions_opt VirtualMessage::getGridDimensions() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -281,7 +281,7 @@ T::Hash VirtualMessage::getGridHash() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -299,7 +299,7 @@ bool VirtualMessage::getGridLatLonCoordinatesByGridPoint(uint grid_i,uint grid_j
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -317,7 +317,7 @@ bool VirtualMessage::getGridLatLonCoordinatesByGridPosition(double grid_i,double
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -335,7 +335,7 @@ bool VirtualMessage::getGridLatLonCoordinatesByOriginalCoordinates(double x,doub
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -353,7 +353,7 @@ bool VirtualMessage::getGridOriginalCoordinatesByGridPoint(uint grid_i,uint grid
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -371,7 +371,7 @@ bool VirtualMessage::getGridOriginalCoordinatesByGridPosition(double grid_i,doub
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -389,7 +389,7 @@ bool VirtualMessage::getGridOriginalCoordinatesByLatLonCoordinates(double lat,do
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -407,7 +407,7 @@ T::GridLayout VirtualMessage::getGridLayout() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -425,7 +425,7 @@ std::size_t VirtualMessage::getGridOriginalColumnCount(std::size_t row) const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -443,7 +443,7 @@ std::size_t VirtualMessage::getGridOriginalColumnCount() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -461,7 +461,7 @@ std::size_t VirtualMessage::getGridOriginalRowCount() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -479,7 +479,7 @@ std::size_t VirtualMessage::getGridOriginalValueCount() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -497,7 +497,7 @@ int VirtualMessage::getGridOriginalValueIndex(uint grid_i,uint grid_j) const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -515,7 +515,7 @@ bool VirtualMessage::getGridPointByLatLonCoordinates(double lat,double lon,doubl
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -533,7 +533,7 @@ bool VirtualMessage::getGridPointByOriginalCoordinates(double x,double y,double&
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -551,7 +551,7 @@ T::GridProjection VirtualMessage::getGridProjection() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -569,7 +569,7 @@ void VirtualMessage::getGridProjectionAttributes(std::string prefix,T::Attribute
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -587,7 +587,7 @@ std::string VirtualMessage::getGridProjectionString() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -605,7 +605,7 @@ bool VirtualMessage::reverseXDirection() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -623,7 +623,7 @@ bool VirtualMessage::reverseYDirection() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -688,7 +688,7 @@ void VirtualMessage::getGridValueByPoint(T::CoordinateType coordinateType,double
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -742,7 +742,7 @@ void VirtualMessage::getGridValueListByCircle(T::CoordinateType coordinateType,d
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -796,7 +796,7 @@ void VirtualMessage::getGridValueListByPointList(T::CoordinateType coordinateTyp
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -850,7 +850,7 @@ void VirtualMessage::getGridValueListByPolygon(T::CoordinateType coordinateType,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -904,7 +904,7 @@ void VirtualMessage::getGridValueListByPolygonPath(T::CoordinateType coordinateT
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -958,7 +958,7 @@ void VirtualMessage::getGridValueListByRectangle(T::CoordinateType coordinateTyp
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -972,8 +972,8 @@ void VirtualMessage::getGridValueVector(T::ParamValue_vec& values) const
   try
   {
     initMessagePtrs();
-    T::Dimensions_opt d = getGridDimensions();
-    if (!d)
+    T::Dimensions d = getGridDimensions();
+    if (d.getDimensions() != 2)
       return;
 
     switch (mFunctionCallMethod)
@@ -1019,7 +1019,7 @@ void VirtualMessage::getGridValueVector(T::ParamValue_vec& values) const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1034,8 +1034,8 @@ void VirtualMessage::getGridOriginalValueVector(T::ParamValue_vec& values) const
   {
     initMessagePtrs();
 
-    T::Dimensions_opt d = getGridDimensions();
-    if (!d)
+    T::Dimensions d = getGridDimensions();
+    if (d.getDimensions() != 2)
       return;
 
     switch (mFunctionCallMethod)
@@ -1079,7 +1079,7 @@ void VirtualMessage::getGridOriginalValueVector(T::ParamValue_vec& values) const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1097,7 +1097,7 @@ T::ParamLevel VirtualMessage::getGridParameterLevel() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1115,7 +1115,7 @@ T::ParamLevelId VirtualMessage::getGridParameterLevelId() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1133,7 +1133,7 @@ std::string VirtualMessage::getGridParameterLevelIdString() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1151,7 +1151,7 @@ void VirtualMessage::getGridMinAndMaxValues(T::ParamValue& minValue,T::ParamValu
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1169,7 +1169,7 @@ T::ParamValue VirtualMessage::getGridValueByGridPoint(uint grid_i,uint grid_j) c
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1187,7 +1187,7 @@ T::ParamValue VirtualMessage::getGridValueByGridPoint(double grid_i,double grid_
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1205,7 +1205,7 @@ T::ParamValue VirtualMessage::getGridValueByGridPoint_nearest(double grid_i,doub
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1223,7 +1223,7 @@ T::ParamValue VirtualMessage::getGridValueByGridPoint_linearInterpolation(double
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1241,7 +1241,7 @@ T::ParamValue VirtualMessage::getGridValueByLatLonCoordinate(double lat,double l
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1259,7 +1259,7 @@ T::ParamValue VirtualMessage::getGridValueByOriginalGridPoint(uint grid_i,uint g
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1277,7 +1277,7 @@ void VirtualMessage::getGridValueVectorByRectangle(uint grid_i_start,uint grid_j
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1295,7 +1295,7 @@ void VirtualMessage::getParameterValuesByRectangle(uint grid_i_start,uint grid_j
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1313,7 +1313,7 @@ T::TimeString VirtualMessage::getReferenceTime() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1321,7 +1321,7 @@ T::TimeString VirtualMessage::getReferenceTime() const
 
 
 
-T::SpatialReference* VirtualMessage::getSpatialReference() const
+T::SpatialRef* VirtualMessage::getSpatialReference() const
 {
   FUNCTION_TRACE
   try
@@ -1331,7 +1331,7 @@ T::SpatialReference* VirtualMessage::getSpatialReference() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1349,7 +1349,7 @@ std::string VirtualMessage::getWKT() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1367,7 +1367,7 @@ bool VirtualMessage::isGridGlobal() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1392,7 +1392,7 @@ double VirtualMessage::executeFunctionCall1(std::vector<double>& parameters) con
     // Trying to find C++ implementation of the function
 
     auto function = mFunctionCollection->getFunction(functionName);
-    if (function != NULL)
+    if (function != nullptr)
     {
       return function->executeFunctionCall1(parameters);
     }
@@ -1403,7 +1403,7 @@ double VirtualMessage::executeFunctionCall1(std::vector<double>& parameters) con
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1431,7 +1431,7 @@ void VirtualMessage::executeFunctionCall2(std::vector<double>& inOutParameters) 
     // Trying to find C++ implementation of the function
 
     auto function = mFunctionCollection->getFunction(functionName);
-    if (function != NULL)
+    if (function != nullptr)
     {
       return function->executeFunctionCall2(columns,rows,inOutParameters);
     }
@@ -1442,7 +1442,7 @@ void VirtualMessage::executeFunctionCall2(std::vector<double>& inOutParameters) 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1469,7 +1469,7 @@ void VirtualMessage::executeFunctionCall2(std::vector<double>& inParameters,std:
     // Trying to find C++ implementation of the function
 
     auto function = mFunctionCollection->getFunction(functionName);
-    if (function != NULL)
+    if (function != nullptr)
     {
       return function->executeFunctionCall2(columns,rows,inParameters,outParameters);
     }
@@ -1480,7 +1480,7 @@ void VirtualMessage::executeFunctionCall2(std::vector<double>& inParameters,std:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1507,7 +1507,7 @@ void VirtualMessage::executeFunctionCall2(std::vector<float>& inParameters,std::
     // Trying to find C++ implementation of the function
 
     auto function = mFunctionCollection->getFunction(functionName);
-    if (function != NULL)
+    if (function != nullptr)
     {
       return function->executeFunctionCall2(columns,rows,inParameters,outParameters);
     }
@@ -1518,7 +1518,7 @@ void VirtualMessage::executeFunctionCall2(std::vector<float>& inParameters,std::
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1545,7 +1545,7 @@ void VirtualMessage::executeFunctionCall2(std::vector<float>& inOutParameters) c
     // Trying to find C++ implementation of the function
 
     auto function = mFunctionCollection->getFunction(functionName);
-    if (function != NULL)
+    if (function != nullptr)
     {
       return function->executeFunctionCall2(columns,rows,inOutParameters);
     }
@@ -1556,7 +1556,7 @@ void VirtualMessage::executeFunctionCall2(std::vector<float>& inOutParameters) c
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1599,7 +1599,7 @@ void VirtualMessage::executeFunctionCall2(T::GridValueList& valueList) const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1626,7 +1626,7 @@ void VirtualMessage::executeFunctionCall3(std::vector<float>& inParameters1,std:
     // Trying to find C++ implementation of the function
 
     auto function = mFunctionCollection->getFunction(functionName);
-    if (function != NULL)
+    if (function != nullptr)
     {
       return function->executeFunctionCall3(columns,rows,inParameters1,inParameters2,outParameters);
     }
@@ -1637,7 +1637,7 @@ void VirtualMessage::executeFunctionCall3(std::vector<float>& inParameters1,std:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1664,7 +1664,7 @@ void VirtualMessage::executeFunctionCall3(std::vector<double>& inParameters1,std
     // Trying to find C++ implementation of the function
 
     auto function = mFunctionCollection->getFunction(functionName);
-    if (function != NULL)
+    if (function != nullptr)
     {
       return function->executeFunctionCall3(columns,rows,inParameters1,inParameters2,outParameters);
     }
@@ -1675,7 +1675,7 @@ void VirtualMessage::executeFunctionCall3(std::vector<double>& inParameters1,std
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1734,7 +1734,7 @@ void VirtualMessage::executeFunctionCall3(T::GridValueList& inValueList1,T::Grid
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1761,7 +1761,7 @@ void VirtualMessage::executeFunctionCall4(std::vector<float>& inParameters1,std:
     // Trying to find C++ implementation of the function
 
     auto function = mFunctionCollection->getFunction(functionName);
-    if (function != NULL)
+    if (function != nullptr)
     {
       return function->executeFunctionCall4(columns,rows,inParameters1,inParameters2,angles,outParameters);
     }
@@ -1772,7 +1772,7 @@ void VirtualMessage::executeFunctionCall4(std::vector<float>& inParameters1,std:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1799,7 +1799,7 @@ void VirtualMessage::executeFunctionCall4(std::vector<double>& inParameters1,std
     // Trying to find C++ implementation of the function
 
     auto function = mFunctionCollection->getFunction(functionName);
-    if (function != NULL)
+    if (function != nullptr)
     {
       return function->executeFunctionCall4(columns,rows,inParameters1,inParameters2,angles,outParameters);
     }
@@ -1810,7 +1810,7 @@ void VirtualMessage::executeFunctionCall4(std::vector<double>& inParameters1,std
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1872,7 +1872,7 @@ void VirtualMessage::executeFunctionCall4(T::CoordinateType coordinateType,T::Gr
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1888,7 +1888,7 @@ void VirtualMessage::setContentInfo(T::ContentInfo& contentInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1905,7 +1905,7 @@ T::ContentInfo* VirtualMessage::getContentInfo()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1921,7 +1921,7 @@ void VirtualMessage::print(std::ostream& stream,uint level,uint optionFlags) con
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

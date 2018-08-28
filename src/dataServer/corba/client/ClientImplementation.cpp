@@ -40,7 +40,7 @@ namespace Corba
   }\
   catch (...)\
   {\
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);\
+    throw Spine::Exception(BCP, exception_operation_failed, nullptr);\
   }
 
 
@@ -51,11 +51,11 @@ ClientImplementation::ClientImplementation()
   try
   {
     mInitialized = false;
-    mService = NULL;
+    mService = nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -71,7 +71,7 @@ ClientImplementation::~ClientImplementation()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

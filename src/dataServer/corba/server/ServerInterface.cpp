@@ -20,11 +20,11 @@ ServerInterface::ServerInterface()
   FUNCTION_TRACE
   try
   {
-    mService = NULL;
+    mService = nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -40,7 +40,7 @@ ServerInterface::~ServerInterface()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -57,7 +57,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -74,7 +74,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     DataServer::Corba::CorbaGridCoordinates *corbaGridCoordinates = new DataServer::Corba::CorbaGridCoordinates();
     coordinates = corbaGridCoordinates;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGridCoordinates(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,sCoordinates);
@@ -86,7 +86,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -105,7 +105,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     DataServer::Corba::CorbaGridData *corbaGridData = new DataServer::Corba::CorbaGridData();
     data = corbaGridData;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGridData(sessionId,fileId,messageIndex,flags,sGridData);
@@ -117,7 +117,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -132,7 +132,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     uint sCount = 0;
@@ -145,7 +145,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -160,7 +160,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     T::ValueRecordList sValueRecordList;
@@ -174,7 +174,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -193,7 +193,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     DataServer::Corba::CorbaAttributeList *corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
     attributeList = corbaAttributeList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGridAttributeList(sessionId,fileId,messageIndex,flags,sAttributeList);
@@ -205,7 +205,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -220,7 +220,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     T::ParamValue sValue = 0;
@@ -233,7 +233,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -252,7 +252,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
     valueList = corbaValueList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGridValueListByCircle(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,origoX,origoY,radius,sValueList);
@@ -264,7 +264,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -286,7 +286,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
     DataServer::Corba::Converter::convert(pointList,sPointList);
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGridValueListByPointList(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,sPointList,(short)interpolationMethod,sValueList);
@@ -298,7 +298,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -321,7 +321,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
     DataServer::Corba::Converter::convert(polygonPoints,sPolygonPoints);
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGridValueListByPolygon(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,sPolygonPoints,sValueList);
@@ -333,7 +333,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -355,7 +355,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
     DataServer::Corba::Converter::convert(polygonPath,sPolygonPath);
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGridValueListByPolygonPath(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,sPolygonPath,sValueList);
@@ -367,7 +367,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -386,7 +386,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
     valueList = corbaValueList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGridValueListByRectangle(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,x1,y1,x2,y2,sValueList);
@@ -398,7 +398,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -417,7 +417,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     DataServer::Corba::CorbaParamValueList *corbaValues = new DataServer::Corba::CorbaParamValueList();
     values = corbaValues;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGridValueVector(sessionId,fileId,messageIndex,flags,sValues);
@@ -429,7 +429,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -451,7 +451,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
     DataServer::Corba::Converter::convert(coordinates,sCoordinateList);
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGridValueVectorByCoordinateList(sessionId,fileId,messageIndex,(T::CoordinateType)coordinateType,sCoordinateList,interpolationMethod,sValues);
@@ -463,7 +463,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -482,7 +482,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     DataServer::Corba::CorbaParamValueList *corbaValues = new DataServer::Corba::CorbaParamValueList();
     values = corbaValues;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGridValueVectorByRectangle(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,columns,rows,x,y,xStep,yStep,(short)interpolationMethod,sValues);
@@ -494,7 +494,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -513,7 +513,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     DataServer::Corba::CorbaDoubleList *corbaValueVector = new DataServer::Corba::CorbaDoubleList();
     valueVector = corbaValueVector;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGridValueVectorByPoint(sessionId,fileId,messageIndex,flags,(T::CoordinateType)coordinateType,x,y,vectorType,sValueVector);
@@ -525,7 +525,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }

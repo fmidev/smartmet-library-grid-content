@@ -21,7 +21,7 @@ GenerationInfoList::GenerationInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -39,7 +39,7 @@ GenerationInfoList::GenerationInfoList(GenerationInfoList& generationInfoList)
     for (uint t=0; t<sz; t++)
     {
       GenerationInfo *info = generationInfoList.getGenerationInfoByIndexNoCheck(t);
-      if (info != NULL)
+      if (info != nullptr)
         mList.push_back(info->duplicate());
     }
     generationInfoList.unlock();
@@ -47,7 +47,7 @@ GenerationInfoList::GenerationInfoList(GenerationInfoList& generationInfoList)
   catch (...)
   {
     generationInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -64,7 +64,7 @@ GenerationInfoList::~GenerationInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -87,13 +87,13 @@ void GenerationInfoList::operator=(GenerationInfoList& generationInfoList)
     for (uint t=0; t<sz; t++)
     {
       GenerationInfo *info = generationInfoList.getGenerationInfoByIndexNoCheck(t);
-      if (info != NULL)
+      if (info != nullptr)
         mList.push_back(info->duplicate());
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -111,7 +111,7 @@ void GenerationInfoList::addGenerationInfo(GenerationInfo *generationInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -133,7 +133,7 @@ void GenerationInfoList::clear()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -151,7 +151,7 @@ bool GenerationInfoList::deleteGenerationInfoById(uint generationId)
     for (uint t=0; t<sz; t++)
     {
       GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
-      if (info != NULL  &&  info->mGenerationId == generationId)
+      if (info != nullptr  &&  info->mGenerationId == generationId)
       {
         delete mList[t];
         mList.erase(mList.begin() + t);
@@ -162,7 +162,7 @@ bool GenerationInfoList::deleteGenerationInfoById(uint generationId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -180,7 +180,7 @@ void GenerationInfoList::deleteGenerationInfoListByProducerId(uint producerId)
     for (int t=sz; t>=0; t--)
     {
       GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
-      if (info != NULL  &&  info->mProducerId == producerId)
+      if (info != nullptr  &&  info->mProducerId == producerId)
       {
         delete mList[t];
         mList.erase(mList.begin() + t);
@@ -189,7 +189,7 @@ void GenerationInfoList::deleteGenerationInfoListByProducerId(uint producerId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -206,14 +206,14 @@ GenerationInfo* GenerationInfoList::getGenerationInfoById(uint generationId)
     for (uint t=0; t<sz; t++)
     {
       GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
-      if (info != NULL  &&  info->mGenerationId == generationId)
+      if (info != nullptr  &&  info->mGenerationId == generationId)
         return info;
     }
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -231,7 +231,7 @@ void GenerationInfoList::deleteGenerationInfoListBySourceId(uint sourceId)
     for (int t=sz; t>=0; t--)
     {
       GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
-      if (info != NULL  &&  info->mSourceId == sourceId)
+      if (info != nullptr  &&  info->mSourceId == sourceId)
       {
         delete mList[t];
         mList.erase(mList.begin() + t);
@@ -240,7 +240,7 @@ void GenerationInfoList::deleteGenerationInfoListBySourceId(uint sourceId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -255,13 +255,13 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByIndex(uint index)
   {
     AutoThreadLock lock(&mThreadLock);
     if (index >= mList.size())
-      return NULL;
+      return nullptr;
 
     return mList.at(index);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -278,7 +278,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByIndexNoCheck(uint index)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -296,14 +296,14 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByName(std::string generati
     for (uint t=0; t<sz; t++)
     {
       GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
-      if (info != NULL  &&  strcasecmp(info->mName.c_str(),generationName.c_str()) == 0)
+      if (info != nullptr  &&  strcasecmp(info->mName.c_str(),generationName.c_str()) == 0)
         return info;
     }
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -322,14 +322,14 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(std::string 
     for (uint t=0; t<sz; t++)
     {
       GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
-      if (info != NULL  &&  strcasecmp(info->mAnalysisTime.c_str(),analysisTime.c_str()) == 0)
+      if (info != nullptr  &&  strcasecmp(info->mAnalysisTime.c_str(),analysisTime.c_str()) == 0)
         return info;
     }
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -348,13 +348,13 @@ void GenerationInfoList::getGenerationInfoListByProducerId(uint producerId,Gener
     for (uint t=0; t<sz; t++)
     {
       GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
-      if (info != NULL  &&  info->mProducerId == producerId)
+      if (info != nullptr  &&  info->mProducerId == producerId)
         generationInfoList.addGenerationInfo(info->duplicate());
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -367,14 +367,14 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(u
   try
   {
     AutoThreadLock lock(&mThreadLock);
-    T::GenerationInfo *generationInfo = NULL;
+    T::GenerationInfo *generationInfo = nullptr;
     uint sz = getLength();
     for (uint t=0; t<sz; t++)
     {
       GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
-      if (info != NULL  &&  info->mProducerId == producerId  &&  info->mStatus == generationStatus)
+      if (info != nullptr  &&  info->mProducerId == producerId  &&  info->mStatus == generationStatus)
       {
-        if (generationInfo == NULL  ||  generationInfo->mName < info->mName)
+        if (generationInfo == nullptr  ||  generationInfo->mName < info->mName)
           generationInfo = info;
       }
     }
@@ -382,7 +382,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -396,14 +396,14 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(uint produ
   try
   {
     AutoThreadLock lock(&mThreadLock);
-    T::GenerationInfo *generationInfo = NULL;
+    T::GenerationInfo *generationInfo = nullptr;
     uint sz = getLength();
     for (uint t=0; t<sz; t++)
     {
       GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
-      if (info != NULL  &&  info->mProducerId == producerId)
+      if (info != nullptr  &&  info->mProducerId == producerId)
       {
-        if (generationInfo == NULL  ||  generationInfo->mName < info->mName)
+        if (generationInfo == nullptr  ||  generationInfo->mName < info->mName)
           generationInfo = info;
       }
     }
@@ -411,7 +411,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(uint produ
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -425,14 +425,14 @@ GenerationInfo*  GenerationInfoList::getPrevGenerationInfoByProducerId(uint prod
   try
   {
     AutoThreadLock lock(&mThreadLock);
-    T::GenerationInfo *generationInfo = NULL;
+    T::GenerationInfo *generationInfo = nullptr;
     uint sz = getLength();
     for (uint t=0; t<sz; t++)
     {
       GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
-      if (info != NULL  &&  info->mProducerId == producerId)
+      if (info != nullptr  &&  info->mProducerId == producerId)
       {
-        if ((generationInfo == NULL  &&  info->mName < nextGenerationName)  ||  (generationInfo != NULL  &&  generationInfo->mName < info->mName  &&  info->mName < nextGenerationName))
+        if ((generationInfo == nullptr  &&  info->mName < nextGenerationName)  ||  (generationInfo != nullptr  &&  generationInfo->mName < info->mName  &&  info->mName < nextGenerationName))
           generationInfo = info;
       }
     }
@@ -440,7 +440,7 @@ GenerationInfo*  GenerationInfoList::getPrevGenerationInfoByProducerId(uint prod
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -458,13 +458,13 @@ void GenerationInfoList::getGenerationInfoListBySourceId(uint sourceId,Generatio
     for (uint t=0; t<sz; t++)
     {
       GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
-      if (info != NULL  &&  info->mSourceId == sourceId)
+      if (info != nullptr  &&  info->mSourceId == sourceId)
         generationInfoList.addGenerationInfo(info->duplicate());
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -480,7 +480,7 @@ uint GenerationInfoList::getLength()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -521,7 +521,7 @@ void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTime
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -538,7 +538,7 @@ void GenerationInfoList::lock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -555,7 +555,7 @@ void GenerationInfoList::unlock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -571,7 +571,7 @@ void GenerationInfoList::writeToFile(std::string filename)
     AutoThreadLock lock(&mThreadLock);
 
     FILE *file = fopen(filename.c_str(),"w");
-    if (file == NULL)
+    if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot create the file!");
       exception.addParameter("Filename",filename);
@@ -588,7 +588,7 @@ void GenerationInfoList::writeToFile(std::string filename)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -609,7 +609,7 @@ void GenerationInfoList::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

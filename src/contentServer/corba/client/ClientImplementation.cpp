@@ -46,7 +46,7 @@ namespace Corba
   catch (...)\
   {\
     mLastErrorTime = time(0);\
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);\
+    throw Spine::Exception(BCP, exception_operation_failed, nullptr);\
   }
 
 
@@ -63,7 +63,7 @@ ClientImplementation::ClientImplementation()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
   }
 }
 
@@ -78,7 +78,7 @@ ClientImplementation::~ClientImplementation()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
   }
 }
 
@@ -127,7 +127,7 @@ uint ClientImplementation::getId()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
   }
 }
 
@@ -143,7 +143,7 @@ void ClientImplementation::setId(uint id)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
   }
 }
 
@@ -159,7 +159,7 @@ time_t ClientImplementation::getLastAccessTime()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
   }
 }
 
@@ -175,7 +175,7 @@ void ClientImplementation::setLastAccessTime(time_t accessTime)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
   }
 }
 
@@ -191,7 +191,7 @@ time_t ClientImplementation::getLastErrorTime()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
   }
 }
 
@@ -207,7 +207,7 @@ void ClientImplementation::setLastErrorTime(time_t errorTime)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, exception_operation_failed, NULL);
+    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
   }
 }
 

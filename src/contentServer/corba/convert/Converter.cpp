@@ -17,7 +17,7 @@ Converter::Converter()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -32,7 +32,7 @@ Converter::~Converter()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -74,7 +74,7 @@ void Converter::convert(T::ContentInfo& source,ContentServer::Corba::CorbaConten
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -116,7 +116,7 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -140,7 +140,7 @@ void Converter::convert(T::ContentInfoList& source,ContentServer::Corba::CorbaCo
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -164,7 +164,7 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfoList& source
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -189,7 +189,7 @@ void Converter::convert(T::FileInfo& source,ContentServer::Corba::CorbaFileInfo&
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -213,7 +213,7 @@ void Converter::convert(const ContentServer::Corba::CorbaFileInfo& source,T::Fil
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -237,7 +237,7 @@ void Converter::convert(T::FileInfoList& source,ContentServer::Corba::CorbaFileI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -261,7 +261,7 @@ void Converter::convert(const ContentServer::Corba::CorbaFileInfoList& source,T:
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -281,7 +281,7 @@ void Converter::convert(T::ServerInfo& source,ContentServer::Corba::CorbaServerI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -301,7 +301,7 @@ void Converter::convert(const ContentServer::Corba::CorbaServerInfo& source,T::S
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -325,7 +325,7 @@ void Converter::convert(T::ServerInfoList& source,ContentServer::Corba::CorbaSer
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -348,7 +348,7 @@ void Converter::convert(const ContentServer::Corba::CorbaServerInfoList& source,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -369,7 +369,7 @@ void Converter::convert(T::ProducerInfo& source,ContentServer::Corba::CorbaProdu
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -390,7 +390,7 @@ void Converter::convert(const ContentServer::Corba::CorbaProducerInfo& source,T:
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -414,7 +414,7 @@ void Converter::convert(T::ProducerInfoList& source,ContentServer::Corba::CorbaP
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -438,7 +438,7 @@ void Converter::convert(const ContentServer::Corba::CorbaProducerInfoList& sourc
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -461,7 +461,7 @@ void Converter::convert(T::GenerationInfo& source,ContentServer::Corba::CorbaGen
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -485,7 +485,7 @@ void Converter::convert(const ContentServer::Corba::CorbaGenerationInfo& source,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -509,7 +509,7 @@ void Converter::convert(T::GenerationInfoList& source,ContentServer::Corba::Corb
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -533,7 +533,7 @@ void Converter::convert(const ContentServer::Corba::CorbaGenerationInfoList& sou
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -557,7 +557,7 @@ void Converter::convert(T::EventInfo& source,ContentServer::Corba::CorbaEventInf
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -581,7 +581,7 @@ void Converter::convert(const ContentServer::Corba::CorbaEventInfo& source,T::Ev
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -597,7 +597,7 @@ void Converter::convert(T::EventInfoList& source,ContentServer::Corba::CorbaEven
     target.length(len);
     uint t = 0;
     T::EventInfo *it = source.getFirstEvent();
-    while (it != NULL)
+    while (it != nullptr)
     {
       ContentServer::Corba::CorbaEventInfo corbaObject;
       convert(*it,corbaObject);
@@ -608,7 +608,7 @@ void Converter::convert(T::EventInfoList& source,ContentServer::Corba::CorbaEven
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -632,7 +632,7 @@ void Converter::convert(const ContentServer::Corba::CorbaEventInfoList& source,T
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -653,7 +653,7 @@ void Converter::convert(string_vec& source,ContentServer::Corba::CorbaStringList
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -673,7 +673,7 @@ void Converter::convert(const ContentServer::Corba::CorbaStringList& source,stri
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -696,7 +696,7 @@ void Converter::convert(std::set<std::string>& source,ContentServer::Corba::Corb
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -716,7 +716,7 @@ void Converter::convert(const ContentServer::Corba::CorbaStringList& source,std:
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -740,7 +740,7 @@ void Converter::convert(std::set<uint>& source,ContentServer::Corba::CorbaULongL
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -761,7 +761,7 @@ void Converter::convert(const ContentServer::Corba::CorbaULongList& source,std::
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -785,7 +785,7 @@ void Converter::convert(std::set<int>& source,ContentServer::Corba::CorbaLongLis
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -806,7 +806,7 @@ void Converter::convert(const ContentServer::Corba::CorbaLongList& source,std::s
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -822,7 +822,7 @@ void Converter::convert(T::FileAndContent& source,ContentServer::Corba::CorbaFil
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -839,7 +839,7 @@ void Converter::convert(const ContentServer::Corba::CorbaFileContent& source,T::
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -862,7 +862,7 @@ void Converter::convert(std::vector<T::FileAndContent>& source,ContentServer::Co
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -884,7 +884,7 @@ void Converter::convert(const ContentServer::Corba::CorbaFileContentList& source
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -905,7 +905,7 @@ void Converter::convert(T::ForecastTime& source,SmartMet::ContentServer::Corba::
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -926,7 +926,7 @@ void Converter::convert(const SmartMet::ContentServer::Corba::CorbaForecastTime&
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -947,7 +947,7 @@ void Converter::convert(std::vector<T::ForecastTime>& source,SmartMet::ContentSe
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -970,7 +970,7 @@ void Converter::convert(const SmartMet::ContentServer::Corba::CorbaForecastTimeL
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -993,7 +993,7 @@ void Converter::convert(T::LevelInfo& source,ContentServer::Corba::CorbaLevelInf
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1014,7 +1014,7 @@ void Converter::convert(const ContentServer::Corba::CorbaLevelInfo& source,T::Le
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1038,7 +1038,7 @@ void Converter::convert(T::LevelInfoList& source,ContentServer::Corba::CorbaLeve
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1062,7 +1062,7 @@ void Converter::convert(const ContentServer::Corba::CorbaLevelInfoList& source,T
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

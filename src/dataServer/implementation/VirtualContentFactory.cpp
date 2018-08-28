@@ -19,12 +19,12 @@ VirtualContentFactory::VirtualContentFactory()
   FUNCTION_TRACE
   try
   {
-    mContentServer = NULL;
-    mGridFileManager = NULL;
+    mContentServer = nullptr;
+    mGridFileManager = nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -40,7 +40,7 @@ VirtualContentFactory::~VirtualContentFactory()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -57,7 +57,7 @@ void VirtualContentFactory::setContentServer(ContentServer::ServiceInterface* co
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -74,7 +74,7 @@ void VirtualContentFactory::setGridFileManager(GridFileManager* GridFileManager)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -91,7 +91,7 @@ void VirtualContentFactory::setLuaFileCollection(Lua::LuaFileCollection *luaFile
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -108,7 +108,7 @@ void VirtualContentFactory::setFunctionCollection(Functions::FunctionCollection 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -130,7 +130,7 @@ void VirtualContentFactory::addFile(T::ProducerInfo& producerInfo,T::GenerationI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -146,7 +146,7 @@ void VirtualContentFactory::addContent(T::ProducerInfo& producerInfo,T::Generati
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

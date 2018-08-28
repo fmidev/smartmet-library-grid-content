@@ -18,12 +18,12 @@ ServiceInterface::ServiceInterface()
   FUNCTION_TRACE
   try
   {
-    mDebugLog = NULL;
-    mProcessingLog = NULL;
+    mDebugLog = nullptr;
+    mProcessingLog = nullptr;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -39,7 +39,7 @@ ServiceInterface::~ServiceInterface()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -56,7 +56,7 @@ void ServiceInterface::setDebugLog(Log *debugLog)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -73,7 +73,7 @@ void ServiceInterface::setProcessingLog(Log *processingLog)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -89,7 +89,7 @@ void ServiceInterface::shutdown()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -111,7 +111,7 @@ int ServiceInterface::executeQuery(T::SessionId sessionId,Query& query)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -133,7 +133,7 @@ int ServiceInterface::getProducerList(T::SessionId sessionId,string_vec& produce
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -155,7 +155,7 @@ int ServiceInterface::getValuesByGridPoint(T::SessionId sessionId,T::ContentInfo
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

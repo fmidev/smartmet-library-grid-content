@@ -15,7 +15,7 @@ VirtualContentDefinitionFile::VirtualContentDefinitionFile()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -31,7 +31,7 @@ VirtualContentDefinitionFile::VirtualContentDefinitionFile(std::string filename)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -48,7 +48,7 @@ VirtualContentDefinitionFile::VirtualContentDefinitionFile(const VirtualContentD
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -63,7 +63,7 @@ VirtualContentDefinitionFile::~VirtualContentDefinitionFile()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -80,7 +80,7 @@ void VirtualContentDefinitionFile::init()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -97,7 +97,7 @@ void VirtualContentDefinitionFile::init(std::string filename)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -118,7 +118,7 @@ void VirtualContentDefinitionFile::checkUpdates()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -151,7 +151,7 @@ void VirtualContentDefinitionFile::getContentDefinitions(std::string sourceParam
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -164,7 +164,7 @@ void VirtualContentDefinitionFile::loadFile()
   try
   {
     FILE *file = fopen(mFilename.c_str(),"r");
-    if (file == NULL)
+    if (file == nullptr)
     {
       Spine::Exception exception(BCP,"Cannot open the definition file!");
       exception.addParameter("Filename",mFilename);
@@ -177,7 +177,7 @@ void VirtualContentDefinitionFile::loadFile()
 
     while (!feof(file))
     {
-      if (fgets(st,1000,file) != NULL  &&  st[0] != '#')
+      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
       {
         std::vector<std::string> partList;
         splitString(st,';',partList);
@@ -204,7 +204,7 @@ void VirtualContentDefinitionFile::loadFile()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -225,7 +225,7 @@ void VirtualContentDefinitionFile::print(std::ostream& stream,uint level,uint op
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

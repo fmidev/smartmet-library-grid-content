@@ -25,7 +25,7 @@ VirtualContentFactory_type1::VirtualContentFactory_type1()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -41,7 +41,7 @@ VirtualContentFactory_type1::~VirtualContentFactory_type1()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -59,7 +59,7 @@ void VirtualContentFactory_type1::init(std::string definitionFileName)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -88,7 +88,7 @@ void VirtualContentFactory_type1::addFile(T::ProducerInfo& producerInfo,T::Gener
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -133,7 +133,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
           for (auto sourceParam = contentDef->mSourceParameters.begin(); sourceParam != contentDef->mSourceParameters.end() && componentsFound; ++sourceParam)
           {
             T::ContentInfoList contentList;
-            T::ContentInfo *cInfo = NULL;
+            T::ContentInfo *cInfo = nullptr;
             if (contentDef->mSourceParameters.size() == 1)
             {
               cInfo = &contentInfo;
@@ -147,7 +147,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
               cInfo = contentList.getContentInfoByIndex(0);
             }
 
-            if (cInfo == NULL || (contentList.getLength() == 1  &&  cInfo->mForecastTime != contentInfo.mForecastTime))
+            if (cInfo == nullptr || (contentList.getLength() == 1  &&  cInfo->mForecastTime != contentInfo.mForecastTime))
             {
               componentsFound = false;
             }
@@ -256,7 +256,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+    SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
     exception.printError();
     throw exception;
   }

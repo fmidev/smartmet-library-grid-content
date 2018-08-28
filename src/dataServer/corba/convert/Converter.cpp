@@ -19,7 +19,7 @@ Converter::Converter()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Constructor failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,"Constructor failed!",nullptr);
   }
 }
 
@@ -34,7 +34,7 @@ Converter::~Converter()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Destructor failed!",NULL);
+    throw SmartMet::Spine::Exception(BCP,"Destructor failed!",nullptr);
   }
 }
 
@@ -89,7 +89,7 @@ void Converter::convert(T::GridData& source,DataServer::Corba::CorbaGridData& ta
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -144,7 +144,7 @@ void Converter::convert(DataServer::Corba::CorbaGridData& source,T::GridData& ta
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -161,7 +161,7 @@ void Converter::convert(T::Attribute& source,DataServer::Corba::CorbaAttribute& 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -178,7 +178,7 @@ void Converter::convert(DataServer::Corba::CorbaAttribute& source,T::Attribute& 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -202,7 +202,7 @@ void Converter::convert(T::AttributeList& source,DataServer::Corba::CorbaAttribu
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -226,7 +226,7 @@ void Converter::convert(DataServer::Corba::CorbaAttributeList& source,T::Attribu
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -256,7 +256,7 @@ void Converter::convert(T::GridCoordinates& source,DataServer::Corba::CorbaGridC
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -285,7 +285,7 @@ void Converter::convert(DataServer::Corba::CorbaGridCoordinates& source,T::GridC
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -310,7 +310,7 @@ void Converter::convert(T::ValueRecord& source,DataServer::Corba::CorbaValueReco
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -333,7 +333,7 @@ void Converter::convert(DataServer::Corba::CorbaValueRecord& source,T::ValueReco
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -356,7 +356,7 @@ void Converter::convert(T::ValueRecordList& source,DataServer::Corba::CorbaValue
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -380,7 +380,7 @@ void Converter::convert(DataServer::Corba::CorbaValueRecordList& source,T::Value
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -401,7 +401,7 @@ void Converter::convert(T::ParamValue_vec& source,DataServer::Corba::CorbaParamV
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -421,7 +421,7 @@ void Converter::convert(DataServer::Corba::CorbaParamValueList& source,T::ParamV
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -443,7 +443,7 @@ void Converter::convert(T::GridValue& source,DataServer::Corba::CorbaGridValue& 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -461,7 +461,7 @@ void Converter::convert(DataServer::Corba::CorbaGridValue& source,T::GridValue& 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -484,7 +484,7 @@ void Converter::convert(T::GridValueList& source,DataServer::Corba::CorbaGridVal
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -508,7 +508,7 @@ void Converter::convert(DataServer::Corba::CorbaGridValueList& source,T::GridVal
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -526,7 +526,7 @@ void Converter::convert(T::Coordinate& source,DataServer::Corba::CorbaCoordinate
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -542,7 +542,7 @@ void Converter::convert(DataServer::Corba::CorbaCoordinate& source,T::Coordinate
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -566,7 +566,7 @@ void Converter::convert(std::vector<T::Coordinate>& source,DataServer::Corba::Co
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -588,7 +588,7 @@ void Converter::convert(const DataServer::Corba::CorbaCoordinateList& source,std
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -612,7 +612,7 @@ void Converter::convert(std::vector<std::vector<T::Coordinate>>& source,SmartMet
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -636,7 +636,7 @@ void Converter::convert(const SmartMet::DataServer::Corba::CorbaPolygonPath& sou
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -656,7 +656,7 @@ void Converter::convert(double_vec& source,DataServer::Corba::CorbaDoubleList& t
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -677,7 +677,7 @@ void Converter::convert(DataServer::Corba::CorbaDoubleList& source,double_vec& t
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

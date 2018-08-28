@@ -37,7 +37,7 @@ class VirtualMessage : public Message
     virtual T::GeometryId           getGridGeometryId() const;
     virtual T::Coordinate_vec       getGridCoordinates() const;
     virtual T::Coordinate_vec       getGridLatLonCoordinates() const;
-    virtual T::Dimensions_opt       getGridDimensions() const;
+    virtual T::Dimensions           getGridDimensions() const;
     virtual T::Hash                 getGridHash() const;
     virtual bool                    getGridLatLonCoordinatesByGridPoint(uint grid_i,uint grid_j,double& lat,double& lon) const;
     virtual bool                    getGridLatLonCoordinatesByGridPosition(double grid_i,double grid_j,double& lat,double& lon) const;
@@ -79,7 +79,7 @@ class VirtualMessage : public Message
     virtual void                    getGridValueVectorByRectangle(uint grid_i_start,uint grid_j_start,uint grid_i_end,uint grid_j_end,T::GridPointValue_vec& gridPointValues) const;
     virtual void                    getParameterValuesByRectangle(uint grid_i_start,uint grid_j_start,uint grid_i_end,uint grid_j_end,T::GridPointValueList& gridPointValues) const;
     virtual T::TimeString           getReferenceTime() const;
-    virtual T::SpatialReference*    getSpatialReference() const;
+    virtual T::SpatialRef*    getSpatialReference() const;
     virtual std::string             getWKT() const;
     virtual bool                    reverseXDirection() const;
     virtual bool                    reverseYDirection() const;

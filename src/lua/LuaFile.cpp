@@ -20,12 +20,12 @@ LuaFile::LuaFile()
 {
   try
   {
-    mLuaState = NULL;
+    mLuaState = nullptr;
     mLastModified = 0;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Constructor failed!", NULL);
+    throw Spine::Exception(BCP, "Constructor failed!", nullptr);
   }
 }
 
@@ -38,12 +38,12 @@ LuaFile::LuaFile(std::string filename)
   try
   {
     mFilename = filename;
-    mLuaState = NULL;
+    mLuaState = nullptr;
     mLastModified = 0;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Constructor failed!", NULL);
+    throw Spine::Exception(BCP, "Constructor failed!", nullptr);
   }
 }
 
@@ -62,7 +62,7 @@ LuaFile::LuaFile(const LuaFile& luaFile)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Copy constructor failed!", NULL);
+    throw Spine::Exception(BCP, "Copy constructor failed!", nullptr);
   }
 }
 
@@ -74,12 +74,12 @@ LuaFile::~LuaFile()
 {
   try
   {
-    if (mLuaState != NULL)
+    if (mLuaState != nullptr)
       lua_close((lua_State*)mLuaState);
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Destructor failed!", NULL);
+    throw Spine::Exception(BCP, "Destructor failed!", nullptr);
   }
 }
 
@@ -99,7 +99,7 @@ void LuaFile::init()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Initialization failed!", NULL);
+    throw Spine::Exception(BCP, "Initialization failed!", nullptr);
   }
 }
 
@@ -116,7 +116,7 @@ void LuaFile::init(std::string filename)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Initialization failed!", NULL);
+    throw Spine::Exception(BCP, "Initialization failed!", nullptr);
   }
 }
 
@@ -134,10 +134,10 @@ bool LuaFile::checkUpdates()
 
     if (tt != mLastModified  &&  (tt+3) < time(0))
     {
-      if (mLuaState != NULL)
+      if (mLuaState != nullptr)
       {
         lua_close((lua_State*)mLuaState);
-        mLuaState = NULL;
+        mLuaState = nullptr;
       }
 
       loadFile();
@@ -150,7 +150,7 @@ bool LuaFile::checkUpdates()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Update check failed!", NULL);
+    throw Spine::Exception(BCP, "Update check failed!", nullptr);
   }
 }
 
@@ -174,7 +174,7 @@ uint LuaFile::getFunction(std::string& functionName,std::string& function)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function searching failed!", NULL);
+    throw Spine::Exception(BCP, "LUA function searching failed!", nullptr);
   }
 }
 
@@ -261,7 +261,7 @@ float LuaFile::executeFunctionCall1(std::string& function,std::vector<float>& pa
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -348,7 +348,7 @@ double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& 
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -428,7 +428,7 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -506,7 +506,7 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -586,7 +586,7 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -664,7 +664,7 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -760,7 +760,7 @@ void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -856,7 +856,7 @@ void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -968,7 +968,7 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -1078,7 +1078,7 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -1166,7 +1166,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -1254,7 +1254,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -1330,7 +1330,7 @@ std::string LuaFile::executeFunctionCall6(std::string& function,std::vector<std:
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -1434,7 +1434,7 @@ std::string LuaFile::executeFunctionCall6(
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", NULL);
+    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -1454,7 +1454,7 @@ void LuaFile::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -1466,10 +1466,10 @@ void LuaFile::loadFile()
 {
   try
   {
-    if (mLuaState != NULL)
+    if (mLuaState != nullptr)
     {
       lua_close((lua_State*)mLuaState);
-      mLuaState = NULL;
+      mLuaState = nullptr;
     }
 
     mLuaState = (lua_State*)luaL_newstate();
@@ -1488,7 +1488,7 @@ void LuaFile::loadFile()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "File loading failed!", NULL);
+    throw Spine::Exception(BCP, "File loading failed!", nullptr);
   }
 }
 
@@ -1543,7 +1543,7 @@ void LuaFile::loadFunctionList(uint type)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function list loading failed!", NULL);
+    throw Spine::Exception(BCP, "LUA function list loading failed!", nullptr);
   }
 }
 

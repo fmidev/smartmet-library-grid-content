@@ -23,7 +23,7 @@ ContentSync::ContentSync()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -39,7 +39,7 @@ ContentSync::~ContentSync()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -80,7 +80,7 @@ void ContentSync::synchronize(T::SessionId sessionId,ServiceInterface *sourceInt
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -121,7 +121,7 @@ void ContentSync::synchronize(T::SessionId sessionId,const char *sourceDir,Servi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -146,7 +146,7 @@ void ContentSync::readSourceProducers(ServiceInterface *sourceInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -171,7 +171,7 @@ void ContentSync::readSourceGenerations(ServiceInterface *sourceInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -212,7 +212,7 @@ void ContentSync::readSourceFiles(ServiceInterface *sourceInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -258,7 +258,7 @@ void ContentSync::readSourceContent(ServiceInterface *sourceInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -277,7 +277,7 @@ void ContentSync::readSourceProducers(const char *sourceDir)
     char filename[300];
     sprintf(filename,"%s/producers.csv",sourceDir);
     FILE *file = fopen(filename,"r");
-    if (file == NULL)
+    if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot open the file!");
       exception.addParameter("Filename",filename);
@@ -287,7 +287,7 @@ void ContentSync::readSourceProducers(const char *sourceDir)
     char st[1000];
     while (!feof(file))
     {
-      if (fgets(st,1000,file) != NULL)
+      if (fgets(st,1000,file) != nullptr)
       {
         if (st[0] != '#')
         {
@@ -301,7 +301,7 @@ void ContentSync::readSourceProducers(const char *sourceDir)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -320,7 +320,7 @@ void ContentSync::readSourceGenerations(const char *sourceDir)
     char filename[300];
     sprintf(filename,"%s/generations.csv",sourceDir);
     FILE *file = fopen(filename,"r");
-    if (file == NULL)
+    if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot open the file!");
       exception.addParameter("Filename",filename);
@@ -330,7 +330,7 @@ void ContentSync::readSourceGenerations(const char *sourceDir)
     char st[1000];
     while (!feof(file))
     {
-      if (fgets(st,1000,file) != NULL)
+      if (fgets(st,1000,file) != nullptr)
       {
         if (st[0] != '#')
         {
@@ -344,7 +344,7 @@ void ContentSync::readSourceGenerations(const char *sourceDir)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -363,7 +363,7 @@ void ContentSync::readSourceFiles(const char *sourceDir)
     char filename[300];
     sprintf(filename,"%s/files.csv",sourceDir);
     FILE *file = fopen(filename,"r");
-    if (file == NULL)
+    if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot open the file!");
       exception.addParameter("Filename",filename);
@@ -373,7 +373,7 @@ void ContentSync::readSourceFiles(const char *sourceDir)
     char st[1000];
     while (!feof(file))
     {
-      if (fgets(st,1000,file) != NULL)
+      if (fgets(st,1000,file) != nullptr)
       {
         if (st[0] != '#')
         {
@@ -387,7 +387,7 @@ void ContentSync::readSourceFiles(const char *sourceDir)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -406,7 +406,7 @@ void ContentSync::readSourceContent(const char *sourceDir)
     char filename[300];
     sprintf(filename,"%s/content.csv",sourceDir);
     FILE *file = fopen(filename,"r");
-    if (file == NULL)
+    if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot open the file!");
       exception.addParameter("Filename",filename);
@@ -416,7 +416,7 @@ void ContentSync::readSourceContent(const char *sourceDir)
     char st[1000];
     while (!feof(file))
     {
-      if (fgets(st,1000,file) != NULL)
+      if (fgets(st,1000,file) != nullptr)
       {
         if (st[0] != '#')
         {
@@ -430,7 +430,7 @@ void ContentSync::readSourceContent(const char *sourceDir)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -455,7 +455,7 @@ void ContentSync::readTargetProducers(ServiceInterface *targetInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -480,7 +480,7 @@ void ContentSync::readTargetGenerations(ServiceInterface *targetInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -523,7 +523,7 @@ void ContentSync::readTargetFiles(ServiceInterface *targetInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -569,7 +569,7 @@ void ContentSync::readTargetContent(ServiceInterface *targetInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -590,7 +590,7 @@ void ContentSync::updateProducers(ServiceInterface *targetInterface)
       if (targetProducer->mSourceId == mTargetId)
       {
         T::ProducerInfo *sourceProducer = mSourceProducerList.getProducerInfoByName(targetProducer->mName);
-        if (sourceProducer == NULL)
+        if (sourceProducer == nullptr)
         {
           // The producer information is not available in the source data storage. So, we should remove
           // it also from the target data storage.
@@ -618,7 +618,7 @@ void ContentSync::updateProducers(ServiceInterface *targetInterface)
       if (sourceProducer->mSourceId == mSourceId)
       {
         T::ProducerInfo *targetProducer = mTargetProducerList.getProducerInfoByName(sourceProducer->mName);
-        if (targetProducer == NULL)
+        if (targetProducer == nullptr)
         {
           // The producer information is not available in the target data storage. So, we should add it.
 
@@ -643,7 +643,7 @@ void ContentSync::updateProducers(ServiceInterface *targetInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -664,7 +664,7 @@ void ContentSync::updateGenerations(ServiceInterface *targetInterface)
       if (targetGeneration->mSourceId == mTargetId)
       {
         T::GenerationInfo *sourceGeneration = mSourceGenerationList.getGenerationInfoByName(targetGeneration->mName);
-        if (sourceGeneration == NULL)
+        if (sourceGeneration == nullptr)
         {
           // The generation information is not available in the source data storage. So, we should remove
           // it also from the target data storage.
@@ -691,13 +691,13 @@ void ContentSync::updateGenerations(ServiceInterface *targetInterface)
       if (sourceGeneration->mSourceId == mSourceId)
       {
         T::GenerationInfo *targetGeneration = mTargetGenerationList.getGenerationInfoByName(sourceGeneration->mName);
-        if (targetGeneration == NULL)
+        if (targetGeneration == nullptr)
         {
           // The generation information is not available in the target data storage. So, we should add it.
 
           // Finding producer name:
           T::ProducerInfo *sourceProducer = mSourceProducerList.getProducerInfoById(sourceGeneration->mProducerId);
-          if (sourceProducer != NULL)
+          if (sourceProducer != nullptr)
           {
             // Finding producer id from the target data storage.
             T::ProducerInfo targetProducer;
@@ -730,7 +730,7 @@ void ContentSync::updateGenerations(ServiceInterface *targetInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -754,7 +754,7 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
       if (targetFile->mSourceId == mTargetId)
       {
         T::FileInfo *sourceFile = mSourceFileList.getFileInfoByName(targetFile->mName);
-        if (sourceFile == NULL)
+        if (sourceFile == nullptr)
         {
           // The file information is not available in the source data storage. So, we should remove
           // it also from the target data storage.
@@ -786,7 +786,7 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
       if (sourceFile->mSourceId == mSourceId)
       {
         T::FileInfo *targetFile = mTargetFileList.getFileInfoByName(sourceFile->mName);
-        if (targetFile == NULL)
+        if (targetFile == nullptr)
         {
           //printf("Target file not found\n");
           //sourceFile->print(std::cout,0,0);
@@ -795,11 +795,11 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
 
           // Finding generation name:
           T::GenerationInfo *sourceGeneration = mSourceGenerationList.getGenerationInfoById(sourceFile->mGenerationId);
-          if (sourceGeneration != NULL)
+          if (sourceGeneration != nullptr)
           {
             // Finding producer id and generation id from the target data storage.
             T::GenerationInfo *targetGeneration = mTargetGenerationList.getGenerationInfoByName(sourceGeneration->mName);
-            if (targetGeneration != NULL)
+            if (targetGeneration != nullptr)
             {
               T::FileAndContent fc;
 
@@ -863,7 +863,7 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -884,7 +884,7 @@ void ContentSync::updateContent(ServiceInterface *targetInterface)
       if (targetContent->mSourceId == mTargetId)
       {
         T::FileInfo *targetFile = mTargetFileList.getFileInfoById(targetContent->mFileId);
-        if (targetFile == NULL)
+        if (targetFile == nullptr)
         {
           // The content information belongs to a file that is not available in the target data storage.
           // So, we should remove it.
@@ -895,8 +895,7 @@ void ContentSync::updateContent(ServiceInterface *targetInterface)
           if (result != 0)
           {
             SmartMet::Spine::Exception exception(BCP,"Cannot delete the generation information from the target data storage!");
-            exception.addParameter("FileId",std::to_string(targetFile->mFileId));
-            exception.addParameter("FileName",targetFile->mName);
+            exception.addParameter("FileId",std::to_string(targetContent->mFileId));
             exception.addParameter("Result",getResultString(result));
             throw exception;
           }
@@ -906,7 +905,7 @@ void ContentSync::updateContent(ServiceInterface *targetInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

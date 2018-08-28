@@ -24,11 +24,11 @@ static void* CacheImplementation_eventProcessingThread(void *arg)
   {
     CacheImplementation *service = (CacheImplementation*)arg;
     service->eventProcessingThread();
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    Spine::Exception exception(BCP,exception_operation_failed,NULL);
+    Spine::Exception exception(BCP,exception_operation_failed,nullptr);
     exception.printError();
     exit(-1);
   }
@@ -45,7 +45,7 @@ CacheImplementation::CacheImplementation()
   {
     mImplementationType = Implementation::Cache;
 
-    mContentStorage = NULL;
+    mContentStorage = nullptr;
     mContentStorageStartTime = 0;
     mContentSortingFlags = 0;
     mStartTime = 0;
@@ -87,7 +87,7 @@ CacheImplementation::CacheImplementation()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -103,7 +103,7 @@ CacheImplementation::~CacheImplementation()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -122,7 +122,7 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
     mContentStorage = contentStorage;
     mContentSortingFlags = contentSortingFlags;
 
-    if (mContentStorage != NULL)
+    if (mContentStorage != nullptr)
     {
       AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
@@ -195,7 +195,7 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
   catch (...)
   {
     mUpdateInProgress = false;
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -208,11 +208,11 @@ void CacheImplementation::startEventProcessing()
   FUNCTION_TRACE
   try
   {
-    pthread_create(&mThread,NULL,CacheImplementation_eventProcessingThread,this);
+    pthread_create(&mThread,nullptr,CacheImplementation_eventProcessingThread,this);
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -229,7 +229,7 @@ void CacheImplementation::shutdown()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -246,7 +246,7 @@ bool CacheImplementation::isSessionValid(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -259,7 +259,7 @@ int CacheImplementation::_clear(T::SessionId sessionId)
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->clear(sessionId);
@@ -268,7 +268,7 @@ int CacheImplementation::_clear(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -281,7 +281,7 @@ int CacheImplementation::_reload(T::SessionId sessionId)
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     mContentStorage->reload(sessionId);
@@ -291,7 +291,7 @@ int CacheImplementation::_reload(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -304,7 +304,7 @@ void CacheImplementation::reloadData()
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage != NULL)
+    if (mContentStorage != nullptr)
     {
       AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
@@ -388,7 +388,7 @@ void CacheImplementation::reloadData()
   catch (...)
   {
     mUpdateInProgress = false;
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -401,7 +401,7 @@ int CacheImplementation::_addDataServerInfo(T::SessionId sessionId,T::ServerInfo
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addDataServerInfo(sessionId,serverInfo);
@@ -410,7 +410,7 @@ int CacheImplementation::_addDataServerInfo(T::SessionId sessionId,T::ServerInfo
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -423,7 +423,7 @@ int CacheImplementation::_deleteDataServerInfoById(T::SessionId sessionId,uint s
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteDataServerInfoById(sessionId,serverId);
@@ -432,7 +432,7 @@ int CacheImplementation::_deleteDataServerInfoById(T::SessionId sessionId,uint s
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -454,7 +454,7 @@ int CacheImplementation::_getDataServerInfoById(T::SessionId sessionId,uint serv
       return Result::INVALID_SESSION;
 
     T::ServerInfo *info = mDataServerInfoList.getServerInfoById(serverId);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     serverInfo = *info;
@@ -462,7 +462,7 @@ int CacheImplementation::_getDataServerInfoById(T::SessionId sessionId,uint serv
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -484,7 +484,7 @@ int CacheImplementation::_getDataServerInfoByName(T::SessionId sessionId,std::st
       return Result::INVALID_SESSION;
 
     T::ServerInfo *info = mDataServerInfoList.getServerInfoByName(serverName);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     serverInfo = *info;
@@ -492,7 +492,7 @@ int CacheImplementation::_getDataServerInfoByName(T::SessionId sessionId,std::st
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -514,7 +514,7 @@ int CacheImplementation::_getDataServerInfoByIor(T::SessionId sessionId,std::str
       return Result::INVALID_SESSION;
 
     T::ServerInfo *info = mDataServerInfoList.getServerInfoByIor(serverIor);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     serverInfo = *info;
@@ -522,7 +522,7 @@ int CacheImplementation::_getDataServerInfoByIor(T::SessionId sessionId,std::str
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -548,7 +548,7 @@ int CacheImplementation::_getDataServerInfoList(T::SessionId sessionId,T::Server
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -572,7 +572,7 @@ int CacheImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& co
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -585,7 +585,7 @@ int CacheImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addProducerInfo(sessionId,producerInfo);
@@ -594,7 +594,7 @@ int CacheImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -607,7 +607,7 @@ int CacheImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint pro
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteProducerInfoById(sessionId,producerId);
@@ -616,7 +616,7 @@ int CacheImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint pro
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -629,7 +629,7 @@ int CacheImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::s
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
      int result = mContentStorage->deleteProducerInfoByName(sessionId,producerName);
@@ -638,7 +638,7 @@ int CacheImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::s
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -660,7 +660,7 @@ int CacheImplementation::_getProducerInfoById(T::SessionId sessionId,uint produc
       return Result::INVALID_SESSION;
 
     T::ProducerInfo *info = mProducerInfoList.getProducerInfoById(producerId);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     producerInfo = *info;
@@ -668,7 +668,7 @@ int CacheImplementation::_getProducerInfoById(T::SessionId sessionId,uint produc
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -681,7 +681,7 @@ int CacheImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteProducerInfoListBySourceId(sessionId,sourceId);
@@ -690,7 +690,7 @@ int CacheImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -712,7 +712,7 @@ int CacheImplementation::_getProducerInfoByName(T::SessionId sessionId,std::stri
       return Result::INVALID_SESSION;
 
     T::ProducerInfo *info = mProducerInfoList.getProducerInfoByName(producerName);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     producerInfo = *info;
@@ -720,7 +720,7 @@ int CacheImplementation::_getProducerInfoByName(T::SessionId sessionId,std::stri
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -746,7 +746,7 @@ int CacheImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -842,7 +842,7 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
         producerIdList.insert(info->mProducerId);
 
         T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(info->mProducerId);
-        if (producerInfo != NULL)
+        if (producerInfo != nullptr)
           producerInfoList.addProducerInfo(producerInfo->duplicate());
       }
     }
@@ -851,7 +851,7 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -877,7 +877,7 @@ int CacheImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -901,7 +901,7 @@ int CacheImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& coun
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -948,7 +948,7 @@ int CacheImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1091,10 +1091,10 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
     {
       char *str = (char*)it->c_str();
       char *pp = strstr(str,";");
-      if (pp != NULL)
+      if (pp != nullptr)
       {
         pp = strstr(pp+1,";");
-        if (pp != NULL)
+        if (pp != nullptr)
         {
           std::string prefix = it->substr(0,pp-str);
           if (prevPrefix != prefix)
@@ -1111,7 +1111,7 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1124,7 +1124,7 @@ int CacheImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addGenerationInfo(sessionId,generationInfo);
@@ -1133,7 +1133,7 @@ int CacheImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1146,7 +1146,7 @@ int CacheImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint g
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteGenerationInfoById(sessionId,generationId);
@@ -1155,7 +1155,7 @@ int CacheImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint g
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1168,7 +1168,7 @@ int CacheImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std:
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteGenerationInfoByName(sessionId,generationName);
@@ -1177,7 +1177,7 @@ int CacheImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std:
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1190,7 +1190,7 @@ int CacheImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteGenerationInfoListByIdList(sessionId,generationIdList);
@@ -1199,7 +1199,7 @@ int CacheImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1212,7 +1212,7 @@ int CacheImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sess
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteGenerationInfoListByProducerId(sessionId,producerId);
@@ -1221,7 +1221,7 @@ int CacheImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sess
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1234,7 +1234,7 @@ int CacheImplementation::_deleteGenerationInfoListByProducerName(T::SessionId se
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteGenerationInfoListByProducerName(sessionId,producerName);
@@ -1243,7 +1243,7 @@ int CacheImplementation::_deleteGenerationInfoListByProducerName(T::SessionId se
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1256,7 +1256,7 @@ int CacheImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessio
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteGenerationInfoListBySourceId(sessionId,sourceId);
@@ -1265,7 +1265,7 @@ int CacheImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessio
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1304,7 +1304,7 @@ int CacheImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1332,7 +1332,7 @@ int CacheImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
     for (auto it=idList.begin(); it!=idList.end(); ++it)
     {
       T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(*it);
-      if (generationInfo != NULL)
+      if (generationInfo != nullptr)
         generationInfoList.addGenerationInfo(generationInfo->duplicate());
     }
 
@@ -1340,7 +1340,7 @@ int CacheImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1362,7 +1362,7 @@ int CacheImplementation::_getGenerationInfoById(T::SessionId sessionId,uint gene
       return Result::INVALID_SESSION;
 
     T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(generationId);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     generationInfo = *info;
@@ -1370,7 +1370,7 @@ int CacheImplementation::_getGenerationInfoById(T::SessionId sessionId,uint gene
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1392,7 +1392,7 @@ int CacheImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::st
       return Result::INVALID_SESSION;
 
     T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoByName(generationName);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     generationInfo = *info;
@@ -1400,7 +1400,7 @@ int CacheImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::st
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1426,7 +1426,7 @@ int CacheImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Genera
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1448,7 +1448,7 @@ int CacheImplementation::_getGenerationInfoListByProducerId(T::SessionId session
       return Result::INVALID_SESSION;
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     mGenerationInfoList.getGenerationInfoListByProducerId(producerId,generationInfoList);
@@ -1456,7 +1456,7 @@ int CacheImplementation::_getGenerationInfoListByProducerId(T::SessionId session
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1478,7 +1478,7 @@ int CacheImplementation::_getGenerationInfoListByProducerName(T::SessionId sessi
       return Result::INVALID_SESSION;
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
     mGenerationInfoList.getGenerationInfoListByProducerId(producerInfo->mProducerId,generationInfoList);
@@ -1486,7 +1486,7 @@ int CacheImplementation::_getGenerationInfoListByProducerName(T::SessionId sessi
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1512,7 +1512,7 @@ int CacheImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1534,12 +1534,12 @@ int CacheImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
       return Result::INVALID_SESSION;
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
 
     T::GenerationInfo *info = mGenerationInfoList.getLastGenerationInfoByProducerIdAndStatus(producerId,generationStatus);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     generationInfo = *info;
@@ -1547,7 +1547,7 @@ int CacheImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1569,11 +1569,11 @@ int CacheImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessio
       return Result::INVALID_SESSION;
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     T::GenerationInfo *info = mGenerationInfoList.getLastGenerationInfoByProducerIdAndStatus(producerInfo->mProducerId,generationStatus);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     generationInfo = *info;
@@ -1581,7 +1581,7 @@ int CacheImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessio
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1605,7 +1605,7 @@ int CacheImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1618,7 +1618,7 @@ int CacheImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->setGenerationInfoStatusById(sessionId,generationId,status);
@@ -1627,7 +1627,7 @@ int CacheImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1640,7 +1640,7 @@ int CacheImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,s
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->setGenerationInfoStatusByName(sessionId,generationName,status);
@@ -1649,7 +1649,7 @@ int CacheImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,s
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1662,7 +1662,7 @@ int CacheImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addFileInfo(sessionId,fileInfo);
@@ -1671,7 +1671,7 @@ int CacheImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1684,7 +1684,7 @@ int CacheImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addFileInfoWithContentList(sessionId,fileInfo,contentInfoList);
@@ -1693,7 +1693,7 @@ int CacheImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1706,7 +1706,7 @@ int CacheImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std:
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addFileInfoListWithContent(sessionId,fileAndContentList);
@@ -1715,7 +1715,7 @@ int CacheImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std:
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1728,7 +1728,7 @@ int CacheImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoById(sessionId,fileId);
@@ -1737,7 +1737,7 @@ int CacheImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1750,7 +1750,7 @@ int CacheImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::strin
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoByName(sessionId,filename);
@@ -1759,7 +1759,7 @@ int CacheImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::strin
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1772,7 +1772,7 @@ int CacheImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoListByGroupFlags(sessionId,groupFlags);
@@ -1781,7 +1781,7 @@ int CacheImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1794,7 +1794,7 @@ int CacheImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoListByProducerId(sessionId,producerId);
@@ -1803,7 +1803,7 @@ int CacheImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1816,7 +1816,7 @@ int CacheImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoListByProducerName(sessionId,producerName);
@@ -1825,7 +1825,7 @@ int CacheImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1838,7 +1838,7 @@ int CacheImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoListByGenerationId(sessionId,generationId);
@@ -1847,7 +1847,7 @@ int CacheImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1860,7 +1860,7 @@ int CacheImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime);
@@ -1869,7 +1869,7 @@ int CacheImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1882,7 +1882,7 @@ int CacheImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sess
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoListByForecastTimeList(sessionId,forecastTimeList);
@@ -1891,7 +1891,7 @@ int CacheImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sess
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1904,7 +1904,7 @@ int CacheImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessio
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoListByGenerationName(sessionId,generationName);
@@ -1913,7 +1913,7 @@ int CacheImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessio
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1926,7 +1926,7 @@ int CacheImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,ui
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoListBySourceId(sessionId,sourceId);
@@ -1935,7 +1935,7 @@ int CacheImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1948,7 +1948,7 @@ int CacheImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteFileInfoListByFileIdList(sessionId,fileIdList);
@@ -1957,7 +1957,7 @@ int CacheImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1979,7 +1979,7 @@ int CacheImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::
       return Result::INVALID_SESSION;
 
     T::FileInfo *info = mFileInfoList.getFileInfoById(fileId);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     fileInfo = *info;
@@ -1987,7 +1987,7 @@ int CacheImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2009,7 +2009,7 @@ int CacheImplementation::_getFileInfoByName(T::SessionId sessionId,std::string f
       return Result::INVALID_SESSION;
 
     T::FileInfo *info = mFileInfoListByName.getFileInfoByName(filename);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     fileInfo = *info;
@@ -2017,7 +2017,7 @@ int CacheImplementation::_getFileInfoByName(T::SessionId sessionId,std::string f
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2043,7 +2043,7 @@ int CacheImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2065,7 +2065,7 @@ int CacheImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uin
       return Result::INVALID_SESSION;
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     mFileInfoList.getFileInfoListByProducerId(producerId,startFileId,maxRecords,fileInfoList);
@@ -2073,7 +2073,7 @@ int CacheImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2095,7 +2095,7 @@ int CacheImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,s
       return Result::INVALID_SESSION;
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
     mFileInfoList.getFileInfoListByProducerId(producerInfo->mProducerId,startFileId,maxRecords,fileInfoList);
@@ -2103,7 +2103,7 @@ int CacheImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,s
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2125,7 +2125,7 @@ int CacheImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,u
       return Result::INVALID_SESSION;
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
     mFileInfoList.getFileInfoListByGenerationId(generationId,startFileId,maxRecords,fileInfoList);
@@ -2133,7 +2133,7 @@ int CacheImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2155,7 +2155,7 @@ int CacheImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
       return Result::INVALID_SESSION;
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
     mFileInfoList.getFileInfoListByGenerationId(generationInfo->mGenerationId,startFileId,maxRecords,fileInfoList);
@@ -2163,7 +2163,7 @@ int CacheImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2189,7 +2189,7 @@ int CacheImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2215,7 +2215,7 @@ int CacheImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2239,7 +2239,7 @@ int CacheImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2263,7 +2263,7 @@ int CacheImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2286,7 +2286,7 @@ int CacheImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2310,7 +2310,7 @@ int CacheImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2323,7 +2323,7 @@ int CacheImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& even
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addEventInfo(sessionId,eventInfo);
@@ -2332,7 +2332,7 @@ int CacheImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& even
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2356,12 +2356,12 @@ int CacheImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
     if (requestingServerId != 0)
     {
       T::ServerInfo *info = mDataServerInfoList.getServerInfoById(requestingServerId);
-      if (info != NULL)
+      if (info != nullptr)
         info->mLastCall = time(0);
     }
 
     T::EventInfo *lastEvent = mEventInfoList.getLastEvent();
-    if (lastEvent == NULL)
+    if (lastEvent == nullptr)
       return Result::DATA_NOT_FOUND;
 
     eventInfo = *lastEvent;
@@ -2371,7 +2371,7 @@ int CacheImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2395,7 +2395,7 @@ int CacheImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
     if (requestingServerId != 0)
     {
       T::ServerInfo *info = mDataServerInfoList.getServerInfoById(requestingServerId);
-      if (info != NULL)
+      if (info != nullptr)
         info->mLastCall = time(0);
     }
 
@@ -2404,7 +2404,7 @@ int CacheImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2428,7 +2428,7 @@ int CacheImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2441,7 +2441,7 @@ int CacheImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addContentInfo(sessionId,contentInfo);
@@ -2450,7 +2450,7 @@ int CacheImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2463,7 +2463,7 @@ int CacheImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addContentList(sessionId,contentInfoList);
@@ -2472,7 +2472,7 @@ int CacheImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2485,7 +2485,7 @@ int CacheImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,u
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentInfo(sessionId,fileId,messageIndex);
@@ -2494,7 +2494,7 @@ int CacheImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,u
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2507,7 +2507,7 @@ int CacheImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint 
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentListByFileId(sessionId,fileId);
@@ -2516,7 +2516,7 @@ int CacheImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2529,7 +2529,7 @@ int CacheImplementation::_deleteContentListByFileName(T::SessionId sessionId,std
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentListByFileName(sessionId,filename);
@@ -2538,7 +2538,7 @@ int CacheImplementation::_deleteContentListByFileName(T::SessionId sessionId,std
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2551,7 +2551,7 @@ int CacheImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentListByGroupFlags(sessionId,groupFlags);
@@ -2560,7 +2560,7 @@ int CacheImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2573,7 +2573,7 @@ int CacheImplementation::_deleteContentListByProducerId(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentListByProducerId(sessionId,producerId);
@@ -2582,7 +2582,7 @@ int CacheImplementation::_deleteContentListByProducerId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2595,7 +2595,7 @@ int CacheImplementation::_deleteContentListByProducerName(T::SessionId sessionId
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentListByProducerName(sessionId,producerName);
@@ -2604,7 +2604,7 @@ int CacheImplementation::_deleteContentListByProducerName(T::SessionId sessionId
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2617,7 +2617,7 @@ int CacheImplementation::_deleteContentListByGenerationId(T::SessionId sessionId
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentListByGenerationId(sessionId,generationId);
@@ -2626,7 +2626,7 @@ int CacheImplementation::_deleteContentListByGenerationId(T::SessionId sessionId
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2639,7 +2639,7 @@ int CacheImplementation::_deleteContentListByGenerationName(T::SessionId session
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentListByGenerationName(sessionId,generationName);
@@ -2648,7 +2648,7 @@ int CacheImplementation::_deleteContentListByGenerationName(T::SessionId session
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2661,7 +2661,7 @@ int CacheImplementation::_deleteContentListBySourceId(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteContentListBySourceId(sessionId,sourceId);
@@ -2670,7 +2670,7 @@ int CacheImplementation::_deleteContentListBySourceId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2683,7 +2683,7 @@ int CacheImplementation::_registerContentList(T::SessionId sessionId,uint server
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->registerContentList(sessionId,serverId,contentInfoList);
@@ -2692,7 +2692,7 @@ int CacheImplementation::_registerContentList(T::SessionId sessionId,uint server
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2705,7 +2705,7 @@ int CacheImplementation::_registerContentListByFileId(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->registerContentListByFileId(sessionId,serverId,fileId);
@@ -2714,7 +2714,7 @@ int CacheImplementation::_registerContentListByFileId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2727,7 +2727,7 @@ int CacheImplementation::_unregisterContentList(T::SessionId sessionId,uint serv
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->unregisterContentList(sessionId,serverId);
@@ -2736,7 +2736,7 @@ int CacheImplementation::_unregisterContentList(T::SessionId sessionId,uint serv
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2749,7 +2749,7 @@ int CacheImplementation::_unregisterContentListByFileId(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->unregisterContentListByFileId(sessionId,serverId,fileId);
@@ -2758,7 +2758,7 @@ int CacheImplementation::_unregisterContentListByFileId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2780,7 +2780,7 @@ int CacheImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint
       return Result::INVALID_SESSION;
 
     T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(fileId,messageIndex);
-    if (cInfo != NULL)
+    if (cInfo != nullptr)
     {
       contentInfo = *cInfo;
       return Result::OK;
@@ -2790,7 +2790,7 @@ int CacheImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2816,7 +2816,7 @@ int CacheImplementation::_getContentList(T::SessionId sessionId,uint startFileId
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2842,7 +2842,7 @@ int CacheImplementation::_getContentListByFileId(T::SessionId sessionId,uint fil
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2864,7 +2864,7 @@ int CacheImplementation::_getContentListByFileName(T::SessionId sessionId,std::s
       return Result::INVALID_SESSION;
 
     T::FileInfo *fileInfo = mFileInfoListByName.getFileInfoByName(filename);
-    if (fileInfo == NULL)
+    if (fileInfo == nullptr)
       return Result::UNKNOWN_FILE_NAME;
 
     mContentInfoList[0].getContentInfoListByFileId(fileInfo->mFileId,contentInfoList);
@@ -2872,7 +2872,7 @@ int CacheImplementation::_getContentListByFileName(T::SessionId sessionId,std::s
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2894,7 +2894,7 @@ int CacheImplementation::_getContentListByServerId(T::SessionId sessionId,uint s
       return Result::INVALID_SESSION;
 
     T::ServerInfo *info = mDataServerInfoList.getServerInfoById(serverId);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::UNKNOWN_SERVER_ID;
 
     mContentInfoList[0].getContentInfoListByServerId(serverId,startFileId,startMessageIndex,maxRecords,contentInfoList);
@@ -2902,7 +2902,7 @@ int CacheImplementation::_getContentListByServerId(T::SessionId sessionId,uint s
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2928,7 +2928,7 @@ int CacheImplementation::_getContentListByGroupFlags(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2950,7 +2950,7 @@ int CacheImplementation::_getContentListByProducerId(T::SessionId sessionId,uint
       return Result::INVALID_SESSION;
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     mContentInfoList[0].getContentInfoListByProducerId(producerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
@@ -2958,7 +2958,7 @@ int CacheImplementation::_getContentListByProducerId(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2980,7 +2980,7 @@ int CacheImplementation::_getContentListByProducerName(T::SessionId sessionId,st
       return Result::INVALID_SESSION;
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
     mContentInfoList[0].getContentInfoListByProducerId(producerInfo->mProducerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
@@ -2988,7 +2988,7 @@ int CacheImplementation::_getContentListByProducerName(T::SessionId sessionId,st
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3018,7 +3018,7 @@ int CacheImplementation::_getContentListByGenerationId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3040,7 +3040,7 @@ int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,
       return Result::INVALID_SESSION;
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
     mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mGenerationId,startFileId,startMessageIndex,maxRecords,contentInfoList);
@@ -3048,7 +3048,7 @@ int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3074,7 +3074,7 @@ int CacheImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3096,7 +3096,7 @@ int CacheImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
       return Result::INVALID_SESSION;
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
     mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mGenerationId,startTime,endTime,contentInfoList);
@@ -3104,7 +3104,7 @@ int CacheImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3130,7 +3130,7 @@ int CacheImplementation::_getContentListBySourceId(T::SessionId sessionId,uint s
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3218,7 +3218,7 @@ int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3240,7 +3240,7 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
       return Result::INVALID_SESSION;
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
     char st[100];
@@ -3325,7 +3325,7 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3347,7 +3347,7 @@ int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionI
       return Result::INVALID_SESSION;
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
     switch (parameterKeyType)
@@ -3412,7 +3412,7 @@ int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3433,7 +3433,7 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
       return Result::INVALID_SESSION;
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     switch (parameterKeyType)
@@ -3498,7 +3498,7 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3519,7 +3519,7 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
       return Result::INVALID_SESSION;
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
-    if (producerInfo == NULL)
+    if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
     switch (parameterKeyType)
@@ -3584,7 +3584,7 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3606,7 +3606,7 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
       return Result::INVALID_SESSION;
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
-    if (generationInfo == NULL)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
 /*
@@ -3638,7 +3638,7 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
         if (mContentInfoListEnabled[2])
         {
           T::ContentInfo *cInfo = mContentInfoList[2].getContentInfoByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
-          if (cInfo != NULL)
+          if (cInfo != nullptr)
           {
             contentInfoList.addContentInfo(cInfo->duplicate());
             return Result::OK;
@@ -3704,7 +3704,7 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     if (contentInfoList.getLength() == 0  &&  contentList.getLength() > 0)
     {
       T::ContentInfo *info = contentList.getContentInfoByIndex(0);
-      if (info != NULL)
+      if (info != nullptr)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -3717,7 +3717,7 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3736,37 +3736,37 @@ int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
     for (uint c=0; c<cLen; c++)
     {
       T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByIndex(c);
-      T::ContentInfo *cError = NULL;
-      if (cInfo != NULL)
+      T::ContentInfo *cError = nullptr;
+      if (cInfo != nullptr)
       {
         T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(cInfo->mFileId);
-        if (fileInfo == NULL)
+        if (fileInfo == nullptr)
         {
           PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : File missing (%u)! *****\n",cInfo->mFileId);
           cError = cInfo;
         }
 
-        if (cError == NULL)
+        if (cError == nullptr)
         {
           T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(cInfo->mGenerationId);
-          if (generationInfo == NULL)
+          if (generationInfo == nullptr)
           {
             PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Generation missing (%u)! *****\n",cInfo->mGenerationId);
             cError = cInfo;
           }
         }
 
-        if (cError == NULL)
+        if (cError == nullptr)
         {
           T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(cInfo->mProducerId);
-          if (producerInfo == NULL)
+          if (producerInfo == nullptr)
           {
             PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Producer missing (%u)! *****\n",cInfo->mProducerId);
             cError = cInfo;
           }
         }
 
-        if (cError != NULL)
+        if (cError != nullptr)
           contentInfoList.addContentInfo(cError->duplicate());
       }
     }
@@ -3774,7 +3774,7 @@ int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3800,7 +3800,7 @@ int CacheImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3825,13 +3825,13 @@ int CacheImplementation::_getContentParamListByGenerationId(T::SessionId session
     mContentInfoList[0].getContentInfoListByGenerationId(generationId,0,0,1000000,contentInfoList);
     contentInfoList.sort(T::ContentInfo::ComparisonMethod::fmiName_fmiLevelId_level_starttime_file_message);
     uint len = contentInfoList.getLength();
-    T::ContentInfo *prev = NULL;
-    T::ContentInfo *currentInfo = NULL;
+    T::ContentInfo *prev = nullptr;
+    T::ContentInfo *currentInfo = nullptr;
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
 
-      if (prev == NULL ||
+      if (prev == nullptr ||
           info->mFmiParameterName != prev->mFmiParameterName ||
           info->mFmiParameterLevelId != prev->mFmiParameterLevelId ||
           info->mParameterLevel != prev->mParameterLevel ||
@@ -3853,7 +3853,7 @@ int CacheImplementation::_getContentParamListByGenerationId(T::SessionId session
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3879,7 +3879,7 @@ int CacheImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3915,7 +3915,7 @@ int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3942,7 +3942,7 @@ int CacheImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3969,7 +3969,7 @@ int CacheImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3993,7 +3993,7 @@ int CacheImplementation::_getContentCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4017,7 +4017,7 @@ int CacheImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoLi
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4030,7 +4030,7 @@ int CacheImplementation::_deleteVirtualContent(T::SessionId sessionId)
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->deleteVirtualContent(sessionId);
@@ -4039,7 +4039,7 @@ int CacheImplementation::_deleteVirtualContent(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4052,7 +4052,7 @@ int CacheImplementation::_updateVirtualContent(T::SessionId sessionId)
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->updateVirtualContent(sessionId);
@@ -4061,7 +4061,7 @@ int CacheImplementation::_updateVirtualContent(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4076,7 +4076,7 @@ void CacheImplementation::readProducerList()
   {
     PRINT_DATA(mDebugLog,"* Reading the producer list\n");
 
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return;
 
     mProducerInfoList.clear();
@@ -4091,7 +4091,7 @@ void CacheImplementation::readProducerList()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4105,7 +4105,7 @@ void CacheImplementation::readGenerationList()
   {
     PRINT_DATA(mDebugLog,"* Reading the generation list\n");
 
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return;
 
     mGenerationInfoList.clear();
@@ -4120,7 +4120,7 @@ void CacheImplementation::readGenerationList()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4134,7 +4134,7 @@ void CacheImplementation::readFileList()
   {
     PRINT_DATA(mDebugLog,"* Reading the file list\n");
 
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return;
 
     mFileInfoList.clear();
@@ -4168,7 +4168,7 @@ void CacheImplementation::readFileList()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4181,7 +4181,7 @@ void CacheImplementation::readContentList()
   try
   {
     PRINT_DATA(mDebugLog,"* Reading the content list\n");
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return;
 
     mContentInfoList[0].clear();
@@ -4216,7 +4216,7 @@ void CacheImplementation::readContentList()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4228,7 +4228,7 @@ void CacheImplementation::readDataServerList()
   try
   {
    PRINT_DATA(mDebugLog,"* Reading the data server list\n");
-   if (mContentStorage == NULL)
+   if (mContentStorage == nullptr)
       return;
 
     mDataServerInfoList.clear();
@@ -4243,7 +4243,7 @@ void CacheImplementation::readDataServerList()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4275,7 +4275,7 @@ void CacheImplementation::event_clear(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4290,7 +4290,7 @@ void CacheImplementation::event_contentServerReload(T::EventInfo& eventInfo)
   {
     // printf("EVENT[%llu]: reload\n",eventInfo.mEventId);
 #if 0
-    if (mContentStorage != NULL)
+    if (mContentStorage != nullptr)
     {
       AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
@@ -4344,7 +4344,7 @@ void CacheImplementation::event_contentServerReload(T::EventInfo& eventInfo)
   catch (...)
   {
     mUpdateInProgress = false;
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4369,7 +4369,7 @@ void CacheImplementation::event_producerAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4398,7 +4398,7 @@ void CacheImplementation::event_producerDeleted(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4428,7 +4428,7 @@ void CacheImplementation::event_producerListDeletedBySourceId(T::EventInfo& even
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4453,7 +4453,7 @@ void CacheImplementation::event_generationAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4487,7 +4487,7 @@ void CacheImplementation::event_generationDeleted(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4503,12 +4503,12 @@ void CacheImplementation::event_generationStatusChanged(T::EventInfo& eventInfo)
     // printf("EVENT[%llu]: generationStatusChanged(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
     T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(eventInfo.mId1);
-    if (info != NULL)
+    if (info != nullptr)
       info->mStatus = (T::GenerationStatus)eventInfo.mId2;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4537,7 +4537,7 @@ void CacheImplementation::event_generationListDeletedByProducerId(T::EventInfo& 
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4566,7 +4566,7 @@ void CacheImplementation::event_generationListDeletedBySourceId(T::EventInfo& ev
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4591,10 +4591,10 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
       strcpy(buf,eventInfo.mNote.c_str());
       char *s = buf;
 
-      while (s != NULL)
+      while (s != nullptr)
       {
         char *p = strstr(s,"\n");
-        if (p != NULL)
+        if (p != nullptr)
         {
           *p = '\0';
           if (s == buf)
@@ -4602,7 +4602,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
             T::FileInfo *fileInfo = new T::FileInfo();
             fileInfo->setCsv(s);
 
-            if (mFileInfoList.getFileInfoById(fileInfo->mFileId) == NULL)
+            if (mFileInfoList.getFileInfoById(fileInfo->mFileId) == nullptr)
             {
               mFileInfoList.addFileInfo(fileInfo);
               if (mDelayedFileAddList.find(fileInfo->mFileId) == mDelayedFileAddList.end())
@@ -4618,7 +4618,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
           {
             T::ContentInfo *contentInfo = new T::ContentInfo();
             contentInfo->setCsv(s);
-            if (mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(contentInfo->mFileId,contentInfo->mMessageIndex) == NULL)
+            if (mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(contentInfo->mFileId,contentInfo->mMessageIndex) == nullptr)
             {
               auto it = mContentTimeCache.find(contentInfo->mGenerationId);
               if (it != mContentTimeCache.end())
@@ -4649,7 +4649,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
         }
         else
         {
-          s = NULL;
+          s = nullptr;
         }
       }
     }
@@ -4676,9 +4676,9 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
               {
                 T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
                 T::ContentInfo *oInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
-                if (oInfo == NULL  ||  (oInfo != NULL  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
+                if (oInfo == nullptr  ||  (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
                 {
-                  if (oInfo != NULL  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
+                  if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
                   {
                     // We should remove the old content before the addition
                   }
@@ -4716,7 +4716,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4734,7 +4734,7 @@ void CacheImplementation::event_fileDeleted(T::EventInfo& eventInfo)
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(eventInfo.mId1);
-    if (fileInfo != NULL)
+    if (fileInfo != nullptr)
     {
       mContentInfoList[0].markDeletedByFileId(fileInfo->mFileId);
       mContentDeleteCount++;
@@ -4754,7 +4754,7 @@ void CacheImplementation::event_fileDeleted(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4776,7 +4776,7 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
     if (mContentStorage->getFileInfoById(mSessionId,eventInfo.mId1,fileInfo) == Result::OK)
     {
       T::FileInfo *info = mFileInfoList.getFileInfoById(eventInfo.mId1);
-      if (info != NULL)
+      if (info != nullptr)
       {
         mContentDeleteCount += mContentInfoList[0].markDeletedByFileId(info->mFileId);
 
@@ -4806,9 +4806,9 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
           {
             T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
             T::ContentInfo *oInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
-            if (oInfo == NULL  ||  (oInfo != NULL  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
+            if (oInfo == nullptr  ||  (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
             {
-              if (oInfo != NULL  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
+              if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
               {
                 // We should remove the old content before the addition
               }
@@ -4837,7 +4837,7 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4865,7 +4865,7 @@ void CacheImplementation::event_fileListDeletedByGroupFlags(T::EventInfo& eventI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4893,7 +4893,7 @@ void CacheImplementation::event_fileListDeletedByProducerId(T::EventInfo& eventI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4921,7 +4921,7 @@ void CacheImplementation::event_fileListDeletedByGenerationId(T::EventInfo& even
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4950,7 +4950,7 @@ void CacheImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventInf
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4975,7 +4975,7 @@ void CacheImplementation::event_contentListDeletedByFileId(T::EventInfo& eventIn
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5000,7 +5000,7 @@ void CacheImplementation::event_contentListDeletedByGroupFlags(T::EventInfo& eve
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5025,7 +5025,7 @@ void CacheImplementation::event_contentListDeletedByProducerId(T::EventInfo& eve
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5050,7 +5050,7 @@ void CacheImplementation::event_contentListDeletedBySourceId(T::EventInfo& event
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5074,7 +5074,7 @@ void CacheImplementation::event_contentListDeletedByGenerationId(T::EventInfo& e
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5100,7 +5100,7 @@ void CacheImplementation::event_dataServerAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5124,7 +5124,7 @@ void CacheImplementation::event_dataServerDeleted(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5142,7 +5142,7 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ContentInfo *oInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
-    if (oInfo != NULL  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+    if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
     {
       // printf("ALREADY IN CACHE %u:%u\n",eventInfo.mId1,eventInfo.mId2);
       return;  // The content info is already in the cache.
@@ -5172,7 +5172,7 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5190,7 +5190,7 @@ void CacheImplementation::event_contentDeleted(T::EventInfo& eventInfo)
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ContentInfo *contentInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
-    if (contentInfo != NULL)
+    if (contentInfo != nullptr)
     {
       for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       {
@@ -5201,7 +5201,7 @@ void CacheImplementation::event_contentDeleted(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5227,7 +5227,7 @@ void CacheImplementation::event_contentRegistered(T::EventInfo& eventInfo)
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ContentInfo *info = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
-    if (info != NULL)
+    if (info != nullptr)
     {
       info->mServerFlags = info->mServerFlags | sf;
       mContentCount = 0xFFFFFFFF;
@@ -5235,7 +5235,7 @@ void CacheImplementation::event_contentRegistered(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5262,7 +5262,7 @@ void CacheImplementation::event_deleteVirtualContent(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5289,7 +5289,7 @@ void CacheImplementation::event_updateVirtualContent(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5425,7 +5425,7 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5438,7 +5438,7 @@ void CacheImplementation::processEvents(bool eventThread)
   FUNCTION_TRACE
   try
   {
-    if (mContentStorage == NULL)
+    if (mContentStorage == nullptr)
       return;
 
     if (!eventThread  &&  mReloadActivated)
@@ -5486,7 +5486,7 @@ void CacheImplementation::processEvents(bool eventThread)
         len = eventInfoList.getLength();
 
         T::EventInfo *it = eventInfoList.getFirstEvent();
-        while (it != NULL)
+        while (it != nullptr)
         {
           processEvent(*it);
 
@@ -5539,7 +5539,7 @@ void CacheImplementation::processEvents(bool eventThread)
       for (auto id = mDelayedFileAddList.begin(); id != mDelayedFileAddList.end(); ++id)
       {
         T::FileInfo *fInfo = mFileInfoList.getFileInfoByIdNoLock(*id);
-        if (fInfo != NULL &&  (fInfo->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
+        if (fInfo != nullptr &&  (fInfo->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
           list.addFileInfo(fInfo);
       }
 
@@ -5570,7 +5570,7 @@ void CacheImplementation::processEvents(bool eventThread)
         uint messageIndex = *id & 0xFFFFFFFF;
 
         T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndexNoLock(fileId,messageIndex);
-        if (cInfo != NULL &&  (cInfo->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        if (cInfo != nullptr &&  (cInfo->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
           list.addContentInfo(cInfo);
       }
 
@@ -5596,7 +5596,7 @@ void CacheImplementation::processEvents(bool eventThread)
 
     for (auto it = mContentTimeCache.begin();  it != mContentTimeCache.end(); ++it)
     {
-      if (mGenerationInfoList.getGenerationInfoById(it->first) == NULL)
+      if (mGenerationInfoList.getGenerationInfoById(it->first) == nullptr)
       {
         mContentTimeCache.erase(it->first);
       }
@@ -5621,7 +5621,7 @@ void CacheImplementation::processEvents(bool eventThread)
     */
 
     T::EventInfo *it = delayedEventInfoList.getFirstEvent();
-    while (it != NULL)
+    while (it != nullptr)
     {
       T::EventInfo *event = it->duplicate();
       mEventInfoList.addEventInfo(event);
@@ -5630,7 +5630,7 @@ void CacheImplementation::processEvents(bool eventThread)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5651,7 +5651,7 @@ void CacheImplementation::eventProcessingThread()
       }
       catch (...)
       {
-        Spine::Exception exception(BCP,exception_operation_failed,NULL);
+        Spine::Exception exception(BCP,exception_operation_failed,nullptr);
         exception.printError();
       }
 
@@ -5664,7 +5664,7 @@ void CacheImplementation::eventProcessingThread()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5704,7 +5704,7 @@ void CacheImplementation::saveData()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

@@ -17,7 +17,7 @@ ServerInfoList::ServerInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -34,7 +34,7 @@ ServerInfoList::ServerInfoList(ServerInfoList& serverInfoList)
     for (uint t=0; t<sz; t++)
     {
       ServerInfo *info = serverInfoList.getServerInfoByIndexNoCheck(t);
-      if (info != NULL)
+      if (info != nullptr)
         mList.push_back(info->duplicate());
     }
     serverInfoList.unlock();
@@ -42,7 +42,7 @@ ServerInfoList::ServerInfoList(ServerInfoList& serverInfoList)
   catch (...)
   {
     serverInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -57,7 +57,7 @@ ServerInfoList::~ServerInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -79,7 +79,7 @@ void ServerInfoList::operator=(ServerInfoList& serverInfoList)
     for (uint t=0; t<sz; t++)
     {
       ServerInfo *info = serverInfoList.getServerInfoByIndexNoCheck(t);
-      if (info != NULL)
+      if (info != nullptr)
         mList.push_back(info->duplicate());
     }
     serverInfoList.unlock();
@@ -87,7 +87,7 @@ void ServerInfoList::operator=(ServerInfoList& serverInfoList)
   catch (...)
   {
     serverInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -103,7 +103,7 @@ void ServerInfoList::addServerInfo(ServerInfo* serverInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -123,7 +123,7 @@ void ServerInfoList::clear()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -140,7 +140,7 @@ bool ServerInfoList::deleteServerInfoById(uint serverId)
     for (uint t=0; t<sz; t++)
     {
       ServerInfo *info = getServerInfoByIndexNoCheck(t);
-      if (info != NULL  &&  info->mServerId == serverId)
+      if (info != nullptr  &&  info->mServerId == serverId)
       {
         delete mList[t];
         mList.erase(mList.begin() + t);
@@ -151,7 +151,7 @@ bool ServerInfoList::deleteServerInfoById(uint serverId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -175,7 +175,7 @@ ServerInfo* ServerInfoList::getPreviousServerInfoById(uint serverId)
     for (uint t=0; t<sz; t++)
     {
       ServerInfo *info = getServerInfoByIndexNoCheck(t);
-      if (info != NULL  &&  info->mServerId != serverId)
+      if (info != nullptr  &&  info->mServerId != serverId)
       {
         if (info->mServerId < serverId  &&  info->mServerId > closestId)
         {
@@ -197,11 +197,11 @@ ServerInfo* ServerInfoList::getPreviousServerInfoById(uint serverId)
     if (maxId != 0)
       return getServerInfoByIndexNoCheck(maxIndex);
 
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -218,14 +218,14 @@ ServerInfo* ServerInfoList::getServerInfoById(uint serverId)
     for (uint t=0; t<sz; t++)
     {
       ServerInfo *info = getServerInfoByIndexNoCheck(t);
-      if (info != NULL  &&  info->mServerId == serverId)
+      if (info != nullptr  &&  info->mServerId == serverId)
         return info;
     }
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -239,13 +239,13 @@ ServerInfo* ServerInfoList::getServerInfoByIndex(uint index)
   {
     AutoThreadLock lock(&mThreadLock);
     if (index >= mList.size())
-      return NULL;
+      return nullptr;
 
     return mList.at(index);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -260,7 +260,7 @@ ServerInfo* ServerInfoList::getServerInfoByIndexNoCheck(uint index)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -276,14 +276,14 @@ ServerInfo*  ServerInfoList::getServerInfoByIor(std::string serverIor)
     for (uint t=0; t<sz; t++)
     {
       ServerInfo *info = getServerInfoByIndexNoCheck(t);
-      if (info != NULL  &&  info->mServerIor == serverIor)
+      if (info != nullptr  &&  info->mServerIor == serverIor)
         return info;
     }
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -299,14 +299,14 @@ ServerInfo*  ServerInfoList::getServerInfoByName(std::string serverName)
     for (uint t=0; t<sz; t++)
     {
       ServerInfo *info = getServerInfoByIndexNoCheck(t);
-      if (info != NULL  &&  strcasecmp(info->mName.c_str(),serverName.c_str()) == 0)
+      if (info != nullptr  &&  strcasecmp(info->mName.c_str(),serverName.c_str()) == 0)
         return info;
     }
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -321,7 +321,7 @@ uint ServerInfoList::getLength()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -337,7 +337,7 @@ void ServerInfoList::lock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -353,7 +353,7 @@ void ServerInfoList::unlock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -368,7 +368,7 @@ void ServerInfoList::writeToFile(std::string filename)
     AutoThreadLock lock(&mThreadLock);
 
     FILE *file = fopen(filename.c_str(),"w");
-    if (file == NULL)
+    if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot create the file!");
       exception.addParameter("Filename",filename);
@@ -385,7 +385,7 @@ void ServerInfoList::writeToFile(std::string filename)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -404,7 +404,7 @@ void ServerInfoList::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

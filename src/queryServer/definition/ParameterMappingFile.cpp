@@ -16,7 +16,7 @@ ParameterMappingFile::ParameterMappingFile(std::string filename)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -33,7 +33,7 @@ ParameterMappingFile::ParameterMappingFile(const ParameterMappingFile& mappingFi
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -48,7 +48,7 @@ ParameterMappingFile::~ParameterMappingFile()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -65,7 +65,7 @@ void ParameterMappingFile::init()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -90,7 +90,7 @@ bool ParameterMappingFile::checkUpdates()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -106,7 +106,7 @@ std::string ParameterMappingFile::getFilename()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -128,7 +128,7 @@ uint ParameterMappingFile::getNumberOfMappings()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -143,11 +143,11 @@ ParameterMapping* ParameterMappingFile::getParameterMappingByIndex(uint index)
     if (index < mMappingVector.size())
       return &mMappingVector[index];
 
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 */
@@ -165,7 +165,7 @@ ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
 
     auto s = mMappingSearch.find(key);
     if (s == mMappingSearch.end())
-      return NULL;
+      return nullptr;
 
     for (auto it = s->second.begin(); it != s->second.end(); ++it)
     {
@@ -180,11 +180,11 @@ ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
         return &(*it);
       }
     }
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -219,7 +219,7 @@ void ParameterMappingFile::getMappings(std::string producerName,std::string para
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -263,7 +263,7 @@ void ParameterMappingFile::getMappings(std::string producerName,std::string para
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -276,7 +276,7 @@ void ParameterMappingFile::loadFile()
   try
   {
     FILE *file = fopen(mFilename.c_str(),"r");
-    if (file == NULL)
+    if (file == nullptr)
     {
       Spine::Exception exception(BCP,"Cannot open the mapping file!");
       exception.addParameter("Filename",mFilename);
@@ -289,7 +289,7 @@ void ParameterMappingFile::loadFile()
 
     while (!feof(file))
     {
-      if (fgets(st,1000,file) != NULL  &&  st[0] != '#')
+      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
       {
         bool ind = false;
         char *field[100];
@@ -384,7 +384,7 @@ void ParameterMappingFile::loadFile()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -399,7 +399,7 @@ void ParameterMappingFile::print(std::ostream& stream,uint level,uint optionFlag
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

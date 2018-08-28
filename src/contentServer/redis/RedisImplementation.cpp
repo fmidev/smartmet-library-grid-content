@@ -26,7 +26,7 @@ class RedisModificationLock
       mTablePrefix = tablePrefix;
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"INCR %smodificationRequestOn",tablePrefix.c_str());
-      if (reply == NULL)
+      if (reply == nullptr)
         return;
 
       mRequestId = (uint)reply->integer;
@@ -39,11 +39,11 @@ class RedisModificationLock
         counter++;
 
         reply = (redisReply*)redisCommand(mContext,"GET %smodificationRequestOff",tablePrefix.c_str());
-        if (reply == NULL)
+        if (reply == nullptr)
           return;
 
         uint id = 0;
-        if (reply->str != NULL)
+        if (reply->str != nullptr)
           id = (uint)atoll(reply->str);
 
         freeReplyObject(reply);
@@ -66,7 +66,7 @@ class RedisModificationLock
     {
       FUNCTION_TRACE
       redisReply *reply = (redisReply*)redisCommand(mContext,"SET %smodificationRequestOff %u",mTablePrefix.c_str(),mRequestId);
-      if (reply == NULL)
+      if (reply == nullptr)
         return;
 
       freeReplyObject(reply);
@@ -88,13 +88,13 @@ RedisImplementation::RedisImplementation()
   try
   {
     mImplementationType = Implementation::Redis;
-    mContext = NULL;
+    mContext = nullptr;
     mStartTime = time(0);
     mRedisPort = 0;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -107,12 +107,12 @@ RedisImplementation::~RedisImplementation()
   FUNCTION_TRACE
   try
   {
-    if (mContext != NULL)
+    if (mContext != nullptr)
       redisFree(mContext);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -131,14 +131,14 @@ void RedisImplementation::init(const char *redisAddress,int redisPort,const char
 
     openConnection();
 
-    if (mContext == NULL)
+    if (mContext == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Cannot connect to Redis!");
 
     resetContentRegistrations();
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -151,22 +151,22 @@ int RedisImplementation::openConnection()
   FUNCTION_TRACE
   try
   {
-    if (mContext != NULL)
+    if (mContext != nullptr)
     {
       redisFree(mContext);
-      mContext = NULL;
+      mContext = nullptr;
     }
 
     struct timeval timeout = { 1, 500000 }; // 1.5 seconds
 
     mContext = redisConnectWithTimeout(mRedisAddress.c_str(), mRedisPort, timeout);
-    if (mContext == NULL || mContext->err)
+    if (mContext == nullptr || mContext->err)
     {
       if (mContext)
       {
         printf("Redis connection error (%s:%d): %s",mRedisAddress.c_str(), mRedisPort,mContext->errstr);
         redisFree(mContext);
-        mContext = NULL;
+        mContext = nullptr;
         return Result::PERMANENT_STORAGE_ERROR;
       }
       else
@@ -181,7 +181,7 @@ int RedisImplementation::openConnection()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -194,15 +194,15 @@ void RedisImplementation::closeConnection()
   FUNCTION_TRACE
   try
   {
-    if (mContext != NULL)
+    if (mContext != nullptr)
     {
       redisFree(mContext);
-      mContext = NULL;
+      mContext = nullptr;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -219,7 +219,7 @@ void RedisImplementation::shutdown()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -236,7 +236,7 @@ bool RedisImplementation::isSessionValid(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -249,14 +249,14 @@ bool RedisImplementation::isConnectionValid()
   FUNCTION_TRACE
   try
   {
-    if (mContext == NULL  &&  openConnection() != Result::OK)
+    if (mContext == nullptr  &&  openConnection() != Result::OK)
       return false;
 
     return true;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -280,7 +280,7 @@ int RedisImplementation::_clear(T::SessionId sessionId)
     RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"DEL %sproducerCounter",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -289,7 +289,7 @@ int RedisImplementation::_clear(T::SessionId sessionId)
     freeReplyObject(reply);
 
     reply = (redisReply*)redisCommand(mContext,"DEL %sproducers",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -298,7 +298,7 @@ int RedisImplementation::_clear(T::SessionId sessionId)
     freeReplyObject(reply);
 
     reply = (redisReply*)redisCommand(mContext,"DEL %sgenerationCounter",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -307,7 +307,7 @@ int RedisImplementation::_clear(T::SessionId sessionId)
     freeReplyObject(reply);
 
     reply = (redisReply*)redisCommand(mContext,"DEL %sgenerations",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -316,7 +316,7 @@ int RedisImplementation::_clear(T::SessionId sessionId)
     freeReplyObject(reply);
 
     reply = (redisReply*)redisCommand(mContext,"DEL %sfileCounter",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -325,7 +325,7 @@ int RedisImplementation::_clear(T::SessionId sessionId)
     freeReplyObject(reply);
 
     reply = (redisReply*)redisCommand(mContext,"DEL %sfiles",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -334,7 +334,7 @@ int RedisImplementation::_clear(T::SessionId sessionId)
     freeReplyObject(reply);
 
     reply = (redisReply*)redisCommand(mContext,"DEL %sfilenames",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -344,7 +344,7 @@ int RedisImplementation::_clear(T::SessionId sessionId)
 
 
     reply = (redisReply*)redisCommand(mContext,"DEL %scontent",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -353,7 +353,7 @@ int RedisImplementation::_clear(T::SessionId sessionId)
     freeReplyObject(reply);
 
     reply = (redisReply*)redisCommand(mContext,"DEL %sdataServers",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -362,7 +362,7 @@ int RedisImplementation::_clear(T::SessionId sessionId)
     freeReplyObject(reply);
 
     reply = (redisReply*)redisCommand(mContext,"DEL %scontentServers",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -371,7 +371,7 @@ int RedisImplementation::_clear(T::SessionId sessionId)
     freeReplyObject(reply);
 
     reply = (redisReply*)redisCommand(mContext,"DEL %sevents",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -385,7 +385,7 @@ int RedisImplementation::_clear(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -405,7 +405,7 @@ int RedisImplementation::_reload(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -434,24 +434,24 @@ int RedisImplementation::_addDataServerInfo(T::SessionId sessionId,T::ServerInfo
     getDataServerList(serverInfoList);
 
     T::ServerInfo *info = serverInfoList.getServerInfoById(serverInfo.mServerId);
-    if (info != NULL)
+    if (info != nullptr)
       return Result::SERVER_ID_ALREADY_REGISTERED;
 
     info = serverInfoList.getServerInfoByName(serverInfo.mName);
-    if (info != NULL)
+    if (info != nullptr)
       return Result::SERVER_NAME_ALREADY_REGISTERED;
 
     if (serverInfo.mServerIor.length() > 0)
     {
       info = serverInfoList.getServerInfoByIor(serverInfo.mServerIor);
-      if (info != NULL)
+      if (info != nullptr)
         return Result::SERVER_IOR_ALREADY_REGISTERED;
     }
 
     RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZADD %sdataServers %u %s",mTablePrefix.c_str(),serverInfo.mServerId,serverInfo.getCsv().c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -465,7 +465,7 @@ int RedisImplementation::_addDataServerInfo(T::SessionId sessionId,T::ServerInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -501,7 +501,7 @@ int RedisImplementation::_deleteDataServerInfoById(T::SessionId sessionId,uint s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -526,7 +526,7 @@ int RedisImplementation::_getDataServerInfoById(T::SessionId sessionId,uint serv
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -551,7 +551,7 @@ int RedisImplementation::_getDataServerInfoByName(T::SessionId sessionId,std::st
     getDataServerList(serverInfoList);
 
     T::ServerInfo *info = serverInfoList.getServerInfoByName(serverInfo.mName);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     serverInfo = *info;
@@ -559,7 +559,7 @@ int RedisImplementation::_getDataServerInfoByName(T::SessionId sessionId,std::st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -584,7 +584,7 @@ int RedisImplementation::_getDataServerInfoByIor(T::SessionId sessionId,std::str
     getDataServerList(serverInfoList);
 
     T::ServerInfo *info = serverInfoList.getServerInfoByIor(serverInfo.mServerIor);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     serverInfo = *info;
@@ -592,7 +592,7 @@ int RedisImplementation::_getDataServerInfoByIor(T::SessionId sessionId,std::str
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -617,7 +617,7 @@ int RedisImplementation::_getDataServerInfoList(T::SessionId sessionId,T::Server
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -641,13 +641,13 @@ int RedisImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& co
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZCOUNT %sdataServers 0 %llu",mTablePrefix.c_str(),0xFFFFFFFF);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
     }
 
-    if (reply->str != NULL)
+    if (reply->str != nullptr)
       count = (uint)atoi(reply->str);
     else
       count = (uint)reply->integer;
@@ -657,7 +657,7 @@ int RedisImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& co
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -682,17 +682,17 @@ int RedisImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
     getProducerList(producerInfoList);
 
     T::ProducerInfo *info = producerInfoList.getProducerInfoByName(producerInfo.mName);
-    if (info != NULL)
+    if (info != nullptr)
       return Result::PRODUCER_NAME_ALREADY_REGISTERED;
 
     RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
-    redisReply *reply = NULL;
+    redisReply *reply = nullptr;
 
     if (producerInfo.mProducerId == 0)
     {
       reply = (redisReply*)redisCommand(mContext,"INCR %sproducerCounter",mTablePrefix.c_str());
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -704,18 +704,18 @@ int RedisImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
     else
     {
       T::ProducerInfo *info = producerInfoList.getProducerInfoById(producerInfo.mProducerId);
-      if (info != NULL)
+      if (info != nullptr)
         return Result::PRODUCER_ID_ALREADY_REGISTERED;
 
       reply = (redisReply*)redisCommand(mContext,"GET %sproducerCounter",mTablePrefix.c_str());
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
       }
 
       uint id = 0;
-      if (reply != NULL  &&  reply->str != NULL)
+      if (reply != nullptr  &&  reply->str != nullptr)
         id = (uint)atoi(reply->str);
       // printf("**** ID %u\n",id);
       freeReplyObject(reply);
@@ -723,7 +723,7 @@ int RedisImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
       if (id < producerInfo.mProducerId)
       {
         reply = (redisReply*)redisCommand(mContext,"SET %sproducerCounter %u",mTablePrefix.c_str(),producerInfo.mProducerId);
-        if (reply == NULL)
+        if (reply == nullptr)
         {
           closeConnection();
           return Result::PERMANENT_STORAGE_ERROR;
@@ -735,7 +735,7 @@ int RedisImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
     }
 
     reply = (redisReply*)redisCommand(mContext,"ZADD %sproducers %u %s",mTablePrefix.c_str(),producerInfo.mProducerId,producerInfo.getCsv().c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -749,7 +749,7 @@ int RedisImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -785,7 +785,7 @@ int RedisImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint pro
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -821,7 +821,7 @@ int RedisImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -857,7 +857,7 @@ int RedisImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -882,7 +882,7 @@ int RedisImplementation::_getProducerInfoById(T::SessionId sessionId,uint produc
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -907,7 +907,7 @@ int RedisImplementation::_getProducerInfoByName(T::SessionId sessionId,std::stri
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -932,7 +932,7 @@ int RedisImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -974,7 +974,7 @@ int RedisImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -999,7 +999,7 @@ int RedisImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1023,13 +1023,13 @@ int RedisImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& coun
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZCOUNT %sproducers 0 %llu",mTablePrefix.c_str(),0xFFFFFFFF);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
     }
 
-    if (reply->str != NULL)
+    if (reply->str != nullptr)
       count = (uint)atoi(reply->str);
     else
       count = (uint)reply->integer;
@@ -1039,7 +1039,7 @@ int RedisImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& coun
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1089,7 +1089,7 @@ int RedisImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1235,7 +1235,7 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1264,11 +1264,11 @@ int RedisImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
     getGenerationList(generationInfoList);
 
     T::GenerationInfo *info = generationInfoList.getGenerationInfoByName(generationInfo.mName);
-    if (info != NULL)
+    if (info != nullptr)
       return Result::GENERATION_NAME_ALREADY_REGISTERED;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"INCR %sgenerationCounter",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -1280,7 +1280,7 @@ int RedisImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
     freeReplyObject(reply);
 
     reply = (redisReply*)redisCommand(mContext,"ZADD %sgenerations %u %s",mTablePrefix.c_str(),generationInfo.mGenerationId,generationInfo.getCsv().c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -1294,7 +1294,7 @@ int RedisImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1333,7 +1333,7 @@ int RedisImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint g
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1372,7 +1372,7 @@ int RedisImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1408,7 +1408,7 @@ int RedisImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1447,7 +1447,7 @@ int RedisImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1486,7 +1486,7 @@ int RedisImplementation::_deleteGenerationInfoListByProducerName(T::SessionId se
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1521,7 +1521,7 @@ int RedisImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1546,7 +1546,7 @@ int RedisImplementation::_getGenerationInfoById(T::SessionId sessionId,uint gene
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1571,7 +1571,7 @@ int RedisImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1596,7 +1596,7 @@ int RedisImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Genera
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1621,7 +1621,7 @@ int RedisImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1650,7 +1650,7 @@ int RedisImplementation::_getGenerationInfoListByProducerId(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1679,7 +1679,7 @@ int RedisImplementation::_getGenerationInfoListByProducerName(T::SessionId sessi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1704,7 +1704,7 @@ int RedisImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1733,7 +1733,7 @@ int RedisImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
     getGenerationListByProducerId(producerId,generationInfoList);
 
     T::GenerationInfo *info = generationInfoList.getLastGenerationInfoByProducerIdAndStatus(producerInfo.mProducerId,generationStatus);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     generationInfo = *info;
@@ -1741,7 +1741,7 @@ int RedisImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1769,7 +1769,7 @@ int RedisImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessio
     getGenerationListByProducerId(producerInfo.mProducerId,generationInfoList);
 
     T::GenerationInfo *info = generationInfoList.getLastGenerationInfoByProducerIdAndStatus(producerInfo.mProducerId,generationStatus);
-    if (info == NULL)
+    if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
     generationInfo = *info;
@@ -1777,7 +1777,7 @@ int RedisImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1800,13 +1800,13 @@ int RedisImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZCOUNT %sgenerations 0 %llu",mTablePrefix.c_str(),0xFFFFFFFF);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
     }
 
-    if (reply->str != NULL)
+    if (reply->str != nullptr)
       count = (uint)atoi(reply->str);
     else
       count = (uint)reply->integer;
@@ -1816,7 +1816,7 @@ int RedisImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1846,7 +1846,7 @@ int RedisImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uin
     RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZREMRANGEBYSCORE %sgenerations %u %u",mTablePrefix.c_str(),generationInfo.mGenerationId,generationInfo.mGenerationId);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -1855,7 +1855,7 @@ int RedisImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uin
     freeReplyObject(reply);
 
     reply = (redisReply*)redisCommand(mContext,"ZADD %sgenerations %u %s",mTablePrefix.c_str(),generationInfo.mGenerationId,generationInfo.getCsv().c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -1869,7 +1869,7 @@ int RedisImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1899,7 +1899,7 @@ int RedisImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,s
     RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZREMRANGEBYSCORE %sgenerations %u %u",mTablePrefix.c_str(),generationInfo.mGenerationId,generationInfo.mGenerationId);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -1908,7 +1908,7 @@ int RedisImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,s
     freeReplyObject(reply);
 
     reply = (redisReply*)redisCommand(mContext,"ZADD %sgenerations %u %s",mTablePrefix.c_str(),generationInfo.mGenerationId,generationInfo.getCsv().c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -1922,7 +1922,7 @@ int RedisImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1976,7 +1976,7 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
       RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"INCR %sfileCounter",mTablePrefix.c_str());
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -1988,7 +1988,7 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
       // ### Adding the file information into the database.
 
       reply = (redisReply*)redisCommand(mContext,"ZADD %sfiles %u %s",mTablePrefix.c_str(),fileInfo.mFileId,fileInfo.getCsv().c_str());
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -2011,7 +2011,7 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2065,7 +2065,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
 
       RedisModificationLock redisModificationLock(mContext,mTablePrefix);
       redisReply *reply = (redisReply*)redisCommand(mContext,"INCR %sfileCounter",mTablePrefix.c_str());
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -2078,7 +2078,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
       // ### Adding the file information into the database.
 
       reply = (redisReply*)redisCommand(mContext,"ZADD %sfiles %u %s",mTablePrefix.c_str(),fileInfo.mFileId,fileInfo.getCsv().c_str());
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -2100,7 +2100,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
-      if (info != NULL)
+      if (info != nullptr)
       {
         // ### Making sure that content data matches the file data.
 
@@ -2118,7 +2118,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
         // ### Adding the content record into the database.
 
         redisReply *reply = (redisReply*)redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,info->getCsv().c_str());
-        if (reply == NULL)
+        if (reply == nullptr)
         {
           closeConnection();
           return Result::PERMANENT_STORAGE_ERROR;
@@ -2145,7 +2145,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2202,7 +2202,7 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std:
         //printf("** File added %s\n",fileInfo.mName.c_str());
 
         redisReply *reply = (redisReply*)redisCommand(mContext,"INCR %sfileCounter",mTablePrefix.c_str());
-        if (reply == NULL)
+        if (reply == nullptr)
         {
           closeConnection();
           return Result::PERMANENT_STORAGE_ERROR;
@@ -2215,7 +2215,7 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std:
         // ### Adding the file information into the database.
 
         reply = (redisReply*)redisCommand(mContext,"ZADD %sfiles %u %s",mTablePrefix.c_str(),ff->mFileInfo.mFileId,ff->mFileInfo.getCsv().c_str());
-        if (reply == NULL)
+        if (reply == nullptr)
         {
           closeConnection();
           return Result::PERMANENT_STORAGE_ERROR;
@@ -2237,7 +2237,7 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std:
       for (uint t=0; t<len; t++)
       {
         T::ContentInfo *info = ff->mContentInfoList.getContentInfoByIndex(t);
-        if (info != NULL)
+        if (info != nullptr)
         {
           // ### Making sure that content data matches the file data.
 
@@ -2255,7 +2255,7 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std:
           // ### Adding the content record into the database.
 
           redisReply *reply = (redisReply*)redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,info->getCsv().c_str());
-          if (reply == NULL)
+          if (reply == nullptr)
           {
             closeConnection();
             return Result::PERMANENT_STORAGE_ERROR;
@@ -2283,7 +2283,7 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2320,7 +2320,7 @@ int RedisImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2362,7 +2362,7 @@ int RedisImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::strin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2394,7 +2394,7 @@ int RedisImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2430,7 +2430,7 @@ int RedisImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2466,7 +2466,7 @@ int RedisImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2502,7 +2502,7 @@ int RedisImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2553,7 +2553,7 @@ int RedisImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2597,7 +2597,7 @@ int RedisImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2633,7 +2633,7 @@ int RedisImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2665,7 +2665,7 @@ int RedisImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2698,7 +2698,7 @@ int RedisImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2723,7 +2723,7 @@ int RedisImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2752,7 +2752,7 @@ int RedisImplementation::_getFileInfoByName(T::SessionId sessionId,std::string f
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2777,7 +2777,7 @@ int RedisImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2806,7 +2806,7 @@ int RedisImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2835,7 +2835,7 @@ int RedisImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2864,7 +2864,7 @@ int RedisImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2893,7 +2893,7 @@ int RedisImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2917,7 +2917,7 @@ int RedisImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2942,7 +2942,7 @@ int RedisImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2966,13 +2966,13 @@ int RedisImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZCOUNT %sfiles 0 %llu",mTablePrefix.c_str(),0xFFFFFFFF);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
     }
 
-    if (reply->str != NULL)
+    if (reply->str != nullptr)
       count = (uint)atoi(reply->str);
     else
       count = (uint)reply->integer;
@@ -2982,7 +2982,7 @@ int RedisImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3000,7 +3000,7 @@ int RedisImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,ui
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sfiles %u %u",mTablePrefix.c_str(),0,0xFFFFFFFF);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -3022,7 +3022,7 @@ int RedisImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3040,7 +3040,7 @@ int RedisImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sfiles %u %u",mTablePrefix.c_str(),0,0xFFFFFFFF);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -3062,7 +3062,7 @@ int RedisImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3080,7 +3080,7 @@ int RedisImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uint
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sfiles %u %u",mTablePrefix.c_str(),0,0xFFFFFFFF);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -3102,7 +3102,7 @@ int RedisImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3128,7 +3128,7 @@ int RedisImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& even
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3152,13 +3152,13 @@ int RedisImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
     T::EventId eventId = 0;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"GET %seventCounter",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
     }
 
-    if (reply->str != NULL)
+    if (reply->str != nullptr)
       eventId = (T::EventId)atoll(reply->str);
 
     freeReplyObject(reply);
@@ -3174,7 +3174,7 @@ int RedisImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
     }
 
     reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sevents %llu %llu",mTablePrefix.c_str(),eventId,eventId);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -3195,7 +3195,7 @@ int RedisImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3217,7 +3217,7 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sevents %llu %llu LIMIT 0 %u",mTablePrefix.c_str(),startEventId,0xFFFFFFFFFFFF,maxRecords);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -3264,7 +3264,7 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3288,13 +3288,13 @@ int RedisImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZCOUNT %sevents 0 %llu",mTablePrefix.c_str(),0xFFFFFFFFFFFFFFFF);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
     }
 
-    if (reply->str != NULL)
+    if (reply->str != nullptr)
       count = (uint)atoi(reply->str);
     else
       count = (uint)reply->integer;
@@ -3304,7 +3304,7 @@ int RedisImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3352,7 +3352,7 @@ int RedisImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
     unsigned long long id = ((unsigned long long)contentInfo.mFileId << 32) + contentInfo.mMessageIndex;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,contentInfo.getCsv().c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -3366,7 +3366,7 @@ int RedisImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3425,7 +3425,7 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
         unsigned long long id = ((unsigned long long)info->mFileId << 32) + info->mMessageIndex;
 
         redisReply *reply = (redisReply*)redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,info->getCsv().c_str());
-        if (reply == NULL)
+        if (reply == nullptr)
         {
           closeConnection();
           return Result::PERMANENT_STORAGE_ERROR;
@@ -3441,7 +3441,7 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3477,7 +3477,7 @@ int RedisImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3513,7 +3513,7 @@ int RedisImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3549,7 +3549,7 @@ int RedisImplementation::_deleteContentListByFileName(T::SessionId sessionId,std
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3581,7 +3581,7 @@ int RedisImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3617,7 +3617,7 @@ int RedisImplementation::_deleteContentListByProducerId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3653,7 +3653,7 @@ int RedisImplementation::_deleteContentListByProducerName(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3688,7 +3688,7 @@ int RedisImplementation::_deleteContentListByGenerationId(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3724,7 +3724,7 @@ int RedisImplementation::_deleteContentListByGenerationName(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3756,7 +3756,7 @@ int RedisImplementation::_deleteContentListBySourceId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3828,7 +3828,7 @@ int RedisImplementation::_registerContentList(T::SessionId sessionId,uint server
         info->mServerFlags = sf;
 
         redisReply *reply = (redisReply*)redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,info->getCsv().c_str());
-        if (reply == NULL)
+        if (reply == nullptr)
         {
           closeConnection();
           return Result::PERMANENT_STORAGE_ERROR;
@@ -3844,7 +3844,7 @@ int RedisImplementation::_registerContentList(T::SessionId sessionId,uint server
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3887,7 +3887,7 @@ int RedisImplementation::_registerContentListByFileId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3914,7 +3914,7 @@ int RedisImplementation::_unregisterContentList(T::SessionId sessionId,uint serv
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3957,7 +3957,7 @@ int RedisImplementation::_unregisterContentListByFileId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -3982,7 +3982,7 @@ int RedisImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4007,7 +4007,7 @@ int RedisImplementation::_getContentList(T::SessionId sessionId,uint startFileId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4032,7 +4032,7 @@ int RedisImplementation::_getContentListByFileId(T::SessionId sessionId,uint fil
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4061,7 +4061,7 @@ int RedisImplementation::_getContentListByFileName(T::SessionId sessionId,std::s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4086,7 +4086,7 @@ int RedisImplementation::_getContentListByGroupFlags(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4115,7 +4115,7 @@ int RedisImplementation::_getContentListByProducerId(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4144,7 +4144,7 @@ int RedisImplementation::_getContentListByProducerName(T::SessionId sessionId,st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4169,7 +4169,7 @@ int RedisImplementation::_getContentListByServerId(T::SessionId sessionId,uint s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4198,7 +4198,7 @@ int RedisImplementation::_getContentListByGenerationId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4227,7 +4227,7 @@ int RedisImplementation::_getContentListByGenerationName(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4256,7 +4256,7 @@ int RedisImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4285,7 +4285,7 @@ int RedisImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4310,7 +4310,7 @@ int RedisImplementation::_getContentListBySourceId(T::SessionId sessionId,uint s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4335,7 +4335,7 @@ int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4364,7 +4364,7 @@ int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4393,7 +4393,7 @@ int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4422,7 +4422,7 @@ int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId se
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4461,7 +4461,7 @@ int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     if (contentInfoList.getLength() == 0  &&  contentList.getLength() > 0)
     {
       T::ContentInfo *info = contentList.getContentInfoByIndex(0);
-      if (info != NULL)
+      if (info != nullptr)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -4474,7 +4474,7 @@ int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4503,7 +4503,7 @@ int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4535,37 +4535,37 @@ int RedisImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
     for (uint c=0; c<cLen; c++)
     {
       T::ContentInfo *cInfo = contentList.getContentInfoByIndex(c);
-      T::ContentInfo *cError = NULL;
-      if (cInfo != NULL)
+      T::ContentInfo *cError = nullptr;
+      if (cInfo != nullptr)
       {
         T::FileInfo *fileInfo = fileInfoList.getFileInfoById(cInfo->mFileId);
-        if (fileInfo == NULL)
+        if (fileInfo == nullptr)
         {
           printf("**** INTEGRITY ERROR : File missing (%u)! *****\n",cInfo->mFileId);
           cError = cInfo;
         }
 
-        if (cError == NULL)
+        if (cError == nullptr)
         {
           T::GenerationInfo *generationInfo = generationInfoList.getGenerationInfoById(cInfo->mGenerationId);
-          if (generationInfo == NULL)
+          if (generationInfo == nullptr)
           {
             printf("**** INTEGRITY ERROR : Generation missing (%u)! *****\n",cInfo->mGenerationId);
             cError = cInfo;
           }
         }
 
-        if (cError == NULL)
+        if (cError == nullptr)
         {
           T::ProducerInfo *producerInfo = producerInfoList.getProducerInfoById(cInfo->mProducerId);
-          if (producerInfo == NULL)
+          if (producerInfo == nullptr)
           {
             printf("**** INTEGRITY ERROR : Producer missing (%u)! *****\n",cInfo->mProducerId);
             cError = cInfo;
           }
         }
 
-        if (cError != NULL)
+        if (cError != nullptr)
           contentInfoList.addContentInfo(cError->duplicate());
       }
     }
@@ -4573,7 +4573,7 @@ int RedisImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4606,7 +4606,7 @@ int RedisImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4636,13 +4636,13 @@ int RedisImplementation::_getContentParamListByGenerationId(T::SessionId session
 
     contentInfoList.sort(T::ContentInfo::ComparisonMethod::fmiName_fmiLevelId_level_starttime_file_message);
     uint len = contentInfoList.getLength();
-    T::ContentInfo *prev = NULL;
-    T::ContentInfo *currentInfo = NULL;
+    T::ContentInfo *prev = nullptr;
+    T::ContentInfo *currentInfo = nullptr;
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
 
-      if (prev == NULL ||
+      if (prev == nullptr ||
           info->mFmiParameterName != prev->mFmiParameterName ||
           info->mFmiParameterLevelId != prev->mFmiParameterLevelId ||
           info->mParameterLevel != prev->mParameterLevel ||
@@ -4663,7 +4663,7 @@ int RedisImplementation::_getContentParamListByGenerationId(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4696,7 +4696,7 @@ int RedisImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4729,7 +4729,7 @@ int RedisImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4761,7 +4761,7 @@ int RedisImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4794,7 +4794,7 @@ int RedisImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4820,7 +4820,7 @@ int RedisImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4844,13 +4844,13 @@ int RedisImplementation::_getContentCount(T::SessionId sessionId,uint& count)
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZCOUNT %scontent 0 %llu",mTablePrefix.c_str(),0xFFFFFFFFFFFFFFFF);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
     }
 
-    if (reply->str != NULL)
+    if (reply->str != nullptr)
       count = (uint)atoi(reply->str);
     else
       count = (uint)reply->integer;
@@ -4860,7 +4860,7 @@ int RedisImplementation::_getContentCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4883,7 +4883,7 @@ int RedisImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoLi
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4915,7 +4915,7 @@ int RedisImplementation::_deleteVirtualContent(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4949,7 +4949,7 @@ int RedisImplementation::_updateVirtualContent(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4974,7 +4974,7 @@ int RedisImplementation::deleteDataServerById(uint serverId)
     unregisterContent(serverId);
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZREMRANGEBYSCORE %sdataServers %u %u",mTablePrefix.c_str(),serverId,serverId);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -4986,7 +4986,7 @@ int RedisImplementation::deleteDataServerById(uint serverId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5003,7 +5003,7 @@ int RedisImplementation::getDataServerById(uint serverId,T::ServerInfo& serverIn
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sdataServers %u %u",mTablePrefix.c_str(),serverId,serverId);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -5021,7 +5021,7 @@ int RedisImplementation::getDataServerById(uint serverId,T::ServerInfo& serverIn
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5038,7 +5038,7 @@ int RedisImplementation::getDataServerList(T::ServerInfoList& serverInfoList)
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGE %sdataServers 0 -1",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -5060,7 +5060,7 @@ int RedisImplementation::getDataServerList(T::ServerInfoList& serverInfoList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5086,7 +5086,7 @@ int RedisImplementation::deleteProducerById(uint producerId,bool deleteGeneratio
       deleteGenerationListByProducerId(producerId,false,false);
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZREMRANGEBYSCORE %sproducers %u %u",mTablePrefix.c_str(),producerId,producerId);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -5098,7 +5098,7 @@ int RedisImplementation::deleteProducerById(uint producerId,bool deleteGeneratio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5128,7 +5128,7 @@ int RedisImplementation::deleteProducerListBySourceId(uint sourceId,bool deleteG
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5145,7 +5145,7 @@ int RedisImplementation::getProducerById(uint producerId,T::ProducerInfo& produc
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sproducers %u %u",mTablePrefix.c_str(),producerId,producerId);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -5163,7 +5163,7 @@ int RedisImplementation::getProducerById(uint producerId,T::ProducerInfo& produc
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5180,7 +5180,7 @@ int RedisImplementation::getProducerByName(std::string producerName,T::ProducerI
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGE %sproducers 0 -1",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -5207,7 +5207,7 @@ int RedisImplementation::getProducerByName(std::string producerName,T::ProducerI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5224,7 +5224,7 @@ int RedisImplementation::getProducerList(T::ProducerInfoList& producerInfoList)
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGE %sproducers 0 -1",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -5246,7 +5246,7 @@ int RedisImplementation::getProducerList(T::ProducerInfoList& producerInfoList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5263,7 +5263,7 @@ int RedisImplementation::getProducerListBySourceId(uint sourceId,T::ProducerInfo
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGE %sproducers 0 -1",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -5287,7 +5287,7 @@ int RedisImplementation::getProducerListBySourceId(uint sourceId,T::ProducerInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5304,7 +5304,7 @@ int RedisImplementation::getGenerationById(uint generationId,T::GenerationInfo& 
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sgenerations %u %u",mTablePrefix.c_str(),generationId,generationId);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -5322,7 +5322,7 @@ int RedisImplementation::getGenerationById(uint generationId,T::GenerationInfo& 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5339,7 +5339,7 @@ int RedisImplementation::getGenerationByName(std::string generationName,T::Gener
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGE %sgenerations 0 -1",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -5366,7 +5366,7 @@ int RedisImplementation::getGenerationByName(std::string generationName,T::Gener
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5383,7 +5383,7 @@ int RedisImplementation::getGenerationList(T::GenerationInfoList& generationInfo
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGE %sgenerations 0 -1",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -5405,7 +5405,7 @@ int RedisImplementation::getGenerationList(T::GenerationInfoList& generationInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5423,7 +5423,7 @@ int RedisImplementation::getGenerationListByGeometryId(T::GeometryId geometryId,
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -5466,7 +5466,7 @@ int RedisImplementation::getGenerationListByGeometryId(T::GeometryId geometryId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5483,7 +5483,7 @@ int RedisImplementation::getGenerationListByProducerId(uint producerId,T::Genera
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGE %sgenerations 0 -1",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -5507,7 +5507,7 @@ int RedisImplementation::getGenerationListByProducerId(uint producerId,T::Genera
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5524,7 +5524,7 @@ int RedisImplementation::getGenerationListBySourceId(uint sourceId,T::Generation
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGE %sgenerations 0 -1",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -5548,7 +5548,7 @@ int RedisImplementation::getGenerationListBySourceId(uint sourceId,T::Generation
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5571,7 +5571,7 @@ int RedisImplementation::deleteGenerationById(uint generationId,bool deleteFiles
       deleteFileListByGenerationId(generationId,false);
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZREMRANGEBYSCORE %sgenerations %u %u",mTablePrefix.c_str(),generationId,generationId);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -5583,7 +5583,7 @@ int RedisImplementation::deleteGenerationById(uint generationId,bool deleteFiles
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5613,7 +5613,7 @@ int RedisImplementation::deleteGenerationListByProducerId(uint producerId,bool d
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5643,7 +5643,7 @@ int RedisImplementation::deleteGenerationListBySourceId(uint sourceId,bool delet
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5663,7 +5663,7 @@ int RedisImplementation::deleteFileById(uint fileId,bool deleteContent)
       deleteContentByFileId(fileId);
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZREMRANGEBYSCORE %sfiles %u %u",mTablePrefix.c_str(),fileId,fileId);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -5675,7 +5675,7 @@ int RedisImplementation::deleteFileById(uint fileId,bool deleteContent)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5708,7 +5708,7 @@ int RedisImplementation::deleteFileListByGroupFlags(uint groupFlags,bool deleteC
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5741,7 +5741,7 @@ int RedisImplementation::deleteFileListByGenerationId(uint generationId,bool del
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5774,7 +5774,7 @@ int RedisImplementation::deleteFileListByGenerationIdList(std::set<uint>& genera
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5791,7 +5791,7 @@ int RedisImplementation::getFileById(uint fileId,T::FileInfo& fileInfo)
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sfiles %u %u",mTablePrefix.c_str(),fileId,fileId);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -5809,7 +5809,7 @@ int RedisImplementation::getFileById(uint fileId,T::FileInfo& fileInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5826,7 +5826,7 @@ int RedisImplementation::getFileList(uint startFileId,uint maxRecords,T::FileInf
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sfiles %u %u LIMIT 0 %u",mTablePrefix.c_str(),startFileId,0xFFFFFFFF,maxRecords);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -5850,7 +5850,7 @@ int RedisImplementation::getFileList(uint startFileId,uint maxRecords,T::FileInf
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5873,7 +5873,7 @@ int RedisImplementation::getFileListByGenerationId(uint generationId,uint startF
       prevFileId = startFileId;
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sfiles %u %u LIMIT 0 10000",mTablePrefix.c_str(),startFileId,0xFFFFFFFF);
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -5923,7 +5923,7 @@ int RedisImplementation::getFileListByGenerationId(uint generationId,uint startF
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -5946,7 +5946,7 @@ int RedisImplementation::getFileListByGenerationIdList(std::set<uint>& generatio
       prevFileId = startFileId;
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sfiles %u %u LIMIT 0 10000",mTablePrefix.c_str(),startFileId,0xFFFFFFFF);
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -5996,7 +5996,7 @@ int RedisImplementation::getFileListByGenerationIdList(std::set<uint>& generatio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6018,7 +6018,7 @@ int RedisImplementation::getFileListByGroupFlags(uint groupFlags,uint startFileI
     {
       prevFileId = startFileId;
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sfiles %u %u LIMIT 0 10000",mTablePrefix.c_str(),startFileId,0xFFFFFFFF);
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -6068,7 +6068,7 @@ int RedisImplementation::getFileListByGroupFlags(uint groupFlags,uint startFileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6101,7 +6101,7 @@ int RedisImplementation::deleteFileListByProducerId(uint producerId,bool deleteC
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6134,7 +6134,7 @@ int RedisImplementation::deleteFileListBySourceId(uint sourceId,bool deleteConte
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6157,7 +6157,7 @@ int RedisImplementation::getFileListByProducerId(uint producerId,uint startFileI
       prevFileId = startFileId;
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sfiles %u %u LIMIT 0 10000",mTablePrefix.c_str(),startFileId,0xFFFFFFFF);
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -6206,7 +6206,7 @@ int RedisImplementation::getFileListByProducerId(uint producerId,uint startFileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6229,7 +6229,7 @@ int RedisImplementation::getFileListBySourceId(uint sourceId,uint startFileId,ui
       prevFileId = startFileId;
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sfiles %u %u LIMIT 0 10000",mTablePrefix.c_str(),startFileId,0xFFFFFFFF);
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -6278,7 +6278,7 @@ int RedisImplementation::getFileListBySourceId(uint sourceId,uint startFileId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6301,7 +6301,7 @@ int RedisImplementation::getVirtualFiles(uint startFileId,uint maxRecords,T::Fil
       prevFileId = startFileId;
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %sfiles %u %u LIMIT 0 10000",mTablePrefix.c_str(),startFileId,0xFFFFFFFF);
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -6350,7 +6350,7 @@ int RedisImplementation::getVirtualFiles(uint startFileId,uint maxRecords,T::Fil
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6383,7 +6383,7 @@ int RedisImplementation::deleteVirtualFiles(bool deleteContent)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6402,7 +6402,7 @@ int RedisImplementation::deleteContent(uint fileId,uint messageIndex)
     unsigned long long id = ((unsigned long long)fileId << 32) + messageIndex;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZREMRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),id,id);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -6414,7 +6414,7 @@ int RedisImplementation::deleteContent(uint fileId,uint messageIndex)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6443,7 +6443,7 @@ int RedisImplementation::deleteContentByFileId(uint fileId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6472,7 +6472,7 @@ int RedisImplementation::deleteContentByProducerId(uint producerId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6501,7 +6501,7 @@ int RedisImplementation::deleteContentByGenerationId(uint generationId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6530,7 +6530,7 @@ int RedisImplementation::deleteContentByGenerationIdList(std::set<uint>& generat
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6559,7 +6559,7 @@ int RedisImplementation::deleteContentByGroupFlags(uint groupFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6588,7 +6588,7 @@ int RedisImplementation::deleteContentBySourceId(uint sourceId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6617,7 +6617,7 @@ int RedisImplementation::removeVirtualContent()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6637,7 +6637,7 @@ int RedisImplementation::setContent(T::ContentInfo& contentInfo)
     unsigned long long id = ((unsigned long long)contentInfo.mFileId << 32) + contentInfo.mMessageIndex;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZREMRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),id,id);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -6646,7 +6646,7 @@ int RedisImplementation::setContent(T::ContentInfo& contentInfo)
     freeReplyObject(reply);
 
     reply = (redisReply*)redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,contentInfo.getCsv().c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -6658,7 +6658,7 @@ int RedisImplementation::setContent(T::ContentInfo& contentInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6677,7 +6677,7 @@ int RedisImplementation::getContent(uint fileId,uint messageIndex,T::ContentInfo
     unsigned long long id = ((unsigned long long)fileId << 32) + messageIndex;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),id,id);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -6695,7 +6695,7 @@ int RedisImplementation::getContent(uint fileId,uint messageIndex,T::ContentInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6714,7 +6714,7 @@ int RedisImplementation::getContent(uint startFileId,uint startMessageIndex,uint
     unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 %u",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF,maxRecords);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -6738,7 +6738,7 @@ int RedisImplementation::getContent(uint startFileId,uint startMessageIndex,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6764,7 +6764,7 @@ int RedisImplementation::getGenerationTimeAndGeometryList(std::set<std::string>&
       prevStartId = startId;
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF);
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -6806,7 +6806,7 @@ int RedisImplementation::getGenerationTimeAndGeometryList(std::set<std::string>&
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6830,7 +6830,7 @@ int RedisImplementation::getContentByGenerationId(uint generationId,uint startFi
       prevStartId = startId;
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF);
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -6883,7 +6883,7 @@ int RedisImplementation::getContentByGenerationId(uint generationId,uint startFi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6907,7 +6907,7 @@ int RedisImplementation::getContentByGenerationIdList(std::set<uint>& generation
       prevStartId = startId;
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF);
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -6960,7 +6960,7 @@ int RedisImplementation::getContentByGenerationIdList(std::set<uint>& generation
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -6984,7 +6984,7 @@ int RedisImplementation::getContentByGroupFlags(uint groupFlags,uint startFileId
       prevStartId = startId;
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF);
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -7037,7 +7037,7 @@ int RedisImplementation::getContentByGroupFlags(uint groupFlags,uint startFileId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -7061,7 +7061,7 @@ int RedisImplementation::getVirtualContent(uint startFileId,uint startMessageInd
       prevStartId = startId;
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF);
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -7114,7 +7114,7 @@ int RedisImplementation::getVirtualContent(uint startFileId,uint startMessageInd
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -7131,7 +7131,7 @@ int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyTyp
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -7147,10 +7147,10 @@ int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyTyp
         if (info->hasKey(parameterKeyType,parameterKey))
         {
           contentInfoList.addContentInfo(info);
-          info = NULL;
+          info = nullptr;
         }
 
-        if (info != NULL)
+        if (info != nullptr)
           delete info;
       }
     }
@@ -7160,7 +7160,7 @@ int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyTyp
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -7177,7 +7177,7 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -7203,13 +7203,13 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
                   (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
               {
                 contentInfoList.addContentInfo(info);
-                info = NULL;
+                info = nullptr;
               }
             }
           }
         }
 
-        if (info != NULL)
+        if (info != nullptr)
           delete info;
       }
     }
@@ -7219,7 +7219,7 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -7236,7 +7236,7 @@ int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -7266,7 +7266,7 @@ int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,
                       (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
                   {
                     contentInfoList.addContentInfo(info);
-                    info = NULL;
+                    info = nullptr;
                   }
                 }
               }
@@ -7274,7 +7274,7 @@ int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,
           }
         }
 
-        if (info != NULL)
+        if (info != nullptr)
           delete info;
       }
     }
@@ -7284,7 +7284,7 @@ int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -7300,7 +7300,7 @@ int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::P
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -7330,7 +7330,7 @@ int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::P
                       (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
                   {
                     contentInfoList.addContentInfo(info);
-                    info = NULL;
+                    info = nullptr;
                   }
                 }
               }
@@ -7338,7 +7338,7 @@ int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::P
           }
         }
 
-        if (info != NULL)
+        if (info != nullptr)
           delete info;
       }
     }
@@ -7348,7 +7348,7 @@ int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::P
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -7364,7 +7364,7 @@ int RedisImplementation::getContentByGenerationIdAndTimeRange(uint generationId,
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -7389,7 +7389,7 @@ int RedisImplementation::getContentByGenerationIdAndTimeRange(uint generationId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -7418,7 +7418,7 @@ int RedisImplementation::getContentByForecastTimeList(std::vector<T::ForecastTim
 
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -7447,7 +7447,7 @@ int RedisImplementation::getContentByForecastTimeList(std::vector<T::ForecastTim
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -7471,7 +7471,7 @@ int RedisImplementation::getContentByProducerId(uint producerId,uint startFileId
       prevStartId = startId;
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF);
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -7526,7 +7526,7 @@ int RedisImplementation::getContentByProducerId(uint producerId,uint startFileId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -7552,7 +7552,7 @@ int RedisImplementation::getContentByServerId(uint serverId,uint startFileId,uin
       prevStartId = startId;
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF);
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -7604,7 +7604,7 @@ int RedisImplementation::getContentByServerId(uint serverId,uint startFileId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -7628,7 +7628,7 @@ int RedisImplementation::getContentBySourceId(uint sourceId,uint startFileId,uin
       prevStartId = startId;
 
       redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF);
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
@@ -7683,7 +7683,7 @@ int RedisImplementation::getContentBySourceId(uint sourceId,uint startFileId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -7703,7 +7703,7 @@ int RedisImplementation::getContentByFileId(uint fileId,T::ContentInfoList& cont
     unsigned long long endId = ((unsigned long long)fileId << 32) + 0xFFFFFF;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),startId,endId);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -7733,7 +7733,7 @@ int RedisImplementation::getContentByFileId(uint fileId,T::ContentInfoList& cont
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -7769,7 +7769,7 @@ int RedisImplementation::unregisterContent(uint serverId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -7797,7 +7797,7 @@ void RedisImplementation::resetContentRegistrations()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -7814,7 +7814,7 @@ T::EventId RedisImplementation::addEvent(EventType eventType,uint id1,uint id2,u
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"INCR %seventCounter",mTablePrefix.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -7826,7 +7826,7 @@ T::EventId RedisImplementation::addEvent(EventType eventType,uint id1,uint id2,u
     T::EventInfo eventInfo(mStartTime,eventId,eventType,id1,id2,id3,flags);
 
     reply = (redisReply*)redisCommand(mContext,"ZADD %sevents %llu %s",mTablePrefix.c_str(),eventId,eventInfo.getCsv().c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -7842,7 +7842,7 @@ T::EventId RedisImplementation::addEvent(EventType eventType,uint id1,uint id2,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -7861,13 +7861,13 @@ void RedisImplementation::truncateEvents()
     uint count = 0;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"ZCOUNT %sevents 0 %llu",mTablePrefix.c_str(),0xFFFFFFFFFFFFFFFF);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return;
     }
 
-    if (reply->str != NULL)
+    if (reply->str != nullptr)
       count = (uint)atoi(reply->str);
     else
       count = (uint)reply->integer;
@@ -7882,7 +7882,7 @@ void RedisImplementation::truncateEvents()
       RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
       reply = (redisReply*)redisCommand(mContext,"ZREMRANGEBYRANK %sevents 0 %u",mTablePrefix.c_str(),count-maxEvents+10000);
-      if (reply == NULL)
+      if (reply == nullptr)
       {
         closeConnection();
         return;
@@ -7892,7 +7892,7 @@ void RedisImplementation::truncateEvents()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -7909,7 +7909,7 @@ int RedisImplementation::addFilename(std::string filename,uint fileId)
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"HSET %sfilenames %s %u",mTablePrefix.c_str(),filename.c_str(),fileId);
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -7921,7 +7921,7 @@ int RedisImplementation::addFilename(std::string filename,uint fileId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -7938,14 +7938,14 @@ uint RedisImplementation::getFileId(std::string filename)
       return 0;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"HGET %sfilenames %s",mTablePrefix.c_str(),filename.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return 0;
     }
 
     uint id = 0;
-    if (reply->str != NULL)
+    if (reply->str != nullptr)
       id = (uint)atoll(reply->str);
 
     freeReplyObject(reply);
@@ -7953,7 +7953,7 @@ uint RedisImplementation::getFileId(std::string filename)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -7970,7 +7970,7 @@ int RedisImplementation::deleteFilename(std::string filename)
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     redisReply *reply = (redisReply*)redisCommand(mContext,"HDEL %sfilenames %s",mTablePrefix.c_str(),filename.c_str());
-    if (reply == NULL)
+    if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
@@ -7982,7 +7982,7 @@ int RedisImplementation::deleteFilename(std::string filename)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

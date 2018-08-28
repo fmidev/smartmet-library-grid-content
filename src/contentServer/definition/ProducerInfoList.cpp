@@ -21,7 +21,7 @@ ProducerInfoList::ProducerInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -39,7 +39,7 @@ ProducerInfoList::ProducerInfoList(ProducerInfoList& producerInfoList)
     for (uint t=0; t<sz; t++)
     {
       ProducerInfo *info = producerInfoList.getProducerInfoByIndexNoCheck(t);
-      if (info != NULL)
+      if (info != nullptr)
         mList.push_back(info->duplicate());
     }
     producerInfoList.unlock();
@@ -47,7 +47,7 @@ ProducerInfoList::ProducerInfoList(ProducerInfoList& producerInfoList)
   catch (...)
   {
     producerInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -64,7 +64,7 @@ ProducerInfoList::~ProducerInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -87,13 +87,13 @@ void ProducerInfoList::operator=(ProducerInfoList& producerInfoList)
     for (uint t=0; t<sz; t++)
     {
       ProducerInfo *info = producerInfoList.getProducerInfoByIndexNoCheck(t);
-      if (info != NULL)
+      if (info != nullptr)
         mList.push_back(info->duplicate());
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -111,7 +111,7 @@ void ProducerInfoList::addProducerInfo(ProducerInfo *producerInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -133,7 +133,7 @@ void ProducerInfoList::clear()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -151,7 +151,7 @@ bool ProducerInfoList::deleteProducerInfoById(uint producerId)
     for (uint t=0; t<sz; t++)
     {
       ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
-      if (info != NULL  &&  info->mProducerId == producerId)
+      if (info != nullptr  &&  info->mProducerId == producerId)
       {
         delete mList[t];
         mList.erase(mList.begin() + t);
@@ -162,7 +162,7 @@ bool ProducerInfoList::deleteProducerInfoById(uint producerId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -180,7 +180,7 @@ void ProducerInfoList::deleteProducerInfoListBySourceId(uint sourceId)
     for (int t=sz; t>=0; t--)
     {
       ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
-      if (info != NULL  &&  info->mSourceId == sourceId)
+      if (info != nullptr  &&  info->mSourceId == sourceId)
       {
         delete mList[t];
         mList.erase(mList.begin() + t);
@@ -189,7 +189,7 @@ void ProducerInfoList::deleteProducerInfoListBySourceId(uint sourceId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -207,14 +207,14 @@ ProducerInfo* ProducerInfoList::getProducerInfoById(uint producerId)
     for (uint t=0; t<sz; t++)
     {
       ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
-      if (info != NULL  &&  info->mProducerId == producerId)
+      if (info != nullptr  &&  info->mProducerId == producerId)
         return info;
     }
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -232,14 +232,14 @@ ProducerInfo* ProducerInfoList::getProducerInfoByName(std::string producerName)
     for (uint t=0; t<sz; t++)
     {
       ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
-      if (info != NULL  &&  strcasecmp(info->mName.c_str(),producerName.c_str()) == 0)
+      if (info != nullptr  &&  strcasecmp(info->mName.c_str(),producerName.c_str()) == 0)
         return info;
     }
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -254,13 +254,13 @@ ProducerInfo* ProducerInfoList::getProducerInfoByIndex(uint index)
   {
     AutoThreadLock lock(&mThreadLock);
     if (index >= mList.size())
-      return NULL;
+      return nullptr;
 
     return mList.at(index);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -277,7 +277,7 @@ ProducerInfo* ProducerInfoList::getProducerInfoByIndexNoCheck(uint index)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -295,7 +295,7 @@ void ProducerInfoList::getProducerInfoListBySourceId(uint sourceId,ProducerInfoL
     for (uint t=0; t<sz; t++)
     {
       ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
-      if (info != NULL  &&  info->mSourceId == sourceId)
+      if (info != nullptr  &&  info->mSourceId == sourceId)
       {
         producerInfoList.addProducerInfo(info->duplicate());
       }
@@ -303,7 +303,7 @@ void ProducerInfoList::getProducerInfoListBySourceId(uint sourceId,ProducerInfoL
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -319,7 +319,7 @@ uint ProducerInfoList::getLength()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -356,7 +356,7 @@ void ProducerInfoList::sortByName()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -373,7 +373,7 @@ void ProducerInfoList::lock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -390,7 +390,7 @@ void ProducerInfoList::unlock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -406,7 +406,7 @@ void ProducerInfoList::writeToFile(std::string filename)
     AutoThreadLock lock(&mThreadLock);
 
     FILE *file = fopen(filename.c_str(),"w");
-    if (file == NULL)
+    if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot create the file!");
       exception.addParameter("Filename",filename);
@@ -423,7 +423,7 @@ void ProducerInfoList::writeToFile(std::string filename)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -443,7 +443,7 @@ void ProducerInfoList::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

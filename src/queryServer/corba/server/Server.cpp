@@ -15,11 +15,11 @@ static void* Server_maintenanceThread(void *arg)
   {
     Server *server = (Server*)arg;
     server->run();
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+    SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
     exception.printError();
     exit(-1);
   }
@@ -35,7 +35,7 @@ Server::Server(const char *address,const char *port)
   {
     mAddress = address;
     mPort = port;
-    mServiceInterface = NULL;
+    mServiceInterface = nullptr;
     int orb_argc = 4;
     char addr[100];
     sprintf(addr,"giop:tcp:%s:%s",address,port);
@@ -84,7 +84,7 @@ Server::Server(const char *address,const char *port)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -100,7 +100,7 @@ Server::~Server()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -151,7 +151,7 @@ void Server::init(QueryServer::ServiceInterface *serviceInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -167,7 +167,7 @@ void Server::shutdown()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -178,11 +178,11 @@ void Server::start()
 {
   try
   {
-    pthread_create(&mThread,NULL,Server_maintenanceThread,this);
+    pthread_create(&mThread,nullptr,Server_maintenanceThread,this);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -221,7 +221,7 @@ void Server::run()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -237,7 +237,7 @@ std::string Server::getServiceIor()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

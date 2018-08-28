@@ -22,11 +22,11 @@ ServerInterface::ServerInterface()
   FUNCTION_TRACE
   try
   {
-    mService = NULL;
+    mService = nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -42,7 +42,7 @@ ServerInterface::~ServerInterface()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -59,7 +59,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -72,14 +72,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->clear(sessionId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -94,14 +94,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->reload(sessionId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -116,7 +116,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     T::ServerInfo sServerInfo;
@@ -130,7 +130,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -145,14 +145,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteDataServerInfoById(sessionId,serverId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -171,7 +171,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaServerInfo *corbaServerInfo = new ContentServer::Corba::CorbaServerInfo();
     serverInfo = corbaServerInfo;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getDataServerInfoById(sessionId,serverId,sServerInfo);
@@ -183,7 +183,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -202,7 +202,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaServerInfo *corbaServerInfo = new ContentServer::Corba::CorbaServerInfo();
     serverInfo = corbaServerInfo;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getDataServerInfoByName(sessionId,serverName,sServerInfo);
@@ -214,7 +214,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -233,7 +233,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaServerInfo *corbaServerInfo = new ContentServer::Corba::CorbaServerInfo();
     serverInfo = corbaServerInfo;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getDataServerInfoByIor(sessionId,serverIor,sServerInfo);
@@ -245,7 +245,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -264,7 +264,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaServerInfoList *corbaServerInfoList = new ContentServer::Corba::CorbaServerInfoList();
     serverInfoList = corbaServerInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getDataServerInfoList(sessionId,sServerInfoList);
@@ -276,7 +276,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -291,7 +291,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     count = 0;
@@ -306,7 +306,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -321,7 +321,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     T::ProducerInfo sProducerInfo;
@@ -335,7 +335,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -350,14 +350,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteProducerInfoById(sessionId,producerId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -372,14 +372,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteProducerInfoByName(sessionId,producerName);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -394,14 +394,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteProducerInfoListBySourceId(sessionId,sourceId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -420,7 +420,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaProducerInfo *corbaProducerInfo = new ContentServer::Corba::CorbaProducerInfo();
     producerInfo = corbaProducerInfo;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getProducerInfoById(sessionId,producerId,sProducerInfo);
@@ -432,7 +432,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -451,7 +451,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaProducerInfo *corbaProducerInfo = new ContentServer::Corba::CorbaProducerInfo();
     producerInfo = corbaProducerInfo;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getProducerInfoByName(sessionId,producerName,sProducerInfo);
@@ -463,7 +463,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -482,7 +482,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaProducerInfoList *corbaProducerInfoList = new ContentServer::Corba::CorbaProducerInfoList();
     producerInfoList = corbaProducerInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getProducerInfoList(sessionId,sProducerInfoList);
@@ -494,7 +494,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -513,7 +513,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaProducerInfoList *corbaProducerInfoList = new ContentServer::Corba::CorbaProducerInfoList();
     producerInfoList = corbaProducerInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getProducerInfoListByParameter(sessionId,(T::ParamKeyType)parameterKeyType,parameterKey,sProducerInfoList);
@@ -525,7 +525,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -544,7 +544,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaProducerInfoList *corbaProducerInfoList = new ContentServer::Corba::CorbaProducerInfoList();
     producerInfoList = corbaProducerInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getProducerInfoListBySourceId(sessionId,sourceId,sProducerInfoList);
@@ -556,7 +556,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -571,7 +571,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     count = 0;
@@ -586,7 +586,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -605,7 +605,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaStringList *corbaList = new ContentServer::Corba::CorbaStringList();
     list = corbaList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getProducerNameAndGeometryList(sessionId,sList);
@@ -617,7 +617,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -636,7 +636,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaStringList *corbaList = new ContentServer::Corba::CorbaStringList();
     list = corbaList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getProducerParameterList(sessionId,(T::ParamKeyType)sourceParameterKeyType,(T::ParamKeyType)targetParameterKeyType,sList);
@@ -648,7 +648,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -663,7 +663,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     T::GenerationInfo sGenerationInfo;
@@ -677,7 +677,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -692,14 +692,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteGenerationInfoById(sessionId,generationId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -714,14 +714,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteGenerationInfoByName(sessionId,generationName);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -736,7 +736,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     std::set<uint> sGenerationIdList;
@@ -748,7 +748,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -763,14 +763,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteGenerationInfoListByProducerId(sessionId,producerId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -785,14 +785,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteGenerationInfoListByProducerName(sessionId,producerName);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -806,14 +806,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteGenerationInfoListBySourceId(sessionId,sourceId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -832,7 +832,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaStringList *corbaList = new ContentServer::Corba::CorbaStringList();
     list = corbaList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGenerationIdGeometryIdAndForecastTimeList(sessionId,sList);
@@ -844,7 +844,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -863,7 +863,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaGenerationInfo *corbaGenerationInfo = new ContentServer::Corba::CorbaGenerationInfo();
     generationInfo = corbaGenerationInfo;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGenerationInfoById(sessionId,generationId,sGenerationInfo);
@@ -875,7 +875,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -894,7 +894,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaGenerationInfo *corbaGenerationInfo = new ContentServer::Corba::CorbaGenerationInfo();
     generationInfo = corbaGenerationInfo;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGenerationInfoByName(sessionId,generationName,sGenerationInfo);
@@ -906,7 +906,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -925,7 +925,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaGenerationInfoList *corbaGenerationInfoList = new ContentServer::Corba::CorbaGenerationInfoList();
     generationInfoList = corbaGenerationInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGenerationInfoList(sessionId,sGenerationInfoList);
@@ -937,7 +937,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -956,7 +956,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaGenerationInfoList *corbaGenerationInfoList = new ContentServer::Corba::CorbaGenerationInfoList();
     generationInfoList = corbaGenerationInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGenerationInfoListByGeometryId(sessionId,geometryId,sGenerationInfoList);
@@ -968,7 +968,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -987,7 +987,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaGenerationInfoList *corbaGenerationInfoList = new ContentServer::Corba::CorbaGenerationInfoList();
     generationInfoList = corbaGenerationInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGenerationInfoListByProducerId(sessionId,producerId,sGenerationInfoList);
@@ -999,7 +999,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1018,7 +1018,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaGenerationInfoList *corbaGenerationInfoList = new ContentServer::Corba::CorbaGenerationInfoList();
     generationInfoList = corbaGenerationInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGenerationInfoListByProducerName(sessionId,producerName,sGenerationInfoList);
@@ -1030,7 +1030,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1049,7 +1049,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaGenerationInfoList *corbaGenerationInfoList = new ContentServer::Corba::CorbaGenerationInfoList();
     generationInfoList = corbaGenerationInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getGenerationInfoListBySourceId(sessionId,sourceId,sGenerationInfoList);
@@ -1061,7 +1061,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1080,7 +1080,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaGenerationInfo *corbaGenerationInfo = new ContentServer::Corba::CorbaGenerationInfo();
     generationInfo = corbaGenerationInfo;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getLastGenerationInfoByProducerIdAndStatus(sessionId,producerId,(T::GenerationStatus)generationStatus,sGenerationInfo);
@@ -1092,7 +1092,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1111,7 +1111,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaGenerationInfo *corbaGenerationInfo = new ContentServer::Corba::CorbaGenerationInfo();
     generationInfo = corbaGenerationInfo;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getLastGenerationInfoByProducerNameAndStatus(sessionId,producerName,(T::GenerationStatus)generationStatus,sGenerationInfo);
@@ -1123,7 +1123,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1138,7 +1138,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     count = 0;
@@ -1153,7 +1153,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1168,7 +1168,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->setGenerationInfoStatusById(sessionId,generationId,(T::GenerationStatus)status);
@@ -1176,7 +1176,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1191,7 +1191,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->setGenerationInfoStatusByName(sessionId,generationName,(T::GenerationStatus)status);
@@ -1199,7 +1199,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1214,7 +1214,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     T::FileInfo sFileInfo;
@@ -1228,7 +1228,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1243,7 +1243,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     T::FileInfo sFileInfo;
@@ -1263,7 +1263,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1278,7 +1278,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     std::vector<T::FileAndContent> sFileContentList;
@@ -1295,7 +1295,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1310,14 +1310,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteFileInfoById(sessionId,fileId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1332,14 +1332,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteFileInfoByName(sessionId,filename);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1354,14 +1354,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteFileInfoListByGroupFlags(sessionId,groupFlags);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1376,14 +1376,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteFileInfoListByProducerId(sessionId,producerId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1398,14 +1398,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteFileInfoListByProducerName(sessionId,producerName);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1420,14 +1420,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteFileInfoListByGenerationId(sessionId,generationId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1442,14 +1442,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1464,7 +1464,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     std::vector<T::ForecastTime> sForecastTimeList;
@@ -1477,7 +1477,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1491,14 +1491,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteFileInfoListByGenerationName(sessionId,generationName);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1513,14 +1513,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteFileInfoListBySourceId(sessionId,sourceId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1535,7 +1535,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     std::set<uint> sFileIdList;
@@ -1547,7 +1547,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1566,7 +1566,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaFileInfo *corbaFileInfo = new ContentServer::Corba::CorbaFileInfo();
     fileInfo = corbaFileInfo;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getFileInfoById(sessionId,fileId,sFileInfo);
@@ -1578,7 +1578,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1597,7 +1597,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaFileInfo *corbaFileInfo = new ContentServer::Corba::CorbaFileInfo();
     fileInfo = corbaFileInfo;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getFileInfoByName(sessionId,filename,sFileInfo);
@@ -1609,7 +1609,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1628,7 +1628,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaFileInfoList *corbaFileInfoList = new ContentServer::Corba::CorbaFileInfoList();
     fileInfoList = corbaFileInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getFileInfoList(sessionId,startFileId,maxRecords,sFileInfoList);
@@ -1640,7 +1640,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1659,7 +1659,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaFileInfoList *corbaFileInfoList = new ContentServer::Corba::CorbaFileInfoList();
     fileInfoList = corbaFileInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getFileInfoListByProducerId(sessionId,producerId,startFileId,maxRecords,sFileInfoList);
@@ -1671,7 +1671,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1690,7 +1690,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaFileInfoList *corbaFileInfoList = new ContentServer::Corba::CorbaFileInfoList();
     fileInfoList = corbaFileInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getFileInfoListByProducerName(sessionId,producerName,startFileId,maxRecords,sFileInfoList);
@@ -1702,7 +1702,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1720,7 +1720,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaFileInfoList *corbaFileInfoList = new ContentServer::Corba::CorbaFileInfoList();
     fileInfoList = corbaFileInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getFileInfoListByGenerationId(sessionId,generationId,startFileId,maxRecords,sFileInfoList);
@@ -1732,7 +1732,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1751,7 +1751,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaFileInfoList *corbaFileInfoList = new ContentServer::Corba::CorbaFileInfoList();
     fileInfoList = corbaFileInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getFileInfoListByGenerationName(sessionId,generationName,startFileId,maxRecords,sFileInfoList);
@@ -1763,7 +1763,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1782,7 +1782,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaFileInfoList *corbaFileInfoList = new ContentServer::Corba::CorbaFileInfoList();
     fileInfoList = corbaFileInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getFileInfoListByGroupFlags(sessionId,groupFlags,startFileId,maxRecords,sFileInfoList);
@@ -1794,7 +1794,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1813,7 +1813,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaFileInfoList *corbaFileInfoList = new ContentServer::Corba::CorbaFileInfoList();
     fileInfoList = corbaFileInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getFileInfoListBySourceId(sessionId,sourceId,startFileId,maxRecords,sFileInfoList);
@@ -1825,7 +1825,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1840,7 +1840,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     count = 0;
@@ -1855,7 +1855,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1870,7 +1870,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     count = 0;
@@ -1885,7 +1885,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1900,7 +1900,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     count = 0;
@@ -1915,7 +1915,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1930,7 +1930,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     count = 0;
@@ -1945,7 +1945,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1960,7 +1960,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     T::EventInfo sEventInfo;
@@ -1974,7 +1974,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -1993,7 +1993,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaEventInfo *corbaEventInfo = new ContentServer::Corba::CorbaEventInfo();
     eventInfo = corbaEventInfo;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getLastEventInfo(sessionId,requestingServerId,sEventInfo);
@@ -2005,7 +2005,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2024,7 +2024,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaEventInfoList *corbaEventInfoList = new ContentServer::Corba::CorbaEventInfoList();
     eventInfoList = corbaEventInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getEventInfoList(sessionId,requestingServerId,startEventId,maxRecords,sEventInfoList);
@@ -2036,7 +2036,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2051,7 +2051,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     count = 0;
@@ -2066,7 +2066,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2081,7 +2081,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     T::ContentInfo sContentInfo;
@@ -2095,7 +2095,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2110,7 +2110,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     T::ContentInfoList sContentInfoList;
@@ -2126,7 +2126,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2141,14 +2141,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteContentInfo(sessionId,fileId,messageIndex);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2163,14 +2163,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteContentListByFileId(sessionId,fileId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2185,14 +2185,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteContentListByFileName(sessionId,filename);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2206,14 +2206,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteContentListByGroupFlags(sessionId,groupFlags);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2228,14 +2228,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteContentListByProducerId(sessionId,producerId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2250,14 +2250,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteContentListByProducerName(sessionId,producerName);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2272,14 +2272,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteContentListByGenerationId(sessionId,generationId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2294,14 +2294,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteContentListByGenerationName(sessionId,generationName);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2316,14 +2316,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->deleteContentListBySourceId(sessionId,sourceId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2338,7 +2338,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     T::ContentInfoList sContentInfoList;
@@ -2354,7 +2354,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2369,14 +2369,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->registerContentListByFileId(sessionId,serverId,fileId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2390,14 +2390,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->unregisterContentList(sessionId,serverId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2412,14 +2412,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mService->unregisterContentListByFileId(sessionId,serverId,fileId);
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2438,7 +2438,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfo *corbaContentInfo = new ContentServer::Corba::CorbaContentInfo();
     contentInfo = corbaContentInfo;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentInfo(sessionId,fileId,messageIndex,sContentInfo);
@@ -2450,7 +2450,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2469,7 +2469,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentList(sessionId,startFileId,startMessageIndex,maxRecords,sContentInfoList);
@@ -2481,7 +2481,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2500,7 +2500,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByFileId(sessionId,fileId,sContentInfoList);
@@ -2512,7 +2512,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2531,7 +2531,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByFileName(sessionId,filename,sContentInfoList);
@@ -2543,7 +2543,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2562,7 +2562,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByGroupFlags(sessionId,groupFlags,startFileId,startMessageIndex,maxRecords,sContentInfoList);
@@ -2574,7 +2574,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2593,7 +2593,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByProducerId(sessionId,producerId,startFileId,startMessageIndex,maxRecords,sContentInfoList);
@@ -2605,7 +2605,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2624,7 +2624,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByProducerName(sessionId,producerName,startFileId,startMessageIndex,maxRecords,sContentInfoList);
@@ -2636,7 +2636,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2655,7 +2655,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByServerId(sessionId,serverId,startFileId,startMessageIndex,maxRecords,sContentInfoList);
@@ -2667,7 +2667,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2685,7 +2685,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByGenerationId(sessionId,generationId,startFileId,startMessageIndex,maxRecords,requestFlags,sContentInfoList);
@@ -2697,7 +2697,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2716,7 +2716,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByGenerationName(sessionId,generationName,startFileId,startMessageIndex,maxRecords,sContentInfoList);
@@ -2728,7 +2728,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2747,7 +2747,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByGenerationIdAndTimeRange(sessionId,generationId,startTime,endTime,sContentInfoList);
@@ -2759,7 +2759,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2778,7 +2778,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByGenerationNameAndTimeRange(sessionId,generationName,startTime,endTime,sContentInfoList);
@@ -2790,7 +2790,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2809,7 +2809,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListBySourceId(sessionId,sourceId,startFileId,startMessageIndex,maxRecords,sContentInfoList);
@@ -2821,7 +2821,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2840,7 +2840,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByParameter(sessionId,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
@@ -2852,7 +2852,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2871,7 +2871,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByParameterAndGenerationId(sessionId,generationId,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
@@ -2883,7 +2883,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2902,7 +2902,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByParameterAndGenerationName(sessionId,generationName,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
@@ -2914,7 +2914,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2933,7 +2933,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByParameterAndProducerId(sessionId,producerId,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
@@ -2945,7 +2945,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2964,7 +2964,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByParameterAndProducerName(sessionId,producerName,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
@@ -2976,7 +2976,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -2995,7 +2995,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,sContentInfoList);
@@ -3007,7 +3007,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -3026,7 +3026,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListOfInvalidIntegrity(sessionId,sContentInfoList);
@@ -3038,7 +3038,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -3057,7 +3057,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaLongList *corbaGeometryIdList = new ContentServer::Corba::CorbaLongList();
     geometryIdList = corbaGeometryIdList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentGeometryIdListByGenerationId(sessionId,generationId,sGeometryIdList);
@@ -3069,7 +3069,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -3088,7 +3088,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaContentInfoList *corbaContentParamList = new ContentServer::Corba::CorbaContentInfoList();
     contentParamList = corbaContentParamList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentParamListByGenerationId(sessionId,generationId,sContentParamList);
@@ -3100,7 +3100,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -3119,7 +3119,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaStringList *corbaParamKeyList = new ContentServer::Corba::CorbaStringList();
     paramKeyList = corbaParamKeyList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentParamKeyListByGenerationId(sessionId,generationId,(T::ParamKeyType)parameterKeyType,sParamKeyList);
@@ -3131,7 +3131,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -3150,7 +3150,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaStringList *corbaContentTimeList = new ContentServer::Corba::CorbaStringList();
     contentTimeList = corbaContentTimeList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentTimeListByGenerationId(sessionId,generationId,sContentTimeList);
@@ -3162,7 +3162,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -3181,7 +3181,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaStringList *corbaContentTimeList = new ContentServer::Corba::CorbaStringList();
     contentTimeList = corbaContentTimeList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentTimeListByGenerationAndGeometryId(sessionId,generationId,geometryId,sContentTimeList);
@@ -3193,7 +3193,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -3212,7 +3212,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaStringList *corbaContentTimeList = new ContentServer::Corba::CorbaStringList();
     contentTimeList = corbaContentTimeList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentTimeListByProducerId(sessionId,producerId,sContentTimeList);
@@ -3224,7 +3224,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -3239,7 +3239,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     count = 0;
@@ -3254,7 +3254,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -3273,7 +3273,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     ContentServer::Corba::CorbaLevelInfoList *corbaLevelInfoList = new ContentServer::Corba::CorbaLevelInfoList();
     levelInfoList = corbaLevelInfoList;
 
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getLevelInfoList(sessionId,sLevelInfoList);
@@ -3285,7 +3285,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -3300,7 +3300,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->deleteVirtualContent(sessionId);
@@ -3309,7 +3309,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -3324,7 +3324,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   FUNCTION_TRACE
   try
   {
-    if (mService == NULL)
+    if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->updateVirtualContent(sessionId);
@@ -3333,7 +3333,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",NULL);
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }

@@ -24,7 +24,7 @@ FileInfo::ComparisonMethod fileInfo_comparisonMethod = FileInfo::ComparisonMetho
 
 int fileInfo_compare(const void *_val1,const void *_val2)
 {
-  if (_val1 != NULL  &&  _val2 != NULL)
+  if (_val1 != nullptr  &&  _val2 != nullptr)
   {
     FileInfoPtr *obj1 = const_cast<FileInfoPtr*>(reinterpret_cast<const FileInfoPtr *>(_val1));
     FileInfoPtr *obj2 = const_cast<FileInfoPtr*>(reinterpret_cast<const FileInfoPtr *>(_val2));
@@ -51,12 +51,12 @@ FileInfoList::FileInfoList()
 
     for (uint t=0; t<100; t++)
     {
-      mArray[t] = NULL;
+      mArray[t] = nullptr;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -81,10 +81,10 @@ FileInfoList::FileInfoList(FileInfoList& fileInfoList)
     for (uint t=0; t<mSize; t++)
     {
       FileInfo *info = fileInfoList.mArray[t];
-      if (info != NULL)
+      if (info != nullptr)
         mArray[t] = info->duplicate();
       else
-        mArray[t] = NULL;
+        mArray[t] = nullptr;
     }
     mComparisonMethod = fileInfoList.mComparisonMethod;
 
@@ -94,7 +94,7 @@ FileInfoList::FileInfoList(FileInfoList& fileInfoList)
   catch (...)
   {
     fileInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -111,7 +111,7 @@ FileInfoList::~FileInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -140,7 +140,7 @@ void FileInfoList::operator=(FileInfoList& fileInfoList)
     for (uint t=0; t<mSize; t++)
     {
       FileInfo *info = fileInfoList.mArray[t];
-      if (info != NULL  &&  mReleaseObjects)
+      if (info != nullptr  &&  mReleaseObjects)
         mArray[t] = info->duplicate();
       else
         mArray[t] = info;
@@ -153,7 +153,7 @@ void FileInfoList::operator=(FileInfoList& fileInfoList)
   catch (...)
   {
     fileInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -166,7 +166,7 @@ void FileInfoList::addFileInfo(FileInfo *fileInfo)
   FUNCTION_TRACE
   try
   {
-    if (mArray == NULL  ||  mLength == mSize)
+    if (mArray == nullptr  ||  mLength == mSize)
     {
       increaseSize(mSize + mSize/5 + 10);
     }
@@ -182,7 +182,7 @@ void FileInfoList::addFileInfo(FileInfo *fileInfo)
 
     int idx = getClosestIndexNoLock(mComparisonMethod,*fileInfo);
 
-    while (idx < (int)mLength  &&  mArray[idx] != NULL  &&   mArray[idx]->compare(mComparisonMethod,fileInfo) < 0)
+    while (idx < (int)mLength  &&  mArray[idx] != nullptr  &&   mArray[idx]->compare(mComparisonMethod,fileInfo) < 0)
     {
       idx++;
     }
@@ -202,7 +202,7 @@ void FileInfoList::addFileInfo(FileInfo *fileInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -220,7 +220,7 @@ void FileInfoList::addFileInfoList(FileInfoList& fileInfoList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -238,7 +238,7 @@ void FileInfoList::addFileInfoListNoLock(FileInfoList& fileInfoList)
 
     if (mComparisonMethod == FileInfo::ComparisonMethod::none)
     {
-      if (mArray == NULL  ||  mLength == mSize  ||  (mLength + len2) > mSize)
+      if (mArray == nullptr  ||  mLength == mSize  ||  (mLength + len2) > mSize)
       {
         increaseSize(len1 + len2);
       }
@@ -266,8 +266,8 @@ void FileInfoList::addFileInfoListNoLock(FileInfoList& fileInfoList)
 
     for (uint t=0; t<newSize; t++)
     {
-      FileInfo *fInfo1 = NULL;
-      FileInfo *fInfo2 = NULL;
+      FileInfo *fInfo1 = nullptr;
+      FileInfo *fInfo2 = nullptr;
 
       if (a < len1)
         fInfo1 = mArray[a];
@@ -275,13 +275,13 @@ void FileInfoList::addFileInfoListNoLock(FileInfoList& fileInfoList)
       if (b < len2)
         fInfo2 = fileInfoList.getFileInfoByIndex(b);
 
-      if (fInfo1 != NULL  &&  fInfo2 == NULL)
+      if (fInfo1 != nullptr  &&  fInfo2 == nullptr)
       {
         newArray[t] = fInfo1;
         a++;
       }
       else
-      if (fInfo1 == NULL  &&  fInfo2 != NULL)
+      if (fInfo1 == nullptr  &&  fInfo2 != nullptr)
       {
         if (mReleaseObjects)
           newArray[t] = fInfo2->duplicate();
@@ -290,7 +290,7 @@ void FileInfoList::addFileInfoListNoLock(FileInfoList& fileInfoList)
         b++;
       }
       else
-      if (fInfo1 != NULL  &&  fInfo2 != NULL)
+      if (fInfo1 != nullptr  &&  fInfo2 != nullptr)
       {
         if (fInfo1->compare(mComparisonMethod,fInfo2) <= 0)
         {
@@ -317,7 +317,7 @@ void FileInfoList::addFileInfoListNoLock(FileInfoList& fileInfoList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -330,14 +330,14 @@ void FileInfoList::clear()
   try
   {
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
-    if (mArray != NULL)
+    if (mArray != nullptr)
     {
       for (uint t=0; t<mLength; t++)
       {
-        if (mArray[t] != NULL  &&  mReleaseObjects)
+        if (mArray[t] != nullptr  &&  mReleaseObjects)
         {
           delete(mArray[t]);
-          mArray[t] = NULL;
+          mArray[t] = nullptr;
         }
       }
       delete mArray;
@@ -349,12 +349,12 @@ void FileInfoList::clear()
 
     for (uint t=0; t<100; t++)
     {
-      mArray[t] = NULL;
+      mArray[t] = nullptr;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -367,7 +367,7 @@ void FileInfoList::increaseSize(uint newSize)
   try
   {
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
-    if (mArray == NULL)
+    if (mArray == nullptr)
     {
       mSize = newSize;
       mLength = 0;
@@ -375,7 +375,7 @@ void FileInfoList::increaseSize(uint newSize)
 
       for (uint t=0; t<mSize; t++)
       {
-        mArray[t] = NULL;
+        mArray[t] = nullptr;
       }
       return;
     }
@@ -389,7 +389,7 @@ void FileInfoList::increaseSize(uint newSize)
       }
       else
       {
-        newArray[t] = NULL;
+        newArray[t] = nullptr;
       }
     }
 
@@ -399,7 +399,7 @@ void FileInfoList::increaseSize(uint newSize)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -418,17 +418,17 @@ FileInfo* FileInfoList::getFileInfoById(uint fileId)
     search.mFileId = fileId;
     int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
     if (idx < 0  ||  idx >= (int)getLength())
-      return NULL;
+      return nullptr;
 
     FileInfo *info = getFileInfoByIndexNoCheck(idx);
-    if (info != NULL  &&  info->mFileId == fileId  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
+    if (info != nullptr  &&  info->mFileId == fileId  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
       return info;
 
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -445,17 +445,17 @@ FileInfo* FileInfoList::getFileInfoByIdNoLock(uint fileId)
     search.mFileId = fileId;
     int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
     if (idx < 0  ||  idx >= (int)getLength())
-      return NULL;
+      return nullptr;
 
     FileInfo *info = getFileInfoByIndexNoCheck(idx);
-    if (info != NULL  &&  info->mFileId == fileId  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
+    if (info != nullptr  &&  info->mFileId == fileId  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
       return info;
 
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -477,14 +477,14 @@ void FileInfoList::markFileInfoDeletedById(uint fileId)
       return;
 
     FileInfo *info = getFileInfoByIndexNoCheck(idx);
-    if (info != NULL  &&  info->mFileId == fileId)
+    if (info != nullptr  &&  info->mFileId == fileId)
     {
       info->mFlags = info->mFlags | T::FileInfo::Flags::DeletedFile;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -502,7 +502,7 @@ int FileInfoList::getClosestIndex(FileInfo::ComparisonMethod comparisonMethod,Fi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -515,14 +515,14 @@ int FileInfoList::getClosestIndexNoLock(FileInfo::ComparisonMethod comparisonMet
   FUNCTION_TRACE
   try
   {
-    if (mArray == NULL  ||  mLength == 0)
+    if (mArray == nullptr  ||  mLength == 0)
           return 0;
 
     if (comparisonMethod != mComparisonMethod)
     {
       for (uint t=0; t<mLength; t++)
       {
-        if (mArray[t] != NULL)
+        if (mArray[t] != nullptr)
         {
           int res = mArray[t]->compare(comparisonMethod,&fileInfo);
           if (res == 0)
@@ -561,14 +561,14 @@ int FileInfoList::getClosestIndexNoLock(FileInfo::ComparisonMethod comparisonMet
     {
       if (mArray[mid]->compare(comparisonMethod,&fileInfo) < 0)
       {
-        while (mid < (int)mLength  &&  mArray[mid] != NULL  &&   mArray[mid]->compare(comparisonMethod,&fileInfo) < 0)
+        while (mid < (int)mLength  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&fileInfo) < 0)
           mid++;
 
         return mid-1;
       }
       else
       {
-        while (mid > 0  &&  mArray[mid] != NULL  &&   mArray[mid]->compare(comparisonMethod,&fileInfo) > 0)
+        while (mid > 0  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&fileInfo) > 0)
           mid--;
 
         return mid;
@@ -578,7 +578,7 @@ int FileInfoList::getClosestIndexNoLock(FileInfo::ComparisonMethod comparisonMet
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -597,26 +597,26 @@ FileInfo* FileInfoList::getFileInfoByName(std::string filename)
     search.mName = filename;
     int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileName,search);
     if (idx < 0  ||  idx >= (int)getLength())
-      return NULL;
+      return nullptr;
 
     FileInfo *info = getFileInfoByIndexNoCheck(idx);
-    if (info != NULL  &&  info->mName == filename  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
+    if (info != nullptr  &&  info->mName == filename  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
       return info;
 
-    return NULL;
+    return nullptr;
     /*
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = getFileInfoByIndexNoCheck(t);
-      if (info != NULL  &&  info->mName == filename)
+      if (info != nullptr  &&  info->mName == filename)
         return info;
     }
-    return NULL;
+    return nullptr;
     */
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -631,16 +631,16 @@ FileInfo* FileInfoList::getFileInfoByIndex(uint index)
   {
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     if (index > mLength)
-      return NULL;
+      return nullptr;
 
-    if (mArray[index] == NULL || (mArray[index]->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
-      return NULL;
+    if (mArray[index] == nullptr || (mArray[index]->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
+      return nullptr;
 
     return mArray[index];
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -671,7 +671,7 @@ void FileInfoList::getFileInfoList(uint startFileId,uint maxRecords,FileInfoList
     for (uint t=startIdx; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId)
+      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId)
       {
         if (fileInfoList.getReleaseObjects())
           fileInfoList.addFileInfo(info->duplicate());
@@ -685,7 +685,7 @@ void FileInfoList::getFileInfoList(uint startFileId,uint maxRecords,FileInfoList
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -704,7 +704,7 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,FileInfoList& fil
     for (uint t=0; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mProducerId == producerId)
+      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mProducerId == producerId)
       {
         if (fileInfoList.getReleaseObjects())
           fileInfoList.addFileInfo(info->duplicate());
@@ -715,7 +715,7 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,FileInfoList& fil
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -747,7 +747,7 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,
     for (uint t=startIdx; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId  &&  info->mProducerId == producerId)
+      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId  &&  info->mProducerId == producerId)
       {
         if (fileInfoList.getReleaseObjects())
           fileInfoList.addFileInfo(info->duplicate());
@@ -761,7 +761,7 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -780,7 +780,7 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,FileInfoList&
     for (uint t=0; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mGenerationId == generationId)
+      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mGenerationId == generationId)
       {
         if (fileInfoList.getReleaseObjects())
           fileInfoList.addFileInfo(info->duplicate());
@@ -791,7 +791,7 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,FileInfoList&
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -823,7 +823,7 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFil
     for (uint t=startIdx; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId  &&  info->mGenerationId == generationId)
+      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId  &&  info->mGenerationId == generationId)
       {
         if (fileInfoList.getReleaseObjects())
           fileInfoList.addFileInfo(info->duplicate());
@@ -837,7 +837,7 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFil
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -856,7 +856,7 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,FileInfoList& fil
     for (uint t=0; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  (info->mGroupFlags & groupFlags) != 0)
+      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  (info->mGroupFlags & groupFlags) != 0)
       {
         if (fileInfoList.getReleaseObjects())
           fileInfoList.addFileInfo(info->duplicate());
@@ -867,7 +867,7 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,FileInfoList& fil
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -899,7 +899,7 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,
     for (uint t=startIdx; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId  &&  (info->mGroupFlags & groupFlags) != 0)
+      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId  &&  (info->mGroupFlags & groupFlags) != 0)
       {
         if (fileInfoList.getReleaseObjects())
           fileInfoList.addFileInfo(info->duplicate());
@@ -913,7 +913,7 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -932,7 +932,7 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,FileInfoList& fileInf
     for (uint t=0; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mSourceId == sourceId)
+      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mSourceId == sourceId)
       {
         if (fileInfoList.getReleaseObjects())
           fileInfoList.addFileInfo(info->duplicate());
@@ -943,7 +943,7 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,FileInfoList& fileInf
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -975,7 +975,7 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,uint
     for (uint t=startIdx; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId  &&  info->mSourceId == sourceId)
+      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId  &&  info->mSourceId == sourceId)
       {
         if (fileInfoList.getReleaseObjects())
           fileInfoList.addFileInfo(info->duplicate());
@@ -989,7 +989,7 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1007,7 +1007,7 @@ uint FileInfoList::getFileInfoCountByProducerId(uint producerId)
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
+      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
       {
         if (info->mProducerId == producerId)
           count++;
@@ -1017,7 +1017,7 @@ uint FileInfoList::getFileInfoCountByProducerId(uint producerId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1035,7 +1035,7 @@ uint FileInfoList::getFileInfoCountByGenerationId(uint generationId)
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
+      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
       {
         if (info->mGenerationId == generationId)
           count++;
@@ -1045,7 +1045,7 @@ uint FileInfoList::getFileInfoCountByGenerationId(uint generationId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1063,7 +1063,7 @@ uint FileInfoList::getFileInfoCountBySourceId(uint sourceId)
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != NULL  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
+      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
       {
         if (info->mSourceId == sourceId)
           count++;
@@ -1073,7 +1073,7 @@ uint FileInfoList::getFileInfoCountBySourceId(uint sourceId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1090,7 +1090,7 @@ FileInfo* FileInfoList::getFileInfoByIndexNoCheck(uint index)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1106,7 +1106,7 @@ uint FileInfoList::getLength()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1134,7 +1134,7 @@ bool FileInfoList::deleteFileInfoById(uint fileId)
     for (uint t=(uint)idx+1; t<mLength; t++)
     {
       mArray[t-1] = mArray[t];
-      mArray[t] = NULL;
+      mArray[t] = nullptr;
     }
 
     if (mReleaseObjects)
@@ -1145,7 +1145,7 @@ bool FileInfoList::deleteFileInfoById(uint fileId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1167,13 +1167,13 @@ bool FileInfoList::deleteFileInfoByName(std::string filename)
       return false;
 
     FileInfo *info = mArray[idx];
-    if (info->mName != filename)
+    if (info == nullptr || info->mName != filename)
       return false;
 
     for (uint t=(uint)idx+1; t<mLength; t++)
     {
       mArray[t-1] = mArray[t];
-      mArray[t] = NULL;
+      mArray[t] = nullptr;
     }
 
     if (mReleaseObjects)
@@ -1184,7 +1184,7 @@ bool FileInfoList::deleteFileInfoByName(std::string filename)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1202,8 +1202,8 @@ uint FileInfoList::deleteFileInfoByGroupFlags(uint groupFlags)
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL)
+      mArray[t] = nullptr;
+      if (info != nullptr)
       {
         if ((info->mGroupFlags & groupFlags) != 0 || (info->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
         {
@@ -1223,7 +1223,7 @@ uint FileInfoList::deleteFileInfoByGroupFlags(uint groupFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1241,12 +1241,12 @@ uint FileInfoList::deleteFileInfoByProducerId(uint producerId)
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL)
+      mArray[t] = nullptr;
+      if (info != nullptr)
       {
         if (info->mProducerId == producerId || (info->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
         {
-          mArray[t] = NULL;
+          mArray[t] = nullptr;
           if (mReleaseObjects)
             delete info;
           count++;
@@ -1263,7 +1263,7 @@ uint FileInfoList::deleteFileInfoByProducerId(uint producerId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1282,12 +1282,12 @@ uint FileInfoList::deleteMarkedFiles()
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL)
+      mArray[t] = nullptr;
+      if (info != nullptr)
       {
         if (info->mFlags & T::FileInfo::Flags::DeletedFile)
         {
-          mArray[t] = NULL;
+          mArray[t] = nullptr;
           if (mReleaseObjects)
             delete info;
           count++;
@@ -1304,7 +1304,7 @@ uint FileInfoList::deleteMarkedFiles()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1323,8 +1323,8 @@ uint FileInfoList::deleteFileInfoByGenerationId(uint generationId)
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL)
+      mArray[t] = nullptr;
+      if (info != nullptr)
       {
         if (info->mGenerationId == generationId || (info->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
         {
@@ -1344,7 +1344,7 @@ uint FileInfoList::deleteFileInfoByGenerationId(uint generationId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1363,8 +1363,8 @@ uint FileInfoList::deleteFileInfoByGenerationIdList(std::set<uint>& generationId
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL)
+      mArray[t] = nullptr;
+      if (info != nullptr)
       {
         if (generationIdList.find(info->mGenerationId) != generationIdList.end() || (info->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
         {
@@ -1384,7 +1384,7 @@ uint FileInfoList::deleteFileInfoByGenerationIdList(std::set<uint>& generationId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1407,7 +1407,7 @@ bool FileInfoList::deleteFileInfoByIndex(uint index)
     for (uint t=(uint)index+1; t<mSize; t++)
     {
       mArray[t-1] = mArray[t];
-      mArray[t] = NULL;
+      mArray[t] = nullptr;
     }
 
     if (mReleaseObjects)
@@ -1418,7 +1418,7 @@ bool FileInfoList::deleteFileInfoByIndex(uint index)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1437,12 +1437,12 @@ uint FileInfoList::deleteFileInfoBySourceId(uint sourceId)
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL)
+      mArray[t] = nullptr;
+      if (info != nullptr)
       {
         if (info->mSourceId == sourceId || (info->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
         {
-          mArray[t] = NULL;
+          mArray[t] = nullptr;
           if (mReleaseObjects)
             delete info;
           count++;
@@ -1459,7 +1459,7 @@ uint FileInfoList::deleteFileInfoBySourceId(uint sourceId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1478,12 +1478,12 @@ uint FileInfoList::deleteFileInfoByFileIdList(std::set<uint>& fileIdList)
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL)
+      mArray[t] = nullptr;
+      if (info != nullptr)
       {
         if (fileIdList.find(info->mFileId) != fileIdList.end() || (info->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
         {
-          mArray[t] = NULL;
+          mArray[t] = nullptr;
           if (mReleaseObjects)
             delete info;
           count++;
@@ -1500,7 +1500,7 @@ uint FileInfoList::deleteFileInfoByFileIdList(std::set<uint>& fileIdList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1519,12 +1519,12 @@ uint FileInfoList::deleteVirtualFiles()
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
-      mArray[t] = NULL;
-      if (info != NULL)
+      mArray[t] = nullptr;
+      if (info != nullptr)
       {
         if (info->mFileType == T::FileType::Virtual || (info->mFlags & T::FileInfo::Flags::VirtualContent) != 0  || (info->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
         {
-          mArray[t] = NULL;
+          mArray[t] = nullptr;
           if (mReleaseObjects)
             delete info;
           count++;
@@ -1541,7 +1541,7 @@ uint FileInfoList::deleteVirtualFiles()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1554,14 +1554,14 @@ void FileInfoList::setModificationLockPtr(ModificationLock* modificationLockPtr)
   FUNCTION_TRACE
   try
   {
-    if (modificationLockPtr != NULL)
+    if (modificationLockPtr != nullptr)
       mModificationLockPtr = modificationLockPtr;
     else
       mModificationLockPtr = &mModificationLock;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1578,7 +1578,7 @@ ModificationLock* FileInfoList::getModificationLockPtr()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1595,7 +1595,7 @@ void FileInfoList::lock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1612,7 +1612,7 @@ void FileInfoList::unlock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1629,7 +1629,7 @@ bool FileInfoList::getReleaseObjects()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1645,7 +1645,7 @@ void FileInfoList::setReleaseObjects(bool releaseObjects)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1669,7 +1669,7 @@ void FileInfoList::setComparisonMethod(FileInfo::ComparisonMethod comparisonMeth
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1693,7 +1693,7 @@ void FileInfoList::sort(FileInfo::ComparisonMethod comparisonMethod)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1710,7 +1710,7 @@ void FileInfoList::writeToFile(std::string filename)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1726,7 +1726,7 @@ void FileInfoList::writeToFile(std::string filename,const char *filemode)
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     FILE *file = fopen(filename.c_str(),filemode);
-    if (file == NULL)
+    if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot create the file!");
       exception.addParameter("Filename",filename);
@@ -1742,7 +1742,7 @@ void FileInfoList::writeToFile(std::string filename,const char *filemode)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1762,7 +1762,7 @@ void FileInfoList::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

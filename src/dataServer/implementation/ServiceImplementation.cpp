@@ -30,11 +30,11 @@ static void* ServiceImplementation_eventProcessingThread(void *arg)
   {
     ServiceImplementation *service = (ServiceImplementation*)arg;
     service->eventProcessingThread();
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+    SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
     exception.printError();
     exit(-1);
   }
@@ -51,7 +51,7 @@ ServiceImplementation::ServiceImplementation()
   {
     mServerSessionId = 0;
     mServerId = 0;
-    mContentServer = NULL;
+    mContentServer = nullptr;
 
     mLastProcessedEventId = 0;
     mShutdownRequested = false;
@@ -65,7 +65,7 @@ ServiceImplementation::ServiceImplementation()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -83,7 +83,7 @@ ServiceImplementation::~ServiceImplementation()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -96,8 +96,8 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,std:
   FUNCTION_TRACE
   try
   {
-    if (contentServer == NULL)
-      throw SmartMet::Spine::Exception(BCP,"The 'contentServer' parameter points to NULL!");
+    if (contentServer == nullptr)
+      throw SmartMet::Spine::Exception(BCP,"The 'contentServer' parameter points to nullptr!");
 
     //if (serverId == 0 ||  serverId > 64)
     //  throw SmartMet::Spine::Exception(BCP,"The 'serverId' parameter value must be in the range [1..64]!");
@@ -134,7 +134,7 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,std:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -151,7 +151,7 @@ void ServiceImplementation::enableVirtualContent(bool enabled)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -168,7 +168,7 @@ void ServiceImplementation::enableContentPreload(bool enabled)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -190,7 +190,7 @@ void ServiceImplementation::addVirtualContentFactory(VirtualContentFactory *fact
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -203,11 +203,11 @@ void ServiceImplementation::startEventProcessing()
   FUNCTION_TRACE
   try
   {
-    pthread_create(&mThread,NULL,ServiceImplementation_eventProcessingThread,this);
+    pthread_create(&mThread,nullptr,ServiceImplementation_eventProcessingThread,this);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -247,7 +247,7 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -264,7 +264,7 @@ int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,T::Valu
     for (uint t=0; t<sz; t++)
     {
       T::ValueRecord *rec = valueRecordList.getValueRecordByIndex(t);
-      if (rec != NULL)
+      if (rec != nullptr)
       {
         GRID::GridFile_sptr gridFile = getGridFile(rec->mFileId);
         if (gridFile)
@@ -295,7 +295,7 @@ int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,T::Valu
             }
             catch (...)
             {
-              SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+              SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
               exception.addParameter("FileId",std::to_string(rec->mFileId));
               exception.addParameter("MessageIndex",std::to_string(rec->mMessageIndex));
               rec->mResult = Result::UNEXPECTED_EXCEPTION;
@@ -318,7 +318,7 @@ int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,T::Valu
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -336,7 +336,7 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileI
       return Result::FILE_NOT_FOUND;
 
     GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
-    if (message == NULL)
+    if (message == nullptr)
       return Result::MESSAGE_NOT_FOUND;
 
     coordinates.mProjection = (uint)message->getGridProjection();
@@ -372,7 +372,7 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -390,7 +390,7 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
       return Result::DATA_NOT_FOUND;
 
     GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
-    if (message == NULL)
+    if (message == nullptr)
       return Result::DATA_NOT_FOUND;
 
     data.mServerId = mServerId;
@@ -436,7 +436,7 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -454,7 +454,7 @@ int ServiceImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -472,7 +472,7 @@ int ServiceImplementation::_getGridAttributeList(T::SessionId sessionId,uint fil
       return Result::DATA_NOT_FOUND;
 
     GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
-    if (message == NULL)
+    if (message == nullptr)
       return Result::DATA_NOT_FOUND;
 
     message->getAttributeList(std::string(""),attributeList);
@@ -481,7 +481,7 @@ int ServiceImplementation::_getGridAttributeList(T::SessionId sessionId,uint fil
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -497,11 +497,11 @@ int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint file
     try
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-      if (gridFile == NULL)
+      if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
-      if (message == NULL)
+      if (message == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
       message->getGridValueByPoint(coordinateType,x,y,interpolationMethod,value);
@@ -510,7 +510,7 @@ int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint file
     }
     catch (...)
     {
-       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
        exception.addParameter("FileId",std::to_string(fileId));
        exception.addParameter("MessageIndex",std::to_string(messageIndex));
        std::string st = exception.getStackTrace();
@@ -520,7 +520,7 @@ int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint file
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -536,11 +536,11 @@ int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,uint fileI
     try
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-      if (gridFile == NULL)
+      if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
-      if (message == NULL)
+      if (message == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
       message->getGridValueVector(values);
@@ -548,7 +548,7 @@ int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,uint fileI
     }
     catch (...)
     {
-       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
        exception.addParameter("FileId",std::to_string(fileId));
        exception.addParameter("MessageIndex",std::to_string(messageIndex));
        std::string st = exception.getStackTrace();
@@ -558,7 +558,7 @@ int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,uint fileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -574,11 +574,11 @@ int ServiceImplementation::_getGridValueVectorByCoordinateList(T::SessionId sess
     try
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-      if (gridFile == NULL)
+      if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
-      if (message == NULL)
+      if (message == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
       message->getGridValueVectorByCoordinateList(coordinateType,coordinates,interpolationMethod,values);
@@ -586,7 +586,7 @@ int ServiceImplementation::_getGridValueVectorByCoordinateList(T::SessionId sess
     }
     catch (...)
     {
-       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
        exception.addParameter("FileId",std::to_string(fileId));
        exception.addParameter("MessageIndex",std::to_string(messageIndex));
        std::string st = exception.getStackTrace();
@@ -596,7 +596,7 @@ int ServiceImplementation::_getGridValueVectorByCoordinateList(T::SessionId sess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -612,11 +612,11 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint
     try
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-      if (gridFile == NULL)
+      if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
-      if (message == NULL)
+      if (message == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
       message->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList);
@@ -624,7 +624,7 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint
     }
     catch (...)
     {
-       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
        exception.addParameter("FileId",std::to_string(fileId));
        exception.addParameter("MessageIndex",std::to_string(messageIndex));
        std::string st = exception.getStackTrace();
@@ -634,7 +634,7 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -649,11 +649,11 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
     try
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-      if (gridFile == NULL)
+      if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
-      if (message == NULL)
+      if (message == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
       switch (coordinateType)
@@ -695,7 +695,7 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
     }
     catch (...)
     {
-       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
        exception.addParameter("FileId",std::to_string(fileId));
        exception.addParameter("MessageIndex",std::to_string(messageIndex));
        std::string st = exception.getStackTrace();
@@ -705,7 +705,7 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -721,11 +721,11 @@ int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,u
     try
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-      if (gridFile == NULL)
+      if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
-      if (message == NULL)
+      if (message == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
       message->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList);
@@ -734,7 +734,7 @@ int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,u
     }
     catch (...)
     {
-       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
        exception.addParameter("FileId",std::to_string(fileId));
        exception.addParameter("MessageIndex",std::to_string(messageIndex));
        std::string st = exception.getStackTrace();
@@ -744,7 +744,7 @@ int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -760,11 +760,11 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
     try
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-      if (gridFile == NULL)
+      if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
-      if (message == NULL)
+      if (message == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
       message->getGridValueListByPolygon(coordinateType,polygonPoints,valueList);
@@ -772,7 +772,7 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
     }
     catch (...)
     {
-       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
        exception.addParameter("FileId",std::to_string(fileId));
        exception.addParameter("MessageIndex",std::to_string(messageIndex));
        std::string st = exception.getStackTrace();
@@ -782,7 +782,7 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -798,11 +798,11 @@ int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId
     try
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-      if (gridFile == NULL)
+      if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
-      if (message == NULL)
+      if (message == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
       message->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList);
@@ -810,7 +810,7 @@ int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId
     }
     catch (...)
     {
-       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
        exception.addParameter("FileId",std::to_string(fileId));
        exception.addParameter("MessageIndex",std::to_string(messageIndex));
        std::string st = exception.getStackTrace();
@@ -820,7 +820,7 @@ int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -836,11 +836,11 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,u
     try
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-      if (gridFile == NULL)
+      if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
-      if (message == NULL)
+      if (message == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
 
@@ -853,7 +853,7 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,u
     }
     catch (...)
     {
-       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
        exception.addParameter("FileId",std::to_string(fileId));
        exception.addParameter("MessageIndex",std::to_string(messageIndex));
        std::string st = exception.getStackTrace();
@@ -863,7 +863,7 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -879,11 +879,11 @@ int ServiceImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,uin
     try
     {
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-      if (gridFile == NULL)
+      if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
-      if (message == NULL)
+      if (message == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
       message->getGridValueVectorByPoint(coordinateType,x,y,vectorType,valueVector);
@@ -892,7 +892,7 @@ int ServiceImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,uin
     }
     catch (...)
     {
-       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
        exception.addParameter("FileId",std::to_string(fileId));
        exception.addParameter("MessageIndex",std::to_string(messageIndex));
        std::string st = exception.getStackTrace();
@@ -902,7 +902,7 @@ int ServiceImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -953,7 +953,7 @@ void ServiceImplementation::readContentList(T::ContentInfoList& contentList,bool
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1085,7 +1085,7 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1161,10 +1161,10 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
             mContentServer->getContentListByFileId(mServerSessionId,fileInfo->mFileId,contentInfoList);
 
           T::ProducerInfo *producerInfo = producerInfoList.getProducerInfoById(fileInfo->mProducerId);
-          if (producerInfo != NULL)
+          if (producerInfo != nullptr)
           {
             T::GenerationInfo *generationInfo = generationInfoList.getGenerationInfoById(fileInfo->mGenerationId);
-            if (generationInfo != NULL)
+            if (generationInfo != nullptr)
             {
               mVirtualContentManager.addFile(*producerInfo,*generationInfo,*fileInfo,contentInfoList,gridFileMap);
             }
@@ -1186,7 +1186,7 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
         }
         catch (...)
         {
-          SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+          SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
           std::string st = exception.getStackTrace();
           PRINT_DATA(mDebugLog,"%s",st.c_str());
         }
@@ -1198,7 +1198,7 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1219,7 +1219,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
 
     GRID::GridFile_sptr storageFile = mGridFileManager.getFileByIdNoMapping(fileInfo.mFileId);
 
-    GRID::GridFile *gridFile = NULL;
+    GRID::GridFile *gridFile = nullptr;
     if (storageFile)
     {
       //printf("** file already in the content storage %u\n",fileInfo.mFileId);
@@ -1299,7 +1299,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
           {
             printf("** PRELOAD %s\n",info->mFmiParameterName.c_str());
             GRID::Message *message = gFile->getMessageByIndex(info->mMessageIndex);
-            if (message != NULL)
+            if (message != nullptr)
               message->getGridValueByGridPoint(0,0);
           }
         }
@@ -1315,7 +1315,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
         unsigned long long sf = (1 << (mServerId-1));
 
         T::ContentInfo *info = contentList.getContentInfoByIndex(0);
-        if (info == NULL  ||  (info->mServerFlags & sf) == 0)
+        if (info == nullptr  ||  (info->mServerFlags & sf) == 0)
           mContentServer->registerContentListByFileId(mServerSessionId,mServerId,fileInfo.mFileId);
       }
 
@@ -1386,7 +1386,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1472,7 +1472,7 @@ void ServiceImplementation::fullUpdate()
         }
         catch (...)
         {
-          SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+          SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
           std::string st = exception.getStackTrace();
           PRINT_DATA(mDebugLog,"%s",st.c_str());
         }
@@ -1499,7 +1499,7 @@ void ServiceImplementation::fullUpdate()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1519,7 +1519,7 @@ void ServiceImplementation::event_clear(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1537,7 +1537,7 @@ void ServiceImplementation::event_contentServerReload(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1554,7 +1554,7 @@ void ServiceImplementation::event_producerAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1573,7 +1573,7 @@ void ServiceImplementation::event_producerDeleted(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1592,7 +1592,7 @@ void ServiceImplementation::event_producerListDeletedBySourceId(T::EventInfo& ev
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1609,7 +1609,7 @@ void ServiceImplementation::event_generationAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1628,7 +1628,7 @@ void ServiceImplementation::event_generationDeleted(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1645,7 +1645,7 @@ void ServiceImplementation::event_generationStatusChanged(T::EventInfo& eventInf
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1664,7 +1664,7 @@ void ServiceImplementation::event_generationListDeletedByProducerId(T::EventInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1683,7 +1683,7 @@ void ServiceImplementation::event_generationListDeletedBySourceId(T::EventInfo& 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1733,7 +1733,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1755,7 +1755,7 @@ void ServiceImplementation::event_fileDeleted(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1830,7 +1830,7 @@ void ServiceImplementation::event_fileUpdated(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1849,7 +1849,7 @@ void ServiceImplementation::event_fileListDeletedByGroupFlags(T::EventInfo& even
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1868,7 +1868,7 @@ void ServiceImplementation::event_fileListDeletedByProducerId(T::EventInfo& even
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1887,7 +1887,7 @@ void ServiceImplementation::event_fileListDeletedByGenerationId(T::EventInfo& ev
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1907,7 +1907,7 @@ void ServiceImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1924,7 +1924,7 @@ void ServiceImplementation::event_contentListDeletedByFileId(T::EventInfo& event
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1941,7 +1941,7 @@ void ServiceImplementation::event_contentListDeletedByGroupFlags(T::EventInfo& e
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1958,7 +1958,7 @@ void ServiceImplementation::event_contentListDeletedByProducerId(T::EventInfo& e
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1975,7 +1975,7 @@ void ServiceImplementation::event_contentListDeletedByGenerationId(T::EventInfo&
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -1991,7 +1991,7 @@ void ServiceImplementation::event_contentListDeletedBySourceId(T::EventInfo& eve
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2008,7 +2008,7 @@ void ServiceImplementation::event_dataServerAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2034,7 +2034,7 @@ void ServiceImplementation::event_dataServerDeleted(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2050,7 +2050,7 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2067,7 +2067,7 @@ void ServiceImplementation::event_contentDeleted(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2084,7 +2084,7 @@ void ServiceImplementation::event_contentRegistered(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2102,7 +2102,7 @@ void ServiceImplementation::event_deleteVirtualContent(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2133,7 +2133,7 @@ void ServiceImplementation::event_updateVirtualContent(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2278,7 +2278,7 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2345,7 +2345,7 @@ void ServiceImplementation::checkServerRegistration()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2379,7 +2379,7 @@ void ServiceImplementation::processEvents()
       if (gFile)
       {
         GRID::Message *message = gFile->getMessageByIndex(it.second);
-        if (message != NULL)
+        if (message != nullptr)
           message->getGridValueByGridPoint(0,0);
       }
 
@@ -2433,7 +2433,7 @@ void ServiceImplementation::processEvents()
       //printf("EVENT LIST %u\n",len);
 
       T::EventInfo *it = eventInfoList.getFirstEvent();
-      while (it != NULL)
+      while (it != nullptr)
       {
         mLastProcessedEventId = it->mEventId;
         processEvent(*it);
@@ -2446,7 +2446,7 @@ void ServiceImplementation::processEvents()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2468,7 +2468,7 @@ void ServiceImplementation::eventProcessingThread()
       }
       catch (...)
       {
-        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,NULL);
+        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
         std::string st = exception.getStackTrace();
         PRINT_DATA(mDebugLog,"%s",st.c_str());
       }
@@ -2483,7 +2483,7 @@ void ServiceImplementation::eventProcessingThread()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2502,7 +2502,7 @@ void ServiceImplementation::shutdown()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

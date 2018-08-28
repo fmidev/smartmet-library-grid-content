@@ -16,7 +16,7 @@ LevelInfoList::LevelInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -32,13 +32,13 @@ LevelInfoList::LevelInfoList(LevelInfoList& levelInfoList)
     for (uint t=0; t<sz; t++)
     {
       LevelInfo *info = levelInfoList.getLevelInfoByIndexNoCheck(t);
-      if (info != NULL)
+      if (info != nullptr)
         mList.push_back(info->duplicate());
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -54,7 +54,7 @@ LevelInfoList::~LevelInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -75,13 +75,13 @@ void LevelInfoList::operator=(LevelInfoList& levelInfoList)
     for (uint t=0; t<sz; t++)
     {
       LevelInfo *info = levelInfoList.getLevelInfoByIndexNoCheck(t);
-      if (info != NULL)
+      if (info != nullptr)
         mList.push_back(info->duplicate());
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -97,7 +97,7 @@ void LevelInfoList::addLevelInfo(LevelInfo* levelInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -117,7 +117,7 @@ void LevelInfoList::clear()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -130,13 +130,13 @@ LevelInfo* LevelInfoList::getLevelInfoByIndex(uint index)
   try
   {
     if (index >= mList.size())
-      return NULL;
+      return nullptr;
 
     return mList.at(index);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -151,7 +151,7 @@ LevelInfo* LevelInfoList::getLevelInfoByIndexNoCheck(uint index)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -166,7 +166,7 @@ uint LevelInfoList::getLength()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -185,7 +185,7 @@ void LevelInfoList::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

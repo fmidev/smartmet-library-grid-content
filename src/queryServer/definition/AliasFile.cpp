@@ -16,7 +16,7 @@ AliasFile::AliasFile()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -33,7 +33,7 @@ AliasFile::AliasFile(std::string filename)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -51,7 +51,7 @@ AliasFile::AliasFile(const AliasFile& aliasFile)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -66,7 +66,7 @@ AliasFile::~AliasFile()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -86,7 +86,7 @@ void AliasFile::init()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -103,7 +103,7 @@ void AliasFile::init(std::string filename)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -121,7 +121,7 @@ void AliasFile::init(std::string filename,bool duplicatesAllowed)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -146,7 +146,7 @@ bool AliasFile::checkUpdates()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -182,7 +182,7 @@ bool AliasFile::getAlias(std::string& name,std::string& alias)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -214,7 +214,7 @@ void AliasFile::getAliasList(std::string& name,std::vector<std::string>& aliasLi
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -227,7 +227,7 @@ void AliasFile::loadFile()
   try
   {
     FILE *file = fopen(mFilename.c_str(),"r");
-    if (file == NULL)
+    if (file == nullptr)
     {
       Spine::Exception exception(BCP,"Cannot open the alias file!");
       exception.addParameter("Filename",mFilename);
@@ -241,13 +241,13 @@ void AliasFile::loadFile()
     uint lineCount = 0;
     while (!feof(file))
     {
-      if (fgets(st,1000,file) != NULL)
+      if (fgets(st,1000,file) != nullptr)
       {
         lineCount++;
         if (st[0] != '#')
         {
           char *p = strstr(st,"\n");
-          if (p != NULL)
+          if (p != nullptr)
           {
             while (*p < ' '  &&  p >= st)
             {
@@ -257,7 +257,7 @@ void AliasFile::loadFile()
           }
 
           p = strstr(st,":");
-          if (p != NULL)
+          if (p != nullptr)
           {
             *p = '\0';
             p++;
@@ -298,7 +298,7 @@ void AliasFile::loadFile()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -319,7 +319,7 @@ void AliasFile::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

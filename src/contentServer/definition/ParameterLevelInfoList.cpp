@@ -16,7 +16,7 @@ ParameterLevelInfoList::ParameterLevelInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -32,13 +32,13 @@ ParameterLevelInfoList::ParameterLevelInfoList(ParameterLevelInfoList& parameter
     for (uint t=0; t<sz; t++)
     {
       ParameterLevelInfo *info = parameterLevelInfoList.getParameterLevelInfoByIndexNoCheck(t);
-      if (info != NULL)
+      if (info != nullptr)
         mList.push_back(info->duplicate());
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -54,7 +54,7 @@ ParameterLevelInfoList::~ParameterLevelInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -75,13 +75,13 @@ void ParameterLevelInfoList::operator=(ParameterLevelInfoList& parameterLevelInf
     for (uint t=0; t<sz; t++)
     {
       ParameterLevelInfo *info = parameterLevelInfoList.getParameterLevelInfoByIndexNoCheck(t);
-      if (info != NULL)
+      if (info != nullptr)
         mList.push_back(info->duplicate());
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -97,7 +97,7 @@ void ParameterLevelInfoList::addParameterLevelInfo(ParameterLevelInfo* parameter
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -117,7 +117,7 @@ void ParameterLevelInfoList::clear()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -130,13 +130,13 @@ ParameterLevelInfo* ParameterLevelInfoList::getParameterLevelInfoByIndex(uint in
   try
   {
     if (index >= mList.size())
-      return NULL;
+      return nullptr;
 
     return mList.at(index);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -151,7 +151,7 @@ ParameterLevelInfo* ParameterLevelInfoList::getParameterLevelInfoByIndexNoCheck(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -180,11 +180,11 @@ ParameterLevelInfo* ParameterLevelInfoList::getParameterLevelInfo(
         return mList[t];
       }
     }
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -200,7 +200,7 @@ uint ParameterLevelInfoList::getLength()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -219,7 +219,7 @@ void ParameterLevelInfoList::print(std::ostream& stream,uint level,uint optionFl
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

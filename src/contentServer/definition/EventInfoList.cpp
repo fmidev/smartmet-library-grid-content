@@ -19,13 +19,13 @@ EventInfoList::EventInfoList()
   try
   {
     mMaxLength = 3000000;
-    firstItem = NULL;
-    lastItem = NULL;
+    firstItem = nullptr;
+    lastItem = nullptr;
     mLength = 0;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -40,12 +40,12 @@ EventInfoList::EventInfoList(EventInfoList& eventInfoList)
   {
     eventInfoList.lock();
     mMaxLength = eventInfoList.mMaxLength;
-    firstItem = NULL;
-    lastItem = NULL;
+    firstItem = nullptr;
+    lastItem = nullptr;
     mLength = 0;
 
     EventInfo *it = eventInfoList.getFirstEvent();
-    while (it != NULL)
+    while (it != nullptr)
     {
       addEventInfo(it->duplicate());
       it = it->nextItem;
@@ -56,7 +56,7 @@ EventInfoList::EventInfoList(EventInfoList& eventInfoList)
   catch (...)
   {
     eventInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -72,7 +72,7 @@ EventInfoList::~EventInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -93,7 +93,7 @@ void EventInfoList::operator=(EventInfoList& eventInfoList)
     eventInfoList.lock();
 
     EventInfo *it = eventInfoList.getFirstEvent();
-    while (it != NULL)
+    while (it != nullptr)
     {
       addEventInfo(it->duplicate());
       it = it->nextItem;
@@ -104,7 +104,7 @@ void EventInfoList::operator=(EventInfoList& eventInfoList)
   catch (...)
   {
     eventInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -120,7 +120,7 @@ EventInfo* EventInfoList::getFirstEvent()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -136,7 +136,7 @@ EventInfo* EventInfoList::getLastEvent()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -153,25 +153,25 @@ void EventInfoList::addEventInfo(EventInfo *dataEventInfo)
 
     AutoThreadLock lock(&mThreadLock);
 
-    if (lastItem != NULL)
+    if (lastItem != nullptr)
     {
       lastItem->nextItem = dataEventInfo;
       dataEventInfo->prevItem = lastItem;
-      dataEventInfo->nextItem = NULL;
+      dataEventInfo->nextItem = nullptr;
       lastItem = dataEventInfo;
     }
     else
     {
       firstItem = dataEventInfo;
       lastItem = dataEventInfo;
-      dataEventInfo->prevItem = NULL;
-      dataEventInfo->nextItem = NULL;
+      dataEventInfo->prevItem = nullptr;
+      dataEventInfo->nextItem = nullptr;
     }
     mLength++;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -186,25 +186,25 @@ void EventInfoList::addEventInfoToBegin(EventInfo *dataEventInfo)
   {
     AutoThreadLock lock(&mThreadLock);
 
-    if (firstItem != NULL)
+    if (firstItem != nullptr)
     {
       firstItem->prevItem = dataEventInfo;
       dataEventInfo->nextItem = firstItem;
-      dataEventInfo->prevItem = NULL;
+      dataEventInfo->prevItem = nullptr;
       firstItem = dataEventInfo;
     }
     else
     {
       firstItem = dataEventInfo;
       lastItem = dataEventInfo;
-      dataEventInfo->prevItem = NULL;
-      dataEventInfo->nextItem = NULL;
+      dataEventInfo->prevItem = nullptr;
+      dataEventInfo->nextItem = nullptr;
     }
     mLength++;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -219,22 +219,22 @@ void EventInfoList::deleteFirstEvent()
   {
     AutoThreadLock lock(&mThreadLock);
 
-    if (firstItem != NULL)
+    if (firstItem != nullptr)
     {
       EventInfo *it = firstItem;
       firstItem = firstItem->nextItem;
       delete it;
-      if (firstItem != NULL)
-        firstItem->prevItem = NULL;
+      if (firstItem != nullptr)
+        firstItem->prevItem = nullptr;
       else
-        lastItem = NULL;
+        lastItem = nullptr;
 
       mLength--;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -248,22 +248,22 @@ void EventInfoList::deleteLastEvent()
   try
   {
     AutoThreadLock lock(&mThreadLock);
-    if (lastItem != NULL)
+    if (lastItem != nullptr)
     {
       EventInfo *it = lastItem;
       lastItem = lastItem->prevItem;
       delete it;
-      if (lastItem != NULL)
-        lastItem->nextItem = NULL;
+      if (lastItem != nullptr)
+        lastItem->nextItem = nullptr;
       else
-        firstItem = NULL;
+        firstItem = nullptr;
 
       mLength--;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -277,20 +277,20 @@ void EventInfoList::clear()
   {
     AutoThreadLock lock(&mThreadLock);
     EventInfo *it = firstItem;
-    while (it != NULL)
+    while (it != nullptr)
     {
       EventInfo *eventInfo = it;
       it = it->nextItem;
       delete eventInfo;
     }
 
-    firstItem = NULL;
-    lastItem = NULL;
+    firstItem = nullptr;
+    lastItem = nullptr;
     mLength = 0;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -307,7 +307,7 @@ uint EventInfoList::getLength()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -324,7 +324,7 @@ uint EventInfoList::getMaxLength()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -340,7 +340,7 @@ EventInfo* EventInfoList::getEventInfo(unsigned long long eventId)
     AutoThreadLock lock(&mThreadLock);
 
     EventInfo *it = lastItem;
-    while (it != NULL)
+    while (it != nullptr)
     {
       if (it->mEventId == eventId)
         return it;
@@ -348,11 +348,11 @@ EventInfo* EventInfoList::getEventInfo(unsigned long long eventId)
       it = it->prevItem;
     }
 
-    return NULL;
+    return nullptr;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -367,19 +367,19 @@ void EventInfoList::getEventInfoList(T::EventId startEventId,uint maxRecords,T::
   {
     AutoThreadLock lock(&mThreadLock);
 
-    if (firstItem == NULL)
+    if (firstItem == nullptr)
       return;
 
     EventInfo *it = lastItem;
-    while (it != NULL  &&  it->mEventId > startEventId)
+    while (it != nullptr  &&  it->mEventId > startEventId)
     {
       it = it->prevItem;
     }
 
-    if (it == NULL)
+    if (it == nullptr)
       it = firstItem;
 
-    while (it != NULL)
+    while (it != nullptr)
     {
       if (it->mEventId >= startEventId)
       {
@@ -393,7 +393,7 @@ void EventInfoList::getEventInfoList(T::EventId startEventId,uint maxRecords,T::
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -414,7 +414,7 @@ void EventInfoList::setMaxLength(uint maxLength)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -431,7 +431,7 @@ void EventInfoList::lock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -448,7 +448,7 @@ void EventInfoList::unlock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -464,7 +464,7 @@ void EventInfoList::writeToFile(std::string filename)
     AutoThreadLock lock(&mThreadLock);
 
     FILE *file = fopen(filename.c_str(),"w");
-    if (file == NULL)
+    if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot create the file!");
       exception.addParameter("Filename",filename);
@@ -472,7 +472,7 @@ void EventInfoList::writeToFile(std::string filename)
     }
 
     EventInfo *it = firstItem;
-    while (it != NULL)
+    while (it != nullptr)
     {
       fprintf(file,"%s\n",it->getCsv().c_str());
       it = it->nextItem;
@@ -482,7 +482,7 @@ void EventInfoList::writeToFile(std::string filename)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -497,7 +497,7 @@ void EventInfoList::print(std::ostream& stream,uint level,uint optionFlags)
     AutoThreadLock lock(&mThreadLock);
     stream << space(level) << "EventInfoList\n";
     EventInfo *it = firstItem;
-    while (it != NULL)
+    while (it != nullptr)
     {
       it->print(stream,level+1,optionFlags);
       it = it->nextItem;
@@ -505,7 +505,7 @@ void EventInfoList::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,NULL);
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
