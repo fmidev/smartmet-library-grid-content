@@ -16,7 +16,7 @@ ValueRecord::ValueRecord()
   {
     mFileId = 0;
     mMessageIndex = 0;
-    mCoordinateType = T::CoordinateType::UNKNOWN;
+    mCoordinateType = T::CoordinateTypeValue::UNKNOWN;
     mAreaInterpolationMethod = T::AreaInterpolationMethod::Linear;
     mX = 0;
     mY = 0;
@@ -75,14 +75,14 @@ void ValueRecord::print(std::ostream& stream,uint level,uint optionFlags)
   try
   {
     stream << space(level) << "ValueRecord\n";
-    stream << space(level) << "- mFileId              = " << mFileId << "\n";
-    stream << space(level) << "- mMessageIndex        = " << mMessageIndex << "\n";
-    stream << space(level) << "- mCoordinateType      = " << (int)mCoordinateType << "\n";
-    stream << space(level) << "- mAreaInterpolationMethod = " << (int)mAreaInterpolationMethod << "\n";
-    stream << space(level) << "- mX                   = " << mX << "\n";
-    stream << space(level) << "- mY                   = " << mY << "\n";
-    stream << space(level) << "- mValue               = " << mValue << "\n";
-    stream << space(level) << "- mResult              = " << mResult << "\n";
+    stream << space(level) << "- mFileId                  = " << mFileId << "\n";
+    stream << space(level) << "- mMessageIndex            = " << mMessageIndex << "\n";
+    stream << space(level) << "- mCoordinateType          = " << mCoordinateType << "\n";
+    stream << space(level) << "- mAreaInterpolationMethod = " << mAreaInterpolationMethod << "\n";
+    stream << space(level) << "- mX                       = " << mX << "\n";
+    stream << space(level) << "- mY                       = " << mY << "\n";
+    stream << space(level) << "- mValue                   = " << mValue << "\n";
+    stream << space(level) << "- mResult                  = " << mResult << "\n";
   }
   catch (...)
   {

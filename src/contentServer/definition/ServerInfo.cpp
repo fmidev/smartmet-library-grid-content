@@ -17,7 +17,7 @@ ServerInfo::ServerInfo()
     mServerId = 0;
     mType = 0;
     mFlags = 0;
-    mLastCall = time(0);
+    mLastCall = time(nullptr);
   }
   catch (...)
   {
@@ -75,7 +75,7 @@ ServerInfo::ServerInfo(std::string name,std::string serverIor,uint type)
     mServerIor = serverIor;
     mType = type;
     mFlags = 0;
-    mLastCall = time(0);
+    mLastCall = time(nullptr);
   }
   catch (...)
   {
@@ -102,12 +102,12 @@ ServerInfo::~ServerInfo()
 
 
 
-void ServerInfo::operator=(ServerInfo& serverInfo)
+ServerInfo& ServerInfo::operator=(ServerInfo& serverInfo)
 {
   try
   {
     if (&serverInfo == this)
-      return;
+      return *this;
 
     mServerId = serverInfo.mServerId;
     mName = serverInfo.mName;
@@ -115,6 +115,8 @@ void ServerInfo::operator=(ServerInfo& serverInfo)
     mType = serverInfo.mType;
     mFlags = serverInfo.mFlags;
     mLastCall = serverInfo.mLastCall;
+
+    return *this;
   }
   catch (...)
   {
@@ -135,7 +137,7 @@ std::string ServerInfo::getCsv()
         mServerId,
         mName.c_str(),
         mServerIor.c_str(),
-        (uint)mType,
+        mType,
         mFlags);
 
     return std::string(st);
@@ -195,11 +197,11 @@ void ServerInfo::setCsv(const char *csv)
 
     if (c >= 4)
     {
-      mServerId = (uint)atoll(field[0]);
+      mServerId = toInt64(field[0]);
       mName = field[1];
       mServerIor = field[2];
-      mType = (uint)atoll(field[3]);
-      mFlags = (uint)atoll(field[4]);
+      mType = toInt64(field[3]);
+      mFlags = toInt64(field[4]);
     }
   }
   catch (...)

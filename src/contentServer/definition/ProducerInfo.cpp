@@ -80,12 +80,12 @@ ProducerInfo::~ProducerInfo()
 
 
 
-void ProducerInfo::operator=(ProducerInfo& producerInfo)
+ProducerInfo& ProducerInfo::operator=(ProducerInfo& producerInfo)
 {
   try
   {
     if (&producerInfo == this)
-      return;
+      return *this;
 
     mProducerId = producerInfo.mProducerId;
     mName = producerInfo.mName;
@@ -93,6 +93,8 @@ void ProducerInfo::operator=(ProducerInfo& producerInfo)
     mDescription = producerInfo.mDescription;
     mFlags = producerInfo.mFlags;
     mSourceId = producerInfo.mSourceId;
+
+    return *this;
   }
   catch (...)
   {
@@ -174,12 +176,12 @@ void ProducerInfo::setCsv(const char *csv)
 
     if (c >= 5)
     {
-       mProducerId = (uint)atoll(field[0]);
+       mProducerId = toInt64(field[0]);
        mName = field[1];
        mTitle = field[2];
        mDescription = field[3];
-       mFlags = (uint)atoll(field[4]);
-       mSourceId = (uint)atoll(field[5]);
+       mFlags = toInt64(field[4]);
+       mSourceId = toInt64(field[5]);
     }
   }
   catch (...)

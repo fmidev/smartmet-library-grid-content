@@ -29,7 +29,7 @@ class RedisModificationLock
       if (reply == nullptr)
         return;
 
-      mRequestId = (uint)reply->integer;
+      mRequestId = reply->integer;
       freeReplyObject(reply);
 
       bool locked = true;
@@ -44,7 +44,7 @@ class RedisModificationLock
 
         uint id = 0;
         if (reply->str != nullptr)
-          id = (uint)atoll(reply->str);
+          id = toInt64(reply->str);
 
         freeReplyObject(reply);
 
@@ -89,7 +89,7 @@ RedisImplementation::RedisImplementation()
   {
     mImplementationType = Implementation::Redis;
     mContext = nullptr;
-    mStartTime = time(0);
+    mStartTime = time(nullptr);
     mRedisPort = 0;
   }
   catch (...)
@@ -176,7 +176,7 @@ int RedisImplementation::openConnection()
       }
     }
 
-    mStartTime = time(0);
+    mStartTime = time(nullptr);
     return Result::OK;
   }
   catch (...)
@@ -648,9 +648,9 @@ int RedisImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& co
     }
 
     if (reply->str != nullptr)
-      count = (uint)atoi(reply->str);
+      count = toInt64(reply->str);
     else
-      count = (uint)reply->integer;
+      count = reply->integer;
 
     freeReplyObject(reply);
     return Result::OK;
@@ -698,7 +698,7 @@ int RedisImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
         return Result::PERMANENT_STORAGE_ERROR;
       }
 
-      producerInfo.mProducerId = (uint)reply->integer;
+      producerInfo.mProducerId = reply->integer;
       freeReplyObject(reply);
     }
     else
@@ -716,7 +716,7 @@ int RedisImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
 
       uint id = 0;
       if (reply != nullptr  &&  reply->str != nullptr)
-        id = (uint)atoi(reply->str);
+        id = toInt64(reply->str);
       // printf("**** ID %u\n",id);
       freeReplyObject(reply);
 
@@ -1030,9 +1030,9 @@ int RedisImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& coun
     }
 
     if (reply->str != nullptr)
-      count = (uint)atoi(reply->str);
+      count = toInt64(reply->str);
     else
-      count = (uint)reply->integer;
+      count = reply->integer;
 
     freeReplyObject(reply);
     return Result::OK;
@@ -1127,38 +1127,38 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
         T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
         std::string sourceParamKey;
         std::string targetParamKey;
-        T::ParamLevelIdType paramLevelIdType = T::ParamLevelIdType::FMI;
+        T::ParamLevelIdType paramLevelIdType = T::ParamLevelIdTypeValue::FMI;
         T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
 
         if (producerInfo->mProducerId == contentInfo->mProducerId)
         {
           switch (sourceParameterKeyType)
           {
-            case T::ParamKeyType::FMI_ID:
+            case T::ParamKeyTypeValue::FMI_ID:
               sourceParamKey = contentInfo->mFmiParameterId;
               break;
 
-            case T::ParamKeyType::FMI_NAME:
+            case T::ParamKeyTypeValue::FMI_NAME:
               sourceParamKey = contentInfo->mFmiParameterName;
               break;
 
-            case T::ParamKeyType::GRIB_ID:
+            case T::ParamKeyTypeValue::GRIB_ID:
               sourceParamKey = contentInfo->mGribParameterId;
               break;
 
-            case T::ParamKeyType::NEWBASE_ID:
+            case T::ParamKeyTypeValue::NEWBASE_ID:
               sourceParamKey = contentInfo->mNewbaseParameterId;
               break;
 
-            case T::ParamKeyType::NEWBASE_NAME:
+            case T::ParamKeyTypeValue::NEWBASE_NAME:
               sourceParamKey = contentInfo->mNewbaseParameterName;
               break;
 
-            case T::ParamKeyType::CDM_ID:
+            case T::ParamKeyTypeValue::CDM_ID:
               sourceParamKey = contentInfo->mCdmParameterId;
               break;
 
-            case T::ParamKeyType::CDM_NAME:
+            case T::ParamKeyTypeValue::CDM_NAME:
               sourceParamKey = contentInfo->mCdmParameterName;
               break;
 
@@ -1169,31 +1169,31 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
 
           switch (targetParameterKeyType)
           {
-            case T::ParamKeyType::FMI_ID:
+            case T::ParamKeyTypeValue::FMI_ID:
               targetParamKey = contentInfo->mFmiParameterId;
               break;
 
-            case T::ParamKeyType::FMI_NAME:
+            case T::ParamKeyTypeValue::FMI_NAME:
               targetParamKey = contentInfo->mFmiParameterName;
               break;
 
-            case T::ParamKeyType::GRIB_ID:
+            case T::ParamKeyTypeValue::GRIB_ID:
               targetParamKey = contentInfo->mGribParameterId;
               break;
 
-            case T::ParamKeyType::NEWBASE_ID:
+            case T::ParamKeyTypeValue::NEWBASE_ID:
               targetParamKey = contentInfo->mNewbaseParameterId;
               break;
 
-            case T::ParamKeyType::NEWBASE_NAME:
+            case T::ParamKeyTypeValue::NEWBASE_NAME:
               targetParamKey = contentInfo->mNewbaseParameterName;
               break;
 
-            case T::ParamKeyType::CDM_ID:
+            case T::ParamKeyTypeValue::CDM_ID:
               targetParamKey = contentInfo->mCdmParameterId;
               break;
 
-            case T::ParamKeyType::CDM_NAME:
+            case T::ParamKeyTypeValue::CDM_NAME:
               targetParamKey = contentInfo->mCdmParameterName;
               break;
 
@@ -1208,13 +1208,13 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
             p += sprintf(p,"%s;%s;%d;%s;%d;%d;%05d;%d;%d",
                 producerInfo->mName.c_str(),
                 sourceParamKey.c_str(),
-                (int)targetParameterKeyType,
+                targetParameterKeyType,
                 targetParamKey.c_str(),
-                (int)paramLevelIdType,
-                (int)paramLevelId,
-                (int)contentInfo->mParameterLevel,
-                (int)contentInfo->mForecastType,
-                (int)contentInfo->mForecastNumber);
+                paramLevelIdType,
+                paramLevelId,
+                contentInfo->mParameterLevel,
+                contentInfo->mForecastType,
+                contentInfo->mForecastNumber);
 
             if (tmpList.find(std::string(tmp)) == tmpList.end())
             {
@@ -1276,7 +1276,7 @@ int RedisImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
 
     RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
-    generationInfo.mGenerationId = (uint)reply->integer;
+    generationInfo.mGenerationId = reply->integer;
     freeReplyObject(reply);
 
     reply = (redisReply*)redisCommand(mContext,"ZADD %sgenerations %u %s",mTablePrefix.c_str(),generationInfo.mGenerationId,generationInfo.getCsv().c_str());
@@ -1712,7 +1712,7 @@ int RedisImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId
 
 
 
-int RedisImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,uint producerId,T::GenerationStatus generationStatus,T::GenerationInfo& generationInfo)
+int RedisImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,uint producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -1748,7 +1748,7 @@ int RedisImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
 
 
 
-int RedisImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,std::string producerName,T::GenerationStatus generationStatus,T::GenerationInfo& generationInfo)
+int RedisImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,std::string producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -1807,9 +1807,9 @@ int RedisImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
     }
 
     if (reply->str != nullptr)
-      count = (uint)atoi(reply->str);
+      count = toInt64(reply->str);
     else
-      count = (uint)reply->integer;
+      count = reply->integer;
 
     freeReplyObject(reply);
     return Result::OK;
@@ -1824,7 +1824,7 @@ int RedisImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
 
 
 
-int RedisImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,T::GenerationStatus status)
+int RedisImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,uchar status)
 {
   FUNCTION_TRACE
   try
@@ -1863,7 +1863,7 @@ int RedisImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uin
 
     freeReplyObject(reply);
 
-    addEvent(EventType::GENERATION_STATUS_CHANGED,generationId,(uint)status,0,0);
+    addEvent(EventType::GENERATION_STATUS_CHANGED,generationId,status,0,0);
 
     return Result::OK;
   }
@@ -1877,7 +1877,7 @@ int RedisImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uin
 
 
 
-int RedisImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,std::string generationName,T::GenerationStatus status)
+int RedisImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,std::string generationName,uchar status)
 {
   FUNCTION_TRACE
   try
@@ -1916,7 +1916,7 @@ int RedisImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,s
 
     freeReplyObject(reply);
 
-    addEvent(EventType::GENERATION_STATUS_CHANGED,generationInfo.mGenerationId,(uint)status,0,0);
+    addEvent(EventType::GENERATION_STATUS_CHANGED,generationInfo.mGenerationId,status,0,0);
 
     return Result::OK;
   }
@@ -1967,7 +1967,7 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
       // ### Adding an event to the event list.
 
       //printf("-- File updated %s\n",fileInfo.mName.c_str());
-      addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,(uint)fileInfo.mFileType,0,0);
+      addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,fileInfo.mFileType,0,0);
     }
     else
     {
@@ -1982,7 +1982,7 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
         return Result::PERMANENT_STORAGE_ERROR;
       }
 
-      fileInfo.mFileId = (uint)reply->integer;
+      fileInfo.mFileId = reply->integer;
       freeReplyObject(reply);
 
       // ### Adding the file information into the database.
@@ -2004,7 +2004,7 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
       // ### Adding an event to the event list.
 
       //printf("-- File added %s\n",fileInfo.mName.c_str());
-      addEvent(EventType::FILE_ADDED,fileInfo.mFileId,(uint)fileInfo.mFileType,0,0);
+      addEvent(EventType::FILE_ADDED,fileInfo.mFileId,fileInfo.mFileType,0,0);
     }
 
     return Result::OK;
@@ -2071,7 +2071,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
         return Result::PERMANENT_STORAGE_ERROR;
       }
 
-      fileInfo.mFileId = (uint)reply->integer;
+      fileInfo.mFileId = reply->integer;
       fileInfo.mFlags = fileInfo.mFlags | T::FileInfo::Flags::PredefinedContent;
       freeReplyObject(reply);
 
@@ -2133,12 +2133,12 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
     if (fileId > 0)
     {
       //printf("-- file update event\n");
-      addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,(uint)fileInfo.mFileType,contentInfoList.getLength(),0);
+      addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,fileInfo.mFileType,contentInfoList.getLength(),0);
     }
     else
     {
       //printf("-- file add event\n");
-      addEvent(EventType::FILE_ADDED,fileInfo.mFileId,(uint)fileInfo.mFileType,contentInfoList.getLength(),0);
+      addEvent(EventType::FILE_ADDED,fileInfo.mFileId,fileInfo.mFileType,contentInfoList.getLength(),0);
     }
 
     return Result::OK;
@@ -2208,7 +2208,7 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std:
           return Result::PERMANENT_STORAGE_ERROR;
         }
 
-        ff->mFileInfo.mFileId = (uint)reply->integer;
+        ff->mFileInfo.mFileId = reply->integer;
         ff->mFileInfo.mFlags = ff->mFileInfo.mFlags | T::FileInfo::Flags::PredefinedContent;
         freeReplyObject(reply);
 
@@ -2270,12 +2270,12 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std:
       if (fileId > 0)
       {
         //printf("-- file update event\n");
-        addEvent(EventType::FILE_UPDATED,ff->mFileInfo.mFileId,(uint)ff->mFileInfo.mFileType,len,0);
+        addEvent(EventType::FILE_UPDATED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,len,0);
       }
       else
       {
         //printf("-- file add event\n");
-        addEvent(EventType::FILE_ADDED,ff->mFileInfo.mFileId,(uint)ff->mFileInfo.mFileType,len,0);
+        addEvent(EventType::FILE_ADDED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,len,0);
       }
     }
 
@@ -2314,7 +2314,7 @@ int RedisImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
     int result = deleteFileById(fileId,true);
 
     if (result == Result::OK)
-      addEvent(EventType::FILE_DELETED,fileId,(uint)fileInfo.mFileType,0,0);
+      addEvent(EventType::FILE_DELETED,fileId,fileInfo.mFileType,0,0);
 
     return result;
   }
@@ -2353,7 +2353,7 @@ int RedisImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::strin
     if (result == Result::OK)
     {
       if (strncmp(filename.c_str(),"VIRT-",5) == 0)
-        addEvent(EventType::FILE_DELETED,fileId,(uint)T::FileType::Virtual,0,0);
+        addEvent(EventType::FILE_DELETED,fileId,T::FileTypeValue::Virtual,0,0);
       else
         addEvent(EventType::FILE_DELETED,fileId,0,0,0);
     }
@@ -2544,7 +2544,7 @@ int RedisImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
         {
           deleteFilename(fileInfo.mName);
           deleteFileById(info->mFileId,false);
-          addEvent(EventType::FILE_DELETED,info->mFileId,(uint)fileInfo.mFileType,0,0);
+          addEvent(EventType::FILE_DELETED,info->mFileId,fileInfo.mFileType,0,0);
         }
       }
     }
@@ -2589,7 +2589,7 @@ int RedisImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sess
       {
         deleteFilename(fileInfo.mName);
         deleteFileById(info->mFileId,false);
-        addEvent(EventType::FILE_DELETED,info->mFileId,(uint)fileInfo.mFileType,0,0);
+        addEvent(EventType::FILE_DELETED,info->mFileId,fileInfo.mFileType,0,0);
       }
     }
 
@@ -2973,9 +2973,9 @@ int RedisImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
     }
 
     if (reply->str != nullptr)
-      count = (uint)atoi(reply->str);
+      count = toInt64(reply->str);
     else
-      count = (uint)reply->integer;
+      count = reply->integer;
 
     freeReplyObject(reply);
     return Result::OK;
@@ -3159,7 +3159,7 @@ int RedisImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
     }
 
     if (reply->str != nullptr)
-      eventId = (T::EventId)atoll(reply->str);
+      eventId = (T::EventId)toInt64(reply->str);
 
     freeReplyObject(reply);
 
@@ -3295,9 +3295,9 @@ int RedisImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
     }
 
     if (reply->str != nullptr)
-      count = (uint)atoi(reply->str);
+      count = toInt64(reply->str);
     else
-      count = (uint)reply->integer;
+      count = reply->integer;
 
     freeReplyObject(reply);
     return Result::OK;
@@ -4851,9 +4851,9 @@ int RedisImplementation::_getContentCount(T::SessionId sessionId,uint& count)
     }
 
     if (reply->str != nullptr)
-      count = (uint)atoi(reply->str);
+      count = toInt64(reply->str);
     else
-      count = (uint)reply->integer;
+      count = reply->integer;
 
     freeReplyObject(reply);
     return Result::OK;
@@ -6322,7 +6322,7 @@ int RedisImplementation::getVirtualFiles(uint startFileId,uint maxRecords,T::Fil
           if (fileInfo->mFileId >= startFileId)
           {
             startFileId = fileInfo->mFileId + 1;
-            if (fileInfo->mFileType == T::FileType::Virtual || (fileInfo->mFlags & T::FileInfo::Flags::VirtualContent) != 0)
+            if (fileInfo->mFileType == T::FileTypeValue::Virtual || (fileInfo->mFlags & T::FileInfo::Flags::VirtualContent) != 0)
               fileInfoList.addFileInfo(fileInfo);
             else
               delete fileInfo;
@@ -7085,7 +7085,7 @@ int RedisImplementation::getVirtualContent(uint startFileId,uint startMessageInd
             startFileId = contentInfo->mFileId;
             startMessageIndex = contentInfo->mMessageIndex + 1;
 
-            if (contentInfo->mFileType == T::FileType::Virtual ||  (contentInfo->mFlags & T::ContentInfo::Flags::VirtualContent) != 0)
+            if (contentInfo->mFileType == T::FileTypeValue::Virtual ||  (contentInfo->mFlags & T::ContentInfo::Flags::VirtualContent) != 0)
               contentInfoList.addContentInfo(contentInfo);
             else
               delete contentInfo;
@@ -7190,17 +7190,17 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
         T::ContentInfo *info = new T::ContentInfo();
         info->setCsv(reply->element[t]->str);
 
-        if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+        if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
         {
           if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
           {
             if (info->hasKey(parameterKeyType,parameterKey) &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
             {
-              if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                  (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                  (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                  (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                  (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+              if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE) ||
+                  (parameterLevelIdType == T::ParamLevelIdTypeValue::ANY) ||
+                  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
+                  (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
+                  (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
               {
                 contentInfoList.addContentInfo(info);
                 info = nullptr;
@@ -7251,7 +7251,7 @@ int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,
 
         if (info->mGenerationId == generationId)
         {
-          if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+          if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
           {
             if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
             {
@@ -7259,11 +7259,11 @@ int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,
               {
                 if (info->hasKey(parameterKeyType,parameterKey) &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                  if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE) ||
+                      (parameterLevelIdType == T::ParamLevelIdTypeValue::ANY) ||
+                      (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
+                      (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
+                      (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
                   {
                     contentInfoList.addContentInfo(info);
                     info = nullptr;
@@ -7315,7 +7315,7 @@ int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::P
 
         if (info->mProducerId == producerId)
         {
-          if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+          if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
           {
             if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
             {
@@ -7323,11 +7323,11 @@ int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::P
               {
                 if (info->hasKey(parameterKeyType,parameterKey) &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::ANY) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdType::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                  if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE) ||
+                      (parameterLevelIdType == T::ParamLevelIdTypeValue::ANY) ||
+                      (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
+                      (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
+                      (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
                   {
                     contentInfoList.addContentInfo(info);
                     info = nullptr;
@@ -7477,7 +7477,7 @@ int RedisImplementation::getContentByProducerId(uint producerId,uint startFileId
         return Result::PERMANENT_STORAGE_ERROR;
       }
 
-      //printf("getContentByProducerId %u %u => %u\n",startFileId,startMessageIndex,(uint)reply->elements);
+      //printf("getContentByProducerId %u %u => %u\n",startFileId,startMessageIndex,reply->elements);
 
       if (reply->elements == 0)
       {
@@ -7634,7 +7634,7 @@ int RedisImplementation::getContentBySourceId(uint sourceId,uint startFileId,uin
         return Result::PERMANENT_STORAGE_ERROR;
       }
 
-      //printf("getContentByProducerId %u %u => %u\n",startFileId,startMessageIndex,(uint)reply->elements);
+      //printf("getContentByProducerId %u %u => %u\n",startFileId,startMessageIndex,reply->elements);
 
       if (reply->elements == 0)
       {
@@ -7805,7 +7805,7 @@ void RedisImplementation::resetContentRegistrations()
 
 
 
-T::EventId RedisImplementation::addEvent(EventType eventType,uint id1,uint id2,uint id3,unsigned long long flags)
+T::EventId RedisImplementation::addEvent(uint eventType,uint id1,uint id2,uint id3,unsigned long long flags)
 {
   FUNCTION_TRACE
   try
@@ -7868,9 +7868,9 @@ void RedisImplementation::truncateEvents()
     }
 
     if (reply->str != nullptr)
-      count = (uint)atoi(reply->str);
+      count = toInt64(reply->str);
     else
-      count = (uint)reply->integer;
+      count = reply->integer;
 
     //printf("EVENTS %u (%s)\n",count,reply->str);
 
@@ -7946,7 +7946,7 @@ uint RedisImplementation::getFileId(std::string filename)
 
     uint id = 0;
     if (reply->str != nullptr)
-      id = (uint)atoll(reply->str);
+      id = toInt64(reply->str);
 
     freeReplyObject(reply);
     return id;

@@ -16,7 +16,7 @@ GenerationInfo::GenerationInfo()
     mGenerationId = 0;
     mGenerationType = 0;
     mProducerId = 0;
-    mStatus = T::GenerationStatus::STATUS_DISABLED;
+    mStatus = Status::Disabled;
     mFlags = 0;
     mSourceId = 0;
   }
@@ -85,12 +85,12 @@ GenerationInfo::~GenerationInfo()
 
 
 
-void GenerationInfo::operator=(GenerationInfo& generationInfo)
+GenerationInfo& GenerationInfo::operator=(GenerationInfo& generationInfo)
 {
   try
   {
     if (&generationInfo == this)
-      return;
+      return *this;
 
     mGenerationId = generationInfo.mGenerationId;
     mGenerationType = generationInfo.mGenerationType;
@@ -101,6 +101,8 @@ void GenerationInfo::operator=(GenerationInfo& generationInfo)
     mStatus = generationInfo.mStatus;
     mFlags = generationInfo.mFlags;
     mSourceId = generationInfo.mSourceId;
+
+    return *this;
   }
   catch (...)
   {
@@ -124,7 +126,7 @@ std::string GenerationInfo::getCsv()
         mName.c_str(),
         mDescription.c_str(),
         mAnalysisTime.c_str(),
-        (uint)mStatus,
+        mStatus,
         mFlags,
         mSourceId);
 
@@ -185,15 +187,15 @@ void GenerationInfo::setCsv(const char *csv)
 
     if (c >= 8)
     {
-      mGenerationId = (uint)atoll(field[0]);
-      mGenerationType = (uint)atoll(field[1]);
-      mProducerId = (uint)atoll(field[2]);
+      mGenerationId = toInt64(field[0]);
+      mGenerationType = toInt64(field[1]);
+      mProducerId = toInt64(field[2]);
       mName = field[3];
       mDescription = field[4];
       mAnalysisTime = field[5];
-      mStatus = (GenerationStatus)atoll(field[6]);
-      mFlags = (uint)atoll(field[7]);
-      mSourceId = (uint)atoll(field[8]);
+      mStatus = toInt64(field[6]);
+      mFlags = toInt64(field[7]);
+      mSourceId = toInt64(field[8]);
     }
   }
   catch (...)
@@ -249,7 +251,7 @@ void GenerationInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mName           = " << mName << "\n";
     stream << space(level) << "- mDescription    = " << mDescription << "\n";
     stream << space(level) << "- mAnalysisTime   = " << mAnalysisTime << "\n";
-    stream << space(level) << "- mStatus         = " << (int)mStatus << "\n";
+    stream << space(level) << "- mStatus         = " << mStatus << "\n";
     stream << space(level) << "- mFlags          = " << mFlags << "\n";
     stream << space(level) << "- mSourceId       = " << mSourceId << "\n";
   }

@@ -12,24 +12,28 @@ namespace T
 class ParameterLevelInfo
 {
   public:
-                          ParameterLevelInfo();
-                          ParameterLevelInfo(ParameterLevelInfo& levelInfo);
-                          ParameterLevelInfo(T::ParamKeyType parameterKeyType,
-                                             T::ParamId parameterKey,
-                                             T::ParamLevelIdType parameterLevelIdType,
-                                             T::ParamLevelId parameterLevelId,
-                                             T::ParamLevel level);
-     virtual              ~ParameterLevelInfo();
+                         ParameterLevelInfo();
+                         ParameterLevelInfo(ParameterLevelInfo& levelInfo);
 
-     void                 operator=(ParameterLevelInfo& levelInfo);
-     ParameterLevelInfo*  duplicate();
-     void                 print(std::ostream& stream,uint level,uint optionFlags);
+                         ParameterLevelInfo(
+                             T::ParamKeyType parameterKeyType,
+                             T::ParamId parameterKey,
+                             T::ParamLevelIdType parameterLevelIdType,
+                             T::ParamLevelId parameterLevelId,
+                             T::ParamLevel level);
 
-     T::ParamKeyType      mParameterKeyType;
-     T::ParamId           mParameterKey;
-     T::ParamLevelIdType  mParameterLevelIdType;
-     T::ParamLevelId      mParameterLevelId;
-     T::ParamLevel        mLevel;
+    virtual              ~ParameterLevelInfo();
+
+    ParameterLevelInfo&  operator=(ParameterLevelInfo& levelInfo);
+
+    ParameterLevelInfo*  duplicate();
+    void                 print(std::ostream& stream,uint level,uint optionFlags);
+
+    T::ParamKeyType      mParameterKeyType;
+    T::ParamId           mParameterKey;
+    T::ParamLevelIdType  mParameterLevelIdType;
+    T::ParamLevelId      mParameterLevelId;
+    T::ParamLevel        mLevel;
 };
 
 

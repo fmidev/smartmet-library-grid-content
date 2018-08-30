@@ -154,7 +154,7 @@ void Function_sequence::executeFunctionCall2(uint columns,uint rows,std::vector<
 {
   try
   {
-    uint len = (uint)mFunctionList.size();
+    uint len = mFunctionList.size();
     if (len == 1)
     {
       mFunctionList[0]->executeFunctionCall2(columns,rows,inParameters,outParameters);
@@ -205,7 +205,7 @@ void Function_sequence::executeFunctionCall2(uint columns,uint rows,std::vector<
 {
   try
   {
-    uint len = (uint)mFunctionList.size();
+    uint len = mFunctionList.size();
     if (len == 1)
     {
       mFunctionList[0]->executeFunctionCall2(columns,rows,inParameters,outParameters);

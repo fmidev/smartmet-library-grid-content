@@ -137,7 +137,7 @@ bool AliasFile::checkUpdates()
 
     time_t tt = getFileModificationTime(mFilename.c_str());
 
-    if (tt != mLastModified  &&  (tt+3) < time(0))
+    if (tt != mLastModified  &&  (tt+3) < time(nullptr))
     {
       loadFile();
       return true;
@@ -226,7 +226,7 @@ void AliasFile::loadFile()
 {
   try
   {
-    FILE *file = fopen(mFilename.c_str(),"r");
+    FILE *file = fopen(mFilename.c_str(),"re");
     if (file == nullptr)
     {
       Spine::Exception exception(BCP,"Cannot open the alias file!");

@@ -72,13 +72,13 @@ ProducerInfoList::~ProducerInfoList()
 
 
 
-void ProducerInfoList::operator=(ProducerInfoList& producerInfoList)
+ProducerInfoList& ProducerInfoList::operator=(ProducerInfoList& producerInfoList)
 {
   FUNCTION_TRACE
   try
   {
     if (&producerInfoList == this)
-      return;
+      return *this;
 
     clear();
 
@@ -90,6 +90,7 @@ void ProducerInfoList::operator=(ProducerInfoList& producerInfoList)
       if (info != nullptr)
         mList.push_back(info->duplicate());
     }
+    return *this;
   }
   catch (...)
   {
@@ -176,7 +177,7 @@ void ProducerInfoList::deleteProducerInfoListBySourceId(uint sourceId)
   try
   {
     AutoThreadLock lock(&mThreadLock);
-    int sz = (int)getLength()-1;
+    int sz = getLength()-1;
     for (int t=sz; t>=0; t--)
     {
       ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
@@ -315,7 +316,7 @@ uint ProducerInfoList::getLength()
   FUNCTION_TRACE
   try
   {
-    return (uint)mList.size();
+    return mList.size();
   }
   catch (...)
   {
@@ -405,7 +406,7 @@ void ProducerInfoList::writeToFile(std::string filename)
   {
     AutoThreadLock lock(&mThreadLock);
 
-    FILE *file = fopen(filename.c_str(),"w");
+    FILE *file = fopen(filename.c_str(),"we");
     if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot create the file!");

@@ -192,7 +192,7 @@ int ClientImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
     int result = mService->getGridFileCount(sessionId,corbaCount);
 
     if (result == 0)
-      count = (uint)corbaCount;
+      count = corbaCount;
 
     return result;
   }
@@ -215,7 +215,7 @@ int ClientImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileI
     int result = mService->getGridValueByPoint(sessionId,fileId,messageIndex,flags,(CORBA::Octet)coordinateType,x,y,(CORBA::Short)interpolationMethod,corbaValue);
 
     if (result == 0)
-      value = (T::ParamValue)corbaValue;
+      value = corbaValue;
 
     return result;
   }

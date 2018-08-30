@@ -39,7 +39,7 @@ std::string getResultString(int resultCode)
         return std::string("Invalid number of coordinates!");
     }
 
-    return std::string("Unknown result code : ") + std::to_string((int)resultCode);
+    return std::string("Unknown result code : ") + std::to_string(resultCode);
   }
   catch (...)
   {

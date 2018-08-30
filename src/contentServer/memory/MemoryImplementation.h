@@ -65,11 +65,11 @@ class MemoryImplementation : public ServiceInterface
      virtual int    _getGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GenerationInfoList& generationInfoList);
      virtual int    _getGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName,T::GenerationInfoList& generationInfoList);
      virtual int    _getGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GenerationInfoList& generationInfoList);
-     virtual int    _getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,uint producerId,T::GenerationStatus generationStatus,T::GenerationInfo& generationInfo);
-     virtual int    _getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,std::string producerName,T::GenerationStatus generationStatus,T::GenerationInfo& generationInfo);
+     virtual int    _getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,uint producerId,uchar generationStatus,T::GenerationInfo& generationInfo);
+     virtual int    _getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,std::string producerName,uchar generationStatus,T::GenerationInfo& generationInfo);
      virtual int    _getGenerationInfoCount(T::SessionId sessionId,uint& count);
-     virtual int    _setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,T::GenerationStatus status);
-     virtual int    _setGenerationInfoStatusByName(T::SessionId sessionId,std::string generationName,T::GenerationStatus status);
+     virtual int    _setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,uchar status);
+     virtual int    _setGenerationInfoStatusByName(T::SessionId sessionId,std::string generationName,uchar status);
 
      virtual int    _addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo);
      virtual int    _addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList);
@@ -160,7 +160,7 @@ class MemoryImplementation : public ServiceInterface
    protected:
 
      virtual bool   isSessionValid(T::SessionId sessionId);
-     T::EventId     addEvent(EventType eventType,uint id1,uint id2,uint id3,unsigned long long flags);
+     T::EventId     addEvent(uint eventType,uint id1,uint id2,uint id3,unsigned long long flags);
      virtual void   saveData();
 
      virtual void   readContentList();

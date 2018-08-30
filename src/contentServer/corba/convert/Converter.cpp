@@ -90,7 +90,7 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::
     target.mGroupFlags = source.groupFlags;
     target.mProducerId = source.producerId;
     target.mGenerationId = source.generationId;
-    target.mFileType = (T::FileType)source.fileType;
+    target.mFileType = source.fileType;
     target.mFileId = source.fileId;
     target.mMessageIndex = source.messageIndex;
     target.mForecastTime = source.forecastTime;
@@ -205,7 +205,7 @@ void Converter::convert(const ContentServer::Corba::CorbaFileInfo& source,T::Fil
     target.mProducerId = source.producerId;
     target.mGenerationId = source.generationId;
     target.mFileId = source.fileId;
-    target.mFileType = (T::FileType)source.fileType;
+    target.mFileType = source.fileType;
     target.mName = source.name;
     target.mFlags = source.flags;
     target.mSourceId = source.sourceId;
@@ -479,7 +479,7 @@ void Converter::convert(const ContentServer::Corba::CorbaGenerationInfo& source,
     target.mName = source.name;
     target.mDescription = source.description;
     target.mAnalysisTime = source.analysisTime;
-    target.mStatus = (T::GenerationStatus)source.status;
+    target.mStatus = source.status;
     target.mFlags = source.flags;
     target.mSourceId = source.sourceId;
   }
@@ -548,7 +548,7 @@ void Converter::convert(T::EventInfo& source,ContentServer::Corba::CorbaEventInf
     target.eventId = source.mEventId;
     target.eventTime = (CORBA::ULong)source.mEventTime;
     target.serverTime = (CORBA::ULong)source.mServerTime;
-    target.type = (unsigned int)source.mType;
+    target.type = source.mType;
     target.id1 = source.mId1;
     target.id2 = source.mId2;
     target.id3 = source.mId3;
@@ -570,9 +570,9 @@ void Converter::convert(const ContentServer::Corba::CorbaEventInfo& source,T::Ev
   try
   {
     target.mEventId = source.eventId;
-    target.mEventTime = (uint)source.eventTime;
-    target.mServerTime = (uint)source.serverTime;
-    target.mType = (ContentServer::EventType)source.type;
+    target.mEventTime = C_UINT(source.eventTime);
+    target.mServerTime = C_UINT(source.serverTime);
+    target.mType = source.type;
     target.mId1 = source.id1;
     target.mId2 = source.id2;
     target.mId3 = source.id3;
@@ -644,7 +644,7 @@ void Converter::convert(string_vec& source,ContentServer::Corba::CorbaStringList
 {
   try
   {
-    uint len = (uint)source.size();
+    uint len = source.size();
     target.length(len);
     for (uint t=0; t<len; t++)
     {
@@ -685,7 +685,7 @@ void Converter::convert(std::set<std::string>& source,ContentServer::Corba::Corb
 {
   try
   {
-    uint len = (uint)source.size();
+    uint len = source.size();
     target.length(len);
     uint t = 0;
     for (auto it=source.begin(); it!=source.end(); ++it)
@@ -728,7 +728,7 @@ void Converter::convert(std::set<uint>& source,ContentServer::Corba::CorbaULongL
 {
   try
   {
-    uint len = (uint)source.size();
+    uint len = source.size();
     target.length(len);
 
     uint t = 0;
@@ -773,7 +773,7 @@ void Converter::convert(std::set<int>& source,ContentServer::Corba::CorbaLongLis
 {
   try
   {
-    uint len = (uint)source.size();
+    uint len = source.size();
     target.length(len);
 
     uint t = 0;
@@ -851,7 +851,7 @@ void Converter::convert(std::vector<T::FileAndContent>& source,ContentServer::Co
 {
   try
   {
-    uint len = (uint)source.size();
+    uint len = source.size();
     target.length(len);
     for (uint t = 0; t<len; t++)
     {
@@ -936,7 +936,7 @@ void Converter::convert(std::vector<T::ForecastTime>& source,SmartMet::ContentSe
 {
   try
   {
-    uint len = (uint)source.size();
+    uint len = source.size();
     target.length(len);
     for (uint t = 0; t<len; t++)
     {

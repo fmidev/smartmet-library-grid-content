@@ -197,7 +197,7 @@ void Query::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mEndTime                = " << mEndTime << "\n";
     stream << space(level) << "- mAnalysisTime           = " << mAnalysisTime << "\n";
     stream << space(level) << "- mFlags                  = " << mFlags << "\n";
-    stream << space(level) << "- mSearchType             = " << (int)mSearchType << "\n";
+    stream << space(level) << "- mSearchType             = " << mSearchType << "\n";
     stream << space(level) << "- mRadius                 = " << mRadius << "\n";
     stream << space(level) << "- mDem                    = " << mDem << "\n";
     stream << space(level) << "- mCoverType              = " << mCoverType << "\n";

@@ -1,5 +1,6 @@
 #include "ClientImplementation.h"
 #include <grid-files/common/Exception.h>
+#include <grid-files/common/GeneralFunctions.h>
 
 
 
@@ -79,7 +80,7 @@ int ClientImplementation::_clear(T::SessionId sessionId)
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -106,7 +107,7 @@ int ClientImplementation::_reload(T::SessionId sessionId)
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -134,7 +135,7 @@ int ClientImplementation::_addDataServerInfo(T::SessionId sessionId,T::ServerInf
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       serverInfo.setCsv(response.getLineByKey("serverInfo"));
 
@@ -164,7 +165,7 @@ int ClientImplementation::_deleteDataServerInfoById(T::SessionId sessionId,uint 
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -192,7 +193,7 @@ int ClientImplementation::_getDataServerInfoById(T::SessionId sessionId,uint ser
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       serverInfo.setCsv(response.getLineByIndex(1));
 
@@ -222,7 +223,7 @@ int ClientImplementation::_getDataServerInfoByName(T::SessionId sessionId,std::s
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       serverInfo.setCsv(response.getLineByKey("serverInfo"));
 
@@ -252,7 +253,7 @@ int ClientImplementation::_getDataServerInfoByIor(T::SessionId sessionId,std::st
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       serverInfo.setCsv(response.getLineByKey("serverInfo"));
 
@@ -281,7 +282,7 @@ int ClientImplementation::_getDataServerInfoList(T::SessionId sessionId,T::Serve
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -319,9 +320,9 @@ int ClientImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& c
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
-      count = (uint)response.getLineValueByKey("count");
+      count = response.getLineValueByKey("count");
     else
       count = 0;
 
@@ -351,7 +352,7 @@ int ClientImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInf
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       producerInfo.setCsv(response.getLineByKey("producerInfo"));
 
@@ -381,7 +382,7 @@ int ClientImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint pr
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -409,7 +410,7 @@ int ClientImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -437,7 +438,7 @@ int ClientImplementation::_deleteProducerInfoListBySourceId(T::SessionId session
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -465,7 +466,7 @@ int ClientImplementation::_getProducerInfoById(T::SessionId sessionId,uint produ
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       producerInfo.setCsv(response.getLineByKey("producerInfo"));
 
@@ -495,7 +496,7 @@ int ClientImplementation::_getProducerInfoByName(T::SessionId sessionId,std::str
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       producerInfo.setCsv(response.getLineByKey("producerInfo"));
 
@@ -524,7 +525,7 @@ int ClientImplementation::_getProducerInfoList(T::SessionId sessionId,T::Produce
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -557,14 +558,14 @@ int ClientImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
 
     request.addLine("method","getProducerInfoListByParameter");
     request.addLine("sessionId",sessionId);
-    request.addLine("parameterKeyType",(uint)parameterKeyType);
+    request.addLine("parameterKeyType",parameterKeyType);
     request.addLine("parameterKey",parameterKey);
 
     T::ResponseMessage response;
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -603,7 +604,7 @@ int ClientImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -641,9 +642,9 @@ int ClientImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& cou
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
-      count = (uint)response.getLineValueByKey("count");
+      count = response.getLineValueByKey("count");
     else
       count = 0;
 
@@ -672,7 +673,7 @@ int ClientImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -703,14 +704,14 @@ int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
 
     request.addLine("method","getProducerParameterList");
     request.addLine("sessionId",sessionId);
-    request.addLine("sourceParameterKeyType",(int)sourceParameterKeyType);
-    request.addLine("targetParameterKeyType",(int)targetParameterKeyType);
+    request.addLine("sourceParameterKeyType",sourceParameterKeyType);
+    request.addLine("targetParameterKeyType",targetParameterKeyType);
 
     T::ResponseMessage response;
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -747,7 +748,7 @@ int ClientImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generatio
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       generationInfo.setCsv(response.getLineByKey("generationInfo"));
 
@@ -777,7 +778,7 @@ int ClientImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint 
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -805,7 +806,7 @@ int ClientImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -836,7 +837,7 @@ int ClientImplementation::_deleteGenerationInfoListByIdList(T::SessionId session
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
  }
@@ -864,7 +865,7 @@ int ClientImplementation::_deleteGenerationInfoListByProducerId(T::SessionId ses
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -892,7 +893,7 @@ int ClientImplementation::_deleteGenerationInfoListByProducerName(T::SessionId s
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -920,7 +921,7 @@ int ClientImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessi
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -947,7 +948,7 @@ int ClientImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessi
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -984,7 +985,7 @@ int ClientImplementation::_getGenerationInfoById(T::SessionId sessionId,uint gen
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       generationInfo.setCsv(response.getLineByKey("generationInfo"));
 
@@ -1014,7 +1015,7 @@ int ClientImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::s
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       generationInfo.setCsv(response.getLineByKey("generationInfo"));
 
@@ -1043,7 +1044,7 @@ int ClientImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Gener
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -1082,7 +1083,7 @@ int ClientImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -1121,7 +1122,7 @@ int ClientImplementation::_getGenerationInfoListByProducerId(T::SessionId sessio
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -1160,7 +1161,7 @@ int ClientImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -1199,7 +1200,7 @@ int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionI
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -1224,7 +1225,7 @@ int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionI
 
 
 
-int ClientImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,uint producerId,T::GenerationStatus generationStatus,T::GenerationInfo& generationInfo)
+int ClientImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,uint producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   try
   {
@@ -1233,13 +1234,13 @@ int ClientImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::Session
     request.addLine("method","getLastGenerationInfoByProducerIdAndStatus");
     request.addLine("sessionId",sessionId);
     request.addLine("producerId",producerId);
-    request.addLine("status",(uint)generationStatus);
+    request.addLine("status",generationStatus);
 
     T::ResponseMessage response;
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       generationInfo.setCsv(response.getLineByKey("generationInfo"));
 
@@ -1255,7 +1256,7 @@ int ClientImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::Session
 
 
 
-int ClientImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,std::string producerName,T::GenerationStatus generationStatus,T::GenerationInfo& generationInfo)
+int ClientImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,std::string producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   try
   {
@@ -1264,13 +1265,13 @@ int ClientImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessi
     request.addLine("method","getLastGenerationInfoByProducerNameAndStatus");
     request.addLine("sessionId",sessionId);
     request.addLine("producerName",producerName);
-    request.addLine("status",(uint)generationStatus);
+    request.addLine("status",generationStatus);
 
     T::ResponseMessage response;
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       generationInfo.setCsv(response.getLineByKey("generationInfo"));
 
@@ -1299,9 +1300,9 @@ int ClientImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& c
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
-      count = (uint)response.getLineValueByKey("count");
+      count = response.getLineValueByKey("count");
     else
       count = 0;
 
@@ -1317,7 +1318,7 @@ int ClientImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& c
 
 
 
-int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,T::GenerationStatus status)
+int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,uchar status)
 {
   try
   {
@@ -1326,13 +1327,13 @@ int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,ui
     request.addLine("method","setGenerationInfoStatusById");
     request.addLine("sessionId",sessionId);
     request.addLine("generationId",generationId);
-    request.addLine("status",(uint)status);
+    request.addLine("status",status);
 
     T::ResponseMessage response;
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -1346,7 +1347,7 @@ int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,ui
 
 
 
-int ClientImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,std::string generationName,T::GenerationStatus status)
+int ClientImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,std::string generationName,uchar status)
 {
   try
   {
@@ -1355,13 +1356,13 @@ int ClientImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,
     request.addLine("method","setGenerationInfoStatusByName");
     request.addLine("sessionId",sessionId);
     request.addLine("generationName",generationName);
-    request.addLine("status",(uint)status);
+    request.addLine("status",status);
 
     T::ResponseMessage response;
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -1389,7 +1390,7 @@ int ClientImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileI
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       fileInfo.setCsv(response.getLineByKey("fileInfo"));
 
@@ -1426,7 +1427,7 @@ int ClientImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       fileInfo.setCsv(response.getLineByKey("fileInfo"));
 
@@ -1448,7 +1449,7 @@ int ClientImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std
   {
     T::RequestMessage request;
 
-    uint length = (uint)fileAndContentList.size();
+    uint length = fileAndContentList.size();
 
     request.addLine("method","addFileInfoListWithContent");
     request.addLine("sessionId",sessionId);
@@ -1474,7 +1475,7 @@ int ClientImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       char tmp[100];
@@ -1521,7 +1522,7 @@ int ClientImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -1549,7 +1550,7 @@ int ClientImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::stri
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -1581,7 +1582,7 @@ int ClientImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId ses
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -1609,7 +1610,7 @@ int ClientImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -1637,7 +1638,7 @@ int ClientImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
  }
@@ -1665,7 +1666,7 @@ int ClientImplementation::_deleteFileInfoListByProducerName(T::SessionId session
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -1693,7 +1694,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationId(T::SessionId session
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -1725,7 +1726,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Se
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -1753,7 +1754,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessi
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -1781,7 +1782,7 @@ int ClientImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,u
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
  }
@@ -1812,7 +1813,7 @@ int ClientImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
  }
@@ -1840,7 +1841,7 @@ int ClientImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T:
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       fileInfo.setCsv(response.getLineByKey("fileInfo"));
 
@@ -1870,7 +1871,7 @@ int ClientImplementation::_getFileInfoByName(T::SessionId sessionId,std::string 
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       fileInfo.setCsv(response.getLineByKey("fileInfo"));
 
@@ -1901,7 +1902,7 @@ int ClientImplementation::_getFileInfoList(T::SessionId sessionId,uint startFile
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -1942,7 +1943,7 @@ int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,ui
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -1983,7 +1984,7 @@ int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -2024,7 +2025,7 @@ int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -2065,7 +2066,7 @@ int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -2106,7 +2107,7 @@ int ClientImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,ui
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -2144,9 +2145,9 @@ int ClientImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
-      count = (uint)response.getLineValueByKey("count");
+      count = response.getLineValueByKey("count");
     else
       count = 0;
 
@@ -2176,9 +2177,9 @@ int ClientImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,u
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
-      count = (uint)response.getLineValueByKey("count");
+      count = response.getLineValueByKey("count");
     else
       count = 0;
 
@@ -2208,9 +2209,9 @@ int ClientImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
-      count = (uint)response.getLineValueByKey("count");
+      count = response.getLineValueByKey("count");
     else
       count = 0;
 
@@ -2240,9 +2241,9 @@ int ClientImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uin
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
-      count = (uint)response.getLineValueByKey("count");
+      count = response.getLineValueByKey("count");
     else
       count = 0;
 
@@ -2274,7 +2275,7 @@ int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -2313,7 +2314,7 @@ int ClientImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eve
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       eventInfo.setCsv(response.getLineByKey("eventInfo"));
 
@@ -2343,7 +2344,7 @@ int ClientImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       eventInfo.setCsv(response.getLineByKey("eventInfo"));
 
@@ -2375,7 +2376,7 @@ int ClientImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -2413,9 +2414,9 @@ int ClientImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
-      count = (uint)response.getLineValueByKey("count");
+      count = response.getLineValueByKey("count");
     else
       count = 0;
 
@@ -2445,7 +2446,7 @@ int ClientImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo&
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       contentInfo.setCsv(response.getLineByKey("contentInfo"));
 
@@ -2480,7 +2481,7 @@ int ClientImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoL
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -2509,7 +2510,7 @@ int ClientImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -2537,7 +2538,7 @@ int ClientImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -2565,7 +2566,7 @@ int ClientImplementation::_deleteContentListByFileName(T::SessionId sessionId,st
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -2593,7 +2594,7 @@ int ClientImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -2621,7 +2622,7 @@ int ClientImplementation::_deleteContentListByProducerId(T::SessionId sessionId,
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -2649,7 +2650,7 @@ int ClientImplementation::_deleteContentListByProducerName(T::SessionId sessionI
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -2677,7 +2678,7 @@ int ClientImplementation::_deleteContentListByGenerationId(T::SessionId sessionI
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -2705,7 +2706,7 @@ int ClientImplementation::_deleteContentListByGenerationName(T::SessionId sessio
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -2733,7 +2734,7 @@ int ClientImplementation::_deleteContentListBySourceId(T::SessionId sessionId,ui
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -2761,7 +2762,7 @@ int ClientImplementation::_registerContentList(T::SessionId sessionId,uint serve
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -2790,7 +2791,7 @@ int ClientImplementation::_registerContentListByFileId(T::SessionId sessionId,ui
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -2818,7 +2819,7 @@ int ClientImplementation::_unregisterContentList(T::SessionId sessionId,uint ser
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -2847,7 +2848,7 @@ int ClientImplementation::_unregisterContentListByFileId(T::SessionId sessionId,
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -2876,7 +2877,7 @@ int ClientImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uin
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
       contentInfo.setCsv(response.getLineByIndex(1));
 
@@ -2908,7 +2909,7 @@ int ClientImplementation::_getContentList(T::SessionId sessionId,uint startFileI
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -2947,7 +2948,7 @@ int ClientImplementation::_getContentListByFileId(T::SessionId sessionId,uint fi
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -2986,7 +2987,7 @@ int ClientImplementation::_getContentListByFileName(T::SessionId sessionId,std::
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3028,7 +3029,7 @@ int ClientImplementation::_getContentListByGroupFlags(T::SessionId sessionId,uin
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3070,7 +3071,7 @@ int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId,uin
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3112,7 +3113,7 @@ int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,s
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3154,7 +3155,7 @@ int ClientImplementation::_getContentListByServerId(T::SessionId sessionId,uint 
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3197,7 +3198,7 @@ int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,u
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3239,7 +3240,7 @@ int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3280,7 +3281,7 @@ int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3321,7 +3322,7 @@ int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3363,7 +3364,7 @@ int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId,uint 
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3396,12 +3397,12 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
 
     request.addLine("method","getContentListByParameter");
     request.addLine("sessionId",sessionId);
-    request.addLine("parameterKeyType",(uint)parameterKeyType);
+    request.addLine("parameterKeyType",parameterKeyType);
     request.addLine("parameterKey",parameterKey);
-    request.addLine("parameterLevelIdType",(uint)parameterLevelIdType);
-    request.addLine("parameterLevelId",(uint)parameterLevelId);
-    request.addLine("minLevel",(int)minLevel);
-    request.addLine("maxLevel",(int)maxLevel);
+    request.addLine("parameterLevelIdType",parameterLevelIdType);
+    request.addLine("parameterLevelId",parameterLevelId);
+    request.addLine("minLevel",minLevel);
+    request.addLine("maxLevel",maxLevel);
     request.addLine("forecastType",forecastType);
     request.addLine("forecastNumber",forecastNumber);
     request.addLine("startTime",startTime);
@@ -3412,7 +3413,7 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3446,12 +3447,12 @@ int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId
     request.addLine("method","getContentListByParameterAndGenerationId");
     request.addLine("sessionId",sessionId);
     request.addLine("generationId",generationId);
-    request.addLine("parameterKeyType",(uint)parameterKeyType);
+    request.addLine("parameterKeyType",parameterKeyType);
     request.addLine("parameterKey",parameterKey);
-    request.addLine("parameterLevelIdType",(uint)parameterLevelIdType);
-    request.addLine("parameterLevelId",(uint)parameterLevelId);
-    request.addLine("minLevel",(int)minLevel);
-    request.addLine("maxLevel",(int)maxLevel);
+    request.addLine("parameterLevelIdType",parameterLevelIdType);
+    request.addLine("parameterLevelId",parameterLevelId);
+    request.addLine("minLevel",minLevel);
+    request.addLine("maxLevel",maxLevel);
     request.addLine("forecastType",forecastType);
     request.addLine("forecastNumber",forecastNumber);
     request.addLine("startTime",startTime);
@@ -3462,7 +3463,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3496,12 +3497,12 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
     request.addLine("method","getContentListByParameterAndGenerationName");
     request.addLine("sessionId",sessionId);
     request.addLine("generationName",generationName);
-    request.addLine("parameterKeyType",(uint)parameterKeyType);
+    request.addLine("parameterKeyType",parameterKeyType);
     request.addLine("parameterKey",parameterKey);
-    request.addLine("parameterLevelIdType",(uint)parameterLevelIdType);
-    request.addLine("parameterLevelId",(uint)parameterLevelId);
-    request.addLine("minLevel",(int)minLevel);
-    request.addLine("maxLevel",(int)maxLevel);
+    request.addLine("parameterLevelIdType",parameterLevelIdType);
+    request.addLine("parameterLevelId",parameterLevelId);
+    request.addLine("minLevel",minLevel);
+    request.addLine("maxLevel",maxLevel);
     request.addLine("forecastType",forecastType);
     request.addLine("forecastNumber",forecastNumber);
     request.addLine("startTime",startTime);
@@ -3512,7 +3513,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3544,12 +3545,12 @@ int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId s
     request.addLine("method","getContentListByParameterAndProducerId");
     request.addLine("sessionId",sessionId);
     request.addLine("producerId",producerId);
-    request.addLine("parameterKeyType",(uint)parameterKeyType);
+    request.addLine("parameterKeyType",parameterKeyType);
     request.addLine("parameterKey",parameterKey);
-    request.addLine("parameterLevelIdType",(uint)parameterLevelIdType);
-    request.addLine("parameterLevelId",(uint)parameterLevelId);
-    request.addLine("minLevel",(int)minLevel);
-    request.addLine("maxLevel",(int)maxLevel);
+    request.addLine("parameterLevelIdType",parameterLevelIdType);
+    request.addLine("parameterLevelId",parameterLevelId);
+    request.addLine("minLevel",minLevel);
+    request.addLine("maxLevel",maxLevel);
     request.addLine("forecastType",forecastType);
     request.addLine("forecastNumber",forecastNumber);
     request.addLine("startTime",startTime);
@@ -3560,7 +3561,7 @@ int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId s
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3593,12 +3594,12 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
     request.addLine("method","getContentListByParameterAndProducerName");
     request.addLine("sessionId",sessionId);
     request.addLine("producerName",producerName);
-    request.addLine("parameterKeyType",(uint)parameterKeyType);
+    request.addLine("parameterKeyType",parameterKeyType);
     request.addLine("parameterKey",parameterKey);
-    request.addLine("parameterLevelIdType",(uint)parameterLevelIdType);
-    request.addLine("parameterLevelId",(uint)parameterLevelId);
-    request.addLine("minLevel",(int)minLevel);
-    request.addLine("maxLevel",(int)maxLevel);
+    request.addLine("parameterLevelIdType",parameterLevelIdType);
+    request.addLine("parameterLevelId",parameterLevelId);
+    request.addLine("minLevel",minLevel);
+    request.addLine("maxLevel",maxLevel);
     request.addLine("forecastType",forecastType);
     request.addLine("forecastNumber",forecastNumber);
     request.addLine("startTime",startTime);
@@ -3609,7 +3610,7 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3643,11 +3644,11 @@ int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(
     request.addLine("method","getContentListByParameterGenerationIdAndForecastTime");
     request.addLine("sessionId",sessionId);
     request.addLine("generationId",generationId);
-    request.addLine("parameterKeyType",(uint)parameterKeyType);
+    request.addLine("parameterKeyType",parameterKeyType);
     request.addLine("parameterKey",parameterKey);
-    request.addLine("parameterLevelIdType",(uint)parameterLevelIdType);
-    request.addLine("parameterLevelId",(uint)parameterLevelId);
-    request.addLine("level",(int)level);
+    request.addLine("parameterLevelIdType",parameterLevelIdType);
+    request.addLine("parameterLevelId",parameterLevelId);
+    request.addLine("level",level);
     request.addLine("forecastType",forecastType);
     request.addLine("forecastNumber",forecastNumber);
     request.addLine("geometryId",geometryId);
@@ -3657,7 +3658,7 @@ int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3693,14 +3694,14 @@ int ClientImplementation::_getContentGeometryIdListByGenerationId(T::SessionId s
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
       uint len = response.getLinesByKey("geometryId",lines);
       for (uint t=0; t<len; t++)
       {
-        geometryIdList.insert((uint)atoll(lines[t].c_str()));
+        geometryIdList.insert(toInt64(lines[t].c_str()));
       }
     }
 
@@ -3730,7 +3731,7 @@ int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessio
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3770,7 +3771,7 @@ int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId ses
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3808,7 +3809,7 @@ int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3845,7 +3846,7 @@ int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId session
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3882,7 +3883,7 @@ int ClientImplementation::_getContentTimeListByProducerId(T::SessionId sessionId
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3918,9 +3919,9 @@ int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
-      count = (uint)response.getLineValueByKey("count");
+      count = response.getLineValueByKey("count");
     else
       count = 0;
 
@@ -3949,7 +3950,7 @@ int ClientImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoL
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     if (result == Result::OK)
     {
       string_vec lines;
@@ -3985,7 +3986,7 @@ int ClientImplementation::_deleteVirtualContent(T::SessionId sessionId)
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     return result;
   }
   catch (...)
@@ -4011,7 +4012,7 @@ int ClientImplementation::_updateVirtualContent(T::SessionId sessionId)
 
     sendRequest(request,response);
 
-    int result = (int)response.getLineValueByKey("result");
+    int result = response.getLineValueByKey("result");
     return result;
   }
   catch (...)
@@ -4027,7 +4028,7 @@ size_t ClientImplementation_responseProcessing(char *ptr, size_t size, size_t nm
 {
   try
   {
-    //printf("\n**** DATA %u (%u) ****\n",(uint)nmemb,(uint)size);
+    //printf("\n**** DATA %u (%u) ****\n",nmemb,size);
     T::ResponseMessage *response = (T::ResponseMessage*)userdata;
 
     //char line[10000];
@@ -4087,6 +4088,9 @@ void ClientImplementation::sendRequest(T::RequestMessage& request,T::ResponseMes
 
       char *data = new char[request.getContentSize() + 100];
       char *p = data;
+
+      std::unique_ptr<char[]> pData(data); // This should automatically release the allocated space
+
       uint lineCount = request.getLineCount();
 
       for (uint t=0; t<lineCount; t++)
@@ -4101,8 +4105,6 @@ void ClientImplementation::sendRequest(T::RequestMessage& request,T::ResponseMes
       CURLcode res = curl_easy_perform(curl);
       if (res != CURLE_OK)
         fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res));
-
-      delete data;
     }
 
     response.addChar('\0');

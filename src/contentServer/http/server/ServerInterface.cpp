@@ -1,5 +1,6 @@
 #include "ServerInterface.h"
 #include <grid-files/common/ShowFunction.h>
+#include <grid-files/common/GeneralFunctions.h>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -77,7 +78,7 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
 
     if (!request.getLineByKey("method",methodStr))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: method");
       return;
     }
@@ -774,7 +775,7 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
-    response.addLine("result",(int)Result::UNKNOWN_METHOD);
+    response.addLine("result",Result::UNKNOWN_METHOD);
     response.addLine("resultString","Unknown method: " + methodStr);
   }
   catch (...)
@@ -795,7 +796,7 @@ void ServerInterface::clear(T::RequestMessage& request,T::ResponseMessage& respo
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -825,7 +826,7 @@ void ServerInterface::reload(T::RequestMessage& request,T::ResponseMessage& resp
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -855,7 +856,7 @@ void ServerInterface::addDataServerInfo(T::RequestMessage& request,T::ResponseMe
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -863,7 +864,7 @@ void ServerInterface::addDataServerInfo(T::RequestMessage& request,T::ResponseMe
     std::string csv;
     if (!request.getLineByKey("serverInfo",csv))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: serverInfo");
       return;
     }
@@ -901,7 +902,7 @@ void ServerInterface::deleteDataServerInfoById(T::RequestMessage& request,T::Res
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -909,7 +910,7 @@ void ServerInterface::deleteDataServerInfoById(T::RequestMessage& request,T::Res
     uint serverId = 0;
     if (!request.getLineByKey("severId",serverId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: serverId");
       return;
     }
@@ -939,7 +940,7 @@ void ServerInterface::getDataServerInfoById(T::RequestMessage& request,T::Respon
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -947,7 +948,7 @@ void ServerInterface::getDataServerInfoById(T::RequestMessage& request,T::Respon
     uint serverId = 0;
     if (!request.getLineByKey("serverId",serverId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: serverId");
       return;
     }
@@ -985,7 +986,7 @@ void ServerInterface::getDataServerInfoByName(T::RequestMessage& request,T::Resp
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -993,7 +994,7 @@ void ServerInterface::getDataServerInfoByName(T::RequestMessage& request,T::Resp
     std::string serverName;
     if (!request.getLineByKey("serverName",serverName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: serverName");
       return;
     }
@@ -1031,7 +1032,7 @@ void ServerInterface::getDataServerInfoByIor(T::RequestMessage& request,T::Respo
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1039,7 +1040,7 @@ void ServerInterface::getDataServerInfoByIor(T::RequestMessage& request,T::Respo
     std::string serverIor;
     if (!request.getLineByKey("serverIor",serverIor))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: serverIor");
       return;
     }
@@ -1077,7 +1078,7 @@ void ServerInterface::getDataServerInfoList(T::RequestMessage& request,T::Respon
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1121,7 +1122,7 @@ void ServerInterface::getDataServerInfoCount(T::RequestMessage& request,T::Respo
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1158,7 +1159,7 @@ void ServerInterface::addProducerInfo(T::RequestMessage& request,T::ResponseMess
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1166,7 +1167,7 @@ void ServerInterface::addProducerInfo(T::RequestMessage& request,T::ResponseMess
     std::string csv;
     if (!request.getLineByKey("producerInfo",csv))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerInfo");
       return;
     }
@@ -1204,7 +1205,7 @@ void ServerInterface::deleteProducerInfoById(T::RequestMessage& request,T::Respo
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1212,7 +1213,7 @@ void ServerInterface::deleteProducerInfoById(T::RequestMessage& request,T::Respo
     uint producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerId");
       return;
     }
@@ -1242,7 +1243,7 @@ void ServerInterface::deleteProducerInfoByName(T::RequestMessage& request,T::Res
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1250,7 +1251,7 @@ void ServerInterface::deleteProducerInfoByName(T::RequestMessage& request,T::Res
     std::string producerName;
     if (!request.getLineByKey("producerName",producerName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerName");
       return;
     }
@@ -1280,7 +1281,7 @@ void ServerInterface::deleteProducerInfoListBySourceId(T::RequestMessage& reques
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1288,7 +1289,7 @@ void ServerInterface::deleteProducerInfoListBySourceId(T::RequestMessage& reques
     uint sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sourceId");
       return;
     }
@@ -1318,7 +1319,7 @@ void ServerInterface::getProducerInfoById(T::RequestMessage& request,T::Response
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1326,7 +1327,7 @@ void ServerInterface::getProducerInfoById(T::RequestMessage& request,T::Response
     uint producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerId");
       return;
     }
@@ -1364,7 +1365,7 @@ void ServerInterface::getProducerInfoByName(T::RequestMessage& request,T::Respon
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1372,7 +1373,7 @@ void ServerInterface::getProducerInfoByName(T::RequestMessage& request,T::Respon
     std::string producerName;
     if (!request.getLineByKey("producerName",producerName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerName");
       return;
     }
@@ -1410,7 +1411,7 @@ void ServerInterface::getProducerInfoList(T::RequestMessage& request,T::Response
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1453,7 +1454,7 @@ void ServerInterface::getProducerInfoListByParameter(T::RequestMessage& request,
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1461,7 +1462,7 @@ void ServerInterface::getProducerInfoListByParameter(T::RequestMessage& request,
     unsigned char parameterKeyType = 0;
     if (!request.getLineByKey("parameterKeyType",parameterKeyType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKeyType");
       return;
     }
@@ -1469,13 +1470,13 @@ void ServerInterface::getProducerInfoListByParameter(T::RequestMessage& request,
     std::string parameterKey;
     if (!request.getLineByKey("parameterKey",parameterKey))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKey");
       return;
     }
 
     T::ProducerInfoList producerInfoList;
-    int result = mService->getProducerInfoListByParameter(sessionId,(T::ParamKeyType)parameterKeyType,parameterKey,producerInfoList);
+    int result = mService->getProducerInfoListByParameter(sessionId,parameterKeyType,parameterKey,producerInfoList);
 
     response.addLine("result",result);
     if (result == Result::OK)
@@ -1512,7 +1513,7 @@ void ServerInterface::getProducerInfoListBySourceId(T::RequestMessage& request,T
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1520,7 +1521,7 @@ void ServerInterface::getProducerInfoListBySourceId(T::RequestMessage& request,T
     uint sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sourceId");
       return;
     }
@@ -1563,7 +1564,7 @@ void ServerInterface::getProducerInfoCount(T::RequestMessage& request,T::Respons
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1600,7 +1601,7 @@ void ServerInterface::getProducerNameAndGeometryList(T::RequestMessage& request,
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1640,7 +1641,7 @@ void ServerInterface::getProducerParameterList(T::RequestMessage& request,T::Res
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1648,7 +1649,7 @@ void ServerInterface::getProducerParameterList(T::RequestMessage& request,T::Res
     int sourceParameterKeyType = 0;
     if (!request.getLineByKey("sourceParameterKeyType",sourceParameterKeyType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sourceParameterKeyType");
       return;
     }
@@ -1656,14 +1657,14 @@ void ServerInterface::getProducerParameterList(T::RequestMessage& request,T::Res
     int targetParameterKeyType = 0;
     if (!request.getLineByKey("targetParameterKeyType",targetParameterKeyType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: targetParameterKeyType");
       return;
     }
 
     std::set<std::string> list;
 
-    int result = mService->getProducerParameterList(sessionId,(T::ParamKeyType)sourceParameterKeyType,(T::ParamKeyType)targetParameterKeyType,list);
+    int result = mService->getProducerParameterList(sessionId,sourceParameterKeyType,targetParameterKeyType,list);
 
     response.addLine("result",result);
     if (result == Result::OK)
@@ -1696,7 +1697,7 @@ void ServerInterface::addGenerationInfo(T::RequestMessage& request,T::ResponseMe
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1704,7 +1705,7 @@ void ServerInterface::addGenerationInfo(T::RequestMessage& request,T::ResponseMe
     std::string csv;
     if (!request.getLineByKey("generationInfo",csv))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationInfo");
       return;
     }
@@ -1742,7 +1743,7 @@ void ServerInterface::deleteGenerationInfoById(T::RequestMessage& request,T::Res
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1750,7 +1751,7 @@ void ServerInterface::deleteGenerationInfoById(T::RequestMessage& request,T::Res
     uint generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationId");
       return;
     }
@@ -1780,7 +1781,7 @@ void ServerInterface::deleteGenerationInfoByName(T::RequestMessage& request,T::R
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1788,7 +1789,7 @@ void ServerInterface::deleteGenerationInfoByName(T::RequestMessage& request,T::R
     std::string generationName;
     if (!request.getLineByKey("generationName",generationName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationName");
       return;
     }
@@ -1819,7 +1820,7 @@ void ServerInterface::deleteGenerationInfoListByIdList(T::RequestMessage& reques
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1827,7 +1828,7 @@ void ServerInterface::deleteGenerationInfoListByIdList(T::RequestMessage& reques
     string_vec csvLines;
     if (request.getLinesByKey("generationId",csvLines) == 0)
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationId");
       return;
     }
@@ -1836,7 +1837,7 @@ void ServerInterface::deleteGenerationInfoListByIdList(T::RequestMessage& reques
 
     for (auto it=csvLines.begin(); it!=csvLines.end(); ++it)
     {
-      generationIdList.insert((uint)atoll(it->c_str()));
+      generationIdList.insert(toInt64(it->c_str()));
     }
 
     int result = mService->deleteGenerationInfoListByIdList(sessionId,generationIdList);
@@ -1860,7 +1861,7 @@ void ServerInterface::deleteGenerationInfoListByProducerId(T::RequestMessage& re
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1868,7 +1869,7 @@ void ServerInterface::deleteGenerationInfoListByProducerId(T::RequestMessage& re
     uint producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerId");
       return;
     }
@@ -1898,7 +1899,7 @@ void ServerInterface::deleteGenerationInfoListByProducerName(T::RequestMessage& 
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1906,7 +1907,7 @@ void ServerInterface::deleteGenerationInfoListByProducerName(T::RequestMessage& 
     std::string producerName;
     if (!request.getLineByKey("producerName",producerName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerName");
       return;
     }
@@ -1936,7 +1937,7 @@ void ServerInterface::deleteGenerationInfoListBySourceId(T::RequestMessage& requ
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -1944,7 +1945,7 @@ void ServerInterface::deleteGenerationInfoListBySourceId(T::RequestMessage& requ
     uint sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sourceId");
       return;
     }
@@ -1974,7 +1975,7 @@ void ServerInterface::getGenerationIdGeometryIdAndForecastTimeList(T::RequestMes
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2013,7 +2014,7 @@ void ServerInterface::getGenerationInfoById(T::RequestMessage& request,T::Respon
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2021,7 +2022,7 @@ void ServerInterface::getGenerationInfoById(T::RequestMessage& request,T::Respon
     uint generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationId");
       return;
     }
@@ -2059,7 +2060,7 @@ void ServerInterface::getGenerationInfoByName(T::RequestMessage& request,T::Resp
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2067,7 +2068,7 @@ void ServerInterface::getGenerationInfoByName(T::RequestMessage& request,T::Resp
     std::string generationName;
     if (!request.getLineByKey("generationName",generationName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationName");
       return;
     }
@@ -2105,7 +2106,7 @@ void ServerInterface::getGenerationInfoList(T::RequestMessage& request,T::Respon
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2149,7 +2150,7 @@ void ServerInterface::getGenerationInfoListByGeometryId(T::RequestMessage& reque
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2157,7 +2158,7 @@ void ServerInterface::getGenerationInfoListByGeometryId(T::RequestMessage& reque
     T::GeometryId geometryId = 0;
     if (!request.getLineByKey("geometryId",geometryId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerId");
       return;
     }
@@ -2201,7 +2202,7 @@ void ServerInterface::getGenerationInfoListByProducerId(T::RequestMessage& reque
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2209,7 +2210,7 @@ void ServerInterface::getGenerationInfoListByProducerId(T::RequestMessage& reque
     uint producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerId");
       return;
     }
@@ -2253,7 +2254,7 @@ void ServerInterface::getGenerationInfoListByProducerName(T::RequestMessage& req
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2261,7 +2262,7 @@ void ServerInterface::getGenerationInfoListByProducerName(T::RequestMessage& req
     std::string producerName;
     if (!request.getLineByKey("producerName",producerName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerName");
       return;
     }
@@ -2305,7 +2306,7 @@ void ServerInterface::getGenerationInfoListBySourceId(T::RequestMessage& request
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2313,7 +2314,7 @@ void ServerInterface::getGenerationInfoListBySourceId(T::RequestMessage& request
     uint sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sourceId");
       return;
     }
@@ -2357,7 +2358,7 @@ void ServerInterface::getLastGenerationInfoByProducerIdAndStatus(T::RequestMessa
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2365,7 +2366,7 @@ void ServerInterface::getLastGenerationInfoByProducerIdAndStatus(T::RequestMessa
     uint producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerId");
       return;
     }
@@ -2373,14 +2374,14 @@ void ServerInterface::getLastGenerationInfoByProducerIdAndStatus(T::RequestMessa
     uint generationStatus = 0;
     if (!request.getLineByKey("generationStatus",generationStatus))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationStatus");
       return;
     }
 
     T::GenerationInfo generationInfo;
 
-    int result = mService->getLastGenerationInfoByProducerIdAndStatus(sessionId,producerId,(T::GenerationStatus)generationStatus,generationInfo);
+    int result = mService->getLastGenerationInfoByProducerIdAndStatus(sessionId,producerId,generationStatus,generationInfo);
 
     response.addLine("result",result);
     if (result == Result::OK)
@@ -2410,7 +2411,7 @@ void ServerInterface::getLastGenerationInfoByProducerNameAndStatus(T::RequestMes
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2418,7 +2419,7 @@ void ServerInterface::getLastGenerationInfoByProducerNameAndStatus(T::RequestMes
     std::string producerName;
     if (!request.getLineByKey("producerName",producerName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerId");
       return;
     }
@@ -2426,14 +2427,14 @@ void ServerInterface::getLastGenerationInfoByProducerNameAndStatus(T::RequestMes
     uint generationStatus = 0;
     if (!request.getLineByKey("generationStatus",generationStatus))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationStatus");
       return;
     }
 
     T::GenerationInfo generationInfo;
 
-    int result = mService->getLastGenerationInfoByProducerNameAndStatus(sessionId,producerName,(T::GenerationStatus)generationStatus,generationInfo);
+    int result = mService->getLastGenerationInfoByProducerNameAndStatus(sessionId,producerName,generationStatus,generationInfo);
 
     response.addLine("result",result);
     if (result == Result::OK)
@@ -2463,7 +2464,7 @@ void ServerInterface::getGenerationInfoCount(T::RequestMessage& request,T::Respo
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2500,7 +2501,7 @@ void ServerInterface::setGenerationInfoStatusById(T::RequestMessage& request,T::
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2508,7 +2509,7 @@ void ServerInterface::setGenerationInfoStatusById(T::RequestMessage& request,T::
     uint generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationId");
       return;
     }
@@ -2516,12 +2517,12 @@ void ServerInterface::setGenerationInfoStatusById(T::RequestMessage& request,T::
     uint status = 0;
     if (!request.getLineByKey("status",status))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: status");
       return;
     }
 
-    int result = mService->setGenerationInfoStatusById(sessionId,generationId,(T::GenerationStatus)status);
+    int result = mService->setGenerationInfoStatusById(sessionId,generationId,status);
 
     response.addLine("result",result);
 
@@ -2546,7 +2547,7 @@ void ServerInterface::setGenerationInfoStatusByName(T::RequestMessage& request,T
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2554,7 +2555,7 @@ void ServerInterface::setGenerationInfoStatusByName(T::RequestMessage& request,T
     std::string generationName;
     if (!request.getLineByKey("generationName",generationName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationName");
       return;
     }
@@ -2562,12 +2563,12 @@ void ServerInterface::setGenerationInfoStatusByName(T::RequestMessage& request,T
     uint status = 0;
     if (!request.getLineByKey("status",status))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: status");
       return;
     }
 
-    int result = mService->setGenerationInfoStatusByName(sessionId,generationName,(T::GenerationStatus)status);
+    int result = mService->setGenerationInfoStatusByName(sessionId,generationName,status);
 
     response.addLine("result",result);
 
@@ -2591,7 +2592,7 @@ void ServerInterface::addFileInfo(T::RequestMessage& request,T::ResponseMessage&
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2599,7 +2600,7 @@ void ServerInterface::addFileInfo(T::RequestMessage& request,T::ResponseMessage&
     std::string csv;
     if (!request.getLineByKey("fileInfo",csv))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: fileInfo");
       return;
     }
@@ -2637,7 +2638,7 @@ void ServerInterface::addFileInfoWithContentList(T::RequestMessage& request,T::R
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2645,7 +2646,7 @@ void ServerInterface::addFileInfoWithContentList(T::RequestMessage& request,T::R
     std::string csv;
     if (!request.getLineByKey("fileInfo",csv))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: fileInfo");
       return;
     }
@@ -2657,13 +2658,13 @@ void ServerInterface::addFileInfoWithContentList(T::RequestMessage& request,T::R
 /*
     if (request.getLinesByKey("contentInfo",csvLines) == 0)
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: contentInfo");
       return;
     }
 */
     T::ContentInfoList contentInfoList;
-    uint len = (uint)csvLines.size();
+    uint len = csvLines.size();
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *info = new T::ContentInfo(csvLines[t].c_str());
@@ -2701,7 +2702,7 @@ void ServerInterface::addFileInfoListWithContent(T::RequestMessage& request,T::R
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2709,7 +2710,7 @@ void ServerInterface::addFileInfoListWithContent(T::RequestMessage& request,T::R
     uint length = 0;
     if (!request.getLineByKey("length",length))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: length");
       return;
     }
@@ -2727,7 +2728,7 @@ void ServerInterface::addFileInfoListWithContent(T::RequestMessage& request,T::R
       std::string csv;
       if (!request.getLineByKey(tmp,csv))
       {
-        response.addLine("result",(int)Result::MISSING_PARAMETER);
+        response.addLine("result",Result::MISSING_PARAMETER);
         sprintf(msg,"Missing parameter: %s",tmp);
         response.addLine("resultString",msg);
         return;
@@ -2740,7 +2741,7 @@ void ServerInterface::addFileInfoListWithContent(T::RequestMessage& request,T::R
       string_vec csvLines;
       request.getLinesByKey(tmp,csvLines);
 
-      uint len = (uint)csvLines.size();
+      uint len = csvLines.size();
       for (uint t=0; t<len; t++)
       {
         T::ContentInfo *info = new T::ContentInfo(csvLines[t].c_str());
@@ -2792,7 +2793,7 @@ void ServerInterface::deleteFileInfoById(T::RequestMessage& request,T::ResponseM
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2800,7 +2801,7 @@ void ServerInterface::deleteFileInfoById(T::RequestMessage& request,T::ResponseM
     uint fileId = 0;
     if (!request.getLineByKey("fileId",fileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: fileId");
       return;
     }
@@ -2830,7 +2831,7 @@ void ServerInterface::deleteFileInfoByName(T::RequestMessage& request,T::Respons
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2838,7 +2839,7 @@ void ServerInterface::deleteFileInfoByName(T::RequestMessage& request,T::Respons
     std::string filename;
     if (!request.getLineByKey("filename",filename))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: fileId");
       return;
     }
@@ -2868,7 +2869,7 @@ void ServerInterface::deleteFileInfoListByForecastTimeList(T::RequestMessage& re
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2878,7 +2879,7 @@ void ServerInterface::deleteFileInfoListByForecastTimeList(T::RequestMessage& re
 
 
     std::vector<T::ForecastTime> forecastTimeList;
-    uint len = (uint)csvLines.size();
+    uint len = csvLines.size();
     for (uint t=0; t<len; t++)
     {
       T::ForecastTime ft(csvLines[t].c_str());
@@ -2909,7 +2910,7 @@ void ServerInterface::deleteFileInfoListByGroupFlags(T::RequestMessage& request,
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2917,7 +2918,7 @@ void ServerInterface::deleteFileInfoListByGroupFlags(T::RequestMessage& request,
     uint groupFlags = 0;
     if (!request.getLineByKey("groupFlags",groupFlags))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: groupFlags");
       return;
     }
@@ -2947,7 +2948,7 @@ void ServerInterface::deleteFileInfoListByProducerId(T::RequestMessage& request,
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2955,7 +2956,7 @@ void ServerInterface::deleteFileInfoListByProducerId(T::RequestMessage& request,
     uint producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerId");
       return;
     }
@@ -2985,7 +2986,7 @@ void ServerInterface::deleteFileInfoListByProducerName(T::RequestMessage& reques
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -2993,7 +2994,7 @@ void ServerInterface::deleteFileInfoListByProducerName(T::RequestMessage& reques
     std::string producerName;
     if (!request.getLineByKey("producerName",producerName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerName");
       return;
     }
@@ -3023,7 +3024,7 @@ void ServerInterface::deleteFileInfoListByGenerationId(T::RequestMessage& reques
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3031,7 +3032,7 @@ void ServerInterface::deleteFileInfoListByGenerationId(T::RequestMessage& reques
     uint generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationId");
       return;
     }
@@ -3061,7 +3062,7 @@ void ServerInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Request
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3069,7 +3070,7 @@ void ServerInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Request
     uint generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationId");
       return;
     }
@@ -3077,7 +3078,7 @@ void ServerInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Request
     T::GeometryId geometryId = 0;
     if (!request.getLineByKey("geometryId",geometryId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: geometryId");
       return;
     }
@@ -3085,7 +3086,7 @@ void ServerInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Request
     short forecastType = 0;
     if (!request.getLineByKey("forecastType",forecastType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: forecastType");
       return;
     }
@@ -3093,7 +3094,7 @@ void ServerInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Request
     short forecastNumber = 0;
     if (!request.getLineByKey("forecastNumber",forecastNumber))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: forecastNumber");
       return;
     }
@@ -3101,7 +3102,7 @@ void ServerInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Request
     std::string forecastTime;
     if (!request.getLineByKey("forecastTime",forecastTime))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: forecastTime");
       return;
     }
@@ -3131,7 +3132,7 @@ void ServerInterface::deleteFileInfoListByGenerationName(T::RequestMessage& requ
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3139,7 +3140,7 @@ void ServerInterface::deleteFileInfoListByGenerationName(T::RequestMessage& requ
     std::string generationName;
     if (!request.getLineByKey("generationName",generationName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationName");
       return;
     }
@@ -3169,7 +3170,7 @@ void ServerInterface::deleteFileInfoListBySourceId(T::RequestMessage& request,T:
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3177,7 +3178,7 @@ void ServerInterface::deleteFileInfoListBySourceId(T::RequestMessage& request,T:
     uint sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sourceId");
       return;
     }
@@ -3207,7 +3208,7 @@ void ServerInterface::getFileInfoById(T::RequestMessage& request,T::ResponseMess
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3215,7 +3216,7 @@ void ServerInterface::getFileInfoById(T::RequestMessage& request,T::ResponseMess
     uint fileId = 0;
     if (!request.getLineByKey("fileId",fileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: fileId");
       return;
     }
@@ -3253,7 +3254,7 @@ void ServerInterface::getFileInfoByName(T::RequestMessage& request,T::ResponseMe
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3261,7 +3262,7 @@ void ServerInterface::getFileInfoByName(T::RequestMessage& request,T::ResponseMe
     std::string filename;
     if (!request.getLineByKey("filename",filename))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: filename");
       return;
     }
@@ -3299,7 +3300,7 @@ void ServerInterface::getFileInfoList(T::RequestMessage& request,T::ResponseMess
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3307,7 +3308,7 @@ void ServerInterface::getFileInfoList(T::RequestMessage& request,T::ResponseMess
     uint startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startFileId");
       return;
     }
@@ -3315,7 +3316,7 @@ void ServerInterface::getFileInfoList(T::RequestMessage& request,T::ResponseMess
     uint maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
@@ -3359,7 +3360,7 @@ void ServerInterface::getFileInfoListByProducerId(T::RequestMessage& request,T::
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3367,7 +3368,7 @@ void ServerInterface::getFileInfoListByProducerId(T::RequestMessage& request,T::
     uint producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerId");
       return;
     }
@@ -3375,7 +3376,7 @@ void ServerInterface::getFileInfoListByProducerId(T::RequestMessage& request,T::
     uint startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startFileId");
       return;
     }
@@ -3383,7 +3384,7 @@ void ServerInterface::getFileInfoListByProducerId(T::RequestMessage& request,T::
     uint maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
@@ -3427,7 +3428,7 @@ void ServerInterface::getFileInfoListByProducerName(T::RequestMessage& request,T
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3435,7 +3436,7 @@ void ServerInterface::getFileInfoListByProducerName(T::RequestMessage& request,T
     std::string producerName;
     if (!request.getLineByKey("producerName",producerName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerName");
       return;
     }
@@ -3443,7 +3444,7 @@ void ServerInterface::getFileInfoListByProducerName(T::RequestMessage& request,T
     uint startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startFileId");
       return;
     }
@@ -3451,7 +3452,7 @@ void ServerInterface::getFileInfoListByProducerName(T::RequestMessage& request,T
     uint maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
@@ -3495,7 +3496,7 @@ void ServerInterface::getFileInfoListByGenerationId(T::RequestMessage& request,T
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3503,7 +3504,7 @@ void ServerInterface::getFileInfoListByGenerationId(T::RequestMessage& request,T
     uint generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationId");
       return;
     }
@@ -3511,7 +3512,7 @@ void ServerInterface::getFileInfoListByGenerationId(T::RequestMessage& request,T
     uint startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startFileId");
       return;
     }
@@ -3519,7 +3520,7 @@ void ServerInterface::getFileInfoListByGenerationId(T::RequestMessage& request,T
     uint maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
@@ -3563,7 +3564,7 @@ void ServerInterface::getFileInfoListByGenerationName(T::RequestMessage& request
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3571,7 +3572,7 @@ void ServerInterface::getFileInfoListByGenerationName(T::RequestMessage& request
     std::string generationName;
     if (!request.getLineByKey("generationName",generationName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationName");
       return;
     }
@@ -3579,7 +3580,7 @@ void ServerInterface::getFileInfoListByGenerationName(T::RequestMessage& request
     uint startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startFileId");
       return;
     }
@@ -3587,7 +3588,7 @@ void ServerInterface::getFileInfoListByGenerationName(T::RequestMessage& request
     uint maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
@@ -3631,7 +3632,7 @@ void ServerInterface::getFileInfoListByGroupFlags(T::RequestMessage& request,T::
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3639,7 +3640,7 @@ void ServerInterface::getFileInfoListByGroupFlags(T::RequestMessage& request,T::
     uint groupFlags = 0;
     if (!request.getLineByKey("groupFlags",groupFlags))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: groupFlags");
       return;
     }
@@ -3647,7 +3648,7 @@ void ServerInterface::getFileInfoListByGroupFlags(T::RequestMessage& request,T::
     uint startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startFileId");
       return;
     }
@@ -3655,7 +3656,7 @@ void ServerInterface::getFileInfoListByGroupFlags(T::RequestMessage& request,T::
     uint maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
@@ -3699,7 +3700,7 @@ void ServerInterface::getFileInfoListBySourceId(T::RequestMessage& request,T::Re
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3707,7 +3708,7 @@ void ServerInterface::getFileInfoListBySourceId(T::RequestMessage& request,T::Re
     uint sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sourceId");
       return;
     }
@@ -3715,7 +3716,7 @@ void ServerInterface::getFileInfoListBySourceId(T::RequestMessage& request,T::Re
     uint startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startFileId");
       return;
     }
@@ -3723,7 +3724,7 @@ void ServerInterface::getFileInfoListBySourceId(T::RequestMessage& request,T::Re
     uint maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
@@ -3767,7 +3768,7 @@ void ServerInterface::deleteFileInfoListByFileIdList(T::RequestMessage& request,
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3775,7 +3776,7 @@ void ServerInterface::deleteFileInfoListByFileIdList(T::RequestMessage& request,
     string_vec csvLines;
     if (request.getLinesByKey("fileId",csvLines) == 0)
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: fileId");
       return;
     }
@@ -3784,7 +3785,7 @@ void ServerInterface::deleteFileInfoListByFileIdList(T::RequestMessage& request,
 
     for (auto it=csvLines.begin(); it!=csvLines.end(); ++it)
     {
-      fileIdList.insert((uint)atoll(it->c_str()));
+      fileIdList.insert(toInt64(it->c_str()));
     }
 
     int result = mService->deleteFileInfoListByFileIdList(sessionId,fileIdList);
@@ -3808,7 +3809,7 @@ void ServerInterface::getFileInfoCount(T::RequestMessage& request,T::ResponseMes
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3845,7 +3846,7 @@ void ServerInterface::getFileInfoCountByProducerId(T::RequestMessage& request,T:
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3853,7 +3854,7 @@ void ServerInterface::getFileInfoCountByProducerId(T::RequestMessage& request,T:
     uint producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerId");
       return;
     }
@@ -3890,7 +3891,7 @@ void ServerInterface::getFileInfoCountByGenerationId(T::RequestMessage& request,
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3898,7 +3899,7 @@ void ServerInterface::getFileInfoCountByGenerationId(T::RequestMessage& request,
     uint generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationId");
       return;
     }
@@ -3935,7 +3936,7 @@ void ServerInterface::getFileInfoCountBySourceId(T::RequestMessage& request,T::R
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3943,7 +3944,7 @@ void ServerInterface::getFileInfoCountBySourceId(T::RequestMessage& request,T::R
     uint sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sourceId");
       return;
     }
@@ -3979,7 +3980,7 @@ void ServerInterface::addEventInfo(T::RequestMessage& request,T::ResponseMessage
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -3987,7 +3988,7 @@ void ServerInterface::addEventInfo(T::RequestMessage& request,T::ResponseMessage
     std::string csv;
     if (!request.getLineByKey("eventInfo",csv))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: eventInfo");
       return;
     }
@@ -4020,7 +4021,7 @@ void ServerInterface::getLastEventInfo(T::RequestMessage& request,T::ResponseMes
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4028,7 +4029,7 @@ void ServerInterface::getLastEventInfo(T::RequestMessage& request,T::ResponseMes
     uint requestingServerId = 0;
     if (!request.getLineByKey("requestingServerId",requestingServerId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: requestingServerId");
       return;
     }
@@ -4066,7 +4067,7 @@ void ServerInterface::getEventInfoList(T::RequestMessage& request,T::ResponseMes
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4074,7 +4075,7 @@ void ServerInterface::getEventInfoList(T::RequestMessage& request,T::ResponseMes
     uint requestingServerId = 0;
     if (!request.getLineByKey("requestingServerId",requestingServerId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: requestingServerId");
       return;
     }
@@ -4082,7 +4083,7 @@ void ServerInterface::getEventInfoList(T::RequestMessage& request,T::ResponseMes
     T::EventId startEventId = 0;
     if (!request.getLineByKey("startEventId",startEventId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startEventId");
       return;
     }
@@ -4090,7 +4091,7 @@ void ServerInterface::getEventInfoList(T::RequestMessage& request,T::ResponseMes
     uint maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
@@ -4135,7 +4136,7 @@ void ServerInterface::getEventInfoCount(T::RequestMessage& request,T::ResponseMe
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4172,7 +4173,7 @@ void ServerInterface::addContentInfo(T::RequestMessage& request,T::ResponseMessa
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4180,7 +4181,7 @@ void ServerInterface::addContentInfo(T::RequestMessage& request,T::ResponseMessa
     std::string csv;
     if (!request.getLineByKey("contentInfo",csv))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: contentInfo");
       return;
     }
@@ -4218,7 +4219,7 @@ void ServerInterface::addContentList(T::RequestMessage& request,T::ResponseMessa
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4226,13 +4227,13 @@ void ServerInterface::addContentList(T::RequestMessage& request,T::ResponseMessa
     string_vec csvLines;
     if (request.getLinesByKey("contentInfo",csvLines) == 0)
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: contentInfo");
       return;
     }
 
     T::ContentInfoList contentInfoList;
-    uint len = (uint)csvLines.size();
+    uint len = csvLines.size();
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *info = new T::ContentInfo(csvLines[t].c_str());
@@ -4264,7 +4265,7 @@ void ServerInterface::deleteContentInfo(T::RequestMessage& request,T::ResponseMe
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4272,7 +4273,7 @@ void ServerInterface::deleteContentInfo(T::RequestMessage& request,T::ResponseMe
     uint fileId = 0;
     if (!request.getLineByKey("fileId",fileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: fileId");
       return;
     }
@@ -4280,7 +4281,7 @@ void ServerInterface::deleteContentInfo(T::RequestMessage& request,T::ResponseMe
     uint messageIndex = 0;
     if (!request.getLineByKey("messageIndex",messageIndex))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: messageIndex");
       return;
     }
@@ -4310,7 +4311,7 @@ void ServerInterface::deleteContentListByFileId(T::RequestMessage& request,T::Re
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4318,7 +4319,7 @@ void ServerInterface::deleteContentListByFileId(T::RequestMessage& request,T::Re
     uint fileId = 0;
     if (!request.getLineByKey("fileId",fileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: fileId");
       return;
     }
@@ -4348,7 +4349,7 @@ void ServerInterface::deleteContentListByFileName(T::RequestMessage& request,T::
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4356,7 +4357,7 @@ void ServerInterface::deleteContentListByFileName(T::RequestMessage& request,T::
     std::string filename;
     if (!request.getLineByKey("filename",filename))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: filename");
       return;
     }
@@ -4386,7 +4387,7 @@ void ServerInterface::deleteContentListByGroupFlags(T::RequestMessage& request,T
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4394,7 +4395,7 @@ void ServerInterface::deleteContentListByGroupFlags(T::RequestMessage& request,T
     uint groupFlags = 0;
     if (!request.getLineByKey("groupFlags",groupFlags))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: groupFlags");
       return;
     }
@@ -4424,7 +4425,7 @@ void ServerInterface::deleteContentListByProducerId(T::RequestMessage& request,T
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4432,7 +4433,7 @@ void ServerInterface::deleteContentListByProducerId(T::RequestMessage& request,T
     uint producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerId");
       return;
     }
@@ -4462,7 +4463,7 @@ void ServerInterface::deleteContentListByProducerName(T::RequestMessage& request
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4470,7 +4471,7 @@ void ServerInterface::deleteContentListByProducerName(T::RequestMessage& request
     std::string producerName;
     if (!request.getLineByKey("producerName",producerName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerName");
       return;
     }
@@ -4500,7 +4501,7 @@ void ServerInterface::deleteContentListByGenerationId(T::RequestMessage& request
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4508,7 +4509,7 @@ void ServerInterface::deleteContentListByGenerationId(T::RequestMessage& request
     uint generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationId");
       return;
     }
@@ -4538,7 +4539,7 @@ void ServerInterface::deleteContentListByGenerationName(T::RequestMessage& reque
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4546,7 +4547,7 @@ void ServerInterface::deleteContentListByGenerationName(T::RequestMessage& reque
     std::string generationName;
     if (!request.getLineByKey("generationName",generationName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationName");
       return;
     }
@@ -4576,7 +4577,7 @@ void ServerInterface::deleteContentListBySourceId(T::RequestMessage& request,T::
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4584,7 +4585,7 @@ void ServerInterface::deleteContentListBySourceId(T::RequestMessage& request,T::
     uint sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sourceId");
       return;
     }
@@ -4614,7 +4615,7 @@ void ServerInterface::registerContentList(T::RequestMessage& request,T::Response
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4622,7 +4623,7 @@ void ServerInterface::registerContentList(T::RequestMessage& request,T::Response
     uint serverId = 0;
     if (!request.getLineByKey("serverId",serverId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: serverId");
       return;
     }
@@ -4654,7 +4655,7 @@ void ServerInterface::registerContentListByFileId(T::RequestMessage& request,T::
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4662,7 +4663,7 @@ void ServerInterface::registerContentListByFileId(T::RequestMessage& request,T::
     uint fileId = 0;
     if (!request.getLineByKey("fileId",fileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: fileId");
       return;
     }
@@ -4670,7 +4671,7 @@ void ServerInterface::registerContentListByFileId(T::RequestMessage& request,T::
     uint serverId = 0;
     if (!request.getLineByKey("serverId",serverId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: serverId");
       return;
     }
@@ -4700,7 +4701,7 @@ void ServerInterface::unregisterContentList(T::RequestMessage& request,T::Respon
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4708,7 +4709,7 @@ void ServerInterface::unregisterContentList(T::RequestMessage& request,T::Respon
     uint serverId = 0;
     if (!request.getLineByKey("serverId",serverId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: serverId");
       return;
     }
@@ -4738,7 +4739,7 @@ void ServerInterface::unregisterContentListByFileId(T::RequestMessage& request,T
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4746,7 +4747,7 @@ void ServerInterface::unregisterContentListByFileId(T::RequestMessage& request,T
     uint serverId = 0;
     if (!request.getLineByKey("serverId",serverId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: serverId");
       return;
     }
@@ -4754,7 +4755,7 @@ void ServerInterface::unregisterContentListByFileId(T::RequestMessage& request,T
     uint fileId = 0;
     if (!request.getLineByKey("fileId",fileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: fileId");
       return;
     }
@@ -4784,7 +4785,7 @@ void ServerInterface::getContentInfo(T::RequestMessage& request,T::ResponseMessa
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4792,7 +4793,7 @@ void ServerInterface::getContentInfo(T::RequestMessage& request,T::ResponseMessa
     uint fileId = 0;
     if (!request.getLineByKey("fileId",fileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: fileId");
       return;
     }
@@ -4800,7 +4801,7 @@ void ServerInterface::getContentInfo(T::RequestMessage& request,T::ResponseMessa
     uint messageIndex = 0;
     if (!request.getLineByKey("messageIndex",messageIndex))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: messageIndex");
       return;
     }
@@ -4838,7 +4839,7 @@ void ServerInterface::getContentList(T::RequestMessage& request,T::ResponseMessa
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4846,7 +4847,7 @@ void ServerInterface::getContentList(T::RequestMessage& request,T::ResponseMessa
     uint startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startFileId");
       return;
     }
@@ -4854,7 +4855,7 @@ void ServerInterface::getContentList(T::RequestMessage& request,T::ResponseMessa
     uint startMessageIndex = 0;
     if (!request.getLineByKey("startMessageIndex",startMessageIndex))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startMessageIndex");
       return;
     }
@@ -4862,7 +4863,7 @@ void ServerInterface::getContentList(T::RequestMessage& request,T::ResponseMessa
     uint maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
@@ -4906,7 +4907,7 @@ void ServerInterface::getContentListByFileId(T::RequestMessage& request,T::Respo
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4914,7 +4915,7 @@ void ServerInterface::getContentListByFileId(T::RequestMessage& request,T::Respo
     uint fileId = 0;
     if (!request.getLineByKey("fileId",fileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: fileId");
       return;
     }
@@ -4958,7 +4959,7 @@ void ServerInterface::getContentListByFileName(T::RequestMessage& request,T::Res
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -4966,7 +4967,7 @@ void ServerInterface::getContentListByFileName(T::RequestMessage& request,T::Res
     std::string filename;
     if (!request.getLineByKey("filename",filename))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: filename");
       return;
     }
@@ -5010,7 +5011,7 @@ void ServerInterface::getContentListByGroupFlags(T::RequestMessage& request,T::R
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -5018,7 +5019,7 @@ void ServerInterface::getContentListByGroupFlags(T::RequestMessage& request,T::R
     uint groupFlags = 0;
     if (!request.getLineByKey("groupFlags",groupFlags))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: groupFlags");
       return;
     }
@@ -5026,7 +5027,7 @@ void ServerInterface::getContentListByGroupFlags(T::RequestMessage& request,T::R
     uint startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startFileId");
       return;
     }
@@ -5034,7 +5035,7 @@ void ServerInterface::getContentListByGroupFlags(T::RequestMessage& request,T::R
     uint startMessageIndex = 0;
     if (!request.getLineByKey("startMessageIndex",startMessageIndex))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startMessageIndex");
       return;
     }
@@ -5042,7 +5043,7 @@ void ServerInterface::getContentListByGroupFlags(T::RequestMessage& request,T::R
     uint maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
@@ -5086,7 +5087,7 @@ void ServerInterface::getContentListByProducerId(T::RequestMessage& request,T::R
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -5094,7 +5095,7 @@ void ServerInterface::getContentListByProducerId(T::RequestMessage& request,T::R
     uint producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerId");
       return;
     }
@@ -5102,7 +5103,7 @@ void ServerInterface::getContentListByProducerId(T::RequestMessage& request,T::R
     uint startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startFileId");
       return;
     }
@@ -5110,7 +5111,7 @@ void ServerInterface::getContentListByProducerId(T::RequestMessage& request,T::R
     uint startMessageIndex = 0;
     if (!request.getLineByKey("startMessageIndex",startMessageIndex))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startMessageIndex");
       return;
     }
@@ -5118,7 +5119,7 @@ void ServerInterface::getContentListByProducerId(T::RequestMessage& request,T::R
     uint maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       return;
     }
 
@@ -5161,7 +5162,7 @@ void ServerInterface::getContentListByProducerName(T::RequestMessage& request,T:
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -5169,7 +5170,7 @@ void ServerInterface::getContentListByProducerName(T::RequestMessage& request,T:
     std::string producerName;
     if (!request.getLineByKey("producerName",producerName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerName");
       return;
     }
@@ -5177,7 +5178,7 @@ void ServerInterface::getContentListByProducerName(T::RequestMessage& request,T:
     uint startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startFileId");
       return;
     }
@@ -5185,7 +5186,7 @@ void ServerInterface::getContentListByProducerName(T::RequestMessage& request,T:
     uint startMessageIndex = 0;
     if (!request.getLineByKey("startMessageIndex",startMessageIndex))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startMessageIndex");
       return;
     }
@@ -5193,7 +5194,7 @@ void ServerInterface::getContentListByProducerName(T::RequestMessage& request,T:
     uint maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
@@ -5237,7 +5238,7 @@ void ServerInterface::getContentListByServerId(T::RequestMessage& request,T::Res
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -5245,7 +5246,7 @@ void ServerInterface::getContentListByServerId(T::RequestMessage& request,T::Res
     uint serverId = 0;
     if (!request.getLineByKey("serverId",serverId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: serverId");
       return;
     }
@@ -5253,7 +5254,7 @@ void ServerInterface::getContentListByServerId(T::RequestMessage& request,T::Res
     uint startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startFileId");
       return;
     }
@@ -5261,7 +5262,7 @@ void ServerInterface::getContentListByServerId(T::RequestMessage& request,T::Res
     uint startMessageIndex = 0;
     if (!request.getLineByKey("startMessageIndex",startMessageIndex))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startMessageIndex");
       return;
     }
@@ -5269,7 +5270,7 @@ void ServerInterface::getContentListByServerId(T::RequestMessage& request,T::Res
     uint maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
@@ -5313,7 +5314,7 @@ void ServerInterface::getContentListByGenerationId(T::RequestMessage& request,T:
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -5321,7 +5322,7 @@ void ServerInterface::getContentListByGenerationId(T::RequestMessage& request,T:
     uint generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationId");
       return;
     }
@@ -5329,7 +5330,7 @@ void ServerInterface::getContentListByGenerationId(T::RequestMessage& request,T:
     uint startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startFileId");
       return;
     }
@@ -5337,7 +5338,7 @@ void ServerInterface::getContentListByGenerationId(T::RequestMessage& request,T:
     uint startMessageIndex = 0;
     if (!request.getLineByKey("startMessageIndex",startMessageIndex))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startMessageIndex");
       return;
     }
@@ -5345,7 +5346,7 @@ void ServerInterface::getContentListByGenerationId(T::RequestMessage& request,T:
     uint maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
@@ -5353,7 +5354,7 @@ void ServerInterface::getContentListByGenerationId(T::RequestMessage& request,T:
     uint requestFlags = 0;
     if (!request.getLineByKey("requestFlags",requestFlags))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: requestFlags");
       return;
     }
@@ -5397,7 +5398,7 @@ void ServerInterface::getContentListByGenerationName(T::RequestMessage& request,
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -5405,7 +5406,7 @@ void ServerInterface::getContentListByGenerationName(T::RequestMessage& request,
     std::string generationName;
     if (!request.getLineByKey("generationName",generationName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationName");
       return;
     }
@@ -5413,7 +5414,7 @@ void ServerInterface::getContentListByGenerationName(T::RequestMessage& request,
     uint startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startFileId");
       return;
     }
@@ -5421,7 +5422,7 @@ void ServerInterface::getContentListByGenerationName(T::RequestMessage& request,
     uint startMessageIndex = 0;
     if (!request.getLineByKey("startMessageIndex",startMessageIndex))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startMessageIndex");
       return;
     }
@@ -5429,7 +5430,7 @@ void ServerInterface::getContentListByGenerationName(T::RequestMessage& request,
     uint maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
@@ -5473,7 +5474,7 @@ void ServerInterface::getContentListByGenerationIdAndTimeRange(T::RequestMessage
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -5481,7 +5482,7 @@ void ServerInterface::getContentListByGenerationIdAndTimeRange(T::RequestMessage
     uint generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationId");
       return;
     }
@@ -5489,7 +5490,7 @@ void ServerInterface::getContentListByGenerationIdAndTimeRange(T::RequestMessage
     std::string startTime;
     if (!request.getLineByKey("startTime",startTime))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startTime");
       return;
     }
@@ -5497,7 +5498,7 @@ void ServerInterface::getContentListByGenerationIdAndTimeRange(T::RequestMessage
     std::string endTime;
     if (!request.getLineByKey("endTime",endTime))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: endTime");
       return;
     }
@@ -5541,7 +5542,7 @@ void ServerInterface::getContentListByGenerationNameAndTimeRange(T::RequestMessa
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -5549,7 +5550,7 @@ void ServerInterface::getContentListByGenerationNameAndTimeRange(T::RequestMessa
     std::string generationName;
     if (!request.getLineByKey("generationName",generationName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationName");
       return;
     }
@@ -5557,7 +5558,7 @@ void ServerInterface::getContentListByGenerationNameAndTimeRange(T::RequestMessa
     std::string startTime;
     if (!request.getLineByKey("startTime",startTime))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startTime");
       return;
     }
@@ -5565,7 +5566,7 @@ void ServerInterface::getContentListByGenerationNameAndTimeRange(T::RequestMessa
     std::string endTime;
     if (!request.getLineByKey("endTime",endTime))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: endTime");
       return;
     }
@@ -5609,7 +5610,7 @@ void ServerInterface::getContentListBySourceId(T::RequestMessage& request,T::Res
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -5617,7 +5618,7 @@ void ServerInterface::getContentListBySourceId(T::RequestMessage& request,T::Res
     uint sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sourceId");
       return;
     }
@@ -5625,7 +5626,7 @@ void ServerInterface::getContentListBySourceId(T::RequestMessage& request,T::Res
     uint startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startFileId");
       return;
     }
@@ -5633,7 +5634,7 @@ void ServerInterface::getContentListBySourceId(T::RequestMessage& request,T::Res
     uint startMessageIndex = 0;
     if (!request.getLineByKey("startMessageIndex",startMessageIndex))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startMessageIndex");
       return;
     }
@@ -5641,7 +5642,7 @@ void ServerInterface::getContentListBySourceId(T::RequestMessage& request,T::Res
     uint maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       return;
     }
 
@@ -5684,7 +5685,7 @@ void ServerInterface::getContentListByParameter(T::RequestMessage& request,T::Re
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -5692,7 +5693,7 @@ void ServerInterface::getContentListByParameter(T::RequestMessage& request,T::Re
     uint parameterKeyType = 0;
     if (!request.getLineByKey("parameterKeyType",parameterKeyType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKeyType");
       return;
     }
@@ -5700,7 +5701,7 @@ void ServerInterface::getContentListByParameter(T::RequestMessage& request,T::Re
     std::string parameterKey;
     if (!request.getLineByKey("parameterKey",parameterKey))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKey");
       return;
     }
@@ -5708,7 +5709,7 @@ void ServerInterface::getContentListByParameter(T::RequestMessage& request,T::Re
     uint parameterLevelIdType = 0;
     if (!request.getLineByKey("parameterLevelIdType",parameterLevelIdType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterLevelIdType");
       return;
     }
@@ -5716,7 +5717,7 @@ void ServerInterface::getContentListByParameter(T::RequestMessage& request,T::Re
     unsigned char parameterLevelId = 0;
     if (!request.getLineByKey("parameterLevelId",parameterLevelId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterLevelId");
       return;
     }
@@ -5724,7 +5725,7 @@ void ServerInterface::getContentListByParameter(T::RequestMessage& request,T::Re
     int minLevel = 0;
     if (!request.getLineByKey("minLevel",minLevel))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: minLevel");
       return;
     }
@@ -5732,7 +5733,7 @@ void ServerInterface::getContentListByParameter(T::RequestMessage& request,T::Re
     int maxLevel = 0;
     if (!request.getLineByKey("maxLevel",maxLevel))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxLevel");
       return;
     }
@@ -5740,7 +5741,7 @@ void ServerInterface::getContentListByParameter(T::RequestMessage& request,T::Re
     T::ForecastType forecastType = 0;
     if (!request.getLineByKey("forecastType",forecastType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: forecastType");
       return;
     }
@@ -5748,7 +5749,7 @@ void ServerInterface::getContentListByParameter(T::RequestMessage& request,T::Re
     T::ForecastNumber forecastNumber = 0;
     if (!request.getLineByKey("forecastNumber",forecastNumber))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: forecastNumber");
       return;
     }
@@ -5756,7 +5757,7 @@ void ServerInterface::getContentListByParameter(T::RequestMessage& request,T::Re
     T::GeometryId geometryId = 0;
     if (!request.getLineByKey("geometryId",geometryId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: geometryId");
       return;
     }
@@ -5764,7 +5765,7 @@ void ServerInterface::getContentListByParameter(T::RequestMessage& request,T::Re
     std::string startTime;
     if (!request.getLineByKey("startTime",startTime))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startTime");
       return;
     }
@@ -5772,7 +5773,7 @@ void ServerInterface::getContentListByParameter(T::RequestMessage& request,T::Re
     std::string endTime;
     if (!request.getLineByKey("endTime",endTime))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: endTime");
       return;
     }
@@ -5780,15 +5781,15 @@ void ServerInterface::getContentListByParameter(T::RequestMessage& request,T::Re
     uint requestFlags = 0;
     if (!request.getLineByKey("requestFlags",requestFlags))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: requestFlags");
       return;
     }
 
     T::ContentInfoList contentInfoList;
 
-    int result = mService->getContentListByParameter(sessionId,(T::ParamKeyType)parameterKeyType,
-        parameterKey,(T::ParamLevelIdType)parameterLevelIdType,parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
+    int result = mService->getContentListByParameter(sessionId,parameterKeyType,
+        parameterKey,parameterLevelIdType,parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
         forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     response.addLine("result",result);
@@ -5826,7 +5827,7 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -5834,7 +5835,7 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
     uint generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationId");
       return;
     }
@@ -5842,7 +5843,7 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
     uint parameterKeyType = 0;
     if (!request.getLineByKey("parameterKeyType",parameterKeyType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKeyType");
       return;
     }
@@ -5850,7 +5851,7 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
     std::string parameterKey;
     if (!request.getLineByKey("parameterKey",parameterKey))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKey");
       return;
     }
@@ -5858,7 +5859,7 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
     uint parameterLevelIdType = 0;
     if (!request.getLineByKey("parameterLevelIdType",parameterLevelIdType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterLevelIdType");
       return;
     }
@@ -5866,7 +5867,7 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
     unsigned char parameterLevelId = 0;
     if (!request.getLineByKey("parameterLevelId",parameterLevelId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterLevelId");
       return;
     }
@@ -5874,7 +5875,7 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
     int minLevel = 0;
     if (!request.getLineByKey("minLevel",minLevel))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: minLevel");
       return;
     }
@@ -5882,7 +5883,7 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
     int maxLevel = 0;
     if (!request.getLineByKey("maxLevel",maxLevel))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxLevel");
       return;
     }
@@ -5890,7 +5891,7 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
     T::ForecastType forecastType = 0;
     if (!request.getLineByKey("forecastType",forecastType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: forecastType");
       return;
     }
@@ -5898,7 +5899,7 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
     T::ForecastNumber forecastNumber = 0;
     if (!request.getLineByKey("forecastNumber",forecastNumber))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: forecastNumber");
       return;
     }
@@ -5906,7 +5907,7 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
     T::GeometryId geometryId = 0;
     if (!request.getLineByKey("geometryId",geometryId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: geometryId");
       return;
     }
@@ -5914,7 +5915,7 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
     std::string startTime;
     if (!request.getLineByKey("startTime",startTime))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startTime");
       return;
     }
@@ -5922,7 +5923,7 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
     std::string endTime;
     if (!request.getLineByKey("endTime",endTime))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: endTime");
       return;
     }
@@ -5930,15 +5931,15 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
     uint requestFlags = 0;
     if (!request.getLineByKey("requestFlags",requestFlags))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: requestFlags");
       return;
     }
 
     T::ContentInfoList contentInfoList;
 
-    int result = mService->getContentListByParameterAndGenerationId(sessionId,generationId,(T::ParamKeyType)parameterKeyType,
-        parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
+    int result = mService->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,
+        parameterKey,parameterLevelIdType,parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
         forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     response.addLine("result",result);
@@ -5976,7 +5977,7 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -5984,7 +5985,7 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
     std::string generationName;
     if (!request.getLineByKey("generationName",generationName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationName");
       return;
     }
@@ -5992,7 +5993,7 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
     uint parameterKeyType = 0;
     if (!request.getLineByKey("parameterKeyType",parameterKeyType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKeyType");
       return;
     }
@@ -6000,7 +6001,7 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
     std::string parameterKey;
     if (!request.getLineByKey("parameterKey",parameterKey))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKey");
       return;
     }
@@ -6008,7 +6009,7 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
     uint parameterLevelIdType = 0;
     if (!request.getLineByKey("parameterLevelIdType",parameterLevelIdType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterLevelIdType");
       return;
     }
@@ -6016,7 +6017,7 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
     unsigned char parameterLevelId = 0;
     if (!request.getLineByKey("parameterLevelId",parameterLevelId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterLevelId");
       return;
     }
@@ -6024,7 +6025,7 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
     int minLevel = 0;
     if (!request.getLineByKey("minLevel",minLevel))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: minLevel");
       return;
     }
@@ -6032,7 +6033,7 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
     int maxLevel = 0;
     if (!request.getLineByKey("maxLevel",maxLevel))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxLevel");
       return;
     }
@@ -6040,7 +6041,7 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
     T::ForecastType forecastType = 0;
     if (!request.getLineByKey("forecastType",forecastType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: forecastType");
       return;
     }
@@ -6048,7 +6049,7 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
     T::ForecastNumber forecastNumber = 0;
     if (!request.getLineByKey("forecastNumber",forecastNumber))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: forecastNumber");
       return;
     }
@@ -6056,7 +6057,7 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
     T::GeometryId geometryId = 0;
     if (!request.getLineByKey("geometryId",geometryId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: geometryId");
       return;
     }
@@ -6064,7 +6065,7 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
     std::string startTime;
     if (!request.getLineByKey("startTime",startTime))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startTime");
       return;
     }
@@ -6072,7 +6073,7 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
     std::string endTime;
     if (!request.getLineByKey("endTime",endTime))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: endTime");
       return;
     }
@@ -6080,15 +6081,15 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
     uint requestFlags = 0;
     if (!request.getLineByKey("requestFlags",requestFlags))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: requestFlags");
       return;
     }
 
     T::ContentInfoList contentInfoList;
 
-    int result = mService->getContentListByParameterAndGenerationName(sessionId,generationName,(T::ParamKeyType)parameterKeyType,
-        parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
+    int result = mService->getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,
+        parameterKey,parameterLevelIdType,parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
         forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     response.addLine("result",result);
@@ -6126,7 +6127,7 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -6134,7 +6135,7 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
     uint producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerId");
       return;
     }
@@ -6142,7 +6143,7 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
     uint parameterKeyType = 0;
     if (!request.getLineByKey("parameterKeyType",parameterKeyType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKeyType");
       return;
     }
@@ -6150,7 +6151,7 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
     std::string parameterKey;
     if (!request.getLineByKey("parameterKey",parameterKey))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKey");
       return;
     }
@@ -6158,7 +6159,7 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
     uint parameterLevelIdType = 0;
     if (!request.getLineByKey("parameterLevelIdType",parameterLevelIdType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterLevelIdType");
       return;
     }
@@ -6166,7 +6167,7 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
     unsigned char parameterLevelId = 0;
     if (!request.getLineByKey("parameterLevelId",parameterLevelId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterLevelId");
       return;
     }
@@ -6174,7 +6175,7 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
     int minLevel = 0;
     if (!request.getLineByKey("minLevel",minLevel))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: minLevel");
       return;
     }
@@ -6182,7 +6183,7 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
     int maxLevel = 0;
     if (!request.getLineByKey("maxLevel",maxLevel))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxLevel");
       return;
     }
@@ -6190,7 +6191,7 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
     T::ForecastType forecastType = 0;
     if (!request.getLineByKey("forecastType",forecastType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: forecastType");
       return;
     }
@@ -6198,7 +6199,7 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
     T::ForecastNumber forecastNumber = 0;
     if (!request.getLineByKey("forecastNumber",forecastNumber))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: forecastNumber");
       return;
     }
@@ -6206,7 +6207,7 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
     T::GeometryId geometryId = 0;
     if (!request.getLineByKey("geometryId",geometryId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: geometryId");
       return;
     }
@@ -6214,7 +6215,7 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
     std::string startTime;
     if (!request.getLineByKey("startTime",startTime))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startTime");
       return;
     }
@@ -6222,7 +6223,7 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
     std::string endTime;
     if (!request.getLineByKey("endTime",endTime))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: endTime");
       return;
     }
@@ -6230,15 +6231,15 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
     uint requestFlags = 0;
     if (!request.getLineByKey("requestFlags",requestFlags))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: requestFlags");
       return;
     }
 
     T::ContentInfoList contentInfoList;
 
-    int result = mService->getContentListByParameterAndProducerId(sessionId,producerId,(T::ParamKeyType)parameterKeyType,
-        parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
+    int result = mService->getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,
+        parameterKey,parameterLevelIdType,parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
         forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     response.addLine("result",result);
@@ -6275,7 +6276,7 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -6283,7 +6284,7 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
     std::string producerName;
     if (!request.getLineByKey("producerName",producerName))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationName");
       return;
     }
@@ -6291,7 +6292,7 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
     uint parameterKeyType = 0;
     if (!request.getLineByKey("parameterKeyType",parameterKeyType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKeyType");
       return;
     }
@@ -6299,7 +6300,7 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
     std::string parameterKey;
     if (!request.getLineByKey("parameterKey",parameterKey))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKey");
       return;
     }
@@ -6307,7 +6308,7 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
     uint parameterLevelIdType = 0;
     if (!request.getLineByKey("parameterLevelIdType",parameterLevelIdType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterLevelIdType");
       return;
     }
@@ -6315,7 +6316,7 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
     unsigned char parameterLevelId = 0;
     if (!request.getLineByKey("parameterLevelId",parameterLevelId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterLevelId");
       return;
     }
@@ -6323,7 +6324,7 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
     int minLevel = 0;
     if (!request.getLineByKey("minLevel",minLevel))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: minLevel");
       return;
     }
@@ -6331,7 +6332,7 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
     int maxLevel = 0;
     if (!request.getLineByKey("maxLevel",maxLevel))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: maxLevel");
       return;
     }
@@ -6339,7 +6340,7 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
     T::ForecastType forecastType = 0;
     if (!request.getLineByKey("forecastType",forecastType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: forecastType");
       return;
     }
@@ -6347,7 +6348,7 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
     T::ForecastNumber forecastNumber = 0;
     if (!request.getLineByKey("forecastNumber",forecastNumber))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: forecastNumber");
       return;
     }
@@ -6355,7 +6356,7 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
     T::GeometryId geometryId = 0;
     if (!request.getLineByKey("geometryId",geometryId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: geometryId");
       return;
     }
@@ -6363,7 +6364,7 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
     std::string startTime;
     if (!request.getLineByKey("startTime",startTime))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: startTime");
       return;
     }
@@ -6371,7 +6372,7 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
     std::string endTime;
     if (!request.getLineByKey("endTime",endTime))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: endTime");
       return;
     }
@@ -6379,15 +6380,15 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
     uint requestFlags = 0;
     if (!request.getLineByKey("requestFlags",requestFlags))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: requestFlags");
       return;
     }
 
     T::ContentInfoList contentInfoList;
 
-    int result = mService->getContentListByParameterAndProducerName(sessionId,producerName,(T::ParamKeyType)parameterKeyType,
-        parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
+    int result = mService->getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,
+        parameterKey,parameterLevelIdType,parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
         forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     response.addLine("result",result);
@@ -6425,7 +6426,7 @@ void ServerInterface::getContentListByParameterGenerationIdAndForecastTime(T::Re
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -6433,7 +6434,7 @@ void ServerInterface::getContentListByParameterGenerationIdAndForecastTime(T::Re
     uint generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationId");
       return;
     }
@@ -6441,7 +6442,7 @@ void ServerInterface::getContentListByParameterGenerationIdAndForecastTime(T::Re
     uint parameterKeyType = 0;
     if (!request.getLineByKey("parameterKeyType",parameterKeyType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKeyType");
       return;
     }
@@ -6449,7 +6450,7 @@ void ServerInterface::getContentListByParameterGenerationIdAndForecastTime(T::Re
     std::string parameterKey;
     if (!request.getLineByKey("parameterKey",parameterKey))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKey");
       return;
     }
@@ -6457,7 +6458,7 @@ void ServerInterface::getContentListByParameterGenerationIdAndForecastTime(T::Re
     uint parameterLevelIdType = 0;
     if (!request.getLineByKey("parameterLevelIdType",parameterLevelIdType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterLevelIdType");
       return;
     }
@@ -6465,7 +6466,7 @@ void ServerInterface::getContentListByParameterGenerationIdAndForecastTime(T::Re
     unsigned char parameterLevelId = 0;
     if (!request.getLineByKey("parameterLevelId",parameterLevelId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterLevelId");
       return;
     }
@@ -6473,7 +6474,7 @@ void ServerInterface::getContentListByParameterGenerationIdAndForecastTime(T::Re
     int level = 0;
     if (!request.getLineByKey("level",level))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: level");
       return;
     }
@@ -6481,7 +6482,7 @@ void ServerInterface::getContentListByParameterGenerationIdAndForecastTime(T::Re
     T::ForecastType forecastType = 0;
     if (!request.getLineByKey("forecastType",forecastType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: forecastType");
       return;
     }
@@ -6489,7 +6490,7 @@ void ServerInterface::getContentListByParameterGenerationIdAndForecastTime(T::Re
     T::ForecastNumber forecastNumber = 0;
     if (!request.getLineByKey("forecastNumber",forecastNumber))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: forecastNumber");
       return;
     }
@@ -6497,7 +6498,7 @@ void ServerInterface::getContentListByParameterGenerationIdAndForecastTime(T::Re
     T::GeometryId geometryId = 0;
     if (!request.getLineByKey("geometryId",geometryId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: geometryId");
       return;
     }
@@ -6505,15 +6506,15 @@ void ServerInterface::getContentListByParameterGenerationIdAndForecastTime(T::Re
     std::string forecastTime;
     if (!request.getLineByKey("forecastTime",forecastTime))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: forecastTime");
       return;
     }
 
     T::ContentInfoList contentInfoList;
 
-    int result = mService->getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,(T::ParamKeyType)parameterKeyType,
-        parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,(T::ParamLevel)level,
+    int result = mService->getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,parameterKeyType,
+        parameterKey,parameterLevelIdType,parameterLevelId,(T::ParamLevel)level,
         forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
 
     response.addLine("result",result);
@@ -6551,7 +6552,7 @@ void ServerInterface::getContentGeometryIdListByGenerationId(T::RequestMessage& 
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -6559,7 +6560,7 @@ void ServerInterface::getContentGeometryIdListByGenerationId(T::RequestMessage& 
     uint generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationId");
       return;
     }
@@ -6599,7 +6600,7 @@ void ServerInterface::getContentParamListByGenerationId(T::RequestMessage& reque
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -6607,7 +6608,7 @@ void ServerInterface::getContentParamListByGenerationId(T::RequestMessage& reque
     uint generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationId");
       return;
     }
@@ -6651,7 +6652,7 @@ void ServerInterface::getContentParamKeyListByGenerationId(T::RequestMessage& re
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -6659,7 +6660,7 @@ void ServerInterface::getContentParamKeyListByGenerationId(T::RequestMessage& re
     uint generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationId");
       return;
     }
@@ -6667,14 +6668,14 @@ void ServerInterface::getContentParamKeyListByGenerationId(T::RequestMessage& re
     unsigned char parameterKeyType = 0;
     if (!request.getLineByKey("parameterKeyType",parameterKeyType))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKeyType");
       return;
     }
 
     std::set<std::string> paramKeyList;
 
-    int result = mService->getContentParamKeyListByGenerationId(sessionId,generationId,(T::ParamKeyType)parameterKeyType,paramKeyList);
+    int result = mService->getContentParamKeyListByGenerationId(sessionId,generationId,parameterKeyType,paramKeyList);
 
     response.addLine("result",result);
     if (result == Result::OK)
@@ -6707,7 +6708,7 @@ void ServerInterface::getContentTimeListByGenerationId(T::RequestMessage& reques
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -6715,7 +6716,7 @@ void ServerInterface::getContentTimeListByGenerationId(T::RequestMessage& reques
     uint generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationId");
       return;
     }
@@ -6756,7 +6757,7 @@ void ServerInterface::getContentTimeListByGenerationAndGeometryId(T::RequestMess
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -6764,7 +6765,7 @@ void ServerInterface::getContentTimeListByGenerationAndGeometryId(T::RequestMess
     uint generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: generationId");
       return;
     }
@@ -6772,7 +6773,7 @@ void ServerInterface::getContentTimeListByGenerationAndGeometryId(T::RequestMess
     T::GeometryId geometryId = 0;
     if (!request.getLineByKey("geometryId",geometryId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: geometryId");
       return;
     }
@@ -6812,7 +6813,7 @@ void ServerInterface::getContentTimeListByProducerId(T::RequestMessage& request,
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -6820,7 +6821,7 @@ void ServerInterface::getContentTimeListByProducerId(T::RequestMessage& request,
     uint producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: producerId");
       return;
     }
@@ -6861,7 +6862,7 @@ void ServerInterface::getContentCount(T::RequestMessage& request,T::ResponseMess
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -6898,7 +6899,7 @@ void ServerInterface::getLevelInfoList(T::RequestMessage& request,T::ResponseMes
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -6942,7 +6943,7 @@ void ServerInterface::deleteVirtualContent(T::RequestMessage& request,T::Respons
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }
@@ -6969,7 +6970,7 @@ void ServerInterface::updateVirtualContent(T::RequestMessage& request,T::Respons
     T::SessionId sessionId = 0;
     if (!request.getLineByKey("sessionId",sessionId))
     {
-      response.addLine("result",(int)Result::MISSING_PARAMETER);
+      response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: sessionId");
       return;
     }

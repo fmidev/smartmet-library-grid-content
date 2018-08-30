@@ -12,8 +12,8 @@ ParameterLevelInfo::ParameterLevelInfo()
 {
   try
   {
-    mParameterKeyType = T::ParamKeyType::FMI_ID;
-    mParameterLevelIdType = T::ParamLevelIdType::ANY;
+    mParameterKeyType = T::ParamKeyTypeValue::FMI_ID;
+    mParameterLevelIdType = T::ParamLevelIdTypeValue::ANY;
     mParameterLevelId = 0;
     mLevel = 0;
   }
@@ -86,24 +86,27 @@ ParameterLevelInfo::~ParameterLevelInfo()
 
 
 
-void ParameterLevelInfo::operator=(ParameterLevelInfo& levelInfo)
+ParameterLevelInfo& ParameterLevelInfo::operator=(ParameterLevelInfo& levelInfo)
 {
   try
   {
     if (&levelInfo == this)
-      return;
+      return *this;
 
     mParameterKeyType = levelInfo.mParameterKeyType;
     mParameterKey = levelInfo.mParameterKey;
     mParameterLevelIdType = levelInfo.mParameterLevelIdType;
     mParameterLevelId = levelInfo.mParameterLevelId;
     mLevel = levelInfo.mLevel;
+
+    return *this;
   }
   catch (...)
   {
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
+
 
 
 
@@ -128,11 +131,11 @@ void ParameterLevelInfo::print(std::ostream& stream,uint level,uint optionFlags)
   try
   {
     stream << space(level) << "ParameterLevelInfo\n";
-    stream << space(level) << "- mParameterKeyType = " << (int)mParameterKeyType << "\n";
-    stream << space(level) << "- mParameterKey = " << mParameterKey << "\n";
-    stream << space(level) << "- mParameterLevelIdType = " << (int)mParameterLevelIdType << "\n";
-    stream << space(level) << "- mParameterLevelId = " << (int)mParameterLevelId << "\n";
-    stream << space(level) << "- mLevel = " << mLevel << "\n";
+    stream << space(level) << "- mParameterKeyType     = " << mParameterKeyType << "\n";
+    stream << space(level) << "- mParameterKey         = " << mParameterKey << "\n";
+    stream << space(level) << "- mParameterLevelIdType = " << mParameterLevelIdType << "\n";
+    stream << space(level) << "- mParameterLevelId     = " << mParameterLevelId << "\n";
+    stream << space(level) << "- mLevel                = " << mLevel << "\n";
   }
   catch (...)
   {

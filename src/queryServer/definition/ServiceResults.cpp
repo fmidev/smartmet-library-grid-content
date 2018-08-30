@@ -30,7 +30,7 @@ std::string getResultString(int resultCode)
         return std::string("No producers found!");
     }
 
-    return std::string("Unknown result code : ") + std::to_string((int)resultCode);
+    return std::string("Unknown result code : ") + std::to_string(resultCode);
   }
   catch (...)
   {

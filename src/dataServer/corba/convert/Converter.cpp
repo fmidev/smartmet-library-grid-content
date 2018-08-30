@@ -80,7 +80,7 @@ void Converter::convert(T::GridData& source,DataServer::Corba::CorbaGridData& ta
 
     convert(source.mProjectionAttributes,target.projectionAttributes);
 
-    uint len = (uint)source.mValues.size();
+    uint len = source.mValues.size();
     target.valueList.length(len);
     for (uint t=0; t<len; t++)
     {
@@ -106,20 +106,20 @@ void Converter::convert(DataServer::Corba::CorbaGridData& source,T::GridData& ta
     target.mProducerId = source.producerId;
     target.mGenerationId = source.generationId;
     target.mFileId = source.fileId;
-    target.mFileType = (T::FileType)source.fileType;
+    target.mFileType = source.fileType;
     target.mFileName = source.fileName;
     target.mMessageIndex = source.messageIndex;
     target.mForecastTime = source.forecastTime;
     target.mForecastType = source.forecastType;
     target.mForecastNumber = source.forecastNumber;
     target.mGribParameterId = source.gribParameterId;
-    target.mGrib1ParameterLevelId = (T::ParamLevelId)source.grib1ParameterLevelId;
-    target.mGrib2ParameterLevelId = (T::ParamLevelId)source.grib2ParameterLevelId;
+    target.mGrib1ParameterLevelId = source.grib1ParameterLevelId;
+    target.mGrib2ParameterLevelId = source.grib2ParameterLevelId;
     target.mGribParameterName = source.gribParameterName;
     target.mGribParameterDescription = source.gribParameterDescription;
     target.mGribParameterUnits = source.gribParameterUnits;
     target.mFmiParameterId = source.fmiParameterId;
-    target.mFmiParameterLevelId = (T::ParamLevelId)source.fmiParameterLevelId;
+    target.mFmiParameterLevelId = source.fmiParameterLevelId;
     target.mFmiParameterName = source.fmiParameterName;
     target.mFmiParameterDescription = source.fmiParameterDescription;
     target.mFmiParameterUnits = source.fmiParameterUnits;
@@ -139,7 +139,7 @@ void Converter::convert(DataServer::Corba::CorbaGridData& source,T::GridData& ta
     target.mValues.reserve(len);
     for (uint t=0; t<len; t++)
     {
-      target.mValues.push_back((T::ParamValue)source.valueList[t]);
+      target.mValues.push_back(source.valueList[t]);
     }
   }
   catch (...)
@@ -243,7 +243,7 @@ void Converter::convert(T::GridCoordinates& source,DataServer::Corba::CorbaGridC
     target.columns = source.mColumns;
     target.coordinateType = (CORBA::Octet)source.mCoordinateType;
 
-    uint len = (uint)source.mCoordinateList.size();
+    uint len = source.mCoordinateList.size();
     target.coordinateList.length(len);
     for (uint t=0; t<len; t++)
     {
@@ -272,7 +272,7 @@ void Converter::convert(DataServer::Corba::CorbaGridCoordinates& source,T::GridC
     convert(source.projectionAttributes,target.mProjectionAttributes);
     target.mRows = source.rows;
     target.mColumns = source.columns;
-    target.mCoordinateType = (T::CoordinateType)source.coordinateType;
+    target.mCoordinateType = source.coordinateType;
 
     target.mCoordinateList.clear();
     uint len = source.coordinateList.length();
@@ -324,7 +324,7 @@ void Converter::convert(DataServer::Corba::CorbaValueRecord& source,T::ValueReco
   {
     target.mFileId = source.fileId;
     target.mMessageIndex = source.messageIndex;
-    target.mCoordinateType = (T::CoordinateType)source.coordinateType;
+    target.mCoordinateType = source.coordinateType;
     target.mAreaInterpolationMethod = (short)source.areaInterpolationMethod;
     target.mX = source.x;
     target.mY = source.y;
@@ -392,7 +392,7 @@ void Converter::convert(T::ParamValue_vec& source,DataServer::Corba::CorbaParamV
 {
   try
   {
-    uint len = (uint)source.size();
+    uint len = source.size();
     target.length(len);
     for (uint t=0; t<len; t++)
     {
@@ -412,11 +412,11 @@ void Converter::convert(DataServer::Corba::CorbaParamValueList& source,T::ParamV
 {
   try
   {
-    uint len = (uint)source.length();
+    uint len = source.length();
     target.clear();
     for (uint t=0; t<len; t++)
     {
-      target.push_back((T::ParamValue)source[t]);
+      target.push_back(source[t]);
     }
   }
   catch (...)

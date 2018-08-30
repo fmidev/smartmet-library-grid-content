@@ -18,7 +18,7 @@ namespace T
 
 ThreadLock FileInfoList_sortLock;
 
-FileInfo::ComparisonMethod fileInfo_comparisonMethod = FileInfo::ComparisonMethod::fileId;
+uint fileInfo_comparisonMethod = FileInfo::ComparisonMethod::fileId;
 
 
 
@@ -119,13 +119,13 @@ FileInfoList::~FileInfoList()
 
 
 
-void FileInfoList::operator=(FileInfoList& fileInfoList)
+FileInfoList& FileInfoList::operator=(FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
   {
     if (&fileInfoList == this)
-      return;
+      return *this;
 
     clear();
 
@@ -149,6 +149,8 @@ void FileInfoList::operator=(FileInfoList& fileInfoList)
 
     if (fileInfoList.getModificationLockPtr() != mModificationLockPtr)
       fileInfoList.unlock();
+
+    return *this;
   }
   catch (...)
   {
@@ -182,19 +184,19 @@ void FileInfoList::addFileInfo(FileInfo *fileInfo)
 
     int idx = getClosestIndexNoLock(mComparisonMethod,*fileInfo);
 
-    while (idx < (int)mLength  &&  mArray[idx] != nullptr  &&   mArray[idx]->compare(mComparisonMethod,fileInfo) < 0)
+    while (idx < C_INT(mLength)  &&  mArray[idx] != nullptr  &&   mArray[idx]->compare(mComparisonMethod,fileInfo) < 0)
     {
       idx++;
     }
 
-    if (idx == (int)mLength)
+    if (idx == C_INT(mLength))
     {
       mArray[mLength] = fileInfo;
       mLength++;
       return;
     }
 
-    if (idx < (int)mLength)
+    if (idx < C_INT(mLength))
       memmove(&mArray[idx+1],&mArray[idx],sizeof(void*)*(mLength-idx));
 
     mArray[idx] = fileInfo;
@@ -417,7 +419,7 @@ FileInfo* FileInfoList::getFileInfoById(uint fileId)
     FileInfo search;
     search.mFileId = fileId;
     int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
-    if (idx < 0  ||  idx >= (int)getLength())
+    if (idx < 0  ||  C_UINT(idx) >= getLength())
       return nullptr;
 
     FileInfo *info = getFileInfoByIndexNoCheck(idx);
@@ -444,7 +446,7 @@ FileInfo* FileInfoList::getFileInfoByIdNoLock(uint fileId)
     FileInfo search;
     search.mFileId = fileId;
     int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
-    if (idx < 0  ||  idx >= (int)getLength())
+    if (idx < 0  ||  C_UINT(idx) >= getLength())
       return nullptr;
 
     FileInfo *info = getFileInfoByIndexNoCheck(idx);
@@ -473,7 +475,7 @@ void FileInfoList::markFileInfoDeletedById(uint fileId)
     FileInfo search;
     search.mFileId = fileId;
     int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
-    if (idx < 0  ||  idx >= (int)getLength())
+    if (idx < 0  ||  C_UINT(idx) >= getLength())
       return;
 
     FileInfo *info = getFileInfoByIndexNoCheck(idx);
@@ -492,7 +494,7 @@ void FileInfoList::markFileInfoDeletedById(uint fileId)
 
 
 
-int FileInfoList::getClosestIndex(FileInfo::ComparisonMethod comparisonMethod,FileInfo& fileInfo)
+int FileInfoList::getClosestIndex(uint comparisonMethod,FileInfo& fileInfo)
 {
   FUNCTION_TRACE
   try
@@ -510,7 +512,7 @@ int FileInfoList::getClosestIndex(FileInfo::ComparisonMethod comparisonMethod,Fi
 
 
 
-int FileInfoList::getClosestIndexNoLock(FileInfo::ComparisonMethod comparisonMethod,FileInfo& fileInfo)
+int FileInfoList::getClosestIndexNoLock(uint comparisonMethod,FileInfo& fileInfo)
 {
   FUNCTION_TRACE
   try
@@ -535,7 +537,7 @@ int FileInfoList::getClosestIndexNoLock(FileInfo::ComparisonMethod comparisonMet
     }
 
     int low = 0;
-    int high = (int)mLength - 1;
+    int high = C_INT(mLength) - 1;
     int mid = 0;
 
     while (low <= high)
@@ -557,11 +559,11 @@ int FileInfoList::getClosestIndexNoLock(FileInfo::ComparisonMethod comparisonMet
         high = mid - 1;
     }
 
-    if (mid >= 0  &&  mid < (int)mLength)
+    if (mid >= 0  &&  mid < C_INT(mLength))
     {
       if (mArray[mid]->compare(comparisonMethod,&fileInfo) < 0)
       {
-        while (mid < (int)mLength  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&fileInfo) < 0)
+        while (mid < C_INT(mLength)  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&fileInfo) < 0)
           mid++;
 
         return mid-1;
@@ -596,7 +598,7 @@ FileInfo* FileInfoList::getFileInfoByName(std::string filename)
     FileInfo search;
     search.mName = filename;
     int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileName,search);
-    if (idx < 0  ||  idx >= (int)getLength())
+    if (idx < 0  ||  C_UINT(idx) >= getLength())
       return nullptr;
 
     FileInfo *info = getFileInfoByIndexNoCheck(idx);
@@ -666,7 +668,7 @@ void FileInfoList::getFileInfoList(uint startFileId,uint maxRecords,FileInfoList
     search.mFileId = startFileId;
     int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
     if (idx >= 0)
-      startIdx = (uint)idx;
+      startIdx = C_UINT(idx);
 
     for (uint t=startIdx; t<sz; t++)
     {
@@ -742,7 +744,7 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,
     search.mFileId = startFileId;
     int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
     if (idx >= 0)
-      startIdx = (uint)idx;
+      startIdx = C_UINT(idx);
 
     for (uint t=startIdx; t<sz; t++)
     {
@@ -818,7 +820,7 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFil
     search.mFileId = startFileId;
     int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
     if (idx >= 0)
-      startIdx = (uint)idx;
+      startIdx = C_UINT(idx);
 
     for (uint t=startIdx; t<sz; t++)
     {
@@ -894,7 +896,7 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,
     search.mFileId = startFileId;
     int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
     if (idx >= 0)
-      startIdx = (uint)idx;
+      startIdx = C_UINT(idx);
 
     for (uint t=startIdx; t<sz; t++)
     {
@@ -970,7 +972,7 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,uint
     search.mFileId = startFileId;
     int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
     if (idx >= 0)
-      startIdx = (uint)idx;
+      startIdx = C_UINT(idx);
 
     for (uint t=startIdx; t<sz; t++)
     {
@@ -1124,14 +1126,14 @@ bool FileInfoList::deleteFileInfoById(uint fileId)
     FileInfo search;
     search.mFileId = fileId;
     int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
-    if (idx < 0 ||  idx >= (int)mLength)
+    if (idx < 0 ||  idx >= C_INT(mLength))
       return false;
 
     FileInfo *info = mArray[idx];
     if (info->mFileId != fileId)
       return false;
 
-    for (uint t=(uint)idx+1; t<mLength; t++)
+    for (uint t=C_UINT(idx)+1; t<mLength; t++)
     {
       mArray[t-1] = mArray[t];
       mArray[t] = nullptr;
@@ -1163,14 +1165,14 @@ bool FileInfoList::deleteFileInfoByName(std::string filename)
     FileInfo search;
     search.mName = filename;
     int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileName,search);
-    if (idx < 0 ||  idx >= (int)mLength)
+    if (idx < 0 ||  idx >= C_INT(mLength))
       return false;
 
     FileInfo *info = mArray[idx];
     if (info == nullptr || info->mName != filename)
       return false;
 
-    for (uint t=(uint)idx+1; t<mLength; t++)
+    for (uint t=C_UINT(idx)+1; t<mLength; t++)
     {
       mArray[t-1] = mArray[t];
       mArray[t] = nullptr;
@@ -1404,7 +1406,7 @@ bool FileInfoList::deleteFileInfoByIndex(uint index)
 
     FileInfo *info = mArray[index];
 
-    for (uint t=(uint)index+1; t<mSize; t++)
+    for (uint t=index+1; t<mSize; t++)
     {
       mArray[t-1] = mArray[t];
       mArray[t] = nullptr;
@@ -1522,7 +1524,7 @@ uint FileInfoList::deleteVirtualFiles()
       mArray[t] = nullptr;
       if (info != nullptr)
       {
-        if (info->mFileType == T::FileType::Virtual || (info->mFlags & T::FileInfo::Flags::VirtualContent) != 0  || (info->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
+        if (info->mFileType == T::FileTypeValue::Virtual || (info->mFlags & T::FileInfo::Flags::VirtualContent) != 0  || (info->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
         {
           mArray[t] = nullptr;
           if (mReleaseObjects)
@@ -1653,7 +1655,7 @@ void FileInfoList::setReleaseObjects(bool releaseObjects)
 
 
 
-void FileInfoList::setComparisonMethod(FileInfo::ComparisonMethod comparisonMethod)
+void FileInfoList::setComparisonMethod(uint comparisonMethod)
 {
   FUNCTION_TRACE
   try
@@ -1677,11 +1679,14 @@ void FileInfoList::setComparisonMethod(FileInfo::ComparisonMethod comparisonMeth
 
 
 
-void FileInfoList::sort(FileInfo::ComparisonMethod comparisonMethod)
+void FileInfoList::sort(uint comparisonMethod)
 {
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr)
+      return;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     mComparisonMethod = comparisonMethod;
 
@@ -1706,7 +1711,7 @@ void FileInfoList::writeToFile(std::string filename)
   FUNCTION_TRACE
   try
   {
-    writeToFile(filename,"w");
+    writeToFile(filename,"we");
   }
   catch (...)
   {

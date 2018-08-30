@@ -132,7 +132,7 @@ int CacheImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint me
       T::GridData *dt = mDataCache[t];
       if (dt != nullptr  &&  dt->mFileId == fileId  &&  dt->mMessageIndex == messageIndex)
       {
-        mDataCacheAccessTime[t] = time(0);
+        mDataCacheAccessTime[t] = time(nullptr);
         data = *dt;
         //printf("** DATA FROM CACHE %u\n",fileId);
         return Result::OK;
@@ -142,7 +142,7 @@ int CacheImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint me
     int result = mDataServer->getGridData(sessionId,fileId,messageIndex,flags,data);
     if (result == Result::OK)
     {
-      time_t oldest = time(0);
+      time_t oldest = time(nullptr);
       uint idx = 0;
       for (uint t=0; t<mDataCacheSize; t++)
       {
@@ -159,7 +159,7 @@ int CacheImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint me
         *mDataCache[idx] = data;
 
       //printf("** DATA TO CACHE %u\n",fileId);
-      mDataCacheAccessTime[idx] = time(0);
+      mDataCacheAccessTime[idx] = time(nullptr);
     }
 
     return result;

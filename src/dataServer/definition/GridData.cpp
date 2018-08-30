@@ -19,7 +19,7 @@ GridData::GridData()
     mProducerId = 0;
     mGenerationId = 0;
     mFileId = 0;
-    mFileType = T::FileType::Unknown;
+    mFileType = T::FileTypeValue::Unknown;
     mMessageIndex = 0;
     mFmiParameterLevelId = 0;
     mGrib1ParameterLevelId = 0;
@@ -115,18 +115,18 @@ void GridData::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mProducerId               = " << mProducerId << "\n";
     stream << space(level) << "- mGenerationId             = " << mGenerationId << "\n";
     stream << space(level) << "- mFileId                   = " << mFileId << "\n";
-    stream << space(level) << "- mFileType                 = " << (uint)mFileType << "\n";
+    stream << space(level) << "- mFileType                 = " << mFileType << "\n";
     stream << space(level) << "- mFileName                 = " << mFileName << "\n";
     stream << space(level) << "- mMessageIndex             = " << mMessageIndex << "\n";
-    stream << space(level) << "- mForecastTime                = " << mForecastTime << "\n";
+    stream << space(level) << "- mForecastTime             = " << mForecastTime << "\n";
     stream << space(level) << "- mGribParameterId          = " << mGribParameterId << "\n";
-    stream << space(level) << "- mGrib1ParameterLevelId    = " << (uint)mGrib1ParameterLevelId << "\n";
-    stream << space(level) << "- mGrib2ParameterLevelId    = " << (uint)mGrib2ParameterLevelId << "\n";
+    stream << space(level) << "- mGrib1ParameterLevelId    = " << mGrib1ParameterLevelId << "\n";
+    stream << space(level) << "- mGrib2ParameterLevelId    = " << mGrib2ParameterLevelId << "\n";
     stream << space(level) << "- mGribParameterName        = " << mGribParameterName << "\n";
     stream << space(level) << "- mGribParameterDescription = " << mGribParameterDescription << "\n";
     stream << space(level) << "- mGribParameterUnits       = " << mGribParameterUnits << "\n";
     stream << space(level) << "- mFmiParameterId           = " << mFmiParameterId << "\n";
-    stream << space(level) << "- mFmiParameterLevelId      = " << (uint)mFmiParameterLevelId << "\n";
+    stream << space(level) << "- mFmiParameterLevelId      = " << mFmiParameterLevelId << "\n";
     stream << space(level) << "- mFmiParameterName         = " << mFmiParameterName << "\n";
     stream << space(level) << "- mFmiParameterDescription  = " << mFmiParameterDescription << "\n";
     stream << space(level) << "- mFmiParameterUnits        = " << mFmiParameterUnits << "\n";
@@ -139,8 +139,8 @@ void GridData::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mProjection               = " << mProjection << "\n";
     stream << space(level) << "- mColumns                  = " << mColumns << "\n";
     stream << space(level) << "- mRows                     = " << mRows << "\n";
-    stream << space(level) << "- mForecastType   = " << mForecastType << "\n";
-    stream << space(level) << "- mForecastNumber       = " << mForecastNumber << "\n";
+    stream << space(level) << "- mForecastType             = " << mForecastType << "\n";
+    stream << space(level) << "- mForecastNumber           = " << mForecastNumber << "\n";
     stream << space(level) << "- mProjectionAttributes     = \n";
     mProjectionAttributes.print(stream,level+2,optionFlags);
   }

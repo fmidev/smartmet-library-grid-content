@@ -113,7 +113,7 @@ void VirtualContentDefinitionFile::checkUpdates()
 
     time_t tt = getFileModificationTime(mFilename.c_str());
 
-    if (tt != mLastModified  &&  (tt+3) < time(0))
+    if (tt != mLastModified  &&  (tt+3) < time(nullptr))
       loadFile();
   }
   catch (...)
@@ -163,7 +163,7 @@ void VirtualContentDefinitionFile::loadFile()
 {
   try
   {
-    FILE *file = fopen(mFilename.c_str(),"r");
+    FILE *file = fopen(mFilename.c_str(),"re");
     if (file == nullptr)
     {
       Spine::Exception exception(BCP,"Cannot open the definition file!");
@@ -189,10 +189,10 @@ void VirtualContentDefinitionFile::loadFile()
           rec.mVirtualParameter = partList[0];
           splitString(partList[1],',',rec.mSourceParameters);
           rec.mFunctionName = partList[2];
-          rec.mFunctionCallMethod = atoi(partList[3].c_str());
+          rec.mFunctionCallMethod = toInt64(partList[3].c_str());
           rec.mProducerName = partList[4];
           if (partList[5].length() > 0)
-            rec.mGeometryId = atoi(partList[5].c_str());
+            rec.mGeometryId = toInt64(partList[5].c_str());
 
           mContentDefList.push_back(rec);
         }

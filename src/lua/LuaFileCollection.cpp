@@ -121,7 +121,7 @@ bool LuaFileCollection::checkUpdates(bool force)
     bool result = false;
     AutoThreadLock lock(&mThreadLock);
 
-    time_t tt = time(0);
+    time_t tt = time(nullptr);
     if (force ||  (tt-mLastCheck) > mCheckInterval)
     {
       for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)

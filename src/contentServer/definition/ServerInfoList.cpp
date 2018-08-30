@@ -64,12 +64,12 @@ ServerInfoList::~ServerInfoList()
 
 
 
-void ServerInfoList::operator=(ServerInfoList& serverInfoList)
+ServerInfoList& ServerInfoList::operator=(ServerInfoList& serverInfoList)
 {
   try
   {
     if (&serverInfoList == this)
-      return;
+      return *this;
 
     clear();
 
@@ -83,6 +83,7 @@ void ServerInfoList::operator=(ServerInfoList& serverInfoList)
         mList.push_back(info->duplicate());
     }
     serverInfoList.unlock();
+    return *this;
   }
   catch (...)
   {
@@ -317,7 +318,7 @@ uint ServerInfoList::getLength()
 {
   try
   {
-    return (uint)mList.size();
+    return mList.size();
   }
   catch (...)
   {
@@ -367,7 +368,7 @@ void ServerInfoList::writeToFile(std::string filename)
   {
     AutoThreadLock lock(&mThreadLock);
 
-    FILE *file = fopen(filename.c_str(),"w");
+    FILE *file = fopen(filename.c_str(),"we");
     if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot create the file!");

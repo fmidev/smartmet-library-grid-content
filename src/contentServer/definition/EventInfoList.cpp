@@ -79,13 +79,13 @@ EventInfoList::~EventInfoList()
 
 
 
-void EventInfoList::operator=(EventInfoList& eventInfoList)
+EventInfoList& EventInfoList::operator=(EventInfoList& eventInfoList)
 {
   FUNCTION_TRACE
   try
   {
     if (&eventInfoList == this)
-      return;
+      return *this;
 
     clear();
 
@@ -100,6 +100,7 @@ void EventInfoList::operator=(EventInfoList& eventInfoList)
     }
 
     eventInfoList.unlock();
+    return *this;
   }
   catch (...)
   {
@@ -463,7 +464,7 @@ void EventInfoList::writeToFile(std::string filename)
   {
     AutoThreadLock lock(&mThreadLock);
 
-    FILE *file = fopen(filename.c_str(),"w");
+    FILE *file = fopen(filename.c_str(),"we");
     if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot create the file!");

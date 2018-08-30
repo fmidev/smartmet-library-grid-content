@@ -18,7 +18,7 @@ GridCoordinates::GridCoordinates()
     mProjection = 0;
     mColumns = 0;
     mRows = 0;
-    mCoordinateType = T::CoordinateType::UNKNOWN;
+    mCoordinateType = T::CoordinateTypeValue::UNKNOWN;
   }
   catch (...)
   {
@@ -76,9 +76,9 @@ void GridCoordinates::print(std::ostream& stream,uint level,uint optionFlags)
     mProjectionAttributes.print(stream,level+2,optionFlags);
     stream << space(level) << "- mColumns        = " << mColumns << "\n";
     stream << space(level) << "- mRows           = " << mRows << "\n";
-    stream << space(level) << "- mCoordinateType = " << (int)mCoordinateType << "\n";
+    stream << space(level) << "- mCoordinateType = " << mCoordinateType << "\n";
 
-    uint sz = (uint)mCoordinateList.size();
+    uint sz = mCoordinateList.size();
     stream << space(level) << "- mCoordinateList (" << sz << ")\n";
 
     if (sz > 10)
