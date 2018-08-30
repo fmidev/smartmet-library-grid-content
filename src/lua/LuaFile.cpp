@@ -132,7 +132,7 @@ bool LuaFile::checkUpdates()
 
     time_t tt = getFileModificationTime(mFilename.c_str());
 
-    if (tt != mLastModified  &&  (tt+3) < time(0))
+    if (tt != mLastModified  &&  (tt+3) < time(nullptr))
     {
       if (mLuaState != nullptr)
       {
@@ -211,7 +211,7 @@ float LuaFile::executeFunctionCall1(std::string& function,std::vector<float>& pa
     }
 
 
-    int pLen = (int)parameters.size();
+    int pLen = parameters.size();
 
     lua_getglobal(L,a->second.mFunctionName.c_str());
 
@@ -298,7 +298,7 @@ double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& 
     }
 
 
-    int pLen = (int)parameters.size();
+    int pLen = parameters.size();
 
     lua_getglobal(L,a->second.mFunctionName.c_str());
 
@@ -384,7 +384,7 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
       throw exception;
     }
 
-    int pLen = (int)inParameters.size();
+    int pLen = inParameters.size();
 
     lua_getglobal(L,a->second.mFunctionName.c_str());
     //lua_pushinteger(L,pLen);
@@ -464,7 +464,7 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
       throw exception;
     }
 
-    int pLen = (int)inOutParameters.size();
+    int pLen = inOutParameters.size();
 
     lua_getglobal(L,a->second.mFunctionName.c_str());
     //lua_pushinteger(L,pLen);
@@ -542,7 +542,7 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
       throw exception;
     }
 
-    int pLen = (int)inParameters.size();
+    int pLen = inParameters.size();
 
     lua_getglobal(L,a->second.mFunctionName.c_str());
     //lua_pushinteger(L,pLen);
@@ -622,7 +622,7 @@ void LuaFile::executeFunctionCall2(std::string& function,uint columns,uint rows,
       throw exception;
     }
 
-    int pLen = (int)inOutParameters.size();
+    int pLen = inOutParameters.size();
 
     lua_getglobal(L,a->second.mFunctionName.c_str());
     //lua_pushinteger(L,pLen);
@@ -700,8 +700,8 @@ void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,
       throw exception;
     }
 
-    int pLen1 = (int)inParameters1.size();
-    int pLen2 = (int)inParameters2.size();
+    int pLen1 = inParameters1.size();
+    int pLen2 = inParameters2.size();
 
     if (pLen1 != pLen2)
     {
@@ -796,8 +796,8 @@ void LuaFile::executeFunctionCall3(std::string& function,uint columns,uint rows,
       throw exception;
     }
 
-    int pLen1 = (int)inParameters1.size();
-    int pLen2 = (int)inParameters2.size();
+    int pLen1 = inParameters1.size();
+    int pLen2 = inParameters2.size();
 
     if (pLen1 != pLen2)
     {
@@ -892,9 +892,9 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
       throw exception;
     }
 
-    int pLen1 = (int)inParameters1.size();
-    int pLen2 = (int)inParameters2.size();
-    int aLen = (int)angles.size();
+    int pLen1 = inParameters1.size();
+    int pLen2 = inParameters2.size();
+    int aLen = angles.size();
 
     if (pLen1 != pLen2)
     {
@@ -1004,9 +1004,9 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
       throw exception;
     }
 
-    int pLen1 = (int)inParameters1.size();
-    int pLen2 = (int)inParameters2.size();
-    int aLen = (int)angles.size();
+    int pLen1 = inParameters1.size();
+    int pLen2 = inParameters2.size();
+    int aLen = angles.size();
 
     if (pLen1 != pLen2)
     {
@@ -1115,7 +1115,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
     }
 
 
-    int pLen = (int)parameters.size();
+    int pLen = parameters.size();
 
     lua_getglobal(L,a->second.mFunctionName.c_str());
 
@@ -1203,7 +1203,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
     }
 
 
-    int pLen = (int)parameters.size();
+    int pLen = parameters.size();
 
     lua_getglobal(L,a->second.mFunctionName.c_str());
 
@@ -1296,8 +1296,8 @@ std::string LuaFile::executeFunctionCall6(std::string& function,std::vector<std:
     //lua_pushstring(mLuaState,a->mFunctionName.c_str());
     //lua_pushinteger(L,pLen);
 
-    int len = (int)params.size();
-    lua_pushinteger(L,(int)len);
+    int len = params.size();
+    lua_pushinteger(L,len);
 
     lua_newtable(L);
     for (int i = 0; i < len; i++)
@@ -1356,14 +1356,14 @@ std::string LuaFile::executeFunctionCall6(
     std::vector<std::string> params;
     params.push_back(producerName);
     params.push_back(parameterName);
-    params.push_back(std::to_string((int)parameterKeyType));
+    params.push_back(std::to_string(parameterKeyType));
     params.push_back(parameterKey);
-    params.push_back(std::to_string((int)parameterLevelIdType));
-    params.push_back(std::to_string((int)parameterLevelId));
-    params.push_back(std::to_string((int)parameterLevel));
-    params.push_back(std::to_string((int)forecastType));
-    params.push_back(std::to_string((int)forecastNumber));
-    params.push_back(std::to_string((int)interpolationMethod));
+    params.push_back(std::to_string(parameterLevelIdType));
+    params.push_back(std::to_string(parameterLevelId));
+    params.push_back(std::to_string(parameterLevel));
+    params.push_back(std::to_string(forecastType));
+    params.push_back(std::to_string(forecastNumber));
+    params.push_back(std::to_string(interpolationMethod));
 
     return executeFunctionCall6(function,params);
 
@@ -1401,9 +1401,9 @@ std::string LuaFile::executeFunctionCall6(
 
     lua_pushstring(L,producerName.c_str());
     lua_pushstring(L,parameterName.c_str());
-    lua_pushinteger(L,(int)parameterKeyType);
+    lua_pushinteger(L,parameterKeyType);
     lua_pushstring(L,parameterKey.c_str());
-    lua_pushinteger(L,(int)parameterLevelIdType);
+    lua_pushinteger(L,parameterLevelIdType);
     lua_pushinteger(L,parameterLevelId);
     lua_pushinteger(L,parameterLevel);
     lua_pushinteger(L,forecastType);

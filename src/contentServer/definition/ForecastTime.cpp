@@ -117,10 +117,10 @@ void ForecastTime::setCsv(const char *csv)
 
     if (partList.size() >= 6)
     {
-      mGenerationId = atoi(partList[0].c_str());
-      mGeometryId = atoi(partList[1].c_str());
-      mForecastType = atoi(partList[2].c_str());
-      mForecastNumber = atoi(partList[3].c_str());
+      mGenerationId = toInt64(partList[0].c_str());
+      mGeometryId = toInt64(partList[1].c_str());
+      mForecastType = toInt64(partList[2].c_str());
+      mForecastNumber = toInt64(partList[3].c_str());
       mForecastTime = partList[4];
       mModificationTime = partList[5];
     }

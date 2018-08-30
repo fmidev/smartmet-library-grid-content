@@ -10,26 +10,28 @@ namespace T
 {
 
 
+typedef std::vector<LevelInfo*> LevelInfo_pvec;
+
+
 class LevelInfoList
 {
   public:
-                 LevelInfoList();
-                 LevelInfoList(LevelInfoList& levelInfoList);
-     virtual     ~LevelInfoList();
+                    LevelInfoList();
+                    LevelInfoList(LevelInfoList& levelInfoList);
+    virtual         ~LevelInfoList();
 
-     void        operator=(LevelInfoList& levelInfoList);
+    LevelInfoList&  operator=(LevelInfoList& levelInfoList);
 
-     void        addLevelInfo(LevelInfo *levelInfo);
-     void        clear();
-     LevelInfo*  getLevelInfoByIndex(uint index);
-     LevelInfo*  getLevelInfoByIndexNoCheck(uint index);
-
-     uint        getLength();
-     void        print(std::ostream& stream,uint level,uint optionFlags);
+    void            addLevelInfo(LevelInfo *levelInfo);
+    void            clear();
+    LevelInfo*      getLevelInfoByIndex(uint index);
+    LevelInfo*      getLevelInfoByIndexNoCheck(uint index);
+    uint            getLength();
+    void            print(std::ostream& stream,uint level,uint optionFlags);
 
   protected:
 
-     std::vector<LevelInfo*>  mList;
+    LevelInfo_pvec  mList;
 };
 
 

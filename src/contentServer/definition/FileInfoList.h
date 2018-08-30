@@ -16,72 +16,72 @@ namespace T
 class FileInfoList
 {
   public:
-                FileInfoList();
-                FileInfoList(FileInfoList& fileInfoList);
-     virtual    ~FileInfoList();
+                   FileInfoList();
+                   FileInfoList(FileInfoList& fileInfoList);
+    virtual        ~FileInfoList();
 
-     void       operator=(FileInfoList& fileInfoList);
+    FileInfoList&  operator=(FileInfoList& fileInfoList);
 
-     void       addFileInfo(FileInfo *fileInfo);
-     void       addFileInfoList(FileInfoList& fileInfoList);
-     void       addFileInfoListNoLock(FileInfoList& fileInfoList);
-     void       clear();
-     bool       deleteFileInfoById(uint fileId);
-     uint       deleteFileInfoByGroupFlags(uint groupFlags);
-     uint       deleteFileInfoByProducerId(uint producerId);
-     uint       deleteFileInfoByGenerationId(uint generationId);
-     uint       deleteFileInfoByGenerationIdList(std::set<uint>& generationIdList);
-     bool       deleteFileInfoByIndex(uint index);
-     bool       deleteFileInfoByName(std::string filename);
-     uint       deleteFileInfoBySourceId(uint sourceId);
-     uint       deleteFileInfoByFileIdList(std::set<uint>& fileIdList);
-     uint       deleteVirtualFiles();
-     uint       deleteMarkedFiles();
-     int        getClosestIndex(FileInfo::ComparisonMethod comparisonMethod,FileInfo& fileInfo);
-     int        getClosestIndexNoLock(FileInfo::ComparisonMethod comparisonMethod,FileInfo& fileInfo);
-     FileInfo*  getFileInfoById(uint fileId);
-     FileInfo*  getFileInfoByIdNoLock(uint fileId);
-     FileInfo*  getFileInfoByName(std::string filename);
-     FileInfo*  getFileInfoByIndex(uint index);
-     FileInfo*  getFileInfoByIndexNoCheck(uint index);
-     uint       getFileInfoCountByProducerId(uint producerId);
-     uint       getFileInfoCountByGenerationId(uint generationId);
-     uint       getFileInfoCountBySourceId(uint sourceId);
-     void       getFileInfoList(uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
-     void       getFileInfoListByGroupFlags(uint groupFlags,FileInfoList& fileInfoList);
-     void       getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
-     void       getFileInfoListByProducerId(uint producerId,FileInfoList& fileInfoList);
-     void       getFileInfoListByProducerId(uint producerId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
-     void       getFileInfoListByGenerationId(uint generationId,FileInfoList& fileInfoList);
-     void       getFileInfoListByGenerationId(uint generationId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
-     void       getFileInfoListBySourceId(uint sourceId,FileInfoList& fileInfoList);
-     void       getFileInfoListBySourceId(uint sourceId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
-     uint       getLength();
-     bool       getReleaseObjects();
-     void       increaseSize(uint newSize);
-     void       markFileInfoDeletedById(uint fileId);
-     void       setComparisonMethod(FileInfo::ComparisonMethod comparisonMethod);
-     void       setReleaseObjects(bool releaseObjects);
-     void       sort(FileInfo::ComparisonMethod comparisonMethod);
-     void       lock();
-     void       unlock();
-     void       print(std::ostream& stream,uint level,uint optionFlags);
+    void           addFileInfo(FileInfo *fileInfo);
+    void           addFileInfoList(FileInfoList& fileInfoList);
+    void           addFileInfoListNoLock(FileInfoList& fileInfoList);
+    void           clear();
+    bool           deleteFileInfoById(uint fileId);
+    uint           deleteFileInfoByGroupFlags(uint groupFlags);
+    uint           deleteFileInfoByProducerId(uint producerId);
+    uint           deleteFileInfoByGenerationId(uint generationId);
+    uint           deleteFileInfoByGenerationIdList(std::set<uint>& generationIdList);
+    bool           deleteFileInfoByIndex(uint index);
+    bool           deleteFileInfoByName(std::string filename);
+    uint           deleteFileInfoBySourceId(uint sourceId);
+    uint           deleteFileInfoByFileIdList(std::set<uint>& fileIdList);
+    uint           deleteVirtualFiles();
+    uint           deleteMarkedFiles();
+    int            getClosestIndex(uint comparisonMethod,FileInfo& fileInfo);
+    int            getClosestIndexNoLock(uint comparisonMethod,FileInfo& fileInfo);
+    FileInfo*      getFileInfoById(uint fileId);
+    FileInfo*      getFileInfoByIdNoLock(uint fileId);
+    FileInfo*      getFileInfoByName(std::string filename);
+    FileInfo*      getFileInfoByIndex(uint index);
+    FileInfo*      getFileInfoByIndexNoCheck(uint index);
+    uint           getFileInfoCountByProducerId(uint producerId);
+    uint           getFileInfoCountByGenerationId(uint generationId);
+    uint           getFileInfoCountBySourceId(uint sourceId);
+    void           getFileInfoList(uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
+    void           getFileInfoListByGroupFlags(uint groupFlags,FileInfoList& fileInfoList);
+    void           getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
+    void           getFileInfoListByProducerId(uint producerId,FileInfoList& fileInfoList);
+    void           getFileInfoListByProducerId(uint producerId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
+    void           getFileInfoListByGenerationId(uint generationId,FileInfoList& fileInfoList);
+    void           getFileInfoListByGenerationId(uint generationId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
+    void           getFileInfoListBySourceId(uint sourceId,FileInfoList& fileInfoList);
+    void           getFileInfoListBySourceId(uint sourceId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
+    uint           getLength();
+    bool           getReleaseObjects();
+    void           increaseSize(uint newSize);
+    void           markFileInfoDeletedById(uint fileId);
+    void           setComparisonMethod(uint comparisonMethod);
+    void           setReleaseObjects(bool releaseObjects);
+    void           sort(uint comparisonMethod);
+    void           lock();
+    void           unlock();
+    void           print(std::ostream& stream,uint level,uint optionFlags);
 
-     void       writeToFile(std::string filename);
-     void       writeToFile(std::string filename,const char *filemode);
+    void           writeToFile(std::string filename);
+    void           writeToFile(std::string filename,const char *filemode);
 
-     ModificationLock*  getModificationLockPtr();
-     void               setModificationLockPtr(ModificationLock* modificationLockPtr);
+    ModificationLock*  getModificationLockPtr();
+    void               setModificationLockPtr(ModificationLock* modificationLockPtr);
 
   protected:
 
-     FileInfoPtr                *mArray;
-     uint                       mSize;
-     uint                       mLength;
-     bool                       mReleaseObjects;
-     ModificationLock           mModificationLock;
-     ModificationLock*          mModificationLockPtr;
-     FileInfo::ComparisonMethod mComparisonMethod;
+    FileInfoPtr                *mArray;
+    uint                       mSize;
+    uint                       mLength;
+    bool                       mReleaseObjects;
+    ModificationLock           mModificationLock;
+    ModificationLock*          mModificationLockPtr;
+    uint                       mComparisonMethod;
 };
 
 

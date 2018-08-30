@@ -19,7 +19,7 @@ ContentInfo::ContentInfo()
     mGroupFlags = 0;
     mProducerId = 0;
     mGenerationId = 0;
-    mFileType = T::FileType::Unknown;
+    mFileType = T::FileTypeValue::Unknown;
     mFileId = 0;
     mMessageIndex = 0;
     mFmiParameterLevelId = 0;
@@ -114,12 +114,12 @@ ContentInfo::~ContentInfo()
 
 
 
-void ContentInfo::operator=(ContentInfo& contentInfo)
+ContentInfo& ContentInfo::operator=(ContentInfo& contentInfo)
 {
   try
   {
     if (&contentInfo == this)
-      return;
+      return *this;
 
     mServerFlags = contentInfo.mServerFlags;
     mGroupFlags = contentInfo.mGroupFlags;
@@ -148,6 +148,8 @@ void ContentInfo::operator=(ContentInfo& contentInfo)
     mSourceId = contentInfo.mSourceId;
     mGeometryId = contentInfo.mGeometryId;
     mModificationTime = contentInfo.mModificationTime;
+
+    return *this;
   }
   catch (...)
   {
@@ -167,7 +169,7 @@ std::string ContentInfo::getCsv()
     sprintf(st,"%u;%u;%u;%u;%u;%u;%s;%s;%s;%s;%s;%s;%s;%s;%u;%u;%u;%d;%s;%s;%d;%d;%llu;%u;%u;%u;%s;",
         mFileId,
         mMessageIndex,
-        (uint)mFileType,
+        mFileType,
         mProducerId,
         mGenerationId,
         mGroupFlags,
@@ -253,12 +255,12 @@ void ContentInfo::setCsv(const char *csv)
 
     if (c >= 25)
     {
-      mFileId = (uint)atoll(field[0]);
-      mMessageIndex = (uint)atoll(field[1]);
-      mFileType = (T::FileType)atoll(field[2]);
-      mProducerId = (uint)atoll(field[3]);
-      mGenerationId = (uint)atoll(field[4]);
-      mGroupFlags = (uint)atoll(field[5]);
+      mFileId = toInt64(field[0]);
+      mMessageIndex = toInt64(field[1]);
+      mFileType = toInt64(field[2]);
+      mProducerId = toInt64(field[3]);
+      mGenerationId = toInt64(field[4]);
+      mGroupFlags = toInt64(field[5]);
       mForecastTime = field[6];
       mFmiParameterId = field[7];
       mFmiParameterName = field[8];
@@ -267,18 +269,18 @@ void ContentInfo::setCsv(const char *csv)
       mCdmParameterName = field[11];
       mNewbaseParameterId = field[12];
       mNewbaseParameterName = field[13];
-      mFmiParameterLevelId = (T::ParamLevelId)atoll(field[14]);
-      mGrib1ParameterLevelId = (T::ParamLevelId)atoll(field[15]);
-      mGrib2ParameterLevelId = (T::ParamLevelId)atoll(field[16]);
-      mParameterLevel = (T::ParamLevel)atoll(field[17]);
+      mFmiParameterLevelId = toInt64(field[14]);
+      mGrib1ParameterLevelId = toInt64(field[15]);
+      mGrib2ParameterLevelId = toInt64(field[16]);
+      mParameterLevel = (T::ParamLevel)toInt64(field[17]);
       mFmiParameterUnits = field[18];
       mGribParameterUnits = field[19];
-      mForecastType = (short)atoll(field[20]);
-      mForecastNumber = (short)atoll(field[21]);
-      mServerFlags = (unsigned long long)atoll(field[22]);
-      mFlags = (uint)atoll(field[23]);
-      mSourceId = (uint)atoll(field[24]);
-      mGeometryId = (uint)atoll(field[25]);
+      mForecastType = (short)toInt64(field[20]);
+      mForecastNumber = (short)toInt64(field[21]);
+      mServerFlags = (unsigned long long)toInt64(field[22]);
+      mFlags = toInt64(field[23]);
+      mSourceId = toInt64(field[24]);
+      mGeometryId = toInt64(field[25]);
       if (c >= 26)
         mModificationTime = field[26];
     }
@@ -315,43 +317,43 @@ bool ContentInfo::hasKey(T::ParamKeyType parameterKeyType,std::string parameterK
   {
     switch (parameterKeyType)
     {
-      case T::ParamKeyType::FMI_ID:
+      case T::ParamKeyTypeValue::FMI_ID:
         if (strcasecmp(mFmiParameterId.c_str(),parameterKey.c_str()) == 0)
           return true;
         else
           return false;
 
-      case T::ParamKeyType::FMI_NAME:
+      case T::ParamKeyTypeValue::FMI_NAME:
         if (strcasecmp(mFmiParameterName.c_str(),parameterKey.c_str()) == 0)
           return true;
         else
           return false;
 
-      case T::ParamKeyType::GRIB_ID:
+      case T::ParamKeyTypeValue::GRIB_ID:
         if (strcasecmp(mGribParameterId.c_str(),parameterKey.c_str()) == 0)
           return true;
         else
           return false;
 
-      case T::ParamKeyType::NEWBASE_ID:
+      case T::ParamKeyTypeValue::NEWBASE_ID:
         if (strcasecmp(mNewbaseParameterId.c_str(),parameterKey.c_str()) == 0)
           return true;
         else
           return false;
 
-      case T::ParamKeyType::NEWBASE_NAME:
+      case T::ParamKeyTypeValue::NEWBASE_NAME:
         if (strcasecmp(mNewbaseParameterName.c_str(),parameterKey.c_str()) == 0)
           return true;
         else
           return false;
 
-      case T::ParamKeyType::CDM_ID:
+      case T::ParamKeyTypeValue::CDM_ID:
         if (strcasecmp(mCdmParameterId.c_str(),parameterKey.c_str()) == 0)
           return true;
         else
           return false;
 
-      case T::ParamKeyType::CDM_NAME:
+      case T::ParamKeyTypeValue::CDM_NAME:
         if (strcasecmp(mCdmParameterName.c_str(),parameterKey.c_str()) == 0)
           return true;
         else
@@ -372,7 +374,7 @@ bool ContentInfo::hasKey(T::ParamKeyType parameterKeyType,std::string parameterK
 
 
 
-int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentInfo)
+int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
 {
   try
   {
@@ -471,7 +473,7 @@ int ContentInfo::compare(ComparisonMethod comparisonMethod,ContentInfo *contentI
         if (res != 0  &&  contentInfo->mGeometryId >= -1)
         //if (res != 0)
           return res;
-        res = uint_compare((uint)mFmiParameterLevelId,(uint)contentInfo->mFmiParameterLevelId);
+        res = uint_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
         if (res != 0)
           return res;
         res = uint_compare(mFileId,contentInfo->mFileId);
@@ -806,7 +808,7 @@ void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags)
   {
     stream << space(level) << "ContentInfo\n";
     stream << space(level) << "- mFileId                 = " << mFileId << "\n";
-    stream << space(level) << "- mFileType               = " << (uint)mFileType << "\n";
+    stream << space(level) << "- mFileType               = " << mFileType << "\n";
     stream << space(level) << "- mMessageIndex           = " << mMessageIndex << "\n";
     stream << space(level) << "- mProducerId             = " << mProducerId << "\n";
     stream << space(level) << "- mGenerationId           = " << mGenerationId << "\n";
@@ -819,14 +821,14 @@ void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mCdmParameterName       = " << mCdmParameterName << "\n";
     stream << space(level) << "- mNewbaseParameterId     = " << mNewbaseParameterId << "\n";
     stream << space(level) << "- mNewbaseParameterName   = " << mNewbaseParameterName << "\n";
-    stream << space(level) << "- mFmiParameterLevelId    = " << (uint)mFmiParameterLevelId << "\n";
-    stream << space(level) << "- mGrib1ParameterLevelId  = " << (uint)mGrib1ParameterLevelId << "\n";
-    stream << space(level) << "- mGrib2ParameterLevelId  = " << (uint)mGrib2ParameterLevelId << "\n";
+    stream << space(level) << "- mFmiParameterLevelId    = " << mFmiParameterLevelId << "\n";
+    stream << space(level) << "- mGrib1ParameterLevelId  = " << mGrib1ParameterLevelId << "\n";
+    stream << space(level) << "- mGrib2ParameterLevelId  = " << mGrib2ParameterLevelId << "\n";
     stream << space(level) << "- mParameterLevel         = " << mParameterLevel << "\n";
     stream << space(level) << "- mFmiParameterUnits      = " << mFmiParameterUnits << "\n";
     stream << space(level) << "- mGribParameterUnits     = " << mGribParameterUnits << "\n";
-    stream << space(level) << "- mForecastType           = " << (int)mForecastType << "\n";
-    stream << space(level) << "- mForecastNumber         = " << (int)mForecastNumber << "\n";
+    stream << space(level) << "- mForecastType           = " << mForecastType << "\n";
+    stream << space(level) << "- mForecastNumber         = " << mForecastNumber << "\n";
     stream << space(level) << "- mServerFlags            = " << mServerFlags << "\n";
     stream << space(level) << "- mFlags                  = " << mFlags << "\n";
     stream << space(level) << "- mSourceId               = " << mSourceId << "\n";

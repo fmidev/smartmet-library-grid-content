@@ -516,7 +516,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getProducerInfoListByParameter(sessionId,(T::ParamKeyType)parameterKeyType,parameterKey,sProducerInfoList);
+    int result = mService->getProducerInfoListByParameter(sessionId,parameterKeyType,parameterKey,sProducerInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sProducerInfoList,*corbaProducerInfoList);
@@ -639,7 +639,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getProducerParameterList(sessionId,(T::ParamKeyType)sourceParameterKeyType,(T::ParamKeyType)targetParameterKeyType,sList);
+    int result = mService->getProducerParameterList(sessionId,sourceParameterKeyType,targetParameterKeyType,sList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sList,*corbaList);
@@ -1083,7 +1083,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getLastGenerationInfoByProducerIdAndStatus(sessionId,producerId,(T::GenerationStatus)generationStatus,sGenerationInfo);
+    int result = mService->getLastGenerationInfoByProducerIdAndStatus(sessionId,producerId,generationStatus,sGenerationInfo);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sGenerationInfo,*corbaGenerationInfo);
@@ -1114,7 +1114,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getLastGenerationInfoByProducerNameAndStatus(sessionId,producerName,(T::GenerationStatus)generationStatus,sGenerationInfo);
+    int result = mService->getLastGenerationInfoByProducerNameAndStatus(sessionId,producerName,generationStatus,sGenerationInfo);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sGenerationInfo,*corbaGenerationInfo);
@@ -1171,7 +1171,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->setGenerationInfoStatusById(sessionId,generationId,(T::GenerationStatus)status);
+    int result = mService->setGenerationInfoStatusById(sessionId,generationId,status);
     return result;
   }
   catch (...)
@@ -1194,7 +1194,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->setGenerationInfoStatusByName(sessionId,generationName,(T::GenerationStatus)status);
+    int result = mService->setGenerationInfoStatusByName(sessionId,generationName,status);
     return result;
   }
   catch (...)
@@ -2843,7 +2843,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentListByParameter(sessionId,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
+    int result = mService->getContentListByParameter(sessionId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
@@ -2874,7 +2874,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentListByParameterAndGenerationId(sessionId,generationId,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
+    int result = mService->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
@@ -2905,7 +2905,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentListByParameterAndGenerationName(sessionId,generationName,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
+    int result = mService->getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
@@ -2936,7 +2936,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentListByParameterAndProducerId(sessionId,producerId,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
+    int result = mService->getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
@@ -2967,7 +2967,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentListByParameterAndProducerName(sessionId,producerName,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
+    int result = mService->getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
@@ -2998,7 +2998,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,(T::ParamKeyType)parameterKeyType,parameterKey,(T::ParamLevelIdType)parameterLevelIdType,(T::ParamLevelId)parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,sContentInfoList);
+    int result = mService->getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,sContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
@@ -3122,7 +3122,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentParamKeyListByGenerationId(sessionId,generationId,(T::ParamKeyType)parameterKeyType,sParamKeyList);
+    int result = mService->getContentParamKeyListByGenerationId(sessionId,generationId,parameterKeyType,sParamKeyList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sParamKeyList,*corbaParamKeyList);

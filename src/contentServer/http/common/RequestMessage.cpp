@@ -220,7 +220,7 @@ uint RequestMessage::getContentSize()
     uint size = 0;
     uint sz = getLineCount();
     for (uint t=0; t<sz; t++)
-      size = size + (uint)mLines[t].length() + 2;
+      size = size + mLines[t].length() + 2;
 
     return size;
   }
@@ -237,7 +237,7 @@ uint RequestMessage::getLineCount()
 {
   try
   {
-    return (uint)mLines.size();
+    return mLines.size();
   }
   catch (...)
   {
@@ -252,7 +252,7 @@ std::string RequestMessage::getLineByIndex(uint index)
 {
   try
   {
-    if (index < (uint)mLines.size())
+    if (index < mLines.size())
       return mLines[index];
 
     return std::string("");
@@ -271,8 +271,8 @@ long long RequestMessage::getLineValueByIndex(uint index)
 {
   try
   {
-    if (index < (uint)mLines.size())
-      return atoll(mLines[index].c_str());
+    if (index < mLines.size())
+      return toInt64(mLines[index].c_str());
 
     return 0;
   }
@@ -290,7 +290,7 @@ std::string RequestMessage::getLineByKey(const char *key)
 {
   try
   {
-    uint len = (uint)strlen(key);
+    uint len = strlen(key);
     uint sz = getLineCount();
     for (uint t=0; t<sz; t++)
     {
@@ -315,13 +315,13 @@ long long RequestMessage::getLineValueByKey(const char *key)
 {
   try
   {
-    uint len = (uint)strlen(key);
+    uint len = strlen(key);
     uint sz = getLineCount();
     for (uint t=0; t<sz; t++)
     {
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
-        return atoll(s+len+1);
+        return toInt64(s+len+1);
     }
 
     return 0;
@@ -340,7 +340,7 @@ bool RequestMessage::getLineByKey(const char *key,std::string& value)
 {
   try
   {
-    uint len = (uint)strlen(key);
+    uint len = strlen(key);
     uint sz = getLineCount();
     for (uint t=0; t<sz; t++)
     {
@@ -368,14 +368,14 @@ bool RequestMessage::getLineByKey(const char *key,short& value)
 {
   try
   {
-    uint len = (uint)strlen(key);
+    uint len = strlen(key);
     uint sz = getLineCount();
     for (uint t=0; t<sz; t++)
     {
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        value = (short)atoll(s+len+1);
+        value = (short)toInt64(s+len+1);
         return true;
       }
     }
@@ -395,14 +395,14 @@ bool RequestMessage::getLineByKey(const char *key,int& value)
 {
   try
   {
-    uint len = (uint)strlen(key);
+    uint len = strlen(key);
     uint sz = getLineCount();
     for (uint t=0; t<sz; t++)
     {
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        value = (int)atoll(s+len+1);
+        value = toInt64(s+len+1);
         return true;
       }
     }
@@ -422,14 +422,14 @@ bool RequestMessage::getLineByKey(const char *key,uint& value)
 {
   try
   {
-    uint len = (uint)strlen(key);
+    uint len = strlen(key);
     uint sz = getLineCount();
     for (uint t=0; t<sz; t++)
     {
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        value = (uint)atoll(s+len+1);
+        value = toInt64(s+len+1);
         return true;
       }
     }
@@ -449,14 +449,14 @@ bool RequestMessage::getLineByKey(const char *key,unsigned char& value)
 {
   try
   {
-    uint len = (uint)strlen(key);
+    uint len = strlen(key);
     uint sz = getLineCount();
     for (uint t=0; t<sz; t++)
     {
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        value = (unsigned char)atoll(s+len+1);
+        value = (unsigned char)toInt64(s+len+1);
         return true;
       }
     }
@@ -476,14 +476,14 @@ bool RequestMessage::getLineByKey(const char *key,unsigned long long& value)
 {
   try
   {
-    uint len = (uint)strlen(key);
+    uint len = strlen(key);
     uint sz = getLineCount();
     for (uint t=0; t<sz; t++)
     {
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        value = (unsigned long long)atoll(s+len+1);
+        value = (unsigned long long)toInt64(s+len+1);
         return true;
       }
     }
@@ -503,14 +503,14 @@ bool RequestMessage::getLineByKey(const char *key,long long& value)
 {
   try
   {
-    uint len = (uint)strlen(key);
+    uint len = strlen(key);
     uint sz = getLineCount();
     for (uint t=0; t<sz; t++)
     {
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        value = (long long)atoll(s+len+1);
+        value = (long long)toInt64(s+len+1);
         return true;
       }
     }
@@ -531,7 +531,7 @@ uint RequestMessage::getLinesByKey(const char *key,std::vector<std::string>& val
 {
   try
   {
-    uint len = (uint)strlen(key);
+    uint len = strlen(key);
     uint sz = getLineCount();
     for (uint t=0; t<sz; t++)
     {
@@ -542,7 +542,7 @@ uint RequestMessage::getLinesByKey(const char *key,std::vector<std::string>& val
       }
     }
 
-    return (uint)values.size();
+    return values.size();
   }
   catch (...)
   {
@@ -558,7 +558,7 @@ void RequestMessage::deleteLineByIndex(uint index)
 {
   try
   {
-    if (index < (uint)mLines.size())
+    if (index < mLines.size())
       mLines.erase(mLines.begin() + index);
   }
   catch (...)

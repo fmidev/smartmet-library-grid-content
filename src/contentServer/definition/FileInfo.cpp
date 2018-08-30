@@ -14,7 +14,7 @@ FileInfo::FileInfo()
   try
   {
     mFileId = 0;
-    mFileType = T::FileType::Unknown;
+    mFileType = T::FileTypeValue::Unknown;
     mProducerId = 0;
     mGenerationId = 0;
     mGroupFlags = 0;
@@ -79,7 +79,7 @@ FileInfo::FileInfo(const FileInfo& fileInfo)
 
 
 
-FileInfo::FileInfo(uint producerId,uint generationId,uint groupFlags,T::FileType type,std::string filename,uint sourceId)
+FileInfo::FileInfo(uint producerId,uint generationId,uint groupFlags,uchar type,std::string filename,uint sourceId)
 {
   try
   {
@@ -132,12 +132,12 @@ FileInfo::~FileInfo()
 
 
 
-void FileInfo::operator=(FileInfo& fileInfo)
+FileInfo& FileInfo::operator=(FileInfo& fileInfo)
 {
   try
   {
     if (&fileInfo == this)
-      return;
+      return *this;
 
     mFileId = fileInfo.mFileId;
     mFileType = fileInfo.mFileType;
@@ -148,6 +148,8 @@ void FileInfo::operator=(FileInfo& fileInfo)
     mFlags = fileInfo.mFlags;
     mSourceId = fileInfo.mSourceId;
     mModificationTime = fileInfo.mModificationTime;
+
+    return *this;
   }
   catch (...)
   {
@@ -159,12 +161,12 @@ void FileInfo::operator=(FileInfo& fileInfo)
 
 
 
-void FileInfo::operator=(const FileInfo& fileInfo)
+FileInfo& FileInfo::operator=(const FileInfo& fileInfo)
 {
   try
   {
     if (&fileInfo == this)
-      return;
+      return *this;
 
     mFileId = fileInfo.mFileId;
     mFileType = fileInfo.mFileType;
@@ -175,6 +177,8 @@ void FileInfo::operator=(const FileInfo& fileInfo)
     mFlags = fileInfo.mFlags;
     mSourceId = fileInfo.mSourceId;
     mModificationTime = fileInfo.mModificationTime;
+
+    return *this;
   }
   catch (...)
   {
@@ -192,7 +196,7 @@ std::string FileInfo::getCsv()
     char st[1000];
     sprintf(st,"%u;%u;%s;%u;%u;%u;%u;%u;%s",
         mFileId,
-        (uint)mFileType,
+        mFileType,
         mName.c_str(),
         mProducerId,
         mGenerationId,
@@ -258,14 +262,14 @@ void FileInfo::setCsv(const char *csv)
 
     if (c >= 7)
     {
-      mFileId = (uint)atoll(field[0]);
-      mFileType = (T::FileType)atoll(field[1]);
+      mFileId = toInt64(field[0]);
+      mFileType = toInt64(field[1]);
       mName = field[2];
-      mProducerId = (uint)atoll(field[3]);
-      mGenerationId = (uint)atoll(field[4]);
-      mGroupFlags = (uint)atoll(field[5]);
-      mFlags = (uint)atoll(field[6]);
-      mSourceId = (uint)atoll(field[7]);
+      mProducerId = toInt64(field[3]);
+      mGenerationId = toInt64(field[4]);
+      mGroupFlags = toInt64(field[5]);
+      mFlags = toInt64(field[6]);
+      mSourceId = toInt64(field[7]);
       if (c >= 8)
         mModificationTime = field[8];
     }
@@ -296,7 +300,7 @@ void FileInfo::setCsv(std::string csv)
 
 
 
-int FileInfo::compare(ComparisonMethod comparisonMethod,FileInfo *fileInfo)
+int FileInfo::compare(uint comparisonMethod,FileInfo *fileInfo)
 {
   try
   {
@@ -348,7 +352,7 @@ void FileInfo::print(std::ostream& stream,uint level,uint optionFlags)
   {
     stream << space(level) << "FileInfo\n";
     stream << space(level) << "- mFileId           = " << mFileId << "\n";
-    stream << space(level) << "- mFileType         = " << (uint)mFileType << "\n";
+    stream << space(level) << "- mFileType         = " << mFileType << "\n";
     stream << space(level) << "- mName             = " << mName << "\n";
     stream << space(level) << "- mProducerId       = " << mProducerId << "\n";
     stream << space(level) << "- mGenerationId     = " << mGenerationId << "\n";

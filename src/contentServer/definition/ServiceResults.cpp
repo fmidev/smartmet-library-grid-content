@@ -114,7 +114,7 @@ std::string getResultString(int resultCode)
         return std::string("Content already exists!");
     }
 
-    return std::string("Unknown result code : ") + std::to_string((int)resultCode);
+    return std::string("Unknown result code : ") + std::to_string(resultCode);
   }
   catch (...)
   {

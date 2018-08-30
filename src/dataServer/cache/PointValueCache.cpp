@@ -60,14 +60,14 @@ void PointValueCache::addValue(uint fileId,uint messageIndex,uint flags,T::Coord
     {
       it->second->fileId = fileId;
       it->second->value = value;
-      it->second->lastAccessTime = time(0);
+      it->second->lastAccessTime = time(nullptr);
       return;
     }
 
     CacheValueRec_ptr rec = new CacheValueRec();
     rec->fileId = fileId;
     rec->value = value;
-    rec->lastAccessTime = time(0);
+    rec->lastAccessTime = time(nullptr);
 
     mValueList.insert(std::pair<std::size_t,CacheValueRec_ptr>(key,rec));
 
@@ -93,7 +93,7 @@ bool PointValueCache::getValue(uint fileId,uint messageIndex,uint flags,T::Coord
 
     if (it != mValueList.end())
     {
-      it->second->lastAccessTime = time(0);
+      it->second->lastAccessTime = time(nullptr);
       value = it->second->value;
       return true;
     }
@@ -210,7 +210,7 @@ void PointValueCache::deleteValuesByAge(uint maxAge)
 {
   try
   {
-    time_t lastAccess = time(0) - maxAge;
+    time_t lastAccess = time(nullptr) - maxAge;
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     std::vector<std::size_t> keyList;
@@ -241,7 +241,7 @@ std::size_t PointValueCache::getKey(uint fileId,uint messageIndex,uint flags,T::
   try
   {
     char buf[100];
-    sprintf(buf,"%08x%04x%08x%u%f%f%u",fileId,messageIndex,flags,(uint)coordinateType,x,y,(uint)interpolationMethod);
+    sprintf(buf,"%08x%04x%08x%u%f%f%u",fileId,messageIndex,flags,coordinateType,x,y,interpolationMethod);
     std::size_t str_hash = std::hash<std::string>{}(std::string(buf));
     return str_hash;
     /*

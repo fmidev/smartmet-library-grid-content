@@ -17,23 +17,23 @@ class ProducerInfo
                     ProducerInfo();
                     ProducerInfo(ProducerInfo& producerInfo);
                     ProducerInfo(const char *csv);
-     virtual        ~ProducerInfo();
+    virtual         ~ProducerInfo();
 
-     std::string    getCsv();
-     std::string    getCsvHeader();
-     void           setCsv(const char *csv);
-     void           setCsv(std::string csv);
+    std::string     getCsv();
+    std::string     getCsvHeader();
+    void            setCsv(const char *csv);
+    void            setCsv(std::string csv);
 
-     void           operator=(ProducerInfo& producerInfo);
-     ProducerInfo*  duplicate();
-     void           print(std::ostream& stream,uint level,uint optionFlags);
+    ProducerInfo&   operator=(ProducerInfo& producerInfo);
+    ProducerInfo*   duplicate();
+    void            print(std::ostream& stream,uint level,uint optionFlags);
 
-     uint           mProducerId;
-     std::string    mName;
-     std::string    mTitle;
-     std::string    mDescription;
-     uint           mFlags;
-     uint           mSourceId;
+    uint            mProducerId;
+    std::string     mName;
+    std::string     mTitle;
+    std::string     mDescription;
+    uint            mFlags;
+    uint            mSourceId;
 };
 
 

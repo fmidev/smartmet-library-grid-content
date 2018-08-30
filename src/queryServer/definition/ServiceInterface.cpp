@@ -106,7 +106,7 @@ int ServiceInterface::executeQuery(T::SessionId sessionId,Query& query)
     int result = _executeQuery(sessionId,query);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,Query);result %d;time %f;",__FUNCTION__,sessionId,result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,Query);result %d;time %f;",__FUNCTION__,sessionId,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -128,7 +128,7 @@ int ServiceInterface::getProducerList(T::SessionId sessionId,string_vec& produce
     int result = _getProducerList(sessionId,producerList);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,producer[%u]);result %d;time %f;",__FUNCTION__,sessionId,(uint)producerList.size(),result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,producer[%lu]);result %d;time %f;",__FUNCTION__,sessionId,producerList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -150,7 +150,7 @@ int ServiceInterface::getValuesByGridPoint(T::SessionId sessionId,T::ContentInfo
     int result = _getValuesByGridPoint(sessionId,contentInfoList,coordinateType,x,y,interpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,ContentInfo[%u],%u,%f,%f,%u,GridPointValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,contentInfoList.getLength(),(uint)coordinateType,x,y,(uint)interpolationMethod,valueList.getLength(),result,(float)requestTime / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,ContentInfo[%u],%u,%f,%f,%u,GridPointValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,contentInfoList.getLength(),coordinateType,x,y,interpolationMethod,valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)

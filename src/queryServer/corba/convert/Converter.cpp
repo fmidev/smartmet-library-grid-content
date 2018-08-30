@@ -45,7 +45,7 @@ void Converter::convert(string_set& source,QueryServer::Corba::CorbaStringList& 
 {
   try
   {
-    uint len = (uint)source.size();
+    uint len = source.size();
     target.length(len);
     uint t = 0;
     for (auto it=source.begin(); it!=source.end(); ++it)
@@ -88,7 +88,7 @@ void Converter::convert(string_vec& source,QueryServer::Corba::CorbaStringList& 
 {
   try
   {
-    uint len = (uint)source.size();
+    uint len = source.size();
     target.length(len);
     uint t = 0;
     for (auto it=source.begin(); it!=source.end(); ++it)
@@ -313,10 +313,10 @@ void Converter::convert(QueryServer::Corba::CorbaParameterValues& source,QuerySe
     target.mProducerId = source.producerId;
     target.mGenerationId = source.generationId;
     target.mGeometryId = source.geometryId;
-    target.mParameterKeyType = (T::ParamKeyType)source.parameterKeyType;
+    target.mParameterKeyType = source.parameterKeyType;
     target.mParameterKey = source.parameterKey;
-    target.mParameterLevelIdType = (T::ParamLevelIdType)source.parameterLevelIdType;
-    target.mParameterLevelId = (T::ParamLevelId)source.parameterLevelId;
+    target.mParameterLevelIdType = source.parameterLevelIdType;
+    target.mParameterLevelId = source.parameterLevelId;
     target.mParameterLevel = source.parameterLevel;
     target.mForecastType = source.forecastType;
     target.mForecastNumber = source.forecastNumber;
@@ -499,9 +499,9 @@ void Converter::convert(QueryServer::Corba::CorbaQueryParameter& source,QuerySer
     target.mParam = source.param;
     target.mOrigParam = source.origParam;
     target.mSymbolicName = source.symbolicName;
-    target.mParameterKeyType = (T::ParamKeyType)source.parameterKeyType;
+    target.mParameterKeyType = source.parameterKeyType;
     target.mParameterKey = source.parameterKey;
-    target.mParameterLevelIdType = (T::ParamLevelIdType)source.parameterLevelIdType;
+    target.mParameterLevelIdType = source.parameterLevelIdType;
     target.mParameterLevelId = source.parameterLevelId;
     target.mParameterLevel = source.parameterLevel;
     target.mForecastType = source.forecastType;

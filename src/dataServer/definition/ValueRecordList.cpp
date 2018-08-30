@@ -130,7 +130,7 @@ void ValueRecordList::clear()
 {
   try
   {
-    uint sz = (uint)mList.size();
+    uint sz = mList.size();
     for (uint t=0; t<sz; t++)
     {
       ValueRecord *rec = mList[t];
@@ -153,7 +153,7 @@ ValueRecord* ValueRecordList::getValueRecordByIndex(uint index)
 {
   try
   {
-    if (index >= (uint)mList.size())
+    if (index >= mList.size())
       return nullptr;
 
     return mList[index];
@@ -171,7 +171,7 @@ uint ValueRecordList::getLength()
 {
   try
   {
-    return (uint)mList.size();
+    return mList.size();
   }
   catch (...)
   {
@@ -190,7 +190,7 @@ void ValueRecordList::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "ValueRecordList\n";
     stream << space(level) << "- mList = \n";
 
-    uint sz = (uint)mList.size();
+    uint sz = mList.size();
     for (uint t=0; t<sz; t++)
     {
       ValueRecord *rec = mList[t];

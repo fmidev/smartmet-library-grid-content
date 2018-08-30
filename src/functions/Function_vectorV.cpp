@@ -59,7 +59,7 @@ void Function_vectorV::executeFunctionCall4(uint columns,uint rows,std::vector<f
   try
   {
     double PI = 3.14159265;
-    uint len = (uint)inParameters1.size();
+    uint len = inParameters1.size();
 
     outParameters.reserve(len);
 
@@ -109,7 +109,7 @@ void Function_vectorV::executeFunctionCall4(uint columns,uint rows,std::vector<d
   try
   {
     double PI = 3.14159265;
-    uint len = (uint)inParameters1.size();
+    uint len = inParameters1.size();
 
     outParameters.reserve(len);
 

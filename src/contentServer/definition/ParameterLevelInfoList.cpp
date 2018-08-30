@@ -62,12 +62,12 @@ ParameterLevelInfoList::~ParameterLevelInfoList()
 
 
 
-void ParameterLevelInfoList::operator=(ParameterLevelInfoList& parameterLevelInfoList)
+ParameterLevelInfoList& ParameterLevelInfoList::operator=(ParameterLevelInfoList& parameterLevelInfoList)
 {
   try
   {
     if (&parameterLevelInfoList == this)
-      return;
+      return *this;
 
     clear();
 
@@ -78,6 +78,7 @@ void ParameterLevelInfoList::operator=(ParameterLevelInfoList& parameterLevelInf
       if (info != nullptr)
         mList.push_back(info->duplicate());
     }
+    return *this;
   }
   catch (...)
   {
@@ -196,7 +197,7 @@ uint ParameterLevelInfoList::getLength()
 {
   try
   {
-    return (uint)mList.size();
+    return mList.size();
   }
   catch (...)
   {

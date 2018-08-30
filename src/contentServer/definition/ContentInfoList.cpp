@@ -21,7 +21,7 @@ namespace T
 
 ThreadLock ContentInfoList_sortLock;
 
-ContentInfo::ComparisonMethod contentInfo_comparisonMethod = ContentInfo::ComparisonMethod::none;
+uint contentInfo_comparisonMethod = ContentInfo::ComparisonMethod::none;
 
 
 
@@ -172,13 +172,13 @@ ContentInfoList::~ContentInfoList()
 
 
 
-void ContentInfoList::operator=(ContentInfoList& contentInfoList)
+ContentInfoList& ContentInfoList::operator=(ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     if (&contentInfoList == this)
-      return;
+      return *this;
 
     clear();
 
@@ -213,6 +213,8 @@ void ContentInfoList::operator=(ContentInfoList& contentInfoList)
     }
     if (contentInfoList.getModificationLockPtr() != mModificationLockPtr)
       contentInfoList.unlock();
+
+    return *this;
   }
   catch (...)
   {
@@ -225,18 +227,17 @@ void ContentInfoList::operator=(ContentInfoList& contentInfoList)
 
 
 
-void ContentInfoList::operator=(const ContentInfoList& contentInfoList)
+ContentInfoList& ContentInfoList::operator=(const ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     if (&contentInfoList == this)
-      return;
+      return *this;
 
     clear();
 
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
-    //contentInfoList.lock();
     mArray = nullptr;
     mSize = contentInfoList.getSize();
     mLength = contentInfoList.getLength();
@@ -261,11 +262,10 @@ void ContentInfoList::operator=(const ContentInfoList& contentInfoList)
         }
       }
     }
-    //contentInfoList.unlock();
+    return *this;
   }
   catch (...)
   {
-    //contentInfoList.unlock();
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
@@ -295,7 +295,7 @@ ContentInfo* ContentInfoList::addContentInfo(ContentInfo *contentInfo)
 
     int idx = getClosestIndexNoLock(mComparisonMethod,*contentInfo);
 
-    if (idx < (int)mLength  &&  mArray[idx] != nullptr  &&   mArray[idx]->compare(mComparisonMethod,contentInfo) == 0)
+    if (idx < C_INT(mLength)  &&  mArray[idx] != nullptr  &&   mArray[idx]->compare(mComparisonMethod,contentInfo) == 0)
     {
       // If content with the same id exists, we should not add the new contet, because other contentLists might point
       // the existing content record;
@@ -303,19 +303,19 @@ ContentInfo* ContentInfoList::addContentInfo(ContentInfo *contentInfo)
       return mArray[idx];
     }
 
-    while (idx < (int)mLength  &&  mArray[idx] != nullptr  &&   mArray[idx]->compare(mComparisonMethod,contentInfo) < 0)
+    while (idx < C_INT(mLength)  &&  mArray[idx] != nullptr  &&   mArray[idx]->compare(mComparisonMethod,contentInfo) < 0)
     {
       idx++;
     }
 
-    if (idx == (int)mLength)
+    if (idx == C_INT(mLength))
     {
       mArray[mLength] = contentInfo;
       mLength++;
       return contentInfo;
     }
 
-    if (idx < (int)mLength)
+    if (idx < C_INT(mLength))
       memmove(&mArray[idx+1],&mArray[idx],sizeof(void*)*(mLength-idx));
 
     mArray[idx] = contentInfo;
@@ -667,7 +667,7 @@ uint ContentInfoList::markDeletedByFileId(uint fileId)
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
       uint t = 0;
       if (idx >= 0)
-        t = (uint)idx;
+        t = idx;
 
       while (t < mLength)
       {
@@ -713,10 +713,10 @@ uint ContentInfoList::deleteContentInfo(ContentInfo& contentInfo)
     int idx = getClosestIndexNoLock(mComparisonMethod,contentInfo);
 
     uint startP = 0;
-    if (idx >= 0  &&  idx < (int)mLength  &&  mArray[idx] != nullptr  &&
+    if (idx >= 0  &&  idx < C_INT(mLength)  &&  mArray[idx] != nullptr  &&
         mArray[idx]->mFileId == contentInfo.mFileId  &&  mArray[idx]->mMessageIndex == contentInfo.mMessageIndex)
     {
-      startP = (uint)idx;
+      startP = idx;
     }
 
     uint p = startP;
@@ -1138,7 +1138,7 @@ uint ContentInfoList::deleteVirtualContent()
     {
       ContentInfo *info = mArray[t];
       mArray[t] = nullptr;
-      if (info != nullptr  &&  (info->mFileType == T::FileType::Virtual  ||  (info->mFlags & T::ContentInfo::Flags::VirtualContent) != 0))
+      if (info != nullptr  &&  (info->mFileType == T::FileTypeValue::Virtual  ||  (info->mFlags & T::ContentInfo::Flags::VirtualContent) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -1383,11 +1383,11 @@ uint ContentInfoList::registerContentInfoByServerAndFileId(uint serverId,uint fi
     contentInfo.mMessageIndex = 0;
 
     int idx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
-    if (idx < 0 ||  (uint)idx >= mLength)
+    if (idx < 0 ||  C_UINT(idx) >= mLength)
       return 0;
 
     uint count = 0;
-    for (uint t=(uint)idx; t<mLength; t++)
+    for (uint t=idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  info->mFileId == fileId)
@@ -1461,11 +1461,11 @@ uint ContentInfoList::unregisterContentInfoByServerAndFileId(uint serverId,uint 
     contentInfo.mMessageIndex = 0;
 
     int idx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
-    if (idx < 0 ||  (uint)idx >= mLength)
+    if (idx < 0 ||  C_UINT(idx) >= mLength)
       return 0;
 
     uint count = 0;
-    for (uint t=(uint)idx; t<mLength; t++)
+    for (uint t=idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  info->mFileId == fileId)
@@ -1550,7 +1550,7 @@ void ContentInfoList::getContentListByForecastTime(std::string forecastTime,T::C
 
 
 
-int ContentInfoList::getClosestIndex(ContentInfo::ComparisonMethod comparisonMethod,ContentInfo& contentInfo)
+int ContentInfoList::getClosestIndex(uint comparisonMethod,ContentInfo& contentInfo)
 {
   //FUNCTION_TRACE
   try
@@ -1568,7 +1568,7 @@ int ContentInfoList::getClosestIndex(ContentInfo::ComparisonMethod comparisonMet
 
 
 
-int ContentInfoList::getClosestIndexNoLock(ContentInfo::ComparisonMethod comparisonMethod,ContentInfo& contentInfo)
+int ContentInfoList::getClosestIndexNoLock(uint comparisonMethod,ContentInfo& contentInfo)
 {
   //FUNCTION_TRACE
   try
@@ -1593,7 +1593,7 @@ int ContentInfoList::getClosestIndexNoLock(ContentInfo::ComparisonMethod compari
     }
 
     int low = 0;
-    int high = (int)mLength - 1;
+    int high = C_INT(mLength) - 1;
     int mid = 0;
 
     while (low <= high)
@@ -1619,11 +1619,11 @@ int ContentInfoList::getClosestIndexNoLock(ContentInfo::ComparisonMethod compari
         high = mid - 1;
     }
 
-    if (mid >= 0  &&  mid < (int)mLength)
+    if (mid >= 0  &&  mid < C_INT(mLength))
     {
-      if (mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
+      if (mArray[mid] != nullptr  &&  mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
       {
-        while (mid < (int)mLength  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
+        while (mid < C_INT(mLength)  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
           mid++;
 
         return mid-1;
@@ -1659,7 +1659,7 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,
     contentInfo.mMessageIndex = messageIndex;
 
     int idx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
-    if (idx < 0  ||  (uint)idx >= mLength)
+    if (idx < 0  ||  C_UINT(idx) >= mLength)
       return nullptr;
 
     T::ContentInfo *info = mArray[idx];
@@ -1688,7 +1688,7 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndexNoLock(uint f
     contentInfo.mMessageIndex = messageIndex;
 
     int idx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
-    if (idx < 0  ||  (uint)idx >= mLength)
+    if (idx < 0  ||  C_UINT(idx) >= mLength)
       return nullptr;
 
     T::ContentInfo *info = mArray[idx];
@@ -1718,7 +1718,7 @@ bool ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,uint mes
     contentInfo.mMessageIndex = messageIndex;
 
     int idx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
-    if (idx < 0 ||  (uint)idx >= mLength)
+    if (idx < 0 ||  C_UINT(idx) >= mLength)
       return false;
 
     T::ContentInfo *info = mArray[idx];
@@ -1791,23 +1791,23 @@ ContentInfo* ContentInfoList::getContentInfoByParameterLevelInfo(T::ParameterLev
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mParameterLevel == levelInfo.mLevel)
       {
-        if ((levelInfo.mParameterKeyType == T::ParamKeyType::FMI_ID  &&  info->mFmiParameterId == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyType::FMI_NAME  &&  info->mFmiParameterName == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyType::NEWBASE_ID  &&  info->mNewbaseParameterId == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyType::NEWBASE_NAME  &&  info->mNewbaseParameterName == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyType::CDM_ID  &&  info->mCdmParameterId == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyType::CDM_NAME  &&  info->mCdmParameterName == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyType::GRIB_ID  &&  info->mGribParameterId == levelInfo.mParameterKey))
+        if ((levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_ID  &&  info->mFmiParameterId == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_NAME  &&  info->mFmiParameterName == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  &&  info->mNewbaseParameterId == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME  &&  info->mNewbaseParameterName == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::CDM_ID  &&  info->mCdmParameterId == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::CDM_NAME  &&  info->mCdmParameterName == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::GRIB_ID  &&  info->mGribParameterId == levelInfo.mParameterKey))
         {
-          if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdType::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdType::FMI) &&
+          if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::FMI) &&
               info->mFmiParameterLevelId == levelInfo.mParameterLevelId)
             return info;
 
-          if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdType::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdType::GRIB1) &&
+          if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1) &&
               info->mGrib1ParameterLevelId == levelInfo.mParameterLevelId)
             return info;
 
-          if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdType::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdType::GRIB2) &&
+          if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2) &&
               info->mGrib2ParameterLevelId == levelInfo.mParameterLevelId)
             return info;
         }
@@ -1837,15 +1837,15 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelIn
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mParameterLevel == levelInfo.mLevel)
       {
-        if ((levelInfo.mParameterKeyType == T::ParamKeyType::FMI_ID  &&  info->mFmiParameterId == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyType::FMI_NAME  &&  info->mFmiParameterName == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyType::NEWBASE_ID  &&  info->mNewbaseParameterId == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyType::NEWBASE_NAME  &&  info->mNewbaseParameterName == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyType::CDM_ID  &&  info->mCdmParameterId == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyType::CDM_NAME  &&  info->mCdmParameterName == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyType::GRIB_ID  &&  info->mGribParameterId == levelInfo.mParameterKey))
+        if ((levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_ID  &&  info->mFmiParameterId == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_NAME  &&  info->mFmiParameterName == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  &&  info->mNewbaseParameterId == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME  &&  info->mNewbaseParameterName == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::CDM_ID  &&  info->mCdmParameterId == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::CDM_NAME  &&  info->mCdmParameterName == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::GRIB_ID  &&  info->mGribParameterId == levelInfo.mParameterKey))
         {
-          if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdType::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdType::FMI) &&
+          if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::FMI) &&
               info->mFmiParameterLevelId == levelInfo.mParameterLevelId)
           {
             if (contentInfoList.getReleaseObjects())
@@ -1854,7 +1854,7 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelIn
               contentInfoList.addContentInfo(info);
           }
 
-          if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdType::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdType::GRIB1) &&
+          if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1) &&
               info->mGrib1ParameterLevelId == levelInfo.mParameterLevelId)
           {
             if (contentInfoList.getReleaseObjects())
@@ -1863,7 +1863,7 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelIn
               contentInfoList.addContentInfo(info);
           }
 
-          if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdType::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdType::GRIB2) &&
+          if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2) &&
               info->mGrib2ParameterLevelId == levelInfo.mParameterLevelId)
           {
             if (contentInfoList.getReleaseObjects())
@@ -1921,7 +1921,7 @@ void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex
     if (startIdx < 0)
       startIdx = 0;
 
-    for (uint t=(uint)startIdx; t<mLength; t++)
+    for (uint t=startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -1985,7 +1985,7 @@ void ContentInfoList::getContentInfoListByGroupFlags(uint groupFlags,uint startF
     if (startIdx < 0)
       startIdx = 0;
 
-    for (uint t=(uint)startIdx; t<mLength; t++)
+    for (uint t=startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
 
@@ -2031,12 +2031,12 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint generationId,T::
       {
         switch (parameterKeyType)
         {
-          case T::ParamKeyType::FMI_ID:
+          case T::ParamKeyTypeValue::FMI_ID:
             if (info->mFmiParameterId > " "  &&  paramKeyList.find(info->mFmiParameterId) == paramKeyList.end())
               paramKeyList.insert(info->mFmiParameterId);
             break;
 
-          case T::ParamKeyType::FMI_NAME:
+          case T::ParamKeyTypeValue::FMI_NAME:
             if (info->mFmiParameterName > " ")
             {
               if (paramKeyList.find(info->mFmiParameterName) == paramKeyList.end())
@@ -2058,27 +2058,27 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint generationId,T::
             }
             break;
 
-          case T::ParamKeyType::GRIB_ID:
+          case T::ParamKeyTypeValue::GRIB_ID:
             if (info->mGribParameterId > " "  &&  paramKeyList.find(info->mGribParameterId) == paramKeyList.end())
               paramKeyList.insert(info->mGribParameterId);
             break;
 
-          case T::ParamKeyType::NEWBASE_ID:
+          case T::ParamKeyTypeValue::NEWBASE_ID:
             if (info->mNewbaseParameterId > " "  &&  paramKeyList.find(info->mNewbaseParameterId) == paramKeyList.end())
               paramKeyList.insert(info->mNewbaseParameterName);
             break;
 
-          case T::ParamKeyType::NEWBASE_NAME:
+          case T::ParamKeyTypeValue::NEWBASE_NAME:
             if (info->mNewbaseParameterName > " "  &&  paramKeyList.find(info->mNewbaseParameterName) == paramKeyList.end())
               paramKeyList.insert(info->mNewbaseParameterName);
             break;
 
-          case T::ParamKeyType::CDM_ID:
+          case T::ParamKeyTypeValue::CDM_ID:
             if (info->mCdmParameterId > " " &&  paramKeyList.find(info->mCdmParameterId) == paramKeyList.end())
               paramKeyList.insert(info->mCdmParameterId);
             break;
 
-          case T::ParamKeyType::CDM_NAME:
+          case T::ParamKeyTypeValue::CDM_NAME:
             if (info->mCdmParameterName > " " &&  paramKeyList.find(info->mCdmParameterName) == paramKeyList.end())
               paramKeyList.insert(info->mCdmParameterName);
             break;
@@ -2207,7 +2207,7 @@ void ContentInfoList::getContentInfoListByFileId(uint fileId,ContentInfoList& co
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
       uint t = 0;
       if (idx >= 0)
-        t = (uint)idx;
+        t = idx;
 
       while (t < mLength)
       {
@@ -2296,7 +2296,7 @@ void ContentInfoList::getContentInfoListByForecastTime(std::string forecastTime,
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
       uint t = 0;
       if (idx >= 0)
-        t = (uint)idx;
+        t = idx;
 
       while (t < mLength)
       {
@@ -2385,10 +2385,10 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),gribParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),gribParameterId.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = idx;
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -2404,12 +2404,12 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                 {
-                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                  if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
                     if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
@@ -2431,7 +2431,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -2441,7 +2441,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  && (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -2451,7 +2451,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  && (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  && (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -2500,10 +2500,10 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),gribParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),gribParameterId.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = idx;
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -2521,12 +2521,12 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
               {
                 if (info->mGenerationId == generationId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                  if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                   {
-                    if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                    if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
                       if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                         prev = info;
@@ -2549,7 +2549,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -2559,7 +2559,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  && (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0 &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  && (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0 &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -2569,7 +2569,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint ge
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  && (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  && (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -2618,10 +2618,10 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),gribParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),gribParameterId.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -2637,12 +2637,12 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                 {
-                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                  if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
                     if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
@@ -2664,7 +2664,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -2674,7 +2674,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -2684,7 +2684,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -2761,10 +2761,10 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -2780,12 +2780,12 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                 {
-                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                  if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
                     if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
@@ -2807,7 +2807,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -2817,7 +2817,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
           // We need to add the previous entry before the start time.
 
@@ -2827,7 +2827,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -2876,10 +2876,10 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -2897,12 +2897,12 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
               {
                 if (geometryId < 0  ||  info->mGeometryId == geometryId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                  if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                   {
-                    if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                    if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
                       if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                         prev = info;
@@ -2925,7 +2925,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -2935,7 +2935,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -2945,7 +2945,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint gen
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -2994,10 +2994,10 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -3013,12 +3013,12 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                 {
-                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                  if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
                     if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
@@ -3040,7 +3040,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -3050,7 +3050,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -3060,7 +3060,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -3108,10 +3108,10 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       //printf("INDEX %u %s %u\n",idx,mArray[t]->mFmiParameterName.c_str(),mArray[t]->mParameterLevel);
 
@@ -3130,12 +3130,12 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                 {
-                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                  if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
                     if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
@@ -3157,7 +3157,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -3167,7 +3167,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -3177,7 +3177,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -3239,7 +3239,7 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(ui
     int idx = getClosestIndexNoLock(mComparisonMethod,info);
     for (int t=0; t < 2; t++)
     {
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr)
       {
         ContentInfo *cInfo = mArray[idx];
 
@@ -3286,10 +3286,10 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
       //info.mParameterLevel = level;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -3305,12 +3305,12 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                 {
-                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || info->mParameterLevel == level)
+                  if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || info->mParameterLevel == level)
                   {
                     if (info->mForecastTime < forecastTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                     {
@@ -3337,7 +3337,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -3406,10 +3406,10 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -3427,12 +3427,12 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
               {
                 if (info->mGenerationId == generationId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                  if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                   {
-                    if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                    if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
                       if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                         prev = info;
@@ -3455,7 +3455,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -3465,7 +3465,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -3475,7 +3475,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -3524,10 +3524,10 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -3543,12 +3543,12 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                 {
-                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                  if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
                     if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
@@ -3570,7 +3570,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -3580,7 +3580,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -3590,7 +3590,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -3639,10 +3639,10 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -3658,12 +3658,12 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                 {
-                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                  if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
                     if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
@@ -3685,7 +3685,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -3695,7 +3695,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -3705,7 +3705,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -3754,10 +3754,10 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -3775,12 +3775,12 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
               {
                 if (info->mGenerationId == generationId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                  if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                   {
-                    if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                    if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
                       if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                         prev = info;
@@ -3803,7 +3803,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -3813,7 +3813,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -3823,7 +3823,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -3872,10 +3872,10 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -3891,12 +3891,12 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                 {
-                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                  if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
                     if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
@@ -3918,7 +3918,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -3928,7 +3928,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -3938,7 +3938,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -3986,10 +3986,10 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -4005,12 +4005,12 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                 {
-                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                  if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
                     if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
@@ -4032,7 +4032,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -4042,7 +4042,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -4052,7 +4052,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -4101,10 +4101,10 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
+      if (C_UINT(idx) < mLength &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -4122,12 +4122,12 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
               {
                 if (info->mGenerationId == generationId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                  if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                   {
-                    if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                    if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
                       if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                         prev = info;
@@ -4150,7 +4150,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -4160,7 +4160,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -4170,7 +4170,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -4219,10 +4219,10 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -4238,12 +4238,12 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                 {
-                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                  if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
                     if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
@@ -4265,7 +4265,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -4275,7 +4275,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -4285,7 +4285,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -4334,10 +4334,10 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -4353,12 +4353,12 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                 {
-                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                  if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
                     if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
@@ -4380,7 +4380,7 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -4390,7 +4390,7 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -4400,7 +4400,7 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -4449,10 +4449,10 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -4470,12 +4470,12 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
               {
                 if (info->mGenerationId == generationId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                  if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                   {
-                    if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                    if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
                       if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                         prev = info;
@@ -4498,7 +4498,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -4508,7 +4508,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -4518,7 +4518,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint gen
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -4567,10 +4567,10 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -4586,12 +4586,12 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                 {
-                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                  if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
                     if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
@@ -4613,7 +4613,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -4623,7 +4623,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time. Notice that this must be
         // done in all requested levels.
@@ -4634,7 +4634,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time. Notice that this must be
         // done in all requested levels.
@@ -4684,10 +4684,10 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -4703,12 +4703,12 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                 {
-                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                  if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
                     if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
@@ -4730,7 +4730,7 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -4740,7 +4740,7 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -4750,7 +4750,7 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  && (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -4799,10 +4799,10 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -4820,12 +4820,12 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
               {
                 if (info->mGenerationId == generationId)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                  if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                   {
-                    if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                    if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
                       if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                         prev = info;
@@ -4848,7 +4848,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -4858,7 +4858,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -4868,7 +4868,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint g
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -4917,10 +4917,10 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
       //info.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,info);
 
-      if ((uint)idx < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
         idx++;
 
-      uint t = (uint)idx;
+      uint t = C_UINT(idx);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -4936,12 +4936,12 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
-                if ((parameterLevelIdType == T::ParamLevelIdType::IGNORE ||  parameterLevelId == 0) ||
-                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdType::FMI || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdType::GRIB1 || parameterLevelIdType == T::ParamLevelIdType::ANY)) ||
-                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdType::GRIB2 || parameterLevelIdType == T::ParamLevelIdType::ANY)))
+                if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
+                    (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
+                    (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                 {
-                  if (parameterLevelIdType == T::ParamLevelIdType::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+                  if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
                     if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
                       prev = info;
@@ -4963,7 +4963,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
           }
           else
           {
-            if (t > (uint)idx)
+            if (t > C_UINT(idx))
               t = mLength;
           }
         }
@@ -4973,7 +4973,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+      if (prev != nullptr  && (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
       {
         // We need to add the previous entry before the start time.
 
@@ -4983,7 +4983,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
           contentInfoList.addContentInfo(prev);
       }
 
-      if (next != nullptr  && (requestFlags & (uint)ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+      if (next != nullptr  && (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
@@ -5052,7 +5052,7 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startF
     if (startIdx < 0)
       startIdx = 0;
 
-    for (uint t=(uint)startIdx; t<mLength; t++)
+    for (uint t=startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
@@ -5113,7 +5113,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint generationId,uint st
     if (startIdx < 0)
       startIdx = 0;
 
-    for (uint t=(uint)startIdx; t<mLength; t++)
+    for (uint t=startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
@@ -5174,7 +5174,7 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(uint generatio
     if (startIdx < 0)
       startIdx = 0;
 
-    for (uint t=(uint)startIdx; t<mLength; t++)
+    for (uint t=startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
@@ -5269,7 +5269,7 @@ void ContentInfoList::getContentInfoListByServerId(uint serverId,uint startFileI
     if (startIdx < 0)
       startIdx = 0;
 
-    for (uint t=(uint)startIdx; t<mLength; t++)
+    for (uint t=startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (info->mServerFlags & sf) != 0 && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
@@ -5330,7 +5330,7 @@ void ContentInfoList::getContentInfoListBySourceId(uint sourceId,uint startFileI
     if (startIdx < 0)
       startIdx = 0;
 
-    for (uint t=(uint)startIdx; t<mLength; t++)
+    for (uint t=startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mSourceId == sourceId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
@@ -5375,7 +5375,7 @@ void ContentInfoList::getContentInfoListByServerAndFileId(uint serverId,uint fil
       if (startIdx < 0)
         startIdx = 0;
 
-      for (uint t=(uint)startIdx; t<mLength; t++)
+      for (uint t=startIdx; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
         if (info != nullptr  &&  info->mFileId > fileId)
@@ -5426,7 +5426,7 @@ void ContentInfoList::getFmiParamLevelIdListByFmiParameterId(T::ParamId fmiParam
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
-        uint vLen = (uint)paramLevelIdList.size();
+        uint vLen = paramLevelIdList.size();
         uint c = 0;
         while (c < vLen)
         {
@@ -5475,7 +5475,7 @@ void ContentInfoList::getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
-        uint vLen = (uint)paramLevelList.size();
+        uint vLen = paramLevelList.size();
         uint c = 0;
         while (c < vLen)
         {
@@ -5523,12 +5523,12 @@ void ContentInfoList::getParamLevelInfoListByFmiParameterId(T::ParamId fmiParame
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFmiParameterId == fmiParameterId)
       {
-        ParameterLevelInfo *pInfo = parameterLevelInfoList.getParameterLevelInfo(T::ParamKeyType::FMI_ID,
-            info->mFmiParameterId,T::ParamLevelIdType::FMI,info->mFmiParameterLevelId,info->mParameterLevel);
+        ParameterLevelInfo *pInfo = parameterLevelInfoList.getParameterLevelInfo(T::ParamKeyTypeValue::FMI_ID,
+            info->mFmiParameterId,T::ParamLevelIdTypeValue::FMI,info->mFmiParameterLevelId,info->mParameterLevel);
 
         if (pInfo == nullptr)
         {
-          pInfo = new ParameterLevelInfo(T::ParamKeyType::FMI_ID,info->mFmiParameterId,T::ParamLevelIdType::FMI,info->mFmiParameterLevelId,info->mParameterLevel);
+          pInfo = new ParameterLevelInfo(T::ParamKeyTypeValue::FMI_ID,info->mFmiParameterId,T::ParamLevelIdTypeValue::FMI,info->mFmiParameterLevelId,info->mParameterLevel);
           parameterLevelInfoList.addParameterLevelInfo(pInfo);
         }
       }
@@ -5806,7 +5806,7 @@ void ContentInfoList::setReleaseObjects(bool releaseObjects)
 
 
 
-void ContentInfoList::setComparisonMethod(ContentInfo::ComparisonMethod comparisonMethod)
+void ContentInfoList::setComparisonMethod(uint comparisonMethod)
 {
   FUNCTION_TRACE
   try
@@ -5829,11 +5829,14 @@ void ContentInfoList::setComparisonMethod(ContentInfo::ComparisonMethod comparis
 
 
 
-void ContentInfoList::sort(ContentInfo::ComparisonMethod comparisonMethod)
+void ContentInfoList::sort(uint comparisonMethod)
 {
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr)
+      return;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     mComparisonMethod = comparisonMethod;
 
@@ -5857,7 +5860,7 @@ void ContentInfoList::writeToFile(std::string filename)
   FUNCTION_TRACE
   try
   {
-    writeToFile(filename,"w");
+    writeToFile(filename,"we");
   }
   catch (...)
   {

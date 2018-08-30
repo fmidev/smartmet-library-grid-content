@@ -13,8 +13,8 @@ QueryParameter::QueryParameter()
   try
   {
     mId = 0;
-    mParameterKeyType = T::ParamKeyType::UNKNOWN;
-    mParameterLevelIdType = T::ParamLevelIdType::ANY;
+    mParameterKeyType = T::ParamKeyTypeValue::UNKNOWN;
+    mParameterLevelIdType = T::ParamLevelIdTypeValue::ANY;
     mParameterLevelId = 0;
     mParameterLevel = 0;
     mForecastType = -1;
@@ -121,13 +121,13 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mParam                    = " << mParam << "\n";
     stream << space(level) << "- mOrigParam                = " << mOrigParam << "\n";
     stream << space(level) << "- mSymbolicName             = " << mSymbolicName << "\n";
-    stream << space(level) << "- mParameterKeyType         = " << (uint)mParameterKeyType << "\n";
+    stream << space(level) << "- mParameterKeyType         = " << mParameterKeyType << "\n";
     stream << space(level) << "- mParameterKey             = " << mParameterKey << "\n";
-    stream << space(level) << "- mParameterLevelIdType     = " << (uint)mParameterLevelIdType << "\n";
-    stream << space(level) << "- mParameterLevelId         = " << (int)mParameterLevelId << "\n";
+    stream << space(level) << "- mParameterLevelIdType     = " << mParameterLevelIdType << "\n";
+    stream << space(level) << "- mParameterLevelId         = " << mParameterLevelId << "\n";
     stream << space(level) << "- mParameterLevel           = " << mParameterLevel << "\n";
-    stream << space(level) << "- mForecastType             = " << (int)mForecastType << "\n";
-    stream << space(level) << "- mForecastNumber           = " << (int)mForecastNumber << "\n";
+    stream << space(level) << "- mForecastType             = " << mForecastType << "\n";
+    stream << space(level) << "- mForecastNumber           = " << mForecastNumber << "\n";
     stream << space(level) << "- mAreaInterpolationMethod  = " << mAreaInterpolationMethod << "\n";
     stream << space(level) << "- mTimeInterpolationMethod  = " << mTimeInterpolationMethod << "\n";
     stream << space(level) << "- mLevelInterpolationMethod = " << mLevelInterpolationMethod << "\n";
@@ -136,7 +136,7 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mTimestepsBefore          = " << mTimestepsBefore << "\n";
     stream << space(level) << "- mTimestepsAfter           = " << mTimestepsAfter << "\n";
     stream << space(level) << "- mTimestepSizeInMinutes    = " << mTimestepSizeInMinutes << "\n";
-    stream << space(level) << "- mTemporary                = " << (int)mTemporary << "\n";
+    stream << space(level) << "- mTemporary                = " << mTemporary << "\n";
     stream << space(level) << "- mPrecision                = " << mPrecision << "\n";
     stream << space(level) << "- mFunction                 = " << mFunction << "\n";
     stream << space(level) << "- mFlags                    = " << mFlags << "\n";

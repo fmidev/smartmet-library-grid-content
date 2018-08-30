@@ -72,7 +72,7 @@ void VirtualContentFactory_type1::addFile(T::ProducerInfo& producerInfo,T::Gener
   FUNCTION_TRACE
   try
   {
-    time_t tt = time(0);
+    time_t tt = time(nullptr);
     if ((tt - mLastCheck) > 10)
     {
       mContentDefinitionFile.checkUpdates();
@@ -140,8 +140,8 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
             }
             else
             {
-              mContentServer->getContentListByParameterGenerationIdAndForecastTime(0,contentInfo.mGenerationId,T::ParamKeyType::FMI_NAME,*sourceParam,
-                T::ParamLevelIdType::FMI,contentInfo.mFmiParameterLevelId,contentInfo.mParameterLevel,contentInfo.mForecastType,contentInfo.mForecastNumber,
+              mContentServer->getContentListByParameterGenerationIdAndForecastTime(0,contentInfo.mGenerationId,T::ParamKeyTypeValue::FMI_NAME,*sourceParam,
+                T::ParamLevelIdTypeValue::FMI,contentInfo.mFmiParameterLevelId,contentInfo.mParameterLevel,contentInfo.mForecastType,contentInfo.mForecastNumber,
                 contentInfo.mGeometryId,contentInfo.mForecastTime,contentList);
 
               cInfo = contentList.getContentInfoByIndex(0);
@@ -217,7 +217,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
             Identification::gridDef.getNewbaseParameterDefByFmiId(def.mFmiParameterId,newbaseDef);
 
             newContentInfo->mFileId = 0;
-            newContentInfo->mFileType = T::FileType::Virtual;
+            newContentInfo->mFileType = T::FileTypeValue::Virtual;
             newContentInfo->mMessageIndex = 0;
             newContentInfo->mProducerId = contentInfo.mProducerId;
             newContentInfo->mGenerationId = contentInfo.mGenerationId;

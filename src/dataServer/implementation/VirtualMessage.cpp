@@ -1425,8 +1425,8 @@ void VirtualMessage::executeFunctionCall2(std::vector<double>& inOutParameters) 
 
 
     std::string functionName = mFunctionName;
-    uint columns = (uint)getGridOriginalColumnCount();
-    uint rows = (uint)getGridOriginalRowCount();
+    uint columns = getGridOriginalColumnCount();
+    uint rows = getGridOriginalRowCount();
 
     // Trying to find C++ implementation of the function
 
@@ -1463,8 +1463,8 @@ void VirtualMessage::executeFunctionCall2(std::vector<double>& inParameters,std:
     }
 
     std::string functionName = mFunctionName;
-    uint columns = (uint)getGridOriginalColumnCount();
-    uint rows = (uint)getGridOriginalRowCount();
+    uint columns = getGridOriginalColumnCount();
+    uint rows = getGridOriginalRowCount();
 
     // Trying to find C++ implementation of the function
 
@@ -1501,8 +1501,8 @@ void VirtualMessage::executeFunctionCall2(std::vector<float>& inParameters,std::
     }
 
     std::string functionName = mFunctionName;
-    uint columns = (uint)getGridOriginalColumnCount();
-    uint rows = (uint)getGridOriginalRowCount();
+    uint columns = getGridOriginalColumnCount();
+    uint rows = getGridOriginalRowCount();
 
     // Trying to find C++ implementation of the function
 
@@ -1539,8 +1539,8 @@ void VirtualMessage::executeFunctionCall2(std::vector<float>& inOutParameters) c
     }
 
     std::string functionName = mFunctionName;
-    uint columns = (uint)getGridOriginalColumnCount();
-    uint rows = (uint)getGridOriginalRowCount();
+    uint columns = getGridOriginalColumnCount();
+    uint rows = getGridOriginalRowCount();
 
     // Trying to find C++ implementation of the function
 
@@ -1620,8 +1620,8 @@ void VirtualMessage::executeFunctionCall3(std::vector<float>& inParameters1,std:
     }
 
     std::string functionName = mFunctionName;
-    uint columns = (uint)getGridOriginalColumnCount();
-    uint rows = (uint)getGridOriginalRowCount();
+    uint columns = getGridOriginalColumnCount();
+    uint rows = getGridOriginalRowCount();
 
     // Trying to find C++ implementation of the function
 
@@ -1658,8 +1658,8 @@ void VirtualMessage::executeFunctionCall3(std::vector<double>& inParameters1,std
     }
 
     std::string functionName = mFunctionName;
-    uint columns = (uint)getGridOriginalColumnCount();
-    uint rows = (uint)getGridOriginalRowCount();
+    uint columns = getGridOriginalColumnCount();
+    uint rows = getGridOriginalRowCount();
 
     // Trying to find C++ implementation of the function
 
@@ -1755,8 +1755,8 @@ void VirtualMessage::executeFunctionCall4(std::vector<float>& inParameters1,std:
     }
 
     std::string functionName = mFunctionName;
-    uint columns = (uint)getGridOriginalColumnCount();
-    uint rows = (uint)getGridOriginalRowCount();
+    uint columns = getGridOriginalColumnCount();
+    uint rows = getGridOriginalRowCount();
 
     // Trying to find C++ implementation of the function
 
@@ -1793,8 +1793,8 @@ void VirtualMessage::executeFunctionCall4(std::vector<double>& inParameters1,std
     }
 
     std::string functionName = mFunctionName;
-    uint columns = (uint)getGridOriginalColumnCount();
-    uint rows = (uint)getGridOriginalRowCount();
+    uint columns = getGridOriginalColumnCount();
+    uint rows = getGridOriginalRowCount();
 
     // Trying to find C++ implementation of the function
 

@@ -13,7 +13,7 @@ ParameterMapping::ParameterMapping()
 {
   try
   {
-    mParameterKeyType = T::ParamKeyType::FMI_ID;
+    mParameterKeyType = T::ParamKeyTypeValue::FMI_ID;
     mParameterLevelId = 0;
     mParameterLevel = 0;
     mAreaInterpolationMethod = T::AreaInterpolationMethod::Undefined;
@@ -82,15 +82,15 @@ void ParameterMapping::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "ParameterMapping\n";
     stream << space(level) << "- mProducerName             = " << mProducerName << "\n";
     stream << space(level) << "- mParameterName            = " << mParameterName << "\n";
-    stream << space(level) << "- mParameterKeyType         = " << (int)mParameterKeyType << "\n";
+    stream << space(level) << "- mParameterKeyType         = " << mParameterKeyType << "\n";
     stream << space(level) << "- mParameterKey             = " << mParameterKey << "\n";
-    stream << space(level) << "- mParameterLevelIdType     = " << (int)mParameterLevelIdType << "\n";
-    stream << space(level) << "- mParameterLevelId         = " << (int)mParameterLevelId << "\n";
+    stream << space(level) << "- mParameterLevelIdType     = " << mParameterLevelIdType << "\n";
+    stream << space(level) << "- mParameterLevelId         = " << mParameterLevelId << "\n";
     stream << space(level) << "- mParameterLevel           = " << mParameterLevel << "\n";
-    stream << space(level) << "- mAreaInterpolationMethod  = " << (int)mAreaInterpolationMethod << "\n";
-    stream << space(level) << "- mTimeInterpolationMethod  = " << (int)mTimeInterpolationMethod << "\n";
-    stream << space(level) << "- mLevelInterpolationMethod = " << (int)mLevelInterpolationMethod << "\n";
-    stream << space(level) << "- mGroupFlags               = " << (int)mGroupFlags << "\n";
+    stream << space(level) << "- mAreaInterpolationMethod  = " << mAreaInterpolationMethod << "\n";
+    stream << space(level) << "- mTimeInterpolationMethod  = " << mTimeInterpolationMethod << "\n";
+    stream << space(level) << "- mLevelInterpolationMethod = " << mLevelInterpolationMethod << "\n";
+    stream << space(level) << "- mGroupFlags               = " << mGroupFlags << "\n";
     stream << space(level) << "- mSearchEnabled            = " << mSearchEnabled << "\n";
     stream << space(level) << "- mConversionFunction       = " << mConversionFunction << "\n";
   }

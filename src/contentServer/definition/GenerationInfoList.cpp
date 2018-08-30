@@ -72,13 +72,13 @@ GenerationInfoList::~GenerationInfoList()
 
 
 
-void GenerationInfoList::operator=(GenerationInfoList& generationInfoList)
+GenerationInfoList& GenerationInfoList::operator=(GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
   try
   {
     if (&generationInfoList == this)
-      return;
+      return *this;
 
     clear();
 
@@ -90,6 +90,7 @@ void GenerationInfoList::operator=(GenerationInfoList& generationInfoList)
       if (info != nullptr)
         mList.push_back(info->duplicate());
     }
+    return *this;
   }
   catch (...)
   {
@@ -176,7 +177,7 @@ void GenerationInfoList::deleteGenerationInfoListByProducerId(uint producerId)
   try
   {
     AutoThreadLock lock(&mThreadLock);
-    int sz = (int)getLength()-1;
+    int sz = getLength()-1;
     for (int t=sz; t>=0; t--)
     {
       GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
@@ -227,7 +228,7 @@ void GenerationInfoList::deleteGenerationInfoListBySourceId(uint sourceId)
   try
   {
     AutoThreadLock lock(&mThreadLock);
-    int sz = (int)getLength()-1;
+    int sz = getLength()-1;
     for (int t=sz; t>=0; t--)
     {
       GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
@@ -361,7 +362,7 @@ void GenerationInfoList::getGenerationInfoListByProducerId(uint producerId,Gener
 
 
 
-GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(uint producerId,T::GenerationStatus generationStatus)
+GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(uint producerId,uchar generationStatus)
 {
   FUNCTION_TRACE
   try
@@ -476,7 +477,7 @@ uint GenerationInfoList::getLength()
   FUNCTION_TRACE
   try
   {
-    return (uint)mList.size();
+    return mList.size();
   }
   catch (...)
   {
@@ -570,7 +571,7 @@ void GenerationInfoList::writeToFile(std::string filename)
   {
     AutoThreadLock lock(&mThreadLock);
 
-    FILE *file = fopen(filename.c_str(),"w");
+    FILE *file = fopen(filename.c_str(),"we");
     if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot create the file!");

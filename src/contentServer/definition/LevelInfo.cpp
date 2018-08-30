@@ -85,12 +85,12 @@ LevelInfo::~LevelInfo()
 
 
 
-void LevelInfo::operator=(LevelInfo& levelInfo)
+LevelInfo& LevelInfo::operator=(LevelInfo& levelInfo)
 {
   try
   {
     if (&levelInfo == this)
-      return;
+      return *this;
 
     mProducerId = levelInfo.mProducerId;
     mFmiParameterName = levelInfo.mFmiParameterName;
@@ -98,6 +98,8 @@ void LevelInfo::operator=(LevelInfo& levelInfo)
     mGrib1ParameterLevelId = levelInfo.mGrib1ParameterLevelId;
     mGrib2ParameterLevelId = levelInfo.mGrib2ParameterLevelId;
     mParameterLevel = levelInfo.mParameterLevel;
+
+    return *this;
   }
   catch (...)
   {
@@ -177,12 +179,12 @@ void LevelInfo::setCsv(const char *csv)
 
     if (c >= 6)
     {
-      mProducerId = atoll(field[0]);
+      mProducerId = toInt64(field[0]);
       mFmiParameterName = field[1];
-      mFmiParameterLevelId = atoll(field[2]);
-      mGrib1ParameterLevelId = atoll(field[3]);
-      mGrib2ParameterLevelId = atoll(field[4]);
-      mParameterLevel = atoll(field[5]);
+      mFmiParameterLevelId = toInt64(field[2]);
+      mGrib1ParameterLevelId = toInt64(field[3]);
+      mGrib2ParameterLevelId = toInt64(field[4]);
+      mParameterLevel = toInt64(field[5]);
     }
   }
   catch (...)
@@ -233,9 +235,9 @@ void LevelInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "LevelInfo\n";
     stream << space(level) << "- mProducerId            = " << mProducerId << "\n";
     stream << space(level) << "- mFmiParameterName      = " << mFmiParameterName << "\n";
-    stream << space(level) << "- mFmiParameterLevelId   = " << (int)mFmiParameterLevelId << "\n";
-    stream << space(level) << "- mGrib1ParameterLevelId = " << (int)mGrib1ParameterLevelId << "\n";
-    stream << space(level) << "- mGrib2ParameterLevelId = " << (int)mGrib2ParameterLevelId << "\n";
+    stream << space(level) << "- mFmiParameterLevelId   = " << mFmiParameterLevelId << "\n";
+    stream << space(level) << "- mGrib1ParameterLevelId = " << mGrib1ParameterLevelId << "\n";
+    stream << space(level) << "- mGrib2ParameterLevelId = " << mGrib2ParameterLevelId << "\n";
     stream << space(level) << "- mParameterLevel        = " << mParameterLevel << "\n";
   }
   catch (...)

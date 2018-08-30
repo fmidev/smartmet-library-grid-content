@@ -15,13 +15,13 @@ namespace Corba
 #define CATCH_EXCEPTION \
   catch (CORBA::TRANSIENT&)\
   {\
-    mLastErrorTime = time(0);\
+    mLastErrorTime = time(nullptr);\
     Spine::Exception exception(BCP, "Caught system exception TRANSIENT -- unable to connect the server!");\
     throw exception;\
   }\
   catch (CORBA::SystemException& ex)\
   {\
-    mLastErrorTime = time(0);\
+    mLastErrorTime = time(nullptr);\
     char msg[500];\
     sprintf(msg, "Caught a CORBA::%s\n", ex._name());\
     Spine::Exception exception(BCP, msg);\
@@ -29,7 +29,7 @@ namespace Corba
   }\
   catch (CORBA::Exception& ex)\
   {\
-    mLastErrorTime = time(0);\
+    mLastErrorTime = time(nullptr);\
     char msg[500];\
     sprintf(msg, "Exception CORBA::%s\n", ex._name());\
     Spine::Exception exception(BCP, msg);\
@@ -37,7 +37,7 @@ namespace Corba
   }\
   catch (omniORB::fatalException& fe)\
   {\
-    mLastErrorTime = time(0);\
+    mLastErrorTime = time(nullptr);\
     char msg[500];\
     sprintf(msg, "Caught omniORB::fatalException:%s\n", fe.errmsg());\
     Spine::Exception exception(BCP, msg);\
@@ -45,7 +45,7 @@ namespace Corba
   }\
   catch (...)\
   {\
-    mLastErrorTime = time(0);\
+    mLastErrorTime = time(nullptr);\
     throw Spine::Exception(BCP, exception_operation_failed, nullptr);\
   }
 
@@ -224,7 +224,7 @@ int ClientImplementation::_clear(T::SessionId sessionId)
 
     int result = mService->clear(sessionId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -243,7 +243,7 @@ int ClientImplementation::_reload(T::SessionId sessionId)
 
     int result = mService->reload(sessionId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -268,7 +268,7 @@ int ClientImplementation::_addDataServerInfo(T::SessionId sessionId, T::ServerIn
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaServerInfo, serverInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -287,7 +287,7 @@ int ClientImplementation::_deleteDataServerInfoById(T::SessionId sessionId, uint
 
     int result = mService->deleteDataServerInfoById(sessionId, serverId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -311,7 +311,7 @@ int ClientImplementation::_getDataServerInfoById(T::SessionId sessionId, uint se
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaServerInfo, serverInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -335,7 +335,7 @@ int ClientImplementation::_getDataServerInfoByName(T::SessionId sessionId, std::
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaServerInfo, serverInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -359,7 +359,7 @@ int ClientImplementation::_getDataServerInfoByIor(T::SessionId sessionId, std::s
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaServerInfo, serverInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -383,7 +383,7 @@ int ClientImplementation::_getDataServerInfoList(T::SessionId sessionId, T::Serv
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaServerInfoList, serverInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -405,9 +405,9 @@ int ClientImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& c
     int result = mService->getDataServerInfoCount(sessionId, corbaCount);
 
     if (result == 0)
-      count = (uint)corbaCount;
+      count = corbaCount;
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -432,7 +432,7 @@ int ClientImplementation::_addProducerInfo(T::SessionId sessionId, T::ProducerIn
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaProducerInfo, producerInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -451,7 +451,7 @@ int ClientImplementation::_deleteProducerInfoById(T::SessionId sessionId, uint p
 
     int result = mService->deleteProducerInfoById(sessionId, producerId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -470,7 +470,7 @@ int ClientImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::
 
     int result = mService->deleteProducerInfoByName(sessionId, producerName.c_str());
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -489,7 +489,7 @@ int ClientImplementation::_deleteProducerInfoListBySourceId(T::SessionId session
 
     int result = mService->deleteProducerInfoListBySourceId(sessionId,sourceId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -513,7 +513,7 @@ int ClientImplementation::_getProducerInfoById(T::SessionId sessionId, uint prod
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaProducerInfo, producerInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -537,7 +537,7 @@ int ClientImplementation::_getProducerInfoByName(T::SessionId sessionId, std::st
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaProducerInfo, producerInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -561,7 +561,7 @@ int ClientImplementation::_getProducerInfoList(T::SessionId sessionId, T::Produc
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaProducerInfoList, producerInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -585,7 +585,7 @@ int ClientImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaProducerInfoList, producerInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -609,7 +609,7 @@ int ClientImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaProducerInfoList, producerInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -631,9 +631,9 @@ int ClientImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& cou
     int result = mService->getProducerInfoCount(sessionId, corbaCount);
 
     if (result == 0)
-      count = (uint)corbaCount;
+      count = corbaCount;
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -657,7 +657,7 @@ int ClientImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaList,list);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -681,7 +681,7 @@ int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaList,list);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -706,7 +706,7 @@ int ClientImplementation::_addGenerationInfo(T::SessionId sessionId, T::Generati
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaGenerationInfo, generationInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -725,7 +725,7 @@ int ClientImplementation::_deleteGenerationInfoById(T::SessionId sessionId, uint
 
     int result = mService->deleteGenerationInfoById(sessionId, generationId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -744,7 +744,7 @@ int ClientImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std
 
     int result = mService->deleteGenerationInfoByName(sessionId, generationName.c_str());
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -766,7 +766,7 @@ int ClientImplementation::_deleteGenerationInfoListByIdList(T::SessionId session
 
     int result = mService->deleteGenerationInfoListByIdList(sessionId, corbaGenerationIdList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -785,7 +785,7 @@ int ClientImplementation::_deleteGenerationInfoListByProducerId(T::SessionId ses
 
     int result = mService->deleteGenerationInfoListByProducerId(sessionId, producerId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -804,7 +804,7 @@ int ClientImplementation::_deleteGenerationInfoListByProducerName(T::SessionId s
 
     int result = mService->deleteGenerationInfoListByProducerName(sessionId, producerName.c_str());
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -823,7 +823,7 @@ int ClientImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessi
 
     int result = mService->deleteGenerationInfoListBySourceId(sessionId, sourceId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -847,7 +847,7 @@ int ClientImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessi
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaList,list);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -870,7 +870,7 @@ int ClientImplementation::_getGenerationInfoById(T::SessionId sessionId, uint ge
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaGenerationInfo, generationInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -894,7 +894,7 @@ int ClientImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::s
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaGenerationInfo, generationInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -918,7 +918,7 @@ int ClientImplementation::_getGenerationInfoList(T::SessionId sessionId, T::Gene
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaGenerationInfoList, generationInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -942,7 +942,7 @@ int ClientImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaGenerationInfoList, generationInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -966,7 +966,7 @@ int ClientImplementation::_getGenerationInfoListByProducerId(T::SessionId sessio
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaGenerationInfoList, generationInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -990,7 +990,7 @@ int ClientImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaGenerationInfoList, generationInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1014,7 +1014,7 @@ int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionI
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaGenerationInfoList, generationInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1024,7 +1024,7 @@ int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionI
 
 
 
-int ClientImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,uint producerId,T::GenerationStatus generationStatus,T::GenerationInfo& generationInfo)
+int ClientImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,uint producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   try
   {
@@ -1038,7 +1038,7 @@ int ClientImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::Session
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaGenerationInfo, generationInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1048,7 +1048,7 @@ int ClientImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::Session
 
 
 
-int ClientImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,std::string producerName,T::GenerationStatus generationStatus,T::GenerationInfo& generationInfo)
+int ClientImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,std::string producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   try
   {
@@ -1062,7 +1062,7 @@ int ClientImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessi
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaGenerationInfo, generationInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1084,9 +1084,9 @@ int ClientImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& c
     int result = mService->getGenerationInfoCount(sessionId, corbaCount);
 
     if (result == 0)
-      count = (uint)corbaCount;
+      count = corbaCount;
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1096,7 +1096,7 @@ int ClientImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& c
 
 
 
-int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,T::GenerationStatus status)
+int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,uchar status)
 {
   try
   {
@@ -1105,7 +1105,7 @@ int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,ui
 
     int result = mService->setGenerationInfoStatusById(sessionId, generationId,  (CORBA::Octet)status);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1115,7 +1115,7 @@ int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,ui
 
 
 
-int ClientImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,std::string generationName,T::GenerationStatus status)
+int ClientImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,std::string generationName,uchar status)
 {
   try
   {
@@ -1124,7 +1124,7 @@ int ClientImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,
 
     int result = mService->setGenerationInfoStatusByName(sessionId, generationName.c_str(),  (CORBA::Octet)status);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1149,7 +1149,7 @@ int ClientImplementation::_addFileInfo(T::SessionId sessionId, T::FileInfo& file
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaFileInfo, fileInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1180,7 +1180,7 @@ int ClientImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
     }
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1208,7 +1208,7 @@ int ClientImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std
       ContentServer::Corba::Converter::convert(corbaFileContentList, fileAndContentList);
     }
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1227,7 +1227,7 @@ int ClientImplementation::_deleteFileInfoById(T::SessionId sessionId, uint fileI
 
     int result = mService->deleteFileInfoById(sessionId, fileId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1246,7 +1246,7 @@ int ClientImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::stri
 
     int result = mService->deleteFileInfoByName(sessionId, filename.c_str());
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1265,7 +1265,7 @@ int ClientImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId
 
     int result = mService->deleteFileInfoListByGroupFlags(sessionId, groupFlags);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1284,7 +1284,7 @@ int ClientImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId
 
     int result = mService->deleteFileInfoListByProducerId(sessionId, producerId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1303,7 +1303,7 @@ int ClientImplementation::_deleteFileInfoListByProducerName(T::SessionId session
 
     int result = mService->deleteFileInfoListByProducerName(sessionId, producerName.c_str());
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1322,7 +1322,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationId(T::SessionId session
 
     int result = mService->deleteFileInfoListByGenerationId(sessionId, generationId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1341,7 +1341,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Se
 
     int result = mService->deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime.c_str());
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1364,7 +1364,7 @@ int ClientImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId ses
 
     int result = mService->deleteFileInfoListByForecastTimeList(sessionId,corbaForecastTimeList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1383,7 +1383,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessi
 
     int result = mService->deleteFileInfoListByGenerationName(sessionId, generationName.c_str());
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1402,7 +1402,7 @@ int ClientImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId, 
 
     int result = mService->deleteFileInfoListBySourceId(sessionId, sourceId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1424,7 +1424,7 @@ int ClientImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId
 
     int result = mService->deleteFileInfoListByFileIdList(sessionId, corbaFileIdList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1447,7 +1447,7 @@ int ClientImplementation::_getFileInfoById(T::SessionId sessionId, uint fileId, 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaFileInfo, fileInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1471,7 +1471,7 @@ int ClientImplementation::_getFileInfoByName(T::SessionId sessionId,std::string 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaFileInfo, fileInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1495,7 +1495,7 @@ int ClientImplementation::_getFileInfoList(T::SessionId sessionId, uint startFil
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaFileInfoList, fileInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1519,7 +1519,7 @@ int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId, u
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaFileInfoList, fileInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1543,7 +1543,7 @@ int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaFileInfoList, fileInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1567,7 +1567,7 @@ int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaFileInfoList, fileInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1591,7 +1591,7 @@ int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaFileInfoList, fileInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1615,7 +1615,7 @@ int ClientImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId, u
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaFileInfoList, fileInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1639,7 +1639,7 @@ int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId, uin
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaFileInfoList, fileInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1661,9 +1661,9 @@ int ClientImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
     int result = mService->getFileInfoCount(sessionId,corbaCount);
 
     if (result == 0)
-      count = (uint)corbaCount;
+      count = corbaCount;
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1685,9 +1685,9 @@ int ClientImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,u
     int result = mService->getFileInfoCountByProducerId(sessionId,producerId,corbaCount);
 
     if (result == 0)
-      count = (uint)corbaCount;
+      count = corbaCount;
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1709,9 +1709,9 @@ int ClientImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId
     int result = mService->getFileInfoCountByGenerationId(sessionId,generationId,corbaCount);
 
     if (result == 0)
-      count = (uint)corbaCount;
+      count = corbaCount;
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1733,9 +1733,9 @@ int ClientImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uin
     int result = mService->getFileInfoCountBySourceId(sessionId,sourceId,corbaCount);
 
     if (result == 0)
-      count = (uint)corbaCount;
+      count = corbaCount;
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1760,7 +1760,7 @@ int ClientImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eve
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaEventInfo, eventInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1790,7 +1790,7 @@ int ClientImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaEventInfo, eventInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1820,7 +1820,7 @@ int ClientImplementation::_getEventInfoList(T::SessionId sessionId, uint request
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaEventInfoList, eventInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1842,9 +1842,9 @@ int ClientImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
     int result = mService->getEventInfoCount(sessionId, corbaCount);
 
     if (result == 0)
-      count = (uint)corbaCount;
+      count = corbaCount;
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1869,7 +1869,7 @@ int ClientImplementation::_addContentInfo(T::SessionId sessionId, T::ContentInfo
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfo, contentInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1894,7 +1894,7 @@ int ClientImplementation::_addContentList(T::SessionId sessionId, T::ContentInfo
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1913,7 +1913,7 @@ int ClientImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,
 
     int result = mService->deleteContentInfo(sessionId,fileId,messageIndex);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1932,7 +1932,7 @@ int ClientImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint
 
     int result = mService->deleteContentListByFileId(sessionId, fileId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1951,7 +1951,7 @@ int ClientImplementation::_deleteContentListByFileName(T::SessionId sessionId,st
 
     int result = mService->deleteContentListByFileName(sessionId, filename.c_str());
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1970,7 +1970,7 @@ int ClientImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,
 
     int result = mService->deleteContentListByGroupFlags(sessionId, groupFlags);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -1989,7 +1989,7 @@ int ClientImplementation::_deleteContentListByProducerId(T::SessionId sessionId,
 
     int result = mService->deleteContentListByProducerId(sessionId, producerId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2008,7 +2008,7 @@ int ClientImplementation::_deleteContentListByProducerName(T::SessionId sessionI
 
     int result = mService->deleteContentListByProducerName(sessionId, producerName.c_str());
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2026,7 +2026,7 @@ int ClientImplementation::_deleteContentListByGenerationId(T::SessionId sessionI
 
     int result = mService->deleteContentListByGenerationId(sessionId, generationId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2045,7 +2045,7 @@ int ClientImplementation::_deleteContentListByGenerationName(T::SessionId sessio
 
     int result = mService->deleteContentListByGenerationName(sessionId, generationName.c_str());
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2064,7 +2064,7 @@ int ClientImplementation::_deleteContentListBySourceId(T::SessionId sessionId, u
 
     int result = mService->deleteContentListBySourceId(sessionId, sourceId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2089,7 +2089,7 @@ int ClientImplementation::_registerContentList(T::SessionId sessionId,uint serve
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2108,7 +2108,7 @@ int ClientImplementation::_registerContentListByFileId(T::SessionId sessionId, u
 
     int result = mService->registerContentListByFileId(sessionId, serverId, fileId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2127,7 +2127,7 @@ int ClientImplementation::_unregisterContentList(T::SessionId sessionId, uint se
 
     int result = mService->unregisterContentList(sessionId, serverId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2146,7 +2146,7 @@ int ClientImplementation::_unregisterContentListByFileId(T::SessionId sessionId,
 
     int result = mService->unregisterContentListByFileId(sessionId, serverId, fileId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2170,7 +2170,7 @@ int ClientImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uin
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfo, contentInfo);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2194,7 +2194,7 @@ int ClientImplementation::_getContentList(T::SessionId sessionId, uint startFile
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2218,7 +2218,7 @@ int ClientImplementation::_getContentListByFileId(T::SessionId sessionId, uint f
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2242,7 +2242,7 @@ int ClientImplementation::_getContentListByFileName(T::SessionId sessionId,std::
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2265,7 +2265,7 @@ int ClientImplementation::_getContentListByGroupFlags(T::SessionId sessionId, ui
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2289,7 +2289,7 @@ int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId, ui
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2313,7 +2313,7 @@ int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,s
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2340,7 +2340,7 @@ int ClientImplementation::_getContentListByServerId(T::SessionId sessionId, uint
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2364,7 +2364,7 @@ int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,u
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2388,7 +2388,7 @@ int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2412,7 +2412,7 @@ int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2436,7 +2436,7 @@ int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2460,7 +2460,7 @@ int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId, uint
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2484,7 +2484,7 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2508,7 +2508,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2532,7 +2532,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2555,7 +2555,7 @@ int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId s
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2579,7 +2579,7 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2603,7 +2603,7 @@ int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2627,7 +2627,7 @@ int ClientImplementation::_getContentListOfInvalidIntegrity(T::SessionId session
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2651,7 +2651,7 @@ int ClientImplementation::_getContentGeometryIdListByGenerationId(T::SessionId s
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaGeometryIdList,geometryIdList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2674,7 +2674,7 @@ int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessio
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentParamList,contentParamList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2698,7 +2698,7 @@ int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId ses
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaParamKeyList,paramKeyList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2722,7 +2722,7 @@ int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId session
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentTimeList,contentTimeList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2746,7 +2746,7 @@ int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentTimeList,contentTimeList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2770,7 +2770,7 @@ int ClientImplementation::_getContentTimeListByProducerId(T::SessionId sessionId
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentTimeList,contentTimeList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2792,9 +2792,9 @@ int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
     int result = mService->getContentCount(sessionId, corbaCount);
 
     if (result == 0)
-      count = (uint)corbaCount;
+      count = corbaCount;
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2818,7 +2818,7 @@ int ClientImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoL
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaLevelInfoList, levelInfoList);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2837,7 +2837,7 @@ int ClientImplementation::_deleteVirtualContent(T::SessionId sessionId)
 
     int result = mService->deleteVirtualContent(sessionId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION
@@ -2856,7 +2856,7 @@ int ClientImplementation::_updateVirtualContent(T::SessionId sessionId)
 
     int result = mService->updateVirtualContent(sessionId);
 
-    mLastAccessTime = time(0);
+    mLastAccessTime = time(nullptr);
     return result;
   }
   CATCH_EXCEPTION

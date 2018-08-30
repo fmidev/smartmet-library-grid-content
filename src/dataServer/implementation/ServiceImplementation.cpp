@@ -276,18 +276,18 @@ int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,T::Valu
             {
               switch (rec->mCoordinateType)
               {
-                case T::CoordinateType::UNKNOWN:
-                case T::CoordinateType::LATLON_COORDINATES:
+                case T::CoordinateTypeValue::UNKNOWN:
+                case T::CoordinateTypeValue::LATLON_COORDINATES:
                   rec->mValue = message->getGridValueByLatLonCoordinate(rec->mY,rec->mX,(short)rec->mAreaInterpolationMethod);
                   rec->mResult = 0;
                   break;
 
-                case T::CoordinateType::GRID_COORDINATES:
+                case T::CoordinateTypeValue::GRID_COORDINATES:
                   rec->mValue = message->getGridValueByGridPoint(rec->mX,rec->mY,(short)rec->mAreaInterpolationMethod);
                   rec->mResult = 0;
                   break;
 
-                case T::CoordinateType::ORIGINAL_COORDINATES:
+                case T::CoordinateTypeValue::ORIGINAL_COORDINATES:
                   // TODO: Implementation required
                   rec->mResult = Result::NOT_IMPLEMENTED;
                   break;
@@ -339,31 +339,31 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileI
     if (message == nullptr)
       return Result::MESSAGE_NOT_FOUND;
 
-    coordinates.mProjection = (uint)message->getGridProjection();
+    coordinates.mProjection = message->getGridProjection();
     message->getGridProjectionAttributes("",coordinates.mProjectionAttributes);
-    coordinates.mColumns = (uint)message->getGridOriginalColumnCount();
-    coordinates.mRows = (uint)message->getGridOriginalRowCount();
+    coordinates.mColumns = message->getGridOriginalColumnCount();
+    coordinates.mRows = message->getGridOriginalRowCount();
     coordinates.mCoordinateType = coordinateType;
 
     switch (coordinateType)
     {
-      case T::CoordinateType::UNKNOWN:
-      case T::CoordinateType::LATLON_COORDINATES:
+      case T::CoordinateTypeValue::UNKNOWN:
+      case T::CoordinateTypeValue::LATLON_COORDINATES:
         coordinates.mCoordinateList = message->getGridLatLonCoordinates();
         break;
 
-      case T::CoordinateType::GRID_COORDINATES:
+      case T::CoordinateTypeValue::GRID_COORDINATES:
         coordinates.mCoordinateList.clear();
         for (uint y=0; y<coordinates.mRows; y++)
         {
           for (uint x=0; x<coordinates.mColumns; x++)
           {
-            coordinates.mCoordinateList.push_back(T::Coordinate((double)x,(double)y));
+            coordinates.mCoordinateList.push_back(T::Coordinate(x,y));
           }
         }
         break;
 
-      case T::CoordinateType::ORIGINAL_COORDINATES:
+      case T::CoordinateTypeValue::ORIGINAL_COORDINATES:
         coordinates.mCoordinateList = message->getGridCoordinates();
         break;
     }
@@ -422,10 +422,10 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
     data.mNewbaseParameterId = message->getNewbaseParameterId();
     data.mNewbaseParameterName = message->getNewbaseParameterName();
     data.mParameterLevel = message->getGridParameterLevel();
-    data.mGeometryId = (uint)message->getGridGeometryId();
-    data.mProjection = (uint)message->getGridProjection();
-    data.mColumns = (uint)message->getGridOriginalColumnCount();
-    data.mRows = (uint)message->getGridOriginalRowCount();
+    data.mGeometryId = message->getGridGeometryId();
+    data.mProjection = message->getGridProjection();
+    data.mColumns = message->getGridOriginalColumnCount();
+    data.mRows = message->getGridOriginalRowCount();
     data.mForecastType = message->getForecastType();
     data.mForecastNumber = message->getForecastNumber();
     message->getGridProjectionAttributes("",data.mProjectionAttributes);
@@ -449,7 +449,7 @@ int ServiceImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
   FUNCTION_TRACE
   try
   {
-    count = (uint)mGridFileManager.getFileCount();
+    count = mGridFileManager.getFileCount();
     return Result::OK;
   }
   catch (...)
@@ -658,8 +658,8 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
 
       switch (coordinateType)
       {
-        case T::CoordinateType::UNKNOWN:
-        case T::CoordinateType::LATLON_COORDINATES:
+        case T::CoordinateTypeValue::UNKNOWN:
+        case T::CoordinateTypeValue::LATLON_COORDINATES:
           for (uint r=0; r < rows; r++)
           {
             double xx = x;
@@ -673,7 +673,7 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
           }
           return Result::OK;
 
-        case T::CoordinateType::GRID_COORDINATES:
+        case T::CoordinateTypeValue::GRID_COORDINATES:
           for (uint r=0; r < rows; r++)
           {
             double xx = x;
@@ -687,7 +687,7 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
           }
           return Result::OK;
 
-        case T::CoordinateType::ORIGINAL_COORDINATES:
+        case T::CoordinateTypeValue::ORIGINAL_COORDINATES:
           // TODO: Implementation required
           return Result::NOT_IMPLEMENTED;
       }
@@ -938,10 +938,10 @@ void ServiceImplementation::readContentList(T::ContentInfoList& contentList,bool
         startFileId = contentInfo->mFileId;
         startMessageIndex = contentInfo->mMessageIndex + 1;
 
-        if (includePhysicalContent && contentInfo->mFileType != T::FileType::Virtual)
+        if (includePhysicalContent && contentInfo->mFileType != T::FileTypeValue::Virtual)
           contentList.addContentInfo(contentInfo->duplicate());
         else
-        if (includeVirtualContent && contentInfo->mFileType == T::FileType::Virtual)
+        if (includeVirtualContent && contentInfo->mFileType == T::FileTypeValue::Virtual)
           contentList.addContentInfo(contentInfo->duplicate());
 
         counter++;
@@ -985,7 +985,7 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
         fc.mFileInfo.mProducerId = virtualFilePtr->getProducerId();
         fc.mFileInfo.mGenerationId = virtualFilePtr->getGenerationId();
         fc.mFileInfo.mSourceId = virtualFilePtr->getSourceId();
-        fc.mFileInfo.mFileType = T::FileType::Virtual;
+        fc.mFileInfo.mFileType = T::FileTypeValue::Virtual;
         fc.mFileInfo.mFlags = fc.mFileInfo.mFlags | T::FileInfo::Flags::VirtualContent;
 
         std::size_t len = virtualFilePtr->getNumberOfMessages();
@@ -1182,7 +1182,7 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
 
           counter++;
           if ((counter % 10000) == 0)
-            PRINT_DATA(mDebugLog,"* Creating virtual files : %u\n",(uint)gridFileMap.size());
+            PRINT_DATA(mDebugLog,"* Creating virtual files : %lu\n",gridFileMap.size());
         }
         catch (...)
         {
@@ -1192,7 +1192,7 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
         }
       }
     }
-    PRINT_DATA(mDebugLog,"* Creating virtual files : %u\n",(uint)gridFileMap.size());
+    PRINT_DATA(mDebugLog,"* Creating virtual files : %lu\n",gridFileMap.size());
 
     registerVirtualFiles(gridFileMap);
   }
@@ -1214,7 +1214,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
     if ((fileInfo.mFlags & T::FileInfo::Flags::VirtualContent) != 0)
       return;
 
-    time_t checkTime = time(0);
+    time_t checkTime = time(nullptr);
     T::ContentInfoList contentList;
 
     GRID::GridFile_sptr storageFile = mGridFileManager.getFileByIdNoMapping(fileInfo.mFileId);
@@ -1356,7 +1356,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
         contentInfo->mGenerationId = fileInfo.mGenerationId;
         contentInfo->mFileType = gridFile->getFileType();
         contentInfo->mFileId = fileInfo.mFileId;
-        contentInfo->mMessageIndex = (uint)m;
+        contentInfo->mMessageIndex = m;
         contentInfo->mForecastTime = message->getForecastTime();
         contentInfo->mFmiParameterId = message->getFmiParameterId();
         contentInfo->mFmiParameterName = message->getFmiParameterName();
@@ -1421,7 +1421,7 @@ void ServiceImplementation::fullUpdate()
     }
 
     uint counter = 0;
-    time_t checkTime = time(0);
+    time_t checkTime = time(nullptr);
     uint startFileId = 0;
     uint len = 50000;
     while (len > 0)
@@ -1698,7 +1698,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo)
   {
     //printf("EVENT[%llu]: fileAdded(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
-    if ((T::FileType)eventInfo.mId2 == T::FileType::Virtual)
+    if (eventInfo.mId2 == T::FileTypeValue::Virtual)
       return; // The added file was virtual. No need to react.
 
     T::FileInfo fileInfo;
@@ -1729,7 +1729,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo)
     }
 
     if ((fileInfo.mFileId % 1000) == 0)
-      PRINT_DATA(mDebugLog,"** fileAdded %u\n",(uint)mGridFileManager.getFileCount());
+      PRINT_DATA(mDebugLog,"** fileAdded %lu\n",mGridFileManager.getFileCount());
   }
   catch (...)
   {
@@ -1748,7 +1748,7 @@ void ServiceImplementation::event_fileDeleted(T::EventInfo& eventInfo)
   {
     //printf("EVENT[%llu]: filedDeleted(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
-    if ((T::FileType)eventInfo.mId2 == T::FileType::Virtual)
+    if (eventInfo.mId2 == T::FileTypeValue::Virtual)
       return; // The deleted file was virtual. No need to react.
 
     mGridFileManager.deleteFileById(eventInfo.mId1);
@@ -1770,7 +1770,7 @@ void ServiceImplementation::event_fileUpdated(T::EventInfo& eventInfo)
   {
     //printf("EVENT[%llu]: filedUpdated(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
-    if ((T::FileType)eventInfo.mId2 == T::FileType::Virtual)
+    if (eventInfo.mId2 == T::FileTypeValue::Virtual)
       return; // The updated file was virtual. No need to react.
 
     GRID::GridFile_sptr storageFile = mGridFileManager.getFileByIdNoMapping(eventInfo.mId1);
@@ -2146,10 +2146,10 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    if (mGridFileMap.size() > 10000  ||  (mGridFileMap.size() > 0  &&  (mLastVirtualFileRegistration + 60) < time(0)))
+    if (mGridFileMap.size() > 10000  ||  (mGridFileMap.size() > 0  &&  (mLastVirtualFileRegistration + 60) < time(nullptr)))
     {
       registerVirtualFiles(mGridFileMap);
-      mLastVirtualFileRegistration = time(0);
+      mLastVirtualFileRegistration = time(nullptr);
       mGridFileMap.clear();
     }
 

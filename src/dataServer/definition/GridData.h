@@ -25,7 +25,7 @@ class GridData
     uint                mProducerId;
     uint                mGenerationId;
     uint                mFileId;
-    T::FileType         mFileType;
+    uchar         mFileType;
     std::string         mFileName;
     uint                mMessageIndex;
     std::string         mForecastTime;

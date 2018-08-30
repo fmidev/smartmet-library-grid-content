@@ -73,7 +73,7 @@ void GridFileManager::addFile(GRID::GridFile *gridFile)
   {
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    gridFile->setCheckTime(time(0));
+    gridFile->setCheckTime(time(nullptr));
 
     GRID::GridFile_sptr ptr;
     ptr.reset(gridFile);

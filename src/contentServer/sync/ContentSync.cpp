@@ -276,7 +276,7 @@ void ContentSync::readSourceProducers(const char *sourceDir)
 
     char filename[300];
     sprintf(filename,"%s/producers.csv",sourceDir);
-    FILE *file = fopen(filename,"r");
+    FILE *file = fopen(filename,"re");
     if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot open the file!");
@@ -319,7 +319,7 @@ void ContentSync::readSourceGenerations(const char *sourceDir)
 
     char filename[300];
     sprintf(filename,"%s/generations.csv",sourceDir);
-    FILE *file = fopen(filename,"r");
+    FILE *file = fopen(filename,"re");
     if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot open the file!");
@@ -362,7 +362,7 @@ void ContentSync::readSourceFiles(const char *sourceDir)
 
     char filename[300];
     sprintf(filename,"%s/files.csv",sourceDir);
-    FILE *file = fopen(filename,"r");
+    FILE *file = fopen(filename,"re");
     if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot open the file!");
@@ -405,7 +405,7 @@ void ContentSync::readSourceContent(const char *sourceDir)
 
     char filename[300];
     sprintf(filename,"%s/content.csv",sourceDir);
-    FILE *file = fopen(filename,"r");
+    FILE *file = fopen(filename,"re");
     if (file == nullptr)
     {
       SmartMet::Spine::Exception exception(BCP,"Cannot open the file!");

@@ -62,12 +62,12 @@ LevelInfoList::~LevelInfoList()
 
 
 
-void LevelInfoList::operator=(LevelInfoList& levelInfoList)
+LevelInfoList& LevelInfoList::operator=(LevelInfoList& levelInfoList)
 {
   try
   {
     if (&levelInfoList == this)
-      return;
+      return *this;
 
     clear();
 
@@ -78,6 +78,7 @@ void LevelInfoList::operator=(LevelInfoList& levelInfoList)
       if (info != nullptr)
         mList.push_back(info->duplicate());
     }
+    return *this;
   }
   catch (...)
   {
@@ -162,7 +163,7 @@ uint LevelInfoList::getLength()
 {
   try
   {
-    return (uint)mList.size();
+    return mList.size();
   }
   catch (...)
   {

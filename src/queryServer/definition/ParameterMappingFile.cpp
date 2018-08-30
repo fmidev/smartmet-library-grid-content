@@ -81,7 +81,7 @@ bool ParameterMappingFile::checkUpdates()
 
     time_t tt = getFileModificationTime(mFilename.c_str());
 
-    if (tt != mLastModified  &&  (tt+3) < time(0))
+    if (tt != mLastModified  &&  (tt+3) < time(nullptr))
     {
       loadFile();
       return true;
@@ -122,7 +122,7 @@ uint ParameterMappingFile::getNumberOfMappings()
     uint cnt = 0;
     for (auto it = mMappingSearch.begin(); it != mMappingSearch.end(); ++it)
     {
-      cnt = cnt + (uint)it->second.size();
+      cnt = cnt + it->second.size();
     }
     return cnt;
   }
@@ -241,11 +241,11 @@ void ParameterMappingFile::getMappings(std::string producerName,std::string para
 
     for (auto it = s->second.begin(); it != s->second.end(); ++it)
     {
-      if (levelIdType == T::ParamLevelIdType::ANY || levelIdType == T::ParamLevelIdType::IGNORE ||  it->mParameterLevelIdType == levelIdType)
+      if (levelIdType == T::ParamLevelIdTypeValue::ANY || levelIdType == T::ParamLevelIdTypeValue::IGNORE ||  it->mParameterLevelIdType == levelIdType)
       {
-        if (levelIdType == T::ParamLevelIdType::IGNORE || levelId == 0 || it->mParameterLevelId == levelId)
+        if (levelIdType == T::ParamLevelIdTypeValue::IGNORE || levelId == 0 || it->mParameterLevelId == levelId)
         {
-          if (levelIdType == T::ParamLevelIdType::IGNORE || it->mParameterLevel == level)
+          if (levelIdType == T::ParamLevelIdTypeValue::IGNORE || it->mParameterLevel == level)
           {
             if (onlySearchEnabled)
             {
@@ -275,7 +275,7 @@ void ParameterMappingFile::loadFile()
 {
   try
   {
-    FILE *file = fopen(mFilename.c_str(),"r");
+    FILE *file = fopen(mFilename.c_str(),"re");
     if (file == nullptr)
     {
       Spine::Exception exception(BCP,"Cannot open the mapping file!");
@@ -325,31 +325,31 @@ void ParameterMappingFile::loadFile()
             rec.mParameterName = field[1];
 
           if (field[2][0] != '\0')
-            rec.mParameterKeyType = (T::ParamKeyType)atoi(field[2]);
+            rec.mParameterKeyType = toInt64(field[2]);
 
           if (field[3][0] != '\0')
             rec.mParameterKey = field[3];
 
           if (field[4][0] != '\0')
-            rec.mParameterLevelIdType = (T::ParamLevelIdType)atoi(field[4]);
+            rec.mParameterLevelIdType = toInt64(field[4]);
 
           if (field[5][0] != '\0')
-            rec.mParameterLevelId = (T::ParamLevelId)atoi(field[5]);
+            rec.mParameterLevelId = toInt64(field[5]);
 
           if (field[6][0] != '\0')
-            rec.mParameterLevel = (T::ParamLevel)atoi(field[6]);
+            rec.mParameterLevel = (T::ParamLevel)toInt64(field[6]);
 
           if (field[7][0] != '\0')
-            rec.mAreaInterpolationMethod = (short)atoi(field[7]);
+            rec.mAreaInterpolationMethod = (short)toInt64(field[7]);
 
           if (field[8][0] != '\0')
-            rec.mTimeInterpolationMethod = (short)atoi(field[8]);
+            rec.mTimeInterpolationMethod = (short)toInt64(field[8]);
 
           if (field[9][0] != '\0')
-            rec.mLevelInterpolationMethod = (short)atoi(field[9]);
+            rec.mLevelInterpolationMethod = (short)toInt64(field[9]);
 
           if (field[10][0] != '\0')
-            rec.mGroupFlags = atoi(field[10]);
+            rec.mGroupFlags = toInt64(field[10]);
 
           if (field[11][0] == 'E')
             rec.mSearchEnabled = true;
