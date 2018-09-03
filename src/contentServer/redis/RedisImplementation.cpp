@@ -6727,7 +6727,7 @@ int RedisImplementation::getContent(uint startFileId,uint startMessageIndex,uint
         T::ContentInfo *contentInfo = new T::ContentInfo();
         contentInfo->setCsv(reply->element[t]->str);
 
-        if (contentInfo->mFileId > startFileId  ||  (contentInfo->mFileId == startFileId   &&  contentInfo->mMessageIndex > startMessageIndex))
+        if (contentInfo->mFileId > startFileId  ||  (contentInfo->mFileId == startFileId   &&  contentInfo->mMessageIndex >= startMessageIndex))
           contentInfoList.addContentInfo(contentInfo);
         else
           delete contentInfo;
