@@ -808,7 +808,7 @@ void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags)
   {
     stream << space(level) << "ContentInfo\n";
     stream << space(level) << "- mFileId                 = " << mFileId << "\n";
-    stream << space(level) << "- mFileType               = " << mFileType << "\n";
+    stream << space(level) << "- mFileType               = " << C_INT(mFileType) << "\n";
     stream << space(level) << "- mMessageIndex           = " << mMessageIndex << "\n";
     stream << space(level) << "- mProducerId             = " << mProducerId << "\n";
     stream << space(level) << "- mGenerationId           = " << mGenerationId << "\n";
@@ -821,9 +821,9 @@ void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mCdmParameterName       = " << mCdmParameterName << "\n";
     stream << space(level) << "- mNewbaseParameterId     = " << mNewbaseParameterId << "\n";
     stream << space(level) << "- mNewbaseParameterName   = " << mNewbaseParameterName << "\n";
-    stream << space(level) << "- mFmiParameterLevelId    = " << mFmiParameterLevelId << "\n";
-    stream << space(level) << "- mGrib1ParameterLevelId  = " << mGrib1ParameterLevelId << "\n";
-    stream << space(level) << "- mGrib2ParameterLevelId  = " << mGrib2ParameterLevelId << "\n";
+    stream << space(level) << "- mFmiParameterLevelId    = " << C_INT(mFmiParameterLevelId) << "\n";
+    stream << space(level) << "- mGrib1ParameterLevelId  = " << C_INT(mGrib1ParameterLevelId) << "\n";
+    stream << space(level) << "- mGrib2ParameterLevelId  = " << C_INT(mGrib2ParameterLevelId) << "\n";
     stream << space(level) << "- mParameterLevel         = " << mParameterLevel << "\n";
     stream << space(level) << "- mFmiParameterUnits      = " << mFmiParameterUnits << "\n";
     stream << space(level) << "- mGribParameterUnits     = " << mGribParameterUnits << "\n";

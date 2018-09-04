@@ -82,10 +82,10 @@ void ParameterMapping::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "ParameterMapping\n";
     stream << space(level) << "- mProducerName             = " << mProducerName << "\n";
     stream << space(level) << "- mParameterName            = " << mParameterName << "\n";
-    stream << space(level) << "- mParameterKeyType         = " << mParameterKeyType << "\n";
+    stream << space(level) << "- mParameterKeyType         = " << C_INT(mParameterKeyType) << "\n";
     stream << space(level) << "- mParameterKey             = " << mParameterKey << "\n";
-    stream << space(level) << "- mParameterLevelIdType     = " << mParameterLevelIdType << "\n";
-    stream << space(level) << "- mParameterLevelId         = " << mParameterLevelId << "\n";
+    stream << space(level) << "- mParameterLevelIdType     = " << C_INT(mParameterLevelIdType) << "\n";
+    stream << space(level) << "- mParameterLevelId         = " << C_INT(mParameterLevelId) << "\n";
     stream << space(level) << "- mParameterLevel           = " << mParameterLevel << "\n";
     stream << space(level) << "- mAreaInterpolationMethod  = " << mAreaInterpolationMethod << "\n";
     stream << space(level) << "- mTimeInterpolationMethod  = " << mTimeInterpolationMethod << "\n";
