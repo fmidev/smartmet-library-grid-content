@@ -755,7 +755,7 @@ void ServiceImplementation::checkConfigurationUpdates()
 
 
 
-void ServiceImplementation::getProducerList(Query& query,Producer_vec& producers)
+void ServiceImplementation::getProducers(Query& query,Producer_vec& producers)
 {
   FUNCTION_TRACE
   try
@@ -1084,7 +1084,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
     // Fetching valid producers.
 
     Producer_vec producers;
-    getProducerList(query,producers);
+    getProducers(query,producers);
 
     if (producers.size() == 0)
       return Result::NO_PRODUCERS_FOUND;
@@ -1288,7 +1288,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
     // Fetching valid producers.
 
     Producer_vec producers;
-    getProducerList(query,producers);
+    getProducers(query,producers);
 
     if (producers.size() == 0)
       return Result::NO_PRODUCERS_FOUND;

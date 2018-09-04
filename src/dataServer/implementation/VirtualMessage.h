@@ -79,7 +79,7 @@ class VirtualMessage : public Message
     virtual void                    getGridValueVectorByRectangle(uint grid_i_start,uint grid_j_start,uint grid_i_end,uint grid_j_end,T::GridPointValue_vec& gridPointValues) const;
     virtual void                    getParameterValuesByRectangle(uint grid_i_start,uint grid_j_start,uint grid_i_end,uint grid_j_end,T::GridPointValueList& gridPointValues) const;
     virtual T::TimeString           getReferenceTime() const;
-    virtual T::SpatialRef*    getSpatialReference() const;
+    virtual T::SpatialRef*          getSpatialReference() const;
     virtual std::string             getWKT() const;
     virtual bool                    reverseXDirection() const;
     virtual bool                    reverseYDirection() const;

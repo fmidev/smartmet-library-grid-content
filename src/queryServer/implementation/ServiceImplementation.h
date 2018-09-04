@@ -158,7 +158,7 @@ class ServiceImplementation : public ServiceInterface
                        std::string& function,
                        std::string& functionParams);
 
-     void           getProducerList(
+     void           getProducers(
                        Query& query,
                        Producer_vec& producers);
 
