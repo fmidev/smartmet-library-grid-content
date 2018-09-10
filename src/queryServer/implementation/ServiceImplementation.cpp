@@ -3581,13 +3581,29 @@ void ServiceImplementation::getGridValues(
                   for (auto pInfo = mappings.begin(); pInfo != mappings.end(); ++pInfo)
                   {
                     std::set<std::string> contentTimeList;
-                    int result = mContentServerPtr->getContentTimeListByGenerationId(0,generationInfo->mGenerationId,contentTimeList);
+                    //int result = mContentServerPtr->getContentTimeListByGenerationId(0,generationInfo->mGenerationId,contentTimeList);
+
+                    T::ContentInfoList contentInfoList;
+                    int result = mContentServerPtr->getContentListByParameterAndGenerationId(0,generationInfo->mGenerationId,pInfo->mParameterKeyType,
+                        pInfo->mParameterKey,pInfo->mParameterLevelIdType,pInfo->mParameterLevelId,paramLevel,paramLevel,forecastType,forecastNumber,producerGeometryId,std::string("19000101T000000"),std::string("30000101T000000"),0,contentInfoList);
+
                     if (result != 0)
                     {
                       SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
-                      exception.addParameter("Service","getContentTimeListByGenerationId");
+                      exception.addParameter("Service","getContentListByParameterAndGenerationId");
                       exception.addParameter("Message",ContentServer::getResultString(result));
                       throw exception;
+                    }
+
+                    uint cLen = contentInfoList.getLength();
+                    for (uint t=0; t<cLen; t++)
+                    {
+                      T::ContentInfo *cInfo = contentInfoList.getContentInfoByIndex(t);
+                      if (cInfo != NULL)
+                      {
+                        if (contentTimeList.find(cInfo->mForecastTime) == contentTimeList.end())
+                          contentTimeList.insert(cInfo->mForecastTime);
+                      }
                     }
 
                     for (auto forecastTime = contentTimeList.begin();forecastTime != contentTimeList.end(); ++forecastTime)
