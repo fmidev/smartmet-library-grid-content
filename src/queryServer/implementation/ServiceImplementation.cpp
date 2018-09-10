@@ -3599,16 +3599,22 @@ void ServiceImplementation::getGridValues(
                           paramLevel,forecastType,forecastNumber,parameterFlags,areaInterpolationMethod,timeInterpolationMethod,
                           levelInterpolationMethod,*forecastTime,true,searchType,coordinates,radius,dem,coverType,valList);
 
-                        if (*forecastTime < minStartTime)
+                        if (valList.mValueList.getLength() > 0)
                         {
-                          minStartTime = *forecastTime;
-                          valueList.insert(valueList.begin(),valList);
-                        }
+                          if (valList.mForecastTime <= " ")
+                            valList.mForecastTime = *forecastTime;
 
-                        if (*forecastTime > maxEndTime  &&  minStartTime != *forecastTime)
-                        {
-                          maxEndTime = *forecastTime;
-                          valueList.push_back(valList);
+                          if (*forecastTime < minStartTime)
+                          {
+                            minStartTime = *forecastTime;
+                            valueList.insert(valueList.begin(),valList);
+                          }
+
+                          if (*forecastTime > maxEndTime  &&  minStartTime != *forecastTime)
+                          {
+                            maxEndTime = *forecastTime;
+                            valueList.push_back(valList);
+                          }
                         }
 
                         if (valueList.size() == maxValues)
