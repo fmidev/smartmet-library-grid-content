@@ -38,8 +38,8 @@ class Query
                         Query(Query& query);
     virtual             ~Query();
 
-    bool                parameterInQuery(std::string param);
-    QueryParameter*     getQueryParameterPtr(std::string param);
+    bool                parameterInQuery(const std::string& param);
+    QueryParameter*     getQueryParameterPtr(const std::string& param);
     QueryParameter*     getQueryParameterPtr(uint id);
     uint                getValuesPerTimeStep();
     void                removeTemporaryParameters();

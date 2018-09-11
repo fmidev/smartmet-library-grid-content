@@ -60,7 +60,12 @@ GenerationInfoList::~GenerationInfoList()
   FUNCTION_TRACE
   try
   {
-    clear();
+    AutoThreadLock lock(&mThreadLock);
+    std::size_t sz = mList.size();
+    for (std::size_t t=0; t<sz; t++)
+      delete(mList[t]);
+
+    mList.clear();
   }
   catch (...)
   {

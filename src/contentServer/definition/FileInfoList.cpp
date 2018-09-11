@@ -107,7 +107,19 @@ FileInfoList::~FileInfoList()
   FUNCTION_TRACE
   try
   {
-    clear();
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    if (mArray != nullptr)
+    {
+      for (uint t=0; t<mLength; t++)
+      {
+        if (mArray[t] != nullptr  &&  mReleaseObjects)
+        {
+          delete(mArray[t]);
+          mArray[t] = nullptr;
+        }
+      }
+      delete[] mArray;
+    }
   }
   catch (...)
   {
@@ -314,7 +326,7 @@ void FileInfoList::addFileInfoListNoLock(FileInfoList& fileInfoList)
     mSize = newSize+100;
     mLength = newSize;
 
-    delete mArray;
+    delete[] mArray;
     mArray = newArray;
   }
   catch (...)
@@ -342,7 +354,7 @@ void FileInfoList::clear()
           mArray[t] = nullptr;
         }
       }
-      delete mArray;
+      delete[] mArray;
     }
 
     mSize = 100;
@@ -395,7 +407,7 @@ void FileInfoList::increaseSize(uint newSize)
       }
     }
 
-    delete mArray;
+    delete[] mArray;
     mArray = newArray;
     mSize = newSize;
   }

@@ -27,7 +27,7 @@ ParameterLevelInfo::ParameterLevelInfo()
 
 
 
-ParameterLevelInfo::ParameterLevelInfo(ParameterLevelInfo& levelInfo)
+ParameterLevelInfo::ParameterLevelInfo(const ParameterLevelInfo& levelInfo)
 {
   try
   {
@@ -86,7 +86,7 @@ ParameterLevelInfo::~ParameterLevelInfo()
 
 
 
-ParameterLevelInfo& ParameterLevelInfo::operator=(ParameterLevelInfo& levelInfo)
+ParameterLevelInfo& ParameterLevelInfo::operator=(const ParameterLevelInfo& levelInfo)
 {
   try
   {

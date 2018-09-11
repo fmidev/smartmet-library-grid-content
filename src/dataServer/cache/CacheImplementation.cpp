@@ -44,12 +44,12 @@ CacheImplementation::~CacheImplementation()
         if (mDataCache[t] != nullptr)
           delete mDataCache[t];
       }
-      delete mDataCache;
+      delete[] mDataCache;
       mDataCache = nullptr;
     }
 
     if (mDataCacheAccessTime != nullptr)
-      delete mDataCacheAccessTime;
+      delete[] mDataCacheAccessTime;
   }
   catch (...)
   {

@@ -18,7 +18,7 @@ class ClientImplementation : public QueryServer::ServiceInterface
                     ClientImplementation();
      virtual        ~ClientImplementation();
 
-     virtual void   init(std::string serviceIor);
+     virtual void   init(const std::string& serviceIor);
 
   protected:
 

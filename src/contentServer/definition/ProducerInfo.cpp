@@ -29,7 +29,7 @@ ProducerInfo::ProducerInfo()
 
 
 
-ProducerInfo::ProducerInfo(ProducerInfo& producerInfo)
+ProducerInfo::ProducerInfo(const ProducerInfo& producerInfo)
 {
   try
   {
@@ -80,7 +80,7 @@ ProducerInfo::~ProducerInfo()
 
 
 
-ProducerInfo& ProducerInfo::operator=(ProducerInfo& producerInfo)
+ProducerInfo& ProducerInfo::operator=(const ProducerInfo& producerInfo)
 {
   try
   {

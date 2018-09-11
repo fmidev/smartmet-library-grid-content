@@ -13,11 +13,11 @@ class ContentInfo
 {
   public:
                        ContentInfo();
-                       ContentInfo(ContentInfo& contentInfo);
+                       ContentInfo(const ContentInfo& contentInfo);
                        ContentInfo(const char *csv);
     virtual            ~ContentInfo();
 
-    ContentInfo&       operator=(ContentInfo& contentInfo);
+    ContentInfo&       operator=(const ContentInfo& contentInfo);
 
     bool               hasKey(T::ParamKeyType parameterKeyType,std::string parameterKey);
     std::string        getCsv();

@@ -42,7 +42,7 @@ ContentInfo::ContentInfo()
 
 
 
-ContentInfo::ContentInfo(ContentInfo& contentInfo)
+ContentInfo::ContentInfo(const ContentInfo& contentInfo)
 {
   try
   {
@@ -114,7 +114,7 @@ ContentInfo::~ContentInfo()
 
 
 
-ContentInfo& ContentInfo::operator=(ContentInfo& contentInfo)
+ContentInfo& ContentInfo::operator=(const ContentInfo& contentInfo)
 {
   try
   {

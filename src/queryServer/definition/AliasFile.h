@@ -15,16 +15,16 @@ class AliasFile
 {
   public:
                   AliasFile();
-                  AliasFile(std::string filename);
+                  AliasFile(const std::string& filename);
                   AliasFile(const AliasFile& aliasFile);
     virtual       ~AliasFile();
 
     virtual void  init();
-    virtual void  init(std::string filename);
-    virtual void  init(std::string filename,bool duplicatesAllowed);
+    virtual void  init(const std::string& filename);
+    virtual void  init(const std::string& filename,bool duplicatesAllowed);
     virtual bool  checkUpdates();
-    virtual bool  getAlias(std::string& name,std::string& alias);
-    virtual void  getAliasList(std::string& name,std::vector<std::string>& aliasList);
+    virtual bool  getAlias(const std::string& name,std::string& alias);
+    virtual void  getAliasList(const std::string& name,std::vector<std::string>& aliasList);
     virtual void  print(std::ostream& stream,uint level,uint optionFlags);
 
   protected:

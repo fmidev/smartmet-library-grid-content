@@ -81,7 +81,7 @@ ClientImplementation::~ClientImplementation()
 
 
 
-void ClientImplementation::init(std::string serviceIor)
+void ClientImplementation::init(const std::string& serviceIor)
 {
   try
   {

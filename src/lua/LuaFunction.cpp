@@ -41,7 +41,7 @@ LuaFunction::LuaFunction(const LuaFunction& luaFunction)
 
 
 
-LuaFunction::LuaFunction(std::string functionName,uint type)
+LuaFunction::LuaFunction(const std::string functionName,const uint type)
 {
   try
   {

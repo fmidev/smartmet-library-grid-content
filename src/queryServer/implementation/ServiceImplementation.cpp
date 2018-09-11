@@ -2034,7 +2034,7 @@ bool ServiceImplementation::getPointValues(
   try
   {
     bool climatologyParam = false;
-    if ((pInfo.mGroupFlags &&  QueryServer::ParameterMapping::GroupFlags::climatology) != 0)
+    if ((pInfo.mGroupFlags &  QueryServer::ParameterMapping::GroupFlags::climatology) != 0)
       climatologyParam = true;
 
     std::string startTime = forecastTime;

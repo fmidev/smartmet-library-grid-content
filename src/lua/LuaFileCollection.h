@@ -12,15 +12,15 @@ class LuaFileCollection
 {
   public:
                     LuaFileCollection();
-                    LuaFileCollection(string_vec& filenames);
+                    LuaFileCollection(const string_vec& filenames);
                     LuaFileCollection(const LuaFileCollection& luaFileCollection);
     virtual         ~LuaFileCollection();
 
     void            init();
-    void            init(string_vec& filenames);
+    void            init(const string_vec& filenames);
     bool            checkUpdates(bool force);
-    bool            getFunction(std::string& functionName,uint functionType,std::string& function);
-    uint            getFunction(std::string& functionName,std::string& function);
+    bool            getFunction(const std::string& functionName,const uint functionType,std::string& function);
+    uint            getFunction(const std::string& functionName,std::string& function);
 
     // Type 1: Takes one or several parameters, returns one value
     float           executeFunctionCall1(std::string& function,std::vector<float>& parameters);

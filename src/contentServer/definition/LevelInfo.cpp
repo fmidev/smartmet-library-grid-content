@@ -28,7 +28,7 @@ LevelInfo::LevelInfo()
 
 
 
-LevelInfo::LevelInfo(LevelInfo& levelInfo)
+LevelInfo::LevelInfo(const LevelInfo& levelInfo)
 {
   try
   {
@@ -85,7 +85,7 @@ LevelInfo::~LevelInfo()
 
 
 
-LevelInfo& LevelInfo::operator=(LevelInfo& levelInfo)
+LevelInfo& LevelInfo::operator=(const LevelInfo& levelInfo)
 {
   try
   {

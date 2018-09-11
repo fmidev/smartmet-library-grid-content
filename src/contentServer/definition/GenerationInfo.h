@@ -15,7 +15,7 @@ class GenerationInfo
 {
   public:
                      GenerationInfo();
-                     GenerationInfo(GenerationInfo& generationInfo);
+                     GenerationInfo(const GenerationInfo& generationInfo);
                      GenerationInfo(const char *csv);
     virtual          ~GenerationInfo();
 
@@ -24,7 +24,7 @@ class GenerationInfo
     void             setCsv(const char *csv);
     void             setCsv(std::string csv);
 
-    GenerationInfo&  operator=(GenerationInfo& generationInfo);
+    GenerationInfo&  operator=(const GenerationInfo& generationInfo);
     GenerationInfo*  duplicate();
     void             print(std::ostream& stream,uint level,uint optionFlags);
 

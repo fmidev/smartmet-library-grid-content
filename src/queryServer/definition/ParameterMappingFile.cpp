@@ -8,7 +8,7 @@ namespace QueryServer
 {
 
 
-ParameterMappingFile::ParameterMappingFile(std::string filename)
+ParameterMappingFile::ParameterMappingFile(const std::string& filename)
 {
   try
   {
@@ -192,7 +192,7 @@ ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
 
 
 
-void ParameterMappingFile::getMappings(std::string producerName,std::string parameterName,bool onlySearchEnabled,ParameterMapping_vec& mappings)
+void ParameterMappingFile::getMappings(const std::string& producerName,const std::string& parameterName,bool onlySearchEnabled,ParameterMapping_vec& mappings)
 {
   try
   {
@@ -227,7 +227,7 @@ void ParameterMappingFile::getMappings(std::string producerName,std::string para
 
 
 
-void ParameterMappingFile::getMappings(std::string producerName,std::string parameterName,T::ParamLevelIdType levelIdType,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings)
+void ParameterMappingFile::getMappings(const std::string& producerName,const std::string& parameterName,T::ParamLevelIdType levelIdType,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings)
 {
   try
   {

@@ -13,7 +13,7 @@ class LevelInfo
 {
   public:
                     LevelInfo();
-                    LevelInfo(LevelInfo& levelInfo);
+                    LevelInfo(const LevelInfo& levelInfo);
 
                     LevelInfo(
                         uint producerId,
@@ -25,7 +25,7 @@ class LevelInfo
 
     virtual         ~LevelInfo();
 
-    LevelInfo&      operator=(LevelInfo& levelInfo);
+    LevelInfo&      operator=(const LevelInfo& levelInfo);
 
     std::string     getCsv();
     std::string     getCsvHeader();

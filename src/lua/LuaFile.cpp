@@ -33,7 +33,7 @@ LuaFile::LuaFile()
 
 
 
-LuaFile::LuaFile(std::string filename)
+LuaFile::LuaFile(const std::string& filename)
 {
   try
   {
@@ -107,7 +107,7 @@ void LuaFile::init()
 
 
 
-void LuaFile::init(std::string filename)
+void LuaFile::init(const std::string& filename)
 {
   try
   {
@@ -158,7 +158,7 @@ bool LuaFile::checkUpdates()
 
 
 
-uint LuaFile::getFunction(std::string& functionName,std::string& function)
+uint LuaFile::getFunction(const std::string& functionName,std::string& function)
 {
   try
   {

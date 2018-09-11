@@ -77,7 +77,7 @@ Query::~Query()
 
 
 
-bool Query::parameterInQuery(std::string param)
+bool Query::parameterInQuery(const std::string& param)
 {
   try
   {
@@ -123,7 +123,7 @@ uint Query::getValuesPerTimeStep()
 
 
 
-QueryParameter* Query::getQueryParameterPtr(std::string param)
+QueryParameter* Query::getQueryParameterPtr(const std::string& param)
 {
   try
   {

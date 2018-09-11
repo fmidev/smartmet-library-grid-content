@@ -45,7 +45,7 @@ ServerInfo::ServerInfo(const char *csv)
 
 
 
-ServerInfo::ServerInfo(ServerInfo& serverInfo)
+ServerInfo::ServerInfo(const ServerInfo& serverInfo)
 {
   try
   {
@@ -102,7 +102,7 @@ ServerInfo::~ServerInfo()
 
 
 
-ServerInfo& ServerInfo::operator=(ServerInfo& serverInfo)
+ServerInfo& ServerInfo::operator=(const ServerInfo& serverInfo)
 {
   try
   {

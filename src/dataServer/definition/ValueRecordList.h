@@ -14,18 +14,18 @@ namespace T
 class ValueRecordList
 {
   public:
-                    ValueRecordList();
-                    ValueRecordList(ValueRecordList& valueRecordList);
-                    ValueRecordList(ContentInfoList& contentInfoList,CoordinateType coordinateType,short interpolationMethod,double x,double y);
-     virtual        ~ValueRecordList();
+                      ValueRecordList();
+                      ValueRecordList(ValueRecordList& valueRecordList);
+                      ValueRecordList(ContentInfoList& contentInfoList,CoordinateType coordinateType,short interpolationMethod,double x,double y);
+     virtual          ~ValueRecordList();
 
-     void           operator=(ValueRecordList& valueRecordList);
+     ValueRecordList& operator=(ValueRecordList& valueRecordList);
 
-     void           addValueRecord(ValueRecord *valueRecord);
-     void           clear();
-     ValueRecord*   getValueRecordByIndex(uint index);
-     uint           getLength();
-     void           print(std::ostream& stream,uint level,uint optionFlags);
+     void             addValueRecord(ValueRecord *valueRecord);
+     void             clear();
+     ValueRecord*     getValueRecordByIndex(uint index);
+     uint             getLength();
+     void             print(std::ostream& stream,uint level,uint optionFlags);
 
   protected:
 

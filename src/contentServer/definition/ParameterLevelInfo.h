@@ -13,7 +13,7 @@ class ParameterLevelInfo
 {
   public:
                          ParameterLevelInfo();
-                         ParameterLevelInfo(ParameterLevelInfo& levelInfo);
+                         ParameterLevelInfo(const ParameterLevelInfo& levelInfo);
 
                          ParameterLevelInfo(
                              T::ParamKeyType parameterKeyType,
@@ -24,7 +24,7 @@ class ParameterLevelInfo
 
     virtual              ~ParameterLevelInfo();
 
-    ParameterLevelInfo&  operator=(ParameterLevelInfo& levelInfo);
+    ParameterLevelInfo&  operator=(const ParameterLevelInfo& levelInfo);
 
     ParameterLevelInfo*  duplicate();
     void                 print(std::ostream& stream,uint level,uint optionFlags);

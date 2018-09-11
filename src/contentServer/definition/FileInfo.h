@@ -16,7 +16,7 @@ class FileInfo
   public:
 
                   FileInfo();
-                  FileInfo(FileInfo& fileInfo);
+                  //FileInfo(FileInfo& fileInfo);
                   FileInfo(const FileInfo& fileInfo);
 
                   FileInfo(
@@ -30,7 +30,7 @@ class FileInfo
                   FileInfo(const char *csv);
     virtual       ~FileInfo();
 
-    FileInfo&     operator=(FileInfo& fileInfo);
+    //FileInfo&     operator=(FileInfo& fileInfo);
     FileInfo&     operator=(const FileInfo& fileInfo);
 
     std::string   getCsv();

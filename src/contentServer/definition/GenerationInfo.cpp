@@ -30,7 +30,7 @@ GenerationInfo::GenerationInfo()
 
 
 
-GenerationInfo::GenerationInfo(GenerationInfo& generationInfo)
+GenerationInfo::GenerationInfo(const GenerationInfo& generationInfo)
 {
   try
   {
@@ -85,7 +85,7 @@ GenerationInfo::~GenerationInfo()
 
 
 
-GenerationInfo& GenerationInfo::operator=(GenerationInfo& generationInfo)
+GenerationInfo& GenerationInfo::operator=(const GenerationInfo& generationInfo)
 {
   try
   {

@@ -160,7 +160,23 @@ ContentInfoList::~ContentInfoList()
   FUNCTION_TRACE
   try
   {
-    clear();
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    if (mArray != nullptr)
+    {
+      for (uint t=0; t<mSize; t++)
+      {
+        if (mArray[t] != nullptr  &&  mReleaseObjects)
+          delete mArray[t];
+
+        mArray[t] = nullptr;
+      }
+
+      delete[] mArray;
+    }
+
+    mArray = nullptr;
+    mSize = 0;
+    mLength = 0;
   }
   catch (...)
   {
@@ -448,7 +464,7 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
     mSize = newSize;
     mLength = cnt;
 
-    delete mArray;
+    delete[] mArray;
     mArray = newArray;
   }
   catch (...)
@@ -493,7 +509,7 @@ void ContentInfoList::increaseSize(uint newSize)
       }
     }
 
-    delete mArray;
+    delete[] mArray;
     mArray = newArray;
     mSize = newSize;
   }
@@ -523,7 +539,7 @@ void ContentInfoList::clear()
         mArray[t] = nullptr;
       }
 
-      delete mArray;
+      delete[] mArray;
     }
 
     mArray = nullptr;

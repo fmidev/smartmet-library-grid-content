@@ -14,14 +14,14 @@ class LuaFile
 {
   public:
                     LuaFile();
-                    LuaFile(std::string filename);
+                    LuaFile(const std::string& filename);
                     LuaFile(const LuaFile& luaFile);
     virtual         ~LuaFile();
 
     void            init();
-    void            init(std::string filename);
+    void            init(const std::string& filename);
     bool            checkUpdates();
-    uint            getFunction(std::string& functionName,std::string& function);
+    uint            getFunction(const std::string& functionName,std::string& function);
 
     // Type 1: Takes one or several parameters, returns one value
     float           executeFunctionCall1(std::string& function,std::vector<float>& parameters);

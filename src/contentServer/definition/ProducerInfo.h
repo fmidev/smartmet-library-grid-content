@@ -15,7 +15,7 @@ class ProducerInfo
 {
   public:
                     ProducerInfo();
-                    ProducerInfo(ProducerInfo& producerInfo);
+                    ProducerInfo(const ProducerInfo& producerInfo);
                     ProducerInfo(const char *csv);
     virtual         ~ProducerInfo();
 
@@ -24,7 +24,7 @@ class ProducerInfo
     void            setCsv(const char *csv);
     void            setCsv(std::string csv);
 
-    ProducerInfo&   operator=(ProducerInfo& producerInfo);
+    ProducerInfo&   operator=(const ProducerInfo& producerInfo);
     ProducerInfo*   duplicate();
     void            print(std::ostream& stream,uint level,uint optionFlags);
 

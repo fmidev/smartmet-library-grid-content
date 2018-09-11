@@ -148,7 +148,7 @@ bool AliasFileCollection::checkUpdates(bool force)
 
 
 
-bool AliasFileCollection::getAlias(std::string& name,std::string& alias)
+bool AliasFileCollection::getAlias(const std::string& name,std::string& alias)
 {
   try
   {

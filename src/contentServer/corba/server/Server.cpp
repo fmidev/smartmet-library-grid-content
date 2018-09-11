@@ -14,7 +14,7 @@ static void* Server_maintenanceThread(void *arg)
 {
   try
   {
-    Server *server = (Server*)arg;
+    Server *server = static_cast<Server*>(arg);
     server->run();
     return nullptr;
   }

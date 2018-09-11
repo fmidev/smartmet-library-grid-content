@@ -15,7 +15,7 @@ class ServerInfo
 {
   public:
                   ServerInfo();
-                  ServerInfo(ServerInfo& serverInfo);
+                  ServerInfo(const ServerInfo& serverInfo);
                   ServerInfo(std::string name,std::string serverIor,uint type);
                   ServerInfo(const char *csv);
     virtual       ~ServerInfo();
@@ -25,7 +25,7 @@ class ServerInfo
     void          setCsv(const char *csv);
     void          setCsv(std::string csv);
 
-    ServerInfo&   operator=(ServerInfo& serverInfo);
+    ServerInfo&   operator=(const ServerInfo& serverInfo);
     ServerInfo*   duplicate();
     void          print(std::ostream& stream,uint level,uint optionFlags);
 

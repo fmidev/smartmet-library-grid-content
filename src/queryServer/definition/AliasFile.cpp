@@ -13,6 +13,7 @@ AliasFile::AliasFile()
   try
   {
     mDuplicatesAllowed = false;
+    mLastModified = 0;
   }
   catch (...)
   {
@@ -24,12 +25,13 @@ AliasFile::AliasFile()
 
 
 
-AliasFile::AliasFile(std::string filename)
+AliasFile::AliasFile(const std::string& filename)
 {
   try
   {
     mFilename = filename;
     mDuplicatesAllowed = false;
+    mLastModified = 0;
   }
   catch (...)
   {
@@ -48,6 +50,7 @@ AliasFile::AliasFile(const AliasFile& aliasFile)
     mFilename = aliasFile.mFilename;
     mAliasList = aliasFile.mAliasList;
     mDuplicatesAllowed  = aliasFile.mDuplicatesAllowed;
+    mLastModified = aliasFile.mLastModified;
   }
   catch (...)
   {
@@ -94,7 +97,7 @@ void AliasFile::init()
 
 
 
-void AliasFile::init(std::string filename)
+void AliasFile::init(const std::string& filename)
 {
   try
   {
@@ -111,7 +114,7 @@ void AliasFile::init(std::string filename)
 
 
 
-void AliasFile::init(std::string filename,bool duplicatesAllowed)
+void AliasFile::init(const std::string& filename,bool duplicatesAllowed)
 {
   try
   {
@@ -153,7 +156,7 @@ bool AliasFile::checkUpdates()
 
 
 
-bool AliasFile::getAlias(std::string& name,std::string& alias)
+bool AliasFile::getAlias(const std::string& name,std::string& alias)
 {
   try
   {
@@ -190,7 +193,7 @@ bool AliasFile::getAlias(std::string& name,std::string& alias)
 
 
 
-void AliasFile::getAliasList(std::string& name,std::vector<std::string>& aliasList)
+void AliasFile::getAliasList(const std::string& name,std::vector<std::string>& aliasList)
 {
   try
   {

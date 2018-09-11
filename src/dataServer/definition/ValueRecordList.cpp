@@ -77,7 +77,14 @@ ValueRecordList::~ValueRecordList()
 {
   try
   {
-    clear();
+    uint sz = mList.size();
+    for (uint t=0; t<sz; t++)
+    {
+      ValueRecord *rec = mList[t];
+      if (rec != nullptr)
+        delete rec;
+    }
+    mList.clear();
   }
   catch (...)
   {
@@ -88,10 +95,13 @@ ValueRecordList::~ValueRecordList()
 
 
 
-void ValueRecordList::operator=(ValueRecordList& valueRecordList)
+ValueRecordList& ValueRecordList::operator=(ValueRecordList& valueRecordList)
 {
   try
   {
+    if (&valueRecordList == this)
+      return *this;
+
     clear();
     uint sz = valueRecordList.getLength();
     for (uint t=0; t<sz; t++)
@@ -100,6 +110,7 @@ void ValueRecordList::operator=(ValueRecordList& valueRecordList)
       if (rec != nullptr)
         mList.push_back(new ValueRecord(*rec));
     }
+    return *this;
   }
   catch (...)
   {

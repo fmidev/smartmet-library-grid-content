@@ -16,7 +16,7 @@ class LuaFunction
   public:
                    LuaFunction();
                    LuaFunction(const LuaFunction& luaFunction);
-                   LuaFunction(std::string functionName,uint type);
+                   LuaFunction(const std::string functionName,const uint type);
     virtual        ~LuaFunction();
 
     void           print(std::ostream& stream,uint level,uint optionFlags);

@@ -68,7 +68,18 @@ EventInfoList::~EventInfoList()
   FUNCTION_TRACE
   try
   {
-    clear();
+    AutoThreadLock lock(&mThreadLock);
+    EventInfo *it = firstItem;
+    while (it != nullptr)
+    {
+      EventInfo *eventInfo = it;
+      it = it->nextItem;
+      delete eventInfo;
+    }
+
+    firstItem = nullptr;
+    lastItem = nullptr;
+    mLength = 0;
   }
   catch (...)
   {

@@ -300,7 +300,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getDataServerInfoCount(sessionId,sCount);
 
     if (result == 0)
-      count = (::CORBA::ULong)sCount;
+      count = static_cast<::CORBA::ULong>(sCount);
 
     return result;
   }
@@ -580,7 +580,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getProducerInfoCount(sessionId,sCount);
 
     if (result == 0)
-      count = (::CORBA::ULong)sCount;
+      count = static_cast<::CORBA::ULong>(sCount);
 
     return result;
   }
@@ -1147,7 +1147,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getGenerationInfoCount(sessionId,sCount);
 
     if (result == 0)
-      count = (::CORBA::ULong)sCount;
+      count = static_cast<::CORBA::ULong>(sCount);
 
     return result;
   }
@@ -1849,7 +1849,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getFileInfoCount(sessionId,sCount);
 
     if (result == 0)
-      count = (::CORBA::ULong)sCount;
+      count = static_cast<::CORBA::ULong>(sCount);
 
     return result;
   }
@@ -1879,7 +1879,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getFileInfoCountByProducerId(sessionId,producerId,sCount);
 
     if (result == 0)
-      count = (::CORBA::ULong)sCount;
+      count = static_cast<::CORBA::ULong>(sCount);
 
     return result;
   }
@@ -1909,7 +1909,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getFileInfoCountByGenerationId(sessionId,generationId,sCount);
 
     if (result == 0)
-      count = (::CORBA::ULong)sCount;
+      count = static_cast<::CORBA::ULong>(sCount);
 
     return result;
   }
@@ -1939,7 +1939,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getFileInfoCountBySourceId(sessionId,sourceId,sCount);
 
     if (result == 0)
-      count = (::CORBA::ULong)sCount;
+      count = static_cast<::CORBA::ULong>(sCount);
 
     return result;
   }
@@ -2060,7 +2060,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getEventInfoCount(sessionId,sCount);
 
     if (result == 0)
-      count = (::CORBA::ULong)sCount;
+      count = static_cast<::CORBA::ULong>(sCount);
 
     return result;
   }
@@ -3248,7 +3248,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentCount(sessionId,sCount);
 
     if (result == 0)
-      count = (::CORBA::ULong)sCount;
+      count = static_cast<::CORBA::ULong>(sCount);
 
     return result;
   }

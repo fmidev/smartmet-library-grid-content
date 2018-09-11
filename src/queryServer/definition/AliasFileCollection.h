@@ -22,7 +22,7 @@ class AliasFileCollection
     virtual void    init();
     virtual void    init(string_vec& filenames);
     virtual bool    checkUpdates(bool force);
-    virtual bool    getAlias(std::string& name,std::string& alias);
+    virtual bool    getAlias(const std::string& name,std::string& alias);
     virtual void    print(std::ostream& stream,uint level,uint optionFlags);
 
   protected:

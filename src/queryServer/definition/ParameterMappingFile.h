@@ -15,7 +15,7 @@ typedef std::map<std::string,ParameterMapping_vec> MappingSearch;
 class ParameterMappingFile
 {
   public:
-                          ParameterMappingFile(std::string filename);
+                          ParameterMappingFile(const std::string& filename);
                           ParameterMappingFile(const ParameterMappingFile& mappingFile);
     virtual               ~ParameterMappingFile();
 
@@ -23,8 +23,8 @@ class ParameterMappingFile
     virtual bool          checkUpdates();
     std::string           getFilename();
     ParameterMapping*     getMapping(ParameterMapping& mapping);
-    virtual void          getMappings(std::string producerName,std::string parameterName,bool onlySearchEnabled,ParameterMapping_vec& mappings);
-    virtual void          getMappings(std::string producerName,std::string parameterName,T::ParamLevelIdType levelIdType,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings);
+    virtual void          getMappings(const std::string& producerName,const std::string& parameterName,bool onlySearchEnabled,ParameterMapping_vec& mappings);
+    virtual void          getMappings(const std::string& producerName,const std::string& parameterName,T::ParamLevelIdType levelIdType,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings);
     uint                  getNumberOfMappings();
     //ParameterMapping*     getParameterMappingByIndex(uint index);
     void                  print(std::ostream& stream,uint level,uint optionFlags);

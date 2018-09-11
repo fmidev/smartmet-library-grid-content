@@ -30,7 +30,7 @@ FileInfo::FileInfo()
 
 
 
-
+/*
 FileInfo::FileInfo(FileInfo& fileInfo)
 {
   try
@@ -50,7 +50,7 @@ FileInfo::FileInfo(FileInfo& fileInfo)
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
-
+*/
 
 
 
@@ -131,7 +131,7 @@ FileInfo::~FileInfo()
 
 
 
-
+/*
 FileInfo& FileInfo::operator=(FileInfo& fileInfo)
 {
   try
@@ -156,7 +156,7 @@ FileInfo& FileInfo::operator=(FileInfo& fileInfo)
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
-
+*/
 
 
 

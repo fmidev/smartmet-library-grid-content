@@ -24,7 +24,7 @@ LuaFileCollection::LuaFileCollection()
 
 
 
-LuaFileCollection::LuaFileCollection(string_vec& filenames)
+LuaFileCollection::LuaFileCollection(const string_vec& filenames)
 {
   try
   {
@@ -98,7 +98,7 @@ void LuaFileCollection::init()
 
 
 
-void LuaFileCollection::init(string_vec& filenames)
+void LuaFileCollection::init(const string_vec& filenames)
 {
   try
   {
@@ -143,7 +143,7 @@ bool LuaFileCollection::checkUpdates(bool force)
 
 
 
-uint LuaFileCollection::getFunction(std::string& functionName,std::string& function)
+uint LuaFileCollection::getFunction(const std::string& functionName,std::string& function)
 {
   try
   {
@@ -166,7 +166,7 @@ uint LuaFileCollection::getFunction(std::string& functionName,std::string& funct
 
 
 
-bool LuaFileCollection::getFunction(std::string& functionName,uint functionType,std::string& function)
+bool LuaFileCollection::getFunction(const std::string& functionName,const uint functionType,std::string& function)
 {
   try
   {
