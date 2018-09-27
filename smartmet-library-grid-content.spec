@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 18.9.10
-Release: 2%{?dist}.fmi
+Version: 18.9.26
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -19,15 +19,15 @@ BuildRequires: libicu-devel
 BuildRequires: lua-devel
 BuildRequires: make
 BuildRequires: omniORB-devel
-BuildRequires: smartmet-library-grid-files-devel >= 18.9.10
-BuildRequires: smartmet-library-spine-devel >= 18.9.5
+BuildRequires: smartmet-library-grid-files-devel >= 18.9.26
+BuildRequires: smartmet-library-spine-devel >= 18.9.24
 BuildRequires: gdal-devel
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
 Requires: boost-date-time
-Requires: smartmet-library-grid-files >= 18.9.10
+Requires: smartmet-library-grid-files >= 18.9.26
 Provides: %{SPECNAME}
 
 %description
@@ -69,6 +69,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Sep 26 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.9.26-1.fmi
+- Version update
 * Mon Sep 10 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.9.10-2.fmi
 - Bug fix to forecast time handling
 * Mon Sep 10 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.9.10-1.fmi
