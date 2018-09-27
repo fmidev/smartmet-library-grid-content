@@ -37,6 +37,9 @@ std::string getResultString(int resultCode)
 
       case Result::INVALID_NUMBER_OF_COORDINATES:
         return std::string("Invalid number of coordinates!");
+
+      case Result::DATA_SETS_NOT_COMPATIBLE:
+        return std::string("Data sets are not compatible!");
     }
 
     return std::string("Unknown result code : ") + std::to_string(resultCode);

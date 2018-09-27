@@ -27,6 +27,7 @@ interface ServiceInterface
   long  getGridValueListByPolygonPath(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in unsigned long flags,in octet coordinateType,in CorbaPolygonPath polygonPath,out CorbaGridValueList valueList);
   long  getGridValueListByRectangle(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in unsigned long flags,in octet coordinateType,in double x1,in double y1,in double x2,in double y2,out CorbaGridValueList valueList);
   long  getGridValueVector(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in unsigned long flags,out CorbaParamValueList values);
+  long  getGridValueVectorByTime(in long long sessionId,in unsigned long fileId1,in unsigned long messageIndex1,in unsigned long fileId2,in unsigned long messageIndex2,in string newTime,in unsigned long flags,out CorbaParamValueList values);
   long  getGridValueVectorByCoordinateList(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,in CorbaCoordinateList coordinates,in short interpolationMethod,out CorbaParamValueList values);
   long  getGridValueVectorByRectangle(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in unsigned long flags,in octet coordinateType,in unsigned long columns,in unsigned long rows,in double x,in double y,in double xStep,in double yStep,in short interpolationMethod,out CorbaParamValueList values);
 

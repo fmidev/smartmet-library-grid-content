@@ -566,6 +566,103 @@ int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,uint fileI
 
 
 
+int ServiceImplementation::_getGridValueVectorByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,uint flags,T::ParamValue_vec& values)
+{
+  FUNCTION_TRACE
+  try
+  {
+    try
+    {
+      GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
+      if (gridFile1 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
+      if (message1 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::GridFile_sptr gridFile2 = getGridFile(fileId2);
+      if (gridFile2 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message2 = gridFile2->getMessageByIndex(messageIndex2);
+      if (message2 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+
+      time_t tt = utcTimeToTimeT(newTime);
+
+      time_t t1 = utcTimeToTimeT(message1->getForecastTime());
+      time_t t2 = utcTimeToTimeT(message2->getForecastTime());
+
+      if (tt == t1)
+      {
+        message1->getGridValueVector(values);
+        return Result::OK;
+      }
+
+      if (tt == t2)
+      {
+        message2->getGridValueVector(values);
+        return Result::OK;
+      }
+
+      T::ParamValue_vec values1;
+      message1->getGridValueVector(values1);
+
+      T::ParamValue_vec values2;
+      message2->getGridValueVector(values2);
+
+      if (values1.size() != values2.size())
+        return Result::DATA_SETS_NOT_COMPATIBLE;
+
+
+      uint sz = values1.size();
+
+      double timeDiff = C_DOUBLE(t2 - t1);
+      double steps = C_DOUBLE(tt - t1);
+
+      for (uint t=0; t<sz; t++)
+      {
+        T::ParamValue v1 = values1[t];
+        T::ParamValue v2 = values2[t];
+
+        if (v1 != ParamValueMissing  &&  v2 != ParamValueMissing)
+        {
+          T::ParamValue vd = (v2 - v1)/timeDiff;
+          T::ParamValue newValue = v1 + steps * vd;
+          values.push_back(newValue);
+        }
+        else
+        {
+          values.push_back(ParamValueMissing);
+        }
+      }
+
+      return Result::OK;
+    }
+    catch (...)
+    {
+       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+       exception.addParameter("FileId1",std::to_string(fileId1));
+       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
+       exception.addParameter("FileId2",std::to_string(fileId2));
+       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 int ServiceImplementation::_getGridValueVectorByCoordinateList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,short interpolationMethod,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
