@@ -21,12 +21,15 @@ BuildRequires: make
 BuildRequires: omniORB-devel
 BuildRequires: smartmet-library-grid-files-devel >= 18.10.1
 BuildRequires: smartmet-library-spine-devel >= 18.9.29
+BuildRequires: smartmet-library-macgyver-devel >= 18.9.29
 BuildRequires: gdal-devel
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
 Requires: boost-date-time
+Requires: smartmet-library-spine >= 18.9.29
+Requires: smartmet-library-macgyver >= 18.9.29
 Requires: smartmet-library-grid-files >= 18.10.1
 Provides: %{SPECNAME}
 

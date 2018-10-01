@@ -96,6 +96,8 @@ CFLAGS_PROFILE = $(DEFINES) $(FLAGS) $(FLAGS_PROFILE) -DNDEBUG -O2 -g -pg
 
 LIBS = -L$(libdir) \
 	-lsmartmet-grid-files \
+	-lsmartmet-spine \
+	-lsmartmet-macgyver \
 	-lboost_date_time \
 	-lhiredis \
 	-lcurl \
