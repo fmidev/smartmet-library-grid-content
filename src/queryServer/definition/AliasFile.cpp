@@ -238,6 +238,7 @@ void AliasFile::loadFile()
     }
 
     mAliasList.clear();
+    mAliasVector.clear();
 
     char st[1000];
 
