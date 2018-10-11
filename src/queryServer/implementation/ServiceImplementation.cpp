@@ -276,8 +276,8 @@ bool ServiceImplementation::getParameterFunctionInfo(std::string paramStr,
   FUNCTION_TRACE
   try
   {
-    char buf[1000];
-    char tmp[1000];
+    char buf[10000];
+    char tmp[10000];
 
     uint c = 0;
     strcpy(buf, paramStr.c_str());
@@ -330,8 +330,8 @@ bool ServiceImplementation::getFunctionParams(std::string functionParamsStr,
   try
   {
     bool containsFunction = false;
-    char buf[1000];
-    char tmp[1000];
+    char buf[10000];
+    char tmp[10000];
     uint c = 0;
     strcpy(buf, functionParamsStr.c_str());
 
@@ -476,7 +476,43 @@ void ServiceImplementation::getParameterStringInfo(std::string param,
   FUNCTION_TRACE
   try
   {
-    char buf[1000];
+    std::vector<T::ForecastNumber>forecastNumberVec;
+    std::string producerName;
+    getParameterStringInfo(param,key,paramLevelId,paramLevel,forecastType,forecastNumberVec,producerName,
+        producerId,generationFlags,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod);
+
+    if (forecastNumberVec.size() > 0)
+      forecastNumber = forecastNumberVec[0];
+
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::getParameterStringInfo(std::string param,
+                                                   std::string& key,
+                                                   T::ParamLevelId& paramLevelId,
+                                                   T::ParamLevel& paramLevel,
+                                                   T::ForecastType& forecastType,
+                                                   std::vector<T::ForecastNumber>& forecastNumberVec,
+                                                   std::string& producerName,
+                                                   uint& producerId,
+                                                   uint& generationFlags,
+                                                   short& areaInterpolationMethod,
+                                                   short& timeInterpolationMethod,
+                                                   short& levelInterpolationMethod)
+
+{
+  FUNCTION_TRACE
+  try
+  {
+    char buf[10000];
     strcpy(buf, param.c_str());
 
     char* field[100];
@@ -512,8 +548,9 @@ void ServiceImplementation::getParameterStringInfo(std::string param,
     {
       if (field[1][0] != '\0')
       {
+        producerName = field[1];
         T::ProducerInfo producerInfo;
-        if (mContentServerPtr->getProducerInfoByName(0, std::string(field[1]), producerInfo) == 0)
+        if (mContentServerPtr->getProducerInfoByName(0, producerName, producerInfo) == 0)
           producerId = producerInfo.mProducerId;
       }
     }
@@ -535,7 +572,27 @@ void ServiceImplementation::getParameterStringInfo(std::string param,
 
     if (c > 5)
     {
-      if (field[5][0] != '\0') forecastNumber = (T::ForecastNumber)toInt64(field[5]);
+      if (field[5][0] != '\0')
+      {
+        std::vector<std::string> partList;
+        splitString(field[5],'-',partList);
+        size_t sz = partList.size();
+        if (sz == 1)
+        {
+          forecastNumberVec.push_back((T::ForecastNumber)toInt64(partList[0].c_str()));
+        }
+        else
+        if (sz == 2)
+        {
+          auto start = toInt64(partList[0].c_str());
+          auto end = toInt64(partList[1].c_str());
+          if (start < end  &&  (end-start) <= 200)
+          {
+            for (auto t=start; t<=end; t++)
+              forecastNumberVec.push_back((T::ForecastNumber)t);
+          }
+        }
+      }
     }
 
     if (c > 6)
@@ -810,17 +867,44 @@ void ServiceImplementation::updateQueryParameters(Query& query)
 
         PRINT_DATA(mDebugLog, " * PARAMETER: %s\n", qParam->mSymbolicName.c_str());
 
+        std::vector<T::ForecastNumber> forecastNumberVec;
+        std::string producerName;
+
         getParameterStringInfo(qParam->mParam,
                                qParam->mParameterKey,
                                qParam->mParameterLevelId,
                                qParam->mParameterLevel,
                                qParam->mForecastType,
-                               qParam->mForecastNumber,
+                               forecastNumberVec,
+                               producerName,
                                qParam->mProducerId,
                                qParam->mGenerationFlags,
                                qParam->mAreaInterpolationMethod,
                                qParam->mTimeInterpolationMethod,
                                qParam->mLevelInterpolationMethod);
+
+        size_t sz = forecastNumberVec.size();
+        if (sz == 1)
+          qParam->mForecastNumber = forecastNumberVec[0];
+        else
+        if (sz > 1)
+        {
+          char buf[10000];
+          char *p = buf;
+          p += sprintf(p,"LIST{");
+          for (size_t t = 0; t<sz; t++)
+          {
+            p += sprintf(p,"%s:%s:%d:%d:%d:%d:%u:%u:%u:%u",qParam->mParameterKey.c_str(),producerName.c_str(),
+                qParam->mParameterLevelId,qParam->mParameterLevel,qParam->mForecastType,forecastNumberVec[t],
+                qParam->mGenerationFlags,qParam->mAreaInterpolationMethod,qParam->mTimeInterpolationMethod,
+                qParam->mLevelInterpolationMethod);
+
+            if ((t+1) < sz)
+              p += sprintf(p,";");
+          }
+          p += sprintf(p,"}");
+          qParam->mParam = buf;
+        }
 
         if (qParam->mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID)
         {

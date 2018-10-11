@@ -134,6 +134,20 @@ class ServiceImplementation : public ServiceInterface
                        short& timeInterpolationMethod,
                        short& levelInterpolationMethod);
 
+     void           getParameterStringInfo(
+                       std::string param,
+                       std::string& key,
+                       T::ParamLevelId& paramLevelId,
+                       T::ParamLevel& paramLevel,
+                       T::ForecastType& forecastType,
+                       std::vector<T::ForecastNumber>& forecastNumberVec,
+                       std::string& producerName,
+                       uint& producerId,
+                       uint& generationFlags,
+                       short& areaInterpolationMethod,
+                       short& timeInterpolationMethod,
+                       short& levelInterpolationMethod);
+
      void          getParameterMappings(
                        std::string producerName,
                        std::string parameterName,
