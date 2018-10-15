@@ -235,9 +235,9 @@ void LevelInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "LevelInfo\n";
     stream << space(level) << "- mProducerId            = " << mProducerId << "\n";
     stream << space(level) << "- mFmiParameterName      = " << mFmiParameterName << "\n";
-    stream << space(level) << "- mFmiParameterLevelId   = " << mFmiParameterLevelId << "\n";
-    stream << space(level) << "- mGrib1ParameterLevelId = " << mGrib1ParameterLevelId << "\n";
-    stream << space(level) << "- mGrib2ParameterLevelId = " << mGrib2ParameterLevelId << "\n";
+    stream << space(level) << "- mFmiParameterLevelId   = " << C_INT(mFmiParameterLevelId) << "\n";
+    stream << space(level) << "- mGrib1ParameterLevelId = " << C_INT(mGrib1ParameterLevelId) << "\n";
+    stream << space(level) << "- mGrib2ParameterLevelId = " << C_INT(mGrib2ParameterLevelId) << "\n";
     stream << space(level) << "- mParameterLevel        = " << mParameterLevel << "\n";
   }
   catch (...)

@@ -222,7 +222,22 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
   {
     GRID::GridFile_sptr gridFile = mGridFileManager.getFileById(fileId);
     if (gridFile)
-      return gridFile;
+    {
+      std::string deletionTime = gridFile->getDeletionTime();
+      if (deletionTime.empty())
+        return gridFile;
+
+      time_t delTime = utcTimeToTimeT(deletionTime);
+      if ((time(nullptr) + 120) > delTime)
+      {
+        // The grid file will be deleted soon. We should not access it anymore.
+        return nullptr;
+      }
+      else
+      {
+        return gridFile;
+      }
+    }
 
     // If the grid file is not found from the grid storage but it is registered
     // to the contentServer then we should try to add it to the grid storage.
@@ -233,6 +248,16 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
     if (mContentServer->getFileInfoById(mServerSessionId,fileId,fileInfo) == 0 &&
         mContentServer->getContentListByFileId(mServerSessionId,fileId,currentContentList) == 0)
     {
+      if (!fileInfo.mDeletionTime.empty())
+      {
+        time_t delTime = utcTimeToTimeT(fileInfo.mDeletionTime);
+        if ((time(nullptr) + 120) > delTime)
+        {
+          // The grid file will be deleted soon. We should not access it anymore.
+          return nullptr;
+        }
+      }
+
       if (getFileSize(fileInfo.mName.c_str()) > 0)
       {
         mContentServer->getContentListByFileId(mServerSessionId,fileId,currentContentList);
@@ -1332,6 +1357,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
       gridFile->setProducerId(fileInfo.mProducerId);
       gridFile->setGenerationId(fileInfo.mGenerationId);
       gridFile->setSourceId(fileInfo.mSourceId);
+      gridFile->setDeletionTime(fileInfo.mDeletionTime);
     }
 
     T::ProducerInfo producerInfo;

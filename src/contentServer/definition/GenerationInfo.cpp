@@ -251,7 +251,7 @@ void GenerationInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mName           = " << mName << "\n";
     stream << space(level) << "- mDescription    = " << mDescription << "\n";
     stream << space(level) << "- mAnalysisTime   = " << mAnalysisTime << "\n";
-    stream << space(level) << "- mStatus         = " << mStatus << "\n";
+    stream << space(level) << "- mStatus         = " << C_INT(mStatus) << "\n";
     stream << space(level) << "- mFlags          = " << mFlags << "\n";
     stream << space(level) << "- mSourceId       = " << mSourceId << "\n";
   }

@@ -30,30 +30,6 @@ FileInfo::FileInfo()
 
 
 
-/*
-FileInfo::FileInfo(FileInfo& fileInfo)
-{
-  try
-  {
-    mFileId = fileInfo.mFileId;
-    mFileType = fileInfo.mFileType;
-    mName = fileInfo.mName;
-    mProducerId = fileInfo.mProducerId;
-    mGenerationId = fileInfo.mGenerationId;
-    mGroupFlags = fileInfo.mGroupFlags;
-    mFlags = fileInfo.mFlags;
-    mSourceId = fileInfo.mSourceId;
-    mModificationTime = fileInfo.mModificationTime;
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
-  }
-}
-*/
-
-
-
 
 FileInfo::FileInfo(const FileInfo& fileInfo)
 {
@@ -68,6 +44,7 @@ FileInfo::FileInfo(const FileInfo& fileInfo)
     mFlags = fileInfo.mFlags;
     mSourceId = fileInfo.mSourceId;
     mModificationTime = fileInfo.mModificationTime;
+    mDeletionTime = fileInfo.mDeletionTime;
   }
   catch (...)
   {
@@ -117,6 +94,7 @@ FileInfo::FileInfo(const char *csv)
 
 
 
+
 FileInfo::~FileInfo()
 {
   try
@@ -128,35 +106,6 @@ FileInfo::~FileInfo()
   }
 }
 
-
-
-
-/*
-FileInfo& FileInfo::operator=(FileInfo& fileInfo)
-{
-  try
-  {
-    if (&fileInfo == this)
-      return *this;
-
-    mFileId = fileInfo.mFileId;
-    mFileType = fileInfo.mFileType;
-    mName = fileInfo.mName;
-    mProducerId = fileInfo.mProducerId;
-    mGenerationId = fileInfo.mGenerationId;
-    mGroupFlags = fileInfo.mGroupFlags;
-    mFlags = fileInfo.mFlags;
-    mSourceId = fileInfo.mSourceId;
-    mModificationTime = fileInfo.mModificationTime;
-
-    return *this;
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
-  }
-}
-*/
 
 
 
@@ -177,6 +126,7 @@ FileInfo& FileInfo::operator=(const FileInfo& fileInfo)
     mFlags = fileInfo.mFlags;
     mSourceId = fileInfo.mSourceId;
     mModificationTime = fileInfo.mModificationTime;
+    mDeletionTime = fileInfo.mDeletionTime;
 
     return *this;
   }
@@ -194,7 +144,7 @@ std::string FileInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%s;%u;%u;%u;%u;%u;%s",
+    sprintf(st,"%u;%u;%s;%u;%u;%u;%u;%u;%s;%s",
         mFileId,
         mFileType,
         mName.c_str(),
@@ -203,7 +153,8 @@ std::string FileInfo::getCsv()
         mGroupFlags,
         mFlags,
         mSourceId,
-        mModificationTime.c_str());
+        mModificationTime.c_str(),
+        mDeletionTime.c_str());
 
     return std::string(st);
   }
@@ -221,7 +172,7 @@ std::string FileInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "fileId;fileType;name;producerId;generationId;groupFlags;flags;sourceId;modificationTime";
+    std::string header = "fileId;fileType;name;producerId;generationId;groupFlags;flags;sourceId;modificationTime;deletionTime";
     return header;
   }
   catch (...)
@@ -272,6 +223,8 @@ void FileInfo::setCsv(const char *csv)
       mSourceId = toInt64(field[7]);
       if (c >= 8)
         mModificationTime = field[8];
+      if (c >= 9)
+        mDeletionTime = field[9];
     }
   }
   catch (...)
@@ -352,7 +305,7 @@ void FileInfo::print(std::ostream& stream,uint level,uint optionFlags)
   {
     stream << space(level) << "FileInfo\n";
     stream << space(level) << "- mFileId           = " << mFileId << "\n";
-    stream << space(level) << "- mFileType         = " << mFileType << "\n";
+    stream << space(level) << "- mFileType         = " << C_INT(mFileType) << "\n";
     stream << space(level) << "- mName             = " << mName << "\n";
     stream << space(level) << "- mProducerId       = " << mProducerId << "\n";
     stream << space(level) << "- mGenerationId     = " << mGenerationId << "\n";
@@ -360,6 +313,7 @@ void FileInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mFlags            = " << mFlags << "\n";
     stream << space(level) << "- mSourceId         = " << mSourceId << "\n";
     stream << space(level) << "- mModificationTime = " << mModificationTime << "\n";
+    stream << space(level) << "- mDeletionTime     = " << mDeletionTime << "\n";
   }
   catch (...)
   {

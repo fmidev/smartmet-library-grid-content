@@ -92,6 +92,7 @@ struct CorbaFileInfo
   unsigned long      flags;
   unsigned long      sourceId;
   string             modificationTime;
+  string             deletionTime;
 };
 
 typedef sequence<CorbaFileInfo> CorbaFileInfoList;

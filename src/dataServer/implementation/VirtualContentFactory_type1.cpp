@@ -104,6 +104,8 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
     VirtualContentDefinition_vec contentDefinitionList;
     mContentDefinitionFile.getContentDefinitions(contentInfo.mFmiParameterName,toLowerString(producerInfo.mName),contentInfo.mGeometryId,contentDefinitionList);
 
+    std::string minDeletionTime = "";
+
     if (contentDefinitionList.size() > 0)
     {
       GRID::GridFile_sptr sourceGridFile = mGridFileManager->getFileByIdNoMapping(fileInfo.mFileId);
@@ -111,6 +113,20 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
       {
         //printf("*** GRID FILE NOT FOUND %u\n",fileInfo.mFileId);
         return;  // File not found
+      }
+
+      std::string deletionTime = sourceGridFile->getDeletionTime();
+      if (!deletionTime.empty())
+      {
+        time_t delTime = utcTimeToTimeT(deletionTime);
+        if ((time(nullptr) + 300) > delTime)
+        {
+          // The grid file will be deleted soon. We should not access it anymore.
+          return;
+        }
+
+        if (minDeletionTime.empty() || deletionTime < minDeletionTime)
+          minDeletionTime = deletionTime;
       }
 
       for (auto contentDef = contentDefinitionList.begin(); contentDef != contentDefinitionList.end(); ++contentDef)
@@ -202,6 +218,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
             virtualGridFile->setProducerId(contentInfo.mProducerId);
             virtualGridFile->setGenerationId(contentInfo.mGenerationId);
             virtualGridFile->setSourceId(contentInfo.mSourceId);
+            virtualGridFile->setDeletionTime(minDeletionTime);
 
             for (auto sm = sourceMessages.begin(); sm != sourceMessages.end(); ++sm)
               virtualGridFile->addPhysicalGridFile(sm->first);

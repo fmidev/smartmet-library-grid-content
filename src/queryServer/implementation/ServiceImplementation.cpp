@@ -725,18 +725,61 @@ bool ServiceImplementation::parseFunction(QueryParameter& queryParam,
     }
     else
     {
+      std::vector<T::ForecastNumber> forecastNumberVec;
+      std::string producerName;
+
       std::string paramName;
       getParameterStringInfo(paramStr,
                              paramName,
                              queryParam.mParameterLevelId,
                              queryParam.mParameterLevel,
                              queryParam.mForecastType,
-                             queryParam.mForecastNumber,
+                             forecastNumberVec,
+                             producerName,
                              queryParam.mProducerId,
                              queryParam.mGenerationFlags,
                              queryParam.mAreaInterpolationMethod,
                              queryParam.mTimeInterpolationMethod,
                              queryParam.mLevelInterpolationMethod);
+
+      size_t sz = forecastNumberVec.size();
+      if (sz == 1)
+        queryParam.mForecastNumber = forecastNumberVec[0];
+      else
+      if (sz > 1)
+      {
+        char buf[10000];
+        char *p = buf;
+        p += sprintf(p,"LIST{");
+        for (size_t t = 0; t<sz; t++)
+        {
+          p += sprintf(p,"%s:%s:%d:%d:%d:%d:%u",paramName.c_str(),producerName.c_str(),
+              queryParam.mParameterLevelId,queryParam.mParameterLevel,queryParam.mForecastType,forecastNumberVec[t],
+              queryParam.mGenerationFlags);
+
+          if (queryParam.mAreaInterpolationMethod >= 0)
+            p += sprintf(p,":%d",queryParam.mAreaInterpolationMethod);
+          else
+            p += sprintf(p,":");
+
+          if (queryParam.mTimeInterpolationMethod >= 0)
+            p += sprintf(p,":%d",queryParam.mTimeInterpolationMethod);
+          else
+            p += sprintf(p,":");
+
+          if (queryParam.mLevelInterpolationMethod >= 0)
+            p += sprintf(p,":%d",queryParam.mLevelInterpolationMethod);
+          else
+            p += sprintf(p,":");
+
+          if ((t+1) < sz)
+            p += sprintf(p,";");
+        }
+        p += sprintf(p,"}");
+        queryParam.mParam = buf;
+
+        return parseFunction(queryParam,queryParam.mParam,function,functionParams,recursionCounter+1,additionalParameterList);
+      }
 
       std::string alias;
       if (getAlias(paramName, alias))
@@ -894,16 +937,31 @@ void ServiceImplementation::updateQueryParameters(Query& query)
           p += sprintf(p,"LIST{");
           for (size_t t = 0; t<sz; t++)
           {
-            p += sprintf(p,"%s:%s:%d:%d:%d:%d:%u:%u:%u:%u",qParam->mParameterKey.c_str(),producerName.c_str(),
+            p += sprintf(p,"%s:%s:%d:%d:%d:%d:%u",qParam->mParameterKey.c_str(),producerName.c_str(),
                 qParam->mParameterLevelId,qParam->mParameterLevel,qParam->mForecastType,forecastNumberVec[t],
-                qParam->mGenerationFlags,qParam->mAreaInterpolationMethod,qParam->mTimeInterpolationMethod,
-                qParam->mLevelInterpolationMethod);
+                qParam->mGenerationFlags);
+
+            if (qParam->mAreaInterpolationMethod >= 0)
+              p += sprintf(p,":%d",qParam->mAreaInterpolationMethod);
+            else
+              p += sprintf(p,":");
+
+            if (qParam->mTimeInterpolationMethod >= 0)
+              p += sprintf(p,":%d",qParam->mTimeInterpolationMethod);
+            else
+              p += sprintf(p,":");
+
+            if (qParam->mLevelInterpolationMethod >= 0)
+              p += sprintf(p,":%d",qParam->mLevelInterpolationMethod);
+            else
+              p += sprintf(p,":");
 
             if ((t+1) < sz)
               p += sprintf(p,";");
           }
           p += sprintf(p,"}");
           qParam->mParam = buf;
+          //updateRequired = true;
         }
 
         if (qParam->mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID)
@@ -944,12 +1002,15 @@ void ServiceImplementation::updateQueryParameters(Query& query)
         // we fetch the required parameter values for it.
 
         if (qParam->mFunction.length() == 0)
+        {
           parseFunction(*qParam,
                         qParam->mParam,
                         qParam->mFunction,
                         qParam->mFunctionParams,
                         0,
                         additionalParameterList);
+          //updateRequired = true;
+        }
       }
 
       // Adding parameters that are required by functions into the query.
@@ -971,6 +1032,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
   FUNCTION_TRACE
   try
   {
+    //query.print(std::cout,0,0);
     uint valueCount = query.getValuesPerTimeStep();
 
     for (auto qParam = query.mQueryParameterList.rbegin();
@@ -979,6 +1041,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
     {
       if (qParam->mFunction.length() > 0)
       {
+        // std::cout << "*** FUNCTION " << qParam->mFunction << "\n";
         uint tCount = 0;
         for (auto tt = query.mForecastTimeList.begin(); tt != query.mForecastTimeList.end(); ++tt)
         {
@@ -1053,7 +1116,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
 
               if (valueList.size() == 0)
               {
-                // printf("** PUSH %f\n",a);
+                //printf("** PUSH %f\n",a);
                 parameters.push_back(a);
                 areaParameters.push_back(a);
 
@@ -1063,7 +1126,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
               {
                 for (auto aa = valueList.begin(); aa != valueList.end(); ++aa)
                 {
-                  // printf("-- PUSH %f\n",*aa);
+                  //printf("-- PUSH %f\n",*aa);
                   parameters.push_back(*aa);
                   areaParameters.push_back(*aa);
 
@@ -1084,14 +1147,15 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
                 case 1:
                 {
                   double val = mLuaFileCollection.executeFunctionCall1(function, parameters);
+                  // printf("-- result %f\n",val);
                   pValues.mValueList.addGridValue(new T::GridValue(lastRec.mX, lastRec.mY, val));
                 }
                 break;
 
                 case 5:
                 {
-                  std::string val = mLuaFileCollection.executeFunctionCall5(
-                      function, query.mLanguage, parameters);
+                  std::string val = mLuaFileCollection.executeFunctionCall5(function, query.mLanguage, parameters);
+                  // std::cout << "** result " << val << "\n";
                   pValues.mValueList.addGridValue(new T::GridValue(lastRec.mX, lastRec.mY, val));
                 }
                 break;

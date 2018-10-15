@@ -61,7 +61,7 @@ class FileInfo
     uint          mFileId;
 
     /*! \brief The file type. */
-    uchar   mFileType;
+    uchar         mFileType;
 
     /*! \brief The file name. */
     std::string   mName;
@@ -76,6 +76,7 @@ class FileInfo
 
     std::string   mModificationTime;
 
+    std::string   mDeletionTime;
 
     /* The FileInfo records can be sorted in different ways when they are stored
      * into the FileInfoList object. That's why the FileInfo class contains
