@@ -14,6 +14,7 @@
 #include <grid-files/common/GraphFunctions.h>
 #include <grid-files/common/CoordinateConversions.h>
 #include <grid-files/grid/PhysicalGridFile.h>
+#include <grid-files/identification/GridDef.h>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
@@ -704,6 +705,53 @@ int ServiceImplementation::_getGridValueVectorByCoordinateList(T::SessionId sess
         return Result::MESSAGE_NOT_FOUND;
 
       message->getGridValueVectorByCoordinateList(coordinateType,coordinates,interpolationMethod,values);
+      return Result::OK;
+    }
+    catch (...)
+    {
+       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+       exception.addParameter("FileId",std::to_string(fileId));
+       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+int ServiceImplementation::_getGridValueVectorByGeometryId(T::SessionId sessionId,uint fileId,uint messageIndex,T::GeometryId geometryId,short interpolationMethod,T::ParamValue_vec& values)
+{
+  FUNCTION_TRACE
+  try
+  {
+    try
+    {
+      GRID::GridFile_sptr gridFile = getGridFile(fileId);
+      if (gridFile == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
+      if (message == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      if (geometryId <= 0)
+        return Result::INVALID_GEOMETRY_ID;
+
+      T::Coordinate_vec coordinates;
+      coordinates = Identification::gridDef.getGridLatLonCoordinatesByGeometryId(geometryId);
+
+      if (coordinates.size() == 0)
+        return Result::GEOMETRY_NOT_FOUND;
+
+      message->getGridValueVectorByCoordinateList(T::CoordinateTypeValue::LATLON_COORDINATES,coordinates,interpolationMethod,values);
       return Result::OK;
     }
     catch (...)

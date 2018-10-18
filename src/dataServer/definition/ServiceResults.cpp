@@ -40,6 +40,12 @@ std::string getResultString(int resultCode)
 
       case Result::DATA_SETS_NOT_COMPATIBLE:
         return std::string("Data sets are not compatible!");
+
+      case Result::INVALID_GEOMETRY_ID:
+        return std::string("Invalid geometry id!");
+
+      case Result::GEOMETRY_NOT_FOUND:
+        return std::string("Geometry not found!");
     }
 
     return std::string("Unknown result code : ") + std::to_string(resultCode);

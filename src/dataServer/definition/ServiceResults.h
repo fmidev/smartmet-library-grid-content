@@ -17,7 +17,9 @@ enum Result
   MESSAGE_NOT_FOUND                   = -2010,
   UNKNOW_COORDINATE_TYPE              = -2020,
   INVALID_NUMBER_OF_COORDINATES       = -2021,
-  DATA_SETS_NOT_COMPATIBLE            = -2022
+  DATA_SETS_NOT_COMPATIBLE            = -2022,
+  INVALID_GEOMETRY_ID                 = -2023,
+  GEOMETRY_NOT_FOUND                  = -2024
 };
 
 

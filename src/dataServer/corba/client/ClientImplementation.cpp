@@ -426,6 +426,29 @@ int ClientImplementation::_getGridValueVectorByCoordinateList(T::SessionId sessi
 
 
 
+int ClientImplementation::_getGridValueVectorByGeometryId(T::SessionId sessionId,uint fileId,uint messageIndex,T::GeometryId geometryId,short interpolationMethod,T::ParamValue_vec& values)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaValues;
+
+    int result = mService->getGridValueVectorByGeometryId(sessionId,fileId,messageIndex,geometryId,(::CORBA::Short)interpolationMethod,corbaValues);
+
+    if (result == 0)
+      DataServer::Corba::Converter::convert(corbaValues,values);
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
 int ClientImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,short interpolationMethod,T::ParamValue_vec& values)
 {
   try

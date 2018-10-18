@@ -413,6 +413,27 @@ int CacheImplementation::_getGridValueVectorByCoordinateList(T::SessionId sessio
 
 
 
+int CacheImplementation::_getGridValueVectorByGeometryId(T::SessionId sessionId,uint fileId,uint messageIndex,T::GeometryId geometryId,short interpolationMethod,T::ParamValue_vec& values)
+{
+  try
+  {
+    // ToDo : Implement caching functionality
+
+    if (mDataServer == nullptr)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    return mDataServer->getGridValueVectorByGeometryId(sessionId,fileId,messageIndex,geometryId,interpolationMethod,values);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,short interpolationMethod,T::ParamValue_vec& values)
 {
   try
