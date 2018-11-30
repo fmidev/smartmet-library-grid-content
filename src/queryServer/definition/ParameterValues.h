@@ -31,6 +31,7 @@ class ParameterValues
     std::string             mForecastTime;
     uint                    mProducerId;
     uint                    mGenerationId;
+    uint                    mGenerationFlags;
     uint                    mGeometryId;
 
     T::ParamKeyType         mParameterKeyType;
@@ -42,6 +43,7 @@ class ParameterValues
     T::ForecastNumber       mForecastNumber;
     uint                    mFlags;
     T::GridValueList        mValueList;
+    T::WkbData_vec          mWkbList;
 };
 
 

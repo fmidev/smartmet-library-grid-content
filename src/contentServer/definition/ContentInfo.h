@@ -62,13 +62,13 @@ class ContentInfo
       public:
         static const uint none                                            = 0;  // No comparison
         static const uint file_message                                    = 1;  // Comparison order: fileId,messageIndex
-        static const uint fmiId_level_starttime_file_message              = 2;  // Comparison order: fmiId,level,startTime,fileId,messageIndex
-        static const uint fmiName_level_starttime_file_message            = 3;  // Comparison order: fmiName,level,startTime,fileId,messageIndex
-        static const uint gribId_level_starttime_file_message             = 4;  // Comparison order: gribId,level,startTime,fileId,messageIndex
-        static const uint newbaseId_level_starttime_file_message          = 5;  // Comparison order: newbaseId,level,startTime,fileId,messageIndex
-        static const uint newbaseName_level_starttime_file_message        = 6;  // Comparison order: newbaseName,level,startTime,fileId,messageIndex
-        static const uint cdmId_level_starttime_file_message              = 7;  // Comparison order: cdmId,level,startTime,fileId,messageIndex
-        static const uint cdmName_level_starttime_file_message            = 8;  // Comparison order: cdmName,level,startTime,fileId,messageIndex
+        static const uint fmiId_generation_producer_level_time              = 2;  // Comparison order: fmiId,level,startTime,fileId,messageIndex
+        static const uint fmiName_generation_producer_level_time            = 3;  // Comparison order: fmiName,level,startTime,fileId,messageIndex
+        static const uint gribId_generation_producer_level_time             = 4;  // Comparison order: gribId,level,startTime,fileId,messageIndex
+        static const uint newbaseId_generation_producer_level_time          = 5;  // Comparison order: newbaseId,level,startTime,fileId,messageIndex
+        static const uint newbaseName_generation_producer_level_time        = 6;  // Comparison order: newbaseName,level,startTime,fileId,messageIndex
+        static const uint cdmId_generation_producer_level_time              = 7;  // Comparison order: cdmId,level,startTime,fileId,messageIndex
+        static const uint cdmName_generation_producer_level_time            = 8;  // Comparison order: cdmName,level,startTime,fileId,messageIndex
         static const uint starttime_file_message                          = 9;  // Comparison order: startTime,fileId,messageIndex
         static const uint fmiName_starttime_level_file_message            = 10; // Comparison order: fmiName,level,startTime,fileId,messageIndex
         static const uint fmiId_fmiLevelId_level_starttime_file_message   = 11;  // Comparison order: fmiId,fmiLevelId,level,startTime,fileId,messageIndex
@@ -76,6 +76,7 @@ class ContentInfo
         static const uint starttime_fmiName_fmiLevelId_level_file_message = 13;
         static const uint generationId_starttime_file_message             = 14;
         static const uint fmiName_fmiLevelId_level_starttime_file_message = 15;
+        static const uint starttime_generationId_file_message             = 16;
     };
 
     class Flags

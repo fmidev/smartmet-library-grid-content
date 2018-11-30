@@ -93,7 +93,7 @@ void ClientImplementation::init(std::string serviceIor)
     mServiceIor = serviceIor;
 
     int argc = 2;
-    char *argv[] = { const_cast<char*>("-ORBgiopMaxMsgSize"), const_cast<char*>("250000000") };
+    char *argv[] = { const_cast<char*>("-ORBgiopMaxMsgSize"), const_cast<char*>("500000000") };
     CORBA::ORB_var orb = CORBA::ORB_init(argc, argv);
 
     CORBA::Object_var obj;

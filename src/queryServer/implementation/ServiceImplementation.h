@@ -13,15 +13,15 @@ namespace SmartMet
 namespace QueryServer
 {
 
-typedef std::vector<std::pair<std::string,T::GeometryId>> Producer_vec;
-typedef ContentServer::ServiceInterface* ContentServer_ptr;
-typedef DataServer::ServiceInterface* DataServer_ptr;
-typedef std::pair<int,double> LevelHeight;
-typedef std::vector<LevelHeight> LevelHeight_vec;
+typedef std::vector<std::pair<std::string,T::GeometryId>>   Producer_vec;
+typedef ContentServer::ServiceInterface*                    ContentServer_ptr;
+typedef DataServer::ServiceInterface*                       DataServer_ptr;
+typedef std::pair<int,double>                               LevelHeight;
+typedef std::vector<LevelHeight>                            LevelHeight_vec;
 typedef std::vector<std::pair<std::string,LevelHeight_vec>> LevelHeightCache;
+typedef std::pair<std::string,ParameterMapping_vec>         ParameterMappingCacheRec;
+typedef std::list<ParameterMappingCacheRec>                 ParameterMappingCache;
 
-typedef std::pair<std::string,ParameterMapping_vec> ParameterMappingCacheRec;
-typedef std::list<ParameterMappingCacheRec> ParameterMappingCache;
 
 
 class ServiceImplementation : public ServiceInterface
@@ -70,6 +70,7 @@ class ServiceImplementation : public ServiceInterface
      int            executeTimeStepQuery(Query& query);
 
      void           getGridValues(
+                       uchar queryType,
                        Producer_vec& producers,
                        std::set<T::GeometryId>& geometryIdList,
                        uint producerId,
@@ -87,14 +88,16 @@ class ServiceImplementation : public ServiceInterface
                        short levelInterpolationMethod,
                        std::string forecastTime,
                        bool timeMatchRequired,
-                       QuerySearchType searchType,
-                       QueryCoordinates& coordinates,
+                       uchar locationType,
+                       T::AreaCoordinates& coordinates,
+                       T::ParamValue_vec& contourLowValues,
+                       T::ParamValue_vec& contourHighValues,
+                       T::AttributeList& attributeList,
                        double radius,
-                       double dem,
-                       ushort coverType,
                        ParameterValues& valueList);
 
      void           getGridValues(
+                       uchar queryType,
                        Producer_vec& producers,
                        std::set<T::GeometryId>& geometryIdList,
                        uint producerId,
@@ -113,11 +116,12 @@ class ServiceImplementation : public ServiceInterface
                        std::string startTime,
                        std::string endTime,
                        bool ignoreStartTimeValue,
-                       QuerySearchType searchType,
-                       QueryCoordinates& coordinates,
+                       uchar locationType,
+                       T::AreaCoordinates& coordinates,
+                       T::ParamValue_vec& contourLowValues,
+                       T::ParamValue_vec& contourHighValues,
+                       T::AttributeList& attributeList,
                        double radius,
-                       double dem,
-                       ushort coverType,
                        uint maxValues,
                        ParameterValues_vec& valueList);
 
@@ -177,7 +181,17 @@ class ServiceImplementation : public ServiceInterface
                        Producer_vec& producers);
 
      void           getGeometryIdListByCoordinates(
-                       QueryCoordinates& coordinates,
+                       T::AreaCoordinates& coordinates,
+                       std::set<T::GeometryId>& geometryIdList);
+
+     void           getGeometryIdListByCoordinates(
+                       uint gridWidth,
+                       uint gridHeight,
+                       std::vector<T::Coordinate>& coordinates,
+                       std::set<T::GeometryId>& geometryIdList);
+
+     void           getGeometryIdListByGeometryId(
+                       T::GeometryId gridGeometryId,
                        std::set<T::GeometryId>& geometryIdList);
 
      void           loadProducerFile();
@@ -192,9 +206,22 @@ class ServiceImplementation : public ServiceInterface
 
      void           updateQueryParameters(Query& query);
 
-     bool           conversionFunction(std::string& conversionFunction,std::string& function,std::vector<std::string>& functionParams);
-     void           executeConversion(std::string& function,std::vector<std::string>& functionParams,T::GridValueList& valueList);
+     bool           conversionFunction(
+                       std::string& conversionFunction,
+                       std::string& function,
+                       std::vector<std::string>& functionParams);
 
+     void           executeConversion(
+                       std::string& function,
+                       std::vector<std::string>& functionParams,
+                       T::GridValueList& valueList);
+
+     void           executeConversion(
+                       std::string& function,
+                       std::vector<std::string>& functionParams,
+                       T::ParamValue_vec& valueList,
+                       T::ParamValue_vec& newValueList);
+/*
      void           timeInterpolation(
                        short timeInterpolationMethod,
                        std::string forecastTimeStr,
@@ -203,7 +230,7 @@ class ServiceImplementation : public ServiceInterface
                        T::GridValueList& list1,
                        T::GridValueList& list2,
                        T::GridValueList& valueList);
-
+*/
      void           levelInterpolation(
                        short levelInterpolationMethod,
                        double level,
@@ -213,11 +240,11 @@ class ServiceImplementation : public ServiceInterface
                        ParameterValues& parameterValues2,
                        ParameterValues& valueList);
 
-
      bool           getPolygonValues(
                        T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
-                       uint& generationId,
+                       uint generationId,
+                       uint generationFlags,
                        ParameterMapping& pInfo,
                        std::string forecastTime,
                        T::ParamLevelId paramLevelId,
@@ -227,14 +254,15 @@ class ServiceImplementation : public ServiceInterface
                        uint parameterFlags,
                        short timeInterpolationMethod,
                        short levelInterpolationMethod,
-                       QueryCoordinates& coordinates,
+                       T::AreaCoordinates& coordinates,
                        uint& newProducerId,
                        ParameterValues& valueList);
 
      bool           getCircleValues(
                        T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
-                       uint& generationId,
+                       uint generationId,
+                       uint generationFlags,
                        ParameterMapping& pInfo,
                        std::string forecastTime,
                        T::ParamLevelId paramLevelId,
@@ -253,7 +281,8 @@ class ServiceImplementation : public ServiceInterface
      bool           getPointValues(
                        T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
-                       uint& generationId,
+                       uint generationId,
+                       uint generationFlags,
                        ParameterMapping& pInfo,
                        std::string forecastTime,
                        T::ParamLevelId paramLevelId,
@@ -264,14 +293,15 @@ class ServiceImplementation : public ServiceInterface
                        short areaInterpolationMethod,
                        short timeInterpolationMethod,
                        short levelInterpolationMethod,
-                       QueryCoordinates& coordinates,
+                       T::AreaCoordinates& coordinates,
                        uint& newProducerId,
                        ParameterValues& valueList);
 
      bool           getSpecialValues(
                        T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
-                       uint& generationId,
+                       uint generationId,
+                       uint generationFlags,
                        ParameterMapping& pInfo,
                        std::string forecastTime,
                        T::ParamLevelId paramLevelId,
@@ -287,7 +317,67 @@ class ServiceImplementation : public ServiceInterface
                        uint& newProducerId,
                        ParameterValues& valueList);
 
-     bool           getPressureLevelsAndHeights(T::ProducerInfo& producerInfo,uint generationId,std::string forecastTime,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,double x,double y,int height,int& lowerPressure,int& higherPressure,double& lowerHeight,double& higherHeight);
+     bool           getIsolineValues(
+                       T::ProducerInfo& producerInfo,
+                       T::GeometryId producerGeometryId,
+                       uint generationId,
+                       uint generationFlags,
+                       ParameterMapping& pInfo,
+                       std::string forecastTime,
+                       T::ParamLevelId paramLevelId,
+                       T::ParamLevel paramLevel,
+                       T::ForecastType forecastType,
+                       T::ForecastNumber forecastNumber,
+                       uint parameterFlags,
+                       short areaInterpolationMethod,
+                       short timeInterpolationMethod,
+                       short levelInterpolationMethod,
+                       uchar locationType,
+                       T::Coordinate_vec& gridCoordinates,
+                       T::ParamValue_vec& contourValues,
+                       T::AttributeList& attributeList,
+                       uint& newProducerId,
+                       ParameterValues& valueList);
+
+
+     bool           getIsobandValues(
+                       T::ProducerInfo& producerInfo,
+                       T::GeometryId producerGeometryId,
+                       uint generationId,
+                       uint generationFlags,
+                       ParameterMapping& pInfo,
+                       std::string forecastTime,
+                       T::ParamLevelId paramLevelId,
+                       T::ParamLevel paramLevel,
+                       T::ForecastType forecastType,
+                       T::ForecastNumber forecastNumber,
+                       uint parameterFlags,
+                       short areaInterpolationMethod,
+                       short timeInterpolationMethod,
+                       short levelInterpolationMethod,
+                       uchar locationType,
+                       T::Coordinate_vec& gridCoordinates,
+                       T::ParamValue_vec& contourLowValues,
+                       T::ParamValue_vec& contourHighValues,
+                       T::AttributeList& attributeList,
+                       uint& newProducerId,
+                       ParameterValues& valueList);
+
+     bool           getPressureLevelsAndHeights(
+                       T::ProducerInfo& producerInfo,
+                       uint generationId,
+                       uint generationFlags,
+                       std::string forecastTime,
+                       T::ForecastType forecastType,
+                       T::ForecastNumber forecastNumber,
+                       T::GeometryId geometryId,
+                       double x,
+                       double y,
+                       int height,
+                       int& lowerPressure,
+                       int& higherPressure,
+                       double& lowerHeight,
+                       double& higherHeight);
 
 
   private:

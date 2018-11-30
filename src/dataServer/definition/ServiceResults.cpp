@@ -46,6 +46,12 @@ std::string getResultString(int resultCode)
 
       case Result::GEOMETRY_NOT_FOUND:
         return std::string("Geometry not found!");
+
+      case Result::INVALID_DIMENSIONS:
+        return std::string("Invalid dimensions!");
+
+      case Result::UNSUPPORTED_INTERPOLATION_METHOD:
+        return std::string("Unsupported or unknown interpolation method!");
     }
 
     return std::string("Unknown result code : ") + std::to_string(resultCode);

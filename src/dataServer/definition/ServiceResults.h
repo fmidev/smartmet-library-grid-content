@@ -19,7 +19,9 @@ enum Result
   INVALID_NUMBER_OF_COORDINATES       = -2021,
   DATA_SETS_NOT_COMPATIBLE            = -2022,
   INVALID_GEOMETRY_ID                 = -2023,
-  GEOMETRY_NOT_FOUND                  = -2024
+  GEOMETRY_NOT_FOUND                  = -2024,
+  INVALID_DIMENSIONS                  = -2025,
+  UNSUPPORTED_INTERPOLATION_METHOD    = -2030
 };
 
 

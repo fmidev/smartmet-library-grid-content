@@ -135,25 +135,6 @@ uint ParameterMappingFile::getNumberOfMappings()
 
 
 
-/*
-ParameterMapping* ParameterMappingFile::getParameterMappingByIndex(uint index)
-{
-  try
-  {
-    if (index < mMappingVector.size())
-      return &mMappingVector[index];
-
-    return nullptr;
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-*/
-
-
-
 
 ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
 {
@@ -358,6 +339,9 @@ void ParameterMappingFile::loadFile()
 
           if (field[12][0] != '\0')
             rec.mConversionFunction = field[12];
+
+          if (c > 13  &&  field[13][0] != '\0')
+            rec.mReverseConversionFunction = field[13];
 
           //rec.print(std::cout,0,0);
 

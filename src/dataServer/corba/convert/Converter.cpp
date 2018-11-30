@@ -42,7 +42,7 @@ Converter::~Converter()
 
 
 
-void Converter::convert(T::GridData& source,DataServer::Corba::CorbaGridData& target)
+void Converter::convert(const T::GridData& source,DataServer::Corba::CorbaGridData& target)
 {
   try
   {
@@ -97,7 +97,7 @@ void Converter::convert(T::GridData& source,DataServer::Corba::CorbaGridData& ta
 
 
 
-void Converter::convert(DataServer::Corba::CorbaGridData& source,T::GridData& target)
+void Converter::convert(const DataServer::Corba::CorbaGridData& source,T::GridData& target)
 {
   try
   {
@@ -152,7 +152,7 @@ void Converter::convert(DataServer::Corba::CorbaGridData& source,T::GridData& ta
 
 
 
-void Converter::convert(T::Attribute& source,DataServer::Corba::CorbaAttribute& target)
+void Converter::convert(const T::Attribute& source,DataServer::Corba::CorbaAttribute& target)
 {
   try
   {
@@ -169,7 +169,7 @@ void Converter::convert(T::Attribute& source,DataServer::Corba::CorbaAttribute& 
 
 
 
-void Converter::convert(DataServer::Corba::CorbaAttribute& source,T::Attribute& target)
+void Converter::convert(const DataServer::Corba::CorbaAttribute& source,T::Attribute& target)
 {
   try
   {
@@ -186,7 +186,7 @@ void Converter::convert(DataServer::Corba::CorbaAttribute& source,T::Attribute& 
 
 
 
-void Converter::convert(T::AttributeList& source,DataServer::Corba::CorbaAttributeList& target)
+void Converter::convert(const T::AttributeList& source,DataServer::Corba::CorbaAttributeList& target)
 {
   try
   {
@@ -210,7 +210,7 @@ void Converter::convert(T::AttributeList& source,DataServer::Corba::CorbaAttribu
 
 
 
-void Converter::convert(DataServer::Corba::CorbaAttributeList& source,T::AttributeList& target)
+void Converter::convert(const DataServer::Corba::CorbaAttributeList& source,T::AttributeList& target)
 {
   try
   {
@@ -233,7 +233,7 @@ void Converter::convert(DataServer::Corba::CorbaAttributeList& source,T::Attribu
 
 
 
-void Converter::convert(T::GridCoordinates& source,DataServer::Corba::CorbaGridCoordinates& target)
+void Converter::convert(const T::GridCoordinates& source,DataServer::Corba::CorbaGridCoordinates& target)
 {
   try
   {
@@ -264,7 +264,7 @@ void Converter::convert(T::GridCoordinates& source,DataServer::Corba::CorbaGridC
 
 
 
-void Converter::convert(DataServer::Corba::CorbaGridCoordinates& source,T::GridCoordinates& target)
+void Converter::convert(const DataServer::Corba::CorbaGridCoordinates& source,T::GridCoordinates& target)
 {
   try
   {
@@ -295,7 +295,7 @@ void Converter::convert(DataServer::Corba::CorbaGridCoordinates& source,T::GridC
 
 
 
-void Converter::convert(T::ValueRecord& source,DataServer::Corba::CorbaValueRecord& target)
+void Converter::convert(const T::ValueRecord& source,DataServer::Corba::CorbaValueRecord& target)
 {
   try
   {
@@ -318,7 +318,7 @@ void Converter::convert(T::ValueRecord& source,DataServer::Corba::CorbaValueReco
 
 
 
-void Converter::convert(DataServer::Corba::CorbaValueRecord& source,T::ValueRecord& target)
+void Converter::convert(const DataServer::Corba::CorbaValueRecord& source,T::ValueRecord& target)
 {
   try
   {
@@ -340,7 +340,7 @@ void Converter::convert(DataServer::Corba::CorbaValueRecord& source,T::ValueReco
 
 
 
-void Converter::convert(T::ValueRecordList& source,DataServer::Corba::CorbaValueRecordList& target)
+void Converter::convert(const T::ValueRecordList& source,DataServer::Corba::CorbaValueRecordList& target)
 {
   try
   {
@@ -364,7 +364,7 @@ void Converter::convert(T::ValueRecordList& source,DataServer::Corba::CorbaValue
 
 
 
-void Converter::convert(DataServer::Corba::CorbaValueRecordList& source,T::ValueRecordList& target)
+void Converter::convert(const DataServer::Corba::CorbaValueRecordList& source,T::ValueRecordList& target)
 {
   try
   {
@@ -388,7 +388,7 @@ void Converter::convert(DataServer::Corba::CorbaValueRecordList& source,T::Value
 
 
 
-void Converter::convert(T::ParamValue_vec& source,DataServer::Corba::CorbaParamValueList& target)
+void Converter::convert(const T::ParamValue_vec& source,DataServer::Corba::CorbaParamValueList& target)
 {
   try
   {
@@ -408,7 +408,7 @@ void Converter::convert(T::ParamValue_vec& source,DataServer::Corba::CorbaParamV
 
 
 
-void Converter::convert(DataServer::Corba::CorbaParamValueList& source,T::ParamValue_vec& target)
+void Converter::convert(const DataServer::Corba::CorbaParamValueList& source,T::ParamValue_vec& target)
 {
   try
   {
@@ -433,7 +433,7 @@ void Converter::convert(DataServer::Corba::CorbaParamValueList& source,T::ParamV
 
 
 
-void Converter::convert(T::GridValue& source,DataServer::Corba::CorbaGridValue& target)
+void Converter::convert(const T::GridValue& source,DataServer::Corba::CorbaGridValue& target)
 {
   try
   {
@@ -451,7 +451,7 @@ void Converter::convert(T::GridValue& source,DataServer::Corba::CorbaGridValue& 
 
 
 
-void Converter::convert(DataServer::Corba::CorbaGridValue& source,T::GridValue& target)
+void Converter::convert(const DataServer::Corba::CorbaGridValue& source,T::GridValue& target)
 {
   try
   {
@@ -468,7 +468,7 @@ void Converter::convert(DataServer::Corba::CorbaGridValue& source,T::GridValue& 
 
 
 
-void Converter::convert(T::GridValueList& source,DataServer::Corba::CorbaGridValueList& target)
+void Converter::convert(const T::GridValueList& source,DataServer::Corba::CorbaGridValueList& target)
 {
   try
   {
@@ -492,7 +492,7 @@ void Converter::convert(T::GridValueList& source,DataServer::Corba::CorbaGridVal
 
 
 
-void Converter::convert(DataServer::Corba::CorbaGridValueList& source,T::GridValueList& target)
+void Converter::convert(const DataServer::Corba::CorbaGridValueList& source,T::GridValueList& target)
 {
   try
   {
@@ -517,7 +517,7 @@ void Converter::convert(DataServer::Corba::CorbaGridValueList& source,T::GridVal
 
 
 
-void Converter::convert(T::Coordinate& source,DataServer::Corba::CorbaCoordinate& target)
+void Converter::convert(const T::Coordinate& source,DataServer::Corba::CorbaCoordinate& target)
 {
   try
   {
@@ -534,7 +534,7 @@ void Converter::convert(T::Coordinate& source,DataServer::Corba::CorbaCoordinate
 
 
 
-void Converter::convert(DataServer::Corba::CorbaCoordinate& source,T::Coordinate& target)
+void Converter::convert(const DataServer::Corba::CorbaCoordinate& source,T::Coordinate& target)
 {
   try
   {
@@ -550,7 +550,7 @@ void Converter::convert(DataServer::Corba::CorbaCoordinate& source,T::Coordinate
 
 
 
-void Converter::convert(std::vector<T::Coordinate>& source,DataServer::Corba::CorbaCoordinateList& target)
+void Converter::convert(const std::vector<T::Coordinate>& source,DataServer::Corba::CorbaCoordinateList& target)
 {
   try
   {
@@ -580,6 +580,7 @@ void Converter::convert(const DataServer::Corba::CorbaCoordinateList& source,std
   {
     target.clear();
     uint len = source.length();
+    target.reserve(len);
     for (uint t=0; t<len; t++)
     {
       DataServer::Corba::CorbaCoordinate corbaObject = source[t];
@@ -596,7 +597,7 @@ void Converter::convert(const DataServer::Corba::CorbaCoordinateList& source,std
 
 
 
-void Converter::convert(std::vector<std::vector<T::Coordinate>>& source,SmartMet::DataServer::Corba::CorbaPolygonPath& target)
+void Converter::convert(const std::vector<std::vector<T::Coordinate>>& source,SmartMet::DataServer::Corba::CorbaPolygonPath& target)
 {
   try
   {
@@ -626,6 +627,7 @@ void Converter::convert(const SmartMet::DataServer::Corba::CorbaPolygonPath& sou
   {
     target.clear();
     uint len = source.length();
+    target.reserve(len);
     for (uint t=0; t<len; t++)
     {
       DataServer::Corba::CorbaCoordinateList corbaObject = source[t];
@@ -643,7 +645,8 @@ void Converter::convert(const SmartMet::DataServer::Corba::CorbaPolygonPath& sou
 
 
 
-void Converter::convert(double_vec& source,DataServer::Corba::CorbaDoubleList& target)
+
+void Converter::convert(const double_vec& source,DataServer::Corba::CorbaDoubleList& target)
 {
   try
   {
@@ -664,12 +667,13 @@ void Converter::convert(double_vec& source,DataServer::Corba::CorbaDoubleList& t
 
 
 
-void Converter::convert(DataServer::Corba::CorbaDoubleList& source,double_vec& target)
+void Converter::convert(const DataServer::Corba::CorbaDoubleList& source,double_vec& target)
 {
   try
   {
     target.clear();
     uint len = source.length();
+    target.reserve(len);
     for (uint t=0; t<len; t++)
     {
       target.push_back(source[t]);
@@ -680,6 +684,100 @@ void Converter::convert(DataServer::Corba::CorbaDoubleList& source,double_vec& t
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
+
+
+
+
+
+void Converter::convert(const SmartMet::T::WkbData& source, SmartMet::DataServer::Corba::CorbaWkbData& target)
+{
+  try
+  {
+    uint len = source.size();
+    target.length(len);
+    for (uint t=0; t<len; t++)
+    {
+      target[t] = source[t];
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const SmartMet::DataServer::Corba::CorbaWkbData& source,SmartMet::T::WkbData& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    target.reserve(len);
+    for (uint t=0; t<len; t++)
+    {
+      target.push_back(source[t]);
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const SmartMet::T::WkbData_vec& source, SmartMet::DataServer::Corba::CorbaWkbDataSequence& target)
+{
+  try
+  {
+    uint len = source.size();
+    target.length(len);
+    for (uint t=0; t<len; t++)
+    {
+      auto obj = source[t];
+      DataServer::Corba::CorbaWkbData corbaObject;
+      convert(obj,corbaObject);
+      target[t] = corbaObject;
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const SmartMet::DataServer::Corba::CorbaWkbDataSequence& source,SmartMet::T::WkbData_vec& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    target.reserve(len);
+    for (uint t=0; t<len; t++)
+    {
+      DataServer::Corba::CorbaWkbData corbaObject = source[t];
+      T::WkbData obj;
+      convert(corbaObject,obj);
+      target.push_back(obj);
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
 
 
 }

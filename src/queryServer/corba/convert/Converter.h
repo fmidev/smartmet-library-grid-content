@@ -31,6 +31,15 @@ class Converter
     static void   convert(string_vec& source,QueryServer::Corba::CorbaStringList& target);
     static void   convert(QueryServer::Corba::CorbaStringList& source,string_vec& target);
 
+    static void   convert(const T::Attribute& source,QueryServer::Corba::CorbaAttribute& target);
+    static void   convert(const QueryServer::Corba::CorbaAttribute& source,T::Attribute& target);
+
+    static void   convert(const T::AttributeList& source,QueryServer::Corba::CorbaAttributeList& target);
+    static void   convert(const QueryServer::Corba::CorbaAttributeList& source,T::AttributeList& target);
+
+    static void   convert(const T::ParamValue_vec& source,QueryServer::Corba::CorbaParamValueList& target);
+    static void   convert(const QueryServer::Corba::CorbaParamValueList& source,T::ParamValue_vec& target);
+
     static void   convert(T::GridPointValue& source,QueryServer::Corba::CorbaGridPointValue& target);
     static void   convert(QueryServer::Corba::CorbaGridPointValue& source,T::GridPointValue& target);
 
@@ -58,11 +67,11 @@ class Converter
     static void   convert(T::Coordinate& source,QueryServer::Corba::CorbaCoordinate& target);
     static void   convert(QueryServer::Corba::CorbaCoordinate& source,T::Coordinate& target);
 
-    static void   convert(QueryServer::Corba::CorbaCoordinateList& source,QueryServer::Coordinate_vec& target);
-    static void   convert(QueryServer::Coordinate_vec& source,QueryServer::Corba::CorbaCoordinateList& target);
+    static void   convert(QueryServer::Corba::CorbaCoordinateList& source,T::Coordinate_vec& target);
+    static void   convert(T::Coordinate_vec& source,QueryServer::Corba::CorbaCoordinateList& target);
 
-    static void   convert(QueryServer::Corba::CorbaQueryCoordinates& source,QueryServer::QueryCoordinates& target);
-    static void   convert(QueryServer::QueryCoordinates& source,QueryServer::Corba::CorbaQueryCoordinates& target);
+    static void   convert(QueryServer::Corba::CorbaAreaCoordinates& source,T::AreaCoordinates& target);
+    static void   convert(T::AreaCoordinates& source,QueryServer::Corba::CorbaAreaCoordinates& target);
 
     static void   convert(QueryServer::Corba::CorbaQuery& source,QueryServer::Query& target);
     static void   convert(QueryServer::Query& source,QueryServer::Corba::CorbaQuery& target);
@@ -73,6 +82,11 @@ class Converter
     static void   convert(SmartMet::QueryServer::Corba::CorbaFunctionParamList& source, SmartMet::QueryServer::FunctionParam_vec& target);
     static void   convert(SmartMet::QueryServer::FunctionParam_vec& source,SmartMet::QueryServer::Corba::CorbaFunctionParamList& target);
 
+    static void   convert(const SmartMet::T::WkbData& source, SmartMet::QueryServer::Corba::CorbaWkbData& target);
+    static void   convert(const SmartMet::QueryServer::Corba::CorbaWkbData& source,SmartMet::T::WkbData& target);
+
+    static void   convert(const SmartMet::T::WkbData_vec& source, SmartMet::QueryServer::Corba::CorbaWkbDataSequence& target);
+    static void   convert(const SmartMet::QueryServer::Corba::CorbaWkbDataSequence& source,SmartMet::T::WkbData_vec& target);
 };
 
 

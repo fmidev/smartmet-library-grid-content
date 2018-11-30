@@ -86,7 +86,7 @@ void ClientImplementation::init(std::string serviceIor)
     mServiceIor = serviceIor;
 
     int argc = 2;
-    char *argv[] = { const_cast<char*>("-ORBgiopMaxMsgSize"),const_cast<char*>("250000000") };
+    char *argv[] = { const_cast<char*>("-ORBgiopMaxMsgSize"),const_cast<char*>("500000000") };
     CORBA::ORB_var orb = CORBA::ORB_init(argc,argv);
 
     CORBA::Object_var obj;
@@ -277,6 +277,33 @@ int ClientImplementation::_getGridValueListByPointList(T::SessionId sessionId,ui
 
 
 
+int ClientImplementation::_getGridValueListByTimeAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,T::GridValueList& valueList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaCoordinateList_var corbaPointList = new DataServer::Corba::CorbaCoordinateList();
+    DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+
+    DataServer::Corba::Converter::convert(pointList,corbaPointList);
+
+
+    int result = mService->getGridValueListByTimeAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),coordinateType,corbaPointList,areaInterpolationMethod,timeInterpolationMethod,corbaGridValueList);
+
+    if (result == 0)
+      DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
 int ClientImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,T::GridValueList& valueList)
 {
   try
@@ -377,7 +404,7 @@ int ClientImplementation::_getGridValueVector(T::SessionId sessionId,uint fileId
 
 
 
-int ClientImplementation::_getGridValueVectorByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,uint flags,T::ParamValue_vec& values)
+int ClientImplementation::_getGridValueVectorByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,short timeInterpolationMethod,T::ParamValue_vec& values)
 {
   try
   {
@@ -386,7 +413,7 @@ int ClientImplementation::_getGridValueVectorByTime(T::SessionId sessionId,uint 
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
 
-    int result = mService->getGridValueVectorByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),flags,corbaValues);
+    int result = mService->getGridValueVectorByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),timeInterpolationMethod,corbaValues);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaValues,values);
@@ -486,6 +513,525 @@ int ClientImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,uint
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaValueVector,valueVector);
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsobands(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,T::WkbData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaWkbDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
+    DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+
+    int result = mService->getGridIsobands(sessionId,fileId,messageIndex,corbaContourLowValues,corbaContourHighValues,corbaAttributeList,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsobandsByBox(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,std::string urn,double x1,double y1,double x2,double y2,T::AttributeList& attributeList,T::WkbData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaWkbDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
+    DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+
+    int result = mService->getGridIsobandsByBox(sessionId,fileId,messageIndex,corbaContourLowValues,corbaContourHighValues,urn.c_str(),x1,y1,x2,y2,corbaAttributeList,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+int ClientImplementation::_getGridIsobandsByGeometryId(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::GeometryId geometryId,T::AttributeList& attributeList,T::WkbData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaWkbDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
+    DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+
+    int result = mService->getGridIsobandsByGeometryId(sessionId,fileId,messageIndex,corbaContourLowValues,corbaContourHighValues,geometryId,corbaAttributeList,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsobandsByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::WkbData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaWkbDataSequence_var corbaContours;
+    DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(gridLatLonCoordinates,corbaCoordinates);
+    DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
+    DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+
+    int result = mService->getGridIsobandsByGrid(sessionId,fileId,messageIndex,corbaContourLowValues,corbaContourHighValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsobandsByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,T::WkbData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaWkbDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
+    DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+
+    int result = mService->getGridIsobandsByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),corbaContourLowValues,corbaContourHighValues,corbaAttributeList,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsobandsByTimeAndBox(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,std::string urn,double x1,double y1,double x2,double y2,T::AttributeList& attributeList,T::WkbData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaWkbDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
+    DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+
+    int result = mService->getGridIsobandsByTimeAndBox(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),corbaContourLowValues,corbaContourHighValues,urn.c_str(),x1,y1,x2,y2,corbaAttributeList,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsobandsByTimeAndGeometryId(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::GeometryId geometryId,T::AttributeList& attributeList,T::WkbData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaWkbDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
+    DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+
+    int result = mService->getGridIsobandsByTimeAndGeometryId(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),corbaContourLowValues,corbaContourHighValues,geometryId,corbaAttributeList,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::WkbData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaWkbDataSequence_var corbaContours;
+    DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(gridLatLonCoordinates,corbaCoordinates);
+    DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
+    DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+
+    int result = mService->getGridIsobandsByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),corbaContourLowValues,corbaContourHighValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsolines(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,T::WkbData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaWkbDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+
+    int result = mService->getGridIsolines(sessionId,fileId,messageIndex,corbaContourValues,corbaAttributeList,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsolinesByBox(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,std::string urn,double x1,double y1,double x2,double y2,T::AttributeList& attributeList,T::WkbData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaWkbDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+
+    int result = mService->getGridIsolinesByBox(sessionId,fileId,messageIndex,corbaContourValues,urn.c_str(),x1,y1,x2,y2,corbaAttributeList,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsolinesByGeometryId(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,T::GeometryId geometryId,T::AttributeList& attributeList,T::WkbData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaWkbDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+
+    int result = mService->getGridIsolinesByGeometryId(sessionId,fileId,messageIndex,corbaContourValues,geometryId,corbaAttributeList,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsolinesByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::WkbData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaWkbDataSequence_var corbaContours;
+    DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(gridLatLonCoordinates,corbaCoordinates);
+    DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+
+    int result = mService->getGridIsolinesByGrid(sessionId,fileId,messageIndex,corbaContourValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsolinesByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,T::WkbData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaWkbDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+
+    int result = mService->getGridIsolinesByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),corbaContourValues,corbaAttributeList,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsolinesByTimeAndBox(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::ParamValue_vec& contourValues,std::string urn,double x1,double y1,double x2,double y2,T::AttributeList& attributeList,T::WkbData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaWkbDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+
+    int result = mService->getGridIsolinesByTimeAndBox(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),corbaContourValues,urn.c_str(),x1,y1,x2,y2,corbaAttributeList,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsolinesByTimeAndGeometryId(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::ParamValue_vec& contourValues,T::GeometryId geometryId,T::AttributeList& attributeList,T::WkbData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaWkbDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+
+    int result = mService->getGridIsolinesByTimeAndGeometryId(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),corbaContourValues,geometryId,corbaAttributeList,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::WkbData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaWkbDataSequence_var corbaContours;
+    DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(gridLatLonCoordinates,corbaCoordinates);
+    DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+
+    int result = mService->getGridIsolinesByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),corbaContourValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
 
     return result;
   }

@@ -23,9 +23,9 @@ class ValueRecordList
 
      void             addValueRecord(ValueRecord *valueRecord);
      void             clear();
-     ValueRecord*     getValueRecordByIndex(uint index);
-     uint             getLength();
-     void             print(std::ostream& stream,uint level,uint optionFlags);
+     ValueRecord*     getValueRecordByIndex(uint index) const;
+     uint             getLength() const;
+     void             print(std::ostream& stream,uint level,uint optionFlags) const;
 
   protected:
 

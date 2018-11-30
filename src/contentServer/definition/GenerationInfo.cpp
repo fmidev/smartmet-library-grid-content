@@ -224,6 +224,44 @@ void GenerationInfo::setCsv(std::string csv)
 
 
 
+int GenerationInfo::compare(uint comparisonMethod,GenerationInfo *generationInfo)
+{
+  try
+  {
+    if (generationInfo == nullptr)
+      return 0;
+
+    int res = 0;
+
+    switch (comparisonMethod)
+    {
+      case GenerationInfo::ComparisonMethod::generationId:
+        return uint_compare(mGenerationId,generationInfo->mGenerationId);
+
+      case GenerationInfo::ComparisonMethod::generationName:
+        return strcasecmp(mName.c_str(),generationInfo->mName.c_str());
+
+      case GenerationInfo::ComparisonMethod::analysisTime_generationId:
+        res = strcasecmp(mAnalysisTime.c_str(),generationInfo->mAnalysisTime.c_str());
+        if (res != 0)
+          return res;
+        return uint_compare(mGenerationId,generationInfo->mGenerationId);
+
+      default:
+        return uint_compare(mGenerationId,generationInfo->mGenerationId);
+    }
+    return 0;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 GenerationInfo* GenerationInfo::duplicate()
 {
   try

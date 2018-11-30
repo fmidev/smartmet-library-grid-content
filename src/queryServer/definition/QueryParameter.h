@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ParameterValues.h"
+#include <grid-files/common/AttributeList.h>
 
 
 namespace SmartMet
@@ -43,6 +44,8 @@ class QueryParameter
     short                       mAreaInterpolationMethod;
     short                       mTimeInterpolationMethod;
     short                       mLevelInterpolationMethod;
+    T::ParamValue_vec           mContourLowValues;
+    T::ParamValue_vec           mContourHighValues;
     uint                        mProducerId;
     uint                        mGenerationFlags;
     int                         mPrecision;

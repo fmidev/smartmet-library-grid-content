@@ -37,7 +37,7 @@ Server::Server(const char *address,const char *port)
     int orb_argc = 4;
     char addr[100];
     sprintf(addr,"giop:tcp:%s:%s",address,port);
-    char *orb_argv[] = {const_cast<char*>("-ORBendPoint"),const_cast<char*>(addr),const_cast<char*>("-ORBgiopMaxMsgSize"),const_cast<char*>("250000000")};
+    char *orb_argv[] = {const_cast<char*>("-ORBendPoint"),const_cast<char*>(addr),const_cast<char*>("-ORBgiopMaxMsgSize"),const_cast<char*>("500000000")};
 
     try
     {

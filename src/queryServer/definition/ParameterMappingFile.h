@@ -26,7 +26,6 @@ class ParameterMappingFile
     virtual void          getMappings(const std::string& producerName,const std::string& parameterName,bool onlySearchEnabled,ParameterMapping_vec& mappings);
     virtual void          getMappings(const std::string& producerName,const std::string& parameterName,T::ParamLevelIdType levelIdType,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings);
     uint                  getNumberOfMappings();
-    //ParameterMapping*     getParameterMappingByIndex(uint index);
     void                  print(std::ostream& stream,uint level,uint optionFlags);
 
   protected:
@@ -36,7 +35,6 @@ class ParameterMappingFile
     std::string           mFilename;
     time_t                mLastModified;
     MappingSearch         mMappingSearch;
-    //ParameterMapping_vec  mMappingVector;
     ThreadLock            mThreadLock;
 };
 

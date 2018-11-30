@@ -877,6 +877,7 @@ void Converter::convert(const ContentServer::Corba::CorbaFileContentList& source
   {
     target.clear();
     uint len = source.length();
+    target.reserve(len);
     for (uint t=0; t<len; t++)
     {
       T::FileAndContent fc;
@@ -963,6 +964,7 @@ void Converter::convert(const SmartMet::ContentServer::Corba::CorbaForecastTimeL
   {
     target.clear();
     uint len = source.length();
+    target.reserve(len);
     for (uint t=0; t<len; t++)
     {
       T::ForecastTime ft;

@@ -31,6 +31,7 @@ class ParameterMapping
     uint                        mGroupFlags;
     bool                        mSearchEnabled;
     std::string                 mConversionFunction;
+    std::string                 mReverseConversionFunction;
 
 
     class GroupFlags

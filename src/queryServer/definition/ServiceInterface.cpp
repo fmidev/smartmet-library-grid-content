@@ -39,7 +39,8 @@ ServiceInterface::~ServiceInterface()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+    exception.printError();
   }
 }
 

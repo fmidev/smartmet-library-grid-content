@@ -530,7 +530,7 @@ int FileInfoList::getClosestIndexNoLock(uint comparisonMethod,FileInfo& fileInfo
   try
   {
     if (mArray == nullptr  ||  mLength == 0)
-          return 0;
+      return 0;
 
     if (comparisonMethod != mComparisonMethod)
     {

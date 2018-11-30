@@ -24,6 +24,7 @@ class GenerationInfo
     void             setCsv(const char *csv);
     void             setCsv(std::string csv);
 
+    int              compare(uint comparisonMethod,GenerationInfo *generationInfo);
     GenerationInfo&  operator=(const GenerationInfo& generationInfo);
     GenerationInfo*  duplicate();
     void             print(std::ostream& stream,uint level,uint optionFlags);
@@ -45,8 +46,20 @@ class GenerationInfo
         const static uchar Ready       = 1;   // The generation process is ready.
         const static uchar Running     = 2;   // Can be accessed, but the generation process is still active
     };
+
+    class ComparisonMethod
+    {
+      public:
+        static const uint none                         = 0;  // No comparison
+        static const uint generationId                 = 1;  // Comparison order: generationId
+        static const uint generationName               = 2;  // Comparison order: generationName
+        static const uint analysisTime_generationId    = 3;  // Comparison order: analysisTime,generationId
+    };
+
 };
 
+
+typedef GenerationInfo* GenerationInfoPtr;
 
 
 }

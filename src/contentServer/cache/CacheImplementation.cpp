@@ -168,25 +168,25 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
       mContentInfoList[0].sort(T::ContentInfo::ComparisonMethod::file_message);
 
       if (mContentInfoListEnabled[1])
-        mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_level_starttime_file_message);
+        mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_generation_producer_level_time);
 
       if (mContentInfoListEnabled[2])
-        mContentInfoList[2].sort(T::ContentInfo::ComparisonMethod::fmiName_level_starttime_file_message);
+        mContentInfoList[2].sort(T::ContentInfo::ComparisonMethod::fmiName_generation_producer_level_time);
 
       if (mContentInfoListEnabled[3])
-        mContentInfoList[3].sort(T::ContentInfo::ComparisonMethod::gribId_level_starttime_file_message);
+        mContentInfoList[3].sort(T::ContentInfo::ComparisonMethod::gribId_generation_producer_level_time);
 
       if (mContentInfoListEnabled[4])
-        mContentInfoList[4].sort(T::ContentInfo::ComparisonMethod::newbaseId_level_starttime_file_message);
+        mContentInfoList[4].sort(T::ContentInfo::ComparisonMethod::newbaseId_generation_producer_level_time);
 
       if (mContentInfoListEnabled[5])
-        mContentInfoList[5].sort(T::ContentInfo::ComparisonMethod::newbaseName_level_starttime_file_message);
+        mContentInfoList[5].sort(T::ContentInfo::ComparisonMethod::newbaseName_generation_producer_level_time);
 
       if (mContentInfoListEnabled[6])
-        mContentInfoList[6].sort(T::ContentInfo::ComparisonMethod::cdmId_level_starttime_file_message);
+        mContentInfoList[6].sort(T::ContentInfo::ComparisonMethod::cdmId_generation_producer_level_time);
 
       if (mContentInfoListEnabled[7])
-        mContentInfoList[7].sort(T::ContentInfo::ComparisonMethod::cdmName_level_starttime_file_message);
+        mContentInfoList[7].sort(T::ContentInfo::ComparisonMethod::cdmName_generation_producer_level_time);
 
       mUpdateInProgress = false;
     }
@@ -354,25 +354,25 @@ void CacheImplementation::reloadData()
       mContentInfoList[0].sort(T::ContentInfo::ComparisonMethod::file_message);
 
       if (mContentInfoListEnabled[1])
-        mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_level_starttime_file_message);
+        mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_generation_producer_level_time);
 
       if (mContentInfoListEnabled[2])
-        mContentInfoList[2].sort(T::ContentInfo::ComparisonMethod::fmiName_level_starttime_file_message);
+        mContentInfoList[2].sort(T::ContentInfo::ComparisonMethod::fmiName_generation_producer_level_time);
 
       if (mContentInfoListEnabled[3])
-        mContentInfoList[3].sort(T::ContentInfo::ComparisonMethod::gribId_level_starttime_file_message);
+        mContentInfoList[3].sort(T::ContentInfo::ComparisonMethod::gribId_generation_producer_level_time);
 
       if (mContentInfoListEnabled[4])
-        mContentInfoList[4].sort(T::ContentInfo::ComparisonMethod::newbaseId_level_starttime_file_message);
+        mContentInfoList[4].sort(T::ContentInfo::ComparisonMethod::newbaseId_generation_producer_level_time);
 
       if (mContentInfoListEnabled[5])
-        mContentInfoList[5].sort(T::ContentInfo::ComparisonMethod::newbaseName_level_starttime_file_message);
+        mContentInfoList[5].sort(T::ContentInfo::ComparisonMethod::newbaseName_generation_producer_level_time);
 
       if (mContentInfoListEnabled[6])
-        mContentInfoList[6].sort(T::ContentInfo::ComparisonMethod::cdmId_level_starttime_file_message);
+        mContentInfoList[6].sort(T::ContentInfo::ComparisonMethod::cdmId_generation_producer_level_time);
 
       if (mContentInfoListEnabled[7])
-        mContentInfoList[7].sort(T::ContentInfo::ComparisonMethod::cdmName_level_starttime_file_message);
+        mContentInfoList[7].sort(T::ContentInfo::ComparisonMethod::cdmName_generation_producer_level_time);
 
       mUpdateInProgress = false;
 
@@ -4335,8 +4335,8 @@ void CacheImplementation::event_contentServerReload(T::EventInfo& eventInfo)
         mContentInfoList[t] = mContentInfoList[0];
 
       mContentInfoList[0].sort(T::ContentInfo::ComparisonMethod::file_message);
-      mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_level_starttime_file_message);
-      mContentInfoList[2].sort(T::ContentInfo::ComparisonMethod::gribId_level_starttime_file_message);
+      mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_generation_producer_level_time);
+      mContentInfoList[2].sort(T::ContentInfo::ComparisonMethod::gribId_generation_producer_level_time);
       mUpdateInProgress = false;
     }
 #endif

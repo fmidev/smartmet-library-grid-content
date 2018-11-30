@@ -11,8 +11,24 @@ module QueryServer
 module Corba
 {
 
+typedef sequence<octet> CorbaWkbData;
+typedef sequence<CorbaWkbData> CorbaWkbDataSequence;
+
+typedef float CorbaParamValue;
+typedef sequence<CorbaParamValue> CorbaParamValueList;
+
 
 typedef sequence<string> CorbaStringList;
+
+
+struct CorbaAttribute
+{
+  string name;
+  string value;
+};
+
+typedef sequence<CorbaAttribute> CorbaAttributeList;
+
 
 
 struct CorbaGridPointValue
@@ -58,19 +74,21 @@ typedef sequence<CorbaFunctionParam> CorbaFunctionParamList;
 
 struct CorbaParameterValues
 {
-  string             forecastTime;
-  unsigned long      producerId;
-  unsigned long      generationId;
-  unsigned long      geometryId;
-  octet              parameterKeyType;
-  string             parameterKey;
-  octet              parameterLevelIdType;
-  octet              parameterLevelId;
-  long               parameterLevel;
-  short              forecastType;
-  short              forecastNumber;
-  unsigned long      flags;
-  CorbaGridValueList valueList;
+  string                  forecastTime;
+  unsigned long           producerId;
+  unsigned long           generationId;
+  unsigned long           generationFlags;
+  unsigned long           geometryId;
+  octet                   parameterKeyType;
+  string                  parameterKey;
+  octet                   parameterLevelIdType;
+  octet                   parameterLevelId;
+  long                    parameterLevel;
+  short                   forecastType;
+  short                   forecastNumber;
+  unsigned long           flags;
+  CorbaGridValueList      valueList;
+  CorbaWkbDataSequence    wkbList;
 };
 
 typedef sequence<CorbaParameterValues> CorbaParameterValuesList;
@@ -93,13 +111,15 @@ struct CorbaQueryParameter
   short                    areaInterpolationMethod;
   short                    timeInterpolationMethod;
   short                    levelInterpolationMethod;
+  CorbaParamValueList      contourLowValues;
+  CorbaParamValueList      contourHighValues;
   unsigned long            producerId;
   unsigned long            generationFlags;
   long                     precision;
   unsigned long            timestepsBefore;
   unsigned long            timestepsAfter;
   unsigned long            timestepSizeInMinutes;
-  unsigned long      	   flags;
+  unsigned long      	     flags;
   string                   function;
   CorbaFunctionParamList   functionParams;
   CorbaParameterValuesList valueList;
@@ -117,22 +137,24 @@ struct CorbaCoordinate
 };
 
 typedef sequence<CorbaCoordinate> CorbaCoordinateList;
-typedef sequence<CorbaCoordinateList> CorbaQueryCoordinates;
+typedef sequence<CorbaCoordinateList> CorbaAreaCoordinates;
 
 
 
 struct CorbaQuery
 {
+  octet                    type;
+  octet                    searchType;
   CorbaStringList          producerNameList;
+  string                   timezone;
   string                   startTime;
   string                   endTime;
   string                   analysisTime;
   CorbaStringList          forecastTimeList;
-  octet                    searchType;
-  CorbaQueryCoordinates    coordinateList;
+  octet                    locationType;
+  CorbaAttributeList       attributeList;
+  CorbaAreaCoordinates     areaCoordinates;
   double                   radius;
-  double                   dem;
-  unsigned short           coverType;
   CorbaQueryParameterList  queryParameterList;
   string                   language;
   unsigned long            generationFlags;

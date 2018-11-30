@@ -22,9 +22,11 @@ QueryParameter::QueryParameter()
     mAreaInterpolationMethod = T::AreaInterpolationMethod::Undefined;
     mTimeInterpolationMethod = T::TimeInterpolationMethod::Undefined;
     mLevelInterpolationMethod = T::LevelInterpolationMethod::Undefined;
+    //mContourSmoothSize = 0;
+    //mContourSmoothDegree = 0;
     mProducerId = 0;
     mGenerationFlags = 0;
-    mPrecision = 0;
+    mPrecision = -1;
     mTimestepsBefore = 0;
     mTimestepsAfter = 0;
     mTimestepSizeInMinutes = 0;
@@ -59,6 +61,11 @@ QueryParameter::QueryParameter(const QueryParameter& queryParameter)
     mAreaInterpolationMethod = queryParameter.mAreaInterpolationMethod;
     mTimeInterpolationMethod = queryParameter.mTimeInterpolationMethod;
     mLevelInterpolationMethod = queryParameter.mLevelInterpolationMethod;
+    mContourLowValues = queryParameter.mContourLowValues;
+    mContourHighValues = queryParameter.mContourHighValues;
+    //mContourSmoothSize = queryParameter.mContourSmoothSize;
+    //mContourSmoothDegree = queryParameter.mContourSmoothDegree;
+    //mAttributeList = queryParameter.mAttributeList;
     mProducerId = queryParameter.mProducerId;
     mGenerationFlags = queryParameter.mGenerationFlags;
     mTimestepsBefore = queryParameter.mTimestepsBefore;
@@ -140,11 +147,28 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mPrecision                = " << mPrecision << "\n";
     stream << space(level) << "- mFunction                 = " << mFunction << "\n";
     stream << space(level) << "- mFlags                    = " << mFlags << "\n";
+    //stream << space(level) << "- mContourSmoothSize        = " << mContourSmoothSize << "\n";
+    //stream << space(level) << "- mContourSmoothDegree      = " << mContourSmoothDegree << "\n";
+
+    //stream << space(level) << "- mAttributeList            = \n";
+    //mAttributeList.print(stream,level+2,optionFlags);
 
     stream << space(level) << "- mFunctionParams           = \n";
     for (auto it = mFunctionParams.begin();  it != mFunctionParams.end(); ++it)
     {
       stream << space(level) << "   * " << it->first << ":" << it->second << "\n";
+    }
+
+    stream << space(level) << "- mContourLowValues         = \n";
+    for (auto it = mContourLowValues.begin();  it != mContourLowValues.end(); ++it)
+    {
+      stream << space(level) << "   * " << *it << "\n";
+    }
+
+    stream << space(level) << "- mContourHighValues        = \n";
+    for (auto it = mContourHighValues.begin();  it != mContourHighValues.end(); ++it)
+    {
+      stream << space(level) << "   * " << *it << "\n";
     }
 
     stream << space(level) << "- mValueList                = (" << mValueList.size() << " items)\n";

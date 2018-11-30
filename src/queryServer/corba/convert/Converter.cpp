@@ -112,9 +112,133 @@ void Converter::convert(QueryServer::Corba::CorbaStringList& source,string_vec& 
   {
     target.clear();
     uint len = source.length();
+    target.reserve(len);
     for (uint t=0; t<len; t++)
     {
       target.push_back(std::string(source[t]));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const T::Attribute& source,QueryServer::Corba::CorbaAttribute& target)
+{
+  try
+  {
+    target.name = CORBA::string_dup(source.mName.c_str());
+    target.value = CORBA::string_dup(source.mValue.c_str());
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const QueryServer::Corba::CorbaAttribute& source,T::Attribute& target)
+{
+  try
+  {
+    target.mName = source.name;
+    target.mValue = source.value;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const T::AttributeList& source,QueryServer::Corba::CorbaAttributeList& target)
+{
+  try
+  {
+    uint len = source.getLength();
+    target.length(len);
+    for (uint t=0; t<len; t++)
+    {
+      T::Attribute *attr = source.getAttributeByIndex(t);
+      QueryServer::Corba::CorbaAttribute corbaObject;
+      convert(*attr,corbaObject);
+      target[t] = corbaObject;
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const QueryServer::Corba::CorbaAttributeList& source,T::AttributeList& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      QueryServer::Corba::CorbaAttribute corbaObject = source[t];
+      T::Attribute *attr = new T::Attribute();
+      convert(corbaObject,*attr);
+      target.addAttribute(attr);
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+void Converter::convert(const T::ParamValue_vec& source,QueryServer::Corba::CorbaParamValueList& target)
+{
+  try
+  {
+    uint len = source.size();
+    target.length(len);
+    for (uint t=0; t<len; t++)
+    {
+      target[t] = source[t];
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+void Converter::convert(const QueryServer::Corba::CorbaParamValueList& source,T::ParamValue_vec& target)
+{
+  try
+  {
+    uint len = source.length();
+    target.clear();
+    target.reserve(len);
+    for (uint t=0; t<len; t++)
+    {
+      target.push_back(source[t]);
     }
   }
   catch (...)
@@ -312,6 +436,7 @@ void Converter::convert(QueryServer::Corba::CorbaParameterValues& source,QuerySe
     target.mForecastTime = source.forecastTime;
     target.mProducerId = source.producerId;
     target.mGenerationId = source.generationId;
+    target.mGenerationFlags = source.generationFlags;
     target.mGeometryId = source.geometryId;
     target.mParameterKeyType = source.parameterKeyType;
     target.mParameterKey = source.parameterKey;
@@ -323,6 +448,7 @@ void Converter::convert(QueryServer::Corba::CorbaParameterValues& source,QuerySe
     target.mFlags = source.flags;
 
     convert(source.valueList,target.mValueList);
+    convert(source.wkbList,target.mWkbList);
   }
   catch (...)
   {
@@ -341,6 +467,7 @@ void Converter::convert(QueryServer::ParameterValues& source,QueryServer::Corba:
     target.forecastTime = CORBA::string_dup(source.mForecastTime.c_str());
     target.producerId = source.mProducerId;
     target.generationId = source.mGenerationId;
+    target.generationFlags = source.mGenerationFlags;
     target.geometryId = source.mGeometryId;
     target.parameterKeyType = (::CORBA::Octet)source.mParameterKeyType;
     target.parameterKey = CORBA::string_dup(source.mParameterKey.c_str());
@@ -352,6 +479,7 @@ void Converter::convert(QueryServer::ParameterValues& source,QueryServer::Corba:
     target.flags = source.mFlags;
 
     convert(source.mValueList,target.valueList);
+    convert(source.mWkbList,target.wkbList);
   }
   catch (...)
   {
@@ -402,6 +530,7 @@ void Converter::convert(SmartMet::QueryServer::Corba::CorbaFunctionParamList& so
   {
     target.clear();
     uint len = source.length();
+    target.reserve(len);
     for (uint t=0; t<len; t++)
     {
       QueryServer::Corba::CorbaFunctionParam corbaObject = source[t];
@@ -450,6 +579,7 @@ void Converter::convert(QueryServer::Corba::CorbaParameterValuesList& source,Que
   {
     target.clear();
     uint len = source.length();
+    target.reserve(len);
     for (uint t=0; t<len; t++)
     {
       QueryServer::Corba::CorbaParameterValues corbaObject = source[t];
@@ -517,6 +647,8 @@ void Converter::convert(QueryServer::Corba::CorbaQueryParameter& source,QuerySer
     target.mTimestepsAfter = source.timestepsAfter;
     target.mTimestepSizeInMinutes = source.timestepSizeInMinutes;
     target.mFlags = source.flags;
+    convert(source.contourLowValues,target.mContourLowValues);
+    convert(source.contourHighValues,target.mContourHighValues);
 
     convert(source.functionParams,target.mFunctionParams);
     convert(source.valueList,target.mValueList);
@@ -557,6 +689,8 @@ void Converter::convert(QueryServer::QueryParameter& source,QueryServer::Corba::
     target.timestepsAfter = source.mTimestepsAfter;
     target.timestepSizeInMinutes = source.mTimestepSizeInMinutes;
     target.flags = source.mFlags;
+    convert(source.mContourLowValues,target.contourLowValues);
+    convert(source.mContourHighValues,target.contourHighValues);
 
     convert(source.mFunctionParams,target.functionParams);
     convert(source.mValueList,target.valueList);
@@ -577,6 +711,7 @@ void Converter::convert(QueryServer::Corba::CorbaQueryParameterList& source,Quer
   {
     target.clear();
     uint len = source.length();
+    target.reserve(len);
     for (uint t=0; t<len; t++)
     {
       QueryServer::Corba::CorbaQueryParameter corbaObject = source[t];
@@ -651,12 +786,13 @@ void Converter::convert(QueryServer::Corba::CorbaCoordinate& source,T::Coordinat
 
 
 
-void Converter::convert(QueryServer::Corba::CorbaCoordinateList& source,QueryServer::Coordinate_vec& target)
+void Converter::convert(QueryServer::Corba::CorbaCoordinateList& source,T::Coordinate_vec& target)
 {
   try
   {
     target.clear();
     uint len = source.length();
+    target.reserve(len);
     for (uint t=0; t<len; t++)
     {
       QueryServer::Corba::CorbaCoordinate corbaObject = source[t];
@@ -675,7 +811,7 @@ void Converter::convert(QueryServer::Corba::CorbaCoordinateList& source,QuerySer
 
 
 
-void Converter::convert(QueryServer::Coordinate_vec& source,QueryServer::Corba::CorbaCoordinateList& target)
+void Converter::convert(T::Coordinate_vec& source,QueryServer::Corba::CorbaCoordinateList& target)
 {
   try
   {
@@ -698,12 +834,13 @@ void Converter::convert(QueryServer::Coordinate_vec& source,QueryServer::Corba::
 
 
 
-void Converter::convert(QueryServer::Corba::CorbaQueryCoordinates& source,QueryServer::QueryCoordinates& target)
+void Converter::convert(QueryServer::Corba::CorbaAreaCoordinates& source,T::AreaCoordinates& target)
 {
   try
   {
     target.clear();
     uint len = source.length();
+    target.reserve(len);
     for (uint t=0; t<len; t++)
     {
       QueryServer::Corba::CorbaCoordinateList corbaObject = source[t];
@@ -722,7 +859,7 @@ void Converter::convert(QueryServer::Corba::CorbaQueryCoordinates& source,QueryS
 
 
 
-void Converter::convert(QueryServer::QueryCoordinates& source,QueryServer::Corba::CorbaQueryCoordinates& target)
+void Converter::convert(T::AreaCoordinates& source,QueryServer::Corba::CorbaAreaCoordinates& target)
 {
   try
   {
@@ -749,16 +886,23 @@ void Converter::convert(QueryServer::Corba::CorbaQuery& source,QueryServer::Quer
 {
   try
   {
+    target.mType = source.type;
+    target.mSearchType = source.searchType;
     convert(source.producerNameList,target.mProducerNameList);
+    target.mTimezone = source.timezone;
     target.mStartTime = source.startTime;
     target.mEndTime = source.endTime;
     target.mAnalysisTime = source.analysisTime;
     convert(source.forecastTimeList,target.mForecastTimeList);
-    target.mSearchType = (QueryServer::QuerySearchType)source.searchType;
-    convert(source.coordinateList,target.mCoordinateList);
+    target.mLocationType = source.locationType;
+    convert(source.attributeList,target.mAttributeList);
+    //target.mGridWidth = source.gridWidth;
+    //target.mGridHeight = source.gridHeight;
+    //target.mGridGeometryId = source.gridGeometryId;
+    convert(source.areaCoordinates,target.mAreaCoordinates);
     target.mRadius = source.radius;
-    target.mDem = source.dem;
-    target.mCoverType = source.coverType;
+    //target.mDem = source.dem;
+    //target.mCoverType = source.coverType;
     convert(source.queryParameterList,target.mQueryParameterList);
     target.mLanguage = source.language;
     target.mGenerationFlags = source.generationFlags;
@@ -779,16 +923,23 @@ void Converter::convert(QueryServer::Query& source,QueryServer::Corba::CorbaQuer
 {
   try
   {
+    target.type = (::CORBA::Octet)source.mType;
+    target.searchType = (::CORBA::Octet)source.mSearchType;
     convert(source.mProducerNameList,target.producerNameList);
+    target.timezone = CORBA::string_dup(source.mTimezone.c_str());
     target.startTime = CORBA::string_dup(source.mStartTime.c_str());
     target.endTime = CORBA::string_dup(source.mEndTime.c_str());
     target.analysisTime = CORBA::string_dup(source.mAnalysisTime.c_str());
     convert(source.mForecastTimeList,target.forecastTimeList);
-    target.searchType = (::CORBA::Octet)source.mSearchType;
-    convert(source.mCoordinateList,target.coordinateList);
+    target.locationType = (::CORBA::Octet)source.mLocationType;
+    convert(source.mAttributeList,target.attributeList);
+    //target.gridWidth = source.mGridWidth;
+    //target.gridHeight = source.mGridHeight;
+    //target.gridGeometryId = source.mGridGeometryId;
+    convert(source.mAreaCoordinates,target.areaCoordinates);
     target.radius = source.mRadius;
-    target.dem = source.mDem;
-    target.coverType = source.mCoverType;
+    //target.dem = source.mDem;
+    //target.coverType = source.mCoverType;
     convert(source.mQueryParameterList,target.queryParameterList);
     target.language = CORBA::string_dup(source.mLanguage.c_str());
     target.generationFlags = source.mGenerationFlags;
@@ -800,6 +951,102 @@ void Converter::convert(QueryServer::Query& source,QueryServer::Corba::CorbaQuer
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
+
+
+
+
+
+
+void Converter::convert(const SmartMet::T::WkbData& source, SmartMet::QueryServer::Corba::CorbaWkbData& target)
+{
+  try
+  {
+    uint len = source.size();
+    target.length(len);
+    for (uint t=0; t<len; t++)
+    {
+      target[t] = source[t];
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const SmartMet::QueryServer::Corba::CorbaWkbData& source,SmartMet::T::WkbData& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    target.reserve(len);
+    for (uint t=0; t<len; t++)
+    {
+      target.push_back(source[t]);
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const SmartMet::T::WkbData_vec& source, SmartMet::QueryServer::Corba::CorbaWkbDataSequence& target)
+{
+  try
+  {
+    uint len = source.size();
+    target.length(len);
+    for (uint t=0; t<len; t++)
+    {
+      auto obj = source[t];
+      QueryServer::Corba::CorbaWkbData corbaObject;
+      convert(obj,corbaObject);
+      target[t] = corbaObject;
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const SmartMet::QueryServer::Corba::CorbaWkbDataSequence& source,SmartMet::T::WkbData_vec& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    target.reserve(len);
+    for (uint t=0; t<len; t++)
+    {
+      QueryServer::Corba::CorbaWkbData corbaObject = source[t];
+      T::WkbData obj;
+      convert(corbaObject,obj);
+      target.push_back(obj);
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
 
 
 }

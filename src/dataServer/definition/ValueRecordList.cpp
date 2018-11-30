@@ -160,7 +160,7 @@ void ValueRecordList::clear()
 
 
 
-ValueRecord* ValueRecordList::getValueRecordByIndex(uint index)
+ValueRecord* ValueRecordList::getValueRecordByIndex(uint index) const
 {
   try
   {
@@ -178,7 +178,7 @@ ValueRecord* ValueRecordList::getValueRecordByIndex(uint index)
 
 
 
-uint ValueRecordList::getLength()
+uint ValueRecordList::getLength() const
 {
   try
   {
@@ -194,7 +194,7 @@ uint ValueRecordList::getLength()
 
 
 
-void ValueRecordList::print(std::ostream& stream,uint level,uint optionFlags)
+void ValueRecordList::print(std::ostream& stream,uint level,uint optionFlags) const
 {
   try
   {
