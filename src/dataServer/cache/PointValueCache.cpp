@@ -40,7 +40,7 @@ PointValueCache::~PointValueCache()
 
 
 
-void PointValueCache::addValue(uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::ParamValue value)
+void PointValueCache::addValue(uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::ParamValue value)
 {
   try
   {
@@ -51,7 +51,7 @@ void PointValueCache::addValue(uint fileId,uint messageIndex,uint flags,T::Coord
       maxAge = maxAge - 30;
     }
 
-    std::size_t key = getKey(fileId,messageIndex,flags,coordinateType,x,y,interpolationMethod);
+    std::size_t key = getKey(fileId,messageIndex,coordinateType,x,y,interpolationMethod);
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     auto it = mValueList.find(key);
@@ -82,11 +82,11 @@ void PointValueCache::addValue(uint fileId,uint messageIndex,uint flags,T::Coord
 
 
 
-bool PointValueCache::getValue(uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::ParamValue& value)
+bool PointValueCache::getValue(uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::ParamValue& value)
 {
   try
   {
-    std::size_t key = getKey(fileId,messageIndex,flags,coordinateType,x,y,interpolationMethod);
+    std::size_t key = getKey(fileId,messageIndex,coordinateType,x,y,interpolationMethod);
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     auto it = mValueList.find(key);
@@ -131,11 +131,11 @@ void PointValueCache::clear()
 
 
 
-void PointValueCache::deleteValue(uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,short interpolationMethod)
+void PointValueCache::deleteValue(uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short interpolationMethod)
 {
   try
   {
-    std::size_t key = getKey(fileId,messageIndex,flags,coordinateType,x,y,interpolationMethod);
+    std::size_t key = getKey(fileId,messageIndex,coordinateType,x,y,interpolationMethod);
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     auto it = mValueList.find(key);
@@ -236,12 +236,12 @@ void PointValueCache::deleteValuesByAge(uint maxAge)
 
 
 
-std::size_t PointValueCache::getKey(uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,short interpolationMethod)
+std::size_t PointValueCache::getKey(uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short interpolationMethod)
 {
   try
   {
     char buf[100];
-    sprintf(buf,"%08x%04x%08x%u%f%f%u",fileId,messageIndex,flags,coordinateType,x,y,interpolationMethod);
+    sprintf(buf,"%08x%04x%u%f%f%u",fileId,messageIndex,coordinateType,x,y,interpolationMethod);
     std::size_t str_hash = std::hash<std::string>{}(std::string(buf));
     return str_hash;
     /*

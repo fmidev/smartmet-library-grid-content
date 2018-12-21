@@ -88,6 +88,7 @@ struct CorbaParameterValues
   short                   forecastNumber;
   unsigned long           flags;
   CorbaGridValueList      valueList;
+  CorbaParamValueList     valueVector;
   CorbaWkbDataSequence    wkbList;
 };
 
@@ -153,6 +154,7 @@ struct CorbaQuery
   CorbaStringList          forecastTimeList;
   octet                    locationType;
   CorbaAttributeList       attributeList;
+  octet                    coordinateType;
   CorbaAreaCoordinates     areaCoordinates;
   double                   radius;
   CorbaQueryParameterList  queryParameterList;

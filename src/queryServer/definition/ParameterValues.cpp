@@ -53,6 +53,7 @@ ParameterValues::ParameterValues(const ParameterValues& parameterValues)
     mFlags = parameterValues.mFlags;
 
     mValueList = parameterValues.mValueList;
+    mValueVector = parameterValues.mValueVector;
     mWkbList = parameterValues.mWkbList;
   }
   catch (...)
@@ -98,6 +99,7 @@ void ParameterValues::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mForecastNumber       = " << mForecastNumber << "\n";
     stream << space(level) << "- mFlags                = " << mFlags << "\n";
     stream << space(level) << "- mWkbList              = (" << mWkbList.size() << " arrays)\n";
+    stream << space(level) << "- mValueVector          = (" << mValueVector.size() << " values)\n";
     stream << space(level) << "- mValueList            = (" << mValueList.getLength() << " records)\n";
 
     uint len = mValueList.getLength();

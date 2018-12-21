@@ -3696,6 +3696,9 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     }
 
     //contentList.print(std::cout,0,0);
+
+    contentInfoList = contentList;
+#if 0
     contentList.getContentListByForecastTime(forecastTime,contentInfoList);
 
     // If we cannot find any forecast time, lets add at least one
@@ -3712,7 +3715,7 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
           contentInfoList.addContentInfo(info);
       }
     }
-
+#endif
     return Result::OK;
   }
   catch (...)

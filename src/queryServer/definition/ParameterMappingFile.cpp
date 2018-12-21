@@ -226,7 +226,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
       {
         if (levelIdType == T::ParamLevelIdTypeValue::IGNORE || levelId == 0 || it->mParameterLevelId == levelId)
         {
-          if (levelIdType == T::ParamLevelIdTypeValue::IGNORE || it->mParameterLevel == level)
+          if (levelIdType == T::ParamLevelIdTypeValue::IGNORE || level < 0  || it->mParameterLevel == level)
           {
             if (onlySearchEnabled)
             {

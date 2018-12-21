@@ -15,17 +15,13 @@ Query::Query()
 {
   try
   {
-    mType = Type::Data;
+    mType = Type::PointValues;
     mSearchType = 0;
-    //mGridWidth = 0;
-    //mGridHeight = 0;
-    //mGridGeometryId = 0;
     mFlags = 0;
     mGenerationFlags = 0;
     mLocationType = LocationType::Point;
+    mCoordinateType = T::CoordinateTypeValue::LATLON_COORDINATES;
     mRadius = 0;
-    //mDem = 0;
-    //mCoverType = 0;
     mMaxParameterValues = 1000000;
   }
   catch (...)
@@ -50,14 +46,10 @@ Query::Query(const Query& query)
     mAnalysisTime = query.mAnalysisTime;
     mForecastTimeList = query.mForecastTimeList;
     mLocationType = query.mLocationType;
+    mCoordinateType = query.mCoordinateType;
     mAttributeList = query.mAttributeList;
-    //mGridWidth = query.mGridWidth;
-    //mGridHeight = query.mGridHeight;
-    //mGridGeometryId = query.mGridGeometryId;
     mAreaCoordinates = query.mAreaCoordinates;
     mRadius = query.mRadius;
-    //mDem = query.mDem;
-    //mCoverType = query.mCoverType;
     mQueryParameterList = query.mQueryParameterList;
     mLanguage = query.mLanguage;
     mGenerationFlags = query.mGenerationFlags;
@@ -131,6 +123,7 @@ uint Query::getValuesPerTimeStep()
     throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
+
 
 
 
@@ -212,12 +205,8 @@ void Query::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mAnalysisTime           = " << mAnalysisTime << "\n";
     stream << space(level) << "- mFlags                  = " << mFlags << "\n";
     stream << space(level) << "- mLocationType           = " << C_INT(mLocationType) << "\n";
+    stream << space(level) << "- mCoordinateType         = " << C_INT(mCoordinateType) << "\n";
     stream << space(level) << "- mRadius                 = " << mRadius << "\n";
-    //stream << space(level) << "- mDem                    = " << mDem << "\n";
-    //stream << space(level) << "- mGridWidth              = " << mGridWidth << "\n";
-    //stream << space(level) << "- mGridHeight             = " << mGridHeight << "\n";
-    //stream << space(level) << "- mGridGeometryId         = " << mGridGeometryId << "\n";
-    //stream << space(level) << "- mCoverType              = " << mCoverType << "\n";
     stream << space(level) << "- mLanguage               = " << mLanguage << "\n";
     stream << space(level) << "- mMaxParameterValues     = " << mMaxParameterValues << "\n";
 

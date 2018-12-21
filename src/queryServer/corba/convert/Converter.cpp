@@ -448,6 +448,7 @@ void Converter::convert(QueryServer::Corba::CorbaParameterValues& source,QuerySe
     target.mFlags = source.flags;
 
     convert(source.valueList,target.mValueList);
+    convert(source.valueVector,target.mValueVector);
     convert(source.wkbList,target.mWkbList);
   }
   catch (...)
@@ -479,6 +480,7 @@ void Converter::convert(QueryServer::ParameterValues& source,QueryServer::Corba:
     target.flags = source.mFlags;
 
     convert(source.mValueList,target.valueList);
+    convert(source.mValueVector,target.valueVector);
     convert(source.mWkbList,target.wkbList);
   }
   catch (...)
@@ -895,14 +897,10 @@ void Converter::convert(QueryServer::Corba::CorbaQuery& source,QueryServer::Quer
     target.mAnalysisTime = source.analysisTime;
     convert(source.forecastTimeList,target.mForecastTimeList);
     target.mLocationType = source.locationType;
+    target.mCoordinateType = source.coordinateType;
     convert(source.attributeList,target.mAttributeList);
-    //target.mGridWidth = source.gridWidth;
-    //target.mGridHeight = source.gridHeight;
-    //target.mGridGeometryId = source.gridGeometryId;
     convert(source.areaCoordinates,target.mAreaCoordinates);
     target.mRadius = source.radius;
-    //target.mDem = source.dem;
-    //target.mCoverType = source.coverType;
     convert(source.queryParameterList,target.mQueryParameterList);
     target.mLanguage = source.language;
     target.mGenerationFlags = source.generationFlags;
@@ -932,14 +930,10 @@ void Converter::convert(QueryServer::Query& source,QueryServer::Corba::CorbaQuer
     target.analysisTime = CORBA::string_dup(source.mAnalysisTime.c_str());
     convert(source.mForecastTimeList,target.forecastTimeList);
     target.locationType = (::CORBA::Octet)source.mLocationType;
+    target.coordinateType = (::CORBA::Octet)source.mCoordinateType;
     convert(source.mAttributeList,target.attributeList);
-    //target.gridWidth = source.mGridWidth;
-    //target.gridHeight = source.mGridHeight;
-    //target.gridGeometryId = source.mGridGeometryId;
     convert(source.mAreaCoordinates,target.areaCoordinates);
     target.radius = source.mRadius;
-    //target.dem = source.mDem;
-    //target.coverType = source.mCoverType;
     convert(source.mQueryParameterList,target.queryParameterList);
     target.language = CORBA::string_dup(source.mLanguage.c_str());
     target.generationFlags = source.mGenerationFlags;

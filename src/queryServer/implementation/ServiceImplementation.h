@@ -89,6 +89,7 @@ class ServiceImplementation : public ServiceInterface
                        std::string forecastTime,
                        bool timeMatchRequired,
                        uchar locationType,
+                       uchar coordinateType,
                        T::AreaCoordinates& coordinates,
                        T::ParamValue_vec& contourLowValues,
                        T::ParamValue_vec& contourHighValues,
@@ -117,6 +118,7 @@ class ServiceImplementation : public ServiceInterface
                        std::string endTime,
                        bool ignoreStartTimeValue,
                        uchar locationType,
+                       uchar coordinateType,
                        T::AreaCoordinates& coordinates,
                        T::ParamValue_vec& contourLowValues,
                        T::ParamValue_vec& contourHighValues,
@@ -222,15 +224,6 @@ class ServiceImplementation : public ServiceInterface
                        T::ParamValue_vec& valueList,
                        T::ParamValue_vec& newValueList);
 /*
-     void           timeInterpolation(
-                       short timeInterpolationMethod,
-                       std::string forecastTimeStr,
-                       std::string forecastTimeStr1,
-                       std::string forecastTimeStr2,
-                       T::GridValueList& list1,
-                       T::GridValueList& list2,
-                       T::GridValueList& valueList);
-*/
      void           levelInterpolation(
                        short levelInterpolationMethod,
                        double level,
@@ -239,6 +232,7 @@ class ServiceImplementation : public ServiceInterface
                        ParameterValues& parameterValues1,
                        ParameterValues& parameterValues2,
                        ParameterValues& valueList);
+*/
 
      bool           getPolygonValues(
                        T::ProducerInfo& producerInfo,
@@ -254,6 +248,7 @@ class ServiceImplementation : public ServiceInterface
                        uint parameterFlags,
                        short timeInterpolationMethod,
                        short levelInterpolationMethod,
+                       uchar coordinateType,
                        T::AreaCoordinates& coordinates,
                        uint& newProducerId,
                        ParameterValues& valueList);
@@ -272,6 +267,7 @@ class ServiceImplementation : public ServiceInterface
                        uint parameterFlags,
                        short timeInterpolationMethod,
                        short levelInterpolationMethod,
+                       uchar coordinateType,
                        double x,
                        double y,
                        double radius,
@@ -293,6 +289,7 @@ class ServiceImplementation : public ServiceInterface
                        short areaInterpolationMethod,
                        short timeInterpolationMethod,
                        short levelInterpolationMethod,
+                       uchar coordinateType,
                        T::AreaCoordinates& coordinates,
                        uint& newProducerId,
                        ParameterValues& valueList);
@@ -312,6 +309,7 @@ class ServiceImplementation : public ServiceInterface
                        short areaInterpolationMethod,
                        short timeInterpolationMethod,
                        short levelInterpolationMethod,
+                       uchar coordinateType,
                        double x,
                        double y,
                        uint& newProducerId,
@@ -333,6 +331,7 @@ class ServiceImplementation : public ServiceInterface
                        short timeInterpolationMethod,
                        short levelInterpolationMethod,
                        uchar locationType,
+                       uchar coordinateType,
                        T::Coordinate_vec& gridCoordinates,
                        T::ParamValue_vec& contourValues,
                        T::AttributeList& attributeList,
@@ -356,6 +355,7 @@ class ServiceImplementation : public ServiceInterface
                        short timeInterpolationMethod,
                        short levelInterpolationMethod,
                        uchar locationType,
+                       uchar coordinateType,
                        T::Coordinate_vec& gridCoordinates,
                        T::ParamValue_vec& contourLowValues,
                        T::ParamValue_vec& contourHighValues,
@@ -371,6 +371,7 @@ class ServiceImplementation : public ServiceInterface
                        T::ForecastType forecastType,
                        T::ForecastNumber forecastNumber,
                        T::GeometryId geometryId,
+                       uchar coordinateType,
                        double x,
                        double y,
                        int height,
@@ -378,6 +379,28 @@ class ServiceImplementation : public ServiceInterface
                        int& higherPressure,
                        double& lowerHeight,
                        double& higherHeight);
+
+     bool           getValueVectors(
+                       T::ProducerInfo& producerInfo,
+                       T::GeometryId producerGeometryId,
+                       uint generationId,
+                       uint generationFlags,
+                       ParameterMapping& pInfo,
+                       std::string forecastTime,
+                       T::ParamLevelId paramLevelId,
+                       T::ParamLevel paramLevel,
+                       T::ForecastType forecastType,
+                       T::ForecastNumber forecastNumber,
+                       uint parameterFlags,
+                       short areaInterpolationMethod,
+                       short timeInterpolationMethod,
+                       short levelInterpolationMethod,
+                       uchar locationType,
+                       uchar coordinateType,
+                       T::Coordinate_vec& gridCoordinates,
+                       T::AttributeList& attributeList,
+                       uint& newProducerId,
+                       ParameterValues& valueList);
 
 
   private:

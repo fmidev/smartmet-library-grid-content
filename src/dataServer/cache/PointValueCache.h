@@ -38,17 +38,17 @@ class PointValueCache
                       PointValueCache();
     virtual           ~PointValueCache();
 
-    void              addValue(uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::ParamValue value);
+    void              addValue(uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::ParamValue value);
     void              clear();
-    bool              getValue(uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::ParamValue& value);
-    void              deleteValue(uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,short interpolationMethod);
+    bool              getValue(uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::ParamValue& value);
+    void              deleteValue(uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short interpolationMethod);
     void              deleteValuesByFileId(uint fileId);
     void              deleteValuesByAge(uint maxAge);
     void              setMaxSize(std::size_t maxSize);
 
   protected:
 
-    std::size_t       getKey(uint fileId,uint messageIndex,uint flags,T::CoordinateType coordinateType,double x,double y,short interpolationMethod);
+    std::size_t       getKey(uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short interpolationMethod);
     void              deleteValue(std::size_t key);
 
     std::size_t       mMaxSize;

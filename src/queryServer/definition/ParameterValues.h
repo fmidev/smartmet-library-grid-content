@@ -43,6 +43,7 @@ class ParameterValues
     T::ForecastNumber       mForecastNumber;
     uint                    mFlags;
     T::GridValueList        mValueList;
+    T::ParamValue_vec       mValueVector;
     T::WkbData_vec          mWkbList;
 };
 

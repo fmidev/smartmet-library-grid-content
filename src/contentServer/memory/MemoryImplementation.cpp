@@ -4126,6 +4126,8 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
     }
 
     //contentList.print(std::cout,0,0);
+    contentInfoList = contentList;
+#if 0
     contentList.getContentListByForecastTime(forecastTime,contentInfoList);
 
     // If we cannot find any forecast time, lets add at least one
@@ -4142,7 +4144,7 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
           contentInfoList.addContentInfo(info);
       }
     }
-
+#endif
     return Result::OK;
   }
   catch (...)

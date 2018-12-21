@@ -3322,8 +3322,15 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
 
       uint t = C_UINT(idx);
 
-      ContentInfo *prev = nullptr;
-      ContentInfo *next = nullptr;
+      ContentInfo *prevTimeSameLevel = nullptr;
+      ContentInfo *nextTimeSameLevel = nullptr;
+
+      ContentInfo *sameTimePrevLevel = nullptr;
+      ContentInfo *sameTimeNextLevel = nullptr;
+      ContentInfo *prevTimePrevLevel = nullptr;
+      ContentInfo *prevTimeNextLevel = nullptr;
+      ContentInfo *nextTimePrevLevel = nullptr;
+      ContentInfo *nextTimeNextLevel = nullptr;
 
       while (t < mLength  &&  mArray[t] != nullptr)
       {
@@ -3343,37 +3350,94 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                   {
-                    if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || info->mParameterLevel == level)
+                    if (info->mForecastTime < forecastTime)
                     {
-                      if (info->mForecastTime < forecastTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                      if (info->mParameterLevel == level || parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE)
                       {
-                        prev = info;
+                        if (prevTimeSameLevel == nullptr || prevTimeSameLevel->mForecastTime < info->mForecastTime)
+                        {
+                          prevTimeSameLevel = info;
+                        }
                       }
-
-                      if (info->mForecastTime > forecastTime  &&  next == nullptr)
+                      else
+                      if (info->mParameterLevel < level)
                       {
-                        next = info;
-                        t = mLength;
+                        if (prevTimePrevLevel == nullptr || prevTimePrevLevel->mForecastTime < info->mForecastTime  || (prevTimePrevLevel->mForecastTime == info->mForecastTime  &&  prevTimePrevLevel->mParameterLevel < info->mParameterLevel))
+                        {
+                          prevTimePrevLevel = info;
+                        }
                       }
-
-                      if (info->mForecastTime == forecastTime)
+                      else
+                      if (info->mParameterLevel > level)
+                      {
+                        if (prevTimeNextLevel == nullptr || prevTimeNextLevel->mForecastTime < info->mForecastTime  ||  (prevTimeNextLevel->mForecastTime == info->mForecastTime &&  prevTimeNextLevel->mParameterLevel > info->mParameterLevel))
+                        {
+                          prevTimeNextLevel = info;
+                        }
+                      }
+                    }
+                    else
+                    if (info->mForecastTime > forecastTime)
+                    {
+                      if (info->mParameterLevel == level || parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE)
+                      {
+                        if (nextTimeSameLevel == nullptr)
+                        {
+                          nextTimeSameLevel = info;
+                          t = mLength;
+                        }
+                      }
+                      else
+                      if (info->mParameterLevel < level)
+                      {
+                        if (nextTimePrevLevel == nullptr || nextTimePrevLevel->mForecastTime > info->mForecastTime || (nextTimePrevLevel->mForecastTime == info->mForecastTime  &&  nextTimePrevLevel->mParameterLevel < info->mParameterLevel))
+                        {
+                          nextTimePrevLevel = info;
+                        }
+                      }
+                      else
+                      if (info->mParameterLevel > level)
+                      {
+                        if (nextTimeNextLevel == nullptr || nextTimePrevLevel->mForecastTime > info->mForecastTime || (nextTimeNextLevel->mForecastTime == info->mForecastTime &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
+                        {
+                          nextTimeNextLevel = info;
+                          t = mLength;
+                        }
+                      }
+                    }
+                    else
+                    if (info->mForecastTime == forecastTime)
+                    {
+                      if (info->mParameterLevel == level || parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE)
                       {
                         if (contentInfoList.getReleaseObjects())
                           contentInfoList.addContentInfo(info->duplicate());
                         else
                           contentInfoList.addContentInfo(info);
                       }
+                      else
+                      if (info->mParameterLevel < level)
+                      {
+                        if (sameTimePrevLevel == nullptr || sameTimePrevLevel->mParameterLevel < info->mParameterLevel)
+                        {
+                          sameTimePrevLevel = info;
+                        }
+                      }
+                      else
+                      if (info->mParameterLevel > level)
+                      {
+                        if (sameTimeNextLevel == nullptr || sameTimeNextLevel->mParameterLevel > info->mParameterLevel)
+                        {
+                          sameTimeNextLevel = info;
+                          t = mLength;
+                        }
+                      }
+
                     }
                   }
                 }
               }
             }
-            /*
-            else
-            {
-              if (t > C_UINT(idx))
-                t = mLength;
-            }*/
           }
           else
           {
@@ -3387,24 +3451,95 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint g
       if (contentInfoList.getLength() > 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+
+      if (prevTimeSameLevel != nullptr  &&  (prevTimeSameLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
         // We need to add the previous entry before the start time.
 
         if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(prev->duplicate());
+          contentInfoList.addContentInfo(prevTimeSameLevel->duplicate());
         else
-          contentInfoList.addContentInfo(prev);
+          contentInfoList.addContentInfo(prevTimeSameLevel);
       }
 
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (nextTimeSameLevel != nullptr  &&  (nextTimeSameLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
         // We need to add the next entry after the end time.
 
         if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(next->duplicate());
+          contentInfoList.addContentInfo(nextTimeSameLevel->duplicate());
         else
-          contentInfoList.addContentInfo(next);
+          contentInfoList.addContentInfo(nextTimeSameLevel);
+      }
+
+      if (contentInfoList.getLength() == 2)
+        return;
+
+
+
+      if (sameTimePrevLevel != nullptr  &&  (sameTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      {
+        // We need to add the previous entry before the start time.
+
+        if (contentInfoList.getReleaseObjects())
+          contentInfoList.addContentInfo(sameTimePrevLevel->duplicate());
+        else
+          contentInfoList.addContentInfo(sameTimePrevLevel);
+      }
+
+      if (sameTimeNextLevel != nullptr  &&  (sameTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      {
+        // We need to add the next entry after the end time.
+
+        if (contentInfoList.getReleaseObjects())
+          contentInfoList.addContentInfo(sameTimeNextLevel->duplicate());
+        else
+          contentInfoList.addContentInfo(sameTimeNextLevel);
+      }
+
+      if (contentInfoList.getLength() == 2)
+        return;
+
+
+
+      if (prevTimePrevLevel != nullptr  &&  (prevTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      {
+        // We need to add the previous entry before the start time.
+
+        if (contentInfoList.getReleaseObjects())
+          contentInfoList.addContentInfo(prevTimePrevLevel->duplicate());
+        else
+          contentInfoList.addContentInfo(prevTimePrevLevel);
+      }
+
+      if (prevTimeNextLevel != nullptr  &&  (prevTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      {
+        // We need to add the previous entry before the start time.
+
+        if (contentInfoList.getReleaseObjects())
+          contentInfoList.addContentInfo(prevTimeNextLevel->duplicate());
+        else
+          contentInfoList.addContentInfo(prevTimeNextLevel);
+      }
+
+      if (nextTimePrevLevel != nullptr  &&  (nextTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      {
+        // We need to add the next entry after the end time.
+
+        if (contentInfoList.getReleaseObjects())
+          contentInfoList.addContentInfo(nextTimePrevLevel->duplicate());
+        else
+          contentInfoList.addContentInfo(nextTimePrevLevel);
+      }
+
+      if (nextTimeNextLevel != nullptr  &&  (nextTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      {
+        // We need to add the next entry after the end time.
+
+        if (contentInfoList.getReleaseObjects())
+          contentInfoList.addContentInfo(nextTimeNextLevel->duplicate());
+        else
+          contentInfoList.addContentInfo(nextTimeNextLevel);
       }
     }
     else
