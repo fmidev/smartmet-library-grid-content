@@ -21,6 +21,7 @@ ParameterMapping::ParameterMapping()
     mLevelInterpolationMethod = T::LevelInterpolationMethod::Undefined;
     mGroupFlags = 0;
     mSearchEnabled = false;
+    mDefaultPrecision = -1;
   }
   catch (...)
   {
@@ -50,6 +51,7 @@ ParameterMapping::ParameterMapping(const ParameterMapping& mapping)
     mSearchEnabled = mapping.mSearchEnabled;
     mConversionFunction = mapping.mConversionFunction;
     mReverseConversionFunction = mapping.mReverseConversionFunction;
+    mDefaultPrecision = mapping.mDefaultPrecision;
   }
   catch (...)
   {
@@ -95,6 +97,7 @@ void ParameterMapping::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mSearchEnabled             = " << mSearchEnabled << "\n";
     stream << space(level) << "- mConversionFunction        = " << mConversionFunction << "\n";
     stream << space(level) << "- mReverseConversionFunction = " << mReverseConversionFunction << "\n";
+    stream << space(level) << "- mDefaultPrecision          = " << mDefaultPrecision << "\n";
   }
   catch (...)
   {

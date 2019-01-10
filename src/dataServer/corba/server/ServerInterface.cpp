@@ -214,7 +214,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueByLevelAndPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short levelInterpolationMethod, SmartMet::DataServer::Corba::CorbaParamValue& value)
+::CORBA::Long ServerInterface::getGridValueByLevelAndPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::Long level1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long level2, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short levelInterpolationMethod, SmartMet::DataServer::Corba::CorbaParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -223,7 +223,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     T::ParamValue sValue = 0;
-    int result = mService->getGridValueByLevelAndPoint(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,sValue);
+    int result = mService->getGridValueByLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,newLevel,coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,sValue);
 
     if (result == 0)
       value = sValue;
@@ -266,6 +266,33 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
 }
 
+
+
+
+
+::CORBA::Long ServerInterface::getGridValueByTimeLevelAndPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::Long level1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long level2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::Long level3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::Long level4, const char* newTime, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, SmartMet::DataServer::Corba::CorbaParamValue& value)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == nullptr)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    T::ParamValue sValue = 0;
+    int result = mService->getGridValueByTimeLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,newTime,newLevel,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,sValue);
+
+    if (result == 0)
+      value = sValue;
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
 
 
 

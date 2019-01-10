@@ -32,6 +32,7 @@ class ParameterMapping
     bool                        mSearchEnabled;
     std::string                 mConversionFunction;
     std::string                 mReverseConversionFunction;
+    short                       mDefaultPrecision;
 
 
     class GroupFlags

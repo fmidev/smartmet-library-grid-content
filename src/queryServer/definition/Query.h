@@ -24,11 +24,11 @@ class Query
     void                removeTemporaryParameters();
     void                print(std::ostream& stream,uint level,uint optionFlags);
 
-    uchar               mType;
+    //uchar               mType;
     uchar               mSearchType;
     string_vec          mProducerNameList;
     string_set          mForecastTimeList;
-    unsigned char       mLocationType;
+    //uchar               mLocationType;
     T::AttributeList    mAttributeList;
     T::CoordinateType   mCoordinateType;
     T::AreaCoordinates  mAreaCoordinates;

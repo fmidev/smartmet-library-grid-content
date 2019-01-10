@@ -41,6 +41,51 @@ Converter::~Converter()
 
 
 
+void Converter::convert(std::vector<uint>& source,QueryServer::Corba::CorbaULongList& target)
+{
+  try
+  {
+    uint len = source.size();
+    target.length(len);
+
+    uint t = 0;
+    for (auto it=source.begin(); it!=source.end(); ++it)
+    {
+      target[t] = *it;
+      t++;
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const QueryServer::Corba::CorbaULongList& source,std::vector<uint>& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      target.push_back(source[t]);
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 void Converter::convert(string_set& source,QueryServer::Corba::CorbaStringList& target)
 {
   try
@@ -102,6 +147,7 @@ void Converter::convert(string_vec& source,QueryServer::Corba::CorbaStringList& 
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
+
 
 
 
@@ -623,11 +669,15 @@ void Converter::convert(QueryServer::ParameterValues_vec& source,QueryServer::Co
 
 
 
+
+
 void Converter::convert(QueryServer::Corba::CorbaQueryParameter& source,QueryServer::QueryParameter& target)
 {
   try
   {
     target.mId = source.id;
+    target.mType = source.type;
+    target.mLocationType = source.locationType;
     target.mParam = source.param;
     target.mOrigParam = source.origParam;
     target.mSymbolicName = source.symbolicName;
@@ -651,6 +701,7 @@ void Converter::convert(QueryServer::Corba::CorbaQueryParameter& source,QuerySer
     target.mFlags = source.flags;
     convert(source.contourLowValues,target.mContourLowValues);
     convert(source.contourHighValues,target.mContourHighValues);
+    convert(source.contourColors,target.mContourColors);
 
     convert(source.functionParams,target.mFunctionParams);
     convert(source.valueList,target.mValueList);
@@ -670,6 +721,8 @@ void Converter::convert(QueryServer::QueryParameter& source,QueryServer::Corba::
   try
   {
     target.id = source.mId;
+    target.type = source.mType;
+    target.locationType = source.mLocationType;
     target.param = CORBA::string_dup(source.mParam.c_str());
     target.origParam = CORBA::string_dup(source.mOrigParam.c_str());
     target.symbolicName = CORBA::string_dup(source.mSymbolicName.c_str());
@@ -693,6 +746,7 @@ void Converter::convert(QueryServer::QueryParameter& source,QueryServer::Corba::
     target.flags = source.mFlags;
     convert(source.mContourLowValues,target.contourLowValues);
     convert(source.mContourHighValues,target.contourHighValues);
+    convert(source.mContourColors,target.contourColors);
 
     convert(source.mFunctionParams,target.functionParams);
     convert(source.mValueList,target.valueList);
@@ -888,7 +942,7 @@ void Converter::convert(QueryServer::Corba::CorbaQuery& source,QueryServer::Quer
 {
   try
   {
-    target.mType = source.type;
+    //target.mType = source.type;
     target.mSearchType = source.searchType;
     convert(source.producerNameList,target.mProducerNameList);
     target.mTimezone = source.timezone;
@@ -896,7 +950,6 @@ void Converter::convert(QueryServer::Corba::CorbaQuery& source,QueryServer::Quer
     target.mEndTime = source.endTime;
     target.mAnalysisTime = source.analysisTime;
     convert(source.forecastTimeList,target.mForecastTimeList);
-    target.mLocationType = source.locationType;
     target.mCoordinateType = source.coordinateType;
     convert(source.attributeList,target.mAttributeList);
     convert(source.areaCoordinates,target.mAreaCoordinates);
@@ -921,7 +974,7 @@ void Converter::convert(QueryServer::Query& source,QueryServer::Corba::CorbaQuer
 {
   try
   {
-    target.type = (::CORBA::Octet)source.mType;
+    //target.type = (::CORBA::Octet)source.mType;
     target.searchType = (::CORBA::Octet)source.mSearchType;
     convert(source.mProducerNameList,target.producerNameList);
     target.timezone = CORBA::string_dup(source.mTimezone.c_str());
@@ -929,7 +982,6 @@ void Converter::convert(QueryServer::Query& source,QueryServer::Corba::CorbaQuer
     target.endTime = CORBA::string_dup(source.mEndTime.c_str());
     target.analysisTime = CORBA::string_dup(source.mAnalysisTime.c_str());
     convert(source.mForecastTimeList,target.forecastTimeList);
-    target.locationType = (::CORBA::Octet)source.mLocationType;
     target.coordinateType = (::CORBA::Octet)source.mCoordinateType;
     convert(source.mAttributeList,target.attributeList);
     convert(source.mAreaCoordinates,target.areaCoordinates);

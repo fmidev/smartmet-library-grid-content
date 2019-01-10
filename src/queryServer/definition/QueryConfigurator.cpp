@@ -54,11 +54,6 @@ void QueryConfigurator::configure(Query& query,T::AttributeList& attributeList)
   {
     attributeList.setCaseSensitive(false);
 
-    const char *typeStr = attributeList.getAttributeValue("type");
-    if (typeStr != nullptr)
-      query.mType = atoi(typeStr);
-
-
     configureProducer(query,attributeList);
     configureGeneration(query,attributeList);
     configureLocation(query,attributeList);
@@ -178,13 +173,13 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
 
     if (timestepsStr != nullptr)
     {
-      timesteps = atoi(timestepsStr);
+      timesteps = toInt32(timestepsStr);
     }
 
 
     if (startStepStr != nullptr)
     {
-      startStep = atoi(startStepStr);
+      startStep = toInt32(startStepStr);
     }
 
 
@@ -194,7 +189,7 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
       splitString(hourStr,',',partList);
       for (auto it = partList.begin(); it != partList.end(); ++it)
       {
-        sprintf(tmp,"%02d00",atoi(it->c_str()));
+        sprintf(tmp,"%02d00",toInt32(it->c_str()));
         timeList.insert(tmp);
       }
     }
@@ -342,7 +337,6 @@ void QueryConfigurator::configureLocation(Query& query,T::AttributeList& attribu
       T::Coordinate_vec coordinates;
       coordinates.push_back(T::Coordinate(coordinateList[0],coordinateList[1]));
       query.mAreaCoordinates.push_back(coordinates);
-      query.mLocationType = Query::LocationType::Point;
     }
 
     if (latlonStr != nullptr)
@@ -355,15 +349,14 @@ void QueryConfigurator::configureLocation(Query& query,T::AttributeList& attribu
       T::Coordinate_vec coordinates;
       coordinates.push_back(T::Coordinate(coordinateList[1],coordinateList[0]));
       query.mAreaCoordinates.push_back(coordinates);
-      query.mLocationType = Query::LocationType::Point;
     }
 
     if (radiusStr != nullptr)
     {
-      query.mRadius = atof(radiusStr);
+      query.mRadius = toDouble(radiusStr);
 
-      if (query.mAreaCoordinates.size() == 1  &&  query.mAreaCoordinates[0].size() == 1)
-        query.mLocationType = Query::LocationType::Circle;
+      //if (query.mAreaCoordinates.size() == 1  &&  query.mAreaCoordinates[0].size() == 1)
+      //  query.mLocationType = Query::LocationType::Circle;
     }
   }
   catch (...)
@@ -383,6 +376,9 @@ void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attri
   {
     const char *levelsStr = attributeList.getAttributeValue("levels");
     const char *paramStr = attributeList.getAttributeValue("param");
+    const char *typeStr = attributeList.getAttributeValue("type");
+    const char *locationTypeStr = attributeList.getAttributeValue("locationType");
+
 
     std::set<double> levels;
     if (levelsStr != nullptr)
@@ -405,6 +401,12 @@ void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attri
         {
           QueryParameter param;
           //param.mId;
+          if (typeStr != nullptr)
+            param.mType = toUInt8(typeStr);
+
+          if (locationTypeStr != nullptr)
+            param.mLocationType = toUInt8(locationTypeStr);
+
           param.mParam = *p;
           param.mOrigParam = *p;
           //param.mSymbolicName = *p;

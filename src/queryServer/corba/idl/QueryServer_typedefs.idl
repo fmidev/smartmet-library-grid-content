@@ -20,6 +20,8 @@ typedef sequence<CorbaParamValue> CorbaParamValueList;
 
 typedef sequence<string> CorbaStringList;
 
+typedef sequence<unsigned long> CorbaULongList;
+
 
 struct CorbaAttribute
 {
@@ -99,6 +101,8 @@ typedef sequence<CorbaParameterValues> CorbaParameterValuesList;
 struct CorbaQueryParameter
 {
   unsigned long            id;
+  octet                    type;
+  octet                    locationType;
   string                   param;
   string                   origParam;
   string                   symbolicName;
@@ -114,9 +118,10 @@ struct CorbaQueryParameter
   short                    levelInterpolationMethod;
   CorbaParamValueList      contourLowValues;
   CorbaParamValueList      contourHighValues;
+  CorbaULongList           contourColors;
   unsigned long            producerId;
   unsigned long            generationFlags;
-  long                     precision;
+  short                    precision;
   unsigned long            timestepsBefore;
   unsigned long            timestepsAfter;
   unsigned long            timestepSizeInMinutes;
@@ -144,7 +149,6 @@ typedef sequence<CorbaCoordinateList> CorbaAreaCoordinates;
 
 struct CorbaQuery
 {
-  octet                    type;
   octet                    searchType;
   CorbaStringList          producerNameList;
   string                   timezone;
@@ -152,7 +156,6 @@ struct CorbaQuery
   string                   endTime;
   string                   analysisTime;
   CorbaStringList          forecastTimeList;
-  octet                    locationType;
   CorbaAttributeList       attributeList;
   octet                    coordinateType;
   CorbaAreaCoordinates     areaCoordinates;

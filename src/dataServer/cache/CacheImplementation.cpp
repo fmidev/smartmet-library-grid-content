@@ -224,7 +224,7 @@ int CacheImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId
 
 
 
-int CacheImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
+int CacheImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
 {
   try
   {
@@ -233,7 +233,7 @@ int CacheImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,uin
     if (mDataServer == nullptr)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
-    return mDataServer->getGridValueByLevelAndPoint(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,value);
+    return mDataServer->getGridValueByLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,newLevel,coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,value);
   }
   catch (...)
   {
@@ -255,6 +255,27 @@ int CacheImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,uint
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     return mDataServer->getGridValueByTimeAndPoint(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,value);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,uint fileId3,uint messageIndex3,int level3,uint fileId4,uint messageIndex4,int level4,std::string newTime,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
+{
+  try
+  {
+    // ToDo : Implement caching functionality
+
+    if (mDataServer == nullptr)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    return mDataServer->getGridValueByTimeLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,newTime,newLevel,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,value);
   }
   catch (...)
   {

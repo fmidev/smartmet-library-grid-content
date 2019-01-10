@@ -25,6 +25,9 @@ class Converter
                   Converter();
     virtual       ~Converter();
 
+    static void   convert(std::vector<uint>& source,QueryServer::Corba::CorbaULongList& target);
+    static void   convert(const QueryServer::Corba::CorbaULongList& source,std::vector<uint>& target);
+
     static void   convert(string_set& source,QueryServer::Corba::CorbaStringList& target);
     static void   convert(QueryServer::Corba::CorbaStringList& source,string_set& target);
 

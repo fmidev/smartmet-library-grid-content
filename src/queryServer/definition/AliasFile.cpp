@@ -193,6 +193,39 @@ bool AliasFile::getAlias(const std::string& name,std::string& alias)
 
 
 
+bool AliasFile::replaceAlias(const std::string& name,std::string& alias)
+{
+  try
+  {
+    auto p1 = name.find("$(");
+    if (p1 == std::string::npos)
+      return false;
+
+    auto p2 = name.find(")",p1);
+    if (p2 == std::string::npos)
+      return false;
+
+    std::string n = name.substr(p1+2,p2-p1-2);
+    std::string a;
+    if (getAlias(n,a))
+    {
+      alias = name;
+      alias.replace(p1,p2-p1+1,a);
+
+      return true;
+    }
+    return false;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 void AliasFile::getAliasList(const std::string& name,std::vector<std::string>& aliasList)
 {
   try

@@ -208,16 +208,16 @@ int ServiceInterface::getGridValueByPoint(T::SessionId sessionId,uint fileId,uin
 
 
 
-int ServiceInterface::getGridValueByLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
+int ServiceInterface::getGridValueByLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
 {
   FUNCTION_TRACE
   try
   {
     unsigned long long timeStart = getTime();
-    int result = _getGridValueByLevelAndPoint(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,value);
+    int result = _getGridValueByLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,newLevel,coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,value);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%d,%u,%f,%f,%u,%u,%f);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,value,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%d,%u,%u,%d,%d,%u,%f,%f,%u,%u,%f);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,newLevel,coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,value,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -240,6 +240,28 @@ int ServiceInterface::getGridValueByTimeAndPoint(T::SessionId sessionId,uint fil
     unsigned long requestTime = getTime() - timeStart;
 
     PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%s,%u,%f,%f,%u,%u,%f);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,value,result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,uint fileId3,uint messageIndex3,int level3,uint fileId4,uint messageIndex4,int level4,std::string newTime,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getGridValueByTimeLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,newTime,newLevel,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,value);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%d,%u,%u,%d,%u,%u,%d,%u,%u,%d,%s,%u,%u,%f,%f,%u,%u,%u,%f);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,newTime.c_str(),newLevel,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,value,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1006,7 +1028,7 @@ int ServiceInterface::_getGridValueByPoint(T::SessionId sessionId,uint fileId,ui
 
 
 
-int ServiceInterface::_getGridValueByLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
+int ServiceInterface::_getGridValueByLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
@@ -1016,6 +1038,15 @@ int ServiceInterface::_getGridValueByLevelAndPoint(T::SessionId sessionId,uint f
 
 
 int ServiceInterface::_getGridValueByTimeAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,T::ParamValue& value)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
+
+
+
+
+int ServiceInterface::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,uint fileId3,uint messageIndex3,int level3,uint fileId4,uint messageIndex4,int level4,std::string newTime,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }

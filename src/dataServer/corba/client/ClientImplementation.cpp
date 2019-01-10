@@ -226,7 +226,7 @@ int ClientImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileI
 
 
 
-int ClientImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
+int ClientImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
 {
   try
   {
@@ -235,7 +235,7 @@ int ClientImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,ui
 
     SmartMet::DataServer::Corba::CorbaParamValue corbaValue;
 
-    int result = mService->getGridValueByLevelAndPoint(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,(CORBA::Octet)coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,corbaValue);
+    int result = mService->getGridValueByLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,newLevel,(CORBA::Octet)coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,corbaValue);
 
     if (result == 0)
       value = corbaValue;
@@ -268,6 +268,28 @@ int ClientImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,uin
   CATCH_EXCEPTION
 }
 
+
+
+
+
+int ClientImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,uint fileId3,uint messageIndex3,int level3,uint fileId4,uint messageIndex4,int level4,std::string newTime,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    SmartMet::DataServer::Corba::CorbaParamValue corbaValue;
+
+    int result = mService->getGridValueByTimeLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,newTime.c_str(),newLevel,(CORBA::Octet)coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,corbaValue);
+
+    if (result == 0)
+      value = corbaValue;
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
 
 
 

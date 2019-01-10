@@ -13,6 +13,8 @@ QueryParameter::QueryParameter()
   try
   {
     mId = 0;
+    mType = 0;
+    mLocationType = 0;
     mParameterKeyType = T::ParamKeyTypeValue::UNKNOWN;
     mParameterLevelIdType = T::ParamLevelIdTypeValue::ANY;
     mParameterLevelId = 0;
@@ -48,6 +50,8 @@ QueryParameter::QueryParameter(const QueryParameter& queryParameter)
   try
   {
     mId = queryParameter.mId;
+    mType = queryParameter.mType;
+    mLocationType = queryParameter.mLocationType;
     mParam = queryParameter.mParam;
     mOrigParam = queryParameter.mOrigParam;
     mSymbolicName = queryParameter.mSymbolicName;
@@ -63,6 +67,7 @@ QueryParameter::QueryParameter(const QueryParameter& queryParameter)
     mLevelInterpolationMethod = queryParameter.mLevelInterpolationMethod;
     mContourLowValues = queryParameter.mContourLowValues;
     mContourHighValues = queryParameter.mContourHighValues;
+    mContourColors = queryParameter.mContourColors;
     //mContourSmoothSize = queryParameter.mContourSmoothSize;
     //mContourSmoothDegree = queryParameter.mContourSmoothDegree;
     //mAttributeList = queryParameter.mAttributeList;
@@ -125,6 +130,8 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
   {
     stream << space(level) << "QueryParameter\n";
     stream << space(level) << "- mId                       = " << mId << "\n";
+    stream << space(level) << "- mType                     = " << C_INT(mType)<< "\n";
+    stream << space(level) << "- mLocationType             = " << C_INT(mLocationType) << "\n";
     stream << space(level) << "- mParam                    = " << mParam << "\n";
     stream << space(level) << "- mOrigParam                = " << mOrigParam << "\n";
     stream << space(level) << "- mSymbolicName             = " << mSymbolicName << "\n";
@@ -169,6 +176,14 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     for (auto it = mContourHighValues.begin();  it != mContourHighValues.end(); ++it)
     {
       stream << space(level) << "   * " << *it << "\n";
+    }
+
+    stream << space(level) << "- mContourColors            = \n";
+    for (auto it = mContourColors.begin();  it != mContourColors.end(); ++it)
+    {
+      char hex[20];
+      sprintf(hex,"%08X",*it);
+      stream << space(level) << "   * " << hex << "\n";
     }
 
     stream << space(level) << "- mValueList                = (" << mValueList.size() << " items)\n";

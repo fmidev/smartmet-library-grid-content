@@ -24,6 +24,7 @@ class AliasFile
     virtual void  init(const std::string& filename,bool duplicatesAllowed);
     virtual bool  checkUpdates();
     virtual bool  getAlias(const std::string& name,std::string& alias);
+    virtual bool  replaceAlias(const std::string& name,std::string& alias);
     virtual void  getAliasList(const std::string& name,std::vector<std::string>& aliasList);
     virtual void  print(std::ostream& stream,uint level,uint optionFlags);
 

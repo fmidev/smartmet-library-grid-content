@@ -83,6 +83,8 @@ else
 	-I$(includedir) \
 	-I$(includedir)/smartmet \
 	-I /usr/include/lua \
+	-I /usr/include/postgresql \
+	-I /usr/pgsql-9.5/include \
 	$(pkg-config --cflags icu-i18n) \
 	$(CORBA_INCLUDE)
 
@@ -103,6 +105,7 @@ LIBS = -L$(libdir) \
 	-lcurl \
 	-llua \
 	-lpthread \
+	-L/usr/lib/x86_64-linux-gnu/ -lpq \
 	$(CORBA_LIBS)
 
 # What to install
@@ -140,7 +143,7 @@ vpath %.cpp src/ \
 			src/contentServer/memory \
 			src/contentServer/redis \
 			src/contentServer/sync \
-            src/dataServer \
+      src/dataServer \
 			src/dataServer/definition \
 			src/dataServer/cache \
 			src/dataServer/implementation \
@@ -160,7 +163,7 @@ vpath %.h 	src/ \
 			src/contentServer/memory \
 			src/contentServer/redis \
 			src/contentServer/sync \
-            src/dataServer \
+      src/dataServer \
 			src/dataServer/definition \
 			src/dataServer/cache \
 			src/dataServer/implementation \
@@ -181,7 +184,7 @@ else
 # Compilation directories
 
 vpath %.cpp src/ \
-            src/contentServer \
+      src/contentServer \
 			src/contentServer/cache \
 			src/contentServer/corba \
 			src/contentServer/corba/client \
@@ -196,7 +199,7 @@ vpath %.cpp src/ \
 			src/contentServer/memory \
 			src/contentServer/redis \
 			src/contentServer/sync \
-            src/dataServer \
+      src/dataServer \
 			src/dataServer/definition \
 			src/dataServer/cache \
 			src/dataServer/implementation \
@@ -214,7 +217,7 @@ vpath %.cpp src/ \
 			src/lua
 
 vpath %.h 	src/ \
-            src/contentServer \
+      src/contentServer \
 			src/contentServer/cache \
 			src/contentServer/corba \
 			src/contentServer/corba/client \
@@ -229,7 +232,7 @@ vpath %.h 	src/ \
 			src/contentServer/memory \
 			src/contentServer/redis \
 			src/contentServer/sync \
-            src/dataServer \
+      src/dataServer \
 			src/dataServer/definition \
 			src/dataServer/cache \
 			src/dataServer/implementation \

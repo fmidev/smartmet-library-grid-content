@@ -16,9 +16,7 @@ namespace QueryServer
 typedef std::vector<std::pair<std::string,T::GeometryId>>   Producer_vec;
 typedef ContentServer::ServiceInterface*                    ContentServer_ptr;
 typedef DataServer::ServiceInterface*                       DataServer_ptr;
-typedef std::pair<int,double>                               LevelHeight;
-typedef std::vector<LevelHeight>                            LevelHeight_vec;
-typedef std::vector<std::pair<std::string,LevelHeight_vec>> LevelHeightCache;
+typedef std::vector<std::pair<std::string,int>>             LevelHeightCache;
 typedef std::pair<std::string,ParameterMapping_vec>         ParameterMappingCacheRec;
 typedef std::list<ParameterMappingCacheRec>                 ParameterMappingCache;
 
@@ -95,6 +93,7 @@ class ServiceImplementation : public ServiceInterface
                        T::ParamValue_vec& contourHighValues,
                        T::AttributeList& attributeList,
                        double radius,
+                       short& precision,
                        ParameterValues& valueList);
 
      void           getGridValues(
@@ -125,6 +124,7 @@ class ServiceImplementation : public ServiceInterface
                        T::AttributeList& attributeList,
                        double radius,
                        uint maxValues,
+                       short& precision,
                        ParameterValues_vec& valueList);
 
      void           getParameterStringInfo(
@@ -223,16 +223,27 @@ class ServiceImplementation : public ServiceInterface
                        std::vector<std::string>& functionParams,
                        T::ParamValue_vec& valueList,
                        T::ParamValue_vec& newValueList);
-/*
-     void           levelInterpolation(
+
+     bool           getPointValuesByHeight(
+                       T::ProducerInfo& producerInfo,
+                       T::GeometryId producerGeometryId,
+                       uint generationId,
+                       uint generationFlags,
+                       ParameterMapping& pInfo,
+                       std::string forecastTime,
+                       T::ParamLevelId paramLevelId,
+                       T::ParamLevel paramLevel,
+                       T::ForecastType forecastType,
+                       T::ForecastNumber forecastNumber,
+                       uint parameterFlags,
+                       short areaInterpolationMethod,
+                       short timeInterpolationMethod,
                        short levelInterpolationMethod,
-                       double level,
-                       double level1,
-                       double level2,
-                       ParameterValues& parameterValues1,
-                       ParameterValues& parameterValues2,
+                       uchar coordinateType,
+                       T::AreaCoordinates& coordinates,
+                       uint& newProducerId,
+                       short& precision,
                        ParameterValues& valueList);
-*/
 
      bool           getPolygonValues(
                        T::ProducerInfo& producerInfo,
@@ -251,6 +262,7 @@ class ServiceImplementation : public ServiceInterface
                        uchar coordinateType,
                        T::AreaCoordinates& coordinates,
                        uint& newProducerId,
+                       short& precision,
                        ParameterValues& valueList);
 
      bool           getCircleValues(
@@ -272,6 +284,7 @@ class ServiceImplementation : public ServiceInterface
                        double y,
                        double radius,
                        uint& newProducerId,
+                       short& precision,
                        ParameterValues& valueList);
 
      bool           getPointValues(
@@ -292,6 +305,7 @@ class ServiceImplementation : public ServiceInterface
                        uchar coordinateType,
                        T::AreaCoordinates& coordinates,
                        uint& newProducerId,
+                       short& precision,
                        ParameterValues& valueList);
 
      bool           getSpecialValues(
@@ -313,6 +327,7 @@ class ServiceImplementation : public ServiceInterface
                        double x,
                        double y,
                        uint& newProducerId,
+                       short& precision,
                        ParameterValues& valueList);
 
      bool           getIsolineValues(
@@ -336,6 +351,7 @@ class ServiceImplementation : public ServiceInterface
                        T::ParamValue_vec& contourValues,
                        T::AttributeList& attributeList,
                        uint& newProducerId,
+                       short& precision,
                        ParameterValues& valueList);
 
 
@@ -361,24 +377,8 @@ class ServiceImplementation : public ServiceInterface
                        T::ParamValue_vec& contourHighValues,
                        T::AttributeList& attributeList,
                        uint& newProducerId,
+                       short& precision,
                        ParameterValues& valueList);
-
-     bool           getPressureLevelsAndHeights(
-                       T::ProducerInfo& producerInfo,
-                       uint generationId,
-                       uint generationFlags,
-                       std::string forecastTime,
-                       T::ForecastType forecastType,
-                       T::ForecastNumber forecastNumber,
-                       T::GeometryId geometryId,
-                       uchar coordinateType,
-                       double x,
-                       double y,
-                       int height,
-                       int& lowerPressure,
-                       int& higherPressure,
-                       double& lowerHeight,
-                       double& higherHeight);
 
      bool           getValueVectors(
                        T::ProducerInfo& producerInfo,
@@ -400,8 +400,15 @@ class ServiceImplementation : public ServiceInterface
                        T::Coordinate_vec& gridCoordinates,
                        T::AttributeList& attributeList,
                        uint& newProducerId,
+                       short& precision,
                        ParameterValues& valueList);
 
+     void           convertLevelsToHeights(
+                       T::ContentInfoList& contentList,
+                       uchar coordinateType,
+                       double x,
+                       double y,
+                       T::ContentInfoList& newContentList);
 
   private:
 

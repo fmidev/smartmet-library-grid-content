@@ -306,28 +306,28 @@ void ParameterMappingFile::loadFile()
             rec.mParameterName = field[1];
 
           if (field[2][0] != '\0')
-            rec.mParameterKeyType = toInt64(field[2]);
+            rec.mParameterKeyType = toInt32(field[2]);
 
           if (field[3][0] != '\0')
             rec.mParameterKey = field[3];
 
           if (field[4][0] != '\0')
-            rec.mParameterLevelIdType = toInt64(field[4]);
+            rec.mParameterLevelIdType = toInt32(field[4]);
 
           if (field[5][0] != '\0')
-            rec.mParameterLevelId = toInt64(field[5]);
+            rec.mParameterLevelId = toInt32(field[5]);
 
           if (field[6][0] != '\0')
-            rec.mParameterLevel = (T::ParamLevel)toInt64(field[6]);
+            rec.mParameterLevel = toInt32(field[6]);
 
           if (field[7][0] != '\0')
-            rec.mAreaInterpolationMethod = (short)toInt64(field[7]);
+            rec.mAreaInterpolationMethod = toInt16(field[7]);
 
           if (field[8][0] != '\0')
-            rec.mTimeInterpolationMethod = (short)toInt64(field[8]);
+            rec.mTimeInterpolationMethod = toInt16(field[8]);
 
           if (field[9][0] != '\0')
-            rec.mLevelInterpolationMethod = (short)toInt64(field[9]);
+            rec.mLevelInterpolationMethod = toInt16(field[9]);
 
           if (field[10][0] != '\0')
             rec.mGroupFlags = toInt64(field[10]);
@@ -340,8 +340,11 @@ void ParameterMappingFile::loadFile()
           if (field[12][0] != '\0')
             rec.mConversionFunction = field[12];
 
-          if (c > 13  &&  field[13][0] != '\0')
+          if (c > 13  &&  field[13][0] > ' ')
             rec.mReverseConversionFunction = field[13];
+
+          if (c > 14  &&  field[14][0] > ' ')
+            rec.mDefaultPrecision = toInt16(field[14]);
 
           //rec.print(std::cout,0,0);
 

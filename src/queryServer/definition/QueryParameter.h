@@ -11,6 +11,7 @@ namespace QueryServer
 
 typedef std::pair<uint,std::string> FunctionParam;
 typedef std::vector<FunctionParam> FunctionParam_vec;
+typedef std::vector<uint> Color_vec;
 
 enum QueryParameterFlags
 {
@@ -31,6 +32,8 @@ class QueryParameter
     void                        print(std::ostream& stream,uint level,uint optionFlags);
 
     uint                        mId;
+    uchar                       mType;
+    uchar                       mLocationType;
     std::string                 mParam;
     std::string                 mOrigParam;
     std::string                 mSymbolicName;
@@ -46,9 +49,10 @@ class QueryParameter
     short                       mLevelInterpolationMethod;
     T::ParamValue_vec           mContourLowValues;
     T::ParamValue_vec           mContourHighValues;
+    Color_vec                   mContourColors;
     uint                        mProducerId;
     uint                        mGenerationFlags;
-    int                         mPrecision;
+    short                       mPrecision;
     bool                        mTemporary;
     std::string                 mFunction;
     FunctionParam_vec           mFunctionParams;
