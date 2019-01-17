@@ -105,7 +105,7 @@ LIBS = -L$(libdir) \
 	-lcurl \
 	-llua \
 	-lpthread \
-	-L/usr/lib/x86_64-linux-gnu/ -lpq \
+	-L/usr/pgsql-9.5/lib -lpq \
 	$(CORBA_LIBS)
 
 # What to install
