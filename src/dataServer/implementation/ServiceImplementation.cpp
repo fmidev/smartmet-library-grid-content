@@ -312,7 +312,7 @@ int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,T::Valu
                   break;
 
                 case T::CoordinateTypeValue::GRID_COORDINATES:
-                  rec->mValue = message->getGridValueByGridPoint(rec->mX,rec->mY,(short)rec->mAreaInterpolationMethod);
+                  rec->mValue = message->getGridValueByGridPoint_byInterpolation(rec->mX,rec->mY,(short)rec->mAreaInterpolationMethod);
                   rec->mResult = 0;
                   break;
 
@@ -1117,7 +1117,7 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
             double xx = x;
             for (uint c=0; c < columns; c++)
             {
-              T::ParamValue value = message->getGridValueByGridPoint(xx,y,areaInterpolationMethod);
+              T::ParamValue value = message->getGridValueByGridPoint_byInterpolation(xx,y,areaInterpolationMethod);
               values.push_back(value);
               xx = xx + xStep;
             }

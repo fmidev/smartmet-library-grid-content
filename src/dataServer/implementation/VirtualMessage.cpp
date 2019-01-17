@@ -1177,13 +1177,13 @@ T::ParamValue VirtualMessage::getGridValueByGridPoint(uint grid_i,uint grid_j) c
 
 
 
-T::ParamValue VirtualMessage::getGridValueByGridPoint(double grid_i,double grid_j,short interpolationMethod) const
+T::ParamValue VirtualMessage::getGridValueByGridPoint_byInterpolation(double grid_i,double grid_j,short interpolationMethod) const
 {
   FUNCTION_TRACE
   try
   {
     initMessagePtrs();
-    return mMessageList[0]->getGridValueByGridPoint(grid_i,grid_j,interpolationMethod);
+    return mMessageList[0]->getGridValueByGridPoint_byInterpolation(grid_i,grid_j,interpolationMethod);
   }
   catch (...)
   {

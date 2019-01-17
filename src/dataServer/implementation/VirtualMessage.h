@@ -71,7 +71,7 @@ class VirtualMessage : public Message
     virtual void                    getGridMinAndMaxValues(T::ParamValue& minValue,T::ParamValue& maxValue) const;
 
     virtual T::ParamValue           getGridValueByGridPoint(uint grid_i,uint grid_j) const;
-    virtual T::ParamValue           getGridValueByGridPoint(double grid_i,double grid_j,short interpolationMethod) const;
+    virtual T::ParamValue           getGridValueByGridPoint_byInterpolation(double grid_i,double grid_j,short interpolationMethod) const;
     virtual T::ParamValue           getGridValueByGridPoint_nearest(double grid_i,double grid_j) const;
     virtual T::ParamValue           getGridValueByGridPoint_linearInterpolation(double grid_i,double grid_j) const;
     virtual T::ParamValue           getGridValueByLatLonCoordinate(double lat,double lon,short interpolationMethod) const;
