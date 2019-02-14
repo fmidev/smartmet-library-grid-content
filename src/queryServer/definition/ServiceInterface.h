@@ -9,6 +9,7 @@
 #include <grid-files/grid/Typedefs.h>
 #include <grid-files/grid/GridPointValueList.h>
 #include <grid-files/common/Log.h>
+#include <gis/DEM.h>
 
 
 namespace SmartMet
@@ -25,6 +26,7 @@ class ServiceInterface
      virtual void   setDebugLog(Log *debugLog);
      virtual void   setProcessingLog(Log *processingLog);
      virtual void   shutdown();
+     virtual void   setDem(boost::shared_ptr<Fmi::DEM> dem);
 
      virtual int    executeQuery(T::SessionId sessionId,Query& query);
      virtual int    getProducerList(T::SessionId sessionId,string_vec& producerList);

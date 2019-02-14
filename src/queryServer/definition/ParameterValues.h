@@ -33,6 +33,7 @@ class ParameterValues
     uint                    mGenerationId;
     uint                    mGenerationFlags;
     uint                    mGeometryId;
+    std::string             mModificationTime;
 
     T::ParamKeyType         mParameterKeyType;
     T::ParamId              mParameterKey;

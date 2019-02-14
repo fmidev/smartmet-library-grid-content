@@ -21,7 +21,6 @@ typedef std::pair<std::string,ParameterMapping_vec>         ParameterMappingCach
 typedef std::list<ParameterMappingCacheRec>                 ParameterMappingCache;
 
 
-
 class ServiceImplementation : public ServiceInterface
 {
   public:
@@ -39,6 +38,9 @@ class ServiceImplementation : public ServiceInterface
                        string_vec& luaFileNames);
 
      virtual void   shutdown();
+
+     virtual void   setDem(boost::shared_ptr<Fmi::DEM> dem);
+
 
   protected:
 
@@ -103,7 +105,6 @@ class ServiceImplementation : public ServiceInterface
                        uint producerId,
                        std::string analysisTime,
                        uint generationFlags,
-                       bool reverseGenerations,
                        std::string parameterKey,
                        T::ParamLevelId paramLevelId,
                        T::ParamLevel paramLevel,
@@ -115,7 +116,9 @@ class ServiceImplementation : public ServiceInterface
                        short levelInterpolationMethod,
                        std::string startTime,
                        std::string endTime,
-                       bool ignoreStartTimeValue,
+                       uint flags,
+                       uint timesteps,
+                       uint timestepSizeInMinutes,
                        uchar locationType,
                        uchar coordinateType,
                        T::AreaCoordinates& coordinates,
@@ -130,10 +133,12 @@ class ServiceImplementation : public ServiceInterface
      void           getParameterStringInfo(
                        std::string param,
                        std::string& key,
+                       T::GeometryId& geometryId,
                        T::ParamLevelId& paramLevelId,
                        T::ParamLevel& paramLevel,
                        T::ForecastType& forecastType,
                        T::ForecastNumber& forecastNumber,
+                       std::string& producerName,
                        uint& producerId,
                        uint& generationFlags,
                        short& areaInterpolationMethod,
@@ -143,6 +148,7 @@ class ServiceImplementation : public ServiceInterface
      void           getParameterStringInfo(
                        std::string param,
                        std::string& key,
+                       T::GeometryId& geometryId,
                        T::ParamLevelId& paramLevelId,
                        T::ParamLevel& paramLevel,
                        T::ForecastType& forecastType,
@@ -157,12 +163,14 @@ class ServiceImplementation : public ServiceInterface
      void          getParameterMappings(
                        std::string producerName,
                        std::string parameterName,
+                       T::GeometryId geometryId,
                        bool onlySearchEnabled,
                        ParameterMapping_vec& mappings);
 
      void          getParameterMappings(
                        std::string producerName,
                        std::string parameterName,
+                       T::GeometryId geometryId,
                        T::ParamLevelIdType levelIdType,
                        T::ParamLevelId levelId,
                        T::ParamLevel level,
@@ -180,6 +188,10 @@ class ServiceImplementation : public ServiceInterface
 
      void           getProducers(
                        Query& query,
+                       Producer_vec& producers);
+
+     void           getProducers(
+                       std::string producerName,
                        Producer_vec& producers);
 
      void           getGeometryIdListByCoordinates(
@@ -431,8 +443,10 @@ class ServiceImplementation : public ServiceInterface
      DataServer_ptr         mDataServerPtr;
      uint                   mCheckInterval;
      LevelHeightCache       mLevelHeightCache;
-     ThreadLock             mCacheThreadLock;
+     ThreadLock             mHeightCacheThreadLock;
      ThreadLock             mParameterMappingCacheThreadLock;
+
+     boost::shared_ptr<Fmi::DEM> mDem;
 };
 
 

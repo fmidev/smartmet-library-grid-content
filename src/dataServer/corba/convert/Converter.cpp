@@ -476,9 +476,10 @@ void Converter::convert(const T::GridValueList& source,DataServer::Corba::CorbaG
     target.length(len);
     for (uint t=0; t<len; t++)
     {
-      T::GridValue *obj = source.getGridValueByIndex(t);
+      T::GridValue obj;
+      source.getGridValueByIndex(t,obj);
       DataServer::Corba::CorbaGridValue corbaObject;
-      convert(*obj,corbaObject);
+      convert(obj,corbaObject);
       target[t] = corbaObject;
     }
   }
@@ -501,8 +502,8 @@ void Converter::convert(const DataServer::Corba::CorbaGridValueList& source,T::G
     for (uint t=0; t<len; t++)
     {
       DataServer::Corba::CorbaGridValue corbaObject = source[t];
-      T::GridValue *obj = new T::GridValue();
-      convert(corbaObject,*obj);
+      T::GridValue obj;
+      convert(corbaObject,obj);
       target.addGridValue(obj);
     }
   }

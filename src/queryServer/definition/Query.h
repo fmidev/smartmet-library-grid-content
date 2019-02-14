@@ -24,11 +24,9 @@ class Query
     void                removeTemporaryParameters();
     void                print(std::ostream& stream,uint level,uint optionFlags);
 
-    //uchar               mType;
     uchar               mSearchType;
     string_vec          mProducerNameList;
     string_set          mForecastTimeList;
-    //uchar               mLocationType;
     T::AttributeList    mAttributeList;
     T::CoordinateType   mCoordinateType;
     T::AreaCoordinates  mAreaCoordinates;
@@ -37,7 +35,10 @@ class Query
     std::string         mTimezone;            // Needed when UTC times are converted back to local times.
     std::string         mStartTime;
     std::string         mEndTime;
+    uint                mTimesteps;
+    uint                mTimestepSizeInMinutes;
     std::string         mAnalysisTime;
+    T::GeometryId_set   mGeometryIdList;
     std::string         mLanguage;
     uint                mGenerationFlags;
     uint                mFlags;
@@ -69,7 +70,8 @@ class Query
         static const uint StartTimeFromData       = 1 << 0;
         static const uint EndTimeFromData         = 1 << 1;
         static const uint StartTimeNotIncluded    = 1 << 2;
-        static const uint ReverseGenerationFlags  = 1 << 3;
+        static const uint EndTimeNotIncluded      = 1 << 3;
+        static const uint ReverseGenerationFlags  = 1 << 4;
     };
 
     class Type

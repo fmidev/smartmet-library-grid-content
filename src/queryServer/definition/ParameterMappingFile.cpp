@@ -142,7 +142,7 @@ ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
   {
     AutoThreadLock lock(&mThreadLock);
 
-    std::string key = toLowerString(mapping.mProducerName + ":" + mapping.mParameterName);
+    std::string key = toLowerString(mapping.mProducerName + ":" + mapping.mParameterName + ":" + std::to_string(mapping.mGeometryId));
 
     auto s = mMappingSearch.find(key);
     if (s == mMappingSearch.end())
@@ -152,6 +152,7 @@ ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
     {
       if (it->mProducerName == mapping.mProducerName  &&
         it->mParameterName == mapping.mParameterName  &&
+        it->mGeometryId == mapping.mGeometryId &&
         it->mParameterKeyType == mapping.mParameterKeyType &&
         it->mParameterKey == mapping.mParameterKey &&
         it->mParameterLevelIdType == mapping.mParameterLevelIdType &&
@@ -173,13 +174,13 @@ ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
 
 
 
-void ParameterMappingFile::getMappings(const std::string& producerName,const std::string& parameterName,bool onlySearchEnabled,ParameterMapping_vec& mappings)
+void ParameterMappingFile::getMappings(const std::string& producerName,const std::string& parameterName,T::GeometryId geometryId,bool onlySearchEnabled,ParameterMapping_vec& mappings)
 {
   try
   {
     AutoThreadLock lock(&mThreadLock);
 
-    std::string key = toLowerString(producerName + ":" + parameterName);
+    std::string key = toLowerString(producerName + ":" + parameterName + ":" + std::to_string(geometryId));
 
     auto s = mMappingSearch.find(key);
     if (s == mMappingSearch.end())
@@ -187,14 +188,17 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 
     for (auto it = s->second.begin(); it != s->second.end(); ++it)
     {
-      if (onlySearchEnabled)
+      if (!it->mIgnore  &&  (geometryId < 0 ||  it->mGeometryId == geometryId))
       {
-        if (it->mSearchEnabled)
+        if (onlySearchEnabled)
+        {
+          if (it->mSearchEnabled)
+            mappings.push_back(*it);
+        }
+        else
+        {
           mappings.push_back(*it);
-      }
-      else
-      {
-        mappings.push_back(*it);
+        }
       }
     }
   }
@@ -208,13 +212,13 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 
 
 
-void ParameterMappingFile::getMappings(const std::string& producerName,const std::string& parameterName,T::ParamLevelIdType levelIdType,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings)
+void ParameterMappingFile::getMappings(const std::string& producerName,const std::string& parameterName,T::GeometryId geometryId,T::ParamLevelIdType levelIdType,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings)
 {
   try
   {
     AutoThreadLock lock(&mThreadLock);
 
-    std::string key = toLowerString(producerName + ":" + parameterName);
+    std::string key = toLowerString(producerName + ":" + parameterName + ":" + std::to_string(geometryId));
 
     auto s = mMappingSearch.find(key);
     if (s == mMappingSearch.end())
@@ -222,20 +226,26 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 
     for (auto it = s->second.begin(); it != s->second.end(); ++it)
     {
-      if (levelIdType == T::ParamLevelIdTypeValue::ANY || levelIdType == T::ParamLevelIdTypeValue::IGNORE ||  it->mParameterLevelIdType == levelIdType)
+      if (!it->mIgnore)
       {
-        if (levelIdType == T::ParamLevelIdTypeValue::IGNORE || levelId == 0 || it->mParameterLevelId == levelId)
+        if (geometryId < 0 || it->mGeometryId == geometryId)
         {
-          if (levelIdType == T::ParamLevelIdTypeValue::IGNORE || level < 0  || it->mParameterLevel == level)
+          if (levelIdType == T::ParamLevelIdTypeValue::ANY || levelIdType == T::ParamLevelIdTypeValue::IGNORE ||  it->mParameterLevelIdType == levelIdType)
           {
-            if (onlySearchEnabled)
+            if (levelIdType == T::ParamLevelIdTypeValue::IGNORE || levelId == 0 || it->mParameterLevelId == levelId)
             {
-              if (it->mSearchEnabled)
-                mappings.push_back(*it);
-            }
-            else
-            {
-              mappings.push_back(*it);
+              if (levelIdType == T::ParamLevelIdTypeValue::IGNORE || level < 0  || it->mParameterLevel == level)
+              {
+                if (onlySearchEnabled)
+                {
+                  if (it->mSearchEnabled)
+                    mappings.push_back(*it);
+                }
+                else
+                {
+                  mappings.push_back(*it);
+                }
+              }
             }
           }
         }
@@ -312,43 +322,49 @@ void ParameterMappingFile::loadFile()
             rec.mParameterKey = field[3];
 
           if (field[4][0] != '\0')
-            rec.mParameterLevelIdType = toInt32(field[4]);
+            rec.mGeometryId = toInt32(field[4]);
 
           if (field[5][0] != '\0')
-            rec.mParameterLevelId = toInt32(field[5]);
+            rec.mParameterLevelIdType = toInt32(field[5]);
 
           if (field[6][0] != '\0')
-            rec.mParameterLevel = toInt32(field[6]);
+            rec.mParameterLevelId = toInt32(field[6]);
 
           if (field[7][0] != '\0')
-            rec.mAreaInterpolationMethod = toInt16(field[7]);
+            rec.mParameterLevel = toInt32(field[7]);
 
           if (field[8][0] != '\0')
-            rec.mTimeInterpolationMethod = toInt16(field[8]);
+            rec.mAreaInterpolationMethod = toInt16(field[8]);
 
           if (field[9][0] != '\0')
-            rec.mLevelInterpolationMethod = toInt16(field[9]);
+            rec.mTimeInterpolationMethod = toInt16(field[9]);
 
           if (field[10][0] != '\0')
-            rec.mGroupFlags = toInt64(field[10]);
+            rec.mLevelInterpolationMethod = toInt16(field[10]);
 
-          if (field[11][0] == 'E')
+          if (field[11][0] != '\0')
+            rec.mGroupFlags = toInt64(field[11]);
+
+          if (field[12][0] == 'E')
             rec.mSearchEnabled = true;
           else
             rec.mSearchEnabled = false;
 
-          if (field[12][0] != '\0')
-            rec.mConversionFunction = field[12];
+          if (field[12][0] == 'I')
+            rec.mIgnore = true;
 
-          if (c > 13  &&  field[13][0] > ' ')
-            rec.mReverseConversionFunction = field[13];
+          if (field[13][0] != '\0')
+            rec.mConversionFunction = field[13];
 
           if (c > 14  &&  field[14][0] > ' ')
-            rec.mDefaultPrecision = toInt16(field[14]);
+            rec.mReverseConversionFunction = field[14];
+
+          if (c > 15  &&  field[15][0] > ' ')
+            rec.mDefaultPrecision = toInt16(field[15]);
 
           //rec.print(std::cout,0,0);
 
-          std::string key = toLowerString(rec.mProducerName + ":" + rec.mParameterName);
+          std::string key = toLowerString(rec.mProducerName + ":" + rec.mParameterName + ":" + std::to_string(rec.mGeometryId));
 
           auto s = mMappingSearch.find(key);
           if (s != mMappingSearch.end())
@@ -383,6 +399,14 @@ void ParameterMappingFile::print(std::ostream& stream,uint level,uint optionFlag
 {
   try
   {
+    for (auto it = mMappingSearch.begin(); it != mMappingSearch.end(); ++it)
+    {
+      stream << it->first << "\n";
+      for (auto s = it->second.begin(); s != it->second.end(); ++s)
+      {
+        s->print(stream,level+2,optionFlags);
+      }
+    }
   }
   catch (...)
   {

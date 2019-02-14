@@ -20,6 +20,7 @@ typedef sequence<CorbaParamValue> CorbaParamValueList;
 
 typedef sequence<string> CorbaStringList;
 
+typedef sequence<long> CorbaLongList;
 typedef sequence<unsigned long> CorbaULongList;
 
 
@@ -81,6 +82,7 @@ struct CorbaParameterValues
   unsigned long           generationId;
   unsigned long           generationFlags;
   unsigned long           geometryId;
+  string                  modificationTime;
   octet                   parameterKeyType;
   string                  parameterKey;
   octet                   parameterLevelIdType;
@@ -106,6 +108,8 @@ struct CorbaQueryParameter
   string                   param;
   string                   origParam;
   string                   symbolicName;
+  string                   producerName;
+  long                     geometryId;
   octet                    parameterKeyType;
   string                   parameterKey;
   octet                    parameterLevelIdType;
@@ -154,7 +158,10 @@ struct CorbaQuery
   string                   timezone;
   string                   startTime;
   string                   endTime;
+  unsigned long            timesteps;
+  unsigned long            timestepSizeInMinutes;
   string                   analysisTime;
+  CorbaLongList            geometryIdList;
   CorbaStringList          forecastTimeList;
   CorbaAttributeList       attributeList;
   octet                    coordinateType;
