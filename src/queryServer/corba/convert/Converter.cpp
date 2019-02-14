@@ -41,6 +41,51 @@ Converter::~Converter()
 
 
 
+void Converter::convert(std::set<int>& source,QueryServer::Corba::CorbaLongList& target)
+{
+  try
+  {
+    uint len = source.size();
+    target.length(len);
+
+    uint t = 0;
+    for (auto it=source.begin(); it!=source.end(); ++it)
+    {
+      target[t] = *it;
+      t++;
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const QueryServer::Corba::CorbaLongList& source,std::set<int>& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      target.insert(source[t]);
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 void Converter::convert(std::vector<uint>& source,QueryServer::Corba::CorbaULongList& target)
 {
   try
@@ -436,8 +481,8 @@ void Converter::convert(QueryServer::Corba::CorbaGridValueList& source,T::GridVa
     for (uint t=0; t<len; t++)
     {
       QueryServer::Corba::CorbaGridValue corbaObject = source[t];
-      T::GridValue *obj = new T::GridValue();
-      convert(corbaObject,*obj);
+      T::GridValue obj;
+      convert(corbaObject,obj);
       target.addGridValue(obj);
     }
   }
@@ -459,9 +504,10 @@ void Converter::convert(T::GridValueList& source,QueryServer::Corba::CorbaGridVa
     target.length(len);
     for (uint t=0; t<len; t++)
     {
-      T::GridValue *obj = source.getGridValueByIndex(t);
+      T::GridValue obj;
+      source.getGridValueByIndex(t,obj);
       QueryServer::Corba::CorbaGridValue corbaObject;
-      convert(*obj,corbaObject);
+      convert(obj,corbaObject);
       target[t] = corbaObject;
     }
   }
@@ -484,6 +530,7 @@ void Converter::convert(QueryServer::Corba::CorbaParameterValues& source,QuerySe
     target.mGenerationId = source.generationId;
     target.mGenerationFlags = source.generationFlags;
     target.mGeometryId = source.geometryId;
+    target.mModificationTime = source.modificationTime;
     target.mParameterKeyType = source.parameterKeyType;
     target.mParameterKey = source.parameterKey;
     target.mParameterLevelIdType = source.parameterLevelIdType;
@@ -516,6 +563,7 @@ void Converter::convert(QueryServer::ParameterValues& source,QueryServer::Corba:
     target.generationId = source.mGenerationId;
     target.generationFlags = source.mGenerationFlags;
     target.geometryId = source.mGeometryId;
+    target.modificationTime = CORBA::string_dup(source.mModificationTime.c_str());
     target.parameterKeyType = (::CORBA::Octet)source.mParameterKeyType;
     target.parameterKey = CORBA::string_dup(source.mParameterKey.c_str());
     target.parameterLevelIdType = (::CORBA::Octet)source.mParameterLevelIdType;
@@ -683,6 +731,8 @@ void Converter::convert(QueryServer::Corba::CorbaQueryParameter& source,QuerySer
     target.mSymbolicName = source.symbolicName;
     target.mParameterKeyType = source.parameterKeyType;
     target.mParameterKey = source.parameterKey;
+    target.mProducerName = source.producerName;
+    target.mGeometryId = source.geometryId;
     target.mParameterLevelIdType = source.parameterLevelIdType;
     target.mParameterLevelId = source.parameterLevelId;
     target.mParameterLevel = source.parameterLevel;
@@ -728,6 +778,8 @@ void Converter::convert(QueryServer::QueryParameter& source,QueryServer::Corba::
     target.symbolicName = CORBA::string_dup(source.mSymbolicName.c_str());
     target.parameterKeyType = (::CORBA::Octet)source.mParameterKeyType;
     target.parameterKey = CORBA::string_dup(source.mParameterKey.c_str());
+    target.producerName = CORBA::string_dup(source.mProducerName.c_str());
+    target.geometryId = source.mGeometryId;
     target.parameterLevelIdType = (::CORBA::Octet)source.mParameterLevelIdType;
     target.parameterLevelId = (::CORBA::Octet)source.mParameterLevelId;
     target.parameterLevel = source.mParameterLevel;
@@ -948,7 +1000,10 @@ void Converter::convert(QueryServer::Corba::CorbaQuery& source,QueryServer::Quer
     target.mTimezone = source.timezone;
     target.mStartTime = source.startTime;
     target.mEndTime = source.endTime;
+    target.mTimesteps = source.timesteps;
+    target.mTimestepSizeInMinutes = source.timestepSizeInMinutes;
     target.mAnalysisTime = source.analysisTime;
+    convert(source.geometryIdList,target.mGeometryIdList);
     convert(source.forecastTimeList,target.mForecastTimeList);
     target.mCoordinateType = source.coordinateType;
     convert(source.attributeList,target.mAttributeList);
@@ -980,7 +1035,10 @@ void Converter::convert(QueryServer::Query& source,QueryServer::Corba::CorbaQuer
     target.timezone = CORBA::string_dup(source.mTimezone.c_str());
     target.startTime = CORBA::string_dup(source.mStartTime.c_str());
     target.endTime = CORBA::string_dup(source.mEndTime.c_str());
+    target.timesteps = source.mTimesteps;
+    target.timestepSizeInMinutes = source.mTimestepSizeInMinutes;
     target.analysisTime = CORBA::string_dup(source.mAnalysisTime.c_str());
+    convert(source.mGeometryIdList,target.geometryIdList);
     convert(source.mForecastTimeList,target.forecastTimeList);
     target.coordinateType = (::CORBA::Octet)source.mCoordinateType;
     convert(source.mAttributeList,target.attributeList);

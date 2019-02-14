@@ -18,16 +18,15 @@ QueryParameter::QueryParameter()
     mParameterKeyType = T::ParamKeyTypeValue::UNKNOWN;
     mParameterLevelIdType = T::ParamLevelIdTypeValue::ANY;
     mParameterLevelId = 0;
-    mParameterLevel = 0;
-    mForecastType = -1;
+    mParameterLevel = -1;
+    mForecastType = 1;
     mForecastNumber = -1;
     mAreaInterpolationMethod = T::AreaInterpolationMethod::Undefined;
     mTimeInterpolationMethod = T::TimeInterpolationMethod::Undefined;
     mLevelInterpolationMethod = T::LevelInterpolationMethod::Undefined;
-    //mContourSmoothSize = 0;
-    //mContourSmoothDegree = 0;
     mProducerId = 0;
     mGenerationFlags = 0;
+    mGeometryId = -1;
     mPrecision = -1;
     mTimestepsBefore = 0;
     mTimestepsAfter = 0;
@@ -57,6 +56,8 @@ QueryParameter::QueryParameter(const QueryParameter& queryParameter)
     mSymbolicName = queryParameter.mSymbolicName;
     mParameterKeyType = queryParameter.mParameterKeyType;
     mParameterKey = queryParameter.mParameterKey;
+    mProducerName = queryParameter.mProducerName;
+    mGeometryId = queryParameter.mGeometryId;
     mParameterLevelIdType = queryParameter.mParameterLevelIdType;
     mParameterLevelId = queryParameter.mParameterLevelId;
     mParameterLevel = queryParameter.mParameterLevel;
@@ -68,9 +69,6 @@ QueryParameter::QueryParameter(const QueryParameter& queryParameter)
     mContourLowValues = queryParameter.mContourLowValues;
     mContourHighValues = queryParameter.mContourHighValues;
     mContourColors = queryParameter.mContourColors;
-    //mContourSmoothSize = queryParameter.mContourSmoothSize;
-    //mContourSmoothDegree = queryParameter.mContourSmoothDegree;
-    //mAttributeList = queryParameter.mAttributeList;
     mProducerId = queryParameter.mProducerId;
     mGenerationFlags = queryParameter.mGenerationFlags;
     mTimestepsBefore = queryParameter.mTimestepsBefore;
@@ -137,6 +135,8 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mSymbolicName             = " << mSymbolicName << "\n";
     stream << space(level) << "- mParameterKeyType         = " << C_INT(mParameterKeyType) << "\n";
     stream << space(level) << "- mParameterKey             = " << mParameterKey << "\n";
+    stream << space(level) << "- mProducerName             = " << mProducerName << "\n";
+    stream << space(level) << "- mGeometryId               = " << mGeometryId << "\n";
     stream << space(level) << "- mParameterLevelIdType     = " << C_INT(mParameterLevelIdType) << "\n";
     stream << space(level) << "- mParameterLevelId         = " << C_INT(mParameterLevelId) << "\n";
     stream << space(level) << "- mParameterLevel           = " << mParameterLevel << "\n";
@@ -154,11 +154,6 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mPrecision                = " << mPrecision << "\n";
     stream << space(level) << "- mFunction                 = " << mFunction << "\n";
     stream << space(level) << "- mFlags                    = " << mFlags << "\n";
-    //stream << space(level) << "- mContourSmoothSize        = " << mContourSmoothSize << "\n";
-    //stream << space(level) << "- mContourSmoothDegree      = " << mContourSmoothDegree << "\n";
-
-    //stream << space(level) << "- mAttributeList            = \n";
-    //mAttributeList.print(stream,level+2,optionFlags);
 
     stream << space(level) << "- mFunctionParams           = \n";
     for (auto it = mFunctionParams.begin();  it != mFunctionParams.end(); ++it)

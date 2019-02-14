@@ -42,6 +42,7 @@ ParameterValues::ParameterValues(const ParameterValues& parameterValues)
     mGenerationId = parameterValues.mGenerationId;
     mGenerationFlags = parameterValues.mGenerationFlags;
     mGeometryId = parameterValues.mGeometryId;
+    mModificationTime = parameterValues.mModificationTime;
 
     mParameterKeyType = parameterValues.mParameterKeyType;
     mParameterKey = parameterValues.mParameterKey;
@@ -90,6 +91,7 @@ void ParameterValues::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mGenerationId         = " << mGenerationId << "\n";
     stream << space(level) << "- mGenerationFlags      = " << mGenerationFlags << "\n";
     stream << space(level) << "- mGeometryId           = " << mGeometryId << "\n";
+    stream << space(level) << "- mModificationTime     = " << mModificationTime << "\n";
     stream << space(level) << "- mParameterKeyType     = " << C_INT(mParameterKeyType) << "\n";
     stream << space(level) << "- mParameterKey         = " << mParameterKey << "\n";
     stream << space(level) << "- mParameterLevelIdType = " << C_INT(mParameterLevelIdType) << "\n";
@@ -101,13 +103,7 @@ void ParameterValues::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mWkbList              = (" << mWkbList.size() << " arrays)\n";
     stream << space(level) << "- mValueVector          = (" << mValueVector.size() << " values)\n";
     stream << space(level) << "- mValueList            = (" << mValueList.getLength() << " records)\n";
-
-    uint len = mValueList.getLength();
-    for (uint t=0; t<len; t++)
-    {
-      T::GridValue *rec = mValueList.getGridValueByIndex(t);
-      rec->print(stream,level+2,optionFlags);
-    }
+    mValueList.print(stream,level+2,optionFlags);
   }
   catch (...)
   {

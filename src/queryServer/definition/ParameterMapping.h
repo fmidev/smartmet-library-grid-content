@@ -16,12 +16,15 @@ class ParameterMapping
                                 ParameterMapping(const ParameterMapping& mapping);
     virtual                     ~ParameterMapping();
 
+    virtual std::size_t         getHash();
+
     void                        print(std::ostream& stream,uint level,uint optionFlags);
 
     std::string                 mProducerName;
     std::string                 mParameterName;
     T::ParamKeyType             mParameterKeyType;
     T::ParamId                  mParameterKey;
+    T::GeometryId               mGeometryId;
     T::ParamLevelIdType         mParameterLevelIdType;
     T::ParamLevelId             mParameterLevelId;
     T::ParamLevel               mParameterLevel;
@@ -30,6 +33,7 @@ class ParameterMapping
     short                       mLevelInterpolationMethod;
     uint                        mGroupFlags;
     bool                        mSearchEnabled;
+    bool                        mIgnore;
     std::string                 mConversionFunction;
     std::string                 mReverseConversionFunction;
     short                       mDefaultPrecision;

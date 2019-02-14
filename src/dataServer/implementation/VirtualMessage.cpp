@@ -1582,8 +1582,9 @@ void VirtualMessage::executeFunctionCall2(T::GridValueList& valueList) const
     uint len = valueList.getLength();
     for (uint t=0; t<len; t++)
     {
-      T::GridValue *value = valueList.getGridValueByIndex(t);
-      inParameters.push_back(value->mValue);
+      T::GridValue value;
+      valueList.getGridValueByIndex(t,value);
+      inParameters.push_back(value.mValue);
     }
 
     executeFunctionCall2(inParameters,outParameters);
@@ -1592,8 +1593,9 @@ void VirtualMessage::executeFunctionCall2(T::GridValueList& valueList) const
     {
       for (uint t=0; t<len; t++)
       {
-        T::GridValue *value = valueList.getGridValueByIndex(t);
-        value->mValue = outParameters[t];
+        T::GridValue value;
+        valueList.getGridValueByIndex(t,value);
+        value.mValue = outParameters[t];
       }
     }
   }
@@ -1712,11 +1714,13 @@ void VirtualMessage::executeFunctionCall3(T::GridValueList& inValueList1,T::Grid
 
     for (uint t=0; t<len1; t++)
     {
-      T::GridValue *value1 = inValueList1.getGridValueByIndex(t);
-      inParameters1.push_back(value1->mValue);
+      T::GridValue value1;
+      inValueList1.getGridValueByIndex(t,value1);
+      inParameters1.push_back(value1.mValue);
 
-      T::GridValue *value2 = inValueList2.getGridValueByIndex(t);
-      inParameters2.push_back(value2->mValue);
+      T::GridValue value2;
+      inValueList2.getGridValueByIndex(t,value2);
+      inParameters2.push_back(value2.mValue);
     }
 
     executeFunctionCall3(inParameters1,inParameters2,outParameters);
@@ -1725,9 +1729,10 @@ void VirtualMessage::executeFunctionCall3(T::GridValueList& inValueList1,T::Grid
     {
       for (uint t=0; t<len1; t++)
       {
-        T::GridValue *value = inValueList1.getGridValueByIndex(t);
-        T::GridValue *newValue = new T::GridValue(*value);
-        newValue->mValue = outParameters[t];
+        T::GridValue value;
+        inValueList1.getGridValueByIndex(t,value);
+        T::GridValue newValue(value);
+        newValue.mValue = outParameters[t];
         outValueList.addGridValue(newValue);
       }
     }
@@ -1848,13 +1853,15 @@ void VirtualMessage::executeFunctionCall4(T::CoordinateType coordinateType,T::Gr
 
     for (uint t=0; t<len1; t++)
     {
-      T::GridValue *value1 = inValueList1.getGridValueByIndex(t);
-      inParameters1.push_back(value1->mValue);
-      float angle = mMessageList[0]->getGridPointAngle(coordinateType,value1->mX,value1->mY);
+      T::GridValue value1;
+      inValueList1.getGridValueByIndex(t,value1);
+      inParameters1.push_back(value1.mValue);
+      float angle = mMessageList[0]->getGridPointAngle(coordinateType,value1.mX,value1.mY);
       angles.push_back(angle);
 
-      T::GridValue *value2 = inValueList2.getGridValueByIndex(t);
-      inParameters2.push_back(value2->mValue);
+      T::GridValue value2;
+      inValueList2.getGridValueByIndex(t,value2);
+      inParameters2.push_back(value2.mValue);
     }
 
     executeFunctionCall4(inParameters1,inParameters2,angles,outParameters);
@@ -1863,9 +1870,10 @@ void VirtualMessage::executeFunctionCall4(T::CoordinateType coordinateType,T::Gr
     {
       for (uint t=0; t<len1; t++)
       {
-        T::GridValue *value = inValueList1.getGridValueByIndex(t);
-        T::GridValue *newValue = new T::GridValue(*value);
-        newValue->mValue = outParameters[t];
+        T::GridValue value;
+        inValueList1.getGridValueByIndex(t,value);
+        T::GridValue newValue(value);
+        newValue.mValue = outParameters[t];
         outValueList.addGridValue(newValue);
       }
     }

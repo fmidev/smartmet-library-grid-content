@@ -39,6 +39,8 @@ class QueryParameter
     std::string                 mSymbolicName;
     T::ParamKeyType             mParameterKeyType;
     T::ParamId                  mParameterKey;
+    std::string                 mProducerName;
+    T::GeometryId               mGeometryId;
     T::ParamLevelIdType         mParameterLevelIdType;
     T::ParamLevelId             mParameterLevelId;
     T::ParamLevel               mParameterLevel;

@@ -1,5 +1,6 @@
 #include "ParameterMapping.h"
 #include <grid-files/common/GeneralFunctions.h>
+#include <boost/functional/hash.hpp>
 
 
 namespace SmartMet
@@ -20,7 +21,9 @@ ParameterMapping::ParameterMapping()
     mTimeInterpolationMethod = T::TimeInterpolationMethod::Undefined;
     mLevelInterpolationMethod = T::LevelInterpolationMethod::Undefined;
     mGroupFlags = 0;
+    mGeometryId = -1;
     mSearchEnabled = false;
+    mIgnore = false;
     mDefaultPrecision = -1;
   }
   catch (...)
@@ -41,6 +44,7 @@ ParameterMapping::ParameterMapping(const ParameterMapping& mapping)
     mParameterName = mapping.mParameterName;
     mParameterKeyType = mapping.mParameterKeyType;
     mParameterKey = mapping.mParameterKey;
+    mGeometryId = mapping.mGeometryId;
     mParameterLevelIdType = mapping.mParameterLevelIdType;
     mParameterLevelId = mapping.mParameterLevelId;
     mParameterLevel = mapping.mParameterLevel;
@@ -49,6 +53,7 @@ ParameterMapping::ParameterMapping(const ParameterMapping& mapping)
     mLevelInterpolationMethod = mapping.mLevelInterpolationMethod;
     mGroupFlags = mapping.mGroupFlags;
     mSearchEnabled = mapping.mSearchEnabled;
+    mIgnore = mapping.mIgnore;
     mConversionFunction = mapping.mConversionFunction;
     mReverseConversionFunction = mapping.mReverseConversionFunction;
     mDefaultPrecision = mapping.mDefaultPrecision;
@@ -78,6 +83,39 @@ ParameterMapping::~ParameterMapping()
 
 
 
+std::size_t ParameterMapping::getHash()
+{
+  try
+  {
+    std::size_t seed = 0;
+    boost::hash_combine(seed,mProducerName);
+    boost::hash_combine(seed,mParameterName);
+    boost::hash_combine(seed,C_INT(mParameterKeyType));
+    boost::hash_combine(seed,mParameterKey);
+    boost::hash_combine(seed,mGeometryId);
+    boost::hash_combine(seed,C_INT(mParameterLevelIdType));
+    boost::hash_combine(seed,C_INT(mParameterLevelId));
+    boost::hash_combine(seed,mParameterLevel);
+    boost::hash_combine(seed,mAreaInterpolationMethod);
+    boost::hash_combine(seed,mTimeInterpolationMethod);
+    boost::hash_combine(seed,mLevelInterpolationMethod);
+    boost::hash_combine(seed,mGroupFlags);
+    boost::hash_combine(seed,mSearchEnabled);
+    boost::hash_combine(seed,mIgnore);
+    boost::hash_combine(seed,mConversionFunction);
+    boost::hash_combine(seed,mReverseConversionFunction);
+    boost::hash_combine(seed,mDefaultPrecision);
+    return seed;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
 void ParameterMapping::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try
@@ -87,6 +125,7 @@ void ParameterMapping::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mParameterName             = " << mParameterName << "\n";
     stream << space(level) << "- mParameterKeyType          = " << C_INT(mParameterKeyType) << "\n";
     stream << space(level) << "- mParameterKey              = " << mParameterKey << "\n";
+    stream << space(level) << "- mGeometryId                = " << mGeometryId << "\n";
     stream << space(level) << "- mParameterLevelIdType      = " << C_INT(mParameterLevelIdType) << "\n";
     stream << space(level) << "- mParameterLevelId          = " << C_INT(mParameterLevelId) << "\n";
     stream << space(level) << "- mParameterLevel            = " << mParameterLevel << "\n";
@@ -95,6 +134,7 @@ void ParameterMapping::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mLevelInterpolationMethod  = " << mLevelInterpolationMethod << "\n";
     stream << space(level) << "- mGroupFlags                = " << mGroupFlags << "\n";
     stream << space(level) << "- mSearchEnabled             = " << mSearchEnabled << "\n";
+    stream << space(level) << "- mIgnore                    = " << mIgnore << "\n";
     stream << space(level) << "- mConversionFunction        = " << mConversionFunction << "\n";
     stream << space(level) << "- mReverseConversionFunction = " << mReverseConversionFunction << "\n";
     stream << space(level) << "- mDefaultPrecision          = " << mDefaultPrecision << "\n";

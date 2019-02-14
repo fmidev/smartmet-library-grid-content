@@ -5,6 +5,7 @@
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/identification/GridDef.h>
 #include <macgyver/StringConversion.h>
+#include <boost/functional/hash.hpp>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
@@ -83,17 +84,36 @@ void ServiceImplementation::init(
     for (auto it = mParameterMappingFiles.begin(); it != mParameterMappingFiles.end(); ++it)
     {
       ParameterMappingFile mapping(*it);
+      //std::cout << "MAPPING : " << *it << "\n";
       mParameterMappings.push_back(mapping);
     }
 
     for (auto it = mParameterMappings.begin(); it != mParameterMappings.end(); ++it)
     {
       it->init();
+      //it->print(std::cout,0,0);
     }
   }
   catch (...)
   {
     throw Spine::Exception(BCP, exception_operation_failed, nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::setDem(boost::shared_ptr<Fmi::DEM> dem)
+{
+  try
+  {
+    mDem = dem;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP, "Operation failed!", nullptr);
+    throw exception;
   }
 }
 
@@ -625,11 +645,11 @@ bool ServiceImplementation::getFunctionParams(std::string functionParamsStr, Fun
 
 
 
-void ServiceImplementation::getParameterMappings(std::string producerName, std::string parameterName, bool onlySearchEnabled, ParameterMapping_vec& mappings)
+void ServiceImplementation::getParameterMappings(std::string producerName,std::string parameterName,T::GeometryId geometryId, bool onlySearchEnabled, ParameterMapping_vec& mappings)
 {
   try
   {
-    std::string key = producerName + ":" + parameterName + ":" + std::to_string(C_INT(onlySearchEnabled));
+    std::string key = producerName + ":" + parameterName + ":" + std::to_string(geometryId) + ":" + std::to_string(C_INT(onlySearchEnabled));
 
     AutoThreadLock lock(&mParameterMappingCacheThreadLock);
 
@@ -646,7 +666,8 @@ void ServiceImplementation::getParameterMappings(std::string producerName, std::
 
     for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
     {
-      m->getMappings(producerName, parameterName, onlySearchEnabled, mappings);
+      m->getMappings(producerName, parameterName, geometryId, onlySearchEnabled, mappings);
+      //printf("Get mappings [%s][%s][%d] %lu\n",producerName.c_str(),parameterName.c_str(),geometryId,mappings.size());
     }
 
     mParameterMappingCache.push_front(std::pair<std::string, ParameterMapping_vec>(key, mappings));
@@ -667,6 +688,7 @@ void ServiceImplementation::getParameterMappings(std::string producerName, std::
 void ServiceImplementation::getParameterMappings(
     std::string producerName,
     std::string parameterName,
+    T::GeometryId geometryId,
     T::ParamLevelIdType levelIdType,
     T::ParamLevelId levelId,
     T::ParamLevel level,
@@ -675,7 +697,7 @@ void ServiceImplementation::getParameterMappings(
 {
   try
   {
-    std::string key = producerName + ":" + parameterName + ":" + std::to_string(levelIdType) + ":" + std::to_string(levelId) + ":" + std::to_string(level) + ":"
+    std::string key = producerName + ":" + parameterName + ":" + std::to_string(geometryId) + ":" + std::to_string(levelIdType) + ":" + std::to_string(levelId) + ":" + std::to_string(level) + ":"
         + std::to_string(onlySearchEnabled);
 
     AutoThreadLock lock(&mParameterMappingCacheThreadLock);
@@ -693,7 +715,8 @@ void ServiceImplementation::getParameterMappings(
 
     for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
     {
-      m->getMappings(producerName, parameterName, levelIdType, levelId, level, onlySearchEnabled, mappings);
+      m->getMappings(producerName, parameterName, geometryId, levelIdType, levelId, level, onlySearchEnabled, mappings);
+      //printf("Get mappings [%s][%s][%d] [%d][%d][%d] %lu\n",producerName.c_str(),parameterName.c_str(),geometryId,levelIdType, levelId, level,mappings.size());
     }
 
     mParameterMappingCache.push_front(std::pair<std::string, ParameterMapping_vec>(key, mappings));
@@ -715,10 +738,12 @@ void ServiceImplementation::getParameterMappings(
 void ServiceImplementation::getParameterStringInfo(
     std::string param,
     std::string& key,
+    T::GeometryId& geometryId,
     T::ParamLevelId& paramLevelId,
     T::ParamLevel& paramLevel,
     T::ForecastType& forecastType,
     T::ForecastNumber& forecastNumber,
+    std::string& producerName,
     uint& producerId,
     uint& generationFlags,
     short& areaInterpolationMethod,
@@ -730,8 +755,7 @@ void ServiceImplementation::getParameterStringInfo(
   try
   {
     std::vector < T::ForecastNumber > forecastNumberVec;
-    std::string producerName;
-    getParameterStringInfo(param, key, paramLevelId, paramLevel, forecastType, forecastNumberVec, producerName, producerId, generationFlags, areaInterpolationMethod,
+    getParameterStringInfo(param, key, geometryId,paramLevelId, paramLevel, forecastType, forecastNumberVec, producerName, producerId, generationFlags, areaInterpolationMethod,
         timeInterpolationMethod, levelInterpolationMethod);
 
     if (forecastNumberVec.size() > 0)
@@ -751,6 +775,7 @@ void ServiceImplementation::getParameterStringInfo(
 void ServiceImplementation::getParameterStringInfo(
     std::string param,
     std::string& key,
+    T::GeometryId& geometryId,
     T::ParamLevelId& paramLevelId,
     T::ParamLevel& paramLevel,
     T::ForecastType& forecastType,
@@ -814,27 +839,33 @@ void ServiceImplementation::getParameterStringInfo(
     if (c > 2)
     {
       if (field[2][0] != '\0')
-        paramLevelId = toInt64(field[2]);
+        geometryId = toInt64(field[2]);
     }
 
     if (c > 3)
     {
       if (field[3][0] != '\0')
-        paramLevel = toInt64(field[3]);
+        paramLevelId = toInt64(field[3]);
     }
 
     if (c > 4)
     {
       if (field[4][0] != '\0')
-        forecastType = (T::ForecastType) toInt64(field[4]);
+        paramLevel = toInt64(field[4]);
     }
 
     if (c > 5)
     {
       if (field[5][0] != '\0')
+        forecastType = (T::ForecastType) toInt64(field[5]);
+    }
+
+    if (c > 6)
+    {
+      if (field[6][0] != '\0')
       {
         std::vector < std::string > partList;
-        splitString(field[5], '-', partList);
+        splitString(field[6], '-', partList);
         size_t sz = partList.size();
         if (sz == 1)
         {
@@ -853,28 +884,28 @@ void ServiceImplementation::getParameterStringInfo(
       }
     }
 
-    if (c > 6)
-    {
-      if (field[6][0] != '\0')
-        generationFlags = toInt64(field[6]);
-    }
-
     if (c > 7)
     {
       if (field[7][0] != '\0')
-        areaInterpolationMethod = (short) toInt64(field[7]);
+        generationFlags = toInt64(field[7]);
     }
 
     if (c > 8)
     {
       if (field[8][0] != '\0')
-        timeInterpolationMethod = (short) toInt64(field[8]);
+        areaInterpolationMethod = (short) toInt64(field[8]);
     }
 
     if (c > 9)
     {
       if (field[9][0] != '\0')
-        levelInterpolationMethod = (short) toInt64(field[9]);
+        timeInterpolationMethod = (short) toInt64(field[9]);
+    }
+
+    if (c > 10)
+    {
+      if (field[10][0] != '\0')
+        levelInterpolationMethod = (short) toInt64(field[10]);
     }
   }
   catch (...)
@@ -942,6 +973,7 @@ bool ServiceImplementation::parseFunction(
           newParam.mParam = fParam->second;
           newParam.mOrigParam = paramStr + " => " + fParam->second;
           newParam.mSymbolicName = fParam->second;
+          newParam.mGeometryId = queryParam.mGeometryId;
           newParam.mParameterLevelId = queryParam.mParameterLevelId;
           newParam.mParameterLevel = queryParam.mParameterLevel;
           newParam.mForecastType = queryParam.mForecastType;
@@ -960,8 +992,8 @@ bool ServiceImplementation::parseFunction(
             newParam.mParam = alias;
             newParam.mOrigParam = newParam.mOrigParam + " => " + alias;
             std::string paramName;
-            getParameterStringInfo(fParam->second, paramName, newParam.mParameterLevelId, newParam.mParameterLevel, newParam.mForecastType, newParam.mForecastNumber,
-                newParam.mProducerId, newParam.mGenerationFlags, newParam.mAreaInterpolationMethod, newParam.mTimeInterpolationMethod, newParam.mLevelInterpolationMethod);
+            getParameterStringInfo(fParam->second, paramName, newParam.mGeometryId, newParam.mParameterLevelId, newParam.mParameterLevel, newParam.mForecastType, newParam.mForecastNumber,
+                newParam.mProducerName,newParam.mProducerId, newParam.mGenerationFlags, newParam.mAreaInterpolationMethod, newParam.mTimeInterpolationMethod, newParam.mLevelInterpolationMethod);
           }
           // newParam.print(std::cout,0,0);
 
@@ -978,7 +1010,7 @@ bool ServiceImplementation::parseFunction(
       std::string producerName;
 
       std::string paramName;
-      getParameterStringInfo(paramStr, paramName, queryParam.mParameterLevelId, queryParam.mParameterLevel, queryParam.mForecastType, forecastNumberVec, producerName,
+      getParameterStringInfo(paramStr, paramName, queryParam.mGeometryId, queryParam.mParameterLevelId, queryParam.mParameterLevel, queryParam.mForecastType, forecastNumberVec, producerName,
           queryParam.mProducerId, queryParam.mGenerationFlags, queryParam.mAreaInterpolationMethod, queryParam.mTimeInterpolationMethod, queryParam.mLevelInterpolationMethod);
 
       size_t sz = forecastNumberVec.size();
@@ -991,7 +1023,7 @@ bool ServiceImplementation::parseFunction(
         p += sprintf(p, "LIST{");
         for (size_t t = 0; t < sz; t++)
         {
-          p += sprintf(p, "%s:%s:%d:%d:%d:%d:%u", paramName.c_str(), producerName.c_str(), queryParam.mParameterLevelId, queryParam.mParameterLevel, queryParam.mForecastType,
+          p += sprintf(p, "%s:%s:%d:%d:%d:%d:%d:%u", paramName.c_str(), producerName.c_str(), queryParam.mGeometryId, queryParam.mParameterLevelId, queryParam.mParameterLevel, queryParam.mForecastType,
               forecastNumberVec[t], queryParam.mGenerationFlags);
 
           if (queryParam.mAreaInterpolationMethod >= 0)
@@ -1124,6 +1156,29 @@ void ServiceImplementation::getProducers(Query& query, Producer_vec& producers)
 
 
 
+void ServiceImplementation::getProducers(std::string producerName, Producer_vec& producers)
+{
+  FUNCTION_TRACE
+  try
+  {
+    for (auto it = mProducerList.begin(); it != mProducerList.end(); ++it)
+    {
+      if (strcasecmp(producerName.c_str(), it->first.c_str()) == 0)
+      {
+        producers.push_back(std::pair<std::string, T::GeometryId>(it->first, it->second));
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 void ServiceImplementation::updateQueryParameters(Query& query)
 {
   FUNCTION_TRACE
@@ -1152,9 +1207,9 @@ void ServiceImplementation::updateQueryParameters(Query& query)
         PRINT_DATA(mDebugLog, " * PARAMETER: %s\n", qParam->mSymbolicName.c_str());
 
         std::vector < T::ForecastNumber > forecastNumberVec;
-        std::string producerName;
+        //std::string producerName;
 
-        getParameterStringInfo(qParam->mParam, qParam->mParameterKey, qParam->mParameterLevelId, qParam->mParameterLevel, qParam->mForecastType, forecastNumberVec, producerName,
+        getParameterStringInfo(qParam->mParam, qParam->mParameterKey, qParam->mGeometryId, qParam->mParameterLevelId, qParam->mParameterLevel, qParam->mForecastType, forecastNumberVec, qParam->mProducerName,
             qParam->mProducerId, qParam->mGenerationFlags, qParam->mAreaInterpolationMethod, qParam->mTimeInterpolationMethod, qParam->mLevelInterpolationMethod);
 
         size_t sz = forecastNumberVec.size();
@@ -1167,7 +1222,7 @@ void ServiceImplementation::updateQueryParameters(Query& query)
           p += sprintf(p, "LIST{");
           for (size_t t = 0; t < sz; t++)
           {
-            p += sprintf(p, "%s:%s:%d:%d:%d:%d:%u", qParam->mParameterKey.c_str(), producerName.c_str(), qParam->mParameterLevelId, qParam->mParameterLevel, qParam->mForecastType,
+            p += sprintf(p, "%s:%s:%d:%d:%d:%d:%d:%u", qParam->mParameterKey.c_str(), qParam->mProducerName.c_str(), qParam->mGeometryId, qParam->mParameterLevelId, qParam->mParameterLevel, qParam->mForecastType,
                 forecastNumberVec[t], qParam->mGenerationFlags);
 
             if (qParam->mAreaInterpolationMethod >= 0)
@@ -1303,27 +1358,27 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
                     geometryId = q->mValueList[tCount].mGeometryId;
                   }
 
-                  T::GridValue* rec = q->mValueList[tCount].mValueList.getGridValueByIndex(v);
-                  if (rec != nullptr)
+                  T::GridValue rec;
+                  if (q->mValueList[tCount].mValueList.getGridValueByIndex(v,rec))
                   {
                     if (/*qParam->mAreaInterpolationMethod == T::AreaInterpolationMethod::External
                      &&*/
-                    rec->mValueString.length() > 0)
+                    rec.mValueString.length() > 0)
                     {
-                      splitString(rec->mValueString, ';', valueList);
+                      splitString(rec.mValueString, ';', valueList);
                     }
                     else
                     {
-                      a = rec->mValue;
+                      a = rec.mValue;
                     }
 
-                    if (rec->mX == -1000 && rec->mY == -1000)
+                    if (rec.mX == -1000 && rec.mY == -1000)
                     {
                       areaCnt = true;
                     }
                     else
                     {
-                      lastRec = *rec;
+                      lastRec = rec;
                     }
                   }
                   else
@@ -1375,7 +1430,8 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
                 {
                   double val = mLuaFileCollection.executeFunctionCall1(function, parameters);
                   // printf("-- result %f\n",val);
-                  pValues.mValueList.addGridValue(new T::GridValue(lastRec.mX, lastRec.mY, val));
+                  T::GridValue rec(lastRec.mX, lastRec.mY, val);
+                  pValues.mValueList.addGridValue(rec);
                 }
                   break;
 
@@ -1383,7 +1439,8 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
                 {
                   std::string val = mLuaFileCollection.executeFunctionCall5(function, query.mLanguage, parameters);
                   // std::cout << "** result " << val << "\n";
-                  pValues.mValueList.addGridValue(new T::GridValue(lastRec.mX, lastRec.mY, val));
+                  T::GridValue rec(lastRec.mX, lastRec.mY, val);
+                  pValues.mValueList.addGridValue(rec);
                 }
                   break;
               }
@@ -1399,7 +1456,8 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
           {
             // double val = executeFunctionCall1(qParam->mFunction,extParameters);
             double val = mLuaFileCollection.executeFunctionCall1(qParam->mFunction, extParameters);
-            pValues.mValueList.addGridValue(new T::GridValue(-1000, -1000, val));
+            T::GridValue rec(-1000, -1000, val);
+            pValues.mValueList.addGridValue(rec);
           }
 
           if (qParam->mFunction.substr(0, 1) == "@")
@@ -1408,17 +1466,20 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
             std::string func = qParam->mFunction.substr(1);
             double val = mLuaFileCollection.executeFunctionCall1(func, areaParameters);
             // double val = executeFunctionCall1(func,areaParameters);
-            pValues.mValueList.addGridValue(new T::GridValue(-1000, -1000, val));
+            T::GridValue rec(-1000, -1000, val);
+            pValues.mValueList.addGridValue(rec);
           }
 
           if (areaCnt)
           {
             if (pValues.mValueList.getLength() > 0)
             {
-              T::GridValue* rec = pValues.mValueList.getGridValueByIndex(0);
-              T::ParamValue val = rec->mValue;
+              T::GridValue rec;
+              pValues.mValueList.getGridValueByIndex(0,rec);
+              T::ParamValue val = rec.mValue;
               pValues.mValueList.clear();
-              pValues.mValueList.addGridValue(new T::GridValue(-1000, -1000, val));
+              T::GridValue rec2(-1000, -1000, val);
+              pValues.mValueList.addGridValue(rec2);
             }
           }
           qParam->mValueList.push_back(pValues);
@@ -1467,38 +1528,29 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
     std::set < T::GeometryId > geometryIdList;
 
-    const char *geometryIdStr = query.mAttributeList.getAttributeValue("grid.geometryId");
-    if (geometryIdStr != nullptr)
+    if (query.mGeometryIdList.size() > 0)
     {
-      getGeometryIdListByGeometryId(toInt32(geometryIdStr),geometryIdList);
+      geometryIdList = query.mGeometryIdList;
     }
     else
     {
-      const char *gridUrnStr = query.mAttributeList.getAttributeValue("grid.urn");
-      if (gridUrnStr != nullptr)
+      const char *geometryIdStr = query.mAttributeList.getAttributeValue("grid.geometryId");
+      if (geometryIdStr != nullptr)
       {
-        Identification::gridDef.getGeometryIdList(geometryIdList);
+        getGeometryIdListByGeometryId(toInt32(geometryIdStr),geometryIdList);
       }
-/*
-      const char *gridWidthStr = query.mAttributeList.getAttributeValue("grid.width");
-      const char *gridHeightStr = query.mAttributeList.getAttributeValue("grid.height");
-
-      if (gridWidthStr != nullptr  &&  gridHeightStr != nullptr)
+      else
       {
+        const char *gridUrnStr = query.mAttributeList.getAttributeValue("grid.urn");
         if (gridUrnStr != nullptr)
         {
-          T::AreaCoordinates latlonCoordinates;
-          convertCoordinatesToLatLon(gridUrnStr,query.mAreaCoordinates,latlonCoordinates);
-          getGeometryIdListByCoordinates(atoi(gridWidthStr),atoi(gridHeightStr),latlonCoordinates[0], geometryIdList);
+          Identification::gridDef.getGeometryIdList(geometryIdList);
         }
         else
         {
-          getGeometryIdListByCoordinates(atoi(gridWidthStr),atoi(gridHeightStr),query.mAreaCoordinates[0], geometryIdList);
+          getGeometryIdListByCoordinates(query.mAreaCoordinates, geometryIdList);
         }
       }
-*/
-      else
-        getGeometryIdListByCoordinates(query.mAreaCoordinates, geometryIdList);
     }
 
     std::map < std::string, uint > parameterProducers;
@@ -1514,14 +1566,6 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
       PRINT_DATA(mDebugLog, "\nQuery -object after parameter update:\n");
       PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
     }
-
-    bool ignoreStartTimeValue = false;
-    if ((query.mFlags & Query::Flags::StartTimeNotIncluded) != 0)
-      ignoreStartTimeValue = true;
-
-    bool reverseGenerations = false;
-    if ((query.mFlags & Query::Flags::ReverseGenerationFlags) != 0)
-      reverseGenerations = true;
 
     // Fetching parameter data according to the given time range and the coordinate list. Notice
     // that the coordinate list can be used in two ways. It can 1) contain coordinate points
@@ -1545,13 +1589,15 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
         short levelInterpolationMethod = qParam->mLevelInterpolationMethod;
         uint parameterFlags = qParam->mFlags;
         uint producerId = qParam->mProducerId;
+        std::string producerName = qParam->mProducerName;
         uint generationFlags = qParam->mGenerationFlags;
+        int geometryId = qParam->mGeometryId;
         if (generationFlags == 0)
           generationFlags = query.mGenerationFlags;
 
         // qParam->print(std::cout,0,0);
 
-        getParameterStringInfo(qParam->mParam, paramName, paramLevelId, paramLevel, forecastType, forecastNumber, producerId, generationFlags, areaInterpolationMethod,
+        getParameterStringInfo(qParam->mParam, paramName, geometryId, paramLevelId, paramLevel, forecastType, forecastNumber, producerName,producerId, generationFlags, areaInterpolationMethod,
             timeInterpolationMethod, levelInterpolationMethod);
 
         // printf("**** PARAM %s  => %d %d\n",qParam->mParam.c_str(),paramLevelId,paramLevel);
@@ -1587,6 +1633,10 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
             if ((query.mFlags & Query::Flags::StartTimeFromData) != 0)
             {
               startTime = "15000101T000000";  // Start time is the start time of the data
+            }
+
+            if ((query.mFlags & Query::Flags::EndTimeFromData) != 0)
+            {
               endTime = "30000101T000000";    // End time is the end time of the data
             }
 
@@ -1597,14 +1647,34 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
                 producerId = it->second;
             }
 
-            getGridValues(qParam->mType,producers, geometryIdList, producerId, query.mAnalysisTime, generationFlags, reverseGenerations, paramName, paramLevelId, paramLevel, forecastType,
-                forecastNumber, parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, startTime, endTime, ignoreStartTimeValue,
-                qParam->mLocationType, query.mCoordinateType, query.mAreaCoordinates, qParam->mContourLowValues, qParam->mContourHighValues, query.mAttributeList,
+            Producer_vec tmpProducers;
+            if (producerName > " ")
+            {
+              if (geometryId > 0)
+                tmpProducers.push_back(std::pair<std::string, T::GeometryId>(producerName, geometryId));
+              else
+                getProducers(producerName,tmpProducers);
+            }
+            else
+              tmpProducers = producers;
+
+            std::set < T::GeometryId > geomIdList;
+            if (geometryId > 0)
+              geomIdList.insert(geometryId);
+            else
+              geomIdList = geometryIdList;
+
+            getGridValues(qParam->mType,tmpProducers, geomIdList, producerId, query.mAnalysisTime, generationFlags, paramName, paramLevelId, paramLevel, forecastType,
+                forecastNumber, parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, startTime, endTime, query.mFlags, query.mTimesteps,
+                query.mTimestepSizeInMinutes,qParam->mLocationType, query.mCoordinateType, query.mAreaCoordinates, qParam->mContourLowValues, qParam->mContourHighValues, query.mAttributeList,
                 query.mRadius, query.mMaxParameterValues, qParam->mPrecision, qParam->mValueList);
 
-            if (producerId == 0 && qParam->mValueList.size() > 0 && qParam->mValueList[0].mProducerId != 0)
+            if (qParam->mValueList.size() > 0)
             {
-              parameterProducers.insert(std::pair<std::string, uint>(paramName, qParam->mValueList[0].mProducerId));
+              if (producerId == 0 && qParam->mValueList[0].mProducerId != 0)
+              {
+                parameterProducers.insert(std::pair<std::string, uint>(paramName, qParam->mValueList[0].mProducerId));
+              }
             }
           }
         }
@@ -1633,6 +1703,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
     // current forecast time. If not, then the forecast time is added to the parameters's forecast
     // time list, but the actual value list of the current forecast time will be empty.
 
+    size_t timeCnt = timeList.size();
     for (auto tt = timeList.begin(); tt != timeList.end(); ++tt)
     {
       query.mForecastTimeList.insert(*tt);
@@ -1643,10 +1714,14 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
         {
           bool found = false;
           uint cnt = 0;
+
+          if (qParam->mValueList.size() < timeCnt)
+            qParam->mValueList.reserve(timeCnt);
+
           for (auto it = qParam->mValueList.begin(); it != qParam->mValueList.end() && !found; ++it)
           {
             if ((query.mFlags & Query::Flags::StartTimeFromData) == 0
-                && ((ignoreStartTimeValue && it->mForecastTime == query.mStartTime) || it->mForecastTime < query.mStartTime || it->mForecastTime > query.mEndTime))
+                && (it->mForecastTime < query.mStartTime || it->mForecastTime > query.mEndTime))
               it->mFlags = it->mFlags | QueryServer::QPF_AGGREGATION_VALUE;
 
             if (it->mForecastTime < *tt)
@@ -1704,38 +1779,29 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
     std::set < T::GeometryId > geometryIdList;
 
-    const char *geometryIdStr = query.mAttributeList.getAttributeValue("grid.geometryId");
-    if (geometryIdStr != nullptr)
+    if (query.mGeometryIdList.size() > 0)
     {
-      getGeometryIdListByGeometryId(toInt32(geometryIdStr),geometryIdList);
+      geometryIdList = query.mGeometryIdList;
     }
     else
     {
-      const char *gridUrnStr = query.mAttributeList.getAttributeValue("grid.urn");
-      if (gridUrnStr != nullptr)
+      const char *geometryIdStr = query.mAttributeList.getAttributeValue("grid.geometryId");
+      if (geometryIdStr != nullptr)
       {
-        Identification::gridDef.getGeometryIdList(geometryIdList);
+        getGeometryIdListByGeometryId(toInt32(geometryIdStr),geometryIdList);
       }
-/*
-      const char *gridWidthStr = query.mAttributeList.getAttributeValue("grid.width");
-      const char *gridHeightStr = query.mAttributeList.getAttributeValue("grid.height");
-
-      if (gridWidthStr != nullptr  &&  gridHeightStr != nullptr)
+      else
       {
+        const char *gridUrnStr = query.mAttributeList.getAttributeValue("grid.urn");
         if (gridUrnStr != nullptr)
         {
-          T::AreaCoordinates latlonCoordinates;
-          convertCoordinatesToLatLon(gridUrnStr,query.mAreaCoordinates,latlonCoordinates);
-          getGeometryIdListByCoordinates(atoi(gridWidthStr),atoi(gridHeightStr),latlonCoordinates[0], geometryIdList);
+          Identification::gridDef.getGeometryIdList(geometryIdList);
         }
         else
         {
-          getGeometryIdListByCoordinates(atoi(gridWidthStr),atoi(gridHeightStr),query.mAreaCoordinates[0], geometryIdList);
+          getGeometryIdListByCoordinates(query.mAreaCoordinates, geometryIdList);
         }
       }
-*/
-      else
-        getGeometryIdListByCoordinates(query.mAreaCoordinates, geometryIdList);
     }
 
     std::map < std::string, uint > parameterProducers;
@@ -1781,12 +1847,14 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
         short timeInterpolationMethod = qParam->mTimeInterpolationMethod;
         short levelInterpolationMethod = qParam->mLevelInterpolationMethod;
         uint parameterFlags = qParam->mFlags;
+        std::string producerName = qParam->mProducerName;
         uint producerId = qParam->mProducerId;
         uint generationFlags = qParam->mGenerationFlags;
+        int geometryId = qParam->mGeometryId;
         if (generationFlags == 0)
           generationFlags = query.mGenerationFlags;
 
-        getParameterStringInfo(qParam->mParam, paramName, paramLevelId, paramLevel, forecastType, forecastNumber, producerId, generationFlags, areaInterpolationMethod,
+        getParameterStringInfo(qParam->mParam, paramName, geometryId,paramLevelId, paramLevel, forecastType, forecastNumber, producerName, producerId, generationFlags, areaInterpolationMethod,
             timeInterpolationMethod, levelInterpolationMethod);
 
         if (paramName.substr(0, 1) == "$")
@@ -1859,7 +1927,26 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
             if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN)
             {
-              getGridValues(qParam->mType,producers, geometryIdList, producerId, query.mAnalysisTime, gflags, reverseGenerations, paramName, paramLevelId, paramLevel, forecastType,
+
+              Producer_vec tmpProducers;
+              if (producerName > " ")
+              {
+                if (geometryId > 0)
+                  tmpProducers.push_back(std::pair<std::string, T::GeometryId>(producerName, geometryId));
+                else
+                  getProducers(producerName,tmpProducers);
+              }
+              else
+                tmpProducers = producers;
+
+              std::set < T::GeometryId > geomIdList;
+              if (geometryId > 0)
+                geomIdList.insert(geometryId);
+              else
+                geomIdList = geometryIdList;
+
+
+              getGridValues(qParam->mType,tmpProducers, geomIdList, producerId, query.mAnalysisTime, gflags, reverseGenerations, paramName, paramLevelId, paramLevel, forecastType,
                   forecastNumber, parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, *fTime, false, qParam->mLocationType,
                   query.mCoordinateType, query.mAreaCoordinates, qParam->mContourLowValues, qParam->mContourHighValues, query.mAttributeList,query.mRadius,qParam->mPrecision,valueList);
 
@@ -1870,15 +1957,20 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
               if (valueList.mValueList.getLength() > 0)
               {
-                // We hava got some values. We should not change the producer anymore.
+                // We have got some values. We should not change the producer anymore.
 
                 if (producerId == 0)
                   producerId = valueList.mProducerId;
 
                 // We should use this generation or older.
                 if (generationFlags == 0)
-                {
                   gflags = valueList.mGenerationFlags + (valueList.mGenerationFlags << 1);
+
+                // We should not change the forecast number.
+                if (forecastType < 0  &&  forecastNumber < 0)
+                {
+                  forecastType = valueList.mForecastType;
+                  forecastNumber = valueList.mForecastNumber;
                 }
               }
             }
@@ -2076,7 +2168,7 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
     uint vLen = valueList.getLength();
     for (uint i = 0; i < vLen; i++)
     {
-      T::GridValue* gv = valueList.getGridValueByIndex(i);
+      auto gv = valueList.getGridValuePtrByIndex(i);
       if (gv != nullptr)
       {
         std::vector<double> parameters;
@@ -2097,114 +2189,6 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
   }
 }
 
-
-
-
-#if 0
-void ServiceImplementation::levelInterpolation(
-    short levelInterpolationMethod,
-    double level,
-    double level1,
-    double level2,
-    ParameterValues& parameterValues1,
-    ParameterValues& parameterValues2,
-    ParameterValues& valueList)
-{
-  try
-  {
-    // std::cout << "LEVEL INTERPOLATION " << level1 << " " << level << " " << level2 << "   METHOD
-    // " << levelInterpolationMethod << "\n";
-
-    // parameterValues1.print(std::cout,0,0);
-    // parameterValues2.print(std::cout,0,0);
-
-    if (level == level1)
-    {
-      valueList = parameterValues1;
-      return;
-    }
-
-    if (level == level2)
-    {
-      valueList = parameterValues2;
-      return;
-    }
-
-    if (parameterValues1.mValueList.getLength() != parameterValues2.mValueList.getLength())
-    {
-      std::cout << CODE_LOCATION << ": Lengths do not match\n";
-      return;
-    }
-
-    valueList.mForecastTime = parameterValues1.mForecastTime;
-    valueList.mProducerId = parameterValues1.mProducerId;
-    valueList.mGenerationId = parameterValues1.mGenerationId;
-    valueList.mGeometryId = parameterValues1.mGeometryId;
-
-    valueList.mParameterKeyType = parameterValues1.mParameterKeyType;
-    valueList.mParameterKey = parameterValues1.mParameterKey;
-    valueList.mParameterLevelIdType = parameterValues1.mParameterLevelIdType;
-    valueList.mParameterLevelId = parameterValues1.mParameterLevelId;
-    valueList.mParameterLevel = level;
-    valueList.mForecastType = parameterValues1.mForecastType;
-    valueList.mForecastNumber = parameterValues1.mForecastNumber;
-    valueList.mFlags = parameterValues1.mFlags;
-
-    double dist1 = level - level1;
-    double dist2 = level2 - level;
-
-    uint len = parameterValues1.mValueList.getLength();
-    for (uint t = 0; t < len; t++)
-    {
-      T::GridValue* val1 = parameterValues1.mValueList.getGridValueByIndex(t);
-      T::GridValue* val2 = parameterValues2.mValueList.getGridValueByIndex(t);
-
-      if (val1->mX != val2->mX || val1->mY != val1->mY)
-      {
-        std::cout << CODE_LOCATION << " : Coordinates do not match\n";
-      }
-
-      if (val1->mValue != ParamValueMissing && val2->mValue != ParamValueMissing)
-      {
-        switch (levelInterpolationMethod)
-        {
-          case T::LevelInterpolationMethod::Nearest:
-          {
-            if (dist1 <= dist2)
-              valueList.mValueList.addGridValue(new T::GridValue(val1->mX, val1->mX, val1->mValue));
-            else
-              valueList.mValueList.addGridValue(new T::GridValue(val2->mX, val2->mX, val2->mValue));
-          }
-          break;
-
-          case T::LevelInterpolationMethod::Linear:
-          {
-            double newValue = linearInterpolation(level, level1, level2, val1->mValue, val2->mValue);
-            valueList.mValueList.addGridValue(new T::GridValue(val1->mX, val1->mX, newValue));
-          }
-          break;
-
-          default:
-          case T::LevelInterpolationMethod::Logarithmic:
-          {
-            double newValue = logarithmicInterpolation(level, level1, level2, val1->mValue, val2->mValue);
-            valueList.mValueList.addGridValue(new T::GridValue(val1->mX, val1->mX, newValue));
-          }
-          break;
-        }
-      }
-      else
-      {
-        valueList.mValueList.addGridValue(new T::GridValue(val1->mX, val1->mX, ParamValueMissing));
-      }
-    }
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-#endif
 
 
 
@@ -2283,6 +2267,7 @@ bool ServiceImplementation::getSpecialValues(
     valueList.mProducerId = contentInfo1->mProducerId;
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGeometryId = contentInfo1->mGeometryId;
+    valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mForecastType = contentInfo1->mForecastType;
     valueList.mForecastNumber = contentInfo1->mForecastNumber;
     valueList.mParameterLevel = contentInfo1->mParameterLevel;
@@ -2293,9 +2278,9 @@ bool ServiceImplementation::getSpecialValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime)
+      if (contentInfo1->mForecastTime == forecastTime || timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest)
       {
-        // We found a grid which forecast time is exactly the same as the requested forecast time.
+        // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
         double_vec valueVector;
         int result = mDataServerPtr->getGridValueVectorByPoint(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, coordinateType, x, y, areaInterpolationMethod, valueVector);
@@ -2321,7 +2306,10 @@ bool ServiceImplementation::getSpecialValues(
 
           T::GridValueList list;
           for (uint vv = sLen + 1; vv < vSize; vv++)
-            list.addGridValue(new T::GridValue(x, y, valueVector[vv]));
+          {
+            T::GridValue rec(x, y, valueVector[vv]);
+            list.addGridValue(rec);
+          }
 
           if (conversionByFunction)
             executeConversion(function, functionParams, list);
@@ -2332,11 +2320,13 @@ bool ServiceImplementation::getSpecialValues(
           uint len = list.getLength();
           for (uint vv = 0; vv < len; vv++)
           {
-            T::GridValue* rec = list.getGridValueByIndex(vv);
-            p += sprintf(p, "%f;", rec->mValue);
+            T::GridValue rec;
+            list.getGridValueByIndex(vv,rec);
+            p += sprintf(p, "%f;", rec.mValue);
           }
 
-          valueList.mValueList.addGridValue(new T::GridValue(x, y, std::string(tmp)));
+          T::GridValue rec(x, y, std::string(tmp));
+          valueList.mValueList.addGridValue(rec);
         }
 
         if (precision < 0)
@@ -2416,8 +2406,10 @@ bool ServiceImplementation::getSpecialValues(
         T::GridValueList list2;
         for (uint vv = sLen + 1; vv < vLen1; vv++)
         {
-          list1.addGridValue(new T::GridValue(x, y, valueVector1[vv]));
-          list2.addGridValue(new T::GridValue(x, y, valueVector2[vv]));
+          T::GridValue val1(x, y, valueVector1[vv]);
+          T::GridValue val2(x, y, valueVector2[vv]);
+          list1.addGridValue(val1);
+          list2.addGridValue(val2);
         }
 
         T::GridValueList list;
@@ -2433,11 +2425,13 @@ bool ServiceImplementation::getSpecialValues(
         uint len = list.getLength();
         for (uint s = 0; s < len; s++)
         {
-          T::GridValue* rec = list.getGridValueByIndex(s);
-          p += sprintf(p, "%f;", rec->mValue);
+          T::GridValue rec;
+           list.getGridValueByIndex(s,rec);
+          p += sprintf(p, "%f;", rec.mValue);
         }
 
-        valueList.mValueList.addGridValue(new T::GridValue(x, y, std::string(tmp)));
+        T::GridValue rec(x, y, std::string(tmp));
+        valueList.mValueList.addGridValue(rec);
 
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
@@ -2526,6 +2520,8 @@ bool ServiceImplementation::getValueVectors(
 
     T::ContentInfo* contentInfo1 = contentList.getContentInfoByIndex(0);
     T::ContentInfo* contentInfo2 = contentList.getContentInfoByIndex(1);
+    T::ContentInfo* contentInfo3 = contentList.getContentInfoByIndex(2);
+    T::ContentInfo* contentInfo4 = contentList.getContentInfoByIndex(3);
 
     valueList.mParameterKeyType = pInfo.mParameterKeyType;
     valueList.mParameterKey = pInfo.mParameterKey;
@@ -2536,6 +2532,7 @@ bool ServiceImplementation::getValueVectors(
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
     valueList.mGeometryId = contentInfo1->mGeometryId;
+    valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mForecastType = contentInfo1->mForecastType;
     valueList.mForecastNumber = contentInfo1->mForecastNumber;
     valueList.mParameterLevel = contentInfo1->mParameterLevel;
@@ -2546,12 +2543,13 @@ bool ServiceImplementation::getValueVectors(
 
     attributeList.setAttribute("grid.timeInterpolationMethod",std::to_string(timeInterpolationMethod));
     attributeList.setAttribute("grid.areaInterpolationMethod",std::to_string(areaInterpolationMethod));
+    attributeList.setAttribute("grid.levelInterpolationMethod",std::to_string(levelInterpolationMethod));
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime)
+      if (contentInfo1->mForecastTime == forecastTime || timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest)
       {
-        // We found a grid which forecast time is exactly the same as the requested forecast time.
+        // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
         int result = 0;
 
@@ -2643,7 +2641,74 @@ bool ServiceImplementation::getValueVectors(
 
         return true;
       }
+
+      if (contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel)
+      {
+        // We did not find a grid with the exact level but we find grids that
+        // are before and after the current level. This means that we should do
+        // some level interpolation.
+
+        switch (locationType)
+        {
+          case Query::LocationType::Geometry:
+            result = mDataServerPtr->getGridValueVectorByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,attributeList,valueVector);
+            break;
+
+          case Query::LocationType::Grid:
+            result = mDataServerPtr->getGridValueVectorByLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,coordinateType,gridCoordinates,attributeList,valueVector);
+            break;
+
+          default:
+            result = mDataServerPtr->getGridValueVectorByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,levelInterpolationMethod,valueVector);
+            break;
+        }
+
+        valueList.mParameterLevel = paramLevel;
+
+        if (conversionByFunction)
+           executeConversion(function, functionParams, valueVector, valueList.mValueVector);
+
+        if (precision < 0)
+          precision = pInfo.mDefaultPrecision;
+
+
+        return true;
+      }
     }
+
+    if (contentLen == 4)
+    {
+      if (contentInfo1->mForecastTime < forecastTime  &&  contentInfo2->mForecastTime < forecastTime  &&  contentInfo3->mForecastTime > forecastTime  &&  contentInfo4->mForecastTime > forecastTime  &&
+          contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&  contentInfo3->mParameterLevel < paramLevel  &&  contentInfo4->mParameterLevel > paramLevel)
+      {
+        switch (locationType)
+        {
+          case Query::LocationType::Geometry:
+            result = mDataServerPtr->getGridValueVectorByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,forecastTime,paramLevel,attributeList,valueVector);
+            break;
+
+          case Query::LocationType::Grid:
+            result = mDataServerPtr->getGridValueVectorByTimeLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,forecastTime,paramLevel,coordinateType,gridCoordinates,attributeList,valueVector);
+            break;
+
+          default:
+            result = mDataServerPtr->getGridValueVectorByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,forecastTime,paramLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,valueVector);
+            break;
+        }
+
+        valueList.mParameterLevel = paramLevel;
+
+        if (conversionByFunction)
+           executeConversion(function, functionParams, valueVector, valueList.mValueVector);
+
+        if (precision < 0)
+          precision = pInfo.mDefaultPrecision;
+
+
+        return true;
+      }
+    }
+
     return false;
   }
   catch (...)
@@ -2704,16 +2769,7 @@ bool ServiceImplementation::getPointValuesByHeight(
       exception.addParameter("Message", ContentServer::getResultString(result));
       throw exception;
     }
-/*
-    PRINT_DATA(mDebugLog, "         + Found %u content records\n", tmpContentList.getLength());
 
-    if (mDebugLog != nullptr)
-    {
-      std::stringstream stream;
-      tmpContentList.print(stream, 0, 4);
-      PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
-    }
-*/
     uint tmpContentLen = tmpContentList.getLength();
     if (tmpContentLen == 0)
       return false;
@@ -2859,6 +2915,7 @@ bool ServiceImplementation::getPointValuesByHeight(
         valueList.mGenerationId = contentInfo1->mGenerationId;
         valueList.mGenerationFlags = generationFlags;
         valueList.mGeometryId = contentInfo1->mGeometryId;
+        valueList.mModificationTime = contentInfo1->mModificationTime;
         valueList.mForecastType = contentInfo1->mForecastType;
         valueList.mForecastNumber = contentInfo1->mForecastNumber;
         valueList.mParameterLevel = contentInfo1->mParameterLevel;
@@ -2870,9 +2927,10 @@ bool ServiceImplementation::getPointValuesByHeight(
 
         if (contentLen == 1)
         {
-          if (contentInfo1->mForecastTime == fTime)
+          if (contentInfo1->mForecastTime == fTime || timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest)
           {
-            // We found a grid which forecast time is exactly the same as the requested forecast time.
+            // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
+
             T::ParamValue value = 0;
             int result = mDataServerPtr->getGridValueByPoint(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, coordinateType,coordinate->x(),coordinate->y(),areaInterpolationMethod, value);
             if (result != 0)
@@ -2886,7 +2944,8 @@ bool ServiceImplementation::getPointValuesByHeight(
               //return false;
             }
 
-            valueList.mValueList.addGridValue(new T::GridValue(coordinate->x(),coordinate->y(),value));
+            T::GridValue rec(coordinate->x(),coordinate->y(),value);
+            valueList.mValueList.addGridValue(rec);
             valueList.mParameterLevel = paramLevel;
           }
           else
@@ -2934,7 +2993,8 @@ bool ServiceImplementation::getPointValuesByHeight(
               //return false;
             }
 
-            valueList.mValueList.addGridValue(new T::GridValue(coordinate->x(),coordinate->y(),value));
+            T::GridValue rec(coordinate->x(),coordinate->y(),value);
+            valueList.mValueList.addGridValue(rec);
             valueList.mParameterLevel = paramLevel;
           }
         }
@@ -2965,7 +3025,8 @@ bool ServiceImplementation::getPointValuesByHeight(
               //return false;
             }
 
-            valueList.mValueList.addGridValue(new T::GridValue(coordinate->x(),coordinate->y(),value));
+            T::GridValue rec(coordinate->x(),coordinate->y(),value);
+            valueList.mValueList.addGridValue(rec);
             valueList.mParameterLevel = paramLevel;
           }
         }
@@ -3021,6 +3082,7 @@ bool ServiceImplementation::getPointValues(
   try
   {
     PRINT_DATA(mDebugLog, "getPointValues()\n");
+
     if ((parameterFlags & QPF_HEIGHT_LEVEL_INTERPOLATION_ENABLED) != 0)
     {
       return getPointValuesByHeight(producerInfo,producerGeometryId,generationId,generationFlags,pInfo,forecastTime,
@@ -3040,7 +3102,6 @@ bool ServiceImplementation::getPointValues(
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
     std::string fTime = forecastTime;
-
 
     T::ContentInfoList contentList;
     if (climatologyParam)
@@ -3113,6 +3174,7 @@ bool ServiceImplementation::getPointValues(
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
     valueList.mGeometryId = contentInfo1->mGeometryId;
+    valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mForecastType = contentInfo1->mForecastType;
     valueList.mForecastNumber = contentInfo1->mForecastNumber;
     valueList.mParameterLevel = contentInfo1->mParameterLevel;
@@ -3123,9 +3185,9 @@ bool ServiceImplementation::getPointValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == fTime)
+      if (contentInfo1->mForecastTime == fTime || timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest)
       {
-        // We found a grid which forecast time is exactly the same as the requested forecast time.
+        // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
         int result = mDataServerPtr->getGridValueListByPointList(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, coordinateType,coordinates[0],areaInterpolationMethod, valueList.mValueList);
         if (result != 0)
@@ -3321,138 +3383,22 @@ bool ServiceImplementation::getCircleValues(
 
     uint contentLen = contentList.getLength();
 
-#if 0  // This level handling is under construction
-    bool multipleValues = contentList.containsSameForecastTimes();
-    if (multipleValues)
-    {
-      PRINT_DATA(mDebugLog, "         + Content records contains multiple values with the same timestep\n");
-      return false;
-    }
-
-    if (contentLen == 0 && ((parameterFlags & QPF_PRESSURE_LEVEL_INTERPOLATION_ENABLED) != 0 || (parameterFlags & QPF_HEIGHT_LEVEL_INTERPOLATION_ENABLED) != 0))
-    {
-      // It seems that there are no content available for the requested level. Let's try
-      // to find some other levels.
-
-      int lowerLevel = -1000000000;
-      int higherLevel = 1000000000;
-      double lowerHeight = 0;
-      double higherHeight = 0;
-      T::ParamLevelId pLevelId = paramLevelId;
-
-      int result = mContentServerPtr->getContentListByParameterAndGenerationId(0, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
-          paramLevelId, -1000000000, 1000000000, forecastType, forecastNumber, producerGeometryId, "19000101T000000", "30000101T000000", 0, contentList);
-      if (result != 0)
-      {
-        SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
-        exception.addParameter("Service", "getContentListByParameterAndGenerationId");
-        exception.addParameter("Message", ContentServer::getResultString(result));
-        throw exception;
-      }
-
-      uint contentLen = contentList.getLength();
-      if (contentLen > 0)
-      {
-        std::set<int> levelIdList;
-
-        for (uint t = 0; t < contentLen; t++)
-        {
-          T::ContentInfo* cInfo = contentList.getContentInfoByIndex(t);
-
-          if (cInfo->mParameterLevel != 0)
-          {
-            if (levelIdList.find(cInfo->mFmiParameterLevelId) == levelIdList.end())
-              levelIdList.insert(cInfo->mFmiParameterLevelId);
-
-            if ((parameterFlags & QPF_PRESSURE_LEVEL_INTERPOLATION_ENABLED) != 0 && cInfo->mFmiParameterLevelId == 2)
-            {
-              // The data was requested by using pressure levels.
-
-              if (cInfo->mParameterLevel < paramLevel && cInfo->mParameterLevel > lowerLevel)
-                lowerLevel = cInfo->mParameterLevel;
-
-              if (cInfo->mParameterLevel > paramLevel && cInfo->mParameterLevel < higherLevel)
-                higherLevel = cInfo->mParameterLevel;
-            }
-
-            if ((parameterFlags & QPF_HEIGHT_LEVEL_INTERPOLATION_ENABLED) != 0 && cInfo->mFmiParameterLevelId == 3)
-            {
-              // The data was requested by using metric levels.
-
-              if (cInfo->mParameterLevel < paramLevel && cInfo->mParameterLevel > lowerHeight)
-                lowerHeight = cInfo->mParameterLevel;
-
-              if (cInfo->mParameterLevel > paramLevel && cInfo->mParameterLevel < higherHeight)
-                higherHeight = cInfo->mParameterLevel;
-            }
-          }
-        }
-
-        if ((parameterFlags & QPF_HEIGHT_LEVEL_INTERPOLATION_ENABLED) != 0)
-        {
-          // The data was requested by using metric levels
-
-          if (levelIdList.find(3) != levelIdList.end())
-          {
-            // There are metric levels available
-            lowerLevel = lowerHeight;
-            higherLevel = higherHeight;
-            pLevelId = 3;
-          }
-          else if (levelIdList.find(2) != levelIdList.end())
-          {
-            // The data is not available on the metric level, but it can be found from the pressure
-            // level.
-            getPressureLevelsAndHeights(producerInfo, generationId, generationFlags, forecastTime, forecastType, forecastNumber, producerGeometryId, coordinateType, x, y, paramLevel, lowerLevel, higherLevel,
-                lowerHeight, higherHeight);
-            pLevelId = 2;
-          }
-        }
-
-        if (lowerLevel != -1000000000 && higherLevel != 1000000000)
-        {
-          // We found lower and upper levels. Let's fetch data from the both levels and count
-          // new values by interpolating.
-
-          ParameterValues parameterValues1;
-          ParameterValues parameterValues2;
-
-          if (!getCircleValues(producerInfo, producerGeometryId, generationId, generationFlags, pInfo, forecastTime, pLevelId, lowerLevel, forecastType, forecastNumber, 0, timeInterpolationMethod,
-              levelInterpolationMethod, coordinateType, x, y, radius, newProducerId,precision,parameterValues1))
-            return false;
-
-          if (!getCircleValues(producerInfo, producerGeometryId, generationId, generationFlags, pInfo, forecastTime, pLevelId, higherLevel, forecastType, forecastNumber, 0, timeInterpolationMethod,
-              levelInterpolationMethod, coordinateType, x, y, radius, newProducerId,precision, parameterValues2))
-            return false;
-
-          short iplMethod = levelInterpolationMethod;
-          if (levelInterpolationMethod == T::LevelInterpolationMethod::Undefined)
-          {
-            if ((parameterFlags & QPF_HEIGHT_LEVEL_INTERPOLATION_ENABLED) != 0)
-              iplMethod = T::LevelInterpolationMethod::Linear;
-            else
-              iplMethod = T::LevelInterpolationMethod::Logarithmic;
-          }
-
-          if ((parameterFlags & QPF_HEIGHT_LEVEL_INTERPOLATION_ENABLED) != 0)
-            levelInterpolation(iplMethod, paramLevel, lowerHeight, higherHeight, parameterValues1, parameterValues2, valueList);
-          else
-            levelInterpolation(iplMethod, paramLevel, lowerLevel, higherLevel, parameterValues1, parameterValues2, valueList);
-
-          // levelInterpolation(levelInterpolationMethod,paramLevel,parameterValues1.mParameterLevel,parameterValues2.mParameterLevel,parameterValues1,parameterValues2,valueList);
-          return true;
-        }
-        return false;
-      }
-    }
-#endif
-
-
     if (contentLen == 0)
       return false;
 
+    short iplMethod = levelInterpolationMethod;
+    if (levelInterpolationMethod == T::LevelInterpolationMethod::Undefined)
+    {
+      if ((parameterFlags & QPF_HEIGHT_LEVEL_INTERPOLATION_ENABLED) != 0)
+        iplMethod = T::LevelInterpolationMethod::Linear;
+      else
+        iplMethod = T::LevelInterpolationMethod::Logarithmic;
+    }
+
     T::ContentInfo* contentInfo1 = contentList.getContentInfoByIndex(0);
     T::ContentInfo* contentInfo2 = contentList.getContentInfoByIndex(1);
+    T::ContentInfo* contentInfo3 = contentList.getContentInfoByIndex(2);
+    T::ContentInfo* contentInfo4 = contentList.getContentInfoByIndex(3);
 
     valueList.mParameterKeyType = pInfo.mParameterKeyType;
     valueList.mParameterKey = pInfo.mParameterKey;
@@ -3463,6 +3409,7 @@ bool ServiceImplementation::getCircleValues(
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
     valueList.mGeometryId = contentInfo1->mGeometryId;
+    valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mForecastType = contentInfo1->mForecastType;
     valueList.mForecastNumber = contentInfo1->mForecastNumber;
     valueList.mParameterLevel = contentInfo1->mParameterLevel;
@@ -3473,9 +3420,9 @@ bool ServiceImplementation::getCircleValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime)
+      if (contentInfo1->mForecastTime == forecastTime || timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest)
       {
-        // We found a grid which forecast time is exactly the same as the requested forecast time.
+        // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
 
         int result = mDataServerPtr->getGridValueListByCircle(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, coordinateType, x, y, radius, valueList.mValueList);
@@ -3523,6 +3470,7 @@ bool ServiceImplementation::getCircleValues(
         valueList.mGenerationId = contentInfo1->mGenerationId;
         valueList.mGenerationFlags = generationFlags;
         valueList.mGeometryId = contentInfo1->mGeometryId;
+        valueList.mModificationTime = contentInfo1->mModificationTime;
         valueList.mForecastType = contentInfo1->mForecastType;
         valueList.mForecastNumber = contentInfo1->mForecastNumber;
         valueList.mParameterLevel = contentInfo1->mParameterLevel;
@@ -3542,6 +3490,65 @@ bool ServiceImplementation::getCircleValues(
           PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
           return false;
         }
+
+        if (conversionByFunction)
+          executeConversion(function, functionParams, valueList.mValueList);
+
+        if (precision < 0)
+          precision = pInfo.mDefaultPrecision;
+
+        return true;
+      }
+
+      if (contentInfo1->mForecastTime == forecastTime  &&  contentInfo2->mForecastTime == forecastTime  &&  contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel)
+      {
+        // Content records have the same time but different levels, so we need to level interpolation.
+
+        int result = mDataServerPtr->getGridValueListByLevelAndCircle(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,coordinateType,x,y,radius,iplMethod,valueList.mValueList);
+        if (result != 0)
+        {
+          SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+          exception.addParameter("Service", "getGridValueListByLevelAndCircle");
+          exception.addParameter("Message", DataServer::getResultString(result));
+          std::string errorMsg = exception.getStackTrace();
+          PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+          return false;
+        }
+
+        valueList.mParameterLevel = paramLevel;
+
+        if (conversionByFunction)
+          executeConversion(function, functionParams, valueList.mValueList);
+
+        if (precision < 0)
+          precision = pInfo.mDefaultPrecision;
+
+        return true;
+      }
+    }
+
+
+    if (contentLen == 4)
+    {
+      if (contentInfo1->mForecastTime < forecastTime  &&  contentInfo2->mForecastTime < forecastTime  &&  contentInfo3->mForecastTime > forecastTime  &&  contentInfo4->mForecastTime > forecastTime  &&
+          contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&  contentInfo3->mParameterLevel < paramLevel  &&  contentInfo4->mParameterLevel > paramLevel)
+      {
+        int result = mDataServerPtr->getGridValueListByTimeLevelAndCircle(0,
+            contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,
+            contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,
+            forecastTime,paramLevel,coordinateType,x,y,radius,timeInterpolationMethod,iplMethod,valueList.mValueList);
+
+        if (result != 0)
+        {
+          SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+          exception.addParameter("Service", "getGridValueListByTimeLevelAndCircle");
+          exception.addParameter("Message", DataServer::getResultString(result));
+          std::string errorMsg = exception.getStackTrace();
+          PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+          return false;
+        }
+
+        valueList.mParameterLevel = paramLevel;
 
         if (conversionByFunction)
           executeConversion(function, functionParams, valueList.mValueList);
@@ -3615,44 +3622,53 @@ bool ServiceImplementation::getPolygonValues(
     }
 
     uint contentLen = contentList.getLength();
-    bool multipleValues = contentList.containsSameForecastTimes();
-    if (multipleValues)
-    {
-      PRINT_DATA(mDebugLog, "         + Content records contains multiple values with the same timestep\n");
-      return false;
-    }
 
     if (contentLen == 0)
       return false;
 
+    short iplMethod = levelInterpolationMethod;
+    if (levelInterpolationMethod == T::LevelInterpolationMethod::Undefined)
+    {
+      if ((parameterFlags & QPF_HEIGHT_LEVEL_INTERPOLATION_ENABLED) != 0)
+        iplMethod = T::LevelInterpolationMethod::Linear;
+      else
+        iplMethod = T::LevelInterpolationMethod::Logarithmic;
+    }
+
+
     // We found content information close to the current forecast time
+
+    T::ContentInfo* contentInfo1 = contentList.getContentInfoByIndex(0);
+    T::ContentInfo* contentInfo2 = contentList.getContentInfoByIndex(1);
+    T::ContentInfo* contentInfo3 = contentList.getContentInfoByIndex(2);
+    T::ContentInfo* contentInfo4 = contentList.getContentInfoByIndex(3);
 
     valueList.mParameterKeyType = pInfo.mParameterKeyType;
     valueList.mParameterKey = pInfo.mParameterKey;
     valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
     valueList.mParameterLevelId = paramLevelId;
+    valueList.mForecastTime = forecastTime;
+    valueList.mProducerId = contentInfo1->mProducerId;
+    valueList.mGenerationId = contentInfo1->mGenerationId;
+    valueList.mGenerationFlags = generationFlags;
+    valueList.mGeometryId = contentInfo1->mGeometryId;
+    valueList.mModificationTime = contentInfo1->mModificationTime;
+    valueList.mForecastType = contentInfo1->mForecastType;
+    valueList.mForecastNumber = contentInfo1->mForecastNumber;
+    valueList.mParameterLevel = contentInfo1->mParameterLevel;
+    if (pInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::FMI)
+      valueList.mParameterLevelId = contentInfo1->mFmiParameterLevelId;
+    else
+      valueList.mParameterLevelId = pInfo.mParameterLevelId;
+
 
     if (contentLen == 1)
     {
-      T::ContentInfo* contentInfo = contentList.getContentInfoByIndex(0);
-      if (contentInfo->mForecastTime == forecastTime)
+      if (contentInfo1->mForecastTime == forecastTime || timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest)
       {
-        // We found a grid which forecast time is exactly the same as the requested forecast time.
+        // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
-        valueList.mForecastTime = forecastTime;
-        valueList.mProducerId = contentInfo->mProducerId;
-        valueList.mGenerationId = contentInfo->mGenerationId;
-        valueList.mGenerationFlags = generationFlags;
-        valueList.mGeometryId = contentInfo->mGeometryId;
-        valueList.mForecastType = contentInfo->mForecastType;
-        valueList.mForecastNumber = contentInfo->mForecastNumber;
-        valueList.mParameterLevel = contentInfo->mParameterLevel;
-        if (pInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::FMI)
-          valueList.mParameterLevelId = contentInfo->mFmiParameterLevelId;
-        else
-          valueList.mParameterLevelId = pInfo.mParameterLevelId;
-
-        int result = mDataServerPtr->getGridValueListByPolygonPath(0, contentInfo->mFileId, contentInfo->mMessageIndex, coordinateType, coordinates, valueList.mValueList);
+        int result = mDataServerPtr->getGridValueListByPolygonPath(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, coordinateType, coordinates, valueList.mValueList);
         if (result != 0)
         {
           SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
@@ -3684,56 +3700,93 @@ bool ServiceImplementation::getPolygonValues(
       }
     }
 
+
     if (contentLen == 2)
     {
-      T::ContentInfo* contentInfo1 = contentList.getContentInfoByIndex(0);
-      T::ContentInfo* contentInfo2 = contentList.getContentInfoByIndex(1);
-      if (!(contentInfo1->mForecastTime < forecastTime && contentInfo2->mForecastTime > forecastTime))
+      if (contentInfo1->mForecastTime < forecastTime  &&  contentInfo2->mForecastTime > forecastTime)
       {
-        SmartMet::Spine::Exception exception(BCP, "Unexpected result!");
-        exception.addDetail("The given forecast time should been between the found content times.");
-        exception.addParameter("Content 1 ForecastTime", contentInfo1->mForecastTime);
-        exception.addParameter("Content 2 ForecastTime", contentInfo2->mForecastTime);
-        exception.addParameter("Request ForecastTime", forecastTime);
-        throw exception;
+        // Content records have different times, but most likely the same levels, so we need to do time interpolation.
+
+        int result = mDataServerPtr->getGridValueListByTimeAndPolygonPath(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,forecastTime,coordinateType,coordinates,timeInterpolationMethod,valueList.mValueList);
+        if (result != 0)
+        {
+          SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+          exception.addParameter("Service", "getGridValueListByTimeAndPolygonPath");
+          exception.addParameter("Message", DataServer::getResultString(result));
+          std::string errorMsg = exception.getStackTrace();
+          PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+          return false;
+        }
+
+        if (conversionByFunction)
+          executeConversion(function, functionParams, valueList.mValueList);
+
+        if (precision < 0)
+          precision = pInfo.mDefaultPrecision;
+
+        return true;
       }
 
-      // We did not find a grid with the exact forecast time, but we find grids that
-      // are before and after the current forecast time. This means that we should do
-      // some time interpolation.
-
-      valueList.mForecastTime = forecastTime;
-      valueList.mProducerId = contentInfo1->mProducerId;
-      valueList.mGenerationId = contentInfo1->mGenerationId;
-      valueList.mGenerationFlags = generationFlags;
-      valueList.mGeometryId = contentInfo1->mGeometryId;
-      valueList.mForecastType = contentInfo1->mForecastType;
-      valueList.mForecastNumber = contentInfo1->mForecastNumber;
-      valueList.mParameterLevel = contentInfo1->mParameterLevel;
-      if (pInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::FMI)
-        valueList.mParameterLevelId = contentInfo1->mFmiParameterLevelId;
-      else
-        valueList.mParameterLevelId = pInfo.mParameterLevelId;
-
-      int result = mDataServerPtr->getGridValueListByTimeAndPolygonPath(0,contentInfo1->mFileId,contentInfo1->mMessageIndex,contentInfo2->mFileId,contentInfo2->mMessageIndex,forecastTime,coordinateType,coordinates,timeInterpolationMethod,valueList.mValueList);
-      if (result != 0)
+      if (contentInfo1->mForecastTime == forecastTime  &&  contentInfo2->mForecastTime == forecastTime  &&  contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel)
       {
-        SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
-        exception.addParameter("Service", "getGridValueListByTimeAndPolygonPath");
-        exception.addParameter("Message", DataServer::getResultString(result));
-        std::string errorMsg = exception.getStackTrace();
-        PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-        return false;
+        // Content records have the same time but different levels, so we need to level interpolation.
+
+        int result = mDataServerPtr->getGridValueListByLevelAndPolygonPath(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,coordinateType,coordinates,iplMethod,valueList.mValueList);
+        if (result != 0)
+        {
+          SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+          exception.addParameter("Service", "getGridValueListByLevelAndPolygonPath");
+          exception.addParameter("Message", DataServer::getResultString(result));
+          std::string errorMsg = exception.getStackTrace();
+          PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+          return false;
+        }
+
+        valueList.mParameterLevel = paramLevel;
+
+        if (conversionByFunction)
+          executeConversion(function, functionParams, valueList.mValueList);
+
+        if (precision < 0)
+          precision = pInfo.mDefaultPrecision;
+
+        return true;
       }
-
-      if (conversionByFunction)
-        executeConversion(function, functionParams, valueList.mValueList);
-
-      if (precision < 0)
-        precision = pInfo.mDefaultPrecision;
-
-      return true;
     }
+
+
+    if (contentLen == 4)
+    {
+      if (contentInfo1->mForecastTime < forecastTime  &&  contentInfo2->mForecastTime < forecastTime  &&  contentInfo3->mForecastTime > forecastTime  &&  contentInfo4->mForecastTime > forecastTime  &&
+          contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&  contentInfo3->mParameterLevel < paramLevel  &&  contentInfo4->mParameterLevel > paramLevel)
+      {
+        int result = mDataServerPtr->getGridValueListByTimeLevelAndPolygonPath(0,
+            contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,
+            contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,
+            forecastTime,paramLevel,coordinateType,coordinates,timeInterpolationMethod,iplMethod,valueList.mValueList);
+
+        if (result != 0)
+        {
+          SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+          exception.addParameter("Service", "getGridValueListByTimeLevelAndPolygonPath");
+          exception.addParameter("Message", DataServer::getResultString(result));
+          std::string errorMsg = exception.getStackTrace();
+          PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+          return false;
+        }
+
+        valueList.mParameterLevel = paramLevel;
+
+        if (conversionByFunction)
+          executeConversion(function, functionParams, valueList.mValueList);
+
+        if (precision < 0)
+          precision = pInfo.mDefaultPrecision;
+
+        return true;
+      }
+    }
+
     return false;
   }
   catch (...)
@@ -3812,19 +3865,13 @@ bool ServiceImplementation::getIsolineValues(
     }
 
     uint contentLen = contentList.getLength();
-    bool multipleValues = contentList.containsSameForecastTimes();
-    if (multipleValues)
-    {
-      PRINT_DATA(mDebugLog, "         + Content records contains multiple values with the same timestep\n");
-      return false;
-    }
-
     if (contentLen == 0)
       return false;
 
-
     T::ContentInfo* contentInfo1 = contentList.getContentInfoByIndex(0);
     T::ContentInfo* contentInfo2 = contentList.getContentInfoByIndex(1);
+    T::ContentInfo* contentInfo3 = contentList.getContentInfoByIndex(2);
+    T::ContentInfo* contentInfo4 = contentList.getContentInfoByIndex(3);
 
     valueList.mParameterKeyType = pInfo.mParameterKeyType;
     valueList.mParameterKey = pInfo.mParameterKey;
@@ -3836,6 +3883,7 @@ bool ServiceImplementation::getIsolineValues(
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
     valueList.mGeometryId = contentInfo1->mGeometryId;
+    valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mForecastType = contentInfo1->mForecastType;
     valueList.mForecastNumber = contentInfo1->mForecastNumber;
     valueList.mParameterLevel = contentInfo1->mParameterLevel;
@@ -3850,9 +3898,9 @@ bool ServiceImplementation::getIsolineValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime)
+      if (contentInfo1->mForecastTime == forecastTime || timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest)
       {
-        // We found a grid which forecast time is exactly the same as the requested forecast time.
+        // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
         int result = 0;
 
@@ -3931,7 +3979,68 @@ bool ServiceImplementation::getIsolineValues(
 
         return true;
       }
+
+      if (contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel)
+      {
+        // We did not find a grid with the exact level but we find grids that
+        // are before and after the current level. This means that we should do
+        // some level interpolation.
+
+        switch (locationType)
+        {
+          case Query::LocationType::Geometry:
+            result = mDataServerPtr->getGridIsolinesByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourValues,attributeList,valueList.mWkbList);
+            break;
+
+          case Query::LocationType::Grid:
+            if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
+              result = mDataServerPtr->getGridIsolinesByLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourValues,toUInt32(gridWidthStr),toUInt32(gridHeightStr),gridCoordinates,attributeList,valueList.mWkbList);
+            break;
+
+          default:
+            result = mDataServerPtr->getGridIsolinesByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourValues,attributeList,valueList.mWkbList);
+            break;
+        }
+
+        valueList.mParameterLevel = paramLevel;
+
+        if (precision < 0)
+          precision = pInfo.mDefaultPrecision;
+
+        return true;
+      }
     }
+
+    if (contentLen == 4)
+    {
+      if (contentInfo1->mForecastTime < forecastTime  &&  contentInfo2->mForecastTime < forecastTime  &&  contentInfo3->mForecastTime > forecastTime  &&  contentInfo4->mForecastTime > forecastTime  &&
+          contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&  contentInfo3->mParameterLevel < paramLevel  &&  contentInfo4->mParameterLevel > paramLevel)
+      {
+        switch (locationType)
+        {
+          case Query::LocationType::Geometry:
+            result = mDataServerPtr->getGridIsolinesByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,forecastTime,paramLevel,newContourValues,attributeList,valueList.mWkbList);
+            break;
+
+          case Query::LocationType::Grid:
+            if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
+              result = mDataServerPtr->getGridIsolinesByTimeLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,forecastTime,paramLevel,newContourValues,toUInt32(gridWidthStr),toUInt32(gridHeightStr),gridCoordinates,attributeList,valueList.mWkbList);
+            break;
+
+          default:
+            result = mDataServerPtr->getGridIsolinesByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,forecastTime,paramLevel,newContourValues,attributeList,valueList.mWkbList);
+            break;
+        }
+
+        valueList.mParameterLevel = paramLevel;
+
+        if (precision < 0)
+          precision = pInfo.mDefaultPrecision;
+
+        return true;
+      }
+    }
+
     return false;
   }
   catch (...)
@@ -4018,18 +4127,13 @@ bool ServiceImplementation::getIsobandValues(
     }
 
     uint contentLen = contentList.getLength();
-    bool multipleValues = contentList.containsSameForecastTimes();
-    if (multipleValues)
-    {
-      PRINT_DATA(mDebugLog, "         + Content records contains multiple values with the same timestep\n");
-      return false;
-    }
-
     if (contentLen == 0)
       return false;
 
     T::ContentInfo* contentInfo1 = contentList.getContentInfoByIndex(0);
     T::ContentInfo* contentInfo2 = contentList.getContentInfoByIndex(1);
+    T::ContentInfo* contentInfo3 = contentList.getContentInfoByIndex(2);
+    T::ContentInfo* contentInfo4 = contentList.getContentInfoByIndex(3);
 
     valueList.mParameterKeyType = pInfo.mParameterKeyType;
     valueList.mParameterKey = pInfo.mParameterKey;
@@ -4040,6 +4144,7 @@ bool ServiceImplementation::getIsobandValues(
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
     valueList.mGeometryId = contentInfo1->mGeometryId;
+    valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mForecastType = contentInfo1->mForecastType;
     valueList.mForecastNumber = contentInfo1->mForecastNumber;
     valueList.mParameterLevel = contentInfo1->mParameterLevel;
@@ -4053,9 +4158,9 @@ bool ServiceImplementation::getIsobandValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime)
+      if (contentInfo1->mForecastTime == forecastTime || timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest)
       {
-        // We found a grid which forecast time is exactly the same as the requested forecast time.
+        // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
         int result = 0;
 
@@ -4133,6 +4238,67 @@ bool ServiceImplementation::getIsobandValues(
 
         return true;
       }
+
+
+      if (contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel)
+      {
+        // We did not find a grid with the exact level but we find grids that
+        // are before and after the current level. This means that we should do
+        // some level interpolation.
+
+        switch (locationType)
+        {
+          case Query::LocationType::Geometry:
+            result = mDataServerPtr->getGridIsobandsByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourLowValues,newContourHighValues,attributeList,valueList.mWkbList);
+            break;
+
+          case Query::LocationType::Grid:
+            if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
+              result = mDataServerPtr->getGridIsobandsByLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourLowValues,newContourHighValues,toUInt32(gridWidthStr),toUInt32(gridHeightStr),gridCoordinates,attributeList,valueList.mWkbList);
+            break;
+
+          default:
+            result = mDataServerPtr->getGridIsobandsByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourLowValues,newContourHighValues,attributeList,valueList.mWkbList);
+            break;
+        }
+
+        valueList.mParameterLevel = paramLevel;
+
+        if (precision < 0)
+          precision = pInfo.mDefaultPrecision;
+
+        return true;
+      }
+    }
+
+    if (contentLen == 4)
+    {
+      if (contentInfo1->mForecastTime < forecastTime  &&  contentInfo2->mForecastTime < forecastTime  &&  contentInfo3->mForecastTime > forecastTime  &&  contentInfo4->mForecastTime > forecastTime  &&
+          contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&  contentInfo3->mParameterLevel < paramLevel  &&  contentInfo4->mParameterLevel > paramLevel)
+      {
+        switch (locationType)
+        {
+          case Query::LocationType::Geometry:
+            result = mDataServerPtr->getGridIsobandsByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,forecastTime,paramLevel,newContourLowValues,newContourHighValues,attributeList,valueList.mWkbList);
+            break;
+
+          case Query::LocationType::Grid:
+            if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
+              result = mDataServerPtr->getGridIsobandsByTimeLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,forecastTime,paramLevel,newContourLowValues,newContourHighValues,toUInt32(gridWidthStr),toUInt32(gridHeightStr),gridCoordinates,attributeList,valueList.mWkbList);
+            break;
+
+          default:
+            result = mDataServerPtr->getGridIsobandsByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,forecastTime,paramLevel,newContourLowValues,newContourHighValues,attributeList,valueList.mWkbList);
+            break;
+        }
+
+        valueList.mParameterLevel = paramLevel;
+
+        if (precision < 0)
+          precision = pInfo.mDefaultPrecision;
+
+        return true;
+      }
     }
 
     return false;
@@ -4184,6 +4350,8 @@ void ServiceImplementation::getGridValues(
       PRINT_DATA(mDebugLog, "\nMETHOD getGridValues()\n");
       PRINT_DATA(mDebugLog, "  - queryType                : %u items\n", queryType);
       PRINT_DATA(mDebugLog, "  - producers                : %lu items\n", producers.size());
+      for (auto it = producers.begin(); it != producers.end(); ++it)
+        PRINT_DATA(mDebugLog, "    * %s:%d\n", it->first.c_str(), it->second);
       PRINT_DATA(mDebugLog, "  - geometryIdList           : %lu items\n", geometryIdList.size());
       PRINT_DATA(mDebugLog, "  - producerId               : %u\n", producerId);
       PRINT_DATA(mDebugLog, "  - analysisTime             : %s\n", analysisTime.c_str());
@@ -4277,44 +4445,48 @@ void ServiceImplementation::getGridValues(
             ParameterMapping_vec mappings;
             if (paramLevelId > 0 || paramLevel > 0)
             {
-              getParameterMappings(producerInfo.mName, parameterKey, T::ParamLevelIdTypeValue::ANY, paramLevelId, paramLevel, false, mappings);
+              getParameterMappings(producerInfo.mName, parameterKey, producerGeometryId, T::ParamLevelIdTypeValue::ANY, paramLevelId, paramLevel, false, mappings);
               if (mappings.size() == 0)
-                getParameterMappings(producerInfo.mName, parameterKey, T::ParamLevelIdTypeValue::ANY, paramLevelId, -1, false, mappings);
+                getParameterMappings(producerInfo.mName, parameterKey, producerGeometryId, T::ParamLevelIdTypeValue::ANY, paramLevelId, -1, false, mappings);
             }
             else
             {
-              getParameterMappings(producerInfo.mName, parameterKey, true, mappings);
+              getParameterMappings(producerInfo.mName, parameterKey, producerGeometryId, true, mappings);
             }
 
             if (mappings.size() == 0)
-              PRINT_DATA(mDebugLog, "    - No parameter mappings '%s:%s:%d:%d' found!\n", producerInfo.mName.c_str(), parameterKey.c_str(), paramLevelId, paramLevel);
+              PRINT_DATA(mDebugLog, "    - No parameter mappings '%s:%s:%d:%d:%d' found!\n", producerInfo.mName.c_str(), parameterKey.c_str(), producerGeometryId, paramLevelId, paramLevel);
 
             if (mappings.size() > 0)
             {
               // PRINT_DATA(mDebugLog,"    - Parameter mappings '%s:%s' found from the file
               // '%s'!\n",producerInfo.mName.c_str(),parameterKey.c_str(),m->getFilename().c_str());
 
-              uint gCount = 0;
-
               PRINT_DATA(mDebugLog, "  - Going through the generations from the newest to the oldest.\n");
 
-              for (auto gTime = analysisTimes.begin(); gTime != analysisTimes.end(); ++gTime)
+              uint gLen = analysisTimes.size();
+              for (uint g = 0; g < gLen; g++)
               {
-                PRINT_DATA(mDebugLog, "    * %s\n", gTime->c_str());
+                PRINT_DATA(mDebugLog, "    * %s\n", analysisTimes[g].c_str());
 
-                uint gflags = 1 << gCount;
+                uint gflags = 1 << g;
 
                 bool generationValid = false;
 
-                if (generationFlags == 0 || (generationFlags & gflags) != 0)
-                  generationValid = true;
-
-                if (analysisTime.length() > 0 && analysisTime != *gTime)
-                  generationValid = false;
+                if (analysisTime.length() > 0)
+                {
+                  if (analysisTime == analysisTimes[g] || (analysisTimes[g] < analysisTime  &&  ((g+1) == gLen  ||  analysisTimes[g+1] > analysisTime)))
+                    generationValid = true;
+                }
+                else
+                {
+                  if (generationFlags == 0 || (generationFlags & gflags) != 0)
+                    generationValid = true;
+                }
 
                 if (generationValid)
                 {
-                  T::GenerationInfo* generationInfo = generationInfoList.getGenerationInfoByAnalysisTime(*gTime);
+                  T::GenerationInfo* generationInfo = generationInfoList.getGenerationInfoByAnalysisTime(analysisTimes[g]);
 
                   PRINT_DATA(mDebugLog, "      - Going through the parameter mappings\n");
                   for (auto pInfo = mappings.begin(); pInfo != mappings.end(); ++pInfo)
@@ -4344,7 +4516,7 @@ void ServiceImplementation::getGridValues(
                     if (paramLevelId > 0)
                       pLevelId = paramLevelId;
 
-                    if (paramLevel != 0)
+                    if (paramLevel >= 0)
                       pLevel = paramLevel;
 
 
@@ -4468,7 +4640,7 @@ void ServiceImplementation::getGridValues(
                           std::vector<double> constParams;
                           std::vector<ParameterValues> valueListVec;
 
-                          // std::cout << "LUA_PARAMETERS : " << paramList << "\n";
+                          //std::cout << "LUA_PARAMETERS : " << paramList << "\n";
 
                           std::vector < std::string > paramVec;
                           splitString(paramList, ';', paramVec);
@@ -4554,7 +4726,7 @@ void ServiceImplementation::getGridValues(
                                   {
                                     T::ContentInfoList contentList;
                                     if (mContentServerPtr->getContentListByParameterAndGenerationId(0, generationInfo->mGenerationId, T::ParamKeyTypeValue::FMI_NAME, a_parameterKey,
-                                        T::ParamLevelIdTypeValue::FMI, a_paramLevel, a_paramLevel, a_paramLevel, a_forecastType, a_forecastNumber, -1, "19000101T000000",
+                                        T::ParamLevelIdTypeValue::FMI, a_paramLevel, a_paramLevel, a_paramLevel, a_forecastType, a_forecastNumber, producerGeometryId, "19000101T000000",
                                         "30000101T000000", 0, contentList) == 0)
                                     {
                                       if (contentList.getLength() > 0)
@@ -4581,9 +4753,8 @@ void ServiceImplementation::getGridValues(
                                       a_levelInterpolationMethod, a_forecastTime, a_timeMatchRequired, a_locationType, coordinateType, coordinates, contourLowValues, contourHighValues,
                                       attributeList,a_radius, precision, valList);
 
-                                  // printf("PARAM : %s
-                                  // %d\n",a_parameterKey.c_str(),valList.mValueList.getLength());
-                                  // valList.mValueList.print(std::cout,0,0);
+                                  //printf("PARAM : %s %d\n",a_parameterKey.c_str(),valList.mValueList.getLength());
+                                  //valList.mValueList.print(std::cout,0,0);
                                   valueList.mFlags = valList.mFlags;
                                   valueListVec.push_back(valList);
                                 }
@@ -4611,17 +4782,18 @@ void ServiceImplementation::getGridValues(
 
                               if (vLen1 == vLen2)
                               {
-                                T::GridValue* v = vList->mValueList.getGridValueByIndex(t);
+                                T::GridValue v;
+                                vList->mValueList.getGridValueByIndex(t,v);
                                 if (vx == ParamValueMissing)
                                 {
-                                  vx = v->mX;
-                                  vy = v->mY;
+                                  vx = v.mX;
+                                  vy = v.mY;
                                 }
 
-                                if (!v->mValueString.empty())
+                                if (!v.mValueString.empty())
                                 {
                                   std::vector<double> vec;
-                                  splitString(v->mValueString, ';', vec);
+                                  splitString(v.mValueString, ';', vec);
 
                                   params.push_back(vec.size());
                                   if (vec.size() > 0)
@@ -4633,7 +4805,7 @@ void ServiceImplementation::getGridValues(
                                 else
                                 {
                                   params.push_back(1);
-                                  params.push_back(v->mValue);
+                                  params.push_back(v.mValue);
                                 }
                               }
                             }
@@ -4641,7 +4813,8 @@ void ServiceImplementation::getGridValues(
                             // ### Calling the LUA interpolation function.
 
                             double val = mLuaFileCollection.executeFunctionCall1(interpolationFunction, params);
-                            valueList.mValueList.addGridValue(new T::GridValue(vx, vy, val));
+                            T::GridValue rec(vx, vy, val);
+                            valueList.mValueList.addGridValue(rec);
 
                             std::string function;
                             std::vector < std::string > functionParams;
@@ -4691,7 +4864,6 @@ void ServiceImplementation::getGridValues(
 
                   }
                 }
-                gCount++;
               }
             }
           }
@@ -4724,7 +4896,6 @@ void ServiceImplementation::getGridValues(
     uint producerId,
     std::string analysisTime,
     uint generationFlags,
-    bool reverseGenerations,
     std::string parameterKey,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
@@ -4736,7 +4907,9 @@ void ServiceImplementation::getGridValues(
     short levelInterpolationMethod,
     std::string startTime,
     std::string endTime,
-    bool ignoreStartTimeValue,
+    uint flags,
+    uint timesteps,
+    uint timestepSizeInMinutes,
     uchar locationType,
     uchar coordinateType,
     T::AreaCoordinates& coordinates,
@@ -4756,11 +4929,12 @@ void ServiceImplementation::getGridValues(
       PRINT_DATA(mDebugLog, "\nMETHOD getGridValues()\n");
       PRINT_DATA(mDebugLog, "  - queryType                : %u items\n", queryType);
       PRINT_DATA(mDebugLog, "  - producers                : %lu items\n", producers.size());
+      for (auto it = producers.begin(); it != producers.end(); ++it)
+        PRINT_DATA(mDebugLog, "    * %s:%d\n", it->first.c_str(), it->second);
       PRINT_DATA(mDebugLog, "  - geometryIdList           : %lu items\n", geometryIdList.size());
       PRINT_DATA(mDebugLog, "  - producerId               : %u\n", producerId);
       PRINT_DATA(mDebugLog, "  - analysisTime             : %s\n", analysisTime.c_str());
       PRINT_DATA(mDebugLog, "  - generationFlags          : %08x\n", generationFlags);
-      PRINT_DATA(mDebugLog, "  - reverseGenerations       : %d\n", reverseGenerations);
       PRINT_DATA(mDebugLog, "  - parameterKey             : %s\n", parameterKey.c_str());
       PRINT_DATA(mDebugLog, "  - paramLevelId             : %d\n", paramLevelId);
       PRINT_DATA(mDebugLog, "  - paramLevel               : %d\n", paramLevel);
@@ -4772,7 +4946,9 @@ void ServiceImplementation::getGridValues(
       PRINT_DATA(mDebugLog, "  - levelInterpolationMethod : %d\n", levelInterpolationMethod);
       PRINT_DATA(mDebugLog, "  - startTime                : %s\n", startTime.c_str());
       PRINT_DATA(mDebugLog, "  - endTime                  : %s\n", endTime.c_str());
-      PRINT_DATA(mDebugLog, "  - ignoreStartTimeValue     : %d\n", ignoreStartTimeValue);
+      PRINT_DATA(mDebugLog, "  - flags                    : %d\n", flags);
+      PRINT_DATA(mDebugLog, "  - timesteps                : %u\n", timesteps);
+      PRINT_DATA(mDebugLog, "  - timestepSizeInMinutes    : %u\n", timestepSizeInMinutes);
       PRINT_DATA(mDebugLog, "  - locationType             : %d\n", locationType);
       PRINT_DATA(mDebugLog, "  - coordinateType           : %d\n", coordinateType);
       PRINT_DATA(mDebugLog, "  - coordinates              : %lu vectors\n", coordinates.size());
@@ -4799,6 +4975,14 @@ void ServiceImplementation::getGridValues(
         }
       }
     }
+
+    bool ignoreStartTimeValue = false;
+    if ((flags & Query::Flags::StartTimeNotIncluded) != 0)
+      ignoreStartTimeValue = true;
+
+    bool reverseGenerations = false;
+    if ((flags & Query::Flags::ReverseGenerationFlags) != 0)
+      reverseGenerations = true;
 
     // Going through the producer list.
 
@@ -4842,20 +5026,27 @@ void ServiceImplementation::getGridValues(
 
             ParameterMapping_vec mappings;
             if (paramLevelId > 0 || paramLevel > 0)
-              getParameterMappings(producerInfo.mName, parameterKey, T::ParamLevelIdTypeValue::ANY, paramLevelId, paramLevel, false, mappings);
+              getParameterMappings(producerInfo.mName, parameterKey, producerGeometryId, T::ParamLevelIdTypeValue::ANY, paramLevelId, paramLevel, false, mappings);
             else
-              getParameterMappings(producerInfo.mName, parameterKey, true, mappings);
+              getParameterMappings(producerInfo.mName, parameterKey, producerGeometryId, true, mappings);
 
             if (mappings.size() > 0)
             {
               for (auto pInfo = mappings.begin(); pInfo != mappings.end(); ++pInfo)
               {
+                if (mDebugLog != nullptr)
+                {
+                  std::stringstream stream;
+                  pInfo->print(stream, 5, 0);
+                  PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
+                }
+
                 //pInfo->print(std::cout,0,0);
                 std::map<std::string,uint> contentTimeList;
 
                 T::ContentInfoList contentInfoList;
                 int result = mContentServerPtr->getContentListByParameterAndProducerId(0, producerInfo.mProducerId, pInfo->mParameterKeyType, pInfo->mParameterKey,
-                    pInfo->mParameterLevelIdType, pInfo->mParameterLevelId, paramLevel, paramLevel, forecastType, forecastNumber, producerGeometryId,
+                    pInfo->mParameterLevelIdType, pInfo->mParameterLevelId, pInfo->mParameterLevel, pInfo->mParameterLevel, forecastType, forecastNumber, producerGeometryId,
                     std::string("19000101T000000"), std::string("30000101T000000"), 0, contentInfoList);
 
                 if (result != 0)
@@ -4865,7 +5056,10 @@ void ServiceImplementation::getGridValues(
                   exception.addParameter("Message", ContentServer::getResultString(result));
                   throw exception;
                 }
+
                 int cLen = contentInfoList.getLength();
+                PRINT_DATA(mDebugLog, "         + Found %u content records\n", cLen);
+
                 if (cLen > 0)
                 {
                   contentInfoList.sort(T::ContentInfo::ComparisonMethod::starttime_generationId_file_message);
@@ -4881,12 +5075,18 @@ void ServiceImplementation::getGridValues(
 
                     bool generationValid = false;
                     T::GenerationInfo* gInfo = generationInfoList.getGenerationInfoByIndex(g);
+                    T::GenerationInfo* gNext = generationInfoList.getGenerationInfoByIndex(g+1);
 
-                    if (generationFlags == 0 || (generationFlags & gFlags) != 0)
-                      generationValid = true;
-
-                    if (analysisTime.length() > 0 && analysisTime != gInfo->mAnalysisTime)
-                      generationValid = false;
+                    if (analysisTime.length() > 0)
+                    {
+                      if (analysisTime == gInfo->mAnalysisTime || (gInfo->mAnalysisTime < analysisTime  &&  (gNext == nullptr  ||  gNext->mAnalysisTime > analysisTime)))
+                        generationValid = true;
+                    }
+                    else
+                    {
+                      if (generationFlags == 0 || (generationFlags & gFlags) != 0)
+                        generationValid = true;
+                    }
 
                     if (generationValid)
                     {
@@ -4913,14 +5113,82 @@ void ServiceImplementation::getGridValues(
                   }
                 }
 
-                for (auto forecastTime = contentTimeList.begin(); forecastTime != contentTimeList.end(); ++forecastTime)
+
+                Producer_vec producers2;
+                producers2.push_back(*it);
+
+                std::set<T::GeometryId> geometryIdList2;
+                geometryIdList2.insert(producerGeometryId);
+
+                std::map<std::string,uint> contentTimeList2;
+
+                if (timestepSizeInMinutes > 0 && (flags & Query::Flags::StartTimeFromData) != 0  &&  (flags & Query::Flags::EndTimeFromData) == 0)
                 {
-                  if (((forecastTime->first == startTime && !ignoreStartTimeValue) || (forecastTime->first > startTime && forecastTime->first <= endTime)))
+                  auto it = contentTimeList.begin();
+                  time_t  tt = utcTimeToTimeT(it->first);
+                  time_t  et = tt + timesteps * timestepSizeInMinutes*60;
+
+                  if (timesteps == 0)
+                    et = utcTimeToTimeT(endTime);
+
+                  while (tt <= et)
+                  {
+                    std::string ts = utcTimeFromTimeT(tt);
+                    contentTimeList2.insert(std::pair<std::string,uint>(ts,0xFFFFFFFF));
+                    tt = tt + timestepSizeInMinutes*60;
+                  }
+                }
+                else
+                if (timestepSizeInMinutes > 0 && (flags & Query::Flags::StartTimeFromData) == 0  &&  (flags & Query::Flags::EndTimeFromData) != 0)
+                {
+                  auto it = contentTimeList.rbegin();
+                  time_t  tt = utcTimeToTimeT(it->first);
+
+                  time_t  et = tt - timesteps * timestepSizeInMinutes*60;
+
+                  if (timesteps == 0)
+                    et = utcTimeToTimeT(startTime);
+
+                  while (tt >= et)
+                  {
+                    std::string ts = utcTimeFromTimeT(tt);
+                    contentTimeList2.insert(std::pair<std::string,uint>(ts,0xFFFFFFFF));
+                    tt = tt - timestepSizeInMinutes*60;
+                  }
+                }
+                else
+                if (timestepSizeInMinutes > 0 && (flags & Query::Flags::StartTimeFromData) != 0  &&  (flags & Query::Flags::EndTimeFromData) != 0)
+                {
+                  auto it1 = contentTimeList.begin();
+                  time_t  tt = utcTimeToTimeT(it1->first);
+
+                  auto it2 = contentTimeList.rbegin();
+                  time_t  et = utcTimeToTimeT(it2->first);
+
+                  while (tt <= et)
+                  {
+                    std::string ts = utcTimeFromTimeT(tt);
+                    contentTimeList2.insert(std::pair<std::string,uint>(ts,0xFFFFFFFF));
+                    tt = tt + timestepSizeInMinutes*60;
+                  }
+                }
+                else
+                {
+                  contentTimeList2 = contentTimeList;
+                }
+
+
+                for (auto forecastTime = contentTimeList2.begin(); forecastTime != contentTimeList2.end(); ++forecastTime)
+                {
+                  // std::cout << forecastTime->first << "[" << startTime << " " << endTime << "]\n";
+                  if (((forecastTime->first == startTime && !ignoreStartTimeValue) || (forecastTime->first >= startTime && forecastTime->first <= endTime)))
                   {
                     ParameterValues valList;
-                    getGridValues(queryType,producers, geometryIdList, producerInfo.mProducerId, analysisTime, forecastTime->second, reverseGenerations, parameterKey, paramLevelId, paramLevel,
+                    getGridValues(queryType,producers2, geometryIdList2, producerInfo.mProducerId, analysisTime, forecastTime->second, reverseGenerations, parameterKey, paramLevelId, paramLevel,
                         forecastType, forecastNumber, parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, forecastTime->first, true,
                         locationType, coordinateType, coordinates, contourLowValues, contourHighValues, attributeList, radius, precision, valList);
+
+                    //valList.print(std::cout,0,0);
 
                     if (valList.mValueList.getLength() > 0 || valList.mWkbList.size() > 0)
                     {
@@ -4962,281 +5230,6 @@ void ServiceImplementation::getGridValues(
 
 
 
-#if 0
-
-bool ServiceImplementation::getPressureLevelsAndHeights(
-    T::ProducerInfo& producerInfo,
-    uint generationId,
-    uint generationFlags,
-    std::string forecastTime,
-    T::ForecastType forecastType,
-    T::ForecastNumber forecastNumber,
-    T::GeometryId geometryId,
-    uchar coordinateType,
-    double x,
-    double y,
-    int height,
-    int& lowerPressure,
-    int& higherPressure,
-    double& lowerHeight,
-    double& higherHeight)
-{
-  FUNCTION_TRACE
-  try
-  {
-    std::string cacheKey = std::to_string(generationId) + ":" + forecastTime + ":" + std::to_string(x) + std::to_string(y);
-    LevelHeight_vec levelHeights;
-
-    if (mLevelHeightCache.size() > 0)
-    {
-      AutoThreadLock lock(&mCacheThreadLock);
-
-      for (auto cc = mLevelHeightCache.rbegin(); cc != mLevelHeightCache.rend() && levelHeights.size() == 0; ++cc)
-      {
-        if (cc->first == cacheKey)
-        {
-          levelHeights = cc->second;
-          // std::cout << "*** CACHE MATCH : " << cacheKey << "\n";
-        }
-      }
-    }
-
-    if (levelHeights.size() == 0)
-    {
-      T::ParamKeyType paramKeyType = T::ParamKeyTypeValue::FMI_NAME;
-      std::string paramKey = "Z-M2S2";
-      T::ParamLevelIdType levelIdType = T::ParamLevelIdTypeValue::FMI;
-      T::ParamLevelId levelId = 2;
-
-      ParameterMapping_vec mappings;
-      for (auto m = mParameterMappings.begin(); m != mParameterMappings.end() && mappings.size() == 0; ++m)
-      {
-        m->getMappings(producerInfo.mName, paramKey, true, mappings);
-      }
-
-      if (mappings.size() == 0)
-        return false;
-
-      T::ContentInfoList contentList;
-      int result = mContentServerPtr->getContentListByParameterAndGenerationId(0, generationId, paramKeyType, paramKey, levelIdType, levelId, 0, 1000000000, forecastType,
-          forecastNumber, geometryId, "19000101T000000", "30000101T000000", 0, contentList);
-      if (result != 0)
-      {
-        SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
-        exception.addParameter("Service", "getContentListByParameterAndGenerationId");
-        exception.addParameter("Message", ContentServer::getResultString(result));
-        throw exception;
-      }
-
-      uint contentLen = contentList.getLength();
-      std::set<int> levels;
-      if (contentLen > 0)
-      {
-        for (uint t = 0; t < contentLen; t++)
-        {
-          T::ContentInfo* cInfo = contentList.getContentInfoByIndex(t);
-          if (levels.find(cInfo->mParameterLevel) == levels.end())
-            levels.insert(cInfo->mParameterLevel);
-        }
-
-        T::AreaCoordinates coordinates;
-        T::Coordinate_vec coordinateVec;
-        coordinateVec.push_back(T::Coordinate(x, y));
-        coordinates.push_back(coordinateVec);
-
-        uint newProducerId = 0;
-        for (auto level = levels.begin(); level != levels.end(); level++)
-        {
-          ParameterValues valueList;
-          if (getPointValues(producerInfo, geometryId, generationId, generationFlags, mappings[0], forecastTime, levelId, *level, forecastType, forecastNumber, 0,
-              T::AreaInterpolationMethod::Linear, T::TimeInterpolationMethod::Linear, T::LevelInterpolationMethod::Linear, coordinateType, coordinates,precision, newProducerId, valueList))
-          {
-            // valueList.print(std::cout,0,0);
-            if (valueList.mValueList.getLength() == 1)
-            {
-              T::GridValue* rec = valueList.mValueList.getGridValueByIndex(0);
-              levelHeights.push_back(std::pair<int, double>(*level, rec->mValue));
-            }
-          }
-        }
-
-        if (levelHeights.size() > 0)
-        {
-          AutoThreadLock lock(&mCacheThreadLock);
-          if (mLevelHeightCache.size() >= 5000)
-            mLevelHeightCache.erase(mLevelHeightCache.begin(), mLevelHeightCache.begin() + 1000);
-
-          mLevelHeightCache.push_back(std::pair<std::string, LevelHeight_vec>(cacheKey, levelHeights));
-        }
-      }
-    }
-
-    lowerPressure = -1000000000;
-    higherPressure = 1000000000;
-    lowerHeight = -1000000000;
-    higherHeight = 1000000000;
-
-    for (auto it = levelHeights.begin(); it != levelHeights.end(); ++it)
-    {
-      // std::cout << "LEVEL HEIGHTS: " << it->first << " : " << it->second << "\n";
-
-      if (it->second <= height && it->second > lowerHeight)
-      {
-        lowerPressure = it->first;
-        lowerHeight = it->second;
-      }
-
-      if (it->second >= height && it->second < higherHeight)
-      {
-        higherPressure = it->first;
-        higherHeight = it->second;
-      }
-    }
-
-    if (lowerHeight != -1000000000 && higherHeight != 1000000000)
-      return true;
-
-    return false;
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
-  }
-}
-
-#endif
-
-#if 0
-
-void ServiceImplementation::getGeopotentialHeightPressures(uint generationId,std::set<int>& pressures)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::ParamKeyType paramKeyType = T::ParamKeyTypeValue::FMI_NAME;
-    std::string paramKey = "Z-M2S2";
-    T::ParamLevelIdType levelIdType = T::ParamLevelIdTypeValue::FMI;
-    T::ParamLevelId levelId = 2;
-
-    T::ContentInfoList cList;
-    int result = mContentServerPtr->getContentListByParameterAndGenerationId(0, generationId, paramKeyType, paramKey, levelIdType, levelId, -1000000000, 1000000000, -1, -1, -1,"19000101T000000", "30000101T000000", 0, cList);
-    if (result != 0)
-    {
-      SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
-      exception.addParameter("Service", "getContentListByParameterAndGenerationId");
-      exception.addParameter("Message", ContentServer::getResultString(result));
-      throw exception;
-    }
-
-    //cList.print(std::cout,0,0);
-
-    uint clen = cList.getLength();
-    for (uint c=0; c<clen; c++)
-    {
-      T::ContentInfo* info = cList.getContentInfoByIndex(c);
-      if (pressures.find(info->mParameterLevel) == pressures.end())
-      {
-        pressures.insert(info->mParameterLevel);
-        printf("*** LEVEL %d\n",info->mParameterLevel);
-      }
-    }
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
-  }
-}
-
-
-
-
-
-bool ServiceImplementation::getGeopotentialHeight(uint generationId,std::string forecastTime,int level,int geometryId,uchar coordinateType,double x,double y,T::ParamValue& value)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::ParamKeyType paramKeyType = T::ParamKeyTypeValue::FMI_NAME;
-    std::string paramKey = "Z-M2S2";
-    T::ParamLevelIdType levelIdType = T::ParamLevelIdTypeValue::FMI;
-    T::ParamLevelId levelId = 2;
-
-    T::ContentInfoList contentList;
-    int result = mContentServerPtr->getContentListByParameterGenerationIdAndForecastTime(0, generationId, paramKeyType, paramKey, levelIdType,
-        levelId, level, -1, -1, geometryId, forecastTime, contentList);
-
-    if (result != 0)
-    {
-      SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
-      exception.addParameter("Service", "getContentListByParameterGenerationIdAndForecastTime");
-      exception.addParameter("Message", ContentServer::getResultString(result));
-      throw exception;
-    }
-
-    //contentList.print(std::cout,0,0);
-
-    uint contentLen = contentList.getLength();
-    T::ContentInfo* contentInfo1 = contentList.getContentInfoByIndex(0);
-    T::ContentInfo* contentInfo2 = contentList.getContentInfoByIndex(1);
-
-    if (contentLen == 1)
-    {
-      if (contentInfo1->mForecastTime == forecastTime)
-      {
-        // We found a grid which forecast time is exactly the same as the requested forecast time.
-
-        int result = mDataServerPtr->getGridValueByPoint(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, coordinateType,x,y,T::AreaInterpolationMethod::Linear,value);
-        if (result != 0)
-        {
-          SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
-          exception.addParameter("Service", "getGridValueByPoint");
-          exception.addParameter("Message", DataServer::getResultString(result));
-          std::string errorMsg = exception.getStackTrace();
-          PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-          return false;
-        }
-
-        printf("*** VALUE %f\n",value);
-        return true;
-      }
-      else
-      {
-        return false;
-      }
-    }
-
-    if (contentLen == 2)
-    {
-      if (contentInfo1->mForecastTime < forecastTime  &&  contentInfo2->mForecastTime > forecastTime)
-      {
-        // Content records have different times, but most likely the same levels, so we need to do time interpolation.
-
-        int result = mDataServerPtr->getGridValueByTimeAndPoint(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,forecastTime,coordinateType,x,y,T::AreaInterpolationMethod::Linear,T::TimeInterpolationMethod::Linear,value);
-        if (result != 0)
-        {
-          SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
-          exception.addParameter("Service", "getGridValueListByTimeAndPointList");
-          exception.addParameter("Message", DataServer::getResultString(result));
-          std::string errorMsg = exception.getStackTrace();
-          PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-          return false;
-        }
-
-        printf("*** INTERPOLATED VALUE %f\n",value);
-        return true;
-      }
-    }
-
-    return false;
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
-  }
-}
-
-
-#endif
 
 
 void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentList,uchar coordinateType,double x,double y,T::ContentInfoList& newContentList)
@@ -5253,7 +5246,7 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
       std::string cacheKey = std::to_string(contentInfo->mGenerationId) + ":" + contentInfo->mForecastTime + ":" + std::to_string(contentInfo->mFmiParameterLevelId) + ":" + std::to_string(contentInfo->mParameterLevel) + std::to_string(x) + std::to_string(y);
       if (mLevelHeightCache.size() > 0)
       {
-        AutoThreadLock lock(&mCacheThreadLock);
+        AutoThreadLock lock(&mHeightCacheThreadLock);
 
         for (auto cc = mLevelHeightCache.rbegin(); cc != mLevelHeightCache.rend(); ++cc)
         {
@@ -5314,7 +5307,7 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
             newContentInfo->mParameterLevel = (T::ParamLevel)(value/9.80665);
             newContentList.addContentInfo(newContentInfo);
 
-            AutoThreadLock lock(&mCacheThreadLock);
+            AutoThreadLock lock(&mHeightCacheThreadLock);
             if (mLevelHeightCache.size() >= 5000)
               mLevelHeightCache.erase(mLevelHeightCache.begin(), mLevelHeightCache.begin() + 1000);
 

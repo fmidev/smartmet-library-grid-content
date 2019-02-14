@@ -3,6 +3,7 @@
 #include <grid-files/common/AutoThreadLock.h>
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/common/GeneralFunctions.h>
+#include <boost/functional/hash.hpp>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -1107,135 +1108,158 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::ProducerInfoList producerInfoList;
-    getProducerList(producerInfoList);
+    T::ContentInfoList cList;
+    getContent(0,0,10000000,cList);
+    cList.sort(T::ContentInfo::ComparisonMethod::producer_file_message);
 
-    uint pLen = producerInfoList.getLength();
+    std::set<std::size_t> tmpList;
 
-    std::set<std::string> tmpList;
+    uint producerId = 0;
+    T::ProducerInfo *producerInfo = nullptr;
+    T::ProducerInfo pInfo;
 
-    for (uint p=0; p<pLen; p++)
+    uint len = cList.getLength();
+    for (uint t=0; t<len; t++)
     {
-      T::ProducerInfo *producerInfo = producerInfoList.getProducerInfoByIndex(p);
+      T::ContentInfo *contentInfo = cList.getContentInfoByIndex(t);
+      std::string sourceParamKey;
+      std::string targetParamKey;
+      T::ParamLevelIdType paramLevelIdType = T::ParamLevelIdTypeValue::FMI;
+      T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
 
-      T::ContentInfoList contentInfoList;
-      getContentByProducerId(producerInfo->mProducerId,0,0,10000000,contentInfoList);
-
-      uint len = contentInfoList.getLength();
-      for (uint t=0; t<len; t++)
+      if (contentInfo->mProducerId != producerId)
       {
-        T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
-        std::string sourceParamKey;
-        std::string targetParamKey;
-        T::ParamLevelIdType paramLevelIdType = T::ParamLevelIdTypeValue::FMI;
-        T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
-
-        if (producerInfo->mProducerId == contentInfo->mProducerId)
+        if (getProducerById(contentInfo->mProducerId,pInfo) == 0)
         {
-          switch (sourceParameterKeyType)
+          producerInfo = &pInfo;
+          producerId = pInfo.mProducerId;
+        }
+        else
+        {
+          producerInfo = nullptr;
+        }
+      }
+
+      if (producerInfo != nullptr  &&  producerInfo->mProducerId == contentInfo->mProducerId)
+      {
+        switch (sourceParameterKeyType)
+        {
+          case T::ParamKeyTypeValue::FMI_ID:
+            sourceParamKey = contentInfo->mFmiParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::FMI_NAME:
+            sourceParamKey = contentInfo->mFmiParameterName;
+            break;
+
+          case T::ParamKeyTypeValue::GRIB_ID:
+            sourceParamKey = contentInfo->mGribParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::NEWBASE_ID:
+            sourceParamKey = contentInfo->mNewbaseParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::NEWBASE_NAME:
+            sourceParamKey = contentInfo->mNewbaseParameterName;
+            break;
+
+          case T::ParamKeyTypeValue::CDM_ID:
+            sourceParamKey = contentInfo->mCdmParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::CDM_NAME:
+            sourceParamKey = contentInfo->mCdmParameterName;
+            break;
+
+          default:
+            break;
+        }
+
+
+        switch (targetParameterKeyType)
+        {
+          case T::ParamKeyTypeValue::FMI_ID:
+            targetParamKey = contentInfo->mFmiParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::FMI_NAME:
+            targetParamKey = contentInfo->mFmiParameterName;
+            break;
+
+          case T::ParamKeyTypeValue::GRIB_ID:
+            targetParamKey = contentInfo->mGribParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::NEWBASE_ID:
+            targetParamKey = contentInfo->mNewbaseParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::NEWBASE_NAME:
+            targetParamKey = contentInfo->mNewbaseParameterName;
+            break;
+
+          case T::ParamKeyTypeValue::CDM_ID:
+            targetParamKey = contentInfo->mCdmParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::CDM_NAME:
+            targetParamKey = contentInfo->mCdmParameterName;
+            break;
+
+          default:
+            break;
+        }
+
+        if (sourceParamKey.length() > 0  &&  targetParamKey.length() > 0)
+        {
+          std::size_t seed = 0;
+          boost::hash_combine(seed,producerInfo->mName);
+          boost::hash_combine(seed,sourceParamKey);
+          boost::hash_combine(seed,targetParameterKeyType);
+          boost::hash_combine(seed,targetParamKey);
+          boost::hash_combine(seed,contentInfo->mGeometryId);
+          boost::hash_combine(seed,paramLevelIdType);
+          boost::hash_combine(seed,paramLevelId);
+          boost::hash_combine(seed,contentInfo->mParameterLevel);
+          boost::hash_combine(seed,contentInfo->mForecastType);
+          boost::hash_combine(seed,contentInfo->mForecastNumber);
+
+
+          if (tmpList.find(seed) == tmpList.end())
           {
-            case T::ParamKeyTypeValue::FMI_ID:
-              sourceParamKey = contentInfo->mFmiParameterId;
-              break;
+            tmpList.insert(seed);
 
-            case T::ParamKeyTypeValue::FMI_NAME:
-              sourceParamKey = contentInfo->mFmiParameterName;
-              break;
-
-            case T::ParamKeyTypeValue::GRIB_ID:
-              sourceParamKey = contentInfo->mGribParameterId;
-              break;
-
-            case T::ParamKeyTypeValue::NEWBASE_ID:
-              sourceParamKey = contentInfo->mNewbaseParameterId;
-              break;
-
-            case T::ParamKeyTypeValue::NEWBASE_NAME:
-              sourceParamKey = contentInfo->mNewbaseParameterName;
-              break;
-
-            case T::ParamKeyTypeValue::CDM_ID:
-              sourceParamKey = contentInfo->mCdmParameterId;
-              break;
-
-            case T::ParamKeyTypeValue::CDM_NAME:
-              sourceParamKey = contentInfo->mCdmParameterName;
-              break;
-
-            default:
-              break;
-          }
-
-
-          switch (targetParameterKeyType)
-          {
-            case T::ParamKeyTypeValue::FMI_ID:
-              targetParamKey = contentInfo->mFmiParameterId;
-              break;
-
-            case T::ParamKeyTypeValue::FMI_NAME:
-              targetParamKey = contentInfo->mFmiParameterName;
-              break;
-
-            case T::ParamKeyTypeValue::GRIB_ID:
-              targetParamKey = contentInfo->mGribParameterId;
-              break;
-
-            case T::ParamKeyTypeValue::NEWBASE_ID:
-              targetParamKey = contentInfo->mNewbaseParameterId;
-              break;
-
-            case T::ParamKeyTypeValue::NEWBASE_NAME:
-              targetParamKey = contentInfo->mNewbaseParameterName;
-              break;
-
-            case T::ParamKeyTypeValue::CDM_ID:
-              targetParamKey = contentInfo->mCdmParameterId;
-              break;
-
-            case T::ParamKeyTypeValue::CDM_NAME:
-              targetParamKey = contentInfo->mCdmParameterName;
-              break;
-
-            default:
-              break;
-          }
-
-          if (sourceParamKey.length() > 0  &&  targetParamKey.length() > 0)
-          {
             char tmp[200];
             char *p = tmp;
-            p += sprintf(p,"%s;%s;%d;%s;%d;%d;%05d;%d;%d",
-                producerInfo->mName.c_str(),
-                sourceParamKey.c_str(),
-                targetParameterKeyType,
-                targetParamKey.c_str(),
-                paramLevelIdType,
-                paramLevelId,
-                contentInfo->mParameterLevel,
-                contentInfo->mForecastType,
-                contentInfo->mForecastNumber);
+            p += sprintf(p,"%s;%s;%d;%s;%d;%d;%d;%05d;%d;%d",
+                  producerInfo->mName.c_str(),
+                  sourceParamKey.c_str(),
+                  targetParameterKeyType,
+                  targetParamKey.c_str(),
+                  contentInfo->mGeometryId,
+                  paramLevelIdType,
+                  paramLevelId,
+                  contentInfo->mParameterLevel,
+                  contentInfo->mForecastType,
+                  contentInfo->mForecastNumber);
 
-            if (tmpList.find(std::string(tmp)) == tmpList.end())
-            {
-              tmpList.insert(std::string(tmp));
+            if ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
+              p += sprintf(p,";1");
+            else
+              p += sprintf(p,";0");
 
-              if ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
-                p += sprintf(p,";1");
-              else
-                p += sprintf(p,";0");
-
-              list.insert(std::string(tmp));
-            }
+            list.insert(std::string(tmp));
           }
         }
       }
     }
+
     return Result::OK;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -4603,7 +4627,7 @@ int RedisImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
     T::ContentInfoList contentInfoList;
     int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
 
-    contentInfoList.getContentGeometryIdListByGenerationId(generationId,geometryIdList);
+    contentInfoList.getContentGeometryIdListByGenerationId(generationInfo.mProducerId,generationId,geometryIdList);
     return res;
   }
   catch (...)
@@ -4692,7 +4716,7 @@ int RedisImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
 
     T::ContentInfoList contentInfoList;
     int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
-    contentInfoList.getContentParamKeyListByGenerationId(generationId,parameterKeyType,paramKeyList);
+    contentInfoList.getContentParamKeyListByGenerationId(generationInfo.mProducerId,generationId,parameterKeyType,paramKeyList);
 
     return res;
   }
@@ -4725,7 +4749,7 @@ int RedisImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
 
     T::ContentInfoList contentInfoList;
     int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
-    contentInfoList.getForecastTimeListByGenerationId(generationId,contentTimeList);
+    contentInfoList.getForecastTimeListByGenerationId(generationInfo.mProducerId,generationId,contentTimeList);
 
     return res;
   }
@@ -4758,7 +4782,7 @@ int RedisImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
 
     T::ContentInfoList contentInfoList;
     int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
-    contentInfoList.getForecastTimeListByGenerationAndGeometry(generationId,geometryId,contentTimeList);
+    contentInfoList.getForecastTimeListByGenerationAndGeometry(generationInfo.mProducerId,generationId,geometryId,contentTimeList);
     return res;
   }
   catch (...)

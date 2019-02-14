@@ -15,13 +15,13 @@ Query::Query()
 {
   try
   {
-    //mType = Type::PointValues;
     mSearchType = 0;
     mFlags = 0;
     mGenerationFlags = 0;
-    //mLocationType = LocationType::Point;
     mCoordinateType = T::CoordinateTypeValue::LATLON_COORDINATES;
     mRadius = 0;
+    mTimesteps = 0;
+    mTimestepSizeInMinutes = 0;
     mMaxParameterValues = 1000000;
   }
   catch (...)
@@ -38,14 +38,15 @@ Query::Query(const Query& query)
 {
   try
   {
-    //mType = query.mType;
     mProducerNameList = query.mProducerNameList;
     mTimezone = query.mTimezone;
     mStartTime = query.mStartTime;
     mEndTime = query.mEndTime;
+    mTimesteps = query.mTimesteps;
+    mTimestepSizeInMinutes = query.mTimestepSizeInMinutes;
     mAnalysisTime = query.mAnalysisTime;
+    mGeometryIdList = query.mGeometryIdList;
     mForecastTimeList = query.mForecastTimeList;
-    //mLocationType = query.mLocationType;
     mCoordinateType = query.mCoordinateType;
     mAttributeList = query.mAttributeList;
     mAreaCoordinates = query.mAreaCoordinates;
@@ -197,20 +198,25 @@ void Query::print(std::ostream& stream,uint level,uint optionFlags)
   try
   {
     stream << space(level) << "Query\n";
-    //stream << space(level) << "- mType                   = " << C_INT(mType) << "\n";
     stream << space(level) << "- mSearchType             = " << C_INT(mSearchType) << "\n";
     stream << space(level) << "- mTimezone               = " << mTimezone << "\n";
     stream << space(level) << "- mStartTime              = " << mStartTime << "\n";
     stream << space(level) << "- mEndTime                = " << mEndTime << "\n";
+    stream << space(level) << "- mTimesteps              = " << mTimesteps << "\n";
+    stream << space(level) << "- mTimestepSizeInMinutes  = " << mTimestepSizeInMinutes << "\n";
     stream << space(level) << "- mAnalysisTime           = " << mAnalysisTime << "\n";
     stream << space(level) << "- mFlags                  = " << mFlags << "\n";
-    //stream << space(level) << "- mLocationType           = " << C_INT(mLocationType) << "\n";
     stream << space(level) << "- mCoordinateType         = " << C_INT(mCoordinateType) << "\n";
     stream << space(level) << "- mRadius                 = " << mRadius << "\n";
     stream << space(level) << "- mLanguage               = " << mLanguage << "\n";
     stream << space(level) << "- mMaxParameterValues     = " << mMaxParameterValues << "\n";
 
     stream << space(level) << "- mGenerationFlags        = " << mGenerationFlags << "\n";
+
+    stream << space(level) << "- mGeometryIdList         = \n";
+    for (auto it = mGeometryIdList.begin(); it != mGeometryIdList.end(); ++it)
+      stream << space(level) << "   * " << *it << "\n";
+
     stream << space(level) << "- mAttributeList          = \n";
     mAttributeList.print(stream,level+2,optionFlags);
 

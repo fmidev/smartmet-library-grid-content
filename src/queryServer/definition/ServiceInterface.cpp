@@ -82,6 +82,22 @@ void ServiceInterface::setProcessingLog(Log *processingLog)
 
 
 
+void  ServiceInterface::setDem(boost::shared_ptr<Fmi::DEM> dem)
+{
+  FUNCTION_TRACE
+  try
+  {
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 void ServiceInterface::shutdown()
 {
   FUNCTION_TRACE
