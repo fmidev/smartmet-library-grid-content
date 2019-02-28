@@ -1888,8 +1888,7 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std
 
         // ### Deleting old content information.
 
-        for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-          mContentInfoList[t].deleteContentInfoByFileId(ff->mFileInfo.mFileId);
+        mContentInfoList[0].markDeletedByFileId(ff->mFileInfo.mFileId);
       }
       else
       {
@@ -1946,6 +1945,9 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std
       }
     }
 
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+      mContentInfoList[t].deleteMarkedContent();
+
     mFileInfoList.addFileInfoList(tmpFileList);
     mFileInfoListByName.addFileInfoList(tmpFileList);
 
@@ -1954,6 +1956,8 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std
       if (mContentInfoListEnabled[t])
         mContentInfoList[t].addContentInfoList(tmpContentList);
     }
+
+
 
     return Result::OK;
   }
@@ -4111,7 +4115,7 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
             contentInfoList.addContentInfo(cInfo->duplicate());
             return Result::OK;
           }
-          //mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+          //mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
           mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentList);
         }
         else
@@ -4164,6 +4168,7 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
     }
 
     //contentList.print(std::cout,0,0);
+
     contentInfoList = contentList;
 #if 0
     contentList.getContentListByForecastTime(forecastTime,contentInfoList);

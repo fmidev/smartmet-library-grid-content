@@ -3504,70 +3504,77 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
         return;
 
 
-
-      if (sameTimePrevLevel != nullptr  &&  (sameTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (sameTimePrevLevel != nullptr  && sameTimeNextLevel != nullptr)
       {
-        // We need to add the previous entry before the start time.
+        if (sameTimePrevLevel != nullptr  &&  (sameTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        {
+          // We need to add the previous entry before the start time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(sameTimePrevLevel->duplicate());
-        else
-          contentInfoList.addContentInfo(sameTimePrevLevel);
-      }
+          if (contentInfoList.getReleaseObjects())
+            contentInfoList.addContentInfo(sameTimePrevLevel->duplicate());
+          else
+            contentInfoList.addContentInfo(sameTimePrevLevel);
+        }
 
-      if (sameTimeNextLevel != nullptr  &&  (sameTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-      {
-        // We need to add the next entry after the end time.
+        if (sameTimeNextLevel != nullptr  &&  (sameTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        {
+          // We need to add the next entry after the end time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(sameTimeNextLevel->duplicate());
-        else
-          contentInfoList.addContentInfo(sameTimeNextLevel);
+          if (contentInfoList.getReleaseObjects())
+            contentInfoList.addContentInfo(sameTimeNextLevel->duplicate());
+          else
+            contentInfoList.addContentInfo(sameTimeNextLevel);
+        }
       }
 
       if (contentInfoList.getLength() == 2)
         return;
 
 
-
-      if (prevTimePrevLevel != nullptr  &&  (prevTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (prevTimePrevLevel != nullptr  &&  prevTimeNextLevel != nullptr)
       {
-        // We need to add the previous entry before the start time.
+        if (prevTimePrevLevel != nullptr  &&  (prevTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        {
+          // We need to add the previous entry before the start time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(prevTimePrevLevel->duplicate());
-        else
-          contentInfoList.addContentInfo(prevTimePrevLevel);
+          if (contentInfoList.getReleaseObjects())
+            contentInfoList.addContentInfo(prevTimePrevLevel->duplicate());
+          else
+            contentInfoList.addContentInfo(prevTimePrevLevel);
+        }
+
+        if (prevTimeNextLevel != nullptr  &&  (prevTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        {
+          // We need to add the previous entry before the start time.
+
+          if (contentInfoList.getReleaseObjects())
+            contentInfoList.addContentInfo(prevTimeNextLevel->duplicate());
+          else
+            contentInfoList.addContentInfo(prevTimeNextLevel);
+        }
       }
 
-      if (prevTimeNextLevel != nullptr  &&  (prevTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (nextTimePrevLevel != nullptr  &&  nextTimeNextLevel != nullptr)
       {
-        // We need to add the previous entry before the start time.
+        if (nextTimePrevLevel != nullptr  &&  (nextTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        {
+          // We need to add the next entry after the end time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(prevTimeNextLevel->duplicate());
-        else
-          contentInfoList.addContentInfo(prevTimeNextLevel);
-      }
+          if (contentInfoList.getReleaseObjects())
+            contentInfoList.addContentInfo(nextTimePrevLevel->duplicate());
+          else
+            contentInfoList.addContentInfo(nextTimePrevLevel);
+        }
 
-      if (nextTimePrevLevel != nullptr  &&  (nextTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-      {
-        // We need to add the next entry after the end time.
+        if (nextTimeNextLevel != nullptr  &&  (nextTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        {
+          // We need to add the next entry after the end time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(nextTimePrevLevel->duplicate());
-        else
-          contentInfoList.addContentInfo(nextTimePrevLevel);
-      }
-
-      if (nextTimeNextLevel != nullptr  &&  (nextTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-      {
-        // We need to add the next entry after the end time.
-
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(nextTimeNextLevel->duplicate());
-        else
-          contentInfoList.addContentInfo(nextTimeNextLevel);
+          if (contentInfoList.getReleaseObjects())
+            contentInfoList.addContentInfo(nextTimeNextLevel->duplicate());
+          else
+            contentInfoList.addContentInfo(nextTimeNextLevel);
+        }
       }
     }
     else

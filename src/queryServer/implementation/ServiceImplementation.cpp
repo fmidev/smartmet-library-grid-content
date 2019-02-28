@@ -5,6 +5,9 @@
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/identification/GridDef.h>
 #include <macgyver/StringConversion.h>
+#include <macgyver/TimeParser.h>
+#include <macgyver/Astronomy.h>
+#include <macgyver/CharsetTools.h>
 #include <boost/functional/hash.hpp>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -1520,6 +1523,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
     Producer_vec producers;
     getProducers(query, producers);
+    T::Coordinate_vec coordinates;
 
     if (producers.size() == 0)
       return Result::NO_PRODUCERS_FOUND;
@@ -1642,7 +1646,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
             if (producerId == 0)
             {
-              auto it = parameterProducers.find(paramName);
+              auto it = parameterProducers.find(paramName + ":" + producerName);
               if (it != parameterProducers.end())
                 producerId = it->second;
             }
@@ -1673,7 +1677,17 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
             {
               if (producerId == 0 && qParam->mValueList[0].mProducerId != 0)
               {
-                parameterProducers.insert(std::pair<std::string, uint>(paramName, qParam->mValueList[0].mProducerId));
+                parameterProducers.insert(std::pair<std::string, uint>(paramName + ":" + producerName, qParam->mValueList[0].mProducerId));
+              }
+
+              uint len = qParam->mValueList[0].mValueList.getLength();
+              if (coordinates.size() == 0  &&  len > 0)
+              {
+                for (uint s = 0; s<len; s++)
+                {
+                  T::GridValue *val = qParam->mValueList[0].mValueList.getGridValuePtrByIndex(s);
+                  coordinates.push_back(T::Coordinate(val->mX,val->mY));
+                }
               }
             }
           }
@@ -1726,8 +1740,16 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
             if (it->mForecastTime < *tt)
               cnt++;
-            else if (it->mForecastTime == *tt)
+            else
+            if (it->mForecastTime == *tt)
+            {
               found = true;
+
+              if (it->mValueList.getLength() == 0)
+              {
+                getAdditionalValues(qParam->mSymbolicName,query.mCoordinateType,coordinates,*it);
+              }
+            }
           }
 
           if (!found)
@@ -1737,7 +1759,13 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
             ParameterValues pValues;
             pValues.mForecastTime = *tt;
-            pValues.mFlags = pValues.mFlags | QueryServer::QPF_ADDITIONAL_VALUE;
+
+            if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN)
+            {
+              pValues.mFlags = pValues.mFlags | QueryServer::QPF_ADDITIONAL_VALUE;
+            }
+
+            getAdditionalValues(qParam->mSymbolicName,query.mCoordinateType,coordinates,pValues);
 
             if ((query.mFlags & Query::Flags::StartTimeFromData) == 0 && (*tt < query.mStartTime || *tt > query.mEndTime))
               pValues.mFlags = pValues.mFlags | QueryServer::QPF_AGGREGATION_VALUE;
@@ -1773,6 +1801,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
     Producer_vec producers;
     getProducers(query, producers);
+    T::Coordinate_vec coordinates;
 
     if (producers.size() == 0)
       return Result::NO_PRODUCERS_FOUND;
@@ -1920,7 +1949,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
           {
             if (producerId == 0)
             {
-              auto it = parameterProducers.find(paramName);
+              auto it = parameterProducers.find(paramName + ":" + producerName);
               if (it != parameterProducers.end())
                 producerId = it->second;
             }
@@ -1952,7 +1981,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
               if (producerId == 0 && valueList.mProducerId != 0)
               {
-                parameterProducers.insert(std::pair<std::string, uint>(paramName, valueList.mProducerId));
+                parameterProducers.insert(std::pair<std::string, uint>(paramName + ":" + producerName, valueList.mProducerId));
               }
 
               if (valueList.mValueList.getLength() > 0)
@@ -1972,6 +2001,17 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
                   forecastType = valueList.mForecastType;
                   forecastNumber = valueList.mForecastNumber;
                 }
+
+                uint len = valueList.mValueList.getLength();
+                if (coordinates.size() == 0  &&  len > 0)
+                {
+                  for (uint s = 0; s<len; s++)
+                  {
+                    T::GridValue *val = valueList.mValueList.getGridValuePtrByIndex(s);
+                    coordinates.push_back(T::Coordinate(val->mX,val->mY));
+                  }
+                }
+
               }
             }
           }
@@ -2031,8 +2071,15 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
           {
             if (it->mForecastTime < *tt)
               cnt++;
-            else if (it->mForecastTime == *tt)
+            else
+            if (it->mForecastTime == *tt)
+            {
               found = true;
+              if (it->mValueList.getLength() == 0)
+              {
+                getAdditionalValues(qParam->mSymbolicName,query.mCoordinateType,coordinates,*it);
+              }
+            }
           }
 
           if (!found)
@@ -2042,7 +2089,12 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
             ParameterValues pValues;
             pValues.mForecastTime = *tt;
-            pValues.mFlags = pValues.mFlags | QueryServer::QPF_ADDITIONAL_VALUE;
+
+            if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN)
+              pValues.mFlags = pValues.mFlags | QueryServer::QPF_ADDITIONAL_VALUE;
+
+            getAdditionalValues(qParam->mSymbolicName,query.mCoordinateType,coordinates,pValues);
+
             if (additionalTimeList.find(*tt) != additionalTimeList.end())
               pValues.mFlags = pValues.mFlags | QueryServer::QPF_AGGREGATION_VALUE;
 
@@ -4514,9 +4566,13 @@ void ServiceImplementation::getGridValues(
                     T::ParamLevel pLevel = pInfo->mParameterLevel;
 
                     if (paramLevelId > 0)
+                    {
                       pLevelId = paramLevelId;
+                      if (paramLevel >= 0)
+                        pLevel = paramLevel;
+                    }
 
-                    if (paramLevel >= 0)
+                    if (paramLevel > 0)
                       pLevel = paramLevel;
 
 
@@ -5221,6 +5277,202 @@ void ServiceImplementation::getGridValues(
         PRINT_DATA(mDebugLog, "  - Producer's '%s' geometry '%d' does not cover all requested coordinates!\n", producerName.c_str(), producerGeometryId);
       }
     }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::getAdditionalValues(
+    std::string& parameterName,
+    uchar coordinateType,
+    T::Coordinate_vec& coordinates,
+    ParameterValues& values)
+{
+  try
+  {
+
+    std::string param = toLowerString(parameterName);
+    boost::local_time::local_date_time utcTime(boost::posix_time::from_iso_string(values.mForecastTime), nullptr);
+
+    for (auto c = coordinates.begin(); c != coordinates.end(); ++c)
+    {
+      T::GridValue val;
+      val.mX = c->x();
+      val.mY = c->y();
+
+      if (param == "dem")
+      {
+        if (mDem)
+        {
+          val.mValue = mDem->elevation(val.mX, val.mY);
+          values.mValueList.addGridValue(val);
+        }
+      }
+      else
+      if (param == "dark")
+      {
+        Fmi::Astronomy::solar_position_t sp = Fmi::Astronomy::solar_position(utcTime, val.mX, val.mY);
+        val.mValue = (double)sp.dark();
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "sunelevation")
+      {
+        Fmi::Astronomy::solar_position_t sp = Fmi::Astronomy::solar_position(utcTime, val.mX, val.mY);
+        val.mValue = (double)sp.elevation;
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "sundeclination")
+      {
+        Fmi::Astronomy::solar_position_t sp = Fmi::Astronomy::solar_position(utcTime, val.mX, val.mY);
+        val.mValue = (double)sp.declination;
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "sunatzimuth")
+      {
+        Fmi::Astronomy::solar_position_t sp = Fmi::Astronomy::solar_position(utcTime, val.mX, val.mY);
+        val.mValue = (double)sp.azimuth;
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "moonphase")
+      {
+        val.mValue = (double)Fmi::Astronomy::moonphase(utcTime.utc_time());
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "moonrise_utc")
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_iso_string(lt.moonrise.local_time());
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "moonrise2_utc")
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+
+        if (lt.moonrise2_today())
+          val.mValueString = Fmi::to_iso_string(lt.moonrise2.local_time());
+        else
+          val.mValueString = std::string("");
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "moonset_utc")
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_iso_string(lt.moonset.local_time());
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "moonset2_utc")
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+
+        if (lt.moonset2_today())
+          val.mValueString = Fmi::to_iso_string(lt.moonset2.local_time());
+        else
+          val.mValueString = "";
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "moonrisetoday_utc")
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_string(lt.moonrise_today());
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "moonrise2today_utc")
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_string(lt.moonrise2_today());
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "moonsettoday_utc")
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_string(lt.moonset_today());
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "moonset2today_utc")
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_string(lt.moonset2_today());
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "moonup24h")
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+        val.mValue = (double)lt.above_horizont_24h();
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "moondown24h")
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+        val.mValue = (double)(!lt.moonrise_today() && !lt.moonset_today() && !lt.above_horizont_24h());
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "sunrise_utc")
+      {
+        Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_iso_string(st.sunrise.local_time());
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "sunset_utc")
+      {
+        Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_iso_string(st.sunset.local_time());
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "noon_utc")
+      {
+        Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_iso_string(st.noon.local_time());
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "sunrisetoday_utc")
+      {
+        Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_string(st.sunrise_today());
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "sunsettoday_utc")
+      {
+        Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_string(st.sunset_today());
+        values.mValueList.addGridValue(val);
+      }
+      else
+      if (param == "daylength")
+      {
+        Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
+        auto seconds = st.daylength().total_seconds();
+        auto minutes = boost::numeric_cast<long>(round(seconds / 60.0));
+        val.mValue = minutes;
+        values.mValueList.addGridValue(val);
+      }
+    }
+
+
   }
   catch (...)
   {

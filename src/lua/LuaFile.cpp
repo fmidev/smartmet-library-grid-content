@@ -94,6 +94,8 @@ void LuaFile::init()
     AutoThreadLock lock(&mThreadLock);
 
     loadFile();
+    mFunctions.clear();
+
     for (int t=1; t<10; t++)
       loadFunctionList(t);
   }
@@ -141,6 +143,8 @@ bool LuaFile::checkUpdates()
       }
 
       loadFile();
+      mFunctions.clear();
+
       for (int t=1; t<10; t++)
         loadFunctionList(t);
 

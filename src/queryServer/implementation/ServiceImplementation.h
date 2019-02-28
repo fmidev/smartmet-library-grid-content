@@ -422,6 +422,13 @@ class ServiceImplementation : public ServiceInterface
                        double y,
                        T::ContentInfoList& newContentList);
 
+
+     void           getAdditionalValues(
+                       std::string& parameterName,
+                       uchar coordinateType,
+                       T::Coordinate_vec& coordinates,
+                       ParameterValues& values);
+
   private:
 
      // Private attributes
