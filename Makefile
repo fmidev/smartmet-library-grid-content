@@ -100,6 +100,7 @@ LIBS = -L$(libdir) \
 	-lsmartmet-grid-files \
 	-lsmartmet-spine \
 	-lsmartmet-macgyver \
+	-lsmartmet-gis \
 	-lboost_date_time \
 	-lhiredis \
 	-lcurl \
