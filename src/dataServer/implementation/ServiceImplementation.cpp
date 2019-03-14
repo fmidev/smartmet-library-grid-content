@@ -15,6 +15,7 @@
 #include <grid-files/common/GraphFunctions.h>
 #include <grid-files/common/CoordinateConversions.h>
 #include <grid-files/common/MemoryWriter.h>
+#include <grid-files/common/RequestCounter.h>
 #include <grid-files/grid/PhysicalGridFile.h>
 #include <grid-files/grid/MessageProcessing.h>
 #include <grid-files/identification/GridDef.h>
@@ -48,6 +49,26 @@ static void* ServiceImplementation_eventProcessingThread(void *arg)
 
 
 
+static void* ServiceImplementation_requestCounterThread(void *arg)
+{
+  try
+  {
+    ServiceImplementation *service = (ServiceImplementation*)arg;
+    service->requestCounterThread();
+    return nullptr;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+    exception.printError();
+    exit(-1);
+  }
+}
+
+
+
+
+
 ServiceImplementation::ServiceImplementation()
 {
   FUNCTION_TRACE
@@ -61,11 +82,18 @@ ServiceImplementation::ServiceImplementation()
     mShutdownRequested = false;
     mFullUpdateRequired = false;
     mEventProcessingActive = false;
+    mRequestCountingActive = false;
     mContentRegistrationEnabled = false;
     mVirtualContentEnabled = true;
     mContentServerStartTime = 0;
     mLastVirtualFileRegistration = 0;
     mContentPreloadEnabled = true;
+    mLastCacheCheck = time(0);
+    mPointCacheEnabled = false;
+    mPointCacheHitsRequired = 20;
+    mPointCacheTimePeriod = 1200;
+
+    mRequestCounterEnabled = false;
   }
   catch (...)
   {
@@ -146,7 +174,43 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,std:
 
 
 
-void ServiceImplementation::enableVirtualContent(bool enabled)
+void ServiceImplementation::setRequestCounterEnabled(std::string requestCounterFilename,bool requestCounterEnabled)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mRequestCounterEnabled = requestCounterEnabled;
+    mRequestCounterFilename = requestCounterFilename;
+
+    requestCounter.setCountingEnabled(mRequestCounterEnabled);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+void ServiceImplementation::setPointCacheEnabled(bool enabled,uint hitsRequired,uint timePeriod)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mPointCacheEnabled = enabled;
+    mPointCacheHitsRequired = hitsRequired;
+    mPointCacheTimePeriod = timePeriod;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::setVirtualContentEnabled(bool enabled)
 {
   FUNCTION_TRACE
   try
@@ -163,7 +227,7 @@ void ServiceImplementation::enableVirtualContent(bool enabled)
 
 
 
-void ServiceImplementation::enableContentPreload(bool enabled)
+void ServiceImplementation::setContentPreloadEnabled(bool enabled)
 {
   FUNCTION_TRACE
   try
@@ -207,7 +271,24 @@ void ServiceImplementation::startEventProcessing()
   FUNCTION_TRACE
   try
   {
-    pthread_create(&mThread,nullptr,ServiceImplementation_eventProcessingThread,this);
+    pthread_create(&mEventProcessingThread,nullptr,ServiceImplementation_eventProcessingThread,this);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::startRequestCounting()
+{
+  FUNCTION_TRACE
+  try
+  {
+    pthread_create(&mRequestCounterThread,nullptr,ServiceImplementation_requestCounterThread,this);
   }
   catch (...)
   {
@@ -602,6 +683,7 @@ int ServiceImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,u
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
+
 
 
 
@@ -4187,6 +4269,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
     {
       gridFile = new GRID::PhysicalGridFile();
       gridFile->setFileName(mDataDir + "/" + fileInfo.mName);
+      gridFile->setPointCacheEnabled(mPointCacheEnabled);
 
       gridFile->setFileId(fileInfo.mFileId);
       gridFile->setGroupFlags(fileInfo.mGroupFlags);
@@ -5347,7 +5430,6 @@ void ServiceImplementation::processEvents()
     }
 
 
-
     T::EventInfo eventInfo;
     int result = mContentServer->getLastEventInfo(mServerSessionId,mServerId,eventInfo);
     if (result == Result::OK)
@@ -5402,6 +5484,12 @@ void ServiceImplementation::processEvents()
           return;
       }
     }
+
+    if ((mLastCacheCheck + 120) < time(0))
+    {
+      mGridFileManager.clearCachedValues(mPointCacheHitsRequired,mPointCacheTimePeriod);
+      mLastCacheCheck = time(0);
+    }
   }
   catch (...)
   {
@@ -5449,6 +5537,125 @@ void ServiceImplementation::eventProcessingThread()
 
 
 
+
+void ServiceImplementation::processRequestCounters()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (requestCounter.getTotalRequests() > 1000000)
+    {
+      requestCounter.setCountingEnabled(false);
+      requestCounter.resetTotalRequests();
+
+      requestCounter.updateTopRequestIndexes();
+      requestCounter.saveTopIndexes(mRequestCounterFilename.c_str());
+      requestCounter.multiplyCounters(0.9);
+      requestCounter.setCountingEnabled(true);
+    }
+
+    KeyCountList toprc = requestCounter.getTopRequestCounters();
+
+    for (auto it = toprc.begin(); it != toprc.end(); ++it)
+    {
+      if (mShutdownRequested)
+        return;
+
+      std::vector<uint> indexes = requestCounter.getTopRequestIndexes(it->second);
+      if (indexes.size() > 0)
+      {
+        T::ContentInfoList contentInfoList;
+
+        int result = mContentServer->getContentListByRequestCounterKey(mServerSessionId,it->second,contentInfoList);
+        if (result != 0)
+        {
+          std::string cPos = CODE_LOCATION;
+          PRINT_DATA(mDebugLog,"%s: Cannot get the content list (key=%llu) from the content server!\n",cPos.c_str(),it->second);
+          PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
+          return;
+        }
+
+        uint len = contentInfoList.getLength();
+        for (uint t=0; t<len; t++)
+        {
+          if (mShutdownRequested)
+            return;
+
+          T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
+          if (info != NULL)
+          {
+            GRID::GridFile_sptr gridFile = getGridFile(info->mFileId);
+            if (gridFile != nullptr)
+            {
+              GRID::Message *message = gridFile->getMessageByIndex(info->mMessageIndex);
+              if (message != nullptr)
+              {
+                message->refreshIndexes(indexes);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::requestCounterThread()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mRequestCounterEnabled)
+      return;
+
+    requestCounter.loadTopIndexes(mRequestCounterFilename.c_str());
+
+    sleep(5);
+
+    while (!mShutdownRequested)
+    {
+      try
+      {
+        while (mFullUpdateRequired  &&  !mShutdownRequested)
+          sleep(1);
+
+        mRequestCountingActive = true;
+        processRequestCounters();
+      }
+      catch (...)
+      {
+        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+        std::string st = exception.getStackTrace();
+        PRINT_DATA(mDebugLog,"%s",st.c_str());
+      }
+
+      for (int t=0; t<300; t++)
+      {
+        if (!mShutdownRequested)
+          sleep(1);
+      }
+    }
+
+    mRequestCountingActive = false;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 void ServiceImplementation::shutdown()
 {
   FUNCTION_TRACE
@@ -5456,7 +5663,7 @@ void ServiceImplementation::shutdown()
   {
     PRINT_DATA(mDebugLog,"*** SHUTDOWN ***\n");
     mShutdownRequested = true;
-    while (mEventProcessingActive)
+    while (mEventProcessingActive || mRequestCountingActive)
       sleep(1);
   }
   catch (...)

@@ -3740,12 +3740,42 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
 
 
 
+int CacheImplementation::_getContentListByRequestCounterKey(T::SessionId sessionId,ulonglong key,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getContentListByRequestCounterKey(sessionId,key,contentInfoList);
+
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    mContentInfoList[0].getContentInfoListByRequestCounterKey(key,contentInfoList);;
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
 
     uint cLen = mContentInfoList[0].getLength();
     for (uint c=0; c<cLen; c++)
@@ -5565,7 +5595,7 @@ void CacheImplementation::processEvents(bool eventThread)
 
     time_t timeNow = time(nullptr);
 
-    if (mDelayedFileAddList.size() > 20000 || (mDelayedFileAddList.size() > 20000  &&  (timeNow - mDelayedFileAdditionTime)  > 10))
+    if (mDelayedFileAddList.size() > 100000 || (mDelayedFileAddList.size() > 0  &&  (timeNow - mDelayedFileAdditionTime)  > 30))
     {
       PRINT_DATA(mDebugLog,"* Adding files that were waiting the addition : %ld\n",mDelayedFileAddList.size());
 
@@ -5590,7 +5620,7 @@ void CacheImplementation::processEvents(bool eventThread)
     }
 
 
-    if (mDelayedContentAddList.size() > 20000 || (mDelayedContentAddList.size() > 0  &&  (timeNow - mDelayedContentAdditionTime)  > 10))
+    if (mDelayedContentAddList.size() > 100000 || (mDelayedContentAddList.size() > 0  &&  (timeNow - mDelayedContentAdditionTime)  > 30))
     {
       PRINT_DATA(mDebugLog,"* Adding content that was waiting the addition : %ld\n",mDelayedContentAddList.size());
 

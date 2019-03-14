@@ -35,12 +35,17 @@ class ServiceImplementation : public ServiceInterface
                        string_vec& luaFileNames);
 
      virtual void   startEventProcessing();
+     virtual void   startRequestCounting();
      virtual void   shutdown();
 
      virtual void   addVirtualContentFactory(VirtualContentFactory *factory);
-     virtual void   enableContentPreload(bool enabled);
-     virtual void   enableVirtualContent(bool enabled);
+     virtual void   setContentPreloadEnabled(bool enabled);
+     virtual void   setVirtualContentEnabled(bool enabled);
+     virtual void   setPointCacheEnabled(bool enabled,uint hitsRequired,uint timePeriod);
+     virtual void   setRequestCounterEnabled(std::string requestCounterFilename,bool requestCounterEnabled);
+
      virtual void   eventProcessingThread();
+     virtual void   requestCounterThread();
 
   protected:
 
@@ -159,6 +164,7 @@ class ServiceImplementation : public ServiceInterface
      virtual void   registerVirtualFiles(VirtualGridFilePtr_map& gridFileMap);
      virtual void   processEvent(T::EventInfo& eventInfo);
      virtual void   processEvents();
+     virtual void   processRequestCounters();
      virtual void   readContentList(T::ContentInfoList& contentList,bool includePhysicalContent,bool includeVirtualContent);
 
      GRID::GridFile_sptr  getGridFile(uint fileId);
@@ -167,6 +173,7 @@ class ServiceImplementation : public ServiceInterface
      bool                 mShutdownRequested;
      bool                 mFullUpdateRequired;
      bool                 mEventProcessingActive;
+     bool                 mRequestCountingActive;
      bool                 mContentRegistrationEnabled;
      bool                 mVirtualContentEnabled;
      bool                 mContentPreloadEnabled;
@@ -176,10 +183,17 @@ class ServiceImplementation : public ServiceInterface
      std::string          mServerName;
      std::string          mServerIor;
      std::string          mDataDir;
-     pthread_t            mThread;
+     bool                 mRequestCounterEnabled;
+     bool                 mPointCacheEnabled;
+     uint                 mPointCacheHitsRequired;
+     uint                 mPointCacheTimePeriod;
+     std::string          mRequestCounterFilename;
+     pthread_t            mEventProcessingThread;
+     pthread_t            mRequestCounterThread;
      time_t               mContentServerStartTime;
      GridFileManager      mGridFileManager;
      PreloadList          mPrealoadList;
+     time_t               mLastCacheCheck;
 
      VirtualContentManager            mVirtualContentManager;
      ContentServer::ServiceInterface* mContentServer;

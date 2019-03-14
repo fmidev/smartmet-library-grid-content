@@ -2800,6 +2800,37 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getContentListByRequestCounterKey(::CORBA::LongLong sessionId, ::CORBA::ULongLong key, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ContentInfoList sContentInfoList;
+    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    contentInfoList = corbaContentInfoList;
+
+    if (mService == nullptr)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getContentListByRequestCounterKey(sessionId,key,sContentInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::getContentListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE

@@ -54,6 +54,7 @@ class GenerationInfo
         static const uint generationId                 = 1;  // Comparison order: generationId
         static const uint generationName               = 2;  // Comparison order: generationName
         static const uint analysisTime_generationId    = 3;  // Comparison order: analysisTime,generationId
+        static const uint producerId                   = 4;  // Comparison order: producerId
     };
 
 };

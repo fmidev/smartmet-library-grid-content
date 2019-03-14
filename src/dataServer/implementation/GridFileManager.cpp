@@ -387,6 +387,37 @@ GRID::GridFile_sptr GridFileManager::getFileByIdNoMapping(uint fileId)
 
 
 
+void GridFileManager::clearCachedValues(uint hitsRequired,uint timePeriod)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
+    {
+      if (it->second->isMemoryMapped())
+      {
+        std::size_t sz = it->second->getNumberOfMessages();
+        for (std::size_t t=0; t< sz; t++)
+        {
+          GRID::Message *msg = it->second->getMessageByIndex(t);
+          if (msg != nullptr)
+            msg->clearCachedValues(hitsRequired,timePeriod);
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 std::size_t GridFileManager::getFileCount()
 {
   FUNCTION_TRACE

@@ -3054,6 +3054,45 @@ int ClientImplementation::_getContentListByGroupFlags(T::SessionId sessionId,uin
 
 
 
+int ClientImplementation::_getContentListByRequestCounterKey(T::SessionId sessionId,ulonglong key,T::ContentInfoList& contentInfoList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getContentListByRequestCounterKey");
+    request.addLine("sessionId",sessionId);
+    request.addLine("key",key);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      string_vec lines;
+      uint len = response.getLinesByKey("contentInfo",lines);
+      for (uint t=0; t<len; t++)
+      {
+        T::ContentInfo *info = new T::ContentInfo();
+        info->setCsv(lines[t]);
+        contentInfoList.addContentInfo(info);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
   try

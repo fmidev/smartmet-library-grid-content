@@ -14,6 +14,7 @@ namespace QueryServer
 {
 
 typedef std::vector<std::pair<std::string,T::GeometryId>>   Producer_vec;
+typedef std::map<std::string,T::ProducerInfo>               Producer_map;
 typedef ContentServer::ServiceInterface*                    ContentServer_ptr;
 typedef DataServer::ServiceInterface*                       DataServer_ptr;
 typedef std::vector<std::pair<std::string,int>>             LevelHeightCache;
@@ -429,6 +430,10 @@ class ServiceImplementation : public ServiceInterface
                        T::Coordinate_vec& coordinates,
                        ParameterValues& values);
 
+
+     bool           getProducerInfoByName(std::string& name,T::ProducerInfo& info);
+     void           getGenerationInfoListByProducerId(uint producerId,T::GenerationInfoList& generationInfoList);
+
   private:
 
      // Private attributes
@@ -444,6 +449,9 @@ class ServiceImplementation : public ServiceInterface
      std::string            mProducerFile;
      time_t                 mProducerFileModificationTime;
      Producer_vec           mProducerList;
+     T::GenerationInfoList  mGenerationInfoList;
+     time_t                 mGenerationInfoListUpdateTime;
+     Producer_map           mProducerMap;
      AliasFile              mProducerAliasFile;
      ThreadLock             mThreadLock;
      ContentServer_ptr      mContentServerPtr;

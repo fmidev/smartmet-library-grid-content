@@ -247,6 +247,9 @@ int GenerationInfo::compare(uint comparisonMethod,GenerationInfo *generationInfo
           return res;
         return uint_compare(mGenerationId,generationInfo->mGenerationId);
 
+      case GenerationInfo::ComparisonMethod::producerId:
+        return uint_compare(mProducerId,generationInfo->mProducerId);
+
       default:
         return uint_compare(mGenerationId,generationInfo->mGenerationId);
     }

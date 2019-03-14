@@ -208,6 +208,32 @@ std::string ContentInfo::getCsv()
 
 
 
+ulonglong ContentInfo::getRequestCounterKey()
+{
+  try
+  {
+    ulonglong geometryId = C_UINT64(mGeometryId);
+    ulonglong level = C_UINT64(mParameterLevel);
+    ulonglong levelId = C_UINT64(mFmiParameterLevelId);
+    ulonglong paramId = toUInt64(mFmiParameterId);
+    ulonglong key = (geometryId << 48) + (levelId << 40) + (level << 20) + paramId;
+
+    ulonglong producerId = C_UINT64(mProducerId);
+    if (producerId > 0)
+      key = key * producerId;
+
+    return key;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 std::string ContentInfo::getCsvHeader()
 {
   try

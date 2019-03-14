@@ -22,6 +22,7 @@ class ContentInfo
     bool               hasKey(T::ParamKeyType parameterKeyType,std::string parameterKey);
     std::string        getCsv();
     std::string        getCsvHeader();
+    ulonglong          getRequestCounterKey();
     void               setCsv(const char *csv);
     void               setCsv(std::string csv);
     int                compare(uint comparisonMethod,ContentInfo *contentInfo);

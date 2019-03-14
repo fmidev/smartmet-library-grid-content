@@ -2305,6 +2305,35 @@ void ContentInfoList::getContentInfoListByGeometryId(T::GeometryId geometryId,Co
 
 
 
+void ContentInfoList::getContentInfoListByRequestCounterKey(ulonglong key,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->getRequestCounterKey() == key)
+      {
+        if (contentInfoList.getReleaseObjects())
+          contentInfoList.addContentInfo(info->duplicate());
+        else
+          contentInfoList.addContentInfo(info);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 void ContentInfoList::getContentInfoListByForecastTime(std::string forecastTime,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3453,11 +3482,6 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
 
                     }
                   }
-                }
-                else
-                {
-                  if (t > C_UINT(idx)  &&  geometryId > 0  &&  info->mGeometryId != geometryId)
-                    t = mLength;
                 }
               }
             }

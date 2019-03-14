@@ -4201,6 +4201,31 @@ int RedisImplementation::_getContentListByServerId(T::SessionId sessionId,uint s
 
 
 
+int RedisImplementation::_getContentListByRequestCounterKey(T::SessionId sessionId,ulonglong key,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    return getContentByRequestCounterKey(key,contentInfoList);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 int RedisImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4225,6 +4250,7 @@ int RedisImplementation::_getContentListByGenerationId(T::SessionId sessionId,ui
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
+
 
 
 
@@ -7044,6 +7070,77 @@ int RedisImplementation::getContentByGroupFlags(uint groupFlags,uint startFileId
               freeReplyObject(reply);
               return Result::OK;
             }
+          }
+          else
+          {
+            delete contentInfo;
+          }
+        }
+        freeReplyObject(reply);
+      }
+      else
+      {
+        freeReplyObject(reply);
+        return Result::OK;
+      }
+      startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+    }
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::getContentByRequestCounterKey(ulonglong key,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    uint startFileId = 0;
+    uint startMessageIndex = 0;
+
+    unsigned long long startId = 0;
+    unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
+
+    while (startId != prevStartId)
+    {
+      prevStartId = startId;
+
+      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF));
+      if (reply == nullptr)
+      {
+        closeConnection();
+        return Result::PERMANENT_STORAGE_ERROR;
+      }
+
+      if (reply->elements == 0)
+      {
+        freeReplyObject(reply);
+        return Result::OK;
+      }
+
+      if (reply->type == REDIS_REPLY_ARRAY)
+      {
+        for (uint t = 0; t < reply->elements; t++)
+        {
+          T::ContentInfo *contentInfo = new T::ContentInfo();
+          contentInfo->setCsv(reply->element[t]->str);
+
+          if (contentInfo->getRequestCounterKey() == key)
+          {
+            startFileId = contentInfo->mFileId;
+            startMessageIndex = contentInfo->mMessageIndex + 1;
+
+            contentInfoList.addContentInfo(contentInfo);
           }
           else
           {

@@ -28,6 +28,7 @@ ServiceImplementation::ServiceImplementation()
     mProducerFileModificationTime = 0;
     mLastConfiguratonCheck = 0;
     mCheckInterval = 5;
+    mGenerationInfoListUpdateTime = 0;
   }
   catch (...)
   {
@@ -136,6 +137,62 @@ void ServiceImplementation::shutdown()
     throw Spine::Exception(BCP, exception_operation_failed, nullptr);
   }
 }
+
+
+
+
+
+bool ServiceImplementation::getProducerInfoByName(std::string& name,T::ProducerInfo& info)
+{
+  FUNCTION_TRACE
+  try
+  {
+    auto it = mProducerMap.find(name);
+    if (it != mProducerMap.end())
+    {
+      info = it->second;
+      return true;
+    }
+
+    if (mContentServerPtr->getProducerInfoByName(0, name, info) == 0)
+    {
+      mProducerMap.insert(std::pair<std::string,T::ProducerInfo>(name,info));
+      return true;
+    }
+    return false;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::getGenerationInfoListByProducerId(uint producerId,T::GenerationInfoList& generationInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if ((time(0) - mGenerationInfoListUpdateTime) > 120)
+    {
+      if (mContentServerPtr->getGenerationInfoList(0,mGenerationInfoList) == 0)
+      {
+        mGenerationInfoList.sort(T::GenerationInfo::ComparisonMethod::producerId);
+        mGenerationInfoListUpdateTime = time(0);
+      }
+    }
+
+    mGenerationInfoList.getGenerationInfoListByProducerId(producerId,generationInfoList);
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
+  }
+}
+
 
 
 
@@ -834,7 +891,7 @@ void ServiceImplementation::getParameterStringInfo(
       {
         producerName = field[1];
         T::ProducerInfo producerInfo;
-        if (mContentServerPtr->getProducerInfoByName(0, producerName, producerInfo) == 0)
+        if (getProducerInfoByName(producerName, producerInfo))
           producerId = producerInfo.mProducerId;
       }
     }
@@ -4465,21 +4522,14 @@ void ServiceImplementation::getGridValues(
         // The current producer supports a geometry where the current coordinates can be found.
 
         T::ProducerInfo producerInfo;
-        if (mContentServerPtr->getProducerInfoByName(0, producerName, producerInfo) == 0 && (producerId == 0 || producerInfo.mProducerId == producerId))
+        if (getProducerInfoByName(producerName, producerInfo) && (producerId == 0 || producerInfo.mProducerId == producerId))
         {
           PRINT_DATA(mDebugLog, "  - The producer and the geometry are acceptable!\n");
 
           // Reading generations supported by the current producer.
 
           T::GenerationInfoList generationInfoList;
-          int result = mContentServerPtr->getGenerationInfoListByProducerId(0, producerInfo.mProducerId, generationInfoList);
-          if (result != 0)
-          {
-            SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
-            exception.addParameter("Service", "getGenerationInfoListByProducerId");
-            exception.addParameter("Message", ContentServer::getResultString(result));
-            throw exception;
-          }
+          getGenerationInfoListByProducerId(producerInfo.mProducerId, generationInfoList);
 
           uint gLen = generationInfoList.getLength();
           if (gLen == 0)
@@ -5056,21 +5106,14 @@ void ServiceImplementation::getGridValues(
         // The current producer supports a geometry where the current coordinates can be found.
 
         T::ProducerInfo producerInfo;
-        if (mContentServerPtr->getProducerInfoByName(0, producerName, producerInfo) == 0 && (producerId == 0 || producerInfo.mProducerId == producerId))
+        if (getProducerInfoByName(producerName, producerInfo) && (producerId == 0 || producerInfo.mProducerId == producerId))
         {
           PRINT_DATA(mDebugLog, "  - The producer and the geometry are acceptable!\n");
 
           // Reading generations supported by the current producer.
 
           T::GenerationInfoList generationInfoList;
-          int result = mContentServerPtr->getGenerationInfoListByProducerId(0, producerInfo.mProducerId, generationInfoList);
-          if (result != 0)
-          {
-            SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
-            exception.addParameter("Service", "getGenerationInfoListByProducerId");
-            exception.addParameter("Message", ContentServer::getResultString(result));
-            throw exception;
-          }
+          getGenerationInfoListByProducerId(producerInfo.mProducerId, generationInfoList);
 
           uint gLen = generationInfoList.getLength();
 
