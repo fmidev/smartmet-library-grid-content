@@ -10,29 +10,31 @@ Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires: rpm-build
 BuildRequires: boost-devel
 BuildRequires: gcc-c++
+BuildRequires: gdal-devel
 BuildRequires: hiredis-devel
 BuildRequires: libcurl-devel
 BuildRequires: libicu-devel
 BuildRequires: lua-devel
 BuildRequires: make
 BuildRequires: omniORB-devel
+BuildRequires: postgresql95-devel
+BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 19.3.14
 BuildRequires: smartmet-library-grid-files-devel >= 19.3.15
-BuildRequires: smartmet-library-spine-devel >= 19.3.14
 BuildRequires: smartmet-library-macgyver-devel >= 18.11.24
-BuildRequires: gdal-devel
+BuildRequires: smartmet-library-spine-devel >= 19.3.14
+Requires: boost-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
-Requires: boost-date-time
+Requires: postgresql95
 Requires: smartmet-library-gis >= 19.3.14
-Requires: smartmet-library-spine >= 19.3.14
-Requires: smartmet-library-macgyver >= 18.11.24
 Requires: smartmet-library-grid-files >= 19.3.15
+Requires: smartmet-library-macgyver >= 18.11.24
+Requires: smartmet-library-spine >= 19.3.14
 Provides: %{SPECNAME}
 
 %description
