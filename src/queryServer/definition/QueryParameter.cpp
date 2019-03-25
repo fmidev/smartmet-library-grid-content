@@ -19,7 +19,7 @@ QueryParameter::QueryParameter()
     mParameterLevelIdType = T::ParamLevelIdTypeValue::ANY;
     mParameterLevelId = 0;
     mParameterLevel = -1;
-    mForecastType = 1;
+    mForecastType = -1;
     mForecastNumber = -1;
     mAreaInterpolationMethod = T::AreaInterpolationMethod::Undefined;
     mTimeInterpolationMethod = T::TimeInterpolationMethod::Undefined;

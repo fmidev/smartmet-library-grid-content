@@ -5162,6 +5162,7 @@ void ServiceImplementation::getGridValues(
                 if (cLen > 0)
                 {
                   contentInfoList.sort(T::ContentInfo::ComparisonMethod::starttime_generationId_file_message);
+                  T::ContentInfo* cFirst = contentInfoList.getContentInfoByIndex(0);
 
                   std::string firstTime = "30000101T000000";
                   std::string lastTime = startTime;
@@ -5192,7 +5193,7 @@ void ServiceImplementation::getGridValues(
                       for (int t = cLen-1; t >= 0; t--)
                       {
                         T::ContentInfo* cInfo = contentInfoList.getContentInfoByIndex(t);
-                        if (cInfo != nullptr &&  cInfo->mGenerationId == gInfo->mGenerationId   &&  cInfo->mForecastTime >= startTime  &&  cInfo->mForecastTime <= endTime)
+                        if (cInfo != nullptr &&  cInfo->mGenerationId == gInfo->mGenerationId   &&  cInfo->mForecastTime >= startTime  &&  cInfo->mForecastTime <= endTime  &&  cInfo->mForecastType == cFirst->mForecastType  &&  cInfo->mForecastNumber == cFirst->mForecastNumber)
                         {
                           if (cInfo->mForecastTime > lastTime)
                           {
