@@ -4577,8 +4577,25 @@ void ServiceImplementation::getGridValues(
 
                 if (analysisTime.length() > 0)
                 {
-                  if (analysisTime == analysisTimes[g] || (analysisTimes[g] < analysisTime  &&  ((g+1) == gLen  ||  analysisTimes[g+1] > analysisTime)))
+                  if (analysisTime == analysisTimes[g])
+                  {
                     generationValid = true;
+                  }
+                  else
+                  if (g == 0  &&  analysisTimes[g] < analysisTime)
+                  {
+                    generationValid = true;
+                  }
+                  else
+                  if ((g+1) == gLen  &&  analysisTimes[g] > analysisTime)
+                  {
+                    generationValid = true;
+                  }
+                  else
+                  if (analysisTimes[g] > analysisTime  &&  (g+1) < gLen  &&  analysisTimes[g+1] < analysisTime)
+                  {
+                    generationValid = true;
+                  }
                 }
                 else
                 {
@@ -5159,10 +5176,13 @@ void ServiceImplementation::getGridValues(
                 int cLen = contentInfoList.getLength();
                 PRINT_DATA(mDebugLog, "         + Found %u content records\n", cLen);
 
+
                 if (cLen > 0)
                 {
                   contentInfoList.sort(T::ContentInfo::ComparisonMethod::starttime_generationId_file_message);
+                  //contentInfoList.print(std::cout,0,0);
                   T::ContentInfo* cFirst = contentInfoList.getContentInfoByIndex(0);
+                  //cFirst->print(std::cout,0,0);
 
                   std::string firstTime = "30000101T000000";
                   std::string lastTime = startTime;
@@ -5179,13 +5199,27 @@ void ServiceImplementation::getGridValues(
 
                     if (analysisTime.length() > 0)
                     {
-                      if (analysisTime == gInfo->mAnalysisTime || (gInfo->mAnalysisTime < analysisTime  &&  (gNext == nullptr  ||  gNext->mAnalysisTime > analysisTime)))
+                      if (g == 0 &&  analysisTime < gInfo->mAnalysisTime)
+                      {
                         generationValid = true;
+                      }
+                      else
+                      if (g == C_INT(gLen-1)  &&  analysisTime > gInfo->mAnalysisTime)
+                      {
+                        generationValid = true;
+                      }
+                      else
+                      if (analysisTime == gInfo->mAnalysisTime || (gInfo->mAnalysisTime < analysisTime  &&  (gNext == nullptr  ||  gNext->mAnalysisTime > analysisTime)))
+                      {
+                        generationValid = true;
+                      }
                     }
                     else
                     {
                       if (generationFlags == 0 || (generationFlags & gFlags) != 0)
+                      {
                         generationValid = true;
+                      }
                     }
 
                     if (generationValid)
@@ -5193,116 +5227,124 @@ void ServiceImplementation::getGridValues(
                       for (int t = cLen-1; t >= 0; t--)
                       {
                         T::ContentInfo* cInfo = contentInfoList.getContentInfoByIndex(t);
-                        if (cInfo != nullptr &&  cInfo->mGenerationId == gInfo->mGenerationId   &&  cInfo->mForecastTime >= startTime  &&  cInfo->mForecastTime <= endTime  &&  cInfo->mForecastType == cFirst->mForecastType  &&  cInfo->mForecastNumber == cFirst->mForecastNumber)
+                        if (cInfo != nullptr &&  cInfo->mGenerationId == gInfo->mGenerationId)
                         {
-                          if (cInfo->mForecastTime > lastTime)
-                          {
-                            contentTimeList.clear();
-                            lastTime = cInfo->mForecastTime;
-                            firstTime = "30000101T000000";
-                          }
+                          // cInfo->print(std::cout,0,0);
+                          // std::cout << "-- TIME " << firstTime << "  " << lastTime << " " << cFirst->mForecastType << cFirst->mForecastNumber << "\n";
 
-                          if (cInfo->mForecastTime < firstTime)
+                          if (cInfo->mForecastTime >= startTime  &&  cInfo->mForecastTime <= endTime  &&  cInfo->mForecastType == cFirst->mForecastType  &&  cInfo->mForecastNumber == cFirst->mForecastNumber)
                           {
-                            contentTimeList.insert(std::pair<std::string,uint>(cInfo->mForecastTime,gFlags));
-                            firstTime = cInfo->mForecastTime;
+                            if (cInfo->mForecastTime > lastTime)
+                            {
+                              contentTimeList.clear();
+                              lastTime = cInfo->mForecastTime;
+                              firstTime = "30000101T000000";
+                            }
+
+                            if (cInfo->mForecastTime < firstTime)
+                            {
+                              contentTimeList.insert(std::pair<std::string,uint>(cInfo->mForecastTime,gFlags));
+                              firstTime = cInfo->mForecastTime;
+                            }
                           }
                         }
                       }
                     }
                   }
-                }
 
-
-                Producer_vec producers2;
-                producers2.push_back(*it);
-
-                std::set<T::GeometryId> geometryIdList2;
-                geometryIdList2.insert(producerGeometryId);
-
-                std::map<std::string,uint> contentTimeList2;
-
-                if (timestepSizeInMinutes > 0 && (flags & Query::Flags::StartTimeFromData) != 0  &&  (flags & Query::Flags::EndTimeFromData) == 0)
-                {
-                  auto it = contentTimeList.begin();
-                  time_t  tt = utcTimeToTimeT(it->first);
-                  time_t  et = tt + timesteps * timestepSizeInMinutes*60;
-
-                  if (timesteps == 0)
-                    et = utcTimeToTimeT(endTime);
-
-                  while (tt <= et)
+                  if (contentTimeList.size() > 0)
                   {
-                    std::string ts = utcTimeFromTimeT(tt);
-                    contentTimeList2.insert(std::pair<std::string,uint>(ts,0xFFFFFFFF));
-                    tt = tt + timestepSizeInMinutes*60;
-                  }
-                }
-                else
-                if (timestepSizeInMinutes > 0 && (flags & Query::Flags::StartTimeFromData) == 0  &&  (flags & Query::Flags::EndTimeFromData) != 0)
-                {
-                  auto it = contentTimeList.rbegin();
-                  time_t  tt = utcTimeToTimeT(it->first);
+                    Producer_vec producers2;
+                    producers2.push_back(*it);
 
-                  time_t  et = tt - timesteps * timestepSizeInMinutes*60;
+                    std::set<T::GeometryId> geometryIdList2;
+                    geometryIdList2.insert(producerGeometryId);
 
-                  if (timesteps == 0)
-                    et = utcTimeToTimeT(startTime);
+                    std::map<std::string,uint> contentTimeList2;
 
-                  while (tt >= et)
-                  {
-                    std::string ts = utcTimeFromTimeT(tt);
-                    contentTimeList2.insert(std::pair<std::string,uint>(ts,0xFFFFFFFF));
-                    tt = tt - timestepSizeInMinutes*60;
-                  }
-                }
-                else
-                if (timestepSizeInMinutes > 0 && (flags & Query::Flags::StartTimeFromData) != 0  &&  (flags & Query::Flags::EndTimeFromData) != 0)
-                {
-                  auto it1 = contentTimeList.begin();
-                  time_t  tt = utcTimeToTimeT(it1->first);
-
-                  auto it2 = contentTimeList.rbegin();
-                  time_t  et = utcTimeToTimeT(it2->first);
-
-                  while (tt <= et)
-                  {
-                    std::string ts = utcTimeFromTimeT(tt);
-                    contentTimeList2.insert(std::pair<std::string,uint>(ts,0xFFFFFFFF));
-                    tt = tt + timestepSizeInMinutes*60;
-                  }
-                }
-                else
-                {
-                  contentTimeList2 = contentTimeList;
-                }
-
-
-                for (auto forecastTime = contentTimeList2.begin(); forecastTime != contentTimeList2.end(); ++forecastTime)
-                {
-                  // std::cout << forecastTime->first << "[" << startTime << " " << endTime << "]\n";
-                  if (((forecastTime->first == startTime && !ignoreStartTimeValue) || (forecastTime->first >= startTime && forecastTime->first <= endTime)))
-                  {
-                    ParameterValues valList;
-                    getGridValues(queryType,producers2, geometryIdList2, producerInfo.mProducerId, analysisTime, forecastTime->second, reverseGenerations, parameterKey, paramLevelId, paramLevel,
-                        forecastType, forecastNumber, parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, forecastTime->first, true,
-                        locationType, coordinateType, coordinates, contourLowValues, contourHighValues, attributeList, radius, precision, valList);
-
-                    //valList.print(std::cout,0,0);
-
-                    if (valList.mValueList.getLength() > 0 || valList.mWkbList.size() > 0)
+                    if (timestepSizeInMinutes > 0 && (flags & Query::Flags::StartTimeFromData) != 0  &&  (flags & Query::Flags::EndTimeFromData) == 0)
                     {
-                      if (valList.mForecastTime <= " ")
-                        valList.mForecastTime = forecastTime->first;
+                      auto it = contentTimeList.begin();
+                      time_t  tt = utcTimeToTimeT(it->first);
+                      time_t  et = tt + timesteps * timestepSizeInMinutes*60;
 
-                        valueList.push_back(valList);
+                      if (timesteps == 0)
+                        et = utcTimeToTimeT(endTime);
+
+                      while (tt <= et)
+                      {
+                        std::string ts = utcTimeFromTimeT(tt);
+                        contentTimeList2.insert(std::pair<std::string,uint>(ts,0xFFFFFFFF));
+                        tt = tt + timestepSizeInMinutes*60;
+                      }
+                    }
+                    else
+                    if (timestepSizeInMinutes > 0 && (flags & Query::Flags::StartTimeFromData) == 0  &&  (flags & Query::Flags::EndTimeFromData) != 0)
+                    {
+                      auto it = contentTimeList.rbegin();
+                      time_t  tt = utcTimeToTimeT(it->first);
+
+                      time_t  et = tt - timesteps * timestepSizeInMinutes*60;
+
+                      if (timesteps == 0)
+                        et = utcTimeToTimeT(startTime);
+
+                      while (tt >= et)
+                      {
+                        std::string ts = utcTimeFromTimeT(tt);
+                        contentTimeList2.insert(std::pair<std::string,uint>(ts,0xFFFFFFFF));
+                        tt = tt - timestepSizeInMinutes*60;
+                      }
+                    }
+                    else
+                    if (timestepSizeInMinutes > 0 && (flags & Query::Flags::StartTimeFromData) != 0  &&  (flags & Query::Flags::EndTimeFromData) != 0)
+                    {
+                      auto it1 = contentTimeList.begin();
+                      time_t  tt = utcTimeToTimeT(it1->first);
+
+                      auto it2 = contentTimeList.rbegin();
+                      time_t  et = utcTimeToTimeT(it2->first);
+
+                      while (tt <= et)
+                      {
+                        std::string ts = utcTimeFromTimeT(tt);
+                        contentTimeList2.insert(std::pair<std::string,uint>(ts,0xFFFFFFFF));
+                        tt = tt + timestepSizeInMinutes*60;
+                      }
+                    }
+                    else
+                    {
+                      contentTimeList2 = contentTimeList;
                     }
 
-                    if (valueList.size() == maxValues)
-                      return;
+
+                    for (auto forecastTime = contentTimeList2.begin(); forecastTime != contentTimeList2.end(); ++forecastTime)
+                    {
+                      // std::cout << forecastTime->first << "[" << startTime << " " << endTime << "]\n";
+                      if (((forecastTime->first == startTime && !ignoreStartTimeValue) || (forecastTime->first >= startTime && forecastTime->first <= endTime)))
+                      {
+                        ParameterValues valList;
+                        getGridValues(queryType,producers2, geometryIdList2, producerInfo.mProducerId, analysisTime, forecastTime->second, reverseGenerations, parameterKey, paramLevelId, paramLevel,
+                            forecastType, forecastNumber, parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, forecastTime->first, true,
+                            locationType, coordinateType, coordinates, contourLowValues, contourHighValues, attributeList, radius, precision, valList);
+
+                        //valList.print(std::cout,0,0);
+
+                        if (valList.mValueList.getLength() > 0 || valList.mWkbList.size() > 0)
+                        {
+                          if (valList.mForecastTime <= " ")
+                            valList.mForecastTime = forecastTime->first;
+
+                            valueList.push_back(valList);
+                        }
+
+                        if (valueList.size() == maxValues)
+                          return;
+                      }
+                    }
+                    return;
                   }
                 }
-                return;
               }
             }
           }
