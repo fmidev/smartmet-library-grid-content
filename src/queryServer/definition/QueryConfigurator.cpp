@@ -156,6 +156,7 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
     const char *endTimeStr = attributeList.getAttributeValue("endtime");
     const char *hourStr = attributeList.getAttributeValue("hour");
     const char *timeStr = attributeList.getAttributeValue("time");
+    const char *timeListStr = attributeList.getAttributeValue("timelist");
 
     if (timestepStr != nullptr)
     {
@@ -207,6 +208,7 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
       {
         startTime = 0;
         query.mFlags |= Query::Flags::StartTimeFromData;
+        query.mSearchType = Query::SearchType::TimeRange;
       }
       else
       if (strcasecmp(startTimeStr,"now") == 0)
@@ -227,6 +229,7 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
       {
         endTime = 0;
         query.mFlags |= Query::Flags::EndTimeFromData;
+        query.mSearchType = Query::SearchType::TimeRange;
       }
       else
       {
@@ -237,6 +240,29 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
       }
     }
 
+
+    if (timeListStr != nullptr)
+    {
+      std::vector<std::string> tList;
+      splitString(timeListStr,',',tList);
+
+      for (auto it = tList.begin(); it != tList.end(); ++it)
+      {
+        time_t tim = 0;
+        if (timezoneStr != nullptr)
+          tim = localTimeToTimeT(it->c_str(),timezoneStr);
+        else
+          tim = localTimeToTimeT(it->c_str(),"");
+
+        struct tm tt;
+        gmtime_r(&tim,&tt);
+        sprintf(tmp,"%04d%02d%02dT%02d%02d%02d",tt.tm_year + 1900,tt.tm_mon + 1,tt.tm_mday,tt.tm_hour,tt.tm_min,tt.tm_sec);
+        query.mForecastTimeList.insert(std::string(tmp));
+      }
+      startTime = 0;
+      endTime = 0;
+      timesteps = 0;
+    }
 
     if (startTime > 0)
     {

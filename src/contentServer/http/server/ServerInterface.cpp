@@ -89,11 +89,15 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
     // printf("[%s]\n",method);
     //request.print(std::cout,0,0);
 
+    /* This is for debugging purposes. I.e. you can crash the system and get a core dump for
+     * example when there is a deadlock or a busy loop that cannot be otherways found.
+
     if (strcasecmp(method,"crash") == 0)
     {
       sprintf(nullptr,"Crash");
       return;
     }
+    */
 
     if (strcasecmp(method,"clear") == 0)
     {
