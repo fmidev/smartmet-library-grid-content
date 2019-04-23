@@ -34,7 +34,8 @@ Converter::~Converter()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,"Destructor failed!",nullptr);
+    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    exception.printError();
   }
 }
 

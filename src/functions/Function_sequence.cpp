@@ -52,7 +52,8 @@ Function_sequence::~Function_sequence()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    exception.printError();
   }
 }
 

@@ -79,7 +79,8 @@ LuaFile::~LuaFile()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Destructor failed!", nullptr);
+    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    exception.printError();
   }
 }
 

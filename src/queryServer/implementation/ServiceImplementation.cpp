@@ -48,7 +48,8 @@ ServiceImplementation::~ServiceImplementation()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
+    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    exception.printError();
   }
 }
 
@@ -5335,7 +5336,7 @@ void ServiceImplementation::getGridValues(
                           if (valList.mForecastTime <= " ")
                             valList.mForecastTime = forecastTime->first;
 
-                            valueList.push_back(valList);
+                          valueList.push_back(valList);
                         }
 
                         if (valueList.size() == maxValues)

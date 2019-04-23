@@ -106,7 +106,8 @@ ContentInfo::~ContentInfo()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    exception.printError();
   }
 }
 

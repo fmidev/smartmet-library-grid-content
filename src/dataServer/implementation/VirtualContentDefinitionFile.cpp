@@ -63,7 +63,8 @@ VirtualContentDefinitionFile::~VirtualContentDefinitionFile()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    exception.printError();
   }
 }
 

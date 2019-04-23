@@ -47,7 +47,8 @@ Function_multiply::~Function_multiply()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    exception.printError();
   }
 }
 
