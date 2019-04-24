@@ -249,7 +249,10 @@ int GenerationInfo::compare(uint comparisonMethod,GenerationInfo *generationInfo
         return uint_compare(mGenerationId,generationInfo->mGenerationId);
 
       case GenerationInfo::ComparisonMethod::producerId:
-        return uint_compare(mProducerId,generationInfo->mProducerId);
+        res = uint_compare(mProducerId,generationInfo->mProducerId);
+        if (res != 0)
+          return res;
+        return uint_compare(mGenerationId,generationInfo->mGenerationId);
 
       default:
         return uint_compare(mGenerationId,generationInfo->mGenerationId);
