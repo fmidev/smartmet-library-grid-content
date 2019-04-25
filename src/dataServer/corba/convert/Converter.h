@@ -64,11 +64,11 @@ class Converter
     static void   convert(const double_vec& source,DataServer::Corba::CorbaDoubleList& target);
     static void   convert(const DataServer::Corba::CorbaDoubleList& source,double_vec& target);
 
-    static void   convert(const SmartMet::T::WkbData& source, SmartMet::DataServer::Corba::CorbaWkbData& target);
-    static void   convert(const SmartMet::DataServer::Corba::CorbaWkbData& source,SmartMet::T::WkbData& target);
+    static void   convert(const SmartMet::T::ByteData& source, SmartMet::DataServer::Corba::CorbaByteData& target);
+    static void   convert(const SmartMet::DataServer::Corba::CorbaByteData& source,SmartMet::T::ByteData& target);
 
-    static void   convert(const SmartMet::T::WkbData_vec& source, SmartMet::DataServer::Corba::CorbaWkbDataSequence& target);
-    static void   convert(const SmartMet::DataServer::Corba::CorbaWkbDataSequence& source,SmartMet::T::WkbData_vec& target);
+    static void   convert(const SmartMet::T::ByteData_vec& source, SmartMet::DataServer::Corba::CorbaByteDataSequence& target);
+    static void   convert(const SmartMet::DataServer::Corba::CorbaByteDataSequence& source,SmartMet::T::ByteData_vec& target);
 };
 
 

@@ -543,7 +543,7 @@ void Converter::convert(QueryServer::Corba::CorbaParameterValues& source,QuerySe
 
     convert(source.valueList,target.mValueList);
     convert(source.valueVector,target.mValueVector);
-    convert(source.wkbList,target.mWkbList);
+    convert(source.valueData,target.mValueData);
   }
   catch (...)
   {
@@ -576,7 +576,7 @@ void Converter::convert(QueryServer::ParameterValues& source,QueryServer::Corba:
 
     convert(source.mValueList,target.valueList);
     convert(source.mValueVector,target.valueVector);
-    convert(source.mWkbList,target.wkbList);
+    convert(source.mValueData,target.valueData);
   }
   catch (...)
   {
@@ -1062,7 +1062,7 @@ void Converter::convert(QueryServer::Query& source,QueryServer::Corba::CorbaQuer
 
 
 
-void Converter::convert(const SmartMet::T::WkbData& source, SmartMet::QueryServer::Corba::CorbaWkbData& target)
+void Converter::convert(const SmartMet::T::ByteData& source, SmartMet::QueryServer::Corba::CorbaByteData& target)
 {
   try
   {
@@ -1083,7 +1083,7 @@ void Converter::convert(const SmartMet::T::WkbData& source, SmartMet::QueryServe
 
 
 
-void Converter::convert(const SmartMet::QueryServer::Corba::CorbaWkbData& source,SmartMet::T::WkbData& target)
+void Converter::convert(const SmartMet::QueryServer::Corba::CorbaByteData& source,SmartMet::T::ByteData& target)
 {
   try
   {
@@ -1105,7 +1105,7 @@ void Converter::convert(const SmartMet::QueryServer::Corba::CorbaWkbData& source
 
 
 
-void Converter::convert(const SmartMet::T::WkbData_vec& source, SmartMet::QueryServer::Corba::CorbaWkbDataSequence& target)
+void Converter::convert(const SmartMet::T::ByteData_vec& source, SmartMet::QueryServer::Corba::CorbaByteDataSequence& target)
 {
   try
   {
@@ -1114,7 +1114,7 @@ void Converter::convert(const SmartMet::T::WkbData_vec& source, SmartMet::QueryS
     for (uint t=0; t<len; t++)
     {
       auto obj = source[t];
-      QueryServer::Corba::CorbaWkbData corbaObject;
+      QueryServer::Corba::CorbaByteData corbaObject;
       convert(obj,corbaObject);
       target[t] = corbaObject;
     }
@@ -1129,7 +1129,7 @@ void Converter::convert(const SmartMet::T::WkbData_vec& source, SmartMet::QueryS
 
 
 
-void Converter::convert(const SmartMet::QueryServer::Corba::CorbaWkbDataSequence& source,SmartMet::T::WkbData_vec& target)
+void Converter::convert(const SmartMet::QueryServer::Corba::CorbaByteDataSequence& source,SmartMet::T::ByteData_vec& target)
 {
   try
   {
@@ -1138,8 +1138,8 @@ void Converter::convert(const SmartMet::QueryServer::Corba::CorbaWkbDataSequence
     target.reserve(len);
     for (uint t=0; t<len; t++)
     {
-      QueryServer::Corba::CorbaWkbData corbaObject = source[t];
-      T::WkbData obj;
+      QueryServer::Corba::CorbaByteData corbaObject = source[t];
+      T::ByteData obj;
       convert(corbaObject,obj);
       target.push_back(obj);
     }

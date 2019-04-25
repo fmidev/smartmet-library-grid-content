@@ -88,11 +88,11 @@ class Converter
     static void   convert(SmartMet::QueryServer::Corba::CorbaFunctionParamList& source, SmartMet::QueryServer::FunctionParam_vec& target);
     static void   convert(SmartMet::QueryServer::FunctionParam_vec& source,SmartMet::QueryServer::Corba::CorbaFunctionParamList& target);
 
-    static void   convert(const SmartMet::T::WkbData& source, SmartMet::QueryServer::Corba::CorbaWkbData& target);
-    static void   convert(const SmartMet::QueryServer::Corba::CorbaWkbData& source,SmartMet::T::WkbData& target);
+    static void   convert(const SmartMet::T::ByteData& source, SmartMet::QueryServer::Corba::CorbaByteData& target);
+    static void   convert(const SmartMet::QueryServer::Corba::CorbaByteData& source,SmartMet::T::ByteData& target);
 
-    static void   convert(const SmartMet::T::WkbData_vec& source, SmartMet::QueryServer::Corba::CorbaWkbDataSequence& target);
-    static void   convert(const SmartMet::QueryServer::Corba::CorbaWkbDataSequence& source,SmartMet::T::WkbData_vec& target);
+    static void   convert(const SmartMet::T::ByteData_vec& source, SmartMet::QueryServer::Corba::CorbaByteDataSequence& target);
+    static void   convert(const SmartMet::QueryServer::Corba::CorbaByteDataSequence& source,SmartMet::T::ByteData_vec& target);
 };
 
 

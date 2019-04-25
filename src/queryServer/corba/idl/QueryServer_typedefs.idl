@@ -11,8 +11,8 @@ module QueryServer
 module Corba
 {
 
-typedef sequence<octet> CorbaWkbData;
-typedef sequence<CorbaWkbData> CorbaWkbDataSequence;
+typedef sequence<octet> CorbaByteData;
+typedef sequence<CorbaByteData> CorbaByteDataSequence;
 
 typedef float CorbaParamValue;
 typedef sequence<CorbaParamValue> CorbaParamValueList;
@@ -93,7 +93,7 @@ struct CorbaParameterValues
   unsigned long           flags;
   CorbaGridValueList      valueList;
   CorbaParamValueList     valueVector;
-  CorbaWkbDataSequence    wkbList;
+  CorbaByteDataSequence   valueData;
 };
 
 typedef sequence<CorbaParameterValues> CorbaParameterValuesList;

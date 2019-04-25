@@ -121,8 +121,8 @@ struct CorbaGridCoordinates
 
 
 
-typedef sequence<octet> CorbaWkbData;
-typedef sequence<CorbaWkbData> CorbaWkbDataSequence;
+typedef sequence<octet> CorbaByteData;
+typedef sequence<CorbaByteData> CorbaByteDataSequence;
 
 
 

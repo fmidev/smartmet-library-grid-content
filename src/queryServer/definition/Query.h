@@ -45,17 +45,6 @@ class Query
     uint                mMaxParameterValues;
 
 
-    class LocationType
-    {
-      public:
-        static const uchar Point      = 0;  // mAreaCoordinates[0][0]   => Singe x,y -coordinate
-        static const uchar Polygon    = 1;  // mAreaCoordinates[0 - N]  => 1-N polygons
-        static const uchar Path       = 2;  // mAreaCoordinates[0]      => List of x,y -coordinates
-        static const uchar Circle     = 3;  // mAreaCoordinates[0][0] + radius
-        static const uchar Grid       = 4;  // mAttributeList : "grid.width", "grid.height" ; mAreaCoordinates[0] => Grid coordinates
-        static const uchar Geometry   = 5;  // mAttributeList : "grid.geometryId","grid.geometryString"
-    };
-
     class SearchType
     {
       public:
@@ -73,16 +62,6 @@ class Query
         static const uint EndTimeNotIncluded      = 1 << 3;
         static const uint ReverseGenerationFlags  = 1 << 4;
     };
-
-    class Type
-    {
-      public:
-        static const uchar PointValues    = 0;
-        static const uchar Isoline        = 1;
-        static const uchar Isoband        = 2;
-        static const uchar Vector         = 3;
-    };
-
 
 };
 

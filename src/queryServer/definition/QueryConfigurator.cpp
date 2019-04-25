@@ -382,7 +382,7 @@ void QueryConfigurator::configureLocation(Query& query,T::AttributeList& attribu
       query.mRadius = toDouble(radiusStr);
 
       //if (query.mAreaCoordinates.size() == 1  &&  query.mAreaCoordinates[0].size() == 1)
-      //  query.mLocationType = Query::LocationType::Circle;
+      //  query.mLocationType = QueryParameter::LocationType::Circle;
     }
   }
   catch (...)

@@ -691,7 +691,7 @@ void Converter::convert(const DataServer::Corba::CorbaDoubleList& source,double_
 
 
 
-void Converter::convert(const SmartMet::T::WkbData& source, SmartMet::DataServer::Corba::CorbaWkbData& target)
+void Converter::convert(const SmartMet::T::ByteData& source, SmartMet::DataServer::Corba::CorbaByteData& target)
 {
   try
   {
@@ -712,7 +712,7 @@ void Converter::convert(const SmartMet::T::WkbData& source, SmartMet::DataServer
 
 
 
-void Converter::convert(const SmartMet::DataServer::Corba::CorbaWkbData& source,SmartMet::T::WkbData& target)
+void Converter::convert(const SmartMet::DataServer::Corba::CorbaByteData& source,SmartMet::T::ByteData& target)
 {
   try
   {
@@ -734,7 +734,7 @@ void Converter::convert(const SmartMet::DataServer::Corba::CorbaWkbData& source,
 
 
 
-void Converter::convert(const SmartMet::T::WkbData_vec& source, SmartMet::DataServer::Corba::CorbaWkbDataSequence& target)
+void Converter::convert(const SmartMet::T::ByteData_vec& source, SmartMet::DataServer::Corba::CorbaByteDataSequence& target)
 {
   try
   {
@@ -743,7 +743,7 @@ void Converter::convert(const SmartMet::T::WkbData_vec& source, SmartMet::DataSe
     for (uint t=0; t<len; t++)
     {
       auto obj = source[t];
-      DataServer::Corba::CorbaWkbData corbaObject;
+      DataServer::Corba::CorbaByteData corbaObject;
       convert(obj,corbaObject);
       target[t] = corbaObject;
     }
@@ -758,7 +758,7 @@ void Converter::convert(const SmartMet::T::WkbData_vec& source, SmartMet::DataSe
 
 
 
-void Converter::convert(const SmartMet::DataServer::Corba::CorbaWkbDataSequence& source,SmartMet::T::WkbData_vec& target)
+void Converter::convert(const SmartMet::DataServer::Corba::CorbaByteDataSequence& source,SmartMet::T::ByteData_vec& target)
 {
   try
   {
@@ -767,8 +767,8 @@ void Converter::convert(const SmartMet::DataServer::Corba::CorbaWkbDataSequence&
     target.reserve(len);
     for (uint t=0; t<len; t++)
     {
-      DataServer::Corba::CorbaWkbData corbaObject = source[t];
-      T::WkbData obj;
+      DataServer::Corba::CorbaByteData corbaObject = source[t];
+      T::ByteData obj;
       convert(corbaObject,obj);
       target.push_back(obj);
     }
