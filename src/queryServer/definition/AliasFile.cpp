@@ -274,57 +274,78 @@ void AliasFile::loadFile()
     mAliasList.clear();
     mAliasVector.clear();
 
-    char st[1000];
+    char st[30000];
 
     uint lineCount = 0;
     while (!feof(file))
     {
-      if (fgets(st,1000,file) != nullptr)
+      char *pp = st;
+      bool ind = true;
+      while (ind)
       {
-        lineCount++;
-        if (st[0] != '#')
+        ind = false;
+        if (fgets(pp,30000,file) != nullptr)
         {
-          char *p = strstr(st,"\n");
-          if (p != nullptr)
+          lineCount++;
+          char *p = strstr(pp,"\n");
+          if (p != nullptr  &&  p > pp)
           {
-            while (*p < ' '  &&  p >= st)
+            p--;
+            if (*p == '\\')
             {
-              *p = '\0';
-              p--;
+              pp = p;
+              ind = true;
             }
           }
+        }
+        else
+        {
+          pp[0] = '\n';
+        }
+      }
 
-          p = strstr(st,":");
-          if (p != nullptr)
+      if (st[0] != '#')
+      {
+        char *p = strstr(st,"\n");
+        if (p != nullptr)
+        {
+          while (*p < ' '  &&  p >= st)
           {
             *p = '\0';
-            p++;
-            Alias rec;
+            p--;
+          }
+        }
 
-            rec.mName = st;
-            rec.mAliasString = p;
+        p = strstr(st,":");
+        if (p != nullptr)
+        {
+          *p = '\0';
+          p++;
+          Alias rec;
 
-            if (rec.mName.length() > 0  &&  rec.mAliasString.length() > 0)
+          rec.mName = st;
+          rec.mAliasString = p;
+
+          if (rec.mName.length() > 0  &&  rec.mAliasString.length() > 0)
+          {
+            if (!mDuplicatesAllowed)
             {
-              if (!mDuplicatesAllowed)
+              auto alias = mAliasList.find(toLowerString(rec.mName));
+              if (alias != mAliasList.end())
               {
-                auto alias = mAliasList.find(toLowerString(rec.mName));
-                if (alias != mAliasList.end())
-                {
-                  std::cout << "#### ALIAS '" << rec.mName << "' ALREADY DEFINED (" << mFilename << ":" << lineCount << ")\n";
-                  std::cout << "  " << CODE_LOCATION << "\n\n";
-                  //rec.print(std::cout,0,0);
-                }
-                else
-                {
-                  //rec.print(std::cout,0,0);
-                  mAliasList.insert(std::pair<std::string,Alias>(toLowerString(rec.mName),rec));
-                }
+                std::cout << "#### ALIAS '" << rec.mName << "' ALREADY DEFINED (" << mFilename << ":" << lineCount << ")\n";
+                std::cout << "  " << CODE_LOCATION << "\n\n";
+                //rec.print(std::cout,0,0);
               }
               else
               {
-                mAliasVector.push_back(rec);
+                //rec.print(std::cout,0,0);
+                mAliasList.insert(std::pair<std::string,Alias>(toLowerString(rec.mName),rec));
               }
+            }
+            else
+            {
+              mAliasVector.push_back(rec);
             }
           }
         }

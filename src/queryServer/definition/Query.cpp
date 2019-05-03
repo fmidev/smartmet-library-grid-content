@@ -38,7 +38,14 @@ Query::Query(const Query& query)
 {
   try
   {
+    mSearchType = query.mSearchType;
     mProducerNameList = query.mProducerNameList;
+    mForecastTimeList = query.mForecastTimeList;
+    mAttributeList = query.mAttributeList;
+    mCoordinateType = query.mCoordinateType;
+    mAreaCoordinates = query.mAreaCoordinates;
+    mRadius = query.mRadius;
+    mQueryParameterList = query.mQueryParameterList;
     mTimezone = query.mTimezone;
     mStartTime = query.mStartTime;
     mEndTime = query.mEndTime;
@@ -46,12 +53,6 @@ Query::Query(const Query& query)
     mTimestepSizeInMinutes = query.mTimestepSizeInMinutes;
     mAnalysisTime = query.mAnalysisTime;
     mGeometryIdList = query.mGeometryIdList;
-    mForecastTimeList = query.mForecastTimeList;
-    mCoordinateType = query.mCoordinateType;
-    mAttributeList = query.mAttributeList;
-    mAreaCoordinates = query.mAreaCoordinates;
-    mRadius = query.mRadius;
-    mQueryParameterList = query.mQueryParameterList;
     mLanguage = query.mLanguage;
     mGenerationFlags = query.mGenerationFlags;
     mFlags = query.mFlags;

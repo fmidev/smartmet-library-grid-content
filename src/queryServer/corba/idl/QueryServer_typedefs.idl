@@ -83,6 +83,7 @@ struct CorbaParameterValues
   unsigned long           generationFlags;
   unsigned long           geometryId;
   string                  modificationTime;
+  string                  analysisTime;
   octet                   parameterKeyType;
   string                  parameterKey;
   octet                   parameterLevelIdType;

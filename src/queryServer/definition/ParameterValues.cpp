@@ -43,6 +43,7 @@ ParameterValues::ParameterValues(const ParameterValues& parameterValues)
     mGenerationFlags = parameterValues.mGenerationFlags;
     mGeometryId = parameterValues.mGeometryId;
     mModificationTime = parameterValues.mModificationTime;
+    mAnalysisTime = parameterValues.mAnalysisTime;
 
     mParameterKeyType = parameterValues.mParameterKeyType;
     mParameterKey = parameterValues.mParameterKey;
@@ -93,6 +94,7 @@ void ParameterValues::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mGenerationFlags      = " << mGenerationFlags << "\n";
     stream << space(level) << "- mGeometryId           = " << mGeometryId << "\n";
     stream << space(level) << "- mModificationTime     = " << mModificationTime << "\n";
+    stream << space(level) << "- mAnalysisTime         = " << mAnalysisTime << "\n";
     stream << space(level) << "- mParameterKeyType     = " << C_INT(mParameterKeyType) << "\n";
     stream << space(level) << "- mParameterKey         = " << mParameterKey << "\n";
     stream << space(level) << "- mParameterLevelIdType = " << C_INT(mParameterLevelIdType) << "\n";
@@ -101,7 +103,7 @@ void ParameterValues::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mForecastType         = " << mForecastType << "\n";
     stream << space(level) << "- mForecastNumber       = " << mForecastNumber << "\n";
     stream << space(level) << "- mFlags                = " << mFlags << "\n";
-    stream << space(level) << "- mValueData              = (" << mValueData.size() << " arrays)\n";
+    stream << space(level) << "- mValueData            = (" << mValueData.size() << " arrays)\n";
     stream << space(level) << "- mValueVector          = (" << mValueVector.size() << " values)\n";
     stream << space(level) << "- mValueList            = (" << mValueList.getLength() << " records)\n";
     mValueList.print(stream,level+2,optionFlags);
