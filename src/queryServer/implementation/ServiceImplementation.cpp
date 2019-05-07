@@ -1598,6 +1598,11 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
       geometryIdList = query.mGeometryIdList;
     }
     else
+    if (query.mFlags & Query::Flags::GeometryHitNotRequired)
+    {
+      Identification::gridDef.getGeometryIdList(geometryIdList);
+    }
+    else
     {
       const char *geometryIdStr = query.mAttributeList.getAttributeValue("grid.geometryId");
       if (geometryIdStr != nullptr)
@@ -1880,6 +1885,11 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
     if (query.mGeometryIdList.size() > 0)
     {
       geometryIdList = query.mGeometryIdList;
+    }
+    else
+    if (query.mFlags & Query::Flags::GeometryHitNotRequired)
+    {
+      Identification::gridDef.getGeometryIdList(geometryIdList);
     }
     else
     {
@@ -2946,9 +2956,23 @@ bool ServiceImplementation::getGridFiles(
       valueList.mParameterLevelId = pInfo.mParameterLevelId;
 
 
+    T::AttributeList attrList;
+    result = mDataServerPtr->getGridAttributeList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,attrList);
+    if (result != 0)
+    {
+      SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+      exception.addParameter("Service", "getGridAttributeList");
+      exception.addParameter("Message", DataServer::getResultString(result));
+      std::string errorMsg = exception.getStackTrace();
+      PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+      return false;
+    }
+
+    attrList.setCaseSensitive(false);
+
+
     int year = 0, month = 0, day = 0, hour = 0, minute = 0, second = 0;
     splitTimeString(forecastTime,year,month,day,hour,minute,second);
-
 
     const char *version1 = attributeList.getAttributeValue("Grib1.IndicatorSection.EditionNumber");
     const char *version2 = attributeList.getAttributeValue("Grib2.IndicatorSection.EditionNumber");
@@ -2965,6 +2989,8 @@ bool ServiceImplementation::getGridFiles(
       newGridFile.setGridFile(T::FileTypeValue::Grib1);
       newMessage = newGridFile.newMessage();
 
+      // ### Setting default values for the parameters
+
       //newMessage->setProperty(Property::ProductSection::TableVersion,128);
       //newMessage->setProperty(Property::ProductSection::Centre,98);
       //newMessage->setProperty(Property::ProductSection::GeneratingProcessIdentifier,149);
@@ -2980,8 +3006,8 @@ bool ServiceImplementation::getGridFiles(
       newMessage->setProperty(Property::ProductSection::Minute,minute);
       newMessage->setProperty(Property::ProductSection::UnitOfTimeRange,1);
       newMessage->setProperty(Property::ProductSection::P1,0);
-      newMessage->setProperty(Property::ProductSection::P2,1);
-      newMessage->setProperty(Property::ProductSection::TimeRangeIndicator,2);
+      newMessage->setProperty(Property::ProductSection::P2,0);
+      newMessage->setProperty(Property::ProductSection::TimeRangeIndicator,0);
       //newMessage->setProperty(Property::ProductSection::NumberIncludedInAverage,0);
       //newMessage->setProperty(Property::ProductSection::NumberMissingFromAveragesOrAccumulations,0);
       newMessage->setProperty(Property::ProductSection::CenturyOfReferenceTimeOfData,(year/100)+1);
@@ -2996,6 +3022,8 @@ bool ServiceImplementation::getGridFiles(
       newMessage->setProperty(Property::DataSection::BitsPerValue,32);
       newMessage->setProperty(Property::DataSection::PackingMethod,0);
 
+
+      // ### Trying to get parameter values accoding to parameter mapping definitions
 
       Identification::FmiParameterId_grib1 def;
 
@@ -3022,9 +3050,46 @@ bool ServiceImplementation::getGridFiles(
         }
       }
 
+      // ### Trying to get parameter values from the original grib
 
-      // contentInfo1->print(std::cout,0,0);
+      T::Attribute *attr = attrList.getAttributeByNameEnd("product.tableVersion");
+      if (attr != nullptr)
+        newMessage->setProperty(Property::ProductSection::TableVersion,atoi(attr->mValue.c_str()));
 
+      attr = attrList.getAttributeByNameEnd("centre.id");
+      if (attr != nullptr)
+        newMessage->setProperty(Property::ProductSection::Centre,atoi(attr->mValue.c_str()));
+
+      attr = attrList.getAttributeByNameEnd("subCentre");
+      if (attr != nullptr)
+        newMessage->setProperty(Property::ProductSection::SubCentre,0);
+
+      attr = attrList.getAttributeByNameEnd("generatingProcessIdentifier");
+      if (attr != nullptr)
+        newMessage->setProperty(Property::ProductSection::GeneratingProcessIdentifier,atoi(attr->mValue.c_str()));
+
+      attr = attrList.getAttributeByNameEnd("indicatorOfParameter");
+      if (attr != nullptr)
+        newMessage->setProperty(Property::ProductSection::IndicatorOfParameter,atoi(attr->mValue.c_str()));
+
+      attr = attrList.getAttributeByNameEnd("indicatorOfTypeOfLevel");
+      if (attr != nullptr)
+        newMessage->setProperty(Property::ProductSection::IndicatorOfTypeOfLevel,atoi(attr->mValue.c_str()));
+
+      attr = attrList.getAttributeByNameEnd("BinaryScaleFactor");
+      if (attr != nullptr)
+        newMessage->setProperty(Property::DataSection::BinaryScaleFactor,atoi(attr->mValue.c_str()));
+
+      //attr = attrList.getAttributeByNameEnd("DecimalScaleFactor");
+      //if (attr != nullptr)
+      //  newMessage->setProperty(Property::ProductSection::DecimalScaleFactor,atoi(attr->mValue.c_str()));
+
+      attr = attrList.getAttributeByNameEnd("BitsPerValue");
+      if (attr != nullptr)
+        newMessage->setProperty(Property::DataSection::BitsPerValue,atoi(attr->mValue.c_str()));
+
+
+      // ### Setting parameter values according to the attribute list
 
       uint len = attributeList.getLength();
       for (uint t=0; t<len; t++)
@@ -3032,8 +3097,6 @@ bool ServiceImplementation::getGridFiles(
         T::Attribute *attr = attributeList.getAttributeByIndex(t);
         if (attr != nullptr &&  strncasecmp(attr->mName.c_str(),"Grib1.",6) == 0)
         {
-          // std::cout << "SET " << attr->mName << " : " << attr->mValue << "\n";
-
           if (!newMessage->setProperty(attr->mName.c_str(),toInt64(attr->mValue)))
           {
             if (!newMessage->setProperty(attr->mName.c_str(),toDouble(attr->mValue)))
@@ -3052,6 +3115,7 @@ bool ServiceImplementation::getGridFiles(
       newGridFile.setGridFile(T::FileTypeValue::Grib2);
       newMessage = newGridFile.newMessage();
 
+      // ### Setting default values for the parameters
 
       // ### INDICATOR SECTION ###
 
@@ -3094,6 +3158,7 @@ bool ServiceImplementation::getGridFiles(
       newMessage->setProperty(Property::ProductSection::HorizontalSettings::ScaleFactorOfFirstFixedSurface,0LL);
       newMessage->setProperty(Property::ProductSection::HorizontalSettings::ScaledValueOfFirstFixedSurface,paramLevel);
 
+      // ### REPRESENTATION SECTION ###
 
       newMessage->setProperty(Property::RepresentationSection::RepresentationTemplateNumber,RepresentationSection::Template::GridDataRepresentation);
       newMessage->setProperty(Property::RepresentationSection::Packing::BinaryScaleFactor,-5);
@@ -3103,6 +3168,7 @@ bool ServiceImplementation::getGridFiles(
       newMessage->setProperty(Property::RepresentationSection::OriginalValues::TypeOfOriginalFieldValues,0LL);
 
 
+      // ### Trying to get parameter values accoding to parameter mapping definitions
 
       Identification::FmiParameterId_grib2 def;
 
@@ -3130,11 +3196,53 @@ bool ServiceImplementation::getGridFiles(
             newMessage->setProperty(Property::ProductSection::HorizontalSettings::TypeOfFirstFixedSurface,def2.mGribLevelId);
           }
         }
-
       }
 
-      // contentInfo1->print(std::cout,0,0);
 
+      // ### Trying to get parameter values from the original grib
+
+      T::Attribute *attr = attrList.getAttributeByNameEnd("identification.tablesVersion");
+      if (attr != nullptr)
+        newMessage->setProperty(Property::IdentificationSection::TablesVersion,atoi(attr->mValue.c_str()));
+
+      attr = attrList.getAttributeByNameEnd("centre.id");
+      if (attr != nullptr)
+        newMessage->setProperty(Property::IdentificationSection::Centre,atoi(attr->mValue.c_str()));
+
+      attr = attrList.getAttributeByNameEnd("subCentre");
+      if (attr != nullptr)
+        newMessage->setProperty(Property::IdentificationSection::SubCentre,0);
+
+      attr = attrList.getAttributeByNameEnd("GeneratingProcessIdentifier");
+      if (attr != nullptr)
+        newMessage->setProperty(Property::ProductSection::ParameterSettings::GeneratingProcessIdentifier,atoi(attr->mValue.c_str()));
+
+      attr = attrList.getAttributeByNameEnd("ParameterCategory");
+      if (attr != nullptr)
+        newMessage->setProperty(Property::ProductSection::ParameterSettings::ParameterCategory,atoi(attr->mValue.c_str()));
+
+      attr = attrList.getAttributeByNameEnd("ParameterNumber");
+      if (attr != nullptr)
+        newMessage->setProperty(Property::ProductSection::ParameterSettings::ParameterNumber,atoi(attr->mValue.c_str()));
+
+      attr = attrList.getAttributeByNameEnd("TypeOfFirstFixedSurface");
+      if (attr != nullptr)
+        newMessage->setProperty(Property::ProductSection::HorizontalSettings::TypeOfFirstFixedSurface,atoi(attr->mValue.c_str()));
+
+      attr = attrList.getAttributeByNameEnd("BinaryScaleFactor");
+      if (attr != nullptr)
+        newMessage->setProperty(Property::RepresentationSection::Packing::BinaryScaleFactor,atoi(attr->mValue.c_str()));
+
+      //attr = attrList.getAttributeByNameEnd("DecimalScaleFactor");
+      //if (attr != nullptr)
+      //  newMessage->setProperty(Property::RepresentationSection::Packing::DecimalScaleFactor,atoi(attr->mValue.c_str()));
+
+      attr = attrList.getAttributeByNameEnd("BitsPerValue");
+      if (attr != nullptr)
+        newMessage->setProperty(Property::RepresentationSection::Packing::BitsPerValue,atoi(attr->mValue.c_str()));
+
+
+      // ### Setting parameter values according to the attribute list
 
       uint len = attributeList.getLength();
       for (uint t=0; t<len; t++)
@@ -3142,8 +3250,6 @@ bool ServiceImplementation::getGridFiles(
         T::Attribute *attr = attributeList.getAttributeByIndex(t);
         if (attr != nullptr &&  strncasecmp(attr->mName.c_str(),"Grib2.",6) == 0)
         {
-          //std::cout << "SET " << attr->mName << " : " << attr->mValue << "\n";
-
           if (!newMessage->setProperty(attr->mName.c_str(),toInt64(attr->mValue)))
           {
             if (!newMessage->setProperty(attr->mName.c_str(),toDouble(attr->mValue)))

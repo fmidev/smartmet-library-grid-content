@@ -61,6 +61,7 @@ class Query
         static const uint StartTimeNotIncluded    = 1 << 2;
         static const uint EndTimeNotIncluded      = 1 << 3;
         static const uint ReverseGenerationFlags  = 1 << 4;
+        static const uint GeometryHitNotRequired  = 1 << 5;
     };
 
 };
