@@ -147,6 +147,11 @@ void VirtualMessage::getAttributeList(std::string prefix,T::AttributeList& attri
 
 
 
+/*! \brief The method returns the forecast time of the current grid.
+
+        \return   The forecast time.
+*/
+
 T::TimeString VirtualMessage::getForecastTime() const
 {
   FUNCTION_TRACE
@@ -165,6 +170,11 @@ T::TimeString VirtualMessage::getForecastTime() const
 
 
 
+/*! \brief The method returns the forecast type of the current grid.
+
+        \return   The forecast type.
+*/
+
 short VirtualMessage::getForecastType() const
 {
   FUNCTION_TRACE
@@ -181,6 +191,12 @@ short VirtualMessage::getForecastType() const
 
 
 
+
+
+/*! \brief The method returns the forecast number of the current grid.
+
+        \return   The forecast number.
+*/
 
 short VirtualMessage::getForecastNumber() const
 {
@@ -200,6 +216,11 @@ short VirtualMessage::getForecastNumber() const
 
 
 
+/*! \brief The method returns the grid geometry identifer.
+
+        \return   The grid geometry identifier.
+*/
+
 T::GeometryId VirtualMessage::getGridGeometryId() const
 {
   FUNCTION_TRACE
@@ -217,6 +238,14 @@ T::GeometryId VirtualMessage::getGridGeometryId() const
 
 
 
+
+/*! \brief The method returns all grid coordinates as a coordinate vector (in original projection).
+    Notice that if the grid layout is "irregular" (i.e. its row lengths vary) then
+    grid width is the same as the length of the longest grid row. I.e. the coordinates
+    are returned as the grid would be a regular grid.
+
+        \return   The grid coordinates.
+*/
 
 T::Coordinate_vec VirtualMessage::getGridCoordinates() const
 {
@@ -236,6 +265,13 @@ T::Coordinate_vec VirtualMessage::getGridCoordinates() const
 
 
 
+/*! \brief The method returns all grid coordinates as a latlon coordinate vector. If the grid
+    original coordiantes were not latlon coordinates then the original coordinates are converted
+    to the latlon coordinates.
+
+        \return   The grid latlon coordinates.
+*/
+
 T::Coordinate_vec VirtualMessage::getGridLatLonCoordinates() const
 {
   FUNCTION_TRACE
@@ -253,6 +289,14 @@ T::Coordinate_vec VirtualMessage::getGridLatLonCoordinates() const
 
 
 
+
+/*! \brief The method returns the grid dimensions (i.e. the width and the height).
+    Notice that the grid might be irregular. For example, the number of rows might
+    be specified while the number of columns is missing. This usually means that each
+    row might have different number of columns.
+
+        \return   The grid dimensions.
+*/
 
 T::Dimensions VirtualMessage::getGridDimensions() const
 {
@@ -272,6 +316,11 @@ T::Dimensions VirtualMessage::getGridDimensions() const
 
 
 
+/*! \brief The method returns the grid hash value.
+
+        \return   The grid hash value.
+*/
+
 T::Hash VirtualMessage::getGridHash() const
 {
   FUNCTION_TRACE
@@ -289,6 +338,15 @@ T::Hash VirtualMessage::getGridHash() const
 
 
 
+
+/*! \brief The method returns the grid latlon coordinates in the given grid point (= integer coordinates).
+
+        \param grid_i  The grid i-coordinate.
+        \param grid_j  The grid j-coordinate.
+        \param lat     The latitude value is returned in this parameter.
+        \param lon     The longitude value is returned in this parameter.
+        \return   The method return true if the latlon values were succesfully returned.
+*/
 
 bool VirtualMessage::getGridLatLonCoordinatesByGridPoint(uint grid_i,uint grid_j,double& lat,double& lon) const
 {
@@ -308,6 +366,15 @@ bool VirtualMessage::getGridLatLonCoordinatesByGridPoint(uint grid_i,uint grid_j
 
 
 
+/*! \brief The method returns the grid latlon coordinates in the given grid position (= double coordinates).
+
+        \param grid_i  The grid i-coordinate.
+        \param grid_j  The grid j-coordinate.
+        \param lat     The latitude value is returned in this parameter.
+        \param lon     The longitude value is returned in this parameter.
+        \return        The method return true if the latlon values were succesfully returned.
+*/
+
 bool VirtualMessage::getGridLatLonCoordinatesByGridPosition(double grid_i,double grid_j,double& lat,double& lon) const
 {
   FUNCTION_TRACE
@@ -325,6 +392,15 @@ bool VirtualMessage::getGridLatLonCoordinatesByGridPosition(double grid_i,double
 
 
 
+
+/*! \brief The method returns the grid latlon coordinates according the grid original (projection) coordinates.
+
+        \param x       The x-coordinate in the original projection.
+        \param y       The y-coordinate in the original projection.
+        \param lat     The latitude value is returned in this parameter.
+        \param lon     The longitude value is returned in this parameter.
+        \return        The method return true if the latlon values were succesfully returned.
+*/
 
 bool VirtualMessage::getGridLatLonCoordinatesByOriginalCoordinates(double x,double y,double& lat,double& lon) const
 {
@@ -344,6 +420,15 @@ bool VirtualMessage::getGridLatLonCoordinatesByOriginalCoordinates(double x,doub
 
 
 
+/*! \brief The method returns the grid original (projection) coordinates in the given grid point (= integer coordinates).
+
+        \param grid_i  The grid i-coordinate.
+        \param grid_j  The grid j-coordinate.
+        \param x       The x-coordinate in the original projection is returned in this parameter.
+        \param y       The y-coordinate in the original projection is returned in this parameter.
+        \return        The method return true if the original coordinates were succesfully returned.
+*/
+
 bool VirtualMessage::getGridOriginalCoordinatesByGridPoint(uint grid_i,uint grid_j,double& x,double& y) const
 {
   FUNCTION_TRACE
@@ -361,6 +446,15 @@ bool VirtualMessage::getGridOriginalCoordinatesByGridPoint(uint grid_i,uint grid
 
 
 
+
+/*! \brief The method returns the grid original (projection) coordinates in the given grid position (= double coordinates).
+
+        \param grid_i  The grid i-coordinate.
+        \param grid_j  The grid j-coordinate.
+        \param x       The x-coordinate in the original projection is returned in this parameter.
+        \param y       The y-coordinate in the original projection is returned in this parameter.
+        \return        The method return true if the original coordinates were succesfully returned.
+*/
 
 bool VirtualMessage::getGridOriginalCoordinatesByGridPosition(double grid_i,double grid_j,double& x,double& y) const
 {
@@ -380,6 +474,15 @@ bool VirtualMessage::getGridOriginalCoordinatesByGridPosition(double grid_i,doub
 
 
 
+/*! \brief The method returns the grid original (projection) coordinates by the given latlon position.
+
+        \param lat  The latitude value.
+        \param lon  The longitude value.
+        \param x    The x-coordinate in the original projection is returned in this parameter.
+        \param y    The y-coordinate in the original projection is returned in this parameter.
+        \return     The method return true if the original coordinates were succesfully returned.
+*/
+
 bool VirtualMessage::getGridOriginalCoordinatesByLatLonCoordinates(double lat,double lon,double& x,double& y) const
 {
   FUNCTION_TRACE
@@ -397,6 +500,11 @@ bool VirtualMessage::getGridOriginalCoordinatesByLatLonCoordinates(double lat,do
 
 
 
+
+/*! \brief The method returns the type of the grid layout.
+
+     \return   The layout of the grid (expressed as an enum value).
+*/
 
 T::GridLayout VirtualMessage::getGridLayout() const
 {
@@ -416,6 +524,12 @@ T::GridLayout VirtualMessage::getGridLayout() const
 
 
 
+/*! \brief The method returns the number of columns used in the given original grid row.
+
+      \param row    The grid row index (= j-position).
+      \return       The number of columns in the given grid row.
+*/
+
 std::size_t VirtualMessage::getGridOriginalColumnCount(std::size_t row) const
 {
   FUNCTION_TRACE
@@ -433,6 +547,12 @@ std::size_t VirtualMessage::getGridOriginalColumnCount(std::size_t row) const
 
 
 
+
+/*! \brief The method returns the maximum number of the columns used in the original grid.
+    If the grid is irregular, this method returns the length of the longest row.
+
+       \return   The maximum number of the columns in the grid.
+*/
 
 std::size_t VirtualMessage::getGridOriginalColumnCount() const
 {
@@ -452,6 +572,11 @@ std::size_t VirtualMessage::getGridOriginalColumnCount() const
 
 
 
+/*! \brief The method returns the number of rows used in the original grid.
+
+     \return   The number of the grid rows.
+*/
+
 std::size_t VirtualMessage::getGridOriginalRowCount() const
 {
   FUNCTION_TRACE
@@ -469,6 +594,11 @@ std::size_t VirtualMessage::getGridOriginalRowCount() const
 
 
 
+
+/*! \brief The method returns the number of original values defined in the original grid.
+
+      \return   The number of the values in the original grid.
+*/
 
 std::size_t VirtualMessage::getGridOriginalValueCount() const
 {
@@ -488,6 +618,19 @@ std::size_t VirtualMessage::getGridOriginalValueCount() const
 
 
 
+/*! \brief The method returns the index of given grid position in the original grid data.
+    In the case of irregular grid the grid rows might contain different number of
+    columns. If the given grid position is outside of the grid data then the method
+    returns -1. This is the case when the grid column (grid_i) is bigger than
+    the length of the given grid row (grid_j), or if the given grid row (grid_j)
+    is bigger than the actual number of grid rows.
+
+      \param grid_i    The grid i-position.
+      \param grid_j    The grid j-position.
+      \return          The index of the original data position. If the position
+                       is outside of the grid data then the method return -1.
+*/
+
 int VirtualMessage::getGridOriginalValueIndex(uint grid_i,uint grid_j) const
 {
   FUNCTION_TRACE
@@ -505,6 +648,16 @@ int VirtualMessage::getGridOriginalValueIndex(uint grid_i,uint grid_j) const
 
 
 
+
+/*! \brief This method calculates the estimated grid position by using the latlon coordinates.
+    The estimated grid position is returned in the 'grid_i' and 'grid_j' parameters.
+
+        \param lat     The latitude.
+        \param lon     The longitude.
+        \param grid_i  The returned grid i-position.
+        \param grid_j  The returned grid j-position.
+        \return        Returns 'false' if the given coordinates are outside of the grid.
+*/
 
 bool VirtualMessage::getGridPointByLatLonCoordinates(double lat,double lon,double& grid_i,double& grid_j) const
 {
@@ -524,6 +677,16 @@ bool VirtualMessage::getGridPointByLatLonCoordinates(double lat,double lon,doubl
 
 
 
+/*! \brief This method calculates the estimated grid position by using the original coordinates.
+    The estimated grid position is returned in the 'grid_i' and 'grid_j' parameters.
+
+      \param x       The original x-coordinate.
+      \param y       The original y-coordinate.
+      \param grid_i  The returned grid i-position.
+      \param grid_j  The returned grid j-position.
+      \return        Returns 'false' if the given coordinates are outside of the grid.
+*/
+
 bool VirtualMessage::getGridPointByOriginalCoordinates(double x,double y,double& grid_i,double& grid_j) const
 {
   FUNCTION_TRACE
@@ -541,6 +704,11 @@ bool VirtualMessage::getGridPointByOriginalCoordinates(double x,double y,double&
 
 
 
+
+/*! \brief This method can be used for finding out the grid projection type (Mercator, LatLon, PolarStereographic, etc.).
+
+        \return   The type of the grid projection (expressed as an enum value).
+*/
 
 T::GridProjection VirtualMessage::getGridProjection() const
 {
@@ -560,6 +728,12 @@ T::GridProjection VirtualMessage::getGridProjection() const
 
 
 
+/*! \brief The method returns a list of grid projection attributes.
+
+        \param prefix         The prefix that is added in the front of each attribute name.
+        \param attributeList  The projection attributes are returned in this parameter.
+*/
+
 void VirtualMessage::getGridProjectionAttributes(std::string prefix,T::AttributeList& attributeList) const
 {
   FUNCTION_TRACE
@@ -577,6 +751,11 @@ void VirtualMessage::getGridProjectionAttributes(std::string prefix,T::Attribute
 
 
 
+
+/*! \brief The method returns the grid definition string (=> Projection name).
+
+        \return   The projection used in the current grid (LatLon, Mercator, etc.)
+*/
 
 std::string VirtualMessage::getGridProjectionString() const
 {
@@ -596,6 +775,13 @@ std::string VirtualMessage::getGridProjectionString() const
 
 
 
+
+/*! \brief The method returns 'true' if the grid horizontal values are in the reverse order.
+
+        \return   The method returns 'true' if the grid horizontal values are in the reverse
+                  order. Otherwise it returns 'false'
+*/
+
 bool VirtualMessage::reverseXDirection() const
 {
   FUNCTION_TRACE
@@ -613,6 +799,12 @@ bool VirtualMessage::reverseXDirection() const
 
 
 
+
+/*! \brief The method returns 'true' if the grid vertical values are in the reverse order.
+
+        \return   The method returns 'true' if the grid vertical values are in the reverse
+                  order. Otherwise it returns 'false'
+*/
 
 bool VirtualMessage::reverseYDirection() const
 {
@@ -1304,6 +1496,12 @@ void VirtualMessage::getParameterValuesByRectangle(uint grid_i_start,uint grid_j
 
 
 
+/*! \brief The method returns the reference time of the current grid. The forecast
+    times are calculated from this.
+
+        \return   The reference time of the current grid.
+*/
+
 T::TimeString VirtualMessage::getReferenceTime() const
 {
   FUNCTION_TRACE
@@ -1321,6 +1519,11 @@ T::TimeString VirtualMessage::getReferenceTime() const
 
 
 
+
+/*! \brief The method returns the pointer to the spatial reference of the current grid.
+
+        \return   The pointer to the spatial reference.
+*/
 
 T::SpatialRef* VirtualMessage::getSpatialReference() const
 {
