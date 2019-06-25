@@ -2810,6 +2810,41 @@ int RedisImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileI
 
 
 
+int RedisImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::FileInfoList& fileInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+
+    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    {
+      T::FileInfo *fileInfo = new T::FileInfo();
+      if (getFileById(*it,*fileInfo) == Result::OK)
+        fileInfoList.addFileInfo(fileInfo);
+      else
+        delete fileInfo;
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 int RedisImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -4054,6 +4089,37 @@ int RedisImplementation::_getContentListByFileId(T::SessionId sessionId,uint fil
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     return getContentByFileId(fileId,contentInfoList);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_getContentListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    {
+      T::ContentInfoList contentList;
+      getContentByFileId(*it,contentList);
+      contentInfoList.addContentInfoList(contentList);
+    }
+    return Result::OK;
   }
   catch (...)
   {

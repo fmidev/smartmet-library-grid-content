@@ -2056,6 +2056,34 @@ int CacheImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileI
 
 
 
+int CacheImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::FileInfoList& fileInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    {
+      T::FileInfo *info = mFileInfoList.getFileInfoById(*it);
+      if (info != nullptr)
+        fileInfoList.addFileInfo(info->duplicate());
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
 int CacheImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -2843,6 +2871,38 @@ int CacheImplementation::_getContentListByFileId(T::SessionId sessionId,uint fil
       return Result::INVALID_SESSION;
 
     mContentInfoList[0].getContentInfoListByFileId(fileId,contentInfoList);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getContentListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress)
+      return mContentStorage->getContentListByFileIdList(sessionId,fileIdList,contentInfoList);
+
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    {
+      T::ContentInfoList contentList;
+      mContentInfoList[0].getContentInfoListByFileId(*it,contentList);
+      contentInfoList.addContentInfoList(contentList);
+    }
+
     return Result::OK;
   }
   catch (...)

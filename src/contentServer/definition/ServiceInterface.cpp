@@ -1363,6 +1363,28 @@ int ServiceInterface::getFileInfoList(T::SessionId sessionId,uint startFileId,ui
 
 
 
+int ServiceInterface::getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::FileInfoList& fileInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getFileInfoListByFileIdList(sessionId,fileIdList,fileInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,fileId[%lu],FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileIdList.size(),fileInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -2058,6 +2080,28 @@ int ServiceInterface::getContentListByFileId(T::SessionId sessionId,uint fileId,
     unsigned long requestTime = getTime() - timeStart;
 
     PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getContentListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getContentListByFileIdList(sessionId,fileIdList,contentInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,fileId[%lu],ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileIdList.size(),contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3222,6 +3266,15 @@ int ServiceInterface::_getFileInfoList(T::SessionId sessionId,uint startFileId,u
 
 
 
+int ServiceInterface::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::FileInfoList& fileInfoList)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
+
+
+
+
 int ServiceInterface::_getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
@@ -3502,6 +3555,15 @@ int ServiceInterface::_getContentList(T::SessionId sessionId,uint startFileId,ui
 
 
 int ServiceInterface::_getContentListByFileId(T::SessionId sessionId,uint fileId,T::ContentInfoList& contentInfoList)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
+
+
+
+
+
+int ServiceInterface::_getContentListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::ContentInfoList& contentInfoList)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }

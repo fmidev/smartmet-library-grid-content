@@ -727,6 +727,51 @@ void Converter::convert(const ContentServer::Corba::CorbaStringList& source,std:
 
 
 
+void Converter::convert(std::vector<uint>& source,ContentServer::Corba::CorbaULongList& target)
+{
+  try
+  {
+    uint len = source.size();
+    target.length(len);
+
+    uint t = 0;
+    for (auto it=source.begin(); it!=source.end(); ++it)
+    {
+      target[t] = *it;
+      t++;
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const ContentServer::Corba::CorbaULongList& source,std::vector<uint>& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      target.push_back(source[t]);
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 void Converter::convert(std::set<uint>& source,ContentServer::Corba::CorbaULongList& target)
 {
   try

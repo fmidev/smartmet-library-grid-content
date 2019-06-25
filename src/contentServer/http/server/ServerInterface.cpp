@@ -438,6 +438,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getFileInfoListByFileIdList") == 0)
+    {
+      getFileInfoListByFileIdList(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"getFileInfoListByProducerId") == 0)
     {
       getFileInfoListByProducerId(request,response);
@@ -627,6 +633,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
     if (strcasecmp(method,"getContentListByFileId") == 0)
     {
       getContentListByFileId(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getContentListByFileIdList") == 0)
+    {
+      getContentListByFileIdList(request,response);
       return;
     }
 
@@ -3357,6 +3369,64 @@ void ServerInterface::getFileInfoList(T::RequestMessage& request,T::ResponseMess
 
 
 
+void ServerInterface::getFileInfoListByFileIdList(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    string_vec csvLines;
+    if (request.getLinesByKey("fileId",csvLines) == 0)
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: fileId");
+      return;
+    }
+
+    std::vector<uint> fileIdList;
+    for (auto it=csvLines.begin(); it!=csvLines.end(); ++it)
+    {
+      fileIdList.push_back(toInt64(it->c_str()));
+    }
+
+    T::FileInfoList fileInfoList;
+
+    int result = mService->getFileInfoListByFileIdList(sessionId,fileIdList,fileInfoList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      uint len = fileInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::FileInfo *info = fileInfoList.getFileInfoByIndex(t);
+        if (t == 0)
+          response.addLine("fileInfoHeader",info->getCsvHeader());
+        response.addLine("fileInfo",info->getCsv());
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 void ServerInterface::getFileInfoListByProducerId(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
@@ -4917,6 +4987,65 @@ void ServerInterface::getContentListByFileId(T::RequestMessage& request,T::Respo
       return;
     }
 
+    string_vec csvLines;
+    if (request.getLinesByKey("fileId",csvLines) == 0)
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: fileId");
+      return;
+    }
+
+    std::vector<uint> fileIdList;
+    for (auto it=csvLines.begin(); it!=csvLines.end(); ++it)
+    {
+      fileIdList.push_back(toInt64(it->c_str()));
+    }
+
+
+    T::ContentInfoList contentInfoList;
+
+    int result = mService->getContentListByFileIdList(sessionId,fileIdList,contentInfoList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      uint len = contentInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
+        if (t == 0)
+          response.addLine("contentInfoHeader",info->getCsvHeader());
+        response.addLine("contentInfo",info->getCsv());
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void ServerInterface::getContentListByFileIdList(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
     uint fileId = 0;
     if (!request.getLineByKey("fileId",fileId))
     {
@@ -4951,8 +5080,6 @@ void ServerInterface::getContentListByFileId(T::RequestMessage& request,T::Respo
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
-
-
 
 
 

@@ -4734,7 +4734,7 @@ void ServiceImplementation::event_generationListDeletedBySourceId(T::EventInfo& 
 
 
 
-void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo)
+void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo *nextEventInfo)
 {
   FUNCTION_TRACE
   try
@@ -4744,6 +4744,55 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo)
     if (eventInfo.mId2 == T::FileTypeValue::Virtual)
       return; // The added file was virtual. No need to react.
 
+    mFileAdditionList.push_back(eventInfo.mId1);
+
+    if (nextEventInfo == nullptr  ||  nextEventInfo->mType != ContentServer::EventType::FILE_ADDED  ||  mFileAdditionList.size() > 1000)
+    {
+      T::FileInfoList fileInfoList;
+      int result = mContentServer->getFileInfoListByFileIdList(mServerSessionId,mFileAdditionList,fileInfoList);
+      if (result != 0)
+      {
+        std::string cPos = CODE_LOCATION;
+        PRINT_DATA(mDebugLog,"%s: Cannot get the file info list from the content server\n",cPos.c_str());
+        PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
+        return;
+      }
+
+      T::ContentInfoList contentInfoList;
+      result = mContentServer->getContentListByFileIdList(mServerSessionId,mFileAdditionList,contentInfoList);
+      if (result != 0)
+      {
+        std::string cPos = CODE_LOCATION;
+        PRINT_DATA(mDebugLog,"%s: Cannot get the content list from the content server!\n",cPos.c_str());
+        PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
+        return;
+      }
+
+      uint len = fileInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::FileInfo *fileInfo = fileInfoList.getFileInfoByIndex(t);
+        if (fileInfo != NULL)
+        {
+          T::ContentInfoList contentList;
+          contentInfoList.getContentInfoListByFileId(fileInfo->mFileId,contentList);
+
+          T::ContentInfoList cList;
+          addFile(*fileInfo,contentList,cList);
+          if (cList.getLength() > 0)
+          {
+            mContentServer->addContentList(mServerSessionId,cList);
+          }
+
+          if ((fileInfo->mFileId % 1000) == 0)
+            PRINT_DATA(mDebugLog,"** fileAdded %lu\n",mGridFileManager.getFileCount());
+        }
+      }
+
+      mFileAdditionList.clear();
+    }
+
+/*
     T::FileInfo fileInfo;
     int result = mContentServer->getFileInfoById(mServerSessionId,eventInfo.mId1,fileInfo);
     if (result != 0)
@@ -4773,6 +4822,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo)
 
     if ((fileInfo.mFileId % 1000) == 0)
       PRINT_DATA(mDebugLog,"** fileAdded %lu\n",mGridFileManager.getFileCount());
+*/
   }
   catch (...)
   {
@@ -5184,7 +5234,7 @@ void ServiceImplementation::event_updateVirtualContent(T::EventInfo& eventInfo)
 
 
 
-void ServiceImplementation::processEvent(T::EventInfo& eventInfo)
+void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *nextEventInfo)
 {
   FUNCTION_TRACE
   try
@@ -5242,7 +5292,7 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo)
         break;
 
       case ContentServer::EventType::FILE_ADDED:
-        event_fileAdded(eventInfo);
+        event_fileAdded(eventInfo,nextEventInfo);
         break;
 
       case ContentServer::EventType::FILE_DELETED:
@@ -5478,7 +5528,7 @@ void ServiceImplementation::processEvents()
       while (it != nullptr)
       {
         mLastProcessedEventId = it->mEventId;
-        processEvent(*it);
+        processEvent(*it,it->nextItem);
         it = it->nextItem;
 
         if (mShutdownRequested)

@@ -137,7 +137,7 @@ class ServiceImplementation : public ServiceInterface
      virtual void   event_generationStatusChanged(T::EventInfo& eventInfo);
      virtual void   event_generationListDeletedByProducerId(T::EventInfo& eventInfo);
      virtual void   event_generationListDeletedBySourceId(T::EventInfo& eventInfo);
-     virtual void   event_fileAdded(T::EventInfo& eventInfo);
+     virtual void   event_fileAdded(T::EventInfo& eventInfo,T::EventInfo *nextEventInfo);
      virtual void   event_fileDeleted(T::EventInfo& eventInfo);
      virtual void   event_fileUpdated(T::EventInfo& eventInfo);
      virtual void   event_fileListDeletedByGroupFlags(T::EventInfo& eventInfo);
@@ -162,7 +162,7 @@ class ServiceImplementation : public ServiceInterface
      virtual void   fullUpdate();
      virtual void   updateVirtualFiles(T::ContentInfoList fullContentList);
      virtual void   registerVirtualFiles(VirtualGridFilePtr_map& gridFileMap);
-     virtual void   processEvent(T::EventInfo& eventInfo);
+     virtual void   processEvent(T::EventInfo& eventInfo,T::EventInfo *nextEventInfo);
      virtual void   processEvents();
      virtual void   processRequestCounters();
      virtual void   readContentList(T::ContentInfoList& contentList,bool includePhysicalContent,bool includeVirtualContent);
@@ -194,6 +194,7 @@ class ServiceImplementation : public ServiceInterface
      GridFileManager      mGridFileManager;
      PreloadList          mPrealoadList;
      time_t               mLastCacheCheck;
+     std::vector<uint>    mFileAdditionList;
 
      VirtualContentManager            mVirtualContentManager;
      ContentServer::ServiceInterface* mContentServer;

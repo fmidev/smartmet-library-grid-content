@@ -83,6 +83,9 @@ class Converter
     static void   convert(std::set<std::string>& source,ContentServer::Corba::CorbaStringList& target);
     static void   convert(const ContentServer::Corba::CorbaStringList& source,std::set<std::string>& target);
 
+    static void   convert(std::vector<uint>& source,ContentServer::Corba::CorbaULongList& target);
+    static void   convert(const ContentServer::Corba::CorbaULongList& source,std::vector<uint>& target);
+
     static void   convert(std::set<uint>& source,ContentServer::Corba::CorbaULongList& target);
     static void   convert(const ContentServer::Corba::CorbaULongList& source,std::set<uint>& target);
 

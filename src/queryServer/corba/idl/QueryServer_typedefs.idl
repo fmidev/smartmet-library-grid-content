@@ -34,6 +34,18 @@ typedef sequence<CorbaAttribute> CorbaAttributeList;
 
 
 
+struct CorbaCoordinate
+{
+  double x;
+  double y;
+};
+
+typedef sequence<CorbaCoordinate> CorbaCoordinateList;
+typedef sequence<CorbaCoordinateList> CorbaAreaCoordinates;
+
+
+
+
 struct CorbaGridPointValue
 {
   unsigned long fileId;
@@ -134,21 +146,12 @@ struct CorbaQueryParameter
   string                   function;
   CorbaFunctionParamList   functionParams;
   CorbaParameterValuesList valueList;
+  CorbaCoordinateList      coordinates;
+  CorbaAttributeList       attributeList;
 };
 
 typedef sequence<CorbaQueryParameter> CorbaQueryParameterList;
 
-
-
-
-struct CorbaCoordinate
-{
-  double x;
-  double y;
-};
-
-typedef sequence<CorbaCoordinate> CorbaCoordinateList;
-typedef sequence<CorbaCoordinateList> CorbaAreaCoordinates;
 
 
 

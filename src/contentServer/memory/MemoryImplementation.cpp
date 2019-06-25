@@ -1871,7 +1871,7 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std
 
       if (producerInfo->mProducerId != generationInfo->mProducerId)
       {
-        ff->print(std::cout,0,0);
+        //ff->print(std::cout,0,0);
         return Result::PRODUCER_AND_GENERATION_DO_NOT_MATCH;
       }
 
@@ -2449,6 +2449,35 @@ int MemoryImplementation::_getFileInfoList(T::SessionId sessionId,uint startFile
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     mFileInfoList.getFileInfoList(startFileId,maxRecords,fileInfoList);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+int MemoryImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::FileInfoList& fileInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    {
+      T::FileInfo *info = mFileInfoList.getFileInfoById(*it);
+      if (info != nullptr)
+        fileInfoList.addFileInfo(info->duplicate());
+    }
+
     return Result::OK;
   }
   catch (...)
@@ -3465,6 +3494,35 @@ int MemoryImplementation::_getContentListByFileId(T::SessionId sessionId,uint fi
   catch (...)
   {
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+int MemoryImplementation::_getContentListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    {
+      T::ContentInfoList contentList;
+      mContentInfoList[0].getContentInfoListByFileId(*it,contentList);
+      contentInfoList.addContentInfoList(contentList);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 

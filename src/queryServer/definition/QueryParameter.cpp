@@ -80,6 +80,8 @@ QueryParameter::QueryParameter(const QueryParameter& queryParameter)
     mFunction = queryParameter.mFunction;
     mFunctionParams = queryParameter.mFunctionParams;
     mFlags = queryParameter.mFlags;
+    mCoordinates = queryParameter.mCoordinates;
+    mAttributeList = queryParameter.mAttributeList;
   }
   catch (...)
   {
@@ -155,6 +157,10 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mPrecision                = " << mPrecision << "\n";
     stream << space(level) << "- mFunction                 = " << mFunction << "\n";
     stream << space(level) << "- mFlags                    = " << mFlags << "\n";
+    stream << space(level) << "- mCoordinates              = " << mCoordinates.size() << " coordinates\n";
+    stream << space(level) << "- mAttributeList            = " << mAttributeList.getLength() << " attributes\n";
+
+    mAttributeList.print(stream,level+2,optionFlags);
 
     stream << space(level) << "- mFunctionParams           = \n";
     for (auto it = mFunctionParams.begin();  it != mFunctionParams.end(); ++it)

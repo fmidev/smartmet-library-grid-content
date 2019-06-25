@@ -91,13 +91,14 @@ class ServiceImplementation : public ServiceInterface
                        bool timeMatchRequired,
                        uchar locationType,
                        uchar coordinateType,
-                       T::AreaCoordinates& coordinates,
+                       T::AreaCoordinates& areaCoordinates,
                        T::ParamValue_vec& contourLowValues,
                        T::ParamValue_vec& contourHighValues,
-                       T::AttributeList& attributeList,
+                       T::AttributeList& queryAttributeList,
                        double radius,
                        short& precision,
-                       ParameterValues& valueList);
+                       ParameterValues& valueList,
+                       T::Coordinate_vec& coordinates);
 
      void           getGridValues(
                        uchar queryType,
@@ -122,14 +123,15 @@ class ServiceImplementation : public ServiceInterface
                        uint timestepSizeInMinutes,
                        uchar locationType,
                        uchar coordinateType,
-                       T::AreaCoordinates& coordinates,
+                       T::AreaCoordinates& areaCoordinates,
                        T::ParamValue_vec& contourLowValues,
                        T::ParamValue_vec& contourHighValues,
-                       T::AttributeList& attributeList,
+                       T::AttributeList& queryAttributeList,
                        double radius,
                        uint maxValues,
                        short& precision,
-                       ParameterValues_vec& valueList);
+                       ParameterValues_vec& valueList,
+                       T::Coordinate_vec& coordinates);
 
      void           getParameterStringInfo(
                        std::string param,
@@ -254,7 +256,7 @@ class ServiceImplementation : public ServiceInterface
                        short timeInterpolationMethod,
                        short levelInterpolationMethod,
                        uchar coordinateType,
-                       T::AreaCoordinates& coordinates,
+                       T::AreaCoordinates& areaCoordinates,
                        uint& newProducerId,
                        short& precision,
                        ParameterValues& valueList);
@@ -275,7 +277,7 @@ class ServiceImplementation : public ServiceInterface
                        short timeInterpolationMethod,
                        short levelInterpolationMethod,
                        uchar coordinateType,
-                       T::AreaCoordinates& coordinates,
+                       T::AreaCoordinates& areaCoordinates,
                        uint& newProducerId,
                        short& precision,
                        ParameterValues& valueList);
@@ -320,7 +322,7 @@ class ServiceImplementation : public ServiceInterface
                        short timeInterpolationMethod,
                        short levelInterpolationMethod,
                        uchar coordinateType,
-                       T::AreaCoordinates& coordinates,
+                       T::AreaCoordinates& areaCoordinates,
                        uint& newProducerId,
                        short& precision,
                        ParameterValues& valueList);
@@ -368,7 +370,7 @@ class ServiceImplementation : public ServiceInterface
                        uchar coordinateType,
                        T::Coordinate_vec& gridCoordinates,
                        T::ParamValue_vec& contourValues,
-                       T::AttributeList& attributeList,
+                       T::AttributeList& queryAttributeList,
                        uint& newProducerId,
                        short& precision,
                        ParameterValues& valueList);
@@ -395,7 +397,7 @@ class ServiceImplementation : public ServiceInterface
                        T::Coordinate_vec& gridCoordinates,
                        T::ParamValue_vec& contourLowValues,
                        T::ParamValue_vec& contourHighValues,
-                       T::AttributeList& attributeList,
+                       T::AttributeList& queryAttributeList,
                        uint& newProducerId,
                        short& precision,
                        ParameterValues& valueList);
@@ -419,10 +421,11 @@ class ServiceImplementation : public ServiceInterface
                        uchar locationType,
                        uchar coordinateType,
                        T::Coordinate_vec& gridCoordinates,
-                       T::AttributeList& attributeList,
+                       T::AttributeList& queryAttributeList,
                        uint& newProducerId,
                        short& precision,
-                       ParameterValues& valueList);
+                       ParameterValues& valueList,
+                       T::Coordinate_vec& coordinates);
 
      bool           getGridFiles(
                        T::ProducerInfo& producerInfo,
@@ -443,7 +446,7 @@ class ServiceImplementation : public ServiceInterface
                        uchar locationType,
                        uchar coordinateType,
                        T::Coordinate_vec& gridCoordinates,
-                       T::AttributeList& attributeList,
+                       T::AttributeList& queryAttributeList,
                        uint& newProducerId,
                        short& precision,
                        ParameterValues& valueList);

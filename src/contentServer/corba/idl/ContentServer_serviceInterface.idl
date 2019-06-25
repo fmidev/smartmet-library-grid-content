@@ -78,6 +78,7 @@ interface ServiceInterface
   long  getFileInfoById(in long long sessionId,in unsigned long fileId,out CorbaFileInfo fileInfo);
   long  getFileInfoByName(in long long sessionId,in string filename,out CorbaFileInfo fileInfo);
   long  getFileInfoList(in long long sessionId,in unsigned long startFileId,in unsigned long maxRecords,out CorbaFileInfoList fileInfoList);
+  long  getFileInfoListByFileIdList(in long long sessionId,in CorbaULongList fileIdList,out CorbaFileInfoList fileInfoList);
   long  getFileInfoListByProducerId(in long long sessionId,in unsigned long producerId,in unsigned long startFileId,in unsigned long maxRecords,out CorbaFileInfoList fileInfoList);
   long  getFileInfoListByProducerName(in long long sessionId,in string producerName,in unsigned long startFileId,in unsigned long maxRecords,out CorbaFileInfoList fileInfoList);
   long  getFileInfoListByGenerationId(in long long sessionId,in unsigned long generationId,in unsigned long startFileId,in unsigned long maxRecords,out CorbaFileInfoList fileInfoList);
@@ -113,6 +114,7 @@ interface ServiceInterface
   long  getContentInfo(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,out CorbaContentInfo contentInfo);
   long  getContentList(in long long sessionId,in unsigned long startFileId,in unsigned long startMessageIndex,in unsigned long maxRecords,out CorbaContentInfoList contentInfoList);
   long  getContentListByFileId(in long long sessionId,in unsigned long fileId,out CorbaContentInfoList contentInfoList);
+  long  getContentListByFileIdList(in long long sessionId,in CorbaULongList fileIdList,out CorbaContentInfoList contentInfoList);
   long  getContentListByFileName(in long long sessionId,in string filename,out CorbaContentInfoList contentInfoList);
   long  getContentListByGroupFlags(in long long sessionId,in unsigned long groupFlags,in unsigned long startFileId,in unsigned long startMessageIndex,in unsigned long maxRecords,out CorbaContentInfoList contentInfoList);
   long  getContentListByProducerId(in long long sessionId,in unsigned long producerId,in unsigned long startFileId,in unsigned long startMessageIndex,in unsigned long maxRecords,out CorbaContentInfoList contentInfoList);

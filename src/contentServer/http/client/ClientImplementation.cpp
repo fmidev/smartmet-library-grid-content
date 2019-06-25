@@ -1928,6 +1928,45 @@ int ClientImplementation::_getFileInfoList(T::SessionId sessionId,uint startFile
 
 
 
+int ClientImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::FileInfoList& fileInfoList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getFileInfoListByFileIdList");
+    request.addLine("sessionId",sessionId);
+
+    for (auto it=fileIdList.begin(); it!=fileIdList.end(); ++it)
+      request.addLine("fileId",*it);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      string_vec lines;
+      uint len = response.getLinesByKey("fileInfo",lines);
+      for (uint t=0; t<len; t++)
+      {
+        T::FileInfo *info = new T::FileInfo();
+        info->setCsv(lines[t]);
+        fileInfoList.addFileInfo(info);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
 int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   try
@@ -2944,6 +2983,47 @@ int ClientImplementation::_getContentListByFileId(T::SessionId sessionId,uint fi
     request.addLine("method","getContentListByFileId");
     request.addLine("sessionId",sessionId);
     request.addLine("fileId",fileId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      string_vec lines;
+      uint len = response.getLinesByKey("contentInfo",lines);
+      for (uint t=0; t<len; t++)
+      {
+        T::ContentInfo *info = new T::ContentInfo();
+        info->setCsv(lines[t]);
+        contentInfoList.addContentInfo(info);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getContentListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::ContentInfoList& contentInfoList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getContentListByFileIdList");
+    request.addLine("sessionId",sessionId);
+
+    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+      request.addLine("fileId",*it);
 
     T::ResponseMessage response;
 

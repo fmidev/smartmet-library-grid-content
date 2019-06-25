@@ -1651,6 +1651,42 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getFileInfoListByFileIdList(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaULongList& fileIdList, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::FileInfoList sFileInfoList;
+    ContentServer::Corba::CorbaFileInfoList *corbaFileInfoList = new ContentServer::Corba::CorbaFileInfoList();
+    fileInfoList = corbaFileInfoList;
+
+    std::vector<uint> sFileIdList;
+    ContentServer::Corba::Converter::convert(fileIdList,sFileIdList);
+
+    if (mService == nullptr)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getFileInfoListByFileIdList(sessionId,sFileIdList,sFileInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sFileInfoList,*corbaFileInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+
+
 ::CORBA::Long ServerInterface::getFileInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::ULong startFileId, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
 {
   FUNCTION_TRACE
@@ -2505,6 +2541,40 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByFileId(sessionId,fileId,sContentInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getContentListByFileIdList(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaULongList& fileIdList, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ContentInfoList sContentInfoList;
+    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    contentInfoList = corbaContentInfoList;
+
+    std::vector<uint> sFileIdList;
+    ContentServer::Corba::Converter::convert(fileIdList,sFileIdList);
+
+    if (mService == nullptr)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getContentListByFileIdList(sessionId,sFileIdList,sContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);

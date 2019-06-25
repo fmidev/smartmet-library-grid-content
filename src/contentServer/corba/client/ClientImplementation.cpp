@@ -1506,6 +1506,32 @@ int ClientImplementation::_getFileInfoList(T::SessionId sessionId, uint startFil
 
 
 
+int ClientImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::FileInfoList& fileInfoList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaFileInfoList_var corbaFileInfoList;
+    ContentServer::Corba::CorbaULongList_var corbaFileIdList = new ContentServer::Corba::CorbaULongList();
+    ContentServer::Corba::Converter::convert(fileIdList, corbaFileIdList);
+
+    int result = mService->getFileInfoListByFileIdList(sessionId, corbaFileIdList, corbaFileInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaFileInfoList, fileInfoList);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
 int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId, uint producerId, uint startFileId, uint maxRecords, T::FileInfoList& fileInfoList)
 {
   try
@@ -2239,6 +2265,32 @@ int ClientImplementation::_getContentListByFileId(T::SessionId sessionId, uint f
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
     int result = mService->getContentListByFileId(sessionId, fileId, corbaContentInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getContentListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::ContentInfoList& contentInfoList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+    ContentServer::Corba::CorbaULongList_var corbaFileIdList = new ContentServer::Corba::CorbaULongList();
+    ContentServer::Corba::Converter::convert(fileIdList, corbaFileIdList);
+
+    int result = mService->getContentListByFileIdList(sessionId, corbaFileIdList, corbaContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);

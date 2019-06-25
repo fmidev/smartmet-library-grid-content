@@ -758,6 +758,8 @@ void Converter::convert(QueryServer::Corba::CorbaQueryParameter& source,QuerySer
 
     convert(source.functionParams,target.mFunctionParams);
     convert(source.valueList,target.mValueList);
+    convert(source.coordinates,target.mCoordinates);
+    convert(source.attributeList,target.mAttributeList);
   }
   catch (...)
   {
@@ -805,6 +807,8 @@ void Converter::convert(QueryServer::QueryParameter& source,QueryServer::Corba::
 
     convert(source.mFunctionParams,target.functionParams);
     convert(source.mValueList,target.valueList);
+    convert(source.mCoordinates,target.coordinates);
+    convert(source.mAttributeList,target.attributeList);
   }
   catch (...)
   {

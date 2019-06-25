@@ -85,6 +85,7 @@ class ServerInterface : public POA_SmartMet::ContentServer::Corba::ServiceInterf
     ::CORBA::Long getFileInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, SmartMet::ContentServer::Corba::CorbaFileInfo_out fileInfo);
     ::CORBA::Long getFileInfoByName(::CORBA::LongLong sessionId, const char* filename, SmartMet::ContentServer::Corba::CorbaFileInfo_out fileInfo);
     ::CORBA::Long getFileInfoList(::CORBA::LongLong sessionId, ::CORBA::ULong startFileId, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList);
+    ::CORBA::Long getFileInfoListByFileIdList(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaULongList& fileIdList, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList);
     ::CORBA::Long getFileInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::ULong startFileId, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList);
     ::CORBA::Long getFileInfoListByProducerName(::CORBA::LongLong sessionId, const char* producerName, ::CORBA::ULong startFileId, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList);
     ::CORBA::Long getFileInfoListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::ULong startFileId, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList);
@@ -117,6 +118,7 @@ class ServerInterface : public POA_SmartMet::ContentServer::Corba::ServiceInterf
     ::CORBA::Long getContentInfo(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::ContentServer::Corba::CorbaContentInfo_out contentInfo);
     ::CORBA::Long getContentList(::CORBA::LongLong sessionId, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList);
     ::CORBA::Long getContentListByFileId(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList);
+    ::CORBA::Long getContentListByFileIdList(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaULongList& fileIdList, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList);
     ::CORBA::Long getContentListByFileName(::CORBA::LongLong sessionId, const char* filename, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList);
     ::CORBA::Long getContentListByGroupFlags(::CORBA::LongLong sessionId, ::CORBA::ULong groupFlags, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList);
     ::CORBA::Long getContentListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList);

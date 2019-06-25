@@ -63,6 +63,8 @@ class QueryParameter
     uint                        mTimestepSizeInMinutes;
     uint                        mFlags;
     ParameterValues_vec         mValueList;
+    T::Coordinate_vec           mCoordinates;
+    T::AttributeList            mAttributeList;
 
 
     class Type
@@ -86,6 +88,11 @@ class QueryParameter
         static const uchar Geometry   = 5;  // mAttributeList : "grid.geometryId","grid.geometryString"
     };
 
+    class Flags
+    {
+      public:
+        static const uint  ReturnCoordinates  = 1 << 0;
+    };
 };
 
 

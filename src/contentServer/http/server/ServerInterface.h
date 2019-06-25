@@ -85,6 +85,7 @@ class ServerInterface
     virtual void getFileInfoById(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getFileInfoByName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getFileInfoList(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getFileInfoListByFileIdList(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getFileInfoListByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getFileInfoListByProducerName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getFileInfoListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
@@ -120,6 +121,7 @@ class ServerInterface
     virtual void getContentInfo(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentList(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByFileId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getContentListByFileIdList(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByFileName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByGroupFlags(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
