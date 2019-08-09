@@ -2270,18 +2270,31 @@ bool ServiceImplementation::conversionFunction(std::string& conversionFunction, 
 
 
 
-void ServiceImplementation::executeConversion(std::string& function, std::vector<std::string>& functionParams, T::ParamValue_vec& valueList, T::ParamValue_vec& newValueList)
+void ServiceImplementation::executeConversion(std::string& function, std::vector<std::string>& functionParams,std::string forecastTime,T::Coordinate_vec& coordinates,T::ParamValue_vec& valueList, T::ParamValue_vec& newValueList)
 {
   try
   {
-    newValueList.reserve(valueList.size());
-    for (auto v = valueList.begin(); v != valueList.end(); ++v)
+    if (valueList.size() != coordinates.size())
+      throw SmartMet::Spine::Exception(BCP, "The number of values is not the same as the number of coordinates!");
+
+    int size = valueList.size();
+    newValueList.reserve(size);
+    for (int t=0; t<size; t++)
     {
       std::vector<double> parameters;
       for (auto fp = functionParams.begin(); fp != functionParams.end(); ++fp)
       {
+        std::string f = fp->substr(0, 1);
+        std::string p = fp->substr(1);
+
         if (*fp == "$")
-          parameters.push_back(*v);
+          parameters.push_back(valueList[t]);
+        else
+        if (f == "$"  &&  !p.empty())
+        {
+          T::ParamValue val = getAdditionalValue(p,forecastTime,coordinates[t].x(), coordinates[t].y());
+          parameters.push_back(val);
+        }
         else
           parameters.push_back(toDouble(fp->c_str()));
       }
@@ -2299,10 +2312,43 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
 
 
 
-void ServiceImplementation::executeConversion(std::string& function, std::vector<std::string>& functionParams, T::GridValueList& valueList)
+
+void ServiceImplementation::executeConversion(std::string& function, std::vector<std::string>& functionParams,T::ParamValue_vec& valueList, T::ParamValue_vec& newValueList)
 {
   try
   {
+    int size = valueList.size();
+    newValueList.reserve(size);
+    for (int t=0; t<size; t++)
+    {
+      std::vector<double> parameters;
+      for (auto fp = functionParams.begin(); fp != functionParams.end(); ++fp)
+      {
+        if (*fp == "$")
+          parameters.push_back(valueList[t]);
+        else
+          parameters.push_back(toDouble(fp->c_str()));
+      }
+      T::ParamValue newValue = mLuaFileCollection.executeFunctionCall1(function, parameters);
+      newValueList.push_back(newValue);
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::executeConversion(std::string& function, std::vector<std::string>& functionParams,std::string forecastTime,T::GridValueList& valueList)
+{
+  try
+  {
+    boost::local_time::local_date_time utcTime(boost::posix_time::from_iso_string(forecastTime), nullptr);
+
     uint vLen = valueList.getLength();
     for (uint i = 0; i < vLen; i++)
     {
@@ -2312,8 +2358,17 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
         std::vector<double> parameters;
         for (auto fp = functionParams.begin(); fp != functionParams.end(); ++fp)
         {
+          std::string f = fp->substr(0, 1);
+          std::string p = fp->substr(1);
+
           if (*fp == "$")
             parameters.push_back(gv->mValue);
+          else
+          if (f == "$"  &&  !p.empty())
+          {
+            T::ParamValue val = getAdditionalValue(p,forecastTime,gv->mX, gv->mY);
+            parameters.push_back(val);
+          }
           else
             parameters.push_back(toDouble(fp->c_str()));
         }
@@ -2452,7 +2507,7 @@ bool ServiceImplementation::getSpecialValues(
           }
 
           if (conversionByFunction)
-            executeConversion(function, functionParams, list);
+            executeConversion(function, functionParams, forecastTime, list);
 
           for (uint vv = 0; vv <= sLen; vv++)
             p += sprintf(p, "%f;", valueVector[vv]);
@@ -2557,7 +2612,7 @@ bool ServiceImplementation::getSpecialValues(
         //timeInterpolation(timeInterpolationMethod, forecastTime, contentInfo1->mForecastTime, contentInfo2->mForecastTime, list1, list2, list);
 
         if (conversionByFunction)
-          executeConversion(function, functionParams, list);
+          executeConversion(function, functionParams, forecastTime, list);
 
         for (uint s = 0; s <= sLen; s++)
           p += sprintf(p, "%f;", valueVector1[s]);
@@ -2748,7 +2803,7 @@ bool ServiceImplementation::getValueVectors(
         //valueList.print(std::cout,0,0);
 
         if (conversionByFunction)
-           executeConversion(function, functionParams, valueVector, valueList.mValueVector);
+           executeConversion(function, functionParams, forecastTime, coordinates, valueVector, valueList.mValueVector);
         else
           valueList.mValueVector = valueVector;
 
@@ -2829,7 +2884,7 @@ bool ServiceImplementation::getValueVectors(
         }
 
         if (conversionByFunction)
-           executeConversion(function, functionParams, valueVector, valueList.mValueVector);
+           executeConversion(function, functionParams, forecastTime, coordinates, valueVector, valueList.mValueVector);
 
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
@@ -2886,7 +2941,7 @@ bool ServiceImplementation::getValueVectors(
         valueList.mParameterLevel = paramLevel;
 
         if (conversionByFunction)
-           executeConversion(function, functionParams, valueVector, valueList.mValueVector);
+           executeConversion(function, functionParams, forecastTime, coordinates, valueVector, valueList.mValueVector);
         else
           valueList.mValueVector = valueVector;
 
@@ -2946,7 +3001,7 @@ bool ServiceImplementation::getValueVectors(
         valueList.mParameterLevel = paramLevel;
 
         if (conversionByFunction)
-           executeConversion(function, functionParams, valueVector, valueList.mValueVector);
+           executeConversion(function, functionParams, forecastTime, coordinates, valueVector, valueList.mValueVector);
         else
           valueList.mValueVector = valueVector;
 
@@ -3417,7 +3472,7 @@ bool ServiceImplementation::getGridFiles(
 
         if (conversionByFunction)
         {
-           executeConversion(function, functionParams, valueVector, newValueVector);
+           executeConversion(function, functionParams, forecastTime, coordinates, valueVector, newValueVector);
            newMessage->setGridValues(newValueVector);
         }
         else
@@ -3481,7 +3536,7 @@ bool ServiceImplementation::getGridFiles(
 
         if (conversionByFunction)
         {
-           executeConversion(function, functionParams, valueVector, newValueVector);
+           executeConversion(function, functionParams, forecastTime, coordinates, valueVector, newValueVector);
            newMessage->setGridValues(newValueVector);
         }
         else
@@ -3532,7 +3587,7 @@ bool ServiceImplementation::getGridFiles(
 
         if (conversionByFunction)
         {
-           executeConversion(function, functionParams, valueVector, newValueVector);
+           executeConversion(function, functionParams, forecastTime, coordinates, valueVector, newValueVector);
            newMessage->setGridValues(newValueVector);
         }
         else
@@ -3582,7 +3637,7 @@ bool ServiceImplementation::getGridFiles(
 
         if (conversionByFunction)
         {
-           executeConversion(function, functionParams, valueVector, newValueVector);
+           executeConversion(function, functionParams, forecastTime, coordinates, valueVector, newValueVector);
            newMessage->setGridValues(newValueVector);
         }
         else
@@ -3942,7 +3997,7 @@ bool ServiceImplementation::getPointValuesByHeight(
     if (valueList.mValueList.getLength() > 0)
     {
       if (conversionByFunction)
-        executeConversion(function, functionParams, valueList.mValueList);
+        executeConversion(function, functionParams, forecastTime, valueList.mValueList);
 
       if (precision < 0)
         precision = pInfo.mDefaultPrecision;
@@ -4108,7 +4163,7 @@ bool ServiceImplementation::getPointValues(
         }
 
         if (conversionByFunction)
-          executeConversion(function, functionParams, valueList.mValueList);
+          executeConversion(function, functionParams, forecastTime, valueList.mValueList);
 
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
@@ -4158,7 +4213,7 @@ bool ServiceImplementation::getPointValues(
         valueList.mParameterLevel = paramLevel;
 
         if (conversionByFunction)
-          executeConversion(function, functionParams, valueList.mValueList);
+          executeConversion(function, functionParams, forecastTime, valueList.mValueList);
 
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
@@ -4183,7 +4238,7 @@ bool ServiceImplementation::getPointValues(
         }
 
         if (conversionByFunction)
-          executeConversion(function, functionParams, valueList.mValueList);
+          executeConversion(function, functionParams, forecastTime, valueList.mValueList);
 
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
@@ -4216,7 +4271,7 @@ bool ServiceImplementation::getPointValues(
         valueList.mParameterLevel = paramLevel;
 
         if (conversionByFunction)
-          executeConversion(function, functionParams, valueList.mValueList);
+          executeConversion(function, functionParams, forecastTime, valueList.mValueList);
 
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
@@ -4346,7 +4401,7 @@ bool ServiceImplementation::getCircleValues(
         }
 
         if (conversionByFunction)
-          executeConversion(function, functionParams, valueList.mValueList);
+          executeConversion(function, functionParams, forecastTime, valueList.mValueList);
 
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
@@ -4402,7 +4457,7 @@ bool ServiceImplementation::getCircleValues(
         }
 
         if (conversionByFunction)
-          executeConversion(function, functionParams, valueList.mValueList);
+          executeConversion(function, functionParams, forecastTime, valueList.mValueList);
 
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
@@ -4428,7 +4483,7 @@ bool ServiceImplementation::getCircleValues(
         valueList.mParameterLevel = paramLevel;
 
         if (conversionByFunction)
-          executeConversion(function, functionParams, valueList.mValueList);
+          executeConversion(function, functionParams, forecastTime, valueList.mValueList);
 
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
@@ -4461,7 +4516,7 @@ bool ServiceImplementation::getCircleValues(
         valueList.mParameterLevel = paramLevel;
 
         if (conversionByFunction)
-          executeConversion(function, functionParams, valueList.mValueList);
+          executeConversion(function, functionParams, forecastTime, valueList.mValueList);
 
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
@@ -4592,7 +4647,7 @@ bool ServiceImplementation::getPolygonValues(
         }
 
         if (conversionByFunction)
-          executeConversion(function, functionParams, valueList.mValueList);
+          executeConversion(function, functionParams, forecastTime, valueList.mValueList);
 
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
@@ -4631,7 +4686,7 @@ bool ServiceImplementation::getPolygonValues(
         }
 
         if (conversionByFunction)
-          executeConversion(function, functionParams, valueList.mValueList);
+          executeConversion(function, functionParams, forecastTime, valueList.mValueList);
 
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
@@ -4657,7 +4712,7 @@ bool ServiceImplementation::getPolygonValues(
         valueList.mParameterLevel = paramLevel;
 
         if (conversionByFunction)
-          executeConversion(function, functionParams, valueList.mValueList);
+          executeConversion(function, functionParams, forecastTime, valueList.mValueList);
 
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
@@ -4690,7 +4745,7 @@ bool ServiceImplementation::getPolygonValues(
         valueList.mParameterLevel = paramLevel;
 
         if (conversionByFunction)
-          executeConversion(function, functionParams, valueList.mValueList);
+          executeConversion(function, functionParams, forecastTime, valueList.mValueList);
 
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
@@ -5751,7 +5806,7 @@ void ServiceImplementation::getGridValues(
                             std::vector < std::string > functionParams;
                             bool conversionByFunction = conversionFunction(pInfo->mConversionFunction, function, functionParams);
                             if (conversionByFunction)
-                              executeConversion(function, functionParams, valueList.mValueList);
+                              executeConversion(function, functionParams, forecastTime, valueList.mValueList);
                           }
                           return;
                         }
@@ -6381,8 +6436,85 @@ void ServiceImplementation::getAdditionalValues(
         values.mValueList.addGridValue(val);
       }
     }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
 
 
+
+
+
+T::ParamValue ServiceImplementation::getAdditionalValue(
+    std::string parameterName,
+    std::string forecastTime,
+    double x,
+    double y)
+{
+  try
+  {
+    std::string param = toLowerString(parameterName);
+    boost::local_time::local_date_time utcTime(boost::posix_time::from_iso_string(forecastTime), nullptr);
+
+    if (param == "dem")
+    {
+      if (mDem)
+      {
+        return mDem->elevation(x,y);
+      }
+    }
+    else
+    if (param == "dark")
+    {
+      Fmi::Astronomy::solar_position_t sp = Fmi::Astronomy::solar_position(utcTime, x,y);
+      return (double)sp.dark();
+    }
+    else
+    if (param == "sunelevation")
+    {
+      Fmi::Astronomy::solar_position_t sp = Fmi::Astronomy::solar_position(utcTime, x,y);
+      return (double)sp.elevation;
+    }
+    else
+    if (param == "sundeclination")
+    {
+      Fmi::Astronomy::solar_position_t sp = Fmi::Astronomy::solar_position(utcTime, x,y);
+      return (double)sp.declination;
+    }
+    else
+    if (param == "sunatzimuth")
+    {
+      Fmi::Astronomy::solar_position_t sp = Fmi::Astronomy::solar_position(utcTime, x,y);
+      return (double)sp.azimuth;
+    }
+    else
+    if (param == "moonphase")
+    {
+      return (double)Fmi::Astronomy::moonphase(utcTime.utc_time());
+    }
+    else
+    if (param == "moonup24h")
+    {
+      Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, x,y);
+      return (double)lt.above_horizont_24h();
+    }
+    else
+    if (param == "moondown24h")
+    {
+      Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, x,y);
+      return (double)(!lt.moonrise_today() && !lt.moonset_today() && !lt.above_horizont_24h());
+    }
+    else
+    if (param == "daylength")
+    {
+      Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, x,y);
+      auto seconds = st.daylength().total_seconds();
+      auto minutes = boost::numeric_cast<long>(round(seconds / 60.0));
+      return (double)minutes;
+    }
+    return ParamValueMissing;
   }
   catch (...)
   {

@@ -231,11 +231,20 @@ class ServiceImplementation : public ServiceInterface
      void           executeConversion(
                        std::string& function,
                        std::vector<std::string>& functionParams,
+                       std::string forecastTime,
                        T::GridValueList& valueList);
 
      void           executeConversion(
                        std::string& function,
                        std::vector<std::string>& functionParams,
+                       T::ParamValue_vec& valueList,
+                       T::ParamValue_vec& newValueList);
+
+     void           executeConversion(
+                       std::string& function,
+                       std::vector<std::string>& functionParams,
+                       std::string forecastTime,
+                       T::Coordinate_vec& coordinates,
                        T::ParamValue_vec& valueList,
                        T::ParamValue_vec& newValueList);
 
@@ -457,6 +466,12 @@ class ServiceImplementation : public ServiceInterface
                        double x,
                        double y,
                        T::ContentInfoList& newContentList);
+
+     T::ParamValue  getAdditionalValue(
+                       std::string parameterName,
+                       std::string forecastTime,
+                       double x,
+                       double y);
 
      void           getAdditionalValues(
                        std::string& parameterName,
