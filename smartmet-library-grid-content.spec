@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 19.5.15
+Version: 19.8.9
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -22,9 +22,9 @@ BuildRequires: omniORB-devel
 BuildRequires: postgresql95-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 19.3.14
-BuildRequires: smartmet-library-grid-files-devel >= 19.5.14
-BuildRequires: smartmet-library-macgyver-devel >= 19.4.23
-BuildRequires: smartmet-library-spine-devel >= 19.5.8
+BuildRequires: smartmet-library-grid-files-devel >= 19.8.9
+BuildRequires: smartmet-library-macgyver-devel >= 19.8.2
+BuildRequires: smartmet-library-spine-devel >= 19.8.7
 Requires: boost-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
@@ -32,9 +32,9 @@ Requires: lua-devel
 Requires: omniORB
 Requires: postgresql95
 Requires: smartmet-library-gis >= 19.3.14
-Requires: smartmet-library-grid-files >= 19.5.14
-Requires: smartmet-library-macgyver >= 19.4.23
-Requires: smartmet-library-spine >= 19.5.8
+Requires: smartmet-library-grid-files >= 19.8.9
+Requires: smartmet-library-macgyver >= 19.8.2
+Requires: smartmet-library-spine >= 19.8.7
 Provides: %{SPECNAME}
 
 %description
@@ -76,6 +76,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Aug  9 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.8.9-1.fmi
+- Numerous improvements
 * Tue May 14 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.5.15-1.fmi
 - Updated grid-files dependency
 * Fri May 10 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.5.10-1.fmi
