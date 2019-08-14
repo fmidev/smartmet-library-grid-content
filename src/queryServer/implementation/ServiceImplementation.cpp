@@ -2885,6 +2885,8 @@ bool ServiceImplementation::getValueVectors(
 
         if (conversionByFunction)
            executeConversion(function, functionParams, forecastTime, coordinates, valueVector, valueList.mValueVector);
+        else
+          valueList.mValueVector = valueVector;
 
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
