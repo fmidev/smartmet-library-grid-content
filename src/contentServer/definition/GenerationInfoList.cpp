@@ -817,6 +817,29 @@ void GenerationInfoList::getGenerationInfoListByProducerId(uint producerId,Gener
 
 
 
+void GenerationInfoList::getGenerationInfoListByAnalysisTime(std::string analysisTime,GenerationInfoList& generationInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    for (uint t=0; t<mLength; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr  &&  info->mAnalysisTime == analysisTime)
+        generationInfoList.addGenerationInfo(info->duplicate());
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(uint producerId,uchar generationStatus)
 {
   FUNCTION_TRACE

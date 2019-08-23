@@ -4,6 +4,7 @@
 
 #include <grid-files/grid/Typedefs.h>
 #include <grid-files/common/AutoThreadLock.h>
+#include "../../contentServer/definition/ServiceInterface.h"
 
 
 namespace SmartMet
@@ -23,7 +24,7 @@ class VirtualContentDefinitionFile
     virtual void  init();
     virtual void  init(std::string filename);
     virtual void  checkUpdates();
-    virtual void  getContentDefinitions(std::string sourceParamName,std::string producerName,int geometryId,VirtualContentDefinition_vec& definitions);
+    virtual void  getContentDefinitions(T::ContentInfo& contentInfo,std::string producerName,VirtualContentDefinition_vec& definitions);
     virtual void  print(std::ostream& stream,uint level,uint optionFlags);
 
   protected:

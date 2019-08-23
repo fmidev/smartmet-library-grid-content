@@ -102,8 +102,10 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
   FUNCTION_TRACE
   try
   {
+    //std::cout << "VirtualContentFactory_type1::addContent\n";
+    //contentInfo.print(std::cout,0,0);
     VirtualContentDefinition_vec contentDefinitionList;
-    mContentDefinitionFile.getContentDefinitions(contentInfo.mFmiParameterName,toLowerString(producerInfo.mName),contentInfo.mGeometryId,contentDefinitionList);
+    mContentDefinitionFile.getContentDefinitions(contentInfo,toLowerString(producerInfo.mName),contentDefinitionList);
 
     std::string minDeletionTime = "";
 
@@ -136,7 +138,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
         //contentInfo.print(std::cout,0,0);
 
         Identification::FmiParameterDef def;
-        if (Identification::gridDef.getFmiParameterDefByName(contentDef->mVirtualParameter.c_str(),def))
+        if (Identification::gridDef.getFmiParameterDefByName(contentDef->mVirtualParameter.mParameterName.c_str(),def))
         {
           bool componentsFound = true;
           bool fileExists = false;
@@ -157,15 +159,64 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
             }
             else
             {
-              mContentServer->getContentListByParameterGenerationIdAndForecastTime(0,contentInfo.mGenerationId,T::ParamKeyTypeValue::FMI_NAME,*sourceParam,
-                T::ParamLevelIdTypeValue::FMI,contentInfo.mFmiParameterLevelId,contentInfo.mParameterLevel,contentInfo.mForecastType,contentInfo.mForecastNumber,
-                contentInfo.mGeometryId,contentInfo.mForecastTime,contentList);
+              int levelId = contentInfo.mFmiParameterLevelId;
+              if (sourceParam->mLevelId > " ")
+                levelId = atoi(sourceParam->mLevelId.c_str());
 
-              cInfo = contentList.getContentInfoByIndex(0);
+              int level = contentInfo.mParameterLevel;
+              if (sourceParam->mLevel > " ")
+                level = atoi(sourceParam->mLevel.c_str());
+
+              std::string producerName = producerInfo.mName;
+              if (sourceParam->mProducerName > " ")
+                producerName = sourceParam->mProducerName;
+
+              int forecastType = contentInfo.mForecastType;
+              if (sourceParam->mForecastType > " ")
+                forecastType = atoi(sourceParam->mForecastType.c_str());
+
+              int forecastNumber = contentInfo.mForecastNumber;
+              if (sourceParam->mForecastNumber > " ")
+                forecastNumber = atoi(sourceParam->mForecastNumber.c_str());
+
+              int geometryId = contentInfo.mGeometryId;
+              if (sourceParam->mGeometryId > " ")
+                geometryId = atoi(sourceParam->mGeometryId.c_str());
+/*
+              mContentServer->getContentListByParameterGenerationIdAndForecastTime(0,contentInfo.mGenerationId,T::ParamKeyTypeValue::FMI_NAME,sourceParam->mParameterName,
+                T::ParamLevelIdTypeValue::FMI,levelId,level,contentInfo.mForecastType,contentInfo.mForecastNumber,
+                contentInfo.mGeometryId,contentInfo.mForecastTime,contentList);
+*/
+              mContentServer->getContentListByParameterAndProducerName(0,producerName,T::ParamKeyTypeValue::FMI_NAME,sourceParam->mParameterName,T::ParamLevelIdTypeValue::FMI,levelId,level,level,forecastType,forecastNumber,geometryId,contentInfo.mForecastTime,contentInfo.mForecastTime,0,contentList);
+
+              uint len = contentList.getLength();
+              for (uint t = 0; t<len; t++)
+              {
+                T::ContentInfo *ci = contentList.getContentInfoByIndex(t);
+                if (ci->mForecastTime == contentInfo.mForecastTime)
+                {
+                  if (ci->mGeometryId == contentInfo.mGeometryId)
+                  {
+                    T::GenerationInfo gInfo;
+                    mContentServer->getGenerationInfoById(0,ci->mGenerationId,gInfo);
+                    if (ci->mGenerationId == contentInfo.mGenerationId  ||  gInfo.mAnalysisTime == generationInfo.mAnalysisTime)
+                    {
+                      cInfo = ci;
+                    }
+                  }
+                }
+              }
+
+              //cInfo = contentList.getContentInfoByIndex(0);
             }
 
             if (cInfo == nullptr || (contentList.getLength() == 1  &&  cInfo->mForecastTime != contentInfo.mForecastTime))
             {
+              // printf("**** Not found : %s (%s) (%s)\n",contentDef->mVirtualParameter.mParameterName.c_str(),producerInfo.mName.c_str(),contentInfo.mFmiParameterName.c_str());
+              // contentDef->print(std::cout,2,0);
+              //contentInfo.print(std::cout,2,0);
+              //if (cInfo != nullptr)
+              //  cInfo->print(std::cout,2,0);
               componentsFound = false;
             }
             else
@@ -173,7 +224,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
               if (sourceParam == contentDef->mSourceParameters.begin())
               {
                 // Checking if the virtual file is already registered to the contentServer.
-                sprintf(filename,"VIRT-%s-%u-%u",contentDef->mVirtualParameter.c_str(),cInfo->mFileId,cInfo->mMessageIndex);
+                sprintf(filename,"VIRT-%s-%u-%u",contentDef->mVirtualParameter.mParameterName.c_str(),cInfo->mFileId,cInfo->mMessageIndex);
 
                 if (gridFileMap.find(std::string(filename)) != gridFileMap.end())
                 {
@@ -207,12 +258,13 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
             }
           }
 
-          //if (contentDef->mSourceParameters.size() > 1)
-            //printf("**** VIRTUAL CONTENT %s\n",contentDef->mTargetParameter.c_str());
-
+          //printf("**** VIRTUAL CONTENT : %s (%s) (%s) (%d)\n",contentDef->mVirtualParameter.mParameterName.c_str(),producerInfo.mName.c_str(),contentInfo.mFmiParameterName.c_str(),(int)componentsFound);
 
           if (!fileExists &&  componentsFound  &&  filename[0] != '\0')
           {
+            //contentDef->print(std::cout,2,0);
+            //contentInfo.print(std::cout,2,0);
+
             GRID::VirtualGridFile *virtualGridFile = new GRID::VirtualGridFile();
             virtualGridFile->setFileName(filename);
             virtualGridFile->setFileId(virtualFileId);
@@ -248,26 +300,47 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
             newContentInfo->mCdmParameterName = "";
             newContentInfo->mNewbaseParameterId = newbaseDef.mNewbaseParameterId;
             newContentInfo->mNewbaseParameterName = newbaseDef.mParameterName;
-            newContentInfo->mFmiParameterLevelId = contentInfo.mFmiParameterLevelId;
+
+            if (contentDef->mVirtualParameter.mLevelId > " ")
+              newContentInfo->mFmiParameterLevelId = atoi(contentDef->mVirtualParameter.mLevelId.c_str());
+            else
+              newContentInfo->mFmiParameterLevelId = contentInfo.mFmiParameterLevelId;
+
             newContentInfo->mGrib1ParameterLevelId = contentInfo.mGrib1ParameterLevelId;
             newContentInfo->mGrib2ParameterLevelId = contentInfo.mGrib2ParameterLevelId;
-            newContentInfo->mParameterLevel = contentInfo.mParameterLevel;
+
+            if (contentDef->mVirtualParameter.mLevel > " ")
+              newContentInfo->mParameterLevel = atoi(contentDef->mVirtualParameter.mLevel.c_str());
+            else
+              newContentInfo->mParameterLevel = contentInfo.mParameterLevel;
+
             newContentInfo->mFmiParameterUnits = def.mParameterUnits;
             newContentInfo->mGribParameterUnits = def.mParameterUnits;
-            newContentInfo->mForecastType = contentInfo.mForecastType;
-            newContentInfo->mForecastNumber = contentInfo.mForecastNumber;
+
+            if (contentDef->mVirtualParameter.mForecastType > " ")
+              newContentInfo->mForecastType = atoi(contentDef->mVirtualParameter.mForecastType.c_str());
+            else
+              newContentInfo->mForecastType = contentInfo.mForecastType;
+
+            if (contentDef->mVirtualParameter.mForecastNumber > " ")
+              newContentInfo->mForecastNumber = atoi(contentDef->mVirtualParameter.mForecastNumber.c_str());
+            else
+              newContentInfo->mForecastNumber = contentInfo.mForecastNumber;
+
             newContentInfo->mServerFlags = contentInfo.mServerFlags;
             newContentInfo->mFlags = T::ContentInfo::Flags::VirtualContent;
             newContentInfo->mSourceId = contentInfo.mSourceId;
             newContentInfo->mGeometryId = contentInfo.mGeometryId;
             newContentInfo->mModificationTime = contentInfo.mModificationTime;
 
+            //newContentInfo->print(std::cout,0,0);
+
             gridFileMap.insert(std::pair<std::string,GRID::VirtualGridFilePtr>(std::string(filename),virtualGridFile));
           }
         }
         else
         {
-          printf("UNKNOWN PARAMETER : %s\n",contentDef->mVirtualParameter.c_str());
+          printf("UNKNOWN PARAMETER : %s\n",contentDef->mVirtualParameter.mParameterName.c_str());
         }
       }
     }

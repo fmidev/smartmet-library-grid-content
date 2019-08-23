@@ -1,7 +1,7 @@
 #pragma once
 
 #include <grid-files/grid/Typedefs.h>
-
+#include "ParameterDef.h"
 
 namespace SmartMet
 {
@@ -18,12 +18,10 @@ class VirtualContentDefinition
 
     void                  print(std::ostream& stream,uint level,uint optionFlags);
 
-    std::string           mVirtualParameter;
-    string_vec            mSourceParameters;
+    ParameterDef          mVirtualParameter;
+    ParameterDef_vec      mSourceParameters;
     std::string           mFunctionName;
     uint                  mFunctionCallMethod;
-    std::string           mProducerName;
-    int                   mGeometryId;
 };
 
 

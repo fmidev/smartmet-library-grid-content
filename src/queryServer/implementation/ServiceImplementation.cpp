@@ -6261,6 +6261,7 @@ void ServiceImplementation::getAdditionalValues(
     T::Coordinate_vec& coordinates,
     ParameterValues& values)
 {
+  FUNCTION_TRACE
   try
   {
 
@@ -6455,6 +6456,7 @@ T::ParamValue ServiceImplementation::getAdditionalValue(
     double x,
     double y)
 {
+  FUNCTION_TRACE
   try
   {
     std::string param = toLowerString(parameterName);

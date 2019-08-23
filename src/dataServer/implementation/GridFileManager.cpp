@@ -334,6 +334,30 @@ void GridFileManager::deleteVirtualFiles()
 
 
 
+void GridFileManager::getVirtualFiles(std::set<uint>& idList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
+    {
+      if (it->second->isVirtual())
+      {
+        idList.insert(it->first);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
 GRID::GridFile_sptr GridFileManager::getFileById(uint fileId)
 {
   FUNCTION_TRACE

@@ -157,6 +157,12 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,std:
 
     mFunctionCollection.addFunction("K2F",k2f);
 
+    // Radians to degrees
+    mFunctionCollection.addFunction("RAD2DEG",new Functions::Function_multiply((360.0/2*3.1415926535)));
+
+    // Degrees to radians
+    mFunctionCollection.addFunction("DEG2RAD",new Functions::Function_multiply((2*3.1415926535/360.0)));
+
     mFunctionCollection.addFunction("WIND_SPEED",new Functions::Function_hypotenuse());
     mFunctionCollection.addFunction("WIND_DIR",new Functions::Function_windDir());
     mFunctionCollection.addFunction("WIND_V",new Functions::Function_vectorV());
@@ -4139,6 +4145,7 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
   FUNCTION_TRACE
   try
   {
+    printf("Update virtual files (%d)\n",(int)mVirtualContentEnabled);
     if (!mVirtualContentEnabled)
       return;
 
@@ -4236,6 +4243,28 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
     PRINT_DATA(mDebugLog,"* Creating virtual files : %lu\n",gridFileMap.size());
 
     registerVirtualFiles(gridFileMap);
+
+    PRINT_DATA(mDebugLog,"* Removing old virtual file registrations\n");
+
+    std::set<uint> idList;
+    mGridFileManager.getVirtualFiles(idList);
+
+    if (mVirtualContentEnabled)
+    {
+      uint len = fullContentList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::ContentInfo *cInfo = fullContentList.getContentInfoByIndex(t);
+        if (cInfo != NULL  &&  (cInfo->mFlags &  T::ContentInfo::Flags::VirtualContent) != 0)
+        {
+          if (idList.find(cInfo->mFileId) == idList.end())
+          {
+            mContentServer->deleteFileInfoById(mServerSessionId,cInfo->mFileId);
+          }
+        }
+      }
+    }
+
   }
   catch (...)
   {
@@ -4481,7 +4510,6 @@ void ServiceImplementation::fullUpdate()
         PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
         return;
       }
-
 
       T::ContentInfoList contentInfoList;
       len = fileInfoList.getLength();

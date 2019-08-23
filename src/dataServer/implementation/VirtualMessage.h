@@ -110,6 +110,14 @@ class VirtualMessage : public Message
     virtual void                    executeFunctionCall4(std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters) const;
     virtual void                    executeFunctionCall4(T::CoordinateType coordinateType,T::GridValueList& inValueList1,T::GridValueList& inValueList2,T::GridValueList& outValueList) const;
 
+    virtual void                    executeFunctionCall7(std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& inParameters3,std::vector<float>& outParameters) const;
+    virtual void                    executeFunctionCall7(std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& inParameters3,std::vector<double>& outParameters) const;
+    virtual void                    executeFunctionCall7(T::GridValueList& inValueList1,T::GridValueList& inValueList2,T::GridValueList& inValueList3,T::GridValueList& outValueList) const;
+
+    virtual void                    executeFunctionCall8(std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& inParameters3,std::vector<float>& inParameters4,std::vector<float>& outParameters) const;
+    virtual void                    executeFunctionCall8(std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& inParameters3,std::vector<double>& inParameters4,std::vector<double>& outParameters) const;
+    virtual void                    executeFunctionCall8(T::GridValueList& inValueList1,T::GridValueList& inValueList2,T::GridValueList& inValueList3,T::GridValueList& inValueList4,T::GridValueList& outValueList) const;
+
     GRID::VirtualGridFile*          mVirtualGridFile;
     mutable GRID::MessagePtr_vec    mMessageList;
     Functions::FunctionCollection*  mFunctionCollection;

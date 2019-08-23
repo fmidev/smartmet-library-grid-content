@@ -60,6 +60,14 @@ class LuaFile
                       short forecastNumber,
                       short interpolationMethod);
 
+    // Type 7: Takes three vectors and returns one vector
+    void            executeFunctionCall7(std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& inParameters3,std::vector<float>& outParameters);
+    void            executeFunctionCall7(std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& inParameters3,std::vector<double>& outParameters);
+
+    // Type 8: Takes four vectors and returns one vector
+    void            executeFunctionCall8(std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& inParameters3,std::vector<float>& inParameters4,std::vector<float>& outParameters);
+    void            executeFunctionCall8(std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& inParameters3,std::vector<double>& inParameters4,std::vector<double>& outParameters);
+
     void            print(std::ostream& stream,uint level,uint optionFlags);
 
   protected:

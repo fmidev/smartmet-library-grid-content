@@ -126,8 +126,7 @@ void VirtualContentDefinitionFile::checkUpdates()
 
 
 
-
-void VirtualContentDefinitionFile::getContentDefinitions(std::string sourceParamName,std::string producerName,int geometryId,VirtualContentDefinition_vec& definitions)
+void VirtualContentDefinitionFile::getContentDefinitions(T::ContentInfo& contentInfo,std::string producerName,VirtualContentDefinition_vec& definitions)
 {
   try
   {
@@ -135,15 +134,27 @@ void VirtualContentDefinitionFile::getContentDefinitions(std::string sourceParam
 
     for (auto it = mContentDefList.begin(); it != mContentDefList.end(); ++it)
     {
-      if (it->mGeometryId < 0 || it->mGeometryId == geometryId)
+      for (auto sp = it->mSourceParameters.begin(); sp != it->mSourceParameters.end(); ++sp)
       {
-        if (it->mProducerName.length() == 0  ||  strcasecmp(it->mProducerName.c_str(),producerName.c_str()) == 0)
+        if (strcasecmp(sp->mParameterName.c_str(),contentInfo.mFmiParameterName.c_str()) == 0)
         {
-          for (auto sp = it->mSourceParameters.begin(); sp != it->mSourceParameters.end(); ++sp)
+          if (sp->mProducerName == "" || strcasecmp(sp->mProducerName.c_str(),producerName.c_str()) == 0)
           {
-            if (strcasecmp(sp->c_str(),sourceParamName.c_str()) == 0)
+            if (sp->mGeometryId == "" || atoi(sp->mGeometryId.c_str()) == contentInfo.mGeometryId)
             {
-              definitions.push_back(*it);
+              if (sp->mLevelId == "" || atoi(sp->mLevelId.c_str()) == contentInfo.mFmiParameterLevelId)
+              {
+                if (sp->mLevel == "" || atoi(sp->mLevel.c_str()) == contentInfo.mParameterLevel)
+                {
+                  if (sp->mForecastType == "" || atoi(sp->mForecastType.c_str()) == contentInfo.mForecastType)
+                  {
+                    if (sp->mForecastNumber == "" || atoi(sp->mForecastNumber.c_str()) == contentInfo.mForecastNumber)
+                    {
+                      definitions.push_back(*it);
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -183,18 +194,20 @@ void VirtualContentDefinitionFile::loadFile()
         std::vector<std::string> partList;
         splitString(st,';',partList);
 
-        if (partList.size() >= 5)
+        if (partList.size() >= 4)
         {
           VirtualContentDefinition rec;
+          std::vector<std::string> params;
 
-          rec.mVirtualParameter = partList[0];
-          splitString(partList[1],',',rec.mSourceParameters);
+          rec.mVirtualParameter.set(partList[0]);
+          splitString(partList[1],',',params);
+          for (auto it = params.begin(); it != params.end(); ++it)
+          {
+            rec.mSourceParameters.push_back(ParameterDef(*it));
+          }
+
           rec.mFunctionName = partList[2];
           rec.mFunctionCallMethod = toInt64(partList[3].c_str());
-          rec.mProducerName = partList[4];
-          if (partList[5].length() > 0)
-            rec.mGeometryId = toInt64(partList[5].c_str());
-
           mContentDefList.push_back(rec);
         }
       }
