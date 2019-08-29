@@ -10,15 +10,6 @@ namespace SmartMet
 namespace QueryServer
 {
 
-// Flags
-
-enum QueryParameterValuesFlags
-{
-  QPF_ADDITIONAL_VALUE    = 1 << 0,   // Value is added in order to fill missing times
-  QPF_AGGREGATION_VALUE   = 1 << 1   // Value is added for aggregation purposes
-};
-
-
 class ParameterValues
 {
   public:
@@ -47,6 +38,18 @@ class ParameterValues
     T::GridValueList        mValueList;
     T::ParamValue_vec       mValueVector;
     T::ByteData_vec         mValueData;
+
+
+    class Flags
+    {
+      public:
+        static const uint  AdditionalValue                       = 1 << 0;  // Value is added in order to fill missing times
+        static const uint  AggregationValue                      = 1 << 1;  // Value is added for aggregation purposes
+        static const uint  DataAvailable                         = 1 << 2;
+        static const uint  DataAvailableByTimeInterpolation      = 1 << 3;
+        static const uint  DataAvailableByLevelInterpolation     = 1 << 4;
+    };
+
 };
 
 

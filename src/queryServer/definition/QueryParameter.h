@@ -13,13 +13,6 @@ typedef std::pair<uint,std::string> FunctionParam;
 typedef std::vector<FunctionParam> FunctionParam_vec;
 typedef std::vector<uint> Color_vec;
 
-enum QueryParameterFlags
-{
-  QPF_PRESSURE_LEVEL_INTERPOLATION_ENABLED   = 1 << 0,
-  QPF_HEIGHT_LEVEL_INTERPOLATION_ENABLED     = 1 << 1
-};
-
-
 
 class QueryParameter
 {
@@ -91,7 +84,10 @@ class QueryParameter
     class Flags
     {
       public:
-        static const uint  ReturnCoordinates  = 1 << 0;
+        static const uint  PressureLevelInterpolation   = 1 << 0;
+        static const uint  HeightLevelInterpolation     = 1 << 1;
+        static const uint  ReturnCoordinates            = 1 << 2;
+        static const uint  NoReturnValues               = 1 << 3;
     };
 };
 
