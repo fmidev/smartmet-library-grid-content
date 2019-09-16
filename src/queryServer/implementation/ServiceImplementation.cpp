@@ -2453,13 +2453,6 @@ bool ServiceImplementation::getSpecialValues(
     }
 
     uint contentLen = contentList.getLength();
-    bool multipleValues = contentList.containsSameForecastTimes();
-    if (multipleValues)
-    {
-      PRINT_DATA(mDebugLog, "         + Content records contains multiple values with the same timestep\n");
-      return false;
-    }
-
     if (contentLen == 0)
       return false;
 
@@ -2728,13 +2721,6 @@ bool ServiceImplementation::getValueVectors(
     }
 
     uint contentLen = contentList.getLength();
-    bool multipleValues = contentList.containsSameForecastTimes();
-    if (multipleValues)
-    {
-      PRINT_DATA(mDebugLog, "         + Content records contains multiple values with the same timestep\n");
-      return false;
-    }
-
     if (contentLen == 0)
       return false;
 
@@ -2929,7 +2915,7 @@ bool ServiceImplementation::getValueVectors(
         return true;
       }
 
-      if (contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
+      if (contentInfo1->mForecastTime == forecastTime  &&  contentInfo2->mForecastTime == forecastTime && contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
         // We did not find a grid with the exact level but we find grids that
         // are before and after the current level. This means that we should do
@@ -3134,13 +3120,6 @@ bool ServiceImplementation::getGridFiles(
     }
 
     uint contentLen = contentList.getLength();
-    bool multipleValues = contentList.containsSameForecastTimes();
-    if (multipleValues)
-    {
-      PRINT_DATA(mDebugLog, "         + Content records contains multiple values with the same timestep\n");
-      return false;
-    }
-
     if (contentLen == 0)
       return false;
 
@@ -3617,7 +3596,7 @@ bool ServiceImplementation::getGridFiles(
         return true;
       }
 
-      if (contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
+      if (contentInfo1->mForecastTime == forecastTime  &&  contentInfo2->mForecastTime == forecastTime && contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
         // We did not find a grid with the exact level but we find grids that
         // are before and after the current level. This means that we should do
@@ -5569,7 +5548,7 @@ void ServiceImplementation::getGridValues(
     if (mDebugLog != nullptr)
     {
       PRINT_DATA(mDebugLog, "\nMETHOD getGridValues()\n");
-      PRINT_DATA(mDebugLog, "  - queryType                : %u items\n", queryType);
+      PRINT_DATA(mDebugLog, "  - queryType                : %u\n", queryType);
       PRINT_DATA(mDebugLog, "  - producers                : %lu items\n", producers.size());
       for (auto it = producers.begin(); it != producers.end(); ++it)
         PRINT_DATA(mDebugLog, "    * %s:%d\n", it->first.c_str(), it->second);
@@ -6174,7 +6153,7 @@ void ServiceImplementation::getGridValues(
     if (mDebugLog != nullptr)
     {
       PRINT_DATA(mDebugLog, "\nMETHOD getGridValues()\n");
-      PRINT_DATA(mDebugLog, "  - queryType                : %u items\n", queryType);
+      PRINT_DATA(mDebugLog, "  - queryType                : %u\n", queryType);
       PRINT_DATA(mDebugLog, "  - producers                : %lu items\n", producers.size());
       for (auto it = producers.begin(); it != producers.end(); ++it)
         PRINT_DATA(mDebugLog, "    * %s:%d\n", it->first.c_str(), it->second);
