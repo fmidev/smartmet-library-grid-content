@@ -46,7 +46,7 @@ endif
 ifeq ($(CXX), clang++)
 
  FLAGS = \
-	-std=c++11 -fPIC -MD \
+	-std=c++11 -fPIC -MD -fno-omit-frame-pointer \
 	-Weverything \
 	-Wno-c++98-compat \
 	-Wno-float-equal \
@@ -61,7 +61,7 @@ ifeq ($(CXX), clang++)
 
 else
 
- FLAGS = -std=c++11 -fdiagnostics-color=always -fPIC -MD -Wall -W -Wno-unused-parameter $(CORBA_FLAGS)
+ FLAGS = -std=c++11 -fdiagnostics-color=always -fPIC -MD -fno-omit-frame-pointer -Wall -W -Wno-unused-parameter $(CORBA_FLAGS)
 
  FLAGS_DEBUG = \
 	-Wcast-align \
