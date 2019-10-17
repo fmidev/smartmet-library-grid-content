@@ -63,7 +63,7 @@ interface ServiceInterface
 
   long  addFileInfo(in long long sessionId,inout CorbaFileInfo fileInfo);
   long  addFileInfoWithContentList(in long long sessionId,inout CorbaFileInfo fileInfo,inout CorbaContentInfoList contentInfoList);
-  long  addFileInfoListWithContent(in long long sessionId,inout CorbaFileContentList fileContentList);
+  long  addFileInfoListWithContent(in long long sessionId,in unsigned long requestFlags,inout CorbaFileContentList fileContentList);
   long  deleteFileInfoById(in long long sessionId,in unsigned long fileId);
   long  deleteFileInfoByName(in long long sessionId,in string filename);
   long  deleteFileInfoListByGroupFlags(in long long sessionId,in unsigned long groupFlags);

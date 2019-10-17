@@ -4047,7 +4047,7 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
 
         if (fileAndContentList.size() > 50000)
         {
-          mContentServer->addFileInfoListWithContent(mServerSessionId,fileAndContentList);
+          mContentServer->addFileInfoListWithContent(mServerSessionId,0,fileAndContentList);
 
           for (auto ff = fileAndContentList.begin(); ff != fileAndContentList.end(); ++ff)
           {
@@ -4098,7 +4098,7 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
 
     if (fileAndContentList.size() > 0)
     {
-      mContentServer->addFileInfoListWithContent(mServerSessionId,fileAndContentList);
+      mContentServer->addFileInfoListWithContent(mServerSessionId,0,fileAndContentList);
 
       for (auto ff = fileAndContentList.begin(); ff != fileAndContentList.end(); ++ff)
       {

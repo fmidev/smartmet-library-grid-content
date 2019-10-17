@@ -125,7 +125,7 @@ class ContentInfoList
     void                getForecastTimeListByProducerId(uint producerId,std::set<std::string>& forecastTimeList);
     //void              getForecastTimeList(string_vec& forecastTimeList);
     void                getFmiParamLevelIdListByFmiParameterId(T::ParamId fmiParameterId,std::vector<T::ParamLevelId>& paramLevelIdList);
-    void                getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId,std::vector<T::ParamLevel>& paramLevelList);
+    void                getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId,std::set<T::ParamLevel>& paramLevelList);
     void                getParamLevelInfoListByFmiParameterId(T::ParamId fmiParameterId,ParameterLevelInfoList& parameterLevelInfoList);
 
     void                getLevelInfoList(T::LevelInfoList& levelInfoList);

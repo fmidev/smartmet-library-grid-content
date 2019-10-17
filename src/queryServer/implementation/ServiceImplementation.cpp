@@ -386,6 +386,40 @@ void ServiceImplementation::loadProducerFile()
 
 
 
+void ServiceImplementation::getGeometryIdListByCoordinates(Producer_vec& producers,T::AreaCoordinates& coordinates, std::set<T::GeometryId>& geometryIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    for (auto prod = producers.begin(); prod != producers.end(); ++prod)
+    {
+      bool match = true;
+      for (auto cList = coordinates.begin(); cList != coordinates.end(); ++cList)
+      {
+        for (auto coordinate = cList->begin(); coordinate != cList->end(); ++coordinate)
+        {
+          double grid_i = ParamValueMissing;
+          double grid_j = ParamValueMissing;
+          if (!Identification::gridDef.getGridPointByGeometryIdAndLatLonCoordinates(prod->second,coordinate->y(), coordinate->x(),grid_i,grid_j))
+            match = false;
+        }
+      }
+      if (match)
+        geometryIdList.insert(prod->second);
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, nullptr);
+  }
+}
+
+
+
+
+
+
+#if 0
 void ServiceImplementation::getGeometryIdListByCoordinates(T::AreaCoordinates& coordinates, std::set<T::GeometryId>& geometryIdList)
 {
   FUNCTION_TRACE
@@ -434,9 +468,7 @@ void ServiceImplementation::getGeometryIdListByCoordinates(T::AreaCoordinates& c
     throw SmartMet::Spine::Exception(BCP, exception_operation_failed, nullptr);
   }
 }
-
-
-
+#endif
 
 
 void ServiceImplementation::getGeometryIdListByCoordinates(uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& coordinates, std::set<T::GeometryId>& geometryIdList)
@@ -1585,6 +1617,8 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
     Producer_vec producers;
     getProducers(query, producers);
     T::Coordinate_vec coordinates;
+    std::string analysisTime = query.mAnalysisTime;
+    uint queryFlags = query.mFlags;
 
     if (producers.size() == 0)
       return Result::NO_PRODUCERS_FOUND;
@@ -1595,11 +1629,14 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
     if (query.mGeometryIdList.size() > 0)
     {
+      // The query defines the geometries that we need to use.
       geometryIdList = query.mGeometryIdList;
     }
     else
     if (query.mFlags & Query::Flags::GeometryHitNotRequired)
     {
+      // The query defines that the requested coordinates does not need to
+      // hit the area. So, all geometries are acceptable.
       Identification::gridDef.getGeometryIdList(geometryIdList);
     }
     else
@@ -1607,6 +1644,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
       const char *geometryIdStr = query.mAttributeList.getAttributeValue("grid.geometryId");
       if (geometryIdStr != nullptr)
       {
+        // Selecting geometries which cover the requested geometry.
         getGeometryIdListByGeometryId(toInt32(geometryIdStr),geometryIdList);
       }
       else
@@ -1614,11 +1652,13 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
         const char *gridUrnStr = query.mAttributeList.getAttributeValue("grid.urn");
         if (gridUrnStr != nullptr)
         {
+          // All geometries are allowed.
           Identification::gridDef.getGeometryIdList(geometryIdList);
         }
         else
         {
-          getGeometryIdListByCoordinates(query.mAreaCoordinates, geometryIdList);
+          // Selecting valid geometries according to given coordiantes.
+          getGeometryIdListByCoordinates(producers,query.mAreaCoordinates, geometryIdList);
         }
       }
     }
@@ -1664,6 +1704,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
         int geometryId = qParam->mGeometryId;
         if (generationFlags == 0)
           generationFlags = query.mGenerationFlags;
+
 
         // qParam->print(std::cout,0,0);
 
@@ -1742,8 +1783,8 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
               }
             }
 
-            getGridValues(qParam->mType,tmpProducers, geomIdList, producerId, query.mAnalysisTime, generationFlags, paramName, paramLevelId, paramLevel, forecastType,
-                forecastNumber, parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, startTime, endTime, query.mFlags, query.mTimesteps,
+            getGridValues(qParam->mType,tmpProducers, geomIdList, producerId, analysisTime, generationFlags, paramName, paramLevelId, paramLevel, forecastType,
+                forecastNumber, queryFlags, parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, startTime, endTime, query.mTimesteps,
                 query.mTimestepSizeInMinutes,qParam->mLocationType, query.mCoordinateType, query.mAreaCoordinates, qParam->mContourLowValues, qParam->mContourHighValues, query.mAttributeList,
                 query.mRadius, query.mMaxParameterValues, qParam->mPrecision, qParam->mValueList,qParam->mCoordinates);
 
@@ -1752,6 +1793,13 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
               if (producerId == 0 && qParam->mValueList[0].mProducerId != 0)
               {
                 parameterProducers.insert(std::pair<std::string, uint>(paramName + ":" + producerName, qParam->mValueList[0].mProducerId));
+              }
+
+              if ((query.mFlags & Query::Flags::SameAnalysisTime) != 0  &&  analysisTime != qParam->mValueList[0].mAnalysisTime)
+              {
+                // The query requires that we use the same analysis time with all parameters
+                analysisTime = qParam->mValueList[0].mAnalysisTime;
+                queryFlags = queryFlags | Query::Flags::AnalysisTimeMatchRequired;
               }
 
               uint len = qParam->mValueList[0].mValueList.getLength();
@@ -1876,6 +1924,8 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
     Producer_vec producers;
     getProducers(query, producers);
     T::Coordinate_vec coordinates;
+    std::string analysisTime = query.mAnalysisTime;
+    uint queryFlags = query.mFlags;
 
     if (producers.size() == 0)
       return Result::NO_PRODUCERS_FOUND;
@@ -1887,7 +1937,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
       geometryIdList = query.mGeometryIdList;
     }
     else
-    if (query.mFlags & Query::Flags::GeometryHitNotRequired)
+    if ((query.mFlags & Query::Flags::GeometryHitNotRequired))
     {
       Identification::gridDef.getGeometryIdList(geometryIdList);
     }
@@ -1907,7 +1957,8 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
         }
         else
         {
-          getGeometryIdListByCoordinates(query.mAreaCoordinates, geometryIdList);
+          //Identification::gridDef.getGeometryIdList(geometryIdList);
+          getGeometryIdListByCoordinates(producers,query.mAreaCoordinates, geometryIdList);
         }
       }
     }
@@ -2061,8 +2112,8 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
                 }
               }
 
-              getGridValues(qParam->mType,tmpProducers, geomIdList, producerId, query.mAnalysisTime, gflags, reverseGenerations, paramName, paramLevelId, paramLevel, forecastType,
-                  forecastNumber, parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, *fTime, false, qParam->mLocationType,
+              getGridValues(qParam->mType,tmpProducers, geomIdList, producerId, analysisTime, gflags, reverseGenerations, paramName, paramLevelId, paramLevel, forecastType,
+                  forecastNumber,queryFlags,parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, *fTime, false, qParam->mLocationType,
                   query.mCoordinateType, query.mAreaCoordinates, qParam->mContourLowValues, qParam->mContourHighValues, query.mAttributeList,query.mRadius,qParam->mPrecision,valueList,qParam->mCoordinates);
 
               if (producerId == 0 && valueList.mProducerId != 0)
@@ -2077,9 +2128,16 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
                 if (producerId == 0)
                   producerId = valueList.mProducerId;
 
-                if (timeInterpolationMethod == T::TimeInterpolationMethod::Forbidden)
+                if ((query.mFlags & Query::Flags::SameAnalysisTime) != 0  &&  analysisTime != valueList.mAnalysisTime)
                 {
-                  // If the time interpolation is forbidden, we should no change the generation.
+                  // The query requires that we use the same analysis time with all parameters
+                  analysisTime = valueList.mAnalysisTime;
+                  queryFlags = queryFlags | Query::Flags::AnalysisTimeMatchRequired;
+                }
+
+                if (timeInterpolationMethod == T::TimeInterpolationMethod::Forbidden || (qParam->mFlags & QueryParameter::Flags::SameAnalysisTime) != 0 || (query.mFlags & Query::Flags::SameAnalysisTime) != 0 )
+                {
+                  // If the time interpolation is forbidden or same analysisTime is required, we should no change the generation.
                   gflags = valueList.mGenerationFlags;
                 }
                 else
@@ -5525,6 +5583,7 @@ void ServiceImplementation::getGridValues(
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
     T::ForecastNumber forecastNumber,
+    uint queryFlags,
     uint parameterFlags,
     short areaInterpolationMethod,
     short timeInterpolationMethod,
@@ -5562,7 +5621,8 @@ void ServiceImplementation::getGridValues(
       PRINT_DATA(mDebugLog, "  - paramLevel               : %d\n", paramLevel);
       PRINT_DATA(mDebugLog, "  - forecastType             : %d\n", forecastType);
       PRINT_DATA(mDebugLog, "  - forecastNumber           : %d\n", forecastNumber);
-      PRINT_DATA(mDebugLog, "  - parameterFlags           : %u\n", parameterFlags);
+      PRINT_DATA(mDebugLog, "  - queryFlags               : %04x\n", queryFlags);
+      PRINT_DATA(mDebugLog, "  - parameterFlags           : %04x\n", parameterFlags);
       PRINT_DATA(mDebugLog, "  - areaInterpolationMethod  : %d\n", areaInterpolationMethod);
       PRINT_DATA(mDebugLog, "  - timeInterpolationMethod  : %d\n", timeInterpolationMethod);
       PRINT_DATA(mDebugLog, "  - levelInterpolationMethod : %d\n", levelInterpolationMethod);
@@ -5640,7 +5700,14 @@ void ServiceImplementation::getGridValues(
             {
               getParameterMappings(producerInfo.mName, parameterKey, producerGeometryId, T::ParamLevelIdTypeValue::ANY, paramLevelId, paramLevel, false, mappings);
               if (mappings.size() == 0)
-                getParameterMappings(producerInfo.mName, parameterKey, producerGeometryId, T::ParamLevelIdTypeValue::ANY, paramLevelId, -1, false, mappings);
+              {
+                // Getting a mapping by using the levelId. This probably returns all levels belonging
+                // to the current levelId. We need just one for mapping.
+                ParameterMapping_vec tmpMappings;
+                getParameterMappings(producerInfo.mName, parameterKey, producerGeometryId, T::ParamLevelIdTypeValue::ANY, paramLevelId, -1,false, tmpMappings);
+                if (tmpMappings.size() > 0)
+                  mappings.push_back(tmpMappings[0]);
+              }
             }
             else
             {
@@ -5673,19 +5740,22 @@ void ServiceImplementation::getGridValues(
                     generationValid = true;
                   }
                   else
-                  if (g == 0  &&  analysisTimes[g] < analysisTime)
+                  if ((queryFlags & Query::Flags::AnalysisTimeMatchRequired) == 0)
                   {
-                    generationValid = true;
-                  }
-                  else
-                  if ((g+1) == gLen  &&  analysisTimes[g] > analysisTime)
-                  {
-                    generationValid = true;
-                  }
-                  else
-                  if (analysisTimes[g] > analysisTime  &&  (g+1) < gLen  &&  analysisTimes[g+1] < analysisTime)
-                  {
-                    generationValid = true;
+                    if (g == 0  &&  analysisTimes[g] < analysisTime)
+                    {
+                      generationValid = true;
+                    }
+                    else
+                    if ((g+1) == gLen  &&  analysisTimes[g] > analysisTime)
+                    {
+                      generationValid = true;
+                    }
+                    else
+                    if (analysisTimes[g] > analysisTime  &&  (g+1) < gLen  &&  analysisTimes[g+1] < analysisTime)
+                    {
+                      generationValid = true;
+                    }
                   }
                 }
                 else
@@ -5872,6 +5942,7 @@ void ServiceImplementation::getGridValues(
                             T::ParamLevel a_paramLevel = paramLevel;
                             T::ForecastType a_forecastType = forecastType;
                             T::ForecastNumber a_forecastNumber = forecastNumber;
+                            uint a_queryFlags = queryFlags;
                             uint a_parameterFlags = parameterFlags;
                             short a_areaInterpolationMethod = areaInterpolationMethod;
                             short a_timeInterpolationMethod = timeInterpolationMethod;
@@ -5963,7 +6034,7 @@ void ServiceImplementation::getGridValues(
 
                                   ParameterValues valList;
                                   getGridValues(queryType,producers, geomIdList, a_producerId, a_analysisTime, a_generationFlags, a_reverseGenerations, a_parameterKey, a_paramLevelId,
-                                      a_paramLevel, a_forecastType, a_forecastNumber, a_parameterFlags, a_areaInterpolationMethod, a_timeInterpolationMethod,
+                                      a_paramLevel, a_forecastType, a_forecastNumber, a_queryFlags, a_parameterFlags, a_areaInterpolationMethod, a_timeInterpolationMethod,
                                       a_levelInterpolationMethod, a_forecastTime, a_timeMatchRequired, a_locationType, coordinateType, areaCoordinates, contourLowValues, contourHighValues,
                                       queryAttributeList,a_radius, precision, valList,coordinates);
 
@@ -6126,13 +6197,13 @@ void ServiceImplementation::getGridValues(
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
     T::ForecastNumber forecastNumber,
+    uint queryFlags,
     uint parameterFlags,
     short areaInterpolationMethod,
     short timeInterpolationMethod,
     short levelInterpolationMethod,
     std::string startTime,
     std::string endTime,
-    uint flags,
     uint timesteps,
     uint timestepSizeInMinutes,
     uchar locationType,
@@ -6166,13 +6237,13 @@ void ServiceImplementation::getGridValues(
       PRINT_DATA(mDebugLog, "  - paramLevel               : %d\n", paramLevel);
       PRINT_DATA(mDebugLog, "  - forecastType             : %d\n", forecastType);
       PRINT_DATA(mDebugLog, "  - forecastNumber           : %d\n", forecastNumber);
-      PRINT_DATA(mDebugLog, "  - parameterFlags           : %u\n", parameterFlags);
+      PRINT_DATA(mDebugLog, "  - queryFlags               : %04x\n", queryFlags);
+      PRINT_DATA(mDebugLog, "  - parameterFlags           : %04x\n", parameterFlags);
       PRINT_DATA(mDebugLog, "  - areaInterpolationMethod  : %d\n", areaInterpolationMethod);
       PRINT_DATA(mDebugLog, "  - timeInterpolationMethod  : %d\n", timeInterpolationMethod);
       PRINT_DATA(mDebugLog, "  - levelInterpolationMethod : %d\n", levelInterpolationMethod);
       PRINT_DATA(mDebugLog, "  - startTime                : %s\n", startTime.c_str());
       PRINT_DATA(mDebugLog, "  - endTime                  : %s\n", endTime.c_str());
-      PRINT_DATA(mDebugLog, "  - flags                    : %d\n", flags);
       PRINT_DATA(mDebugLog, "  - timesteps                : %u\n", timesteps);
       PRINT_DATA(mDebugLog, "  - timestepSizeInMinutes    : %u\n", timestepSizeInMinutes);
       PRINT_DATA(mDebugLog, "  - locationType             : %d\n", locationType);
@@ -6203,11 +6274,11 @@ void ServiceImplementation::getGridValues(
     }
 
     bool ignoreStartTimeValue = false;
-    if ((flags & Query::Flags::StartTimeNotIncluded) != 0)
+    if ((queryFlags & Query::Flags::StartTimeNotIncluded) != 0)
       ignoreStartTimeValue = true;
 
     bool reverseGenerations = false;
-    if ((flags & Query::Flags::ReverseGenerationFlags) != 0)
+    if ((queryFlags & Query::Flags::ReverseGenerationFlags) != 0)
       reverseGenerations = true;
 
     // Going through the producer list.
@@ -6302,19 +6373,27 @@ void ServiceImplementation::getGridValues(
 
                     if (analysisTime.length() > 0)
                     {
-                      if (g == 0 &&  analysisTime < gInfo->mAnalysisTime)
+                      if (analysisTime == gInfo->mAnalysisTime)
                       {
                         generationValid = true;
                       }
                       else
-                      if (g == C_INT(gLen-1)  &&  analysisTime > gInfo->mAnalysisTime)
+                      if ((queryFlags & Query::Flags::AnalysisTimeMatchRequired) == 0)
                       {
-                        generationValid = true;
-                      }
-                      else
-                      if (analysisTime == gInfo->mAnalysisTime || (gInfo->mAnalysisTime < analysisTime  &&  (gNext == nullptr  ||  gNext->mAnalysisTime > analysisTime)))
-                      {
-                        generationValid = true;
+                        if (g == 0 &&  analysisTime < gInfo->mAnalysisTime)
+                        {
+                          generationValid = true;
+                        }
+                        else
+                        if (g == C_INT(gLen-1)  &&  analysisTime > gInfo->mAnalysisTime)
+                        {
+                          generationValid = true;
+                        }
+                        else
+                        if (analysisTime == gInfo->mAnalysisTime || (gInfo->mAnalysisTime < analysisTime  &&  (gNext == nullptr  ||  gNext->mAnalysisTime > analysisTime)))
+                        {
+                          generationValid = true;
+                        }
                       }
                     }
                     else
@@ -6352,6 +6431,13 @@ void ServiceImplementation::getGridValues(
                           }
                         }
                       }
+
+                      if ((parameterFlags & QueryParameter::Flags::SameAnalysisTime) != 0 || (queryFlags & Query::Flags::SameAnalysisTime) != 0)
+                      {
+                        // The requested time interval should contain data only from the same generation.
+                        if (contentTimeList.size() > 0)
+                          g = 0;
+                      }
                     }
                   }
 
@@ -6365,7 +6451,7 @@ void ServiceImplementation::getGridValues(
 
                     std::map<std::string,uint> contentTimeList2;
 
-                    if (timestepSizeInMinutes > 0 && (flags & Query::Flags::StartTimeFromData) != 0  &&  (flags & Query::Flags::EndTimeFromData) == 0)
+                    if (timestepSizeInMinutes > 0 && (queryFlags & Query::Flags::StartTimeFromData) != 0  &&  (queryFlags & Query::Flags::EndTimeFromData) == 0)
                     {
                       auto it = contentTimeList.begin();
                       time_t  tt = utcTimeToTimeT(it->first);
@@ -6382,7 +6468,7 @@ void ServiceImplementation::getGridValues(
                       }
                     }
                     else
-                    if (timestepSizeInMinutes > 0 && (flags & Query::Flags::StartTimeFromData) == 0  &&  (flags & Query::Flags::EndTimeFromData) != 0)
+                    if (timestepSizeInMinutes > 0 && (queryFlags & Query::Flags::StartTimeFromData) == 0  &&  (queryFlags & Query::Flags::EndTimeFromData) != 0)
                     {
                       auto it = contentTimeList.rbegin();
                       time_t  tt = utcTimeToTimeT(it->first);
@@ -6400,7 +6486,7 @@ void ServiceImplementation::getGridValues(
                       }
                     }
                     else
-                    if (timestepSizeInMinutes > 0 && (flags & Query::Flags::StartTimeFromData) != 0  &&  (flags & Query::Flags::EndTimeFromData) != 0)
+                    if (timestepSizeInMinutes > 0 && (queryFlags & Query::Flags::StartTimeFromData) != 0  &&  (queryFlags & Query::Flags::EndTimeFromData) != 0)
                     {
                       auto it1 = contentTimeList.begin();
                       time_t  tt = utcTimeToTimeT(it1->first);
@@ -6428,7 +6514,7 @@ void ServiceImplementation::getGridValues(
                       {
                         ParameterValues valList;
                         getGridValues(queryType,producers2, geometryIdList2, producerInfo.mProducerId, analysisTime, forecastTime->second, reverseGenerations, parameterKey, paramLevelId, paramLevel,
-                            forecastType, forecastNumber, parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, forecastTime->first, true,
+                            forecastType, forecastNumber, queryFlags, parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, forecastTime->first, true,
                             locationType, coordinateType, areaCoordinates, contourLowValues, contourHighValues, queryAttributeList, radius, precision, valList, coordinates);
 
                         //valList.print(std::cout,0,0);

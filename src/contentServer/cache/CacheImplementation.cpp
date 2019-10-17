@@ -1706,7 +1706,7 @@ int CacheImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
 
 
 
-int CacheImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std::vector<T::FileAndContent>& fileAndContentList)
+int CacheImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
 {
   FUNCTION_TRACE
   try
@@ -1714,7 +1714,7 @@ int CacheImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std:
     if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
-    int result = mContentStorage->addFileInfoListWithContent(sessionId,fileAndContentList);
+    int result = mContentStorage->addFileInfoListWithContent(sessionId,requestFlags,fileAndContentList);
     //processEvents(false);
     return result;
   }

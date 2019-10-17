@@ -864,6 +864,34 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(u
 
 
 
+GenerationInfo* GenerationInfoList::getLastGenerationInfoByAnalysisTime()
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    T::GenerationInfo *generationInfo = nullptr;
+    for (uint t=0; t<mLength; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (generationInfo == nullptr  ||  generationInfo->mAnalysisTime < info->mAnalysisTime)
+          generationInfo = info;
+      }
+    }
+    return generationInfo;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(uint producerId)
 {
   FUNCTION_TRACE

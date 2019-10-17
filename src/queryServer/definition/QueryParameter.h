@@ -88,6 +88,7 @@ class QueryParameter
         static const uint  HeightLevelInterpolation     = 1 << 1;
         static const uint  ReturnCoordinates            = 1 << 2;
         static const uint  NoReturnValues               = 1 << 3;
+        static const uint  SameAnalysisTime             = 1 << 4;
     };
 };
 

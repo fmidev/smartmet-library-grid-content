@@ -2178,7 +2178,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
 
 
 
-int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std::vector<T::FileAndContent>& fileAndContentList)
+int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
 {
   FUNCTION_TRACE
   try
@@ -2219,7 +2219,8 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std:
 
         // ### Deleting old content information.
 
-        deleteContentByFileId(ff->mFileInfo.mFileId);
+        if (requestFlags & 0x00000001)
+          deleteContentByFileId(ff->mFileInfo.mFileId);
       }
       else
       {

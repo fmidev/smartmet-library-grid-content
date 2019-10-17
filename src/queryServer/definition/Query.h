@@ -56,12 +56,14 @@ class Query
     class Flags
     {
       public:
-        static const uint StartTimeFromData       = 1 << 0;
-        static const uint EndTimeFromData         = 1 << 1;
-        static const uint StartTimeNotIncluded    = 1 << 2;
-        static const uint EndTimeNotIncluded      = 1 << 3;
-        static const uint ReverseGenerationFlags  = 1 << 4;
-        static const uint GeometryHitNotRequired  = 1 << 5;
+        static const uint StartTimeFromData               = 1 << 0;
+        static const uint EndTimeFromData                 = 1 << 1;
+        static const uint StartTimeNotIncluded            = 1 << 2;
+        static const uint EndTimeNotIncluded              = 1 << 3;
+        static const uint ReverseGenerationFlags          = 1 << 4;
+        static const uint GeometryHitNotRequired          = 1 << 5;
+        static const uint SameAnalysisTime                = 1 << 6;
+        static const uint AnalysisTimeMatchRequired       = 1 << 7;
     };
 
 };

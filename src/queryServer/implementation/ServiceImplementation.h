@@ -83,6 +83,7 @@ class ServiceImplementation : public ServiceInterface
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
                        T::ForecastNumber forecastNumber,
+                       uint queryFlags,
                        uint parameterFlags,
                        short areaInterpolationMethod,
                        short timeInterpolationMethod,
@@ -112,13 +113,13 @@ class ServiceImplementation : public ServiceInterface
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
                        T::ForecastNumber forecastNumber,
+                       uint queryFlags,
                        uint parameterFlags,
                        short areaInterpolationMethod,
                        short timeInterpolationMethod,
                        short levelInterpolationMethod,
                        std::string startTime,
                        std::string endTime,
-                       uint flags,
                        uint timesteps,
                        uint timestepSizeInMinutes,
                        uchar locationType,
@@ -198,9 +199,14 @@ class ServiceImplementation : public ServiceInterface
                        Producer_vec& producers);
 
      void           getGeometryIdListByCoordinates(
+                     Producer_vec& producers,
+                     T::AreaCoordinates& coordinates,
+                     std::set<T::GeometryId>& geometryIdList);
+/*
+     void           getGeometryIdListByCoordinates(
                        T::AreaCoordinates& coordinates,
                        std::set<T::GeometryId>& geometryIdList);
-
+*/
      void           getGeometryIdListByCoordinates(
                        uint gridWidth,
                        uint gridHeight,

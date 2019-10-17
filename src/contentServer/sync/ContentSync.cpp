@@ -828,7 +828,7 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
 
               if (fileAndContentList.size() > 50000)
               {
-                targetInterface->addFileInfoListWithContent(mSessionId,fileAndContentList);
+                targetInterface->addFileInfoListWithContent(mSessionId,0,fileAndContentList);
                 fileAndContentList.clear();
               }
 
@@ -858,7 +858,7 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
 
     if (fileAndContentList.size() > 0)
     {
-      targetInterface->addFileInfoListWithContent(mSessionId,fileAndContentList);
+      targetInterface->addFileInfoListWithContent(mSessionId,0,fileAndContentList);
       fileAndContentList.clear();
     }
   }

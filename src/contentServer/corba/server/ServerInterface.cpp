@@ -1274,7 +1274,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::addFileInfoListWithContent(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaFileContentList& fileContentList)
+::CORBA::Long ServerInterface::addFileInfoListWithContent(::CORBA::LongLong sessionId, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaFileContentList& fileContentList)
 {
   FUNCTION_TRACE
   try
@@ -1286,7 +1286,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
     ContentServer::Corba::Converter::convert(fileContentList,sFileContentList);
 
-    int result = mService->addFileInfoListWithContent(sessionId,sFileContentList);
+    int result = mService->addFileInfoListWithContent(sessionId,requestFlags,sFileContentList);
     if (result == 0)
     {
       ContentServer::Corba::Converter::convert(sFileContentList,fileContentList);

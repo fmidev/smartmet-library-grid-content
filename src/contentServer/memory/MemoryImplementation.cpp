@@ -1843,7 +1843,7 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
 
 
 
-int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std::vector<T::FileAndContent>& fileAndContentList)
+int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
 {
   FUNCTION_TRACE
   try
@@ -1889,7 +1889,8 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std
 
         // ### Deleting old content information.
 
-        mContentInfoList[0].markDeletedByFileId(ff->mFileInfo.mFileId);
+        if (requestFlags & 0x00000001)
+          mContentInfoList[0].markDeletedByFileId(ff->mFileInfo.mFileId);
       }
       else
       {
@@ -1946,8 +1947,11 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std
       }
     }
 
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteMarkedContent();
+    if (requestFlags & 0x00000001)
+    {
+      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+        mContentInfoList[t].deleteMarkedContent();
+    }
 
     mFileInfoList.addFileInfoList(tmpFileList);
     mFileInfoListByName.addFileInfoList(tmpFileList);
@@ -1957,8 +1961,6 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std
       if (mContentInfoListEnabled[t])
         mContentInfoList[t].addContentInfoList(tmpContentList);
     }
-
-
 
     return Result::OK;
   }

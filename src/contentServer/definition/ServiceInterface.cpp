@@ -1033,16 +1033,16 @@ int ServiceInterface::addFileInfoWithContentList(T::SessionId sessionId,T::FileI
 
 
 
-int ServiceInterface::addFileInfoListWithContent(T::SessionId sessionId,std::vector<T::FileAndContent>& fileAndContentList)
+int ServiceInterface::addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
 {
   FUNCTION_TRACE
   try
   {
     unsigned long long timeStart = getTime();
-    int result = _addFileInfoListWithContent(sessionId,fileAndContentList);
+    int result = _addFileInfoListWithContent(sessionId,requestFlags,fileAndContentList);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,FileAndContent[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileAndContentList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,FileAndContent[%lu]);result %d;time %f;",__FUNCTION__,sessionId,requestFlags,fileAndContentList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3131,7 +3131,7 @@ int ServiceInterface::_addFileInfoWithContentList(T::SessionId sessionId,T::File
 
 
 
-int ServiceInterface::_addFileInfoListWithContent(T::SessionId sessionId,std::vector<T::FileAndContent>& fileAndContentList)
+int ServiceInterface::_addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }

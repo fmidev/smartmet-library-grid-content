@@ -1444,7 +1444,7 @@ int ClientImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
 
 
 
-int ClientImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std::vector<T::FileAndContent>& fileAndContentList)
+int ClientImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
 {
   try
   {
@@ -1454,6 +1454,7 @@ int ClientImplementation::_addFileInfoListWithContent(T::SessionId sessionId,std
 
     request.addLine("method","addFileInfoListWithContent");
     request.addLine("sessionId",sessionId);
+    request.addLine("requestFlags",requestFlags);
     request.addLine("length",length);
 
     char tmp[100];

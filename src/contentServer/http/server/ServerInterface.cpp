@@ -2724,6 +2724,14 @@ void ServerInterface::addFileInfoListWithContent(T::RequestMessage& request,T::R
       return;
     }
 
+    uint requestFlags = 0;
+    if (!request.getLineByKey("requestFlags",requestFlags))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: requestFlags");
+      return;
+    }
+
     uint length = 0;
     if (!request.getLineByKey("length",length))
     {
@@ -2768,7 +2776,7 @@ void ServerInterface::addFileInfoListWithContent(T::RequestMessage& request,T::R
       fileAndContentList.push_back(fc);
     }
 
-    int result = mService->addFileInfoListWithContent(sessionId,fileAndContentList);
+    int result = mService->addFileInfoListWithContent(sessionId,requestFlags,fileAndContentList);
 
     response.addLine("result",result);
     if (result == Result::OK)

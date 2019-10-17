@@ -404,6 +404,9 @@ void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attri
     const char *paramStr = attributeList.getAttributeValue("param");
     const char *typeStr = attributeList.getAttributeValue("type");
     const char *locationTypeStr = attributeList.getAttributeValue("locationType");
+    const char *areaInterpolationMethodStr = attributeList.getAttributeValue("areaInterpolationMethod");
+    const char *timeInterpolationMethodStr = attributeList.getAttributeValue("timeIntepolationMethod");
+    const char *levelInterpolationMethodStr = attributeList.getAttributeValue("levelInterpolationMethod");
 
 
     std::set<double> levels;
@@ -443,9 +446,15 @@ void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attri
           param.mParameterLevel = *level;
           //param.mForecastType;
           //param.mForecastNumber;
-          //param.mAreaInterpolationMethod;
-          //param.mTimeInterpolationMethod;
-          //param.mLevelInterpolationMethod;
+          if (areaInterpolationMethodStr)
+            param.mAreaInterpolationMethod = toInt16(areaInterpolationMethodStr);
+
+          if (timeInterpolationMethodStr)
+            param.mTimeInterpolationMethod = toInt16(timeInterpolationMethodStr);
+
+          if (levelInterpolationMethodStr)
+            param.mLevelInterpolationMethod = toInt16(levelInterpolationMethodStr);
+
           //param.mContourLowValues;
           //param.mContourHighValues;
           //param.mContourSmoothSize;

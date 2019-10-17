@@ -213,6 +213,49 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 
 
 
+void ParameterMappingFile::getMappings(const std::string& producerName,const std::string& parameterName,bool onlySearchEnabled,ParameterMapping_vec& mappings)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    std::string key = toLowerString(producerName + ":" + parameterName + ":");
+    int len = strlen(key.c_str());
+
+    auto s = mMappingSearch.lower_bound(key);
+    if (s == mMappingSearch.end())
+      return;
+
+    while (s != mMappingSearch.end()  &&  strncasecmp(s->first.c_str(),key.c_str(),len) == 0)
+    {
+      for (auto it = s->second.begin(); it != s->second.end(); ++it)
+      {
+        if (!it->mIgnore)
+        {
+          if (onlySearchEnabled)
+          {
+            if (it->mSearchEnabled)
+              mappings.push_back(*it);
+          }
+          else
+          {
+            mappings.push_back(*it);
+          }
+        }
+      }
+      s++;
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 void ParameterMappingFile::getMappings(const std::string& producerName,const std::string& parameterName,T::GeometryId geometryId,T::ParamLevelIdType levelIdType,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings)
 {
   try
@@ -225,11 +268,60 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
     if (s == mMappingSearch.end())
       return;
 
+
     for (auto it = s->second.begin(); it != s->second.end(); ++it)
     {
       if (!it->mIgnore)
       {
-        if (geometryId < 0 || it->mGeometryId == geometryId)
+        if (levelIdType == T::ParamLevelIdTypeValue::ANY || levelIdType == T::ParamLevelIdTypeValue::IGNORE ||  it->mParameterLevelIdType == levelIdType)
+        {
+          if (levelIdType == T::ParamLevelIdTypeValue::IGNORE || levelId == 0 || it->mParameterLevelId == levelId)
+          {
+            if (levelIdType == T::ParamLevelIdTypeValue::IGNORE || level < 0  || it->mParameterLevel == level)
+            {
+              if (onlySearchEnabled)
+              {
+                if (it->mSearchEnabled)
+                  mappings.push_back(*it);
+              }
+              else
+              {
+                mappings.push_back(*it);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+void ParameterMappingFile::getMappings(const std::string& producerName,const std::string& parameterName,T::ParamLevelIdType levelIdType,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    std::string key = toLowerString(producerName + ":" + parameterName + ":");
+    int len = strlen(key.c_str());
+
+    auto s = mMappingSearch.lower_bound(key);
+    if (s == mMappingSearch.end())
+      return;
+
+    while (s != mMappingSearch.end()  &&  strncasecmp(s->first.c_str(),key.c_str(),len) == 0)
+    {
+      for (auto it = s->second.begin(); it != s->second.end(); ++it)
+      {
+        if (!it->mIgnore)
         {
           if (levelIdType == T::ParamLevelIdTypeValue::ANY || levelIdType == T::ParamLevelIdTypeValue::IGNORE ||  it->mParameterLevelIdType == levelIdType)
           {
@@ -251,6 +343,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
           }
         }
       }
+      s++;
     }
   }
   catch (...)

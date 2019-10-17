@@ -80,7 +80,7 @@ class CacheImplementation : public ServiceInterface
 
     virtual int     _addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo);
     virtual int     _addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList);
-    virtual int     _addFileInfoListWithContent(T::SessionId sessionId,std::vector<T::FileAndContent>& fileAndContentList);
+    virtual int     _addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList);
     virtual int     _deleteFileInfoById(T::SessionId sessionId,uint fileId);
     virtual int     _deleteFileInfoByName(T::SessionId sessionId,std::string filename);
     virtual int     _deleteFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags);

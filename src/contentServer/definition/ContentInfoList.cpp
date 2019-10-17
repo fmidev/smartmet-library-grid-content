@@ -5836,7 +5836,7 @@ void ContentInfoList::getFmiParamLevelIdListByFmiParameterId(T::ParamId fmiParam
 
 
 
-void ContentInfoList::getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId,std::vector<T::ParamLevel>& paramLevelList)
+void ContentInfoList::getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId,std::set<T::ParamLevel>& paramLevelList)
 {
   FUNCTION_TRACE
   try
@@ -5845,32 +5845,10 @@ void ContentInfoList::getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFmiParameterLevelId == paramLevelId)
       {
-        uint vLen = paramLevelList.size();
-        uint c = 0;
-        while (c < vLen)
-        {
-          if (info->mFmiParameterLevelId == paramLevelId)
-          {
-            if (paramLevelList[c] == info->mParameterLevel)
-            {
-              c = vLen;
-            }
-            else
-            if (paramLevelList[c] > info->mParameterLevel)
-            {
-              paramLevelList.insert(paramLevelList.begin() + c,info->mParameterLevel);
-              c = vLen;
-            }
-          }
-          c++;
-        }
-        if (c == vLen)
-        {
-          if (info->mFmiParameterLevelId == paramLevelId)
-          paramLevelList.push_back(info->mParameterLevel);
-        }
+        if (paramLevelList.find(info->mParameterLevel) == paramLevelList.end())
+          paramLevelList.insert(info->mParameterLevel);
       }
     }
   }
