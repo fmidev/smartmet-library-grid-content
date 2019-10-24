@@ -52,6 +52,8 @@ void Converter::convert(T::ContentInfo& source,ContentServer::Corba::CorbaConten
     target.fileType = (CORBA::Octet)source.mFileType;
     target.fileId = source.mFileId;
     target.messageIndex = source.mMessageIndex;
+    target.filePosition = source.mFilePosition;
+    target.messageSize = source.mMessageSize;
     target.forecastTime = CORBA::string_dup(source.mForecastTime.c_str());
     target.forecastType = source.mForecastType;
     target.forecastNumber = source.mForecastNumber;
@@ -94,6 +96,8 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::
     target.mFileType = source.fileType;
     target.mFileId = source.fileId;
     target.mMessageIndex = source.messageIndex;
+    target.mFilePosition = source.filePosition;
+    target.mMessageSize = source.messageSize;
     target.mForecastTime = source.forecastTime;
     target.mForecastType = source.forecastType;
     target.mForecastNumber = source.forecastNumber;

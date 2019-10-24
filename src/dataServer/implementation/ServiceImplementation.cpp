@@ -4307,6 +4307,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
       gridFile->setGenerationId(fileInfo.mGenerationId);
       gridFile->setSourceId(fileInfo.mSourceId);
       gridFile->setDeletionTime(fileInfo.mDeletionTime);
+      // gridFile->mapToMemory();
     }
 
     T::ProducerInfo producerInfo;
@@ -4358,8 +4359,10 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
       for (uint t=0; t<cLen; t++)
       {
         T::ContentInfo *info = currentContentList.getContentInfoByIndex(t);
-        if (mContentPreloadEnabled && (info->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
-          mPrealoadList.push_back(std::pair<uint,uint>(info->mFileId,info->mMessageIndex));
+        gridFile->newMessage(info->mMessageIndex,info->mFilePosition,info->mMessageSize);
+
+        //if (mContentPreloadEnabled && (info->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
+        //  mPrealoadList.push_back(std::pair<uint,uint>(info->mFileId,info->mMessageIndex));
         /*
         {
           printf("PRELOAD %s\n",info->mFmiParameterName.c_str());
@@ -5490,22 +5493,26 @@ void ServiceImplementation::processEvents()
       return;
     }
 
-    uint preloadCount = 0;
-    while (mContentPreloadEnabled  &&  !mPrealoadList.empty()  &&  preloadCount < 20)
+    time_t sTime = time(0);
+    while (mContentPreloadEnabled  &&  !mPrealoadList.empty()  &&  (time(0)-sTime) < 30)
     {
       auto it = mPrealoadList.front();
-      //printf("PRELOAD %u:%u\n",it.first,it.second);
+      printf("###### PRELOAD %u:%u\n",it.first,it.second);
 
-      auto gFile = getGridFile(it.first);
+      auto gFile = mGridFileManager.getFileByIdNoMapping(it.first);
       if (gFile)
       {
+        if (!gFile->isMemoryMapped())
+          gFile->mapToMemory();
+
+        /*
         GRID::Message *message = gFile->getMessageByIndex(it.second);
         if (message != nullptr)
           message->getGridValueByGridPoint(0,0);
+          */
       }
 
       mPrealoadList.pop_front();
-      preloadCount++;
     }
 
 

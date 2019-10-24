@@ -32,6 +32,8 @@ class ContentInfo
     uint               mFileId;
     uchar              mFileType;
     uint               mMessageIndex;
+    ulonglong          mFilePosition;
+    uint               mMessageSize;
     uint               mProducerId;
     uint               mGenerationId;
     uint               mGroupFlags;
@@ -84,6 +86,7 @@ class ContentInfo
     class Flags
     {
       public:
+        static const uint PredefinedContent       = 0x00000001;
         static const uint VirtualContent          = 0x00000002;
         static const uint PreloadRequired         = 0x00000004;
         static const uint DeletedContent          = 0x80000000;

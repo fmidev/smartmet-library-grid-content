@@ -4895,8 +4895,7 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-
-    // printf("EVENT[%llu]: fileUpdated(%u)\n",eventInfo.mEventId,eventInfo.mId1);
+    //printf("EVENT[%llu]: fileUpdated(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 

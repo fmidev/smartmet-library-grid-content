@@ -22,6 +22,8 @@ ContentInfo::ContentInfo()
     mFileType = T::FileTypeValue::Unknown;
     mFileId = 0;
     mMessageIndex = 0;
+    mFilePosition = 0;
+    mMessageSize = 0;
     mFmiParameterLevelId = 0;
     mGrib1ParameterLevelId = 0;
     mGrib2ParameterLevelId = 0;
@@ -53,6 +55,8 @@ ContentInfo::ContentInfo(const ContentInfo& contentInfo)
     mFileType = contentInfo.mFileType;
     mFileId = contentInfo.mFileId;
     mMessageIndex = contentInfo.mMessageIndex;
+    mFilePosition = contentInfo.mFilePosition;
+    mMessageSize = contentInfo.mMessageSize;
     mForecastTime = contentInfo.mForecastTime;
     mFmiParameterId = contentInfo.mFmiParameterId;
     mFmiParameterName = contentInfo.mFmiParameterName;
@@ -129,6 +133,8 @@ ContentInfo& ContentInfo::operator=(const ContentInfo& contentInfo)
     mFileType = contentInfo.mFileType;
     mFileId = contentInfo.mFileId;
     mMessageIndex = contentInfo.mMessageIndex;
+    mFilePosition = contentInfo.mFilePosition;
+    mMessageSize = contentInfo.mMessageSize;
     mForecastTime = contentInfo.mForecastTime;
     mFmiParameterId = contentInfo.mFmiParameterId;
     mFmiParameterName = contentInfo.mFmiParameterName;
@@ -167,10 +173,12 @@ std::string ContentInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%u;%u;%u;%u;%s;%s;%s;%s;%s;%s;%s;%s;%u;%u;%u;%d;%s;%s;%d;%d;%llu;%u;%u;%u;%s;",
+    sprintf(st,"%u;%u;%u;%llu;%u;%u;%u;%u;%s;%s;%s;%s;%s;%s;%s;%s;%u;%u;%u;%d;%s;%s;%d;%d;%llu;%u;%u;%u;%s;",
         mFileId,
         mMessageIndex,
         mFileType,
+        mFilePosition,
+        mMessageSize,
         mProducerId,
         mGenerationId,
         mGroupFlags,
@@ -280,36 +288,38 @@ void ContentInfo::setCsv(const char *csv)
     }
 
 
-    if (c >= 25)
+    if (c >= 27)
     {
       mFileId = toInt64(field[0]);
       mMessageIndex = toInt64(field[1]);
       mFileType = toInt64(field[2]);
-      mProducerId = toInt64(field[3]);
-      mGenerationId = toInt64(field[4]);
-      mGroupFlags = toInt64(field[5]);
-      mForecastTime = field[6];
-      mFmiParameterId = field[7];
-      mFmiParameterName = field[8];
-      mGribParameterId = field[9];
-      mCdmParameterId = field[10];
-      mCdmParameterName = field[11];
-      mNewbaseParameterId = field[12];
-      mNewbaseParameterName = field[13];
-      mFmiParameterLevelId = toInt64(field[14]);
-      mGrib1ParameterLevelId = toInt64(field[15]);
-      mGrib2ParameterLevelId = toInt64(field[16]);
-      mParameterLevel = (T::ParamLevel)toInt64(field[17]);
-      mFmiParameterUnits = field[18];
-      mGribParameterUnits = field[19];
-      mForecastType = (short)toInt64(field[20]);
-      mForecastNumber = (short)toInt64(field[21]);
-      mServerFlags = (unsigned long long)toInt64(field[22]);
-      mFlags = toInt64(field[23]);
-      mSourceId = toInt64(field[24]);
-      mGeometryId = toInt64(field[25]);
-      if (c >= 26)
-        mModificationTime = field[26];
+      mFilePosition = toInt64(field[3]);
+      mMessageSize = toInt64(field[4]);
+      mProducerId = toInt64(field[5]);
+      mGenerationId = toInt64(field[6]);
+      mGroupFlags = toInt64(field[7]);
+      mForecastTime = field[8];
+      mFmiParameterId = field[9];
+      mFmiParameterName = field[10];
+      mGribParameterId = field[11];
+      mCdmParameterId = field[12];
+      mCdmParameterName = field[13];
+      mNewbaseParameterId = field[14];
+      mNewbaseParameterName = field[15];
+      mFmiParameterLevelId = toInt64(field[16]);
+      mGrib1ParameterLevelId = toInt64(field[17]);
+      mGrib2ParameterLevelId = toInt64(field[18]);
+      mParameterLevel = (T::ParamLevel)toInt64(field[19]);
+      mFmiParameterUnits = field[20];
+      mGribParameterUnits = field[21];
+      mForecastType = (short)toInt64(field[22]);
+      mForecastNumber = (short)toInt64(field[23]);
+      mServerFlags = (unsigned long long)toInt64(field[24]);
+      mFlags = toInt64(field[25]);
+      mSourceId = toInt64(field[26]);
+      mGeometryId = toInt64(field[27]);
+      if (c >= 28)
+        mModificationTime = field[28];
     }
   }
   catch (...)
@@ -905,6 +915,8 @@ void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mFileId                 = " << mFileId << "\n";
     stream << space(level) << "- mFileType               = " << C_INT(mFileType) << "\n";
     stream << space(level) << "- mMessageIndex           = " << mMessageIndex << "\n";
+    stream << space(level) << "- mFilePosition           = " << mFilePosition << "\n";
+    stream << space(level) << "- mMessageSize            = " << mMessageSize << "\n";
     stream << space(level) << "- mProducerId             = " << mProducerId << "\n";
     stream << space(level) << "- mGenerationId           = " << mGenerationId << "\n";
     stream << space(level) << "- mGroupFlags             = " << mGroupFlags << "\n";

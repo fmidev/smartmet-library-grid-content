@@ -423,13 +423,7 @@ void GridFileManager::clearCachedValues(uint hitsRequired,uint timePeriod)
     {
       if (it->second->isMemoryMapped())
       {
-        std::size_t sz = it->second->getNumberOfMessages();
-        for (std::size_t t=0; t< sz; t++)
-        {
-          GRID::Message *msg = it->second->getMessageByIndex(t);
-          if (msg != nullptr)
-            msg->clearCachedValues(hitsRequired,timePeriod);
-        }
+        it->second->clearCachedValues(hitsRequired,timePeriod);
       }
     }
   }

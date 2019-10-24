@@ -2272,7 +2272,10 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
           info->mProducerId = ff->mFileInfo.mProducerId;
           info->mGenerationId = ff->mFileInfo.mGenerationId;
           info->mGroupFlags = ff->mFileInfo.mGroupFlags;
-          info->mFlags = info->mFlags | T::FileInfo::Flags::PredefinedContent;
+          info->mFlags = info->mFlags | T::ContentInfo::Flags::PredefinedContent;
+
+          if (len > 10)
+            info->mFlags = info->mFlags | T::ContentInfo::Flags::PreloadRequired;
 
           // ### Creating a key for the content.
 
@@ -3305,7 +3308,7 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
             getContentByFileId(eventInfo->mId1,contentInfoList);
 
             uint len = contentInfoList.getLength();
-            if (len < 10000)
+            if (len < 20000)
             {
               for (uint t=0; t<len; t++)
               {

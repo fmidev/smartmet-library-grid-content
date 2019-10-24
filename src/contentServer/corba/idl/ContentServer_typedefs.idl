@@ -26,6 +26,8 @@ struct CorbaContentInfo
   octet              fileType;
   unsigned long      fileId;
   unsigned long      messageIndex;
+  unsigned long long filePosition;
+  unsigned long      messageSize;
   string             forecastTime;
   short              forecastType;
   short              forecastNumber;

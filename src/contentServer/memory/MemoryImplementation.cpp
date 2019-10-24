@@ -1926,7 +1926,10 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
           cInfo->mProducerId = ff->mFileInfo.mProducerId;
           cInfo->mGenerationId = ff->mFileInfo.mGenerationId;
           cInfo->mGroupFlags = ff->mFileInfo.mGroupFlags;
-          cInfo->mFlags = cInfo->mFlags | T::FileInfo::Flags::PredefinedContent;
+          cInfo->mFlags = cInfo->mFlags | T::ContentInfo::Flags::PredefinedContent;
+
+          if (len > 10)
+            cInfo->mFlags = cInfo->mFlags | T::ContentInfo::Flags::PreloadRequired;
 
           //mContentInfoList[0].addContentInfo(cInfo);
           tmpContentList.addContentInfo(cInfo);
