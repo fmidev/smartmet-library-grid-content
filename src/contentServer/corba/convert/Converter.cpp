@@ -949,6 +949,7 @@ void Converter::convert(T::ForecastTime& source,SmartMet::ContentServer::Corba::
 {
   try
   {
+    target.sourceId = source.mSourceId;
     target.generationId = source.mGenerationId;
     target.geometryId = source.mGeometryId;
     target.forecastType = source.mForecastType;
@@ -970,6 +971,7 @@ void Converter::convert(const SmartMet::ContentServer::Corba::CorbaForecastTime&
 {
   try
   {
+    target.mSourceId = source.sourceId;
     target.mGenerationId = source.generationId;
     target.mGeometryId = source.geometryId;
     target.mForecastType = source.forecastType;

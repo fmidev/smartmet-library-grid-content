@@ -116,6 +116,7 @@ typedef sequence<CorbaParameterValues> CorbaParameterValuesList;
 struct CorbaQueryParameter
 {
   unsigned long            id;
+  unsigned long            alternativeParamId;
   octet                    type;
   octet                    locationType;
   string                   param;

@@ -4574,8 +4574,8 @@ int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     T::ContentInfoList contentList;
     int res = getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,contentList);
 
-    contentInfoList = contentList;
-#if 0
+//    contentInfoList = contentList;
+//#if 0
     contentList.getContentListByForecastTime(forecastTime,contentInfoList);
 
     // If we cannot find any forecast time, lets add at least one
@@ -4586,13 +4586,10 @@ int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
       T::ContentInfo *info = contentList.getContentInfoByIndex(0);
       if (info != nullptr)
       {
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(info->duplicate());
-        else
-          contentInfoList.addContentInfo(info);
+        contentInfoList.addContentInfo(info->duplicate());
       }
     }
-#endif
+//#endif
     return res;
   }
   catch (...)

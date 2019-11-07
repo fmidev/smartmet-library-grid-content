@@ -247,6 +247,28 @@ int ServiceInterface::getParameterValuesByPointAndTimeList(T::SessionId sessionI
 
 
 
+int ServiceInterface::getParameterValueVectorByGeometryAndTime(T::SessionId sessionId,std::string producer,std::string parameter,std::string& timeString,T::AttributeList& attributeList,T::ParamValue_vec& values)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getParameterValueVectorByGeometryAndTime(sessionId,producer,parameter,timeString,attributeList,values);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s,%s,%s,Attribute[%u],Value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),timeString.c_str(),attributeList.getLength(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 int ServiceInterface::_executeQuery(T::SessionId sessionId,Query& query)
 {
   throw Spine::Exception(BCP,exception_implementation_required);
@@ -381,6 +403,7 @@ int ServiceInterface::_getParameterValuesByPointListAndTime(T::SessionId session
 
 
 
+
 int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId sessionId,std::string producer,std::string parameter,T::CoordinateType coordinateType,double x,double y,std::vector<std::string>& times,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
@@ -450,6 +473,54 @@ int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId session
 }
 
 
+
+
+
+int ServiceInterface::_getParameterValueVectorByGeometryAndTime(T::SessionId sessionId,std::string producer,std::string parameter,std::string& timeString,T::AttributeList& attributeList,T::ParamValue_vec& values)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::AttributeList qAttributeList;
+
+    attributeList.addAttribute("starttime",timeString);
+    attributeList.addAttribute("timesteps","1");
+    attributeList.addAttribute("producer",producer);
+    attributeList.addAttribute("param",parameter);
+
+    QueryConfigurator configurator;
+
+    Query query;
+    configurator.configure(query,qAttributeList);
+
+    uint len = attributeList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::Attribute *attr = attributeList.getAttributeByIndex(t);
+      if (attr != NULL)
+        query.mAttributeList.addAttribute(attr->mName,attr->mValue);
+    }
+
+
+    int result = _executeQuery(sessionId,query);
+    //query.print(std::cout,0,0);
+
+    if (result != 0)
+      return result;
+
+
+    if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  query.mQueryParameterList[0].mValueList[0].mValueList.getLength() == 1)
+    {
+      values = query.mQueryParameterList[0].mValueList[0].mValueVector;
+    }
+
+    return 0;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
 
 }
 }

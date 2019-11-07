@@ -4461,7 +4461,10 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+    exception.addParameter("FileId",std::to_string(fileInfo.mFileId));
+    exception.addParameter("Filename",mDataDir + "/" + fileInfo.mName);
+    throw exception;
   }
 }
 

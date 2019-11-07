@@ -9,6 +9,7 @@
 #include <grid-files/grid/Typedefs.h>
 #include <grid-files/grid/GridPointValueList.h>
 #include <grid-files/common/Log.h>
+#include <grid-files/common/AttributeList.h>
 #include <gis/DEM.h>
 
 
@@ -36,6 +37,8 @@ class ServiceInterface
      virtual int    getParameterValuesByPointListAndTime(T::SessionId sessionId,std::string producer,std::string parameter,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,std::vector<T::ParamValue>& valueList);
      virtual int    getParameterValuesByPointAndTimeList(T::SessionId sessionId,std::string producer,std::string parameter,T::CoordinateType coordinateType,double x,double y,std::vector<std::string>& times,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue_vec& values);
 
+     virtual int    getParameterValueVectorByGeometryAndTime(T::SessionId sessionId,std::string producer,std::string parameter,std::string& timeString,T::AttributeList& attributeList,T::ParamValue_vec& values);
+
   protected:
 
      virtual int    _executeQuery(T::SessionId sessionId,Query& query);
@@ -45,6 +48,8 @@ class ServiceInterface
      virtual int    _getParameterValueByPointAndTime(T::SessionId sessionId,std::string producer,std::string parameter,T::CoordinateType coordinateType,double x,double y,std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value);
      virtual int    _getParameterValuesByPointListAndTime(T::SessionId sessionId,std::string producer,std::string parameter,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,std::vector<T::ParamValue>& valueList);
      virtual int    _getParameterValuesByPointAndTimeList(T::SessionId sessionId,std::string producer,std::string parameter,T::CoordinateType coordinateType,double x,double y,std::vector<std::string>& times,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue_vec& values);
+
+     virtual int    _getParameterValueVectorByGeometryAndTime(T::SessionId sessionId,std::string producer,std::string parameter,std::string& timeString,T::AttributeList& attributeList,T::ParamValue_vec& values);
 
      Log            *mDebugLog;
      Log            *mProcessingLog;

@@ -727,6 +727,7 @@ void Converter::convert(QueryServer::Corba::CorbaQueryParameter& source,QuerySer
   try
   {
     target.mId = source.id;
+    target.mAlternativeParamId = source.alternativeParamId;
     target.mType = source.type;
     target.mLocationType = source.locationType;
     target.mParam = source.param;
@@ -776,6 +777,7 @@ void Converter::convert(QueryServer::QueryParameter& source,QueryServer::Corba::
   try
   {
     target.id = source.mId;
+    target.alternativeParamId = source.mAlternativeParamId;
     target.type = source.mType;
     target.locationType = source.mLocationType;
     target.param = CORBA::string_dup(source.mParam.c_str());

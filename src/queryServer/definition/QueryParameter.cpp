@@ -13,6 +13,7 @@ QueryParameter::QueryParameter()
   try
   {
     mId = 0;
+    mAlternativeParamId = 0;
     mType = 0;
     mLocationType = 0;
     mParameterKeyType = T::ParamKeyTypeValue::UNKNOWN;
@@ -49,6 +50,7 @@ QueryParameter::QueryParameter(const QueryParameter& queryParameter)
   try
   {
     mId = queryParameter.mId;
+    mAlternativeParamId = queryParameter.mAlternativeParamId;
     mType = queryParameter.mType;
     mLocationType = queryParameter.mLocationType;
     mParam = queryParameter.mParam;
@@ -131,6 +133,7 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
   {
     stream << space(level) << "QueryParameter\n";
     stream << space(level) << "- mId                       = " << mId << "\n";
+    stream << space(level) << "- mAlternativeParamId       = " << mAlternativeParamId << "\n";
     stream << space(level) << "- mType                     = " << C_INT(mType)<< "\n";
     stream << space(level) << "- mLocationType             = " << C_INT(mLocationType) << "\n";
     stream << space(level) << "- mParam                    = " << mParam << "\n";

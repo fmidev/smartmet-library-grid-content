@@ -12,6 +12,7 @@ ForecastTime::ForecastTime()
 {
   try
   {
+    mSourceId = 0;
     mGenerationId = 0;
     mGeometryId = 0;
     mForecastType = 0;
@@ -31,6 +32,7 @@ ForecastTime::ForecastTime(const ForecastTime& forecastTime)
 {
   try
   {
+    mSourceId = forecastTime.mSourceId;
     mGenerationId = forecastTime.mGenerationId;
     mGeometryId = forecastTime.mGeometryId;
     mForecastType = forecastTime.mForecastType;
@@ -52,6 +54,7 @@ ForecastTime::ForecastTime(const char *csv)
 {
   try
   {
+    mSourceId = 0;
     mGenerationId = 0;
     mGeometryId = 0;
     mForecastType = 0;
@@ -89,7 +92,8 @@ std::string ForecastTime::getCsv()
   try
   {
     char buf[200];
-    sprintf(buf,"%d;%d;%d;%d;%s;%s",
+    sprintf(buf,"%d;%d;%d;%d;%d;%s;%s",
+        mSourceId,
         mGenerationId,
         mGeometryId,
         mForecastType,
@@ -116,14 +120,15 @@ void ForecastTime::setCsv(const char *csv)
     std::vector<std::string> partList;
     splitString(csv,';',partList);
 
-    if (partList.size() >= 6)
+    if (partList.size() >= 7)
     {
-      mGenerationId = toInt64(partList[0].c_str());
-      mGeometryId = toInt64(partList[1].c_str());
-      mForecastType = toInt64(partList[2].c_str());
-      mForecastNumber = toInt64(partList[3].c_str());
-      mForecastTime = partList[4];
-      mModificationTime = partList[5];
+      mSourceId = toInt64(partList[0].c_str());
+      mGenerationId = toInt64(partList[1].c_str());
+      mGeometryId = toInt64(partList[2].c_str());
+      mForecastType = toInt64(partList[3].c_str());
+      mForecastNumber = toInt64(partList[4].c_str());
+      mForecastTime = partList[5];
+      mModificationTime = partList[6];
     }
   }
   catch (...)
@@ -157,6 +162,7 @@ void ForecastTime::print(std::ostream& stream,uint level,uint optionFlags)
   try
   {
     stream << space(level) << "ForecastTime\n";
+    stream << space(level) << "- mSourceId          = " << mSourceId << "\n";
     stream << space(level) << "- mGenerationId      = " << mGenerationId << "\n";
     stream << space(level) << "- mGeometryId        = " << mGeometryId << "\n";
     stream << space(level) << "- mForecastType      = " << mForecastType << "\n";

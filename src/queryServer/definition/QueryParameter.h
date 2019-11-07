@@ -25,6 +25,7 @@ class QueryParameter
     void                        print(std::ostream& stream,uint level,uint optionFlags);
 
     uint                        mId;
+    uint                        mAlternativeParamId;   // This parameter is an alternative for parameter which id is defined here.
     uchar                       mType;
     uchar                       mLocationType;
     std::string                 mParam;
@@ -89,6 +90,7 @@ class QueryParameter
         static const uint  ReturnCoordinates            = 1 << 2;
         static const uint  NoReturnValues               = 1 << 3;
         static const uint  SameAnalysisTime             = 1 << 4;
+        static const uint  AlternativeParameter         = 1 << 5;
     };
 };
 

@@ -1618,6 +1618,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
     getProducers(query, producers);
     T::Coordinate_vec coordinates;
     std::string analysisTime = query.mAnalysisTime;
+    std::set<uint> alternativeRequired;
     uint queryFlags = query.mFlags;
 
     if (producers.size() == 0)
@@ -1687,7 +1688,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
     {
       // Checking that the parameter is "a data parameter" - not a function.
 
-      if (qParam->mFunction.length() == 0)
+      if (qParam->mFunction.length() == 0 && ((qParam->mFlags & QueryParameter::Flags::AlternativeParameter) == 0 || alternativeRequired.find(qParam->mId) != alternativeRequired.end()))
       {
         std::string paramName = qParam->mParam;
         T::ParamLevelId paramLevelId = qParam->mParameterLevelId;
@@ -1795,6 +1796,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
                 parameterProducers.insert(std::pair<std::string, uint>(paramName + ":" + producerName, qParam->mValueList[0].mProducerId));
               }
 
+
               if ((query.mFlags & Query::Flags::SameAnalysisTime) != 0  &&  analysisTime != qParam->mValueList[0].mAnalysisTime)
               {
                 // The query requires that we use the same analysis time with all parameters
@@ -1811,6 +1813,17 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
                   coordinates.push_back(T::Coordinate(val->mX,val->mY));
                 }
               }
+
+              if (len == 0  || ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0  &&  (qParam->mValueList[0].mFlags & ParameterValues::Flags::DataAvailable) == 0))
+              {
+                if (alternativeRequired.find(qParam->mAlternativeParamId) == alternativeRequired.end())
+                  alternativeRequired.insert(qParam->mAlternativeParamId);
+              }
+            }
+            else
+            {
+              if (alternativeRequired.find(qParam->mAlternativeParamId) == alternativeRequired.end())
+                alternativeRequired.insert(qParam->mAlternativeParamId);
             }
           }
         }
@@ -1926,6 +1939,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
     T::Coordinate_vec coordinates;
     std::string analysisTime = query.mAnalysisTime;
     uint queryFlags = query.mFlags;
+    std::set<uint> alternativeRequired;
 
     if (producers.size() == 0)
       return Result::NO_PRODUCERS_FOUND;
@@ -1995,7 +2009,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
     for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
     {
-      if (qParam->mFunction.length() == 0)
+      if (qParam->mFunction.length() == 0 && ((qParam->mFlags & QueryParameter::Flags::AlternativeParameter) == 0 || alternativeRequired.find(qParam->mId) != alternativeRequired.end()))
       {
         std::string paramName = qParam->mParam;
         T::ParamLevelId paramLevelId = qParam->mParameterLevelId;
@@ -2065,6 +2079,14 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
           }
         }
 
+        if (mDebugLog != nullptr)
+        {
+          std::stringstream stream;
+          qParam->print(stream, 5, 0);
+          PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
+        }
+
+
         // Processing time steps in reverse order. The idea is that we want to
         // find a generation that contains the newest timestep if the generation
         // is not defined. It is possible that the newest generation do not contain
@@ -2086,7 +2108,6 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
             if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN)
             {
-
               Producer_vec tmpProducers;
               if (producerName > " ")
               {
@@ -2119,6 +2140,12 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
               if (producerId == 0 && valueList.mProducerId != 0)
               {
                 parameterProducers.insert(std::pair<std::string, uint>(paramName + ":" + producerName, valueList.mProducerId));
+              }
+
+              if (valueList.mValueList.getLength() == 0  || ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0  &&  (valueList.mFlags & ParameterValues::Flags::DataAvailable) == 0))
+              {
+                if (alternativeRequired.find(qParam->mAlternativeParamId) == alternativeRequired.end())
+                  alternativeRequired.insert(qParam->mAlternativeParamId);
               }
 
               if (valueList.mValueList.getLength() > 0  || ((parameterFlags & QueryParameter::Flags::NoReturnValues) != 0  &&  (valueList.mFlags & ParameterValues::Flags::DataAvailable) != 0))

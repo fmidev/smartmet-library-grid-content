@@ -24,6 +24,7 @@ class ForecastTime
 
      void             print(std::ostream& stream,uint level,uint optionFlags);
 
+     uint             mSourceId;
      uint             mGenerationId;
      uint             mGeometryId;
      short            mForecastType;
