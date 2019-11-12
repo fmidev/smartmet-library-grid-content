@@ -1870,7 +1870,9 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
           for (auto it = qParam->mValueList.begin(); it != qParam->mValueList.end() && !found; ++it)
           {
             if ((query.mFlags & Query::Flags::StartTimeFromData) == 0
-                && (it->mForecastTime < query.mStartTime || it->mForecastTime > query.mEndTime))
+                && ((it->mForecastTime < query.mStartTime || it->mForecastTime > query.mEndTime) ||
+                    (it->mForecastTime == query.mStartTime &&  (query.mFlags & Query::Flags::StartTimeNotIncluded) != 0))
+            )
               it->mFlags = it->mFlags | QueryServer::ParameterValues::Flags::AggregationValue;
 
             if (it->mForecastTime < *tt)
@@ -5937,6 +5939,7 @@ void ServiceImplementation::getGridValues(
                           valueList.mForecastTime = forecastTime;
                           valueList.mProducerId = producerInfo.mProducerId;
                           valueList.mGenerationId = generationInfo->mGenerationId;
+                          valueList.mAnalysisTime = generationInfo->mAnalysisTime;
                           valueList.mGenerationFlags = gflags;
                           valueList.mGeometryId = producerGeometryId;
 
@@ -6359,7 +6362,7 @@ void ServiceImplementation::getGridValues(
                 }
 
                 //pInfo->print(std::cout,0,0);
-                std::map<std::string,uint> contentTimeList;
+                std::map<std::string,std::string> contentTimeList;
 
                 T::ContentInfoList contentInfoList;
                 int result = mContentServerPtr->getContentListByParameterAndProducerId(0, producerInfo.mProducerId, pInfo->mParameterKeyType, pInfo->mParameterKey,
@@ -6452,7 +6455,7 @@ void ServiceImplementation::getGridValues(
 
                             if (cInfo->mForecastTime < firstTime)
                             {
-                              contentTimeList.insert(std::pair<std::string,uint>(cInfo->mForecastTime,gFlags));
+                              contentTimeList.insert(std::pair<std::string,std::string>(cInfo->mForecastTime,gInfo->mAnalysisTime));
                               firstTime = cInfo->mForecastTime;
                             }
                           }
@@ -6476,7 +6479,7 @@ void ServiceImplementation::getGridValues(
                     std::set<T::GeometryId> geometryIdList2;
                     geometryIdList2.insert(producerGeometryId);
 
-                    std::map<std::string,uint> contentTimeList2;
+                    std::map<std::string,std::string> contentTimeList2;
 
                     if (timestepSizeInMinutes > 0 && (queryFlags & Query::Flags::StartTimeFromData) != 0  &&  (queryFlags & Query::Flags::EndTimeFromData) == 0)
                     {
@@ -6490,7 +6493,7 @@ void ServiceImplementation::getGridValues(
                       while (tt <= et)
                       {
                         std::string ts = utcTimeFromTimeT(tt);
-                        contentTimeList2.insert(std::pair<std::string,uint>(ts,0xFFFFFFFF));
+                        contentTimeList2.insert(std::pair<std::string,std::string>(ts,it->second));
                         tt = tt + timestepSizeInMinutes*60;
                       }
                     }
@@ -6508,7 +6511,7 @@ void ServiceImplementation::getGridValues(
                       while (tt >= et)
                       {
                         std::string ts = utcTimeFromTimeT(tt);
-                        contentTimeList2.insert(std::pair<std::string,uint>(ts,0xFFFFFFFF));
+                        contentTimeList2.insert(std::pair<std::string,std::string>(ts,it->second));
                         tt = tt - timestepSizeInMinutes*60;
                       }
                     }
@@ -6524,7 +6527,7 @@ void ServiceImplementation::getGridValues(
                       while (tt <= et)
                       {
                         std::string ts = utcTimeFromTimeT(tt);
-                        contentTimeList2.insert(std::pair<std::string,uint>(ts,0xFFFFFFFF));
+                        contentTimeList2.insert(std::pair<std::string,std::string>(ts,it1->second));
                         tt = tt + timestepSizeInMinutes*60;
                       }
                     }
@@ -6537,10 +6540,10 @@ void ServiceImplementation::getGridValues(
                     for (auto forecastTime = contentTimeList2.begin(); forecastTime != contentTimeList2.end(); ++forecastTime)
                     {
                       // std::cout << forecastTime->first << "[" << startTime << " " << endTime << "]\n";
-                      if (((forecastTime->first == startTime && !ignoreStartTimeValue) || (forecastTime->first >= startTime && forecastTime->first <= endTime)))
+                      if (((forecastTime->first == startTime && !ignoreStartTimeValue) || (forecastTime->first > startTime && forecastTime->first <= endTime)))
                       {
                         ParameterValues valList;
-                        getGridValues(queryType,producers2, geometryIdList2, producerInfo.mProducerId, analysisTime, forecastTime->second, reverseGenerations, parameterKey, paramLevelId, paramLevel,
+                        getGridValues(queryType,producers2, geometryIdList2, producerInfo.mProducerId, forecastTime->second, 0, reverseGenerations, parameterKey, paramLevelId, paramLevel,
                             forecastType, forecastNumber, queryFlags, parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, forecastTime->first, true,
                             locationType, coordinateType, areaCoordinates, contourLowValues, contourHighValues, queryAttributeList, radius, precision, valList, coordinates);
 
