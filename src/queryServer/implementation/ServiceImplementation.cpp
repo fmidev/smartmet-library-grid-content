@@ -1069,6 +1069,8 @@ bool ServiceImplementation::parseFunction(
           newParam.mParam = fParam->second;
           newParam.mOrigParam = paramStr + " => " + fParam->second;
           newParam.mSymbolicName = fParam->second;
+          newParam.mLocationType = queryParam.mLocationType;
+          newParam.mFlags = queryParam.mFlags;
           newParam.mGeometryId = queryParam.mGeometryId;
           newParam.mParameterLevelId = queryParam.mParameterLevelId;
           newParam.mParameterLevel = queryParam.mParameterLevel;
