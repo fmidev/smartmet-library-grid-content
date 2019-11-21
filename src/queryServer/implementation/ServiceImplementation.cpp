@@ -2859,7 +2859,7 @@ bool ServiceImplementation::getValueVectors(
               result = mDataServerPtr->getGridValueVectorByGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,queryAttributeList,valueVector);
               if (result == 0)
               {
-                if ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  &&  coordinates.size() == 0)
+                if (coordinates.size() == 0 && ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
                 {
                   uint width = 0;
                   uint height = 0;
@@ -2872,7 +2872,7 @@ bool ServiceImplementation::getValueVectors(
               result = mDataServerPtr->getGridValueVectorByCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,coordinateType,gridCoordinates,areaInterpolationMethod,valueVector);
               if (result == 0)
               {
-                if ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  &&  coordinates.size() == 0)
+                if (coordinates.size() == 0 && ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
                 {
                   coordinates = gridCoordinates;
                 }
@@ -2883,7 +2883,7 @@ bool ServiceImplementation::getValueVectors(
               result = mDataServerPtr->getGridValueVector(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,valueVector);
               if (result == 0)
               {
-                if ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  &&  coordinates.size() == 0)
+                if (coordinates.size() == 0 && ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
                 {
                   T::GridCoordinates coord;
                   if (mDataServerPtr->getGridCoordinates(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,T::CoordinateTypeValue::LATLON_COORDINATES,coord) == 0)
@@ -2912,6 +2912,9 @@ bool ServiceImplementation::getValueVectors(
 
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
+
+        if ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) == 0)
+          coordinates.clear();
 
         return true;
       }
@@ -2948,7 +2951,7 @@ bool ServiceImplementation::getValueVectors(
               result = mDataServerPtr->getGridValueVectorByTimeAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,forecastTime,queryAttributeList,valueVector);
               if (result == 0)
               {
-                if ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  &&  coordinates.size() == 0)
+                if (coordinates.size() == 0 && ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
                 {
                   uint width = 0;
                   uint height = 0;
@@ -2961,7 +2964,7 @@ bool ServiceImplementation::getValueVectors(
               result = mDataServerPtr->getGridValueVectorByTimeAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,forecastTime,coordinateType,gridCoordinates,queryAttributeList,valueVector);
               if (result == 0)
               {
-                if ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  &&  coordinates.size() == 0)
+                if (coordinates.size() == 0 && ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
                 {
                   coordinates = gridCoordinates;
                 }
@@ -2972,7 +2975,7 @@ bool ServiceImplementation::getValueVectors(
               result = mDataServerPtr->getGridValueVectorByTime(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,forecastTime,timeInterpolationMethod,valueVector);
               if (result == 0)
               {
-                if ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  &&  coordinates.size() == 0)
+                if (coordinates.size() == 0 && ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
                 {
                   T::GridCoordinates coord;
                   if (mDataServerPtr->getGridCoordinates(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,T::CoordinateTypeValue::LATLON_COORDINATES,coord) == 0)
@@ -3001,6 +3004,9 @@ bool ServiceImplementation::getValueVectors(
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
 
+        if ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) == 0)
+          coordinates.clear();
+
         return true;
       }
 
@@ -3024,7 +3030,7 @@ bool ServiceImplementation::getValueVectors(
               result = mDataServerPtr->getGridValueVectorByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,queryAttributeList,valueVector);
               if (result == 0)
               {
-                if ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  &&  coordinates.size() == 0)
+                if (coordinates.size() == 0 && ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
                 {
                   uint width = 0;
                   uint height = 0;
@@ -3037,7 +3043,7 @@ bool ServiceImplementation::getValueVectors(
               result = mDataServerPtr->getGridValueVectorByLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,coordinateType,gridCoordinates,queryAttributeList,valueVector);
               if (result == 0)
               {
-                if ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  &&  coordinates.size() == 0)
+                if (coordinates.size() == 0 && ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
                 {
                   coordinates = gridCoordinates;
                 }
@@ -3048,7 +3054,7 @@ bool ServiceImplementation::getValueVectors(
               result = mDataServerPtr->getGridValueVectorByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,levelInterpolationMethod,valueVector);
               if (result == 0)
               {
-                if ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  &&  coordinates.size() == 0)
+                if (coordinates.size() == 0 && ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
                 {
                   T::GridCoordinates coord;
                   if (mDataServerPtr->getGridCoordinates(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,T::CoordinateTypeValue::LATLON_COORDINATES,coord) == 0)
@@ -3067,6 +3073,8 @@ bool ServiceImplementation::getValueVectors(
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
 
+        if ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) == 0)
+          coordinates.clear();
 
         return true;
       }
@@ -3091,7 +3099,7 @@ bool ServiceImplementation::getValueVectors(
               result = mDataServerPtr->getGridValueVectorByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,forecastTime,paramLevel,queryAttributeList,valueVector);
               if (result == 0)
               {
-                if ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  &&  coordinates.size() == 0)
+                if (coordinates.size() == 0 && ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
                 {
                   uint width = 0;
                   uint height = 0;
@@ -3104,7 +3112,7 @@ bool ServiceImplementation::getValueVectors(
               result = mDataServerPtr->getGridValueVectorByTimeLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,forecastTime,paramLevel,coordinateType,gridCoordinates,queryAttributeList,valueVector);
               if (result == 0)
               {
-                if ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  &&  coordinates.size() == 0)
+                if (coordinates.size() == 0 && ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
                 {
                   coordinates = gridCoordinates;
                 }
@@ -3115,7 +3123,7 @@ bool ServiceImplementation::getValueVectors(
               result = mDataServerPtr->getGridValueVectorByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,forecastTime,paramLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,valueVector);
               if (result == 0)
               {
-                if ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  &&  coordinates.size() == 0)
+                if (coordinates.size() == 0 && ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
                 {
                   T::GridCoordinates coord;
                   if (mDataServerPtr->getGridCoordinates(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,T::CoordinateTypeValue::LATLON_COORDINATES,coord) == 0)
@@ -3134,6 +3142,9 @@ bool ServiceImplementation::getValueVectors(
         if (precision < 0)
           precision = pInfo.mDefaultPrecision;
 
+
+        if ((parameterFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) == 0)
+          coordinates.clear();
 
         return true;
       }
