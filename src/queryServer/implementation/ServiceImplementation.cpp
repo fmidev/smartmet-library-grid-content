@@ -254,7 +254,7 @@ int ServiceImplementation::_executeQuery(T::SessionId sessionId, Query& query)
 
 
 
-
+#if 0
 void convertCoordinatesToLatLon(std::string urn,T::AreaCoordinates& coordinates,T::AreaCoordinates& latlonCoordinates)
 {
   try
@@ -292,8 +292,7 @@ void convertCoordinatesToLatLon(std::string urn,T::AreaCoordinates& coordinates,
     throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
-
-
+#endif
 
 
 
@@ -6562,7 +6561,7 @@ void ServiceImplementation::getGridValues(
 
                         //valList.print(std::cout,0,0);
 
-                        if (valList.mValueList.getLength() > 0 || valList.mValueData.size() > 0)
+                        if (valList.mValueList.getLength() > 0 || valList.mValueData.size() > 0 || valList.mValueVector.size() > 0)
                         {
                           if (valList.mForecastTime <= " ")
                             valList.mForecastTime = forecastTime->first;
