@@ -2723,8 +2723,8 @@ int ServiceImplementation::getGridIsobandsByTimeAndGridImpl(T::SessionId session
       attributeList.setAttribute("grid.areaInterpolationMethod",std::to_string(areaInterpolationMethod));
       attributeList.setAttribute("grid.width",std::to_string(gridWidth));
       attributeList.setAttribute("grid.height",std::to_string(gridHeight));
-      attributeList.setAttribute("grid.reverseYDirection",std::to_string((int)message1->reverseYDirection()));
-      attributeList.setAttribute("grid.reverseXDirection",std::to_string((int)message1->reverseXDirection()));
+      attributeList.setAttribute("grid.original.reverseYDirection",std::to_string((int)message1->reverseYDirection()));
+      attributeList.setAttribute("grid.original.reverseXDirection",std::to_string((int)message1->reverseXDirection()));
       attributeList.setAttribute("contour.coordinateType",std::to_string(coordinateType));
 
       getIsobands(gridValues,coordinatePtr,gridWidth,gridHeight,contourLowValues,contourHighValues,areaInterpolationMethod,smooth_size,smooth_degree,contours);
@@ -3927,8 +3927,8 @@ int ServiceImplementation::getGridIsolinesByTimeAndGridImpl(T::SessionId session
       attributeList.setAttribute("grid.areaInterpolationMethod",std::to_string(areaInterpolationMethod));
       attributeList.setAttribute("grid.width",std::to_string(gridWidth));
       attributeList.setAttribute("grid.height",std::to_string(gridHeight));
-      attributeList.setAttribute("grid.reverseYDirection",std::to_string((int)message1->reverseYDirection()));
-      attributeList.setAttribute("grid.reverseXDirection",std::to_string((int)message1->reverseXDirection()));
+      attributeList.setAttribute("grid.original.reverseYDirection",std::to_string((int)message1->reverseYDirection()));
+      attributeList.setAttribute("grid.original.reverseXDirection",std::to_string((int)message1->reverseXDirection()));
       attributeList.setAttribute("contour.coordinateType",std::to_string(coordinateType));
 
       getIsolines(gridValues,coordinatePtr,gridWidth,gridHeight,contourValues,areaInterpolationMethod,smooth_size,smooth_degree,contours);
