@@ -237,7 +237,7 @@ int GenerationInfo::compare(uint comparisonMethod,GenerationInfo *generationInfo
     switch (comparisonMethod)
     {
       case GenerationInfo::ComparisonMethod::generationId:
-        return uint_compare(mGenerationId,generationInfo->mGenerationId);
+        return num_compare(mGenerationId,generationInfo->mGenerationId);
 
       case GenerationInfo::ComparisonMethod::generationName:
         return strcasecmp(mName.c_str(),generationInfo->mName.c_str());
@@ -246,16 +246,16 @@ int GenerationInfo::compare(uint comparisonMethod,GenerationInfo *generationInfo
         res = strcasecmp(mAnalysisTime.c_str(),generationInfo->mAnalysisTime.c_str());
         if (res != 0)
           return res;
-        return uint_compare(mGenerationId,generationInfo->mGenerationId);
+        return num_compare(mGenerationId,generationInfo->mGenerationId);
 
       case GenerationInfo::ComparisonMethod::producerId:
-        res = uint_compare(mProducerId,generationInfo->mProducerId);
+        res = num_compare(mProducerId,generationInfo->mProducerId);
         if (res != 0)
           return res;
-        return uint_compare(mGenerationId,generationInfo->mGenerationId);
+        return num_compare(mGenerationId,generationInfo->mGenerationId);
 
       default:
-        return uint_compare(mGenerationId,generationInfo->mGenerationId);
+        return num_compare(mGenerationId,generationInfo->mGenerationId);
     }
     return 0;
   }

@@ -3280,6 +3280,9 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    if (maxRecords > 10000)
+      maxRecords = 10000;
+
     redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sevents %llu %llu LIMIT 0 %u",mTablePrefix.c_str(),startEventId,0xFFFFFFFFFFFF,maxRecords));
     if (reply == nullptr)
     {
@@ -3296,7 +3299,7 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
 
         if (eventInfo->mType == EventType::FILE_ADDED  &&  eventInfo->mId3 > 0)
         {
-          char buf[2000000];
+          char buf[3000000];
           char *p = buf;
 
           T::FileInfo fileInfo;

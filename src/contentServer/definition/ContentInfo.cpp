@@ -423,43 +423,43 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
     switch (comparisonMethod)
     {
       case ContentInfo::ComparisonMethod::file_message:
-        res = uint_compare(mFileId,contentInfo->mFileId);
+        res = num_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        return num_compare(mMessageIndex,contentInfo->mMessageIndex);
 
       case ContentInfo::ComparisonMethod::gribId_producer_generation_level_time:
         res = strcasecmp(mGribParameterId.c_str(),contentInfo->mGribParameterId.c_str());
         if (res != 0)
           return res;
-        res = uint_compare(mProducerId,contentInfo->mProducerId);
+        res = num_compare(mProducerId,contentInfo->mProducerId);
         if (res != 0)
           return res;
-        res = uint_compare(mGenerationId,contentInfo->mGenerationId);
+        res = num_compare(mGenerationId,contentInfo->mGenerationId);
         if (res != 0)
           return res;
-        res = int_compare(mParameterLevel,contentInfo->mParameterLevel);
+        res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
         res = strcasecmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         if (res != 0)
           return res;
-        res = int_compare(mGeometryId,contentInfo->mGeometryId);
+        res = num_compare(mGeometryId,contentInfo->mGeometryId);
         if (res != 0)
           return res;
-        res = int_compare(mForecastType,contentInfo->mForecastType);
+        res = num_compare(mForecastType,contentInfo->mForecastType);
         if (res != 0)
           return res;
-        res = int_compare(mForecastNumber,contentInfo->mForecastNumber);
+        res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
         if (res != 0)
           return res;
-        res = uint_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
+        res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
         if (res != 0)
           return res;
-        res = uint_compare(mFileId,contentInfo->mFileId);
+        res = num_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
         if (res != 0)
           return res;
         return 0;
@@ -468,67 +468,67 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = strcasecmp(mFmiParameterId.c_str(),contentInfo->mFmiParameterId.c_str());
         if (res != 0)
           return res;
-        res = uint_compare(mProducerId,contentInfo->mProducerId);
+        res = num_compare(mProducerId,contentInfo->mProducerId);
         if (res != 0)
           return res;
-        res = uint_compare(mGenerationId,contentInfo->mGenerationId);
+        res = num_compare(mGenerationId,contentInfo->mGenerationId);
         if (res != 0)
           return res;
-        res = int_compare(mParameterLevel,contentInfo->mParameterLevel);
+        res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
         res = strcasecmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         if (res != 0)
           return res;
-        res = int_compare(mGeometryId,contentInfo->mGeometryId);
+        res = num_compare(mGeometryId,contentInfo->mGeometryId);
         if (res != 0)
           return res;
-        res = int_compare(mForecastType,contentInfo->mForecastType);
+        res = num_compare(mForecastType,contentInfo->mForecastType);
         if (res != 0)
           return res;
-        res = int_compare(mForecastNumber,contentInfo->mForecastNumber);
+        res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
         if (res != 0)
           return res;
-        res = uint_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
+        res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
         if (res != 0)
           return res;
-        res = uint_compare(mFileId,contentInfo->mFileId);
+        res = num_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        return num_compare(mMessageIndex,contentInfo->mMessageIndex);
 
       case ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time:
         res = strcasecmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
         if (res != 0)
           return res;
-        res = uint_compare(mProducerId,contentInfo->mProducerId);
+        res = num_compare(mProducerId,contentInfo->mProducerId);
         if (res != 0)
           return res;
-        res = uint_compare(mGenerationId,contentInfo->mGenerationId);
+        res = num_compare(mGenerationId,contentInfo->mGenerationId);
         if (res != 0)
           return res;
-        res = int_compare(mParameterLevel,contentInfo->mParameterLevel);
+        res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
         res = strcasecmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         if (res != 0)
           return res;
-        res = int_compare(mGeometryId,contentInfo->mGeometryId);
+        res = num_compare(mGeometryId,contentInfo->mGeometryId);
         if (res != 0)
           return res;
-        res = int_compare(mForecastType,contentInfo->mForecastType);
+        res = num_compare(mForecastType,contentInfo->mForecastType);
         if (res != 0)
           return res;
-        res = int_compare(mForecastNumber,contentInfo->mForecastNumber);
+        res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
         if (res != 0)
           return res;
-        res = uint_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
+        res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
         if (res != 0)
           return res;
-        res = uint_compare(mFileId,contentInfo->mFileId);
+        res = num_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
         if (res != 0)
           return res;
         return 0;
@@ -537,34 +537,34 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = strcasecmp(mNewbaseParameterId.c_str(),contentInfo->mNewbaseParameterId.c_str());
         if (res != 0)
           return res;
-        res = uint_compare(mProducerId,contentInfo->mProducerId);
+        res = num_compare(mProducerId,contentInfo->mProducerId);
         if (res != 0)
           return res;
-        res = uint_compare(mGenerationId,contentInfo->mGenerationId);
+        res = num_compare(mGenerationId,contentInfo->mGenerationId);
         if (res != 0)
           return res;
-        res = int_compare(mParameterLevel,contentInfo->mParameterLevel);
+        res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
         res = strcasecmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         if (res != 0)
           return res;
-        res = int_compare(mGeometryId,contentInfo->mGeometryId);
+        res = num_compare(mGeometryId,contentInfo->mGeometryId);
         if (res != 0)
           return res;
-        res = int_compare(mForecastType,contentInfo->mForecastType);
+        res = num_compare(mForecastType,contentInfo->mForecastType);
         if (res != 0)
           return res;
-        res = int_compare(mForecastNumber,contentInfo->mForecastNumber);
+        res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
         if (res != 0)
           return res;
-        res = uint_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
+        res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
         if (res != 0)
           return res;
-        res = uint_compare(mFileId,contentInfo->mFileId);
+        res = num_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
         if (res != 0)
           return res;
         return 0;
@@ -573,34 +573,34 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = strcasecmp(mNewbaseParameterName.c_str(),contentInfo->mNewbaseParameterName.c_str());
         if (res != 0)
           return res;
-        res = uint_compare(mProducerId,contentInfo->mProducerId);
+        res = num_compare(mProducerId,contentInfo->mProducerId);
         if (res != 0)
           return res;
-        res = uint_compare(mGenerationId,contentInfo->mGenerationId);
+        res = num_compare(mGenerationId,contentInfo->mGenerationId);
         if (res != 0)
           return res;
-        res = int_compare(mParameterLevel,contentInfo->mParameterLevel);
+        res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
         res = strcasecmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         if (res != 0)
           return res;
-        res = int_compare(mGeometryId,contentInfo->mGeometryId);
+        res = num_compare(mGeometryId,contentInfo->mGeometryId);
         if (res != 0)
           return res;
-        res = int_compare(mForecastType,contentInfo->mForecastType);
+        res = num_compare(mForecastType,contentInfo->mForecastType);
         if (res != 0)
           return res;
-        res = int_compare(mForecastNumber,contentInfo->mForecastNumber);
+        res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
         if (res != 0)
           return res;
-        res = uint_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
+        res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
         if (res != 0)
           return res;
-        res = uint_compare(mFileId,contentInfo->mFileId);
+        res = num_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
         if (res != 0)
           return res;
         return 0;
@@ -609,34 +609,34 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = strcasecmp(mCdmParameterId.c_str(),contentInfo->mCdmParameterId.c_str());
         if (res != 0)
           return res;
-        res = uint_compare(mProducerId,contentInfo->mProducerId);
+        res = num_compare(mProducerId,contentInfo->mProducerId);
         if (res != 0)
           return res;
-        res = uint_compare(mGenerationId,contentInfo->mGenerationId);
+        res = num_compare(mGenerationId,contentInfo->mGenerationId);
         if (res != 0)
           return res;
-        res = int_compare(mParameterLevel,contentInfo->mParameterLevel);
+        res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
         res = strcasecmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         if (res != 0)
           return res;
-        res = int_compare(mGeometryId,contentInfo->mGeometryId);
+        res = num_compare(mGeometryId,contentInfo->mGeometryId);
         if (res != 0)
           return res;
-        res = int_compare(mForecastType,contentInfo->mForecastType);
+        res = num_compare(mForecastType,contentInfo->mForecastType);
         if (res != 0)
           return res;
-        res = int_compare(mForecastNumber,contentInfo->mForecastNumber);
+        res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
         if (res != 0)
           return res;
-        res = uint_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
+        res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
         if (res != 0)
           return res;
-        res = uint_compare(mFileId,contentInfo->mFileId);
+        res = num_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
         if (res != 0)
           return res;
         return 0;
@@ -645,34 +645,34 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = strcasecmp(mCdmParameterName.c_str(),contentInfo->mCdmParameterName.c_str());
         if (res != 0)
           return res;
-        res = uint_compare(mProducerId,contentInfo->mProducerId);
+        res = num_compare(mProducerId,contentInfo->mProducerId);
         if (res != 0)
           return res;
-        res = uint_compare(mGenerationId,contentInfo->mGenerationId);
+        res = num_compare(mGenerationId,contentInfo->mGenerationId);
         if (res != 0)
           return res;
-        res = int_compare(mParameterLevel,contentInfo->mParameterLevel);
+        res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
         res = strcasecmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         if (res != 0)
           return res;
-        res = int_compare(mGeometryId,contentInfo->mGeometryId);
+        res = num_compare(mGeometryId,contentInfo->mGeometryId);
         if (res != 0)
           return res;
-        res = int_compare(mForecastType,contentInfo->mForecastType);
+        res = num_compare(mForecastType,contentInfo->mForecastType);
         if (res != 0)
           return res;
-        res = int_compare(mForecastNumber,contentInfo->mForecastNumber);
+        res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
         if (res != 0)
           return res;
-        res = uint_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
+        res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
         if (res != 0)
           return res;
-        res = uint_compare(mFileId,contentInfo->mFileId);
+        res = num_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
         if (res != 0)
           return res;
         return 0;
@@ -681,10 +681,10 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = strcasecmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         if (res != 0)
           return res;
-        res = uint_compare(mFileId,contentInfo->mFileId);
+        res = num_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        return num_compare(mMessageIndex,contentInfo->mMessageIndex);
 
       case ContentInfo::ComparisonMethod::fmiName_starttime_level_file_message:
         res = strcasecmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
@@ -693,13 +693,13 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = strcasecmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         if (res != 0)
           return res;
-        res = int_compare(mParameterLevel,contentInfo->mParameterLevel);
+        res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
-        res = uint_compare(mFileId,contentInfo->mFileId);
+        res = num_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
         if (res != 0)
           return res;
         return 0;
@@ -708,28 +708,28 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = strcasecmp(mFmiParameterId.c_str(),contentInfo->mFmiParameterId.c_str());
         if (res != 0)
           return res;
-        res = int_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
+        res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
         if (res != 0)
           return res;
-        res = int_compare(mParameterLevel,contentInfo->mParameterLevel);
+        res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
-        res = int_compare(mForecastType,contentInfo->mForecastType);
+        res = num_compare(mForecastType,contentInfo->mForecastType);
         if (res != 0)
           return res;
-        res = int_compare(mForecastNumber,contentInfo->mForecastNumber);
+        res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
         if (res != 0)
           return res;
         res = strcasecmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         if (res != 0)
           return res;
-        res = int_compare(mGeometryId,contentInfo->mGeometryId);
+        res = num_compare(mGeometryId,contentInfo->mGeometryId);
         if (res != 0)
           return res;
-        res = uint_compare(mFileId,contentInfo->mFileId);
+        res = num_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
         if (res != 0)
           return res;
         return 0;
@@ -741,25 +741,25 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = strcasecmp(mFmiParameterId.c_str(),contentInfo->mFmiParameterId.c_str());
         if (res != 0)
           return res;
-        res = int_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
+        res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
         if (res != 0)
           return res;
-        res = int_compare(mParameterLevel,contentInfo->mParameterLevel);
+        res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
-        res = int_compare(mForecastType,contentInfo->mForecastType);
+        res = num_compare(mForecastType,contentInfo->mForecastType);
         if (res != 0)
           return res;
-        res = int_compare(mForecastNumber,contentInfo->mForecastNumber);
+        res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
         if (res != 0)
           return res;
-        res = int_compare(mGeometryId,contentInfo->mGeometryId);
+        res = num_compare(mGeometryId,contentInfo->mGeometryId);
         if (res != 0)
           return res;
-        res = uint_compare(mFileId,contentInfo->mFileId);
+        res = num_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
         if (res != 0)
           return res;
         return 0;
@@ -771,40 +771,40 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = strcasecmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
         if (res != 0)
           return res;
-        res = int_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
+        res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
         if (res != 0)
           return res;
-        res = int_compare(mParameterLevel,contentInfo->mParameterLevel);
+        res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
-        res = int_compare(mForecastType,contentInfo->mForecastType);
+        res = num_compare(mForecastType,contentInfo->mForecastType);
         if (res != 0)
           return res;
-        res = int_compare(mForecastNumber,contentInfo->mForecastNumber);
+        res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
         if (res != 0)
           return res;
-        res = int_compare(mGeometryId,contentInfo->mGeometryId);
+        res = num_compare(mGeometryId,contentInfo->mGeometryId);
         if (res != 0)
           return res;
-        res = uint_compare(mFileId,contentInfo->mFileId);
+        res = num_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
         if (res != 0)
           return res;
         return 0;
 
       case ContentInfo::ComparisonMethod::generationId_starttime_file_message:
-        res = uint_compare(mGenerationId,contentInfo->mGenerationId);
+        res = num_compare(mGenerationId,contentInfo->mGenerationId);
         if (res != 0)
           return res;
         res = strcasecmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         if (res != 0)
           return res;
-        res = uint_compare(mFileId,contentInfo->mFileId);
+        res = num_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
         if (res != 0)
           return res;
         return 0;
@@ -813,28 +813,28 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = strcasecmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
         if (res != 0)
           return res;
-        res = int_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
+        res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
         if (res != 0)
           return res;
-        res = int_compare(mParameterLevel,contentInfo->mParameterLevel);
+        res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
-        res = int_compare(mForecastType,contentInfo->mForecastType);
+        res = num_compare(mForecastType,contentInfo->mForecastType);
         if (res != 0)
           return res;
-        res = int_compare(mForecastNumber,contentInfo->mForecastNumber);
+        res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
         if (res != 0)
           return res;
-        res = int_compare(mGeometryId,contentInfo->mGeometryId);
+        res = num_compare(mGeometryId,contentInfo->mGeometryId);
         if (res != 0)
           return res;
         res = strcasecmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         if (res != 0)
           return res;
-        res = uint_compare(mFileId,contentInfo->mFileId);
+        res = num_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
         if (res != 0)
           return res;
         return 0;
@@ -843,41 +843,41 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = strcasecmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         if (res != 0)
           return res;
-        res = uint_compare(mGenerationId,contentInfo->mGenerationId);
+        res = num_compare(mGenerationId,contentInfo->mGenerationId);
         if (res != 0)
           return res;
-        res = int_compare(mForecastType,contentInfo->mForecastType);
+        res = num_compare(mForecastType,contentInfo->mForecastType);
         if (res != 0)
           return res;
-        res = int_compare(mForecastNumber,contentInfo->mForecastNumber);
+        res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
         if (res != 0)
           return res;
-        res = uint_compare(mFileId,contentInfo->mFileId);
+        res = num_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
         if (res != 0)
           return res;
         return 0;
 
       case ContentInfo::ComparisonMethod::producer_file_message:
-        res = uint_compare(mProducerId,contentInfo->mProducerId);
+        res = num_compare(mProducerId,contentInfo->mProducerId);
         if (res != 0)
           return res;
-        res = uint_compare(mFileId,contentInfo->mFileId);
+        res = num_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        res = uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
         if (res != 0)
           return res;
         return 0;
 
 
       default:
-        res = uint_compare(mFileId,contentInfo->mFileId);
+        res = num_compare(mFileId,contentInfo->mFileId);
         if (res != 0)
           return res;
-        return uint_compare(mMessageIndex,contentInfo->mMessageIndex);
+        return num_compare(mMessageIndex,contentInfo->mMessageIndex);
     }
     return 0;
   }

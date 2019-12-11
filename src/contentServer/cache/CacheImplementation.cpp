@@ -5604,7 +5604,7 @@ void CacheImplementation::processEvents(bool eventThread)
       {
 
         T::EventInfoList eventInfoList;
-        result = mContentStorage->getEventInfoList(mSessionId,0,mLastProcessedEventId+1,50000,eventInfoList);
+        result = mContentStorage->getEventInfoList(mSessionId,0,mLastProcessedEventId+1,10000,eventInfoList);
         if (result != 0)
         {
           //printf("ERROR: getEventInfoList : %d\n",result);

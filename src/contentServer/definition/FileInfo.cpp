@@ -264,13 +264,13 @@ int FileInfo::compare(uint comparisonMethod,FileInfo *fileInfo)
         return 0;
 
       case ComparisonMethod::fileId:
-        return uint_compare(mFileId,fileInfo->mFileId);
+        return num_compare(mFileId,fileInfo->mFileId);
 
       case ComparisonMethod::fileName:
         return strcmp(mName.c_str(),fileInfo->mName.c_str());
 
       default:
-        return uint_compare(mFileId,fileInfo->mFileId);
+        return num_compare(mFileId,fileInfo->mFileId);
     }
     return 0;
   }
