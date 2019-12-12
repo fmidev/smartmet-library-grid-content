@@ -2274,23 +2274,29 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
           info->mGroupFlags = ff->mFileInfo.mGroupFlags;
           info->mFlags = info->mFlags | T::ContentInfo::Flags::PredefinedContent;
 
-          if (len > 10)
-            info->mFlags = info->mFlags | T::ContentInfo::Flags::PreloadRequired;
+          //if (len > 10)
+          //  info->mFlags = info->mFlags | T::ContentInfo::Flags::PreloadRequired;
 
-          // ### Creating a key for the content.
-
-          unsigned long long id = ((unsigned long long)info->mFileId << 32) + info->mMessageIndex;
-
-          // ### Adding the content record into the database.
-
-          redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,info->getCsv().c_str()));
-          if (reply == nullptr)
+          T::ContentInfo contentInfo;
+          if (getContent(info->mFileId,info->mMessageIndex,contentInfo) == DATA_NOT_FOUND)
           {
-            closeConnection();
-            return Result::PERMANENT_STORAGE_ERROR;
-          }
+            // ### Creating a key for the content.
+            unsigned long long id = ((unsigned long long)info->mFileId << 32) + info->mMessageIndex;
 
-          freeReplyObject(reply);
+            // ### Adding the content record into the database.
+
+            redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,info->getCsv().c_str()));
+            if (reply == nullptr)
+            {
+              closeConnection();
+              return Result::PERMANENT_STORAGE_ERROR;
+            }
+
+            freeReplyObject(reply);
+
+            if (fileId > 0  &&  (requestFlags & 0x00000001) == 0)
+              addEvent(EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,info->mServerFlags);
+          }
         }
       }
 
@@ -2299,7 +2305,8 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
       if (fileId > 0)
       {
         //printf("-- file update event\n");
-        addEvent(EventType::FILE_UPDATED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,len,0);
+        if (requestFlags & 0x00000001)
+          addEvent(EventType::FILE_UPDATED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,len,0);
       }
       else
       {
@@ -3299,27 +3306,36 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
 
         if (eventInfo->mType == EventType::FILE_ADDED  &&  eventInfo->mId3 > 0)
         {
-          char buf[3000000];
-          char *p = buf;
 
           T::FileInfo fileInfo;
 
           if (getFileById(eventInfo->mId1,fileInfo) == 0)
           {
-            p += sprintf(p,"%s\n",fileInfo.getCsv().c_str());
+            std::ostringstream output;
+            output << fileInfo.getCsv() << "\n";
             T::ContentInfoList contentInfoList;
             getContentByFileId(eventInfo->mId1,contentInfoList);
 
             uint len = contentInfoList.getLength();
-            if (len < 20000)
+            for (uint t=0; t<len; t++)
             {
-              for (uint t=0; t<len; t++)
-              {
-                T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
-                p += sprintf(p,"%s\n",contentInfo->getCsv().c_str());
-              }
-              eventInfo->mNote = buf;
+              T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
+              output << contentInfo->getCsv() << "\n";
             }
+            eventInfo->mNote = output.str();
+          }
+        }
+        else
+        if (eventInfo->mType == EventType::CONTENT_ADDED)
+        {
+          T::ContentInfo contentInfo;
+          if (getContent(eventInfo->mId1,eventInfo->mId2,contentInfo) == 0)
+          {
+            eventInfo->mNote = contentInfo.getCsv();
+          }
+          else
+          {
+           //  printf("**************** CONTENT NOT FOUND   %u %u ***********\n", eventInfo->mId1,eventInfo->mId2);
           }
         }
 
@@ -6811,6 +6827,14 @@ int RedisImplementation::getContent(uint fileId,uint messageIndex,T::ContentInfo
       contentInfo.setCsv(reply->element[0]->str);
       freeReplyObject(reply);
       return Result::OK;
+    }
+
+    if (reply->elements > 1)
+    {
+      SmartMet::Spine::Exception exception(BCP,"Got multiple records - expected one");
+      exception.addParameter("FileId",std::to_string(fileId));
+      exception.addParameter("MessageIndex",std::to_string(messageIndex));
+      exception.printError();
     }
 
     freeReplyObject(reply);

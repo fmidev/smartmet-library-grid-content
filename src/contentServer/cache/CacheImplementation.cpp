@@ -4705,7 +4705,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: fileAdded(%u)\n",eventInfo.mEventId,eventInfo.mId1);
+    // printf("EVENT[%llu]: fileAdded(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
@@ -4744,6 +4744,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
           {
             T::ContentInfo *contentInfo = new T::ContentInfo();
             contentInfo->setCsv(s);
+            //printf("%s\n",s);
             if (mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(contentInfo->mFileId,contentInfo->mMessageIndex) == nullptr)
             {
               auto it = mContentTimeCache.find(contentInfo->mGenerationId);
@@ -5276,12 +5277,44 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
       return;  // The content info is already in the cache.
     }
 
-    T::ContentInfo contentInfo;
-    if (mContentStorage->getContentInfo(mSessionId,eventInfo.mId1,eventInfo.mId2,contentInfo) == Result::OK)
-    {
-      //contentInfo.print(std::cout,0,0);
-      T::ContentInfo *cInfo = contentInfo.duplicate();
+    // eventInfo.print(std::cout,0,0);
 
+    T::ContentInfo contentInfo;
+    if (eventInfo.mNote > " ")
+      contentInfo.setCsv(eventInfo.mNote);
+    else
+    {
+      if (mContentStorage->getContentInfo(mSessionId,eventInfo.mId1,eventInfo.mId2,contentInfo) != Result::OK)
+        return;
+    }
+
+    //contentInfo.print(std::cout,0,0);
+
+    if (mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(contentInfo.mFileId,contentInfo.mMessageIndex) == nullptr)
+    {
+      auto it = mContentTimeCache.find(contentInfo.mGenerationId);
+      if (it != mContentTimeCache.end())
+      {
+        if (it->second.find(contentInfo.mForecastTime) == it->second.end())
+          it->second.insert(contentInfo.mForecastTime);
+      }
+
+      T::ContentInfo *cInfo = contentInfo.duplicate();
+      if (mContentInfoList[0].addContentInfo(cInfo) == cInfo)
+      {
+        // Addition ok
+        ulonglong fid = C_UINT64(cInfo->mFileId);
+        ulonglong id = (fid << 32) + cInfo->mMessageIndex;
+        if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
+          mDelayedContentAddList.insert(id);
+      }
+      else
+      {
+        // Additon failed. The content probably exists
+        delete cInfo;
+      }
+
+#if 0
       T::ContentInfo *aInfo = mContentInfoList[0].addContentInfo(cInfo);
       if (aInfo != cInfo)
       {
@@ -5296,6 +5329,7 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
           mContentInfoList[t].addContentInfo(aInfo);
         }
       }
+#endif
     }
   }
   catch (...)

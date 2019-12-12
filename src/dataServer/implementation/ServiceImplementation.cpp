@@ -5174,6 +5174,32 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
   try
   {
     //printf("EVENT[%llu]: contentAdded(%u,%u)\n",eventInfo.mEventId,eventInfo.mId1,eventInfo.mId2);
+
+    T::ContentInfo contentInfo;
+    if (eventInfo.mNote > " ")
+      contentInfo.setCsv(eventInfo.mNote);
+    else
+    {
+      if (mContentServer->getContentInfo(mServerSessionId,eventInfo.mId1,eventInfo.mId2,contentInfo) != Result::OK)
+        return;
+    }
+
+    GRID::GridFile_sptr storageFile = mGridFileManager.getFileByIdNoMapping(eventInfo.mId1);
+
+    GRID::GridFile *gridFile = nullptr;
+    if (storageFile)
+    {
+      gridFile = storageFile.get();
+      try
+      {
+        gridFile->newMessage(contentInfo.mMessageIndex,contentInfo.mFilePosition,contentInfo.mMessageSize);
+      }
+      catch (...)
+      {
+        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+        exception.printError();
+      }
+    }
   }
   catch (...)
   {
