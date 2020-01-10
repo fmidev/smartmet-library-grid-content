@@ -2193,14 +2193,15 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
 
     RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
+    T::ProducerInfo producerInfo;
+    T::GenerationInfo generationInfo;
+
     for (auto ff = fileAndContentList.begin();ff != fileAndContentList.end(); ++ff)
     {
-      T::ProducerInfo producerInfo;
-      if (getProducerById(ff->mFileInfo.mProducerId,producerInfo) != Result::OK)
+      if (ff->mFileInfo.mProducerId != producerInfo.mProducerId &&  getProducerById(ff->mFileInfo.mProducerId,producerInfo) != Result::OK)
         return Result::UNKNOWN_PRODUCER_ID;
 
-      T::GenerationInfo generationInfo;
-      if (getGenerationById(ff->mFileInfo.mGenerationId,generationInfo) != Result::OK)
+      if (ff->mFileInfo.mGenerationId != generationInfo.mGenerationId  && getGenerationById(ff->mFileInfo.mGenerationId,generationInfo) != Result::OK)
         return Result::UNKNOWN_GENERATION_ID;
 
       if (producerInfo.mProducerId != generationInfo.mProducerId)
@@ -3482,6 +3483,10 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
 
     RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
+    T::ProducerInfo producerInfo;
+    T::GenerationInfo generationInfo;
+    T::FileInfo fileInfo;
+
     uint len = contentInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -3493,16 +3498,13 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
       }
       else
       {
-        T::ProducerInfo producerInfo;
-        if (getProducerById(info->mProducerId,producerInfo) != Result::OK)
+        if (info->mProducerId != producerInfo.mProducerId && getProducerById(info->mProducerId,producerInfo) != Result::OK)
           return Result::UNKNOWN_PRODUCER_ID;
 
-        T::GenerationInfo generationInfo;
-        if (getGenerationById(info->mGenerationId,generationInfo) != Result::OK)
+        if (info->mGenerationId != generationInfo.mGenerationId &&  getGenerationById(info->mGenerationId,generationInfo) != Result::OK)
           return Result::UNKNOWN_GENERATION_ID;
 
-        T::FileInfo fileInfo;
-        if (getFileById(info->mFileId,fileInfo) != Result::OK)
+        if (info->mFileId != fileInfo.mFileId && getFileById(info->mFileId,fileInfo) != Result::OK)
           return Result::UNKNOWN_FILE_ID;
 
         if (producerInfo.mProducerId != generationInfo.mProducerId)

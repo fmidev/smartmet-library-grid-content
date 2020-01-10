@@ -227,9 +227,6 @@ void CacheImplementation::synchronize()
   FUNCTION_TRACE
   try
   {
-    mDelayedFileAdditionTime = time(nullptr) - 1000;
-    mDelayedContentAdditionTime = time(nullptr) - 1000;
-
     T::EventInfo eventInfo;
     while (mLastProcessedEventId != eventInfo.mEventId)
     {
@@ -4805,10 +4802,13 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
               if (mContentInfoList[0].addContentInfo(contentInfo) == contentInfo)
               {
                 // Addition ok
-                ulonglong fid = C_UINT64(contentInfo->mFileId);
-                ulonglong id = (fid << 32) + contentInfo->mMessageIndex;
-                if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
-                  mDelayedContentAddList.insert(id);
+                if (mContentSortingFlags > 1)
+                {
+                  ulonglong fid = C_UINT64(contentInfo->mFileId);
+                  ulonglong id = (fid << 32) + contentInfo->mMessageIndex;
+                  if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
+                    mDelayedContentAddList.insert(id);
+                }
               }
               else
               {
@@ -4872,10 +4872,13 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
                     if (mContentInfoList[0].addContentInfo(cInfo) == cInfo)
                     {
                       // Addition ok
-                      ulonglong fid = C_UINT64(cInfo->mFileId);
-                      ulonglong id = (fid << 32) + cInfo->mMessageIndex;
-                      if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
-                        mDelayedContentAddList.insert(id);
+                      if (mContentSortingFlags > 1)
+                      {
+                        ulonglong fid = C_UINT64(cInfo->mFileId);
+                        ulonglong id = (fid << 32) + cInfo->mMessageIndex;
+                        if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
+                          mDelayedContentAddList.insert(id);
+                      }
                     }
                     else
                     {
@@ -4995,10 +4998,13 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
                 if (mContentInfoList[0].addContentInfo(cInfo) == cInfo)
                 {
                   // Addition ok
-                  ulonglong fid = C_UINT64(cInfo->mFileId);
-                  ulonglong id = (fid << 32) + cInfo->mMessageIndex;
-                  if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
-                    mDelayedContentAddList.insert(id);
+                  if (mContentSortingFlags > 1)
+                  {
+                    ulonglong fid = C_UINT64(cInfo->mFileId);
+                    ulonglong id = (fid << 32) + cInfo->mMessageIndex;
+                    if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
+                      mDelayedContentAddList.insert(id);
+                  }
                 }
                 else
                 {
@@ -5351,10 +5357,14 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
       if (mContentInfoList[0].addContentInfo(cInfo) == cInfo)
       {
         // Addition ok
-        ulonglong fid = C_UINT64(cInfo->mFileId);
-        ulonglong id = (fid << 32) + cInfo->mMessageIndex;
-        if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
-          mDelayedContentAddList.insert(id);
+
+        if (mContentSortingFlags > 1)
+        {
+          ulonglong fid = C_UINT64(cInfo->mFileId);
+          ulonglong id = (fid << 32) + cInfo->mMessageIndex;
+          if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
+            mDelayedContentAddList.insert(id);
+        }
       }
       else
       {
