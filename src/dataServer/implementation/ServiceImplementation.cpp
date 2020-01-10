@@ -4255,7 +4255,7 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
       for (uint t=0; t<len; t++)
       {
         T::ContentInfo *cInfo = fullContentList.getContentInfoByIndex(t);
-        if (cInfo != NULL  &&  (cInfo->mFlags &  T::ContentInfo::Flags::VirtualContent) != 0)
+        if (cInfo != nullptr  &&  (cInfo->mFlags &  T::ContentInfo::Flags::VirtualContent) != 0)
         {
           if (idList.find(cInfo->mFileId) == idList.end())
           {
@@ -4806,7 +4806,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
       for (uint t=0; t<len; t++)
       {
         T::FileInfo *fileInfo = fileInfoList.getFileInfoByIndex(t);
-        if (fileInfo != NULL)
+        if (fileInfo != nullptr)
         {
           T::ContentInfoList contentList;
           contentInfoList.getContentInfoListByFileId(fileInfo->mFileId,contentList);
@@ -5697,7 +5697,7 @@ void ServiceImplementation::processRequestCounters()
             return;
 
           T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
-          if (info != NULL)
+          if (info != nullptr)
           {
             GRID::GridFile_sptr gridFile = getGridFile(info->mFileId);
             if (gridFile != nullptr)

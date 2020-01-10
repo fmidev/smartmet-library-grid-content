@@ -205,6 +205,54 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
 
 
 
+void CacheImplementation::setEventListMaxLength(uint maxLength)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mEventInfoList.setMaxLength(maxLength);
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void CacheImplementation::synchronize()
+{
+  FUNCTION_TRACE
+  try
+  {
+    mDelayedFileAdditionTime = time(nullptr) - 1000;
+    mDelayedContentAdditionTime = time(nullptr) - 1000;
+
+    T::EventInfo eventInfo;
+    while (mLastProcessedEventId != eventInfo.mEventId)
+    {
+      mContentStorage->getLastEventInfo(mSessionId,0,eventInfo);
+      sleep(1);
+    }
+
+    while (mDelayedFileAddList.size() > 0  ||  mDelayedContentAddList.size() > 0 || mFileDeleteCount > 0 || mContentDeleteCount > 0)
+    {
+      mDelayedFileAdditionTime = time(nullptr) - 1000;
+      mDelayedContentAdditionTime = time(nullptr) - 1000;
+      sleep(1);
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
 void CacheImplementation::startEventProcessing()
 {
   FUNCTION_TRACE

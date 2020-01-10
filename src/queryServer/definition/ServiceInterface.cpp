@@ -497,7 +497,7 @@ int ServiceInterface::_getParameterValueVectorByGeometryAndTime(T::SessionId ses
     for (uint t=0; t<len; t++)
     {
       T::Attribute *attr = attributeList.getAttributeByIndex(t);
-      if (attr != NULL)
+      if (attr != nullptr)
         query.mAttributeList.addAttribute(attr->mName,attr->mValue);
     }
 

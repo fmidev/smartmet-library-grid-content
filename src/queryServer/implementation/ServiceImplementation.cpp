@@ -3929,10 +3929,10 @@ bool ServiceImplementation::getPointValuesByHeight(
           }
         }
 
-        if (prevContent != NULL)
+        if (prevContent != nullptr)
           contentList.addContentInfo(prevContent->duplicate());
 
-        if (nextContent != NULL)
+        if (nextContent != nullptr)
           contentList.addContentInfo(nextContent->duplicate());
 
         if (!timeMatch)
@@ -3953,10 +3953,10 @@ bool ServiceImplementation::getPointValuesByHeight(
             }
           }
 
-          if (prevContent != NULL)
+          if (prevContent != nullptr)
             contentList.addContentInfo(prevContent->duplicate());
 
-          if (nextContent != NULL)
+          if (nextContent != nullptr)
             contentList.addContentInfo(nextContent->duplicate());
         }
 

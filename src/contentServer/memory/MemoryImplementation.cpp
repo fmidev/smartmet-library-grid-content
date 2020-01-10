@@ -1928,11 +1928,13 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
           cInfo->mGroupFlags = ff->mFileInfo.mGroupFlags;
           cInfo->mFlags = cInfo->mFlags | T::ContentInfo::Flags::PredefinedContent;
 
-          if (len > 10)
-            cInfo->mFlags = cInfo->mFlags | T::ContentInfo::Flags::PreloadRequired;
 
           //mContentInfoList[0].addContentInfo(cInfo);
           tmpContentList.addContentInfo(cInfo);
+
+          if (cInfo->mFileId != mMaxFileId  &&  (requestFlags & 0x00000001) == 0)
+            addEvent(EventType::CONTENT_ADDED,cInfo->mFileId,cInfo->mMessageIndex,0,cInfo->mServerFlags);
+
         }
       }
 
@@ -1941,12 +1943,13 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
       if (ff->mFileInfo.mFileId != mMaxFileId)
       {
         //printf("-- file update event\n");
-        addEvent(EventType::FILE_UPDATED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,0,0);
+        if (requestFlags & 0x00000001)
+          addEvent(EventType::FILE_UPDATED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,0,0);
       }
       else
       {
         //printf("-- file add event\n");
-        addEvent(EventType::FILE_ADDED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,0,0);
+        addEvent(EventType::FILE_ADDED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,len,0);
       }
     }
 
@@ -2808,7 +2811,55 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
         info->mLastCall = time(nullptr);
     }
 
-    mEventInfoList.getEventInfoList(startEventId,maxRecords,eventInfoList);
+    T::EventInfoList eventList;
+    mEventInfoList.getEventInfoList(startEventId,maxRecords,eventList);
+
+
+    T::EventInfo *event = eventList.getFirstEvent();
+    while (event != nullptr)
+    {
+      T::EventInfo *eventInfo = new T::EventInfo(*event);
+
+      if (eventInfo->mType == EventType::FILE_ADDED  &&  eventInfo->mId3 > 0)
+      {
+
+        T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(eventInfo->mId1);
+        if (fileInfo != nullptr)
+        {
+          std::ostringstream output;
+          output << fileInfo->getCsv() << "\n";
+
+          T::ContentInfoList contentInfoList;
+          mContentInfoList[0].getContentInfoListByFileId(fileInfo->mFileId,contentInfoList);
+
+          uint len = contentInfoList.getLength();
+          for (uint t=0; t<len; t++)
+          {
+            T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
+            output << contentInfo->getCsv() << "\n";
+          }
+          eventInfo->mNote = output.str();
+        }
+      }
+      else
+      if (eventInfo->mType == EventType::CONTENT_ADDED)
+      {
+        T::ContentInfo *contentInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(eventInfo->mId1,eventInfo->mId2);
+
+        if (contentInfo != nullptr)
+        {
+          eventInfo->mNote = contentInfo->getCsv();
+        }
+        else
+        {
+         //  printf("**************** CONTENT NOT FOUND   %u %u ***********\n", eventInfo->mId1,eventInfo->mId2);
+        }
+      }
+
+      eventInfoList.addEventInfo(eventInfo);
+      event = event->nextItem;
+    }
+
     return Result::OK;
   }
   catch (...)

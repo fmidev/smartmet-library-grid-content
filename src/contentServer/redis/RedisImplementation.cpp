@@ -2274,9 +2274,6 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
           info->mGroupFlags = ff->mFileInfo.mGroupFlags;
           info->mFlags = info->mFlags | T::ContentInfo::Flags::PredefinedContent;
 
-          //if (len > 10)
-          //  info->mFlags = info->mFlags | T::ContentInfo::Flags::PreloadRequired;
-
           T::ContentInfo contentInfo;
           if (getContent(info->mFileId,info->mMessageIndex,contentInfo) == DATA_NOT_FOUND)
           {
@@ -2306,7 +2303,7 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
       {
         //printf("-- file update event\n");
         if (requestFlags & 0x00000001)
-          addEvent(EventType::FILE_UPDATED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,len,0);
+          addEvent(EventType::FILE_UPDATED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,0,0);
       }
       else
       {
@@ -2565,6 +2562,7 @@ int RedisImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
 
     RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
+    std::set<uint> fileIdList;
     T::ContentInfoList contentInfoList;
     int result = getContentByGenerationIdAndTimeRange(generationId,forecastTime,forecastTime,contentInfoList);
     uint len = contentInfoList.getLength();
@@ -2574,13 +2572,23 @@ int RedisImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
       if (info->mGeometryId == geometryId  &&  info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber)
       {
         deleteContent(info->mFileId,info->mMessageIndex);
+        if (fileIdList.find(info->mFileId) != fileIdList.end())
+          fileIdList.insert(info->mFileId);
+      }
+    }
 
+    for (auto it=fileIdList.begin(); it != fileIdList.end(); ++it)
+    {
+      T::ContentInfoList contentList;
+      getContentByFileId(*it,contentList);
+      if (contentList.getLength() == 0)
+      {
         T::FileInfo fileInfo;
-        if (getFileById(info->mFileId,fileInfo) == Result::OK)
+        if (getFileById(*it,fileInfo) == Result::OK)
         {
           deleteFilename(fileInfo.mName);
-          deleteFileById(info->mFileId,false);
-          addEvent(EventType::FILE_DELETED,info->mFileId,fileInfo.mFileType,0,0);
+          deleteFileById(*it,false);
+          addEvent(EventType::FILE_DELETED,*it,fileInfo.mFileType,0,0);
         }
       }
     }
@@ -3462,6 +3470,8 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
   FUNCTION_TRACE
   try
   {
+    //printf("ADD CONTENT %u\n",contentInfoList.getLength());
+    //contentInfoList.print(std::cout,0,0);
     AutoThreadLock lock(&mThreadLock);
 
     if (!isSessionValid(sessionId))
@@ -3479,7 +3489,7 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
       T::ContentInfo contentInfo;
       if (getContent(info->mFileId,info->mMessageIndex,contentInfo) == Result::OK)
       {
-        // printf("-- content already added %u\n",info->mFileId);
+        printf("-- content already added %u:%u\n",info->mFileId,info->mMessageIndex);
       }
       else
       {
@@ -3504,7 +3514,7 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
         if (generationInfo.mGenerationId != fileInfo.mGenerationId)
           return Result::GENERATION_AND_FILE_DO_NOT_MATCH;
 
-        // printf("-- add content %u\n",info->mFileId);
+        //printf("-- add content %u %u\n",info->mFileId,info->mMessageIndex);
         unsigned long long id = ((unsigned long long)info->mFileId << 32) + info->mMessageIndex;
 
         redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,info->getCsv().c_str()));
@@ -5294,7 +5304,10 @@ int RedisImplementation::getProducerById(uint producerId,T::ProducerInfo& produc
     {
       producerInfo.setCsv(reply->element[0]->str);
       freeReplyObject(reply);
-      return Result::OK;
+      if (producerInfo.mProducerId == producerId)
+        return Result::OK;
+      else
+        return Result::DATA_NOT_FOUND;
     }
 
     freeReplyObject(reply);
@@ -5453,7 +5466,10 @@ int RedisImplementation::getGenerationById(uint generationId,T::GenerationInfo& 
     {
       generationInfo.setCsv(reply->element[0]->str);
       freeReplyObject(reply);
-      return Result::OK;
+      if (generationInfo.mGenerationId == generationId)
+        return Result::OK;
+      else
+        return Result::DATA_NOT_FOUND;
     }
 
     freeReplyObject(reply);
@@ -5940,6 +5956,12 @@ int RedisImplementation::getFileById(uint fileId,T::FileInfo& fileInfo)
     {
       fileInfo.setCsv(reply->element[0]->str);
       freeReplyObject(reply);
+
+      if (fileInfo.mFileId == fileId)
+        return Result::OK;
+      else
+        return Result::DATA_NOT_FOUND;
+
       return Result::OK;
     }
 
@@ -6822,21 +6844,32 @@ int RedisImplementation::getContent(uint fileId,uint messageIndex,T::ContentInfo
       return Result::PERMANENT_STORAGE_ERROR;
     }
 
-    if (reply->type == REDIS_REPLY_ARRAY  &&  reply->elements == 1)
+    if (reply->type == REDIS_REPLY_ARRAY  &&  reply->elements > 0)
     {
-      contentInfo.setCsv(reply->element[0]->str);
-      freeReplyObject(reply);
-      return Result::OK;
+      for (uint t=0; t< reply->elements; t++)
+      {
+        contentInfo.setCsv(reply->element[t]->str);
+        if (contentInfo.mFileId == fileId  &&  contentInfo.mMessageIndex == messageIndex)
+        {
+          freeReplyObject(reply);
+          return Result::OK;
+        }
+      }
     }
-
+/*
     if (reply->elements > 1)
     {
+      for (uint t=0; t< reply->elements; t++)
+      {
+        contentInfo.setCsv(reply->element[t]->str);
+        contentInfo.print(std::cout,0,0);
+      }
       SmartMet::Spine::Exception exception(BCP,"Got multiple records - expected one");
       exception.addParameter("FileId",std::to_string(fileId));
       exception.addParameter("MessageIndex",std::to_string(messageIndex));
       exception.printError();
     }
-
+*/
     freeReplyObject(reply);
     return Result::DATA_NOT_FOUND;
   }

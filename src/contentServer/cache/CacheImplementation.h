@@ -27,7 +27,9 @@ class CacheImplementation : public ServiceInterface
 
     virtual void    init(T::SessionId sessionId,ServiceInterface *contentStorage,uint contentSortingFlags);
     virtual void    startEventProcessing();
+    virtual void    setEventListMaxLength(uint maxLength);
     virtual void    shutdown();
+    virtual void    synchronize();
 
     virtual void    eventProcessingThread();
 
