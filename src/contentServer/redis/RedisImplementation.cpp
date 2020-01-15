@@ -83,6 +83,17 @@ class RedisModificationLock
 
 
 
+unsigned long long getContentKey(uint fileId,uint messageIndex)
+{
+  unsigned long long key = fileId;
+  key = (key << 24) + messageIndex;
+  return key;
+}
+
+
+
+
+
 RedisImplementation::RedisImplementation()
 {
   FUNCTION_TRACE
@@ -2138,7 +2149,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
 
         // ### Creating a key for the content.
 
-        unsigned long long id = ((unsigned long long)info->mFileId << 32) + info->mMessageIndex;
+        unsigned long long id = getContentKey(info->mFileId,info->mMessageIndex);
 
         // ### Adding the content record into the database.
 
@@ -2212,7 +2223,7 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
       uint fileId = getFileId(ff->mFileInfo.mName);
       if (fileId > 0)
       {
-        //printf("** File exists %s\n",fileInfo.mName.c_str());
+        printf("** File exists %s\n",ff->mFileInfo.mName.c_str());
         // ### File with the same name already exists. Let's return
         // ### the current file-id.
 
@@ -2279,7 +2290,7 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
           if (getContent(info->mFileId,info->mMessageIndex,contentInfo) == DATA_NOT_FOUND)
           {
             // ### Creating a key for the content.
-            unsigned long long id = ((unsigned long long)info->mFileId << 32) + info->mMessageIndex;
+            unsigned long long id = getContentKey(info->mFileId,info->mMessageIndex);
 
             // ### Adding the content record into the database.
 
@@ -2308,7 +2319,6 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
       }
       else
       {
-        //printf("-- file add event\n");
         addEvent(EventType::FILE_ADDED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,len,0);
       }
     }
@@ -3313,25 +3323,34 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
         T::EventInfo *eventInfo = new T::EventInfo();
         eventInfo->setCsv(reply->element[t]->str);
 
-        if (eventInfo->mType == EventType::FILE_ADDED  &&  eventInfo->mId3 > 0)
-        {
+        //printf("# EVENT %llu,%u\n",eventInfo->mEventId,eventInfo->mType);
 
+        if (eventInfo->mType == EventType::FILE_ADDED)
+        {
           T::FileInfo fileInfo;
 
           if (getFileById(eventInfo->mId1,fileInfo) == 0)
           {
             std::ostringstream output;
             output << fileInfo.getCsv() << "\n";
-            T::ContentInfoList contentInfoList;
-            getContentByFileId(eventInfo->mId1,contentInfoList);
 
-            uint len = contentInfoList.getLength();
-            for (uint t=0; t<len; t++)
+            if (eventInfo->mId3 > 0)
             {
-              T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
-              output << contentInfo->getCsv() << "\n";
+              T::ContentInfoList contentInfoList;
+              getContentByFileId(eventInfo->mId1,contentInfoList);
+
+              uint len = contentInfoList.getLength();
+              for (uint t=0; t<len; t++)
+              {
+                T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
+                output << contentInfo->getCsv() << "\n";
+              }
             }
             eventInfo->mNote = output.str();
+          }
+          else
+          {
+            //printf("File not found %u\n",eventInfo->mId1);
           }
         }
         else
@@ -3441,7 +3460,7 @@ int RedisImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
 
     RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
-    unsigned long long id = ((unsigned long long)contentInfo.mFileId << 32) + contentInfo.mMessageIndex;
+    unsigned long long id = getContentKey(contentInfo.mFileId,contentInfo.mMessageIndex);
 
     redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,contentInfo.getCsv().c_str()));
     if (reply == nullptr)
@@ -3517,7 +3536,7 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
           return Result::GENERATION_AND_FILE_DO_NOT_MATCH;
 
         //printf("-- add content %u %u\n",info->mFileId,info->mMessageIndex);
-        unsigned long long id = ((unsigned long long)info->mFileId << 32) + info->mMessageIndex;
+        unsigned long long id = getContentKey(info->mFileId,info->mMessageIndex);
 
         redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,info->getCsv().c_str()));
         if (reply == nullptr)
@@ -3919,7 +3938,7 @@ int RedisImplementation::_registerContentList(T::SessionId sessionId,uint server
           return Result::GENERATION_AND_FILE_DO_NOT_MATCH;
 
         // printf("Add content %u\n",info->mFileId);
-        unsigned long long id = ((unsigned long long)info->mFileId << 32) + info->mMessageIndex;
+        unsigned long long id = getContentKey(info->mFileId,info->mMessageIndex);
         info->mServerFlags = sf;
 
         redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,info->getCsv().c_str()));
@@ -6562,7 +6581,7 @@ int RedisImplementation::deleteContent(uint fileId,uint messageIndex)
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    unsigned long long id = ((unsigned long long)fileId << 32) + messageIndex;
+    unsigned long long id = getContentKey(fileId,messageIndex);
 
     redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),id,id));
     if (reply == nullptr)
@@ -6797,7 +6816,7 @@ int RedisImplementation::setContent(T::ContentInfo& contentInfo)
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     //contentInfo.print(std::cout,0,0);
-    unsigned long long id = ((unsigned long long)contentInfo.mFileId << 32) + contentInfo.mMessageIndex;
+    unsigned long long id = getContentKey(contentInfo.mFileId,contentInfo.mMessageIndex);
 
     redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),id,id));
     if (reply == nullptr)
@@ -6837,7 +6856,7 @@ int RedisImplementation::getContent(uint fileId,uint messageIndex,T::ContentInfo
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    unsigned long long id = ((unsigned long long)fileId << 32) + messageIndex;
+    unsigned long long id = getContentKey(fileId,messageIndex);
 
     redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),id,id));
     if (reply == nullptr)
@@ -6893,7 +6912,7 @@ int RedisImplementation::getContent(uint startFileId,uint startMessageIndex,uint
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+    unsigned long long startId = getContentKey(startFileId,startMessageIndex);
 
     redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 %u",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF,maxRecords));
     if (reply == nullptr)
@@ -6938,7 +6957,7 @@ int RedisImplementation::getGenerationTimeAndGeometryList(std::set<std::string>&
 
     uint startFileId = 0;
     uint startMessageIndex = 0;
-    unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+    unsigned long long startId = getContentKey(startFileId,startMessageIndex);
     unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
 
     while (startId != prevStartId)
@@ -6982,7 +7001,7 @@ int RedisImplementation::getGenerationTimeAndGeometryList(std::set<std::string>&
         freeReplyObject(reply);
         return Result::OK;
       }
-      startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+      startId = getContentKey(startFileId,startMessageIndex);
     }
     return Result::OK;
   }
@@ -7004,7 +7023,7 @@ int RedisImplementation::getContentByGenerationId(uint generationId,uint startFi
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+    unsigned long long startId = getContentKey(startFileId,startMessageIndex);
     unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
 
     while (startId != prevStartId)
@@ -7059,7 +7078,7 @@ int RedisImplementation::getContentByGenerationId(uint generationId,uint startFi
         freeReplyObject(reply);
         return Result::OK;
       }
-      startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+      startId = getContentKey(startFileId,startMessageIndex);
     }
     return Result::OK;
   }
@@ -7081,7 +7100,7 @@ int RedisImplementation::getContentByGenerationIdList(std::set<uint>& generation
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+    unsigned long long startId = getContentKey(startFileId,startMessageIndex);
     unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
 
     while (startId != prevStartId)
@@ -7136,7 +7155,7 @@ int RedisImplementation::getContentByGenerationIdList(std::set<uint>& generation
         freeReplyObject(reply);
         return Result::OK;
       }
-      startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+      startId = getContentKey(startFileId,startMessageIndex);
     }
     return Result::OK;
   }
@@ -7158,7 +7177,7 @@ int RedisImplementation::getContentByGroupFlags(uint groupFlags,uint startFileId
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+    unsigned long long startId = getContentKey(startFileId,startMessageIndex);
     unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
 
     while (startId != prevStartId)
@@ -7213,7 +7232,7 @@ int RedisImplementation::getContentByGroupFlags(uint groupFlags,uint startFileId
         freeReplyObject(reply);
         return Result::OK;
       }
-      startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+      startId = getContentKey(startFileId,startMessageIndex);
     }
     return Result::OK;
   }
@@ -7284,7 +7303,7 @@ int RedisImplementation::getContentByRequestCounterKey(ulonglong key,T::ContentI
         freeReplyObject(reply);
         return Result::OK;
       }
-      startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+      startId = getContentKey(startFileId,startMessageIndex);
     }
     return Result::OK;
   }
@@ -7306,7 +7325,7 @@ int RedisImplementation::getVirtualContent(uint startFileId,uint startMessageInd
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+    unsigned long long startId = getContentKey(startFileId,startMessageIndex);
     unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
 
     while (startId != prevStartId)
@@ -7361,7 +7380,7 @@ int RedisImplementation::getVirtualContent(uint startFileId,uint startMessageInd
         freeReplyObject(reply);
         return Result::OK;
       }
-      startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+      startId = getContentKey(startFileId,startMessageIndex);
     }
     return Result::OK;
   }
@@ -7716,7 +7735,7 @@ int RedisImplementation::getContentByProducerId(uint producerId,uint startFileId
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+    unsigned long long startId = getContentKey(startFileId,startMessageIndex);
     unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
 
     while (startId != prevStartId)
@@ -7773,7 +7792,7 @@ int RedisImplementation::getContentByProducerId(uint producerId,uint startFileId
         freeReplyObject(reply);
         return Result::OK;
       }
-      startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+      startId = getContentKey(startFileId,startMessageIndex);
     }
     return Result::OK;
   }
@@ -7801,7 +7820,7 @@ int RedisImplementation::getContentByServerId(uint serverId,uint startFileId,uin
 
     while (startId != prevStartId)
     {
-      startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+      startId = getContentKey(startFileId,startMessageIndex);
       prevStartId = startId;
 
       redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF));
@@ -7873,7 +7892,7 @@ int RedisImplementation::getContentBySourceId(uint sourceId,uint startFileId,uin
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    unsigned long long startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+    unsigned long long startId = getContentKey(startFileId,startMessageIndex);
     unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
 
     while (startId != prevStartId)
@@ -7930,7 +7949,7 @@ int RedisImplementation::getContentBySourceId(uint sourceId,uint startFileId,uin
         freeReplyObject(reply);
         return Result::OK;
       }
-      startId = ((unsigned long long)startFileId << 32) + startMessageIndex;
+      startId = getContentKey(startFileId,startMessageIndex);
     }
     return Result::OK;
   }
@@ -7952,8 +7971,8 @@ int RedisImplementation::getContentByFileId(uint fileId,T::ContentInfoList& cont
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    unsigned long long startId = ((unsigned long long)fileId << 32);
-    unsigned long long endId = ((unsigned long long)fileId << 32) + 0xFFFFFF;
+    unsigned long long startId = getContentKey(fileId,0);
+    unsigned long long endId = getContentKey(fileId,0xFFFFF);
 
     redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),startId,endId));
     if (reply == nullptr)

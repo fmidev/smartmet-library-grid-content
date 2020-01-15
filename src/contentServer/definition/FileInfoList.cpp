@@ -344,6 +344,9 @@ void FileInfoList::clear()
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     if (mArray != nullptr)
     {
@@ -427,6 +430,9 @@ FileInfo* FileInfoList::getFileInfoById(uint fileId)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     FileInfo search;
@@ -456,6 +462,9 @@ FileInfo* FileInfoList::getFileInfoByIdNoLock(uint fileId)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
     FileInfo search;
     search.mFileId = fileId;
     int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
@@ -483,6 +492,9 @@ void FileInfoList::markFileInfoDeletedById(uint fileId)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     FileInfo search;
@@ -512,6 +524,9 @@ int FileInfoList::getClosestIndex(uint comparisonMethod,FileInfo& fileInfo)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     return getClosestIndexNoLock(comparisonMethod,fileInfo);
   }
@@ -606,6 +621,9 @@ FileInfo* FileInfoList::getFileInfoByName(std::string filename)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     FileInfo search;
@@ -644,6 +662,9 @@ FileInfo* FileInfoList::getFileInfoByIndex(uint index)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     if (index > mLength)
       return nullptr;
@@ -667,6 +688,9 @@ void FileInfoList::getFileInfoList(uint startFileId,uint maxRecords,FileInfoList
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
     {
       std::cout << CODE_LOCATION << " : Not supported when the records are not ordered by the 'fileId' field!\n";
@@ -713,6 +737,9 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,FileInfoList& fil
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint sz = getLength();
 
@@ -743,6 +770,9 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
     {
       std::cout << CODE_LOCATION << " : Not supported when the records are not ordered by the 'fileId' field!\n";
@@ -789,6 +819,9 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,FileInfoList&
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint sz = getLength();
 
@@ -819,6 +852,9 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFil
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
     {
       std::cout << CODE_LOCATION << " : Not supported when the records are not ordered by the 'fileId' field!\n";
@@ -865,6 +901,9 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,FileInfoList& fil
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint sz = getLength();
 
@@ -895,6 +934,9 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
     {
       std::cout << CODE_LOCATION << " : Not supported when the records are not ordered by the 'fileId' field!\n";
@@ -941,6 +983,9 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,FileInfoList& fileInf
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint sz = getLength();
 
@@ -971,6 +1016,9 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,uint
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
     {
       std::cout << CODE_LOCATION << " : Not supported when the records are not ordered by the 'fileId' field!\n";
@@ -1017,6 +1065,9 @@ uint FileInfoList::getFileInfoCountByProducerId(uint producerId)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -1045,6 +1096,9 @@ uint FileInfoList::getFileInfoCountByGenerationId(uint generationId)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -1073,6 +1127,9 @@ uint FileInfoList::getFileInfoCountBySourceId(uint sourceId)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -1134,6 +1191,9 @@ bool FileInfoList::deleteFileInfoById(uint fileId)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return false;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     FileInfo search;
@@ -1173,6 +1233,9 @@ bool FileInfoList::deleteFileInfoByName(std::string filename)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return false;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     FileInfo search;
@@ -1211,6 +1274,9 @@ uint FileInfoList::deleteFileInfoByGroupFlags(uint groupFlags)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
@@ -1250,6 +1316,9 @@ uint FileInfoList::deleteFileInfoByProducerId(uint producerId)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
@@ -1291,6 +1360,9 @@ uint FileInfoList::deleteMarkedFiles()
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
@@ -1332,6 +1404,9 @@ uint FileInfoList::deleteFileInfoByGenerationId(uint generationId)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
@@ -1372,6 +1447,9 @@ uint FileInfoList::deleteFileInfoByGenerationIdList(std::set<uint>& generationId
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
@@ -1412,6 +1490,9 @@ bool FileInfoList::deleteFileInfoByIndex(uint index)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return false;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (index >= mLength)
@@ -1446,6 +1527,9 @@ uint FileInfoList::deleteFileInfoBySourceId(uint sourceId)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
@@ -1487,6 +1571,9 @@ uint FileInfoList::deleteFileInfoByFileIdList(std::set<uint>& fileIdList)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
@@ -1528,6 +1615,9 @@ uint FileInfoList::deleteVirtualFiles()
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint count = 0;
     uint p = 0;
@@ -1675,7 +1765,7 @@ void FileInfoList::setComparisonMethod(uint comparisonMethod)
   {
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     mComparisonMethod = comparisonMethod;
-    if (mLength == 0)
+    if (mArray == nullptr ||  mLength == 0)
       return;
 
     fileInfo_comparisonMethod = comparisonMethod;
@@ -1697,7 +1787,7 @@ void FileInfoList::sort(uint comparisonMethod)
   FUNCTION_TRACE
   try
   {
-    if (mArray == nullptr)
+    if (mArray == nullptr || mLength == 0)
       return;
 
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);

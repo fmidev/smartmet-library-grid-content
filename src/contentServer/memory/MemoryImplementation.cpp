@@ -1859,6 +1859,8 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
     T::ContentInfoList tmpContentList;
     tmpContentList.setReleaseObjects(false);
 
+    T::EventInfoList tmpEventList;
+
     for (auto ff = fileAndContentList.begin(); ff != fileAndContentList.end(); ++ff)
     {
       T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(ff->mFileInfo.mProducerId);
@@ -1933,8 +1935,7 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
           tmpContentList.addContentInfo(cInfo);
 
           if (cInfo->mFileId != mMaxFileId  &&  (requestFlags & 0x00000001) == 0)
-            addEvent(EventType::CONTENT_ADDED,cInfo->mFileId,cInfo->mMessageIndex,0,cInfo->mServerFlags);
-
+            tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::CONTENT_ADDED,cInfo->mFileId,cInfo->mMessageIndex,0,cInfo->mServerFlags));
         }
       }
 
@@ -1944,12 +1945,12 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
       {
         //printf("-- file update event\n");
         if (requestFlags & 0x00000001)
-          addEvent(EventType::FILE_UPDATED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,0,0);
+          tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::FILE_UPDATED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,0,0));
       }
       else
       {
         //printf("-- file add event\n");
-        addEvent(EventType::FILE_ADDED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,len,0);
+        tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::FILE_ADDED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,len,0));
       }
     }
 
@@ -1966,6 +1967,13 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
     {
       if (mContentInfoListEnabled[t])
         mContentInfoList[t].addContentInfoList(tmpContentList);
+    }
+
+    auto it = tmpEventList.getFirstEvent();
+    while (it != nullptr)
+    {
+      addEvent(it->mType,it->mId1,it->mId2,it->mId3,it->mFlags);
+      it = it->nextItem;
     }
 
     return Result::OK;
@@ -2820,7 +2828,7 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
     {
       T::EventInfo *eventInfo = new T::EventInfo(*event);
 
-      if (eventInfo->mType == EventType::FILE_ADDED  &&  eventInfo->mId3 > 0)
+      if (eventInfo->mType == EventType::FILE_ADDED)
       {
 
         T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(eventInfo->mId1);
@@ -2829,14 +2837,17 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
           std::ostringstream output;
           output << fileInfo->getCsv() << "\n";
 
-          T::ContentInfoList contentInfoList;
-          mContentInfoList[0].getContentInfoListByFileId(fileInfo->mFileId,contentInfoList);
-
-          uint len = contentInfoList.getLength();
-          for (uint t=0; t<len; t++)
+          if (eventInfo->mId3 > 0)
           {
-            T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
-            output << contentInfo->getCsv() << "\n";
+            T::ContentInfoList contentInfoList;
+            mContentInfoList[0].getContentInfoListByFileId(fileInfo->mFileId,contentInfoList);
+
+            uint len = contentInfoList.getLength();
+            for (uint t=0; t<len; t++)
+            {
+              T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
+              output << contentInfo->getCsv() << "\n";
+            }
           }
           eventInfo->mNote = output.str();
         }

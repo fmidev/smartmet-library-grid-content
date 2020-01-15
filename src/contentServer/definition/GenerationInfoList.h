@@ -52,6 +52,7 @@ class GenerationInfoList
     void                setModificationLockPtr(ModificationLock* modificationLockPtr);
     void                lock();
     void                unlock();
+    void                setComparisonMethod(uint comparisonMethod);
     void                sort(uint comparisonMethod);
     void                increaseSize(uint newSize);
     void                print(std::ostream& stream,uint level,uint optionFlags);

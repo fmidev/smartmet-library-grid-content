@@ -4145,7 +4145,7 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
   FUNCTION_TRACE
   try
   {
-    printf("Update virtual files (%d)\n",(int)mVirtualContentEnabled);
+    PRINT_DATA(mDebugLog,"Update virtual files (%d)\n",(int)mVirtualContentEnabled);
     if (!mVirtualContentEnabled)
       return;
 
@@ -4773,6 +4773,86 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
   FUNCTION_TRACE
   try
   {
+    uint len = eventInfo.mNote.length();
+    T::FileInfo fileInfo;
+    T::ContentInfoList currentContentList;
+
+    if (len > 0)
+    {
+      char buf[len+10];
+      strcpy(buf,eventInfo.mNote.c_str());
+      char *s = buf;
+
+      while (s != nullptr)
+      {
+        char *p = strstr(s,"\n");
+        if (p != nullptr)
+        {
+          *p = '\0';
+          if (s == buf)
+          {
+            fileInfo.setCsv(s);
+          }
+          else
+          {
+            T::ContentInfo *contentInfo = new T::ContentInfo();
+            contentInfo->setCsv(s);
+            currentContentList.addContentInfo(contentInfo);
+          }
+          s = p + 1;
+        }
+        else
+        {
+          s = nullptr;
+        }
+      }
+    }
+    else
+    {
+      int result = mContentServer->getFileInfoById(mServerSessionId,eventInfo.mId1,fileInfo);
+      if (result != 0)
+      {
+        std::string cPos = CODE_LOCATION;
+        PRINT_DATA(mDebugLog,"%s: Cannot get the file info (fileId=%u) from the content server\n",cPos.c_str(),eventInfo.mId1);
+        PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
+        return;
+      }
+
+      result = mContentServer->getContentListByFileId(mServerSessionId,fileInfo.mFileId,currentContentList);
+      if (result != 0)
+      {
+        std::string cPos = CODE_LOCATION;
+        PRINT_DATA(mDebugLog,"%s: Cannot get the content list (fileId=%d) from the content server!\n",cPos.c_str(),fileInfo.mFileId);
+        PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
+        return;
+      }
+    }
+
+    T::ContentInfoList contentInfoList;
+    addFile(fileInfo,currentContentList,contentInfoList);
+    if (contentInfoList.getLength() > 0)
+    {
+      mContentServer->addContentList(mServerSessionId,contentInfoList);
+    }
+
+    uint cnt = mGridFileManager.getFileCount();
+    if ((cnt % 1000) == 0)
+      PRINT_DATA(mDebugLog,"** file added %u\n",cnt);
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+#if 0
+void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo *nextEventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
     //printf("EVENT[%llu]: fileAdded(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
     if (eventInfo.mId2 == T::FileTypeValue::Virtual)
@@ -4863,7 +4943,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
-
+#endif
 
 
 
@@ -4895,6 +4975,7 @@ void ServiceImplementation::event_fileUpdated(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
+#if 0
     //printf("EVENT[%llu]: filedUpdated(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
     if (eventInfo.mId2 == T::FileTypeValue::Virtual)
@@ -4954,6 +5035,7 @@ void ServiceImplementation::event_fileUpdated(T::EventInfo& eventInfo)
     {
       mContentServer->addContentList(mServerSessionId,contentInfoList);
     }
+#endif
   }
   catch (...)
   {
@@ -5299,6 +5381,7 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *n
   FUNCTION_TRACE
   try
   {
+    //printf("*** EVENT %llu %u\n",eventInfo.mEventId,eventInfo.mType);
     if (mGridFileMap.size() > 10000  ||  (mGridFileMap.size() > 0  &&  (mLastVirtualFileRegistration + 60) < time(nullptr)))
     {
       registerVirtualFiles(mGridFileMap);
@@ -5526,7 +5609,7 @@ void ServiceImplementation::processEvents()
     while (mContentPreloadEnabled  &&  !mPrealoadList.empty()  &&  (time(0)-sTime) < 30)
     {
       auto it = mPrealoadList.front();
-      printf("###### PRELOAD %u:%u\n",it.first,it.second);
+      //printf("###### PRELOAD %u:%u\n",it.first,it.second);
 
       auto gFile = mGridFileManager.getFileByIdNoMapping(it.first);
       if (gFile)
@@ -5586,13 +5669,12 @@ void ServiceImplementation::processEvents()
       }
 
       len = eventInfoList.getLength();
-      //printf("EVENT LIST %u\n",len);
 
       T::EventInfo *it = eventInfoList.getFirstEvent();
       while (it != nullptr)
       {
-        mLastProcessedEventId = it->mEventId;
         processEvent(*it,it->nextItem);
+        mLastProcessedEventId = it->mEventId;
         it = it->nextItem;
 
         if (mShutdownRequested)

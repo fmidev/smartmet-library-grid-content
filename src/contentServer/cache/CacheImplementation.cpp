@@ -228,11 +228,9 @@ void CacheImplementation::synchronize()
   try
   {
     T::EventInfo eventInfo;
-    while (mLastProcessedEventId != eventInfo.mEventId)
-    {
-      mContentStorage->getLastEventInfo(mSessionId,0,eventInfo);
+    mContentStorage->getLastEventInfo(mSessionId,0,eventInfo);
+    while (mLastProcessedEventId < eventInfo.mEventId)
       sleep(1);
-    }
 
     while (mDelayedFileAddList.size() > 0  ||  mDelayedContentAddList.size() > 0 || mFileDeleteCount > 0 || mContentDeleteCount > 0)
     {
@@ -5672,8 +5670,6 @@ void CacheImplementation::processEvents(bool eventThread)
 
     AutoThreadLock eventLock(&mEventProcessingLock);
 
-    T::EventInfoList delayedEventInfoList;
-
     uint len = 1000;
     while (len > 0)
     {
@@ -5708,11 +5704,20 @@ void CacheImplementation::processEvents(bool eventThread)
         T::EventInfo *it = eventInfoList.getFirstEvent();
         while (it != nullptr)
         {
-          processEvent(*it);
+          try
+          {
+            processEvent(*it);
+          }
+          catch (...)
+          {
+            Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+            exception.printError();
+          }
+
 
           T::EventInfo *event = it->duplicate();
           event->mServerTime = mStartTime;
-          delayedEventInfoList.addEventInfo(event);
+          mEventInfoList.addEventInfo(event);
           mLastProcessedEventId = it->mEventId;
 
           it = it->nextItem;
@@ -5747,7 +5752,7 @@ void CacheImplementation::processEvents(bool eventThread)
 
     time_t timeNow = time(nullptr);
 
-    if (mDelayedFileAddList.size() > 100000 || (mDelayedFileAddList.size() > 0  &&  (timeNow - mDelayedFileAdditionTime)  > 30))
+    if (mDelayedFileAddList.size() > 1000000 || (mDelayedFileAddList.size() > 0  &&  (timeNow - mDelayedFileAdditionTime)  > 30))
     {
       PRINT_DATA(mDebugLog,"* Adding files that were waiting the addition : %ld\n",mDelayedFileAddList.size());
 
@@ -5772,7 +5777,7 @@ void CacheImplementation::processEvents(bool eventThread)
     }
 
 
-    if (mDelayedContentAddList.size() > 100000 || (mDelayedContentAddList.size() > 0  &&  (timeNow - mDelayedContentAdditionTime)  > 30))
+    if (mDelayedContentAddList.size() > 1000000 || (mDelayedContentAddList.size() > 0  &&  (timeNow - mDelayedContentAdditionTime)  > 30))
     {
       PRINT_DATA(mDebugLog,"* Adding content that was waiting the addition : %ld\n",mDelayedContentAddList.size());
 
@@ -5820,32 +5825,6 @@ void CacheImplementation::processEvents(bool eventThread)
       {
         mContentTimeCache.erase(it->first);
       }
-    }
-
-
-
-    /*
-    if (mDelayedContentDeleteList.size() > 0)
-    {
-      PRINT_DATA(mDebugLog,"* Deleting content that was waiting the deletion : %u\n",(uint)mDelayedContentDeleteList.size());
-
-      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      {
-        if (mContentInfoListEnabled[t])
-          mContentInfoList[t].deleteContentInfoByFileIdList(mDelayedContentDeleteList);
-      }
-
-      PRINT_DATA(mDebugLog,"  -- Content deletion ready\n");
-      mDelayedContentDeleteList.clear();
-    }
-    */
-
-    T::EventInfo *it = delayedEventInfoList.getFirstEvent();
-    while (it != nullptr)
-    {
-      T::EventInfo *event = it->duplicate();
-      mEventInfoList.addEventInfo(event);
-      it = it->nextItem;
     }
   }
   catch (...)

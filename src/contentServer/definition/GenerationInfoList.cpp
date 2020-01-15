@@ -372,6 +372,9 @@ void GenerationInfoList::clear()
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     if (mArray != nullptr)
     {
@@ -405,6 +408,9 @@ int GenerationInfoList::getClosestIndex(uint comparisonMethod,GenerationInfo& ge
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     return getClosestIndexNoLock(comparisonMethod,generationInfo);
   }
@@ -499,6 +505,9 @@ bool GenerationInfoList::deleteGenerationInfoById(uint generationId)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return false;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     GenerationInfo search;
@@ -538,6 +547,9 @@ void GenerationInfoList::deleteGenerationInfoListByProducerId(uint producerId)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -575,6 +587,9 @@ GenerationInfo* GenerationInfoList::getGenerationInfoById(uint generationId)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     GenerationInfo search;
@@ -604,6 +619,9 @@ void GenerationInfoList::deleteGenerationInfoListBySourceId(uint sourceId)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -641,6 +659,9 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByIndex(uint index)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     if (index >= mLength)
       return nullptr;
@@ -679,6 +700,9 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByName(std::string generati
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
@@ -704,6 +728,9 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(std::string 
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
@@ -728,6 +755,9 @@ int GenerationInfoList::getGenerationInfoIndexByAnalysisTime(std::string analysi
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return -1;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
@@ -753,6 +783,9 @@ int GenerationInfoList::getGenerationInfoIndexByGenerationId(uint generationId)
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return -1;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
@@ -777,6 +810,9 @@ void GenerationInfoList::getGenerationInfoListByProducerId(uint producerId,Gener
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     int len =  getLength();
@@ -822,6 +858,9 @@ void GenerationInfoList::getGenerationInfoListByAnalysisTime(std::string analysi
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
@@ -845,6 +884,9 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(u
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
@@ -869,6 +911,9 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByAnalysisTime()
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     T::GenerationInfo *generationInfo = nullptr;
     for (uint t=0; t<mLength; t++)
@@ -897,6 +942,9 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(uint produ
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     T::GenerationInfo *generationInfo = nullptr;
     for (uint t=0; t<mLength; t++)
@@ -925,6 +973,9 @@ GenerationInfo*  GenerationInfoList::getPrevGenerationInfoByProducerId(uint prod
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     T::GenerationInfo *generationInfo = nullptr;
     for (uint t=0; t<mLength; t++)
@@ -953,6 +1004,9 @@ void GenerationInfoList::getGenerationInfoListBySourceId(uint sourceId,Generatio
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
     {
@@ -1009,6 +1063,9 @@ void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTime
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     std::set<std::string> newList;
@@ -1045,12 +1102,35 @@ void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTime
 
 
 
+void GenerationInfoList::setComparisonMethod(uint comparisonMethod)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    mComparisonMethod = comparisonMethod;
+    if (mLength == 0)
+      return;
+
+    generationInfo_comparisonMethod = comparisonMethod;
+
+    qsort(mArray,mLength,sizeof(GenerationInfoPtr),generationInfo_compare);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
 void GenerationInfoList::sort(uint comparisonMethod)
 {
   FUNCTION_TRACE
   try
   {
-    if (mArray == nullptr)
+    if (mArray == nullptr || mLength == 0)
       return;
 
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
