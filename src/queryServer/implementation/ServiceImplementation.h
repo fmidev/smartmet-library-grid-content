@@ -488,6 +488,22 @@ class ServiceImplementation : public ServiceInterface
      bool           getProducerInfoByName(std::string& name,T::ProducerInfo& info);
      void           getGenerationInfoListByProducerId(uint producerId,T::GenerationInfoList& generationInfoList);
 
+     int            getContentListByParameterGenerationIdAndForecastTime(
+                       T::SessionId sessionId,
+                       uint producerId,
+                       uint generationId,
+                       T::ParamKeyType parameterKeyType,
+                       std::string parameterKey,
+                       T::ParamLevelIdType parameterLevelIdType,
+                       T::ParamLevelId parameterLevelId,
+                       T::ParamLevel level,
+                       T::ForecastType forecastType,
+                       T::ForecastNumber forecastNumber,
+                       T::GeometryId geometryId,
+                       std::string forecastTime,
+                       T::ContentInfoList& contentInfoList);
+
+
   private:
 
      // Private attributes
@@ -514,6 +530,11 @@ class ServiceImplementation : public ServiceInterface
      LevelHeightCache       mLevelHeightCache;
      ThreadLock             mHeightCacheThreadLock;
      ThreadLock             mParameterMappingCacheThreadLock;
+
+     T::ContentInfoList     mCacheContentInfoList[200];
+     std::string            mContentCacheKey[200];
+     uint                   mContentCacheKeyIdx;
+
 
      boost::shared_ptr<Fmi::DEM> mDem;
 };

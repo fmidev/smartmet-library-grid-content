@@ -140,6 +140,7 @@ class ContentInfoList
     void                lock();
     void                unlock();
 
+    uint                getComparisonMethod();
     void                setComparisonMethod(uint comparisonMethod);
     void                setReleaseObjects(bool releaseObjects);
     void                sort(uint comparisonMethod);

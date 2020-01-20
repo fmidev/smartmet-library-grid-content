@@ -32,6 +32,7 @@ ServiceImplementation::ServiceImplementation()
     mLastConfiguratonCheck = 0;
     mCheckInterval = 5;
     mGenerationInfoListUpdateTime = 0;
+    mContentCacheKeyIdx = 0;
   }
   catch (...)
   {
@@ -2487,6 +2488,89 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
 
 
 
+int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint producerId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string forecastTime,T::ContentInfoList& contentInfoList)
+{
+  try
+  {
+    char key[100];
+    sprintf(key,"%u:%u:%s:%d:%d:%d:%d:%d:%d",generationId,parameterKeyType,parameterKey.c_str(),parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId);
+
+    int idx = -1;
+    for (int t=0; t<200 && idx < 0; t++)
+    {
+      if (mContentCacheKey[t] == key)
+        idx = t;
+    }
+
+    if (idx < 0 || mCacheContentInfoList[idx].getLength() == 0)
+    {
+      if (idx < 0)
+      {
+        idx = mContentCacheKeyIdx % 200;
+        mContentCacheKey[idx] = key;
+        mContentCacheKeyIdx++;
+      }
+
+      std::string startTime = "13000101T000000";
+      std::string endTime = "23000101T000000";
+
+      mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,mCacheContentInfoList[idx]);
+    }
+
+
+    T::ContentInfoList contentList;
+    switch (parameterKeyType)
+    {
+/*
+      case T::ParamKeyTypeValue::FMI_ID:
+        break;
+*/
+      case T::ParamKeyTypeValue::FMI_NAME:
+        mCacheContentInfoList[idx].setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
+        T::ContentInfo *cInfo = mCacheContentInfoList[idx].getContentInfoByFmiParameterNameAndGenerationId(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
+        if (cInfo != nullptr)
+        {
+          contentInfoList.addContentInfo(cInfo->duplicate());
+          return Result::OK;
+        }
+        mCacheContentInfoList[idx].getContentInfoListByFmiParameterNameAndGenerationId(producerId,generationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentList);
+        break;
+/*
+        case T::ParamKeyTypeValue::GRIB_ID:
+          break;
+
+        case T::ParamKeyTypeValue::NEWBASE_ID:
+          break;
+
+        case T::ParamKeyTypeValue::NEWBASE_NAME:
+          break;
+
+        case T::ParamKeyTypeValue::CDM_ID:
+          break;
+
+        case T::ParamKeyTypeValue::CDM_NAME:
+          break;
+
+        case T::ParamKeyTypeValue::BUILD_IN:
+          break;
+
+        default:
+          return Result::UNKNOWN_PARAMETER_KEY_TYPE;
+*/
+    }
+    contentInfoList = contentList;
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 bool ServiceImplementation::getSpecialValues(
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
@@ -2521,7 +2605,7 @@ bool ServiceImplementation::getSpecialValues(
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
     T::ContentInfoList contentList;
-    int result = mContentServerPtr->getContentListByParameterGenerationIdAndForecastTime(0, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
+    int result = getContentListByParameterGenerationIdAndForecastTime(0,producerInfo.mProducerId,generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
     if (result != 0)
     {
@@ -2788,7 +2872,7 @@ bool ServiceImplementation::getValueVectors(
     std::string endTime = forecastTime;
 
     T::ContentInfoList contentList;
-    int result = mContentServerPtr->getContentListByParameterGenerationIdAndForecastTime(0, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
+    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
 
     if (result != 0)
@@ -3198,7 +3282,7 @@ bool ServiceImplementation::getGridFiles(
     std::string endTime = forecastTime;
 
     T::ContentInfoList contentList;
-    int result = mContentServerPtr->getContentListByParameterGenerationIdAndForecastTime(0, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
+    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
 
     if (result != 0)
@@ -4236,7 +4320,7 @@ bool ServiceImplementation::getPointValues(
       fTime = cInfo->mForecastTime.substr(0, 4) + forecastTime.substr(4);
     }
 
-    int result = mContentServerPtr->getContentListByParameterGenerationIdAndForecastTime(0, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
+    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, fTime, contentList);
 
     if (result != 0)
@@ -4496,7 +4580,7 @@ bool ServiceImplementation::getCircleValues(
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
     T::ContentInfoList contentList;
-    int result = mContentServerPtr->getContentListByParameterGenerationIdAndForecastTime(0, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
+    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
     if (result != 0)
     {
@@ -4759,7 +4843,7 @@ bool ServiceImplementation::getPolygonValues(
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
     T::ContentInfoList contentList;
-    int result = mContentServerPtr->getContentListByParameterGenerationIdAndForecastTime(0, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
+    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
     if (result != 0)
     {
@@ -5024,7 +5108,7 @@ bool ServiceImplementation::getIsolineValues(
     std::string endTime = forecastTime;
 
     T::ContentInfoList contentList;
-    int result = mContentServerPtr->getContentListByParameterGenerationIdAndForecastTime(0, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
+    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
 
     if (result != 0)
@@ -5345,7 +5429,7 @@ bool ServiceImplementation::getIsobandValues(
     std::string endTime = forecastTime;
 
     T::ContentInfoList contentList;
-    int result = mContentServerPtr->getContentListByParameterGenerationIdAndForecastTime(0, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
+    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
 
     if (result != 0)
@@ -6923,7 +7007,7 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
         T::ParamLevel level = contentInfo->mParameterLevel;
 
         T::ContentInfoList cList;
-        int result = mContentServerPtr->getContentListByParameterGenerationIdAndForecastTime(0, contentInfo->mGenerationId, paramKeyType, paramKey, levelIdType,
+        int result = getContentListByParameterGenerationIdAndForecastTime(0, contentInfo->mProducerId, contentInfo->mGenerationId, paramKeyType, paramKey, levelIdType,
           levelId, level, -1, -1, contentInfo->mGeometryId, contentInfo->mForecastTime, cList);
 
         if (result != 0)

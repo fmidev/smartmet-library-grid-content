@@ -6407,11 +6407,31 @@ void ContentInfoList::setReleaseObjects(bool releaseObjects)
 
 
 
+uint ContentInfoList::getComparisonMethod()
+{
+  FUNCTION_TRACE
+  try
+  {
+    return mComparisonMethod;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 void ContentInfoList::setComparisonMethod(uint comparisonMethod)
 {
   FUNCTION_TRACE
   try
   {
+    if (mComparisonMethod == comparisonMethod)
+      return;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     mComparisonMethod = comparisonMethod;
     if (mArray == nullptr ||  mLength == 0)
