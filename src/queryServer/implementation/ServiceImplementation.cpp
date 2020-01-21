@@ -2492,14 +2492,21 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 {
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     char key[100];
     sprintf(key,"%u:%u:%s:%d:%d:%d:%d:%d:%d",generationId,parameterKeyType,parameterKey.c_str(),parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId);
 
     int idx = -1;
-    for (int t=0; t<200 && idx < 0; t++)
+    uint endp = 200;
+    if (mContentCacheKeyIdx < 200)
+      endp = mContentCacheKeyIdx;
+
+    for (uint t=0; t<endp && idx < 0; t++)
     {
-      if (mContentCacheKey[t] == key)
-        idx = t;
+      int i = (mContentCacheKeyIdx-t) % 200;
+      if (mContentCacheKey[i] == key)
+        idx = (int)i;
     }
 
     if (idx < 0 || mCacheContentInfoList[idx].getLength() == 0)
