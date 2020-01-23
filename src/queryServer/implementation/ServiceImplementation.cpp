@@ -302,6 +302,9 @@ int ServiceImplementation::_getProducerList(T::SessionId sessionId, string_vec& 
   FUNCTION_TRACE
   try
   {
+    checkConfigurationUpdates();
+
+    producerList.clear();
     std::string prev;
     for (auto it = mProducerList.begin(); it != mProducerList.end(); ++it)
     {
@@ -2315,6 +2318,8 @@ int ServiceImplementation::_getValuesByGridPoint(
   FUNCTION_TRACE
   try
   {
+    checkConfigurationUpdates();
+
     uint len = contentInfoList.getLength();
     for (uint c = 0; c < len; c++)
     {
