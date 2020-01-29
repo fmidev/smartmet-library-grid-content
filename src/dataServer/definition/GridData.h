@@ -33,12 +33,10 @@ class GridData
     T::ParamLevelId     mGrib1ParameterLevelId;
     T::ParamLevelId     mGrib2ParameterLevelId;
     std::string         mGribParameterName;
-    std::string         mGribParameterDescription;
     std::string         mGribParameterUnits;
     T::ParamId          mFmiParameterId;
     T::ParamLevelId     mFmiParameterLevelId;
     std::string         mFmiParameterName;
-    std::string         mFmiParameterDescription;
     std::string         mFmiParameterUnits;
     T::ParamId          mCdmParameterId;
     std::string         mCdmParameterName;

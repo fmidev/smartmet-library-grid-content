@@ -527,12 +527,10 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
     data.mGrib1ParameterLevelId = message->getGrib1ParameterLevelId();
     data.mGrib2ParameterLevelId = message->getGrib2ParameterLevelId();
     data.mGribParameterName = message->getGribParameterName();
-    data.mGribParameterDescription = message->getGribParameterDescription();
     data.mGribParameterUnits = message->getGribParameterUnits();
     data.mFmiParameterId = message->getFmiParameterId();
     data.mFmiParameterLevelId = message->getFmiParameterLevelId();
     data.mFmiParameterName = message->getFmiParameterName();
-    data.mFmiParameterDescription = message->getFmiParameterDescription();
     data.mFmiParameterUnits = message->getFmiParameterUnits();
     data.mCdmParameterId = message->getCdmParameterId();
     data.mCdmParameterName = message->getCdmParameterName();

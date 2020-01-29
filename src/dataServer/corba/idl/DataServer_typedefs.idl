@@ -86,12 +86,10 @@ struct CorbaGridData
   unsigned long       grib1ParameterLevelId;
   unsigned long       grib2ParameterLevelId;
   string              gribParameterName;
-  string              gribParameterDescription;  
   string              gribParameterUnits;  
   string              fmiParameterId;
   unsigned long       fmiParameterLevelId;
   string              fmiParameterName;
-  string              fmiParameterDescription;  
   string              fmiParameterUnits;  
   string              cdmParameterId;
   string              cdmParameterName;

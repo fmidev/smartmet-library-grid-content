@@ -57,14 +57,12 @@ GridData::GridData(GridData& gridData)
     mForecastTime = gridData.mForecastTime;
     mGribParameterId = gridData.mGribParameterId;
     mGribParameterName = gridData.mGribParameterName;
-    mGribParameterDescription = gridData.mGribParameterDescription;
     mGribParameterUnits = gridData.mGribParameterUnits;
     mGrib1ParameterLevelId = gridData.mGrib1ParameterLevelId;
     mGrib2ParameterLevelId = gridData.mGrib2ParameterLevelId;
     mFmiParameterId = gridData.mFmiParameterId;
     mFmiParameterLevelId = gridData.mFmiParameterLevelId;
     mFmiParameterName = gridData.mFmiParameterName;
-    mFmiParameterDescription = gridData.mFmiParameterDescription;
     mFmiParameterUnits = gridData.mFmiParameterUnits;
     mCdmParameterId = gridData.mCdmParameterId;
     mCdmParameterName = gridData.mCdmParameterName;
@@ -124,12 +122,10 @@ void GridData::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mGrib1ParameterLevelId    = " << mGrib1ParameterLevelId << "\n";
     stream << space(level) << "- mGrib2ParameterLevelId    = " << mGrib2ParameterLevelId << "\n";
     stream << space(level) << "- mGribParameterName        = " << mGribParameterName << "\n";
-    stream << space(level) << "- mGribParameterDescription = " << mGribParameterDescription << "\n";
     stream << space(level) << "- mGribParameterUnits       = " << mGribParameterUnits << "\n";
     stream << space(level) << "- mFmiParameterId           = " << mFmiParameterId << "\n";
     stream << space(level) << "- mFmiParameterLevelId      = " << mFmiParameterLevelId << "\n";
     stream << space(level) << "- mFmiParameterName         = " << mFmiParameterName << "\n";
-    stream << space(level) << "- mFmiParameterDescription  = " << mFmiParameterDescription << "\n";
     stream << space(level) << "- mFmiParameterUnits        = " << mFmiParameterUnits << "\n";
     stream << space(level) << "- mCdmParameterId           = " << mCdmParameterId << "\n";
     stream << space(level) << "- mCdmParameterName         = " << mCdmParameterName << "\n";

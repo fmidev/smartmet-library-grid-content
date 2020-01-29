@@ -62,12 +62,10 @@ void Converter::convert(const T::GridData& source,DataServer::Corba::CorbaGridDa
     target.grib1ParameterLevelId = source.mGrib1ParameterLevelId;
     target.grib2ParameterLevelId = source.mGrib2ParameterLevelId;
     target.gribParameterName = CORBA::string_dup(source.mGribParameterName.c_str());
-    target.gribParameterDescription = CORBA::string_dup(source.mGribParameterDescription.c_str());
     target.gribParameterUnits = CORBA::string_dup(source.mGribParameterUnits.c_str());
     target.fmiParameterId = CORBA::string_dup(source.mFmiParameterId.c_str());
     target.fmiParameterLevelId = source.mFmiParameterLevelId;
     target.fmiParameterName = CORBA::string_dup(source.mFmiParameterName.c_str());
-    target.fmiParameterDescription = CORBA::string_dup(source.mFmiParameterDescription.c_str());
     target.fmiParameterUnits = CORBA::string_dup(source.mFmiParameterUnits.c_str());
     target.cdmParameterId = CORBA::string_dup(source.mCdmParameterId.c_str());
     target.cdmParameterName = CORBA::string_dup(source.mCdmParameterName.c_str());
@@ -117,12 +115,10 @@ void Converter::convert(const DataServer::Corba::CorbaGridData& source,T::GridDa
     target.mGrib1ParameterLevelId = source.grib1ParameterLevelId;
     target.mGrib2ParameterLevelId = source.grib2ParameterLevelId;
     target.mGribParameterName = source.gribParameterName;
-    target.mGribParameterDescription = source.gribParameterDescription;
     target.mGribParameterUnits = source.gribParameterUnits;
     target.mFmiParameterId = source.fmiParameterId;
     target.mFmiParameterLevelId = source.fmiParameterLevelId;
     target.mFmiParameterName = source.fmiParameterName;
-    target.mFmiParameterDescription = source.fmiParameterDescription;
     target.mFmiParameterUnits = source.fmiParameterUnits;
     target.mCdmParameterId = source.cdmParameterId;
     target.mCdmParameterName = source.cdmParameterName;
