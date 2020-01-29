@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 20.1.16
+Version: 20.1.21
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -76,6 +76,10 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Jan 21 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.1.21-1.fmi
+- Added thread protection for the content cache
+- Significant performance improvements
+- Added message position and size to the CSV header
 * Thu Jan 16 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.1.16-1.fmi
 - Performance improvements
 - Fixed event synchronization
