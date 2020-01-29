@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 20.1.21
+Version: 20.1.29
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -22,7 +22,7 @@ BuildRequires: omniORB-devel
 BuildRequires: postgresql95-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 19.9.26
-BuildRequires: smartmet-library-grid-files-devel >= 20.1.16
+BuildRequires: smartmet-library-grid-files-devel >= 20.1.29
 BuildRequires: smartmet-library-macgyver-devel >= 19.9.26
 BuildRequires: smartmet-library-spine-devel >= 19.11.20
 Requires: boost-date-time
@@ -32,7 +32,7 @@ Requires: lua-devel
 Requires: omniORB
 Requires: postgresql95
 Requires: smartmet-library-gis >= 19.9.26
-Requires: smartmet-library-grid-files >= 20.1.16
+Requires: smartmet-library-grid-files >= 20.1.29
 Requires: smartmet-library-macgyver >= 19.9.26
 Requires: smartmet-library-spine >= 19.11.20
 Provides: %{SPECNAME}
@@ -76,6 +76,10 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Jan 29 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.1.29-1.fmi
+- Fixed memory leaks
+- Removed unnecessary attributes
+- Make sure configuration updates are noticed
 * Tue Jan 21 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.1.21-1.fmi
 - Added thread protection for the content cache
 - Significant performance improvements
