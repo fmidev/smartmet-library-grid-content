@@ -626,6 +626,8 @@ int RedisImplementation::_getDataServerInfoList(T::SessionId sessionId,T::Server
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    serverInfoList.clear();
+
     return getDataServerList(serverInfoList);
   }
   catch (...)
@@ -941,6 +943,8 @@ int RedisImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    producerInfoList.clear();
+
     return getProducerList(producerInfoList);
   }
   catch (...)
@@ -965,6 +969,8 @@ int RedisImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    producerInfoList.clear();
 
     T::ContentInfoList contentInfoList;
     getContentByParameterId(parameterKeyType,parameterKey,contentInfoList);
@@ -1007,6 +1013,8 @@ int RedisImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,u
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    producerInfoList.clear();
 
     return getProducerListBySourceId(sourceId,producerInfoList);
   }
@@ -1070,6 +1078,8 @@ int RedisImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
+    list.clear();
+
     T::ProducerInfoList producerInfoList;
     getProducerList(producerInfoList);
 
@@ -1119,6 +1129,8 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
+
+    list.clear();
 
     T::ContentInfoList cList;
     getContent(0,0,10000000,cList);
@@ -1628,6 +1640,8 @@ int RedisImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Genera
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    generationInfoList.clear();
+
     return getGenerationList(generationInfoList);
   }
   catch (...)
@@ -1653,6 +1667,8 @@ int RedisImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    generationInfoList.clear();
+
     return getGenerationListByGeometryId(geometryId,generationInfoList);
   }
   catch (...)
@@ -1677,6 +1693,8 @@ int RedisImplementation::_getGenerationInfoListByProducerId(T::SessionId session
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    generationInfoList.clear();
 
     T::ProducerInfo producerInfo;
     if (getProducerById(producerId,producerInfo) != Result::OK)
@@ -1707,6 +1725,8 @@ int RedisImplementation::_getGenerationInfoListByProducerName(T::SessionId sessi
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    generationInfoList.clear();
+
     T::ProducerInfo producerInfo;
     if (getProducerByName(producerName,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_NAME;
@@ -1735,6 +1755,8 @@ int RedisImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    generationInfoList.clear();
 
     return getGenerationListBySourceId(sourceId,generationInfoList);
   }
@@ -2828,6 +2850,8 @@ int RedisImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileI
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    fileInfoList.clear();
+
     return getFileList(startFileId,maxRecords,fileInfoList);
   }
   catch (...)
@@ -2853,6 +2877,7 @@ int RedisImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    fileInfoList.clear();
 
     for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
     {
@@ -2888,6 +2913,8 @@ int RedisImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uin
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    fileInfoList.clear();
+
     T::ProducerInfo producerInfo;
     if (getProducerById(producerId,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
@@ -2916,6 +2943,8 @@ int RedisImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,s
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    fileInfoList.clear();
 
     T::ProducerInfo producerInfo;
     if (getProducerByName(producerName,producerInfo) != Result::OK)
@@ -2946,6 +2975,8 @@ int RedisImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,u
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    fileInfoList.clear();
+
     T::GenerationInfo generationInfo;
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
@@ -2975,6 +3006,8 @@ int RedisImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    fileInfoList.clear();
+
     T::GenerationInfo generationInfo;
     if (getGenerationByName(generationName,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_NAME;
@@ -3003,6 +3036,8 @@ int RedisImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,uin
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    fileInfoList.clear();
+
     return getFileListByGroupFlags(groupFlags,startFileId,maxRecords,fileInfoList);
   }
   catch (...)
@@ -3027,6 +3062,8 @@ int RedisImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint 
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    fileInfoList.clear();
 
     return getFileListBySourceId(sourceId,startFileId,maxRecords,fileInfoList);
   }
@@ -3305,6 +3342,8 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    eventInfoList.clear();
 
     if (maxRecords > 10000)
       maxRecords = 10000;
@@ -4117,6 +4156,8 @@ int RedisImplementation::_getContentList(T::SessionId sessionId,uint startFileId
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    contentInfoList.clear();
+
     return getContent(startFileId,startMessageIndex,maxRecords,contentInfoList);
   }
   catch (...)
@@ -4142,6 +4183,8 @@ int RedisImplementation::_getContentListByFileId(T::SessionId sessionId,uint fil
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    contentInfoList.clear();
+
     return getContentByFileId(fileId,contentInfoList);
   }
   catch (...)
@@ -4166,6 +4209,8 @@ int RedisImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    contentInfoList.clear();
 
     for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
     {
@@ -4202,6 +4247,8 @@ int RedisImplementation::_getContentListByFileName(T::SessionId sessionId,std::s
     if (fileId == 0)
       return Result::UNKNOWN_FILE_NAME;
 
+    contentInfoList.clear();
+
     return getContentByFileId(fileId,contentInfoList);
   }
   catch (...)
@@ -4226,6 +4273,8 @@ int RedisImplementation::_getContentListByGroupFlags(T::SessionId sessionId,uint
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    contentInfoList.clear();
 
     return getContentByGroupFlags(groupFlags,startFileId,startMessageIndex,maxRecords,contentInfoList);
   }
@@ -4256,6 +4305,8 @@ int RedisImplementation::_getContentListByProducerId(T::SessionId sessionId,uint
     if (getProducerById(producerId,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
 
+    contentInfoList.clear();
+
     return getContentByProducerId(producerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
   }
   catch (...)
@@ -4285,6 +4336,8 @@ int RedisImplementation::_getContentListByProducerName(T::SessionId sessionId,st
     if (getProducerByName(producerName,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_NAME;
 
+    contentInfoList.clear();
+
     return getContentByProducerId(producerInfo.mProducerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
   }
   catch (...)
@@ -4310,6 +4363,8 @@ int RedisImplementation::_getContentListByServerId(T::SessionId sessionId,uint s
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    contentInfoList.clear();
+
     return getContentByServerId(serverId,startFileId,startMessageIndex,maxRecords,contentInfoList);
   }
   catch (...)
@@ -4334,6 +4389,8 @@ int RedisImplementation::_getContentListByRequestCounterKey(T::SessionId session
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    contentInfoList.clear();
 
     return getContentByRequestCounterKey(key,contentInfoList);
   }
@@ -4363,6 +4420,8 @@ int RedisImplementation::_getContentListByGenerationId(T::SessionId sessionId,ui
     T::GenerationInfo generationInfo;
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
+
+    contentInfoList.clear();
 
     return getContentByGenerationId(generationId,startFileId,startMessageIndex,maxRecords,contentInfoList);
   }
@@ -4394,6 +4453,8 @@ int RedisImplementation::_getContentListByGenerationName(T::SessionId sessionId,
     if (getGenerationByName(generationName,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_NAME;
 
+    contentInfoList.clear();
+
     return getContentByGenerationId(generationInfo.mGenerationId,startFileId,startMessageIndex,maxRecords,contentInfoList);
   }
   catch (...)
@@ -4422,6 +4483,8 @@ int RedisImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
     T::GenerationInfo generationInfo;
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
+
+    contentInfoList.clear();
 
     return getContentByGenerationIdAndTimeRange(generationId,startTime,endTime,contentInfoList);
   }
@@ -4452,6 +4515,8 @@ int RedisImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
     if (getGenerationByName(generationName,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_NAME;
 
+    contentInfoList.clear();
+
     return getContentByGenerationIdAndTimeRange(generationInfo.mGenerationId,startTime,endTime,contentInfoList);
   }
   catch (...)
@@ -4477,6 +4542,8 @@ int RedisImplementation::_getContentListBySourceId(T::SessionId sessionId,uint s
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    contentInfoList.clear();
+
     return getContentBySourceId(sourceId,startFileId,startMessageIndex,maxRecords,contentInfoList);
   }
   catch (...)
@@ -4501,6 +4568,8 @@ int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    contentInfoList.clear();
 
     return getContentByParameterIdAndTimeRange(parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
   }
@@ -4531,6 +4600,8 @@ int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
 
+    contentInfoList.clear();
+
     return getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
   }
   catch (...)
@@ -4559,6 +4630,8 @@ int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionI
     T::GenerationInfo generationInfo;
     if (getGenerationByName(generationName,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_NAME;
+
+    contentInfoList.clear();
 
     return getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
   }
@@ -4589,6 +4662,8 @@ int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId se
     if (getProducerById(producerId,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
 
+    contentInfoList.clear();
+
     return getContentByParameterIdAndProducer(producerInfo.mProducerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
   }
   catch (...)
@@ -4617,6 +4692,8 @@ int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     T::GenerationInfo generationInfo;
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
+
+    contentInfoList.clear();
 
     std::string startTime = "19000101T000000";
     std::string endTime = "23000101T000000";
@@ -4669,6 +4746,8 @@ int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId 
     if (getProducerByName(producerName,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_NAME;
 
+    contentInfoList.clear();
+
     return getContentByParameterIdAndProducer(producerInfo.mProducerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
   }
   catch (...)
@@ -4687,6 +4766,8 @@ int RedisImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
   try
   {
     AutoThreadLock lock(&mThreadLock);
+
+    contentInfoList.clear();
 
     T::ProducerInfoList producerInfoList;
     getProducerList(producerInfoList);
@@ -4768,6 +4849,8 @@ int RedisImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
 
+    geometryIdList.clear();
+
     T::ContentInfoList contentInfoList;
     int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
 
@@ -4800,6 +4883,8 @@ int RedisImplementation::_getContentParamListByGenerationId(T::SessionId session
     T::GenerationInfo generationInfo;
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
+
+    contentParamList.clear();
 
     T::ContentInfoList contentInfoList;
     int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
@@ -4858,6 +4943,8 @@ int RedisImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
 
+    paramKeyList.clear();
+
     T::ContentInfoList contentInfoList;
     int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
     contentInfoList.getContentParamKeyListByGenerationId(generationInfo.mProducerId,generationId,parameterKeyType,paramKeyList);
@@ -4890,6 +4977,8 @@ int RedisImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
     T::GenerationInfo generationInfo;
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
+
+    contentTimeList.clear();
 
     T::ContentInfoList contentInfoList;
     int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
@@ -4924,6 +5013,8 @@ int RedisImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
 
+    contentTimeList.clear();
+
     T::ContentInfoList contentInfoList;
     int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
     contentInfoList.getForecastTimeListByGenerationAndGeometry(generationInfo.mProducerId,generationId,geometryId,contentTimeList);
@@ -4956,6 +5047,8 @@ int RedisImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,
     if (getProducerById(producerId,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
 
+    contentTimeList.clear();
+
     T::ContentInfoList contentInfoList;
     int res = getContentByProducerId(producerId,0,0,1000000,contentInfoList);
     contentInfoList.getForecastTimeListByProducerId(producerId,contentTimeList);
@@ -4984,6 +5077,8 @@ int RedisImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    list.clear();
 
     int res = getGenerationTimeAndGeometryList(list);
     return res;
@@ -5047,6 +5142,8 @@ int RedisImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoLi
 
     T::ContentInfoList contentList;
     getContent(0,0,10000000,contentList);
+
+    levelInfoList.clear();
 
     contentList.getLevelInfoList(levelInfoList);
     return Result::OK;
@@ -5204,6 +5301,8 @@ int RedisImplementation::getDataServerList(T::ServerInfoList& serverInfoList)
   FUNCTION_TRACE
   try
   {
+    serverInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -5393,6 +5492,8 @@ int RedisImplementation::getProducerList(T::ProducerInfoList& producerInfoList)
   FUNCTION_TRACE
   try
   {
+    producerInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -5432,6 +5533,8 @@ int RedisImplementation::getProducerListBySourceId(uint sourceId,T::ProducerInfo
   FUNCTION_TRACE
   try
   {
+    producerInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -5555,6 +5658,8 @@ int RedisImplementation::getGenerationList(T::GenerationInfoList& generationInfo
   FUNCTION_TRACE
   try
   {
+    generationInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -5594,6 +5699,7 @@ int RedisImplementation::getGenerationListByGeometryId(T::GeometryId geometryId,
   FUNCTION_TRACE
   try
   {
+    generationInfoList.clear();
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -5655,6 +5761,8 @@ int RedisImplementation::getGenerationListByProducerId(uint producerId,T::Genera
   FUNCTION_TRACE
   try
   {
+    generationInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -5696,6 +5804,8 @@ int RedisImplementation::getGenerationListBySourceId(uint sourceId,T::Generation
   FUNCTION_TRACE
   try
   {
+    generationInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -6004,6 +6114,8 @@ int RedisImplementation::getFileList(uint startFileId,uint maxRecords,T::FileInf
   FUNCTION_TRACE
   try
   {
+    fileInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -6045,6 +6157,8 @@ int RedisImplementation::getFileListByGenerationId(uint generationId,uint startF
   FUNCTION_TRACE
   try
   {
+    fileInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -6118,6 +6232,8 @@ int RedisImplementation::getFileListByGenerationIdList(std::set<uint>& generatio
   FUNCTION_TRACE
   try
   {
+    fileInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -6191,6 +6307,8 @@ int RedisImplementation::getFileListByGroupFlags(uint groupFlags,uint startFileI
   FUNCTION_TRACE
   try
   {
+    fileInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -6329,6 +6447,8 @@ int RedisImplementation::getFileListByProducerId(uint producerId,uint startFileI
   FUNCTION_TRACE
   try
   {
+    fileInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -6401,6 +6521,8 @@ int RedisImplementation::getFileListBySourceId(uint sourceId,uint startFileId,ui
   FUNCTION_TRACE
   try
   {
+    fileInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -6473,6 +6595,8 @@ int RedisImplementation::getVirtualFiles(uint startFileId,uint maxRecords,T::Fil
   FUNCTION_TRACE
   try
   {
+    fileInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -6909,6 +7033,8 @@ int RedisImplementation::getContent(uint startFileId,uint startMessageIndex,uint
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -6952,6 +7078,8 @@ int RedisImplementation::getGenerationTimeAndGeometryList(std::set<std::string>&
   FUNCTION_TRACE
   try
   {
+    list.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -7020,6 +7148,8 @@ int RedisImplementation::getContentByGenerationId(uint generationId,uint startFi
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -7097,6 +7227,8 @@ int RedisImplementation::getContentByGenerationIdList(std::set<uint>& generation
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -7174,6 +7306,8 @@ int RedisImplementation::getContentByGroupFlags(uint groupFlags,uint startFileId
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -7251,6 +7385,8 @@ int RedisImplementation::getContentByRequestCounterKey(ulonglong key,T::ContentI
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -7322,6 +7458,8 @@ int RedisImplementation::getVirtualContent(uint startFileId,uint startMessageInd
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -7399,6 +7537,8 @@ int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyTyp
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -7445,6 +7585,8 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -7504,6 +7646,8 @@ int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -7568,6 +7712,8 @@ int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::P
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -7632,6 +7778,8 @@ int RedisImplementation::getContentByGenerationIdAndTimeRange(uint generationId,
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -7674,6 +7822,8 @@ int RedisImplementation::getContentByForecastTimeList(std::vector<T::ForecastTim
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -7732,6 +7882,8 @@ int RedisImplementation::getContentByProducerId(uint producerId,uint startFileId
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -7811,6 +7963,8 @@ int RedisImplementation::getContentByServerId(uint serverId,uint startFileId,uin
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -7889,6 +8043,8 @@ int RedisImplementation::getContentBySourceId(uint sourceId,uint startFileId,uin
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -7968,6 +8124,8 @@ int RedisImplementation::getContentByFileId(uint fileId,T::ContentInfoList& cont
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 

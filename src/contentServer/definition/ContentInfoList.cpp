@@ -530,7 +530,7 @@ void ContentInfoList::clear()
   FUNCTION_TRACE
   try
   {
-    if (mArray == nullptr ||  mLength == 0)
+    if (mArray == nullptr)
       return;
 
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
@@ -915,6 +915,8 @@ void ContentInfoList::getLevelInfoList(T::LevelInfoList& levelInfoList)
   FUNCTION_TRACE
   try
   {
+    levelInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -1601,6 +1603,8 @@ void ContentInfoList::getContentListByForecastTime(std::string forecastTime,T::C
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -1953,6 +1957,8 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelIn
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -2016,6 +2022,8 @@ void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -2083,6 +2091,8 @@ void ContentInfoList::getContentInfoListByGroupFlags(uint groupFlags,uint startF
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -2151,10 +2161,11 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint producerId,uint 
   FUNCTION_TRACE
   try
   {
+    paramKeyList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    paramKeyList.clear();
 
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
@@ -2239,10 +2250,10 @@ void ContentInfoList::getContentGeometryIdListByGenerationId(uint producerId,uin
   FUNCTION_TRACE
   try
   {
+    geometryIdList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
-
-    geometryIdList.clear();
 
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
@@ -2273,10 +2284,10 @@ void ContentInfoList::getContentGeometryIdList(std::set<T::GeometryId>& geometry
   FUNCTION_TRACE
   try
   {
+    geometryIdList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
-
-    geometryIdList.clear();
 
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
@@ -2307,10 +2318,10 @@ void ContentInfoList::getGenerationIdListByGeometryId(T::GeometryId geometryId,s
   FUNCTION_TRACE
   try
   {
+    generationIdList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
-
-    generationIdList.clear();
 
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
     for (uint t=0; t<mLength; t++)
@@ -2341,6 +2352,8 @@ void ContentInfoList::getContentInfoListByFileId(uint fileId,ContentInfoList& co
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -2405,6 +2418,8 @@ void ContentInfoList::getContentInfoListByGeometryId(T::GeometryId geometryId,Co
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -2437,6 +2452,8 @@ void ContentInfoList::getContentInfoListByRequestCounterKey(ulonglong key,Conten
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -2469,6 +2486,8 @@ void ContentInfoList::getContentInfoListByForecastTime(std::string forecastTime,
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -2531,6 +2550,8 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -2562,6 +2583,8 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -2680,6 +2703,8 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -2807,6 +2832,8 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -2929,6 +2956,8 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -2960,6 +2989,8 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -3078,6 +3109,8 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint pro
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -3205,6 +3238,8 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -3329,6 +3364,8 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -3515,6 +3552,8 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -3795,6 +3834,8 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -3922,6 +3963,8 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -4049,6 +4092,8 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -4167,6 +4212,8 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -4294,6 +4341,8 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -4420,6 +4469,8 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -4538,6 +4589,8 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -4665,6 +4718,8 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -4792,6 +4847,8 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -4910,6 +4967,8 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint pro
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -5037,6 +5096,8 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -5166,6 +5227,8 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -5284,6 +5347,8 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint p
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -5411,6 +5476,8 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -5538,6 +5605,8 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startF
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -5602,6 +5671,8 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,ContentInfo
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -5667,6 +5738,8 @@ void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint gene
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -5731,6 +5804,8 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(uint producerI
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -5795,6 +5870,8 @@ void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint gene
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -5827,6 +5904,8 @@ void ContentInfoList::getContentInfoListByServerId(uint serverId,uint startFileI
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -5896,6 +5975,8 @@ void ContentInfoList::getContentInfoListBySourceId(uint sourceId,uint startFileI
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -5960,6 +6041,8 @@ void ContentInfoList::getContentInfoListByServerAndFileId(uint serverId,uint fil
   FUNCTION_TRACE
   try
   {
+    contentInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -6023,6 +6106,8 @@ void ContentInfoList::getFmiParamLevelIdListByFmiParameterId(T::ParamId fmiParam
   FUNCTION_TRACE
   try
   {
+    paramLevelIdList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -6074,6 +6159,8 @@ void ContentInfoList::getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId
   FUNCTION_TRACE
   try
   {
+    paramLevelList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -6103,6 +6190,8 @@ void ContentInfoList::getParamLevelInfoListByFmiParameterId(T::ParamId fmiParame
   FUNCTION_TRACE
   try
   {
+    parameterLevelInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -6138,6 +6227,8 @@ void ContentInfoList::getForecastTimeList(std::set<std::string>& forecastTimeLis
   FUNCTION_TRACE
   try
   {
+    forecastTimeList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -6172,6 +6263,8 @@ void ContentInfoList::getForecastTimeListByGenerationId(uint producerId,uint gen
   FUNCTION_TRACE
   try
   {
+    forecastTimeList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -6206,6 +6299,8 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(uint producerId
   FUNCTION_TRACE
   try
   {
+    forecastTimeList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -6240,6 +6335,8 @@ void ContentInfoList::getForecastTimeListByProducerId(uint producerId,std::set<s
   FUNCTION_TRACE
   try
   {
+    forecastTimeList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 

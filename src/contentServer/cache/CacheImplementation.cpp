@@ -588,6 +588,8 @@ int CacheImplementation::_getDataServerInfoList(T::SessionId sessionId,T::Server
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
+    serverInfoList.clear();
+
     serverInfoList = mDataServerInfoList;
     return Result::OK;
   }
@@ -786,6 +788,8 @@ int CacheImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
+    producerInfoList.clear();
+
     producerInfoList = mProducerInfoList;
     return Result::OK;
   }
@@ -811,6 +815,8 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
+
+    producerInfoList.clear();
 
     T::ContentInfoList contentInfoList;
 
@@ -916,6 +922,8 @@ int CacheImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,u
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
+    producerInfoList.clear();
+
     mProducerInfoList.getProducerInfoListBySourceId(sourceId,producerInfoList);
 
     return Result::OK;
@@ -967,6 +975,8 @@ int CacheImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,
 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
+    list.clear();
+
     uint pLen = mProducerInfoList.getLength();
 
     for (uint p=0; p<pLen; p++)
@@ -1013,6 +1023,8 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
       return Result::INVALID_SESSION;
 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    list.clear();
 
     T::ContentInfoList cList;
     cList.setReleaseObjects(false);
@@ -1334,6 +1346,7 @@ int CacheImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
+    list.clear();
 
     uint len = mContentInfoList[0].getLength();
     for (uint t=0; t<len; t++)
@@ -1372,6 +1385,8 @@ int CacheImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
+
+    generationInfoList.clear();
 
     std::set<uint> idList;
 
@@ -1469,6 +1484,8 @@ int CacheImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Genera
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
+    generationInfoList.clear();
+
     generationInfoList = mGenerationInfoList;
     return Result::OK;
   }
@@ -1498,6 +1515,8 @@ int CacheImplementation::_getGenerationInfoListByProducerId(T::SessionId session
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
+
+    generationInfoList.clear();
 
     mGenerationInfoList.getGenerationInfoListByProducerId(producerId,generationInfoList);
     return Result::OK;
@@ -1529,6 +1548,8 @@ int CacheImplementation::_getGenerationInfoListByProducerName(T::SessionId sessi
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
+    generationInfoList.clear();
+
     mGenerationInfoList.getGenerationInfoListByProducerId(producerInfo->mProducerId,generationInfoList);
     return Result::OK;
   }
@@ -1554,6 +1575,8 @@ int CacheImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
+
+    generationInfoList.clear();
 
     mGenerationInfoList.getGenerationInfoListBySourceId(sourceId,generationInfoList);
     return Result::OK;
@@ -2086,6 +2109,8 @@ int CacheImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
+    fileInfoList.clear();
+
     mFileInfoList.getFileInfoList(startFileId,maxRecords,fileInfoList);
     return Result::OK;
   }
@@ -2108,6 +2133,8 @@ int CacheImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
       return Result::INVALID_SESSION;
 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    fileInfoList.clear();
 
     for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
     {
@@ -2139,6 +2166,8 @@ int CacheImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uin
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
+
+    fileInfoList.clear();
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
     if (producerInfo == nullptr)
@@ -2174,6 +2203,8 @@ int CacheImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,s
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
+    fileInfoList.clear();
+
     mFileInfoList.getFileInfoListByProducerId(producerInfo->mProducerId,startFileId,maxRecords,fileInfoList);
     return Result::OK;
   }
@@ -2203,6 +2234,8 @@ int CacheImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,u
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
+
+    fileInfoList.clear();
 
     mFileInfoList.getFileInfoListByGenerationId(generationId,startFileId,maxRecords,fileInfoList);
     return Result::OK;
@@ -2234,6 +2267,8 @@ int CacheImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
+    fileInfoList.clear();
+
     mFileInfoList.getFileInfoListByGenerationId(generationInfo->mGenerationId,startFileId,maxRecords,fileInfoList);
     return Result::OK;
   }
@@ -2260,6 +2295,8 @@ int CacheImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,uin
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
+    fileInfoList.clear();
+
     mFileInfoList.getFileInfoListByGroupFlags(groupFlags,startFileId,maxRecords,fileInfoList);
     return Result::OK;
   }
@@ -2285,6 +2322,8 @@ int CacheImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint 
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
+
+    fileInfoList.clear();
 
     mFileInfoList.getFileInfoListBySourceId(sourceId,startFileId,maxRecords,fileInfoList);
     return Result::OK;
@@ -2467,6 +2506,8 @@ int CacheImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
+
+    eventInfoList.clear();
 
     if (requestingServerId != 0)
     {
@@ -2887,6 +2928,8 @@ int CacheImplementation::_getContentList(T::SessionId sessionId,uint startFileId
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
+    contentInfoList.clear();
+
     mContentInfoList[0].getContentInfoList(startFileId,startMessageIndex,maxRecords,contentInfoList);
     return Result::OK;
   }
@@ -2913,6 +2956,8 @@ int CacheImplementation::_getContentListByFileId(T::SessionId sessionId,uint fil
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
+    contentInfoList.clear();
+
     mContentInfoList[0].getContentInfoListByFileId(fileId,contentInfoList);
     return Result::OK;
   }
@@ -2938,6 +2983,8 @@ int CacheImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
+
+    contentInfoList.clear();
 
     for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
     {
@@ -2975,6 +3022,8 @@ int CacheImplementation::_getContentListByFileName(T::SessionId sessionId,std::s
     if (fileInfo == nullptr)
       return Result::UNKNOWN_FILE_NAME;
 
+    contentInfoList.clear();
+
     mContentInfoList[0].getContentInfoListByFileId(fileInfo->mFileId,contentInfoList);
     return Result::OK;
   }
@@ -3005,6 +3054,8 @@ int CacheImplementation::_getContentListByServerId(T::SessionId sessionId,uint s
     if (info == nullptr)
       return Result::UNKNOWN_SERVER_ID;
 
+    contentInfoList.clear();
+
     mContentInfoList[0].getContentInfoListByServerId(serverId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     return Result::OK;
   }
@@ -3030,6 +3081,8 @@ int CacheImplementation::_getContentListByGroupFlags(T::SessionId sessionId,uint
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
+
+    contentInfoList.clear();
 
     mContentInfoList[0].getContentInfoListByGroupFlags(groupFlags,startFileId,startMessageIndex,maxRecords,contentInfoList);
     return Result::OK;
@@ -3061,6 +3114,8 @@ int CacheImplementation::_getContentListByProducerId(T::SessionId sessionId,uint
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
+    contentInfoList.clear();
+
     mContentInfoList[0].getContentInfoListByProducerId(producerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     return Result::OK;
   }
@@ -3091,6 +3146,8 @@ int CacheImplementation::_getContentListByProducerName(T::SessionId sessionId,st
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
+    contentInfoList.clear();
+
     mContentInfoList[0].getContentInfoListByProducerId(producerInfo->mProducerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     return Result::OK;
   }
@@ -3119,6 +3176,8 @@ int CacheImplementation::_getContentListByGenerationId(T::SessionId sessionId,ui
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
+
+    contentInfoList.clear();
 
     if (requestFlags < CONTENT_LIST_COUNT  &&  mContentInfoListEnabled[requestFlags])
       mContentInfoList[requestFlags].getContentInfoListByGenerationId(generationInfo->mProducerId,generationId,startFileId,startMessageIndex,maxRecords,contentInfoList);
@@ -3154,6 +3213,8 @@ int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
+    contentInfoList.clear();
+
     mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     return Result::OK;
   }
@@ -3183,6 +3244,8 @@ int CacheImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
+
+    contentInfoList.clear();
 
     mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mProducerId,generationId,startTime,endTime,contentInfoList);
     return Result::OK;
@@ -3214,6 +3277,8 @@ int CacheImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
+    contentInfoList.clear();
+
     mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,startTime,endTime,contentInfoList);
     return Result::OK;
   }
@@ -3239,6 +3304,8 @@ int CacheImplementation::_getContentListBySourceId(T::SessionId sessionId,uint s
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
+
+    contentInfoList.clear();
 
     mContentInfoList[0].getContentInfoListBySourceId(sourceId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     return Result::OK;
@@ -3269,6 +3336,8 @@ int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
+
+    contentInfoList.clear();
 
     switch (parameterKeyType)
     {
@@ -3357,6 +3426,8 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
+
+    contentInfoList.clear();
 
     char st[100];
     strcpy(st,parameterKey.c_str());
@@ -3465,6 +3536,8 @@ int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionI
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
+    contentInfoList.clear();
+
     switch (parameterKeyType)
     {
       case T::ParamKeyTypeValue::FMI_ID:
@@ -3550,6 +3623,8 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
+
+    contentInfoList.clear();
 
     switch (parameterKeyType)
     {
@@ -3637,6 +3712,8 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
+    contentInfoList.clear();
+
     switch (parameterKeyType)
     {
       case T::ParamKeyTypeValue::FMI_ID:
@@ -3723,6 +3800,8 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
+
+    contentInfoList.clear();
 
 /*
     boost::posix_time::ptime s = toTimeStamp(forecastTime) - boost::posix_time::minutes(600);;
@@ -3857,6 +3936,8 @@ int CacheImplementation::_getContentListByRequestCounterKey(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
+    contentInfoList.clear();
+
     mContentInfoList[0].getContentInfoListByRequestCounterKey(key,contentInfoList);;
 
     return Result::OK;
@@ -3880,6 +3961,8 @@ int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
+
+    contentInfoList.clear();
 
     uint cLen = mContentInfoList[0].getLength();
     for (uint c=0; c<cLen; c++)
@@ -3948,6 +4031,8 @@ int CacheImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
+    geometryIdList.clear();
+
     mContentInfoList[0].getContentGeometryIdListByGenerationId(generationInfo->mProducerId,generationId,geometryIdList);
     return Result::OK;
   }
@@ -3977,6 +4062,8 @@ int CacheImplementation::_getContentParamListByGenerationId(T::SessionId session
       return Result::UNKNOWN_GENERATION_ID;
 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    contentParamList.clear();
 
     T::ContentInfoList contentInfoList;
     mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mProducerId,generationId,0,0,1000000,contentInfoList);
@@ -4035,6 +4122,8 @@ int CacheImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
+    paramKeyList.clear();
+
     mContentInfoList[0].getContentParamKeyListByGenerationId(generationInfo->mProducerId,generationId,parameterKeyType,paramKeyList);
     return Result::OK;
   }
@@ -4064,6 +4153,8 @@ int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
       return Result::UNKNOWN_GENERATION_ID;
 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    contentTimeList.clear();
 
     auto it = mContentTimeCache.find(generationId);
     if (it == mContentTimeCache.end())
@@ -4105,6 +4196,8 @@ int CacheImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
+    contentTimeList.clear();
+
     mContentInfoList[0].getForecastTimeListByGenerationAndGeometry(generationInfo->mProducerId,generationId,geometryId,contentTimeList);
 
     return Result::OK;
@@ -4131,6 +4224,8 @@ int CacheImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,
       return Result::INVALID_SESSION;
 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    contentTimeList.clear();
 
     mContentInfoList[0].getForecastTimeListByProducerId(producerId,contentTimeList);
 
@@ -4180,6 +4275,8 @@ int CacheImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoLi
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
+
+    levelInfoList.clear();
 
     mContentInfoList[0].getLevelInfoList(levelInfoList);
     return Result::OK;

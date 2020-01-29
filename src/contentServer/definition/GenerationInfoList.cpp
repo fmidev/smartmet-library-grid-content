@@ -372,7 +372,7 @@ void GenerationInfoList::clear()
   FUNCTION_TRACE
   try
   {
-    if (mArray == nullptr ||  mLength == 0)
+    if (mArray == nullptr)
       return;
 
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
@@ -810,6 +810,8 @@ void GenerationInfoList::getGenerationInfoListByProducerId(uint producerId,Gener
   FUNCTION_TRACE
   try
   {
+    generationInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -858,6 +860,8 @@ void GenerationInfoList::getGenerationInfoListByAnalysisTime(std::string analysi
   FUNCTION_TRACE
   try
   {
+    generationInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -1004,6 +1008,8 @@ void GenerationInfoList::getGenerationInfoListBySourceId(uint sourceId,Generatio
   FUNCTION_TRACE
   try
   {
+    generationInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 

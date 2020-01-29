@@ -120,6 +120,7 @@ FileInfoList::~FileInfoList()
       }
       delete[] mArray;
     }
+    mArray = nullptr;
   }
   catch (...)
   {
@@ -344,7 +345,7 @@ void FileInfoList::clear()
   FUNCTION_TRACE
   try
   {
-    if (mArray == nullptr ||  mLength == 0)
+    if (mArray == nullptr)
       return;
 
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
@@ -361,14 +362,9 @@ void FileInfoList::clear()
       delete[] mArray;
     }
 
-    mSize = 100;
+    mSize = 0;
     mLength = 0;
-    mArray = new FileInfoPtr[100];
-
-    for (uint t=0; t<100; t++)
-    {
-      mArray[t] = nullptr;
-    }
+    mArray = nullptr;
   }
   catch (...)
   {
@@ -688,6 +684,8 @@ void FileInfoList::getFileInfoList(uint startFileId,uint maxRecords,FileInfoList
   FUNCTION_TRACE
   try
   {
+    fileInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -737,6 +735,8 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,FileInfoList& fil
   FUNCTION_TRACE
   try
   {
+    fileInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -770,6 +770,8 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,
   FUNCTION_TRACE
   try
   {
+    fileInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -819,6 +821,8 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,FileInfoList&
   FUNCTION_TRACE
   try
   {
+    fileInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -852,6 +856,8 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFil
   FUNCTION_TRACE
   try
   {
+    fileInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -901,6 +907,8 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,FileInfoList& fil
   FUNCTION_TRACE
   try
   {
+    fileInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -934,6 +942,8 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,
   FUNCTION_TRACE
   try
   {
+    fileInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -983,6 +993,8 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,FileInfoList& fileInf
   FUNCTION_TRACE
   try
   {
+    fileInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -1016,6 +1028,8 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,uint
   FUNCTION_TRACE
   try
   {
+    fileInfoList.clear();
+
     if (mArray == nullptr ||  mLength == 0)
       return;
 

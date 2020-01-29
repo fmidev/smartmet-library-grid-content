@@ -378,6 +378,8 @@ void EventInfoList::getEventInfoList(T::EventId startEventId,uint maxRecords,T::
   FUNCTION_TRACE
   try
   {
+    eventInfoList.clear();
+
     AutoThreadLock lock(&mThreadLock);
 
     if (firstItem == nullptr)

@@ -297,6 +297,8 @@ void ProducerInfoList::getProducerInfoListBySourceId(uint sourceId,ProducerInfoL
   FUNCTION_TRACE
   try
   {
+    producerInfoList.clear();
+
     AutoThreadLock lock(&mThreadLock);
     uint sz = getLength();
     for (uint t=0; t<sz; t++)
