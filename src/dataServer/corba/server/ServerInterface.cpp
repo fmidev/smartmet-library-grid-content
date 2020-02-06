@@ -156,6 +156,45 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getGridMessageBytes(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaByteData_out messageBytes, SmartMet::DataServer::Corba::CorbaULongList_out messageSections)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::vector<uchar> sMessageBytes;
+    std::vector<uint> sMessageSections;
+
+    DataServer::Corba::CorbaByteData *corbaMessageBytes = new DataServer::Corba::CorbaByteData();
+    messageBytes = corbaMessageBytes;
+
+    DataServer::Corba::CorbaULongList *corbaMessageSections = new DataServer::Corba::CorbaULongList();
+    messageSections = corbaMessageSections;
+
+    if (mService == nullptr)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getGridMessageBytes(sessionId,fileId,messageIndex,sMessageBytes,sMessageSections);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sMessageBytes,*corbaMessageBytes);
+      DataServer::Corba::Converter::convert(sMessageSections,*corbaMessageSections);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::getGridAttributeList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaAttributeList_out attributeList)
 {
   FUNCTION_TRACE

@@ -198,6 +198,9 @@ void ServiceImplementation::setRequestCounterEnabled(std::string requestCounterF
 }
 
 
+
+
+
 void ServiceImplementation::setPointCacheEnabled(bool enabled,uint hitsRequired,uint timePeriod)
 {
   FUNCTION_TRACE
@@ -565,6 +568,60 @@ int ServiceImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
   try
   {
     count = mGridFileManager.getFileCount();
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+int ServiceImplementation::_getGridMessageBytes(T::SessionId sessionId,uint fileId,uint messageIndex,std::vector<uchar>& messageBytes,std::vector<uint>& messageSections)
+{
+  FUNCTION_TRACE
+  try
+  {
+    GRID::GridFile_sptr gridFile = getGridFile(fileId);
+    if (!gridFile)
+      return Result::DATA_NOT_FOUND;
+
+    GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
+    if (message == nullptr)
+      return Result::DATA_NOT_FOUND;
+
+    uchar *fileStartAddr = (uchar*)gridFile->getMemoryPtr();
+    if (fileStartAddr == nullptr)
+      return Result::DATA_NOT_FOUND;
+
+    long long fileSize = gridFile->getSize();
+    uchar *fileEndAddr = fileStartAddr + fileSize;
+
+    T::FilePosition messagePosition = message->getFilePosition();
+    uint messageSize = message->getMessageSize();
+
+    uchar *messageStartAddr = fileStartAddr + messagePosition;
+    uchar *messageEndAddr = messageStartAddr + messageSize;
+
+    if (messageStartAddr >= fileStartAddr  &&  messageEndAddr <= fileEndAddr)
+    {
+
+      messageBytes.clear();
+      messageBytes.reserve(messageSize);
+      std::copy(messageStartAddr,messageEndAddr,std::back_inserter(messageBytes));
+
+      std::set<T::FilePosition> positions;
+      message->getSectionPositions(positions);
+
+      for (auto it = positions.begin(); it != positions.end(); ++it)
+      {
+        messageSections.push_back(*it - messagePosition);
+      }
+    }
+
     return Result::OK;
   }
   catch (...)

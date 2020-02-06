@@ -204,6 +204,34 @@ int ClientImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
 
 
 
+int ClientImplementation::_getGridMessageBytes(T::SessionId sessionId,uint fileId,uint messageIndex,std::vector<uchar>& messageBytes,std::vector<uint>& messageSections)
+{
+  try
+  {
+    if (!mInitialized)
+      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaByteData_var corbaMessageBytes;
+    DataServer::Corba::CorbaULongList_var corbaMessageSections;
+
+
+    int result = mService->getGridMessageBytes(sessionId,fileId,messageIndex,corbaMessageBytes,corbaMessageSections);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaMessageBytes,messageBytes);
+      DataServer::Corba::Converter::convert(corbaMessageSections,messageSections);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
 int ClientImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,T::ParamValue& value)
 {
   try

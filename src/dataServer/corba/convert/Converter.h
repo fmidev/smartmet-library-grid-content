@@ -69,6 +69,10 @@ class Converter
 
     static void   convert(const SmartMet::T::ByteData_vec& source, SmartMet::DataServer::Corba::CorbaByteDataSequence& target);
     static void   convert(const SmartMet::DataServer::Corba::CorbaByteDataSequence& source,SmartMet::T::ByteData_vec& target);
+
+    static void   convert(std::vector<uint>& source,DataServer::Corba::CorbaULongList& target);
+    static void   convert(const DataServer::Corba::CorbaULongList& source,std::vector<uint>& target);
+
 };
 
 

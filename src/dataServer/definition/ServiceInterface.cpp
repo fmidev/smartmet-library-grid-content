@@ -187,6 +187,28 @@ int ServiceInterface::getGridFileCount(T::SessionId sessionId,uint& count)
 
 
 
+int ServiceInterface::getGridMessageBytes(T::SessionId sessionId,uint fileId,uint messageIndex,std::vector<uchar>& messageBytes,std::vector<uint>& messageSections)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getGridMessageBytes(sessionId,fileId,messageIndex,messageBytes,messageSections);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,byte[%lu],section[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,messageBytes.size(),messageSections.size(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,T::ParamValue& value)
 {
   FUNCTION_TRACE
@@ -1546,6 +1568,14 @@ int ServiceInterface::_getGridFileCount(T::SessionId sessionId,uint& count)
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
 
+
+
+
+
+int ServiceInterface::_getGridMessageBytes(T::SessionId sessionId,uint fileId,uint messageIndex,std::vector<uchar>& messageBytes,std::vector<uint>& messageSections)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
 
 
 

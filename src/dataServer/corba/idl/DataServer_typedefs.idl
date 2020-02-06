@@ -15,6 +15,7 @@ module Corba
 typedef unsigned long long CorbaParamId;
 typedef float CorbaParamValue;
 
+typedef sequence<unsigned long> CorbaULongList;
 typedef sequence<CorbaParamValue> CorbaParamValueList;
 typedef sequence<double> CorbaDoubleList;
 
