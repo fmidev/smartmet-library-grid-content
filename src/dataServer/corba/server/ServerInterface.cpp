@@ -195,6 +195,34 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getGridMessagePreloadCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == nullptr)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    uint sCount = 0;
+    int result = mService->getGridMessagePreloadCount(sessionId,sCount);
+
+    if (result == 0)
+      count = sCount;
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::getGridAttributeList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaAttributeList_out attributeList)
 {
   FUNCTION_TRACE

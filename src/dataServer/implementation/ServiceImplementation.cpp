@@ -93,7 +93,8 @@ ServiceImplementation::ServiceImplementation()
     mPointCacheHitsRequired = 20;
     mPointCacheTimePeriod = 1200;
 
-    mRequestCounterEnabled = false;
+    mPreloadFileGenerationEnabled = false;
+    mPreloadFile_modificationTime = 0;
   }
   catch (...)
   {
@@ -181,15 +182,20 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,std:
 
 
 
-void ServiceImplementation::setRequestCounterEnabled(std::string requestCounterFilename,bool requestCounterEnabled)
+void ServiceImplementation::setPreload(bool preloadEnabled,std::string preloadFile,bool preloadFileGenerationEnabled,std::string generatedPreloadFile)
 {
   FUNCTION_TRACE
   try
   {
-    mRequestCounterEnabled = requestCounterEnabled;
-    mRequestCounterFilename = requestCounterFilename;
+    mContentPreloadEnabled = preloadEnabled;
+    mPreloadFileGenerationEnabled = preloadFileGenerationEnabled;
+    mPreloadFile = preloadFile;
+    mGeneratedPreloadFile = generatedPreloadFile;
 
-    requestCounter.setCountingEnabled(mRequestCounterEnabled);
+    requestCounter.setCountingEnabled(mPreloadFileGenerationEnabled);
+
+    if (mContentPreloadEnabled)
+      loadPreloadList();
   }
   catch (...)
   {
@@ -226,23 +232,6 @@ void ServiceImplementation::setVirtualContentEnabled(bool enabled)
   try
   {
     mVirtualContentEnabled = enabled;
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
-  }
-}
-
-
-
-
-
-void ServiceImplementation::setContentPreloadEnabled(bool enabled)
-{
-  FUNCTION_TRACE
-  try
-  {
-    mContentPreloadEnabled = enabled;
   }
   catch (...)
   {
@@ -484,7 +473,7 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileI
         break;
 
       case T::CoordinateTypeValue::ORIGINAL_COORDINATES:
-        coordinates.mCoordinateList = message->getGridCoordinates();
+        coordinates.mCoordinateList = message->getGridOriginalCoordinates();
         break;
     }
 
@@ -621,6 +610,28 @@ int ServiceImplementation::_getGridMessageBytes(T::SessionId sessionId,uint file
         messageSections.push_back(*it - messagePosition);
       }
     }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+int ServiceImplementation::_getGridMessagePreloadCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentPreloadEnabled)
+      count = mPreloadList.size();
+    else
+      count = 0xFFFFFFFF;
 
     return Result::OK;
   }
@@ -4414,11 +4425,34 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
       for (uint t=0; t<cLen; t++)
       {
         T::ContentInfo *info = currentContentList.getContentInfoByIndex(t);
-        gridFile->newMessage(info->mMessageIndex,info->mFilePosition,info->mMessageSize);
+
+        GRID::MessageInfo mInfo;
+
+        mInfo.mFilePosition = info->mFilePosition;
+        mInfo.mMessageSize = info->mMessageSize;
+        mInfo.mProducerId = info->mProducerId;
+        mInfo.mGenerationId = info->mGenerationId;
+        mInfo.mFmiParameterId = info->mFmiParameterId;
+        mInfo.mFmiParameterName = info->mFmiParameterName;
+        mInfo.mFmiParameterLevelId = info->mFmiParameterLevelId;
+        mInfo.mParameterLevel = info->mParameterLevel;
+        mInfo.mForecastType = info->mForecastType;
+        mInfo.mForecastNumber = info->mForecastNumber;
+        mInfo.mGeometryId = info->mGeometryId;
+
+        gridFile->newMessage(info->mMessageIndex,mInfo);
 
         //if (mContentPreloadEnabled && (info->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
-        //  mPrealoadList.push_back(std::pair<uint,uint>(info->mFileId,info->mMessageIndex));
-        /*
+
+        if (mContentPreloadEnabled)
+        {
+          char tmp[200];
+          sprintf(tmp,"%u;%s;%u;1;%u;%05u;%d;%d;1",info->mProducerId,info->mFmiParameterName.c_str(),info->mGeometryId,info->mFmiParameterLevelId,info->mParameterLevel,info->mForecastType,info->mForecastNumber);
+          //printf("FIND %s\n",tmp);
+          if (mPreloadDefList.find(toLowerString(std::string(tmp))) != mPreloadDefList.end())
+            mPreloadList.push_back(std::pair<uint,uint>(info->mFileId,info->mMessageIndex));
+        }
+/*
         {
           printf("PRELOAD %s\n",info->mFmiParameterName.c_str());
 
@@ -4430,10 +4464,12 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
             printf("** PRELOAD %s\n",info->mFmiParameterName.c_str());
             GRID::Message *message = gFile->getMessageByIndex(info->mMessageIndex);
             if (message != nullptr)
-              message->getGridValueByGridPoint(0,0);
+              message->lockData();
+              //message->getGridValueByGridPoint(0,0);
           }
         }
-          */
+        */
+
       }
 
       // The content of the file is predefined or registered by another server. So,
@@ -5329,7 +5365,31 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
       gridFile = storageFile.get();
       try
       {
-        gridFile->newMessage(contentInfo.mMessageIndex,contentInfo.mFilePosition,contentInfo.mMessageSize);
+        GRID::MessageInfo mInfo;
+
+        mInfo.mFilePosition = contentInfo.mFilePosition;
+        mInfo.mMessageSize = contentInfo.mMessageSize;
+        mInfo.mProducerId = contentInfo.mProducerId;
+        mInfo.mGenerationId = contentInfo.mGenerationId;
+        mInfo.mFmiParameterId = contentInfo.mFmiParameterId;
+        mInfo.mFmiParameterName = contentInfo.mFmiParameterName;
+        mInfo.mFmiParameterLevelId = contentInfo.mFmiParameterLevelId;
+        mInfo.mParameterLevel = contentInfo.mParameterLevel;
+        mInfo.mForecastType = contentInfo.mForecastType;
+        mInfo.mForecastNumber = contentInfo.mForecastNumber;
+        mInfo.mGeometryId = contentInfo.mGeometryId;
+
+        gridFile->newMessage(contentInfo.mMessageIndex,mInfo);
+
+        //if (mContentPreloadEnabled && (contentInfo.mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
+
+        if (mContentPreloadEnabled)
+        {
+          char tmp[200];
+          sprintf(tmp,"%u;%s;%u;1;%u;%05u;%d;%d;1",contentInfo.mProducerId,contentInfo.mFmiParameterName.c_str(),contentInfo.mGenerationId,contentInfo.mFmiParameterLevelId,contentInfo.mParameterLevel,contentInfo.mForecastType,contentInfo.mForecastNumber);
+          if (mPreloadDefList.find(toLowerString(std::string(tmp))) != mPreloadDefList.end())
+            mPreloadList.push_back(std::pair<uint,uint>(contentInfo.mFileId,contentInfo.mMessageIndex));
+        }
       }
       catch (...)
       {
@@ -5576,6 +5636,73 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *n
 
 
 
+void ServiceImplementation::loadPreloadList()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mContentPreloadEnabled)
+      return;
+
+    FILE *file = fopen(mPreloadFile.c_str(), "re");
+    if (file == nullptr)
+    {
+      PRINT_DATA(mDebugLog, "  -- Preload file not available (%s).\n",mPreloadFile.c_str());
+      return;
+    }
+
+    mPreloadFile_modificationTime = getFileModificationTime(mPreloadFile.c_str());
+
+    T::ProducerInfoList producerInfoList;
+    mContentServer->getProducerInfoList(mServerSessionId,producerInfoList);
+
+    mPreloadDefList.clear();
+
+    char st[1000];
+    while (!feof(file))
+    {
+      if (fgets(st, 1000, file) != nullptr)
+      {
+        if (st[0] != '#')
+        {
+          char *p = st;
+          while (*p != '\0')
+          {
+            if (*p <= ' ')
+              *p = '\0';
+            else
+              p++;
+          }
+
+          std::vector <std::string> a;
+          splitString(st, ';', a);
+          if (a.size() == 9)
+          {
+            if (a[8] == "1")
+            {
+              T::ProducerInfo *producer = producerInfoList.getProducerInfoByName(a[0]);
+              if (producer != nullptr)
+              {
+                char tmp[200];
+                sprintf(tmp,"%u;%s;%s;%s;%s;%s;%s;%s;%s",producer->mProducerId,a[1].c_str(),a[2].c_str(),a[3].c_str(),a[4].c_str(),a[5].c_str(),a[6].c_str(),a[7].c_str(),a[8].c_str());
+                //printf("%s\n",tmp);
+                mPreloadDefList.insert(toLowerString(std::string(tmp)));
+              }
+            }
+          }
+        }
+      }
+    }
+    fclose(file);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, nullptr);
+  }
+}
+
+
+
 
 void ServiceImplementation::checkServerRegistration()
 {
@@ -5661,9 +5788,9 @@ void ServiceImplementation::processEvents()
     }
 
     time_t sTime = time(0);
-    while (mContentPreloadEnabled  &&  !mPrealoadList.empty()  &&  (time(0)-sTime) < 30)
+    while (mContentPreloadEnabled  &&  !mPreloadList.empty()  &&  (time(0)-sTime) < 10)
     {
-      auto it = mPrealoadList.front();
+      auto it = mPreloadList.front();
       //printf("###### PRELOAD %u:%u\n",it.first,it.second);
 
       auto gFile = mGridFileManager.getFileByIdNoMapping(it.first);
@@ -5672,6 +5799,20 @@ void ServiceImplementation::processEvents()
         if (!gFile->isMemoryMapped())
           gFile->mapToMemory();
 
+        GRID::Message *message = gFile->getMessageByIndex(it.second);
+        if (message != nullptr)
+        {
+          PRINT_DATA(mDebugLog,"** PRELOAD (%lu) : %s:%u:%s:%u:%u:%d:%d\n",mPreloadList.size(),message->getForecastTime().c_str(),message->getProducerId(),message->getFmiParameterName().c_str(),message->getFmiParameterLevelId(),message->getGridParameterLevel(),message->getForecastType(),message->getForecastNumber());
+          message->lockData();
+        }
+          //message->getGridValueByGridPoint(0,0);
+
+/*
+      if (gFile)
+      {
+        if (!gFile->isMemoryMapped())
+          gFile->mapToMemory();
+*/
         /*
         GRID::Message *message = gFile->getMessageByIndex(it.second);
         if (message != nullptr)
@@ -5679,7 +5820,7 @@ void ServiceImplementation::processEvents()
           */
       }
 
-      mPrealoadList.pop_front();
+      mPreloadList.pop_front();
     }
 
 
@@ -5799,22 +5940,25 @@ void ServiceImplementation::processRequestCounters()
     {
       requestCounter.setCountingEnabled(false);
       requestCounter.resetTotalRequests();
-
-      requestCounter.updateTopRequestIndexes();
-      requestCounter.saveTopIndexes(mRequestCounterFilename.c_str());
+      requestCounter.updateTopCounters();
+      //requestCounter.saveTopCounters(mPreloadFile.c_str());
       requestCounter.multiplyCounters(0.9);
       requestCounter.setCountingEnabled(true);
     }
 
-    KeyCountList toprc = requestCounter.getTopRequestCounters();
+    T::ProducerInfoList producerInfoList;
+    mContentServer->getProducerInfoList(mServerSessionId,producerInfoList);
+
+    TopList toprc = requestCounter.getTopRequestCounters();
+    std::set<std::string> preloadList;
+    std::set<std::string> preloadList2;
 
     for (auto it = toprc.begin(); it != toprc.end(); ++it)
     {
       if (mShutdownRequested)
         return;
 
-      std::vector<uint> indexes = requestCounter.getTopRequestIndexes(it->second);
-      if (indexes.size() > 0)
+      if (it->first > 10)  // *** This limit should be defined in the configuration file
       {
         T::ContentInfoList contentInfoList;
 
@@ -5828,6 +5972,7 @@ void ServiceImplementation::processRequestCounters()
         }
 
         uint len = contentInfoList.getLength();
+
         for (uint t=0; t<len; t++)
         {
           if (mShutdownRequested)
@@ -5836,17 +5981,67 @@ void ServiceImplementation::processRequestCounters()
           T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
           if (info != nullptr)
           {
-            GRID::GridFile_sptr gridFile = getGridFile(info->mFileId);
-            if (gridFile != nullptr)
+            char tmp[100];
+            sprintf(tmp,"%u;%s;%u;%u;%u;%d;%d;1",info->mProducerId,info->mFmiParameterName.c_str(),info->mGeometryId,info->mFmiParameterLevelId,info->mParameterLevel,info->mForecastType,info->mForecastNumber);
+
+            if (preloadList.find(tmp) == preloadList.end())
             {
-              GRID::Message *message = gridFile->getMessageByIndex(info->mMessageIndex);
-              if (message != nullptr)
+              preloadList.insert(tmp);
+              auto producer = producerInfoList.getProducerInfoById(info->mProducerId);
+              if (producer != nullptr)
               {
-                message->refreshIndexes(indexes);
+                sprintf(tmp,"%s;%s;%u;1;%u;%05u;%d;%d;1",producer->mName.c_str(),info->mFmiParameterName.c_str(),info->mGeometryId,info->mFmiParameterLevelId,info->mParameterLevel,info->mForecastType,info->mForecastNumber);
+                preloadList2.insert(tmp);
               }
             }
           }
         }
+      }
+    }
+
+    if (preloadList2.size() > 0)
+    {
+      FILE *file = fopen(mGeneratedPreloadFile.c_str(),"w");
+      if (file != nullptr)
+      {
+        fprintf(file,"# This file is used for indicating which content should be preloaded.\n");
+        fprintf(file,"#\n");
+        fprintf(file,"# FIELDS\n");
+        fprintf(file,"#  1) Producer name\n");
+        fprintf(file,"#  2) Parameter name (Radon name)\n");
+        fprintf(file,"#  3) GeometryId\n");
+        fprintf(file,"#  4) Parameter level id type:\n");
+        fprintf(file,"#         1 = FMI\n");
+        fprintf(file,"#         2 = GRIB1\n");
+        fprintf(file,"#         3 = GRIB2\n");
+        fprintf(file,"#  5) Level id\n");
+        fprintf(file,"#         FMI level identifiers:\n");
+        fprintf(file,"#            1 Gound or water surface\n");
+        fprintf(file,"#            2 Pressure level\n");
+        fprintf(file,"#            3 Hybrid level\n");
+        fprintf(file,"#            4 Altitude\n");
+        fprintf(file,"#            5 Top of atmosphere\n");
+        fprintf(file,"#            6 Height above ground in meters\n");
+        fprintf(file,"#            7 Mean sea level\n");
+        fprintf(file,"#            8 Entire atmosphere\n");
+        fprintf(file,"#            9 Depth below land surface\n");
+        fprintf(file,"#            10 Depth below some surface\n");
+        fprintf(file,"#            11 Level at specified pressure difference from ground to level\n");
+        fprintf(file,"#            12 Max equivalent potential temperature level\n");
+        fprintf(file,"#            13 Layer between two metric heights above ground\n");
+        fprintf(file,"#            14 Layer between two depths below land surface\n");
+        fprintf(file,"#            15 Isothermal level, temperature in 1/100 K\n");
+        fprintf(file,"#  6) Level\n");
+        fprintf(file,"#  7) ForecastType\n");
+        fprintf(file,"#  8) ForecastNumber\n");
+        fprintf(file,"#  9) Preload requested (0 = No, 1 = Yes)\n");
+        fprintf(file,"#\n");
+
+        for (auto it = preloadList2.begin();it != preloadList2.end(); ++it)
+        {
+          fprintf(file,"%s\n",it->c_str());
+        }
+        fclose(file);
       }
     }
   }
@@ -5865,10 +6060,8 @@ void ServiceImplementation::requestCounterThread()
   FUNCTION_TRACE
   try
   {
-    if (!mRequestCounterEnabled)
+    if (!mPreloadFileGenerationEnabled)
       return;
-
-    requestCounter.loadTopIndexes(mRequestCounterFilename.c_str());
 
     sleep(5);
 
@@ -5889,11 +6082,14 @@ void ServiceImplementation::requestCounterThread()
         PRINT_DATA(mDebugLog,"%s",st.c_str());
       }
 
-      for (int t=0; t<300; t++)
+      for (int t=0; t<60; t++)
       {
         if (!mShutdownRequested)
           sleep(1);
       }
+
+      if (mPreloadFile_modificationTime != getFileModificationTime(mPreloadFile.c_str()))
+        loadPreloadList();
     }
 
     mRequestCountingActive = false;

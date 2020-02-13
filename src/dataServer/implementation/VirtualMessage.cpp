@@ -253,7 +253,7 @@ T::Coordinate_vec VirtualMessage::getGridCoordinates() const
   try
   {
     initMessagePtrs();
-    return mMessageList[0]->getGridCoordinates();
+    return mMessageList[0]->getGridOriginalCoordinates();
   }
   catch (...)
   {

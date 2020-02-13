@@ -31,6 +31,7 @@ class ServerInterface : public POA_SmartMet::DataServer::Corba::ServiceInterface
     ::CORBA::Long getGridData(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaGridData_out data);
     ::CORBA::Long getGridFileCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count);
     ::CORBA::Long getGridMessageBytes(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaByteData_out messageBytes, SmartMet::DataServer::Corba::CorbaULongList_out messageSections);
+    ::CORBA::Long getGridMessagePreloadCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count);
 
     ::CORBA::Long getGridValueByPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short areaInterpolationMethod, SmartMet::DataServer::Corba::CorbaParamValue& value);
     ::CORBA::Long getGridValueByLevelAndPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::Long level1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long level2, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short levelInterpolationMethod, SmartMet::DataServer::Corba::CorbaParamValue& value);

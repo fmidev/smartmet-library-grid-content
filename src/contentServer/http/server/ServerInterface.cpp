@@ -750,6 +750,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getContentParamKeyListByGenerationId") == 0)
+    {
+      getContentParamKeyListByGenerationId(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"getContentTimeListByGenerationId") == 0)
     {
       getContentTimeListByGenerationId(request,response);

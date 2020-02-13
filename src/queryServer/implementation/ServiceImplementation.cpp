@@ -2651,6 +2651,8 @@ bool ServiceImplementation::getSpecialValues(
     valueList.mProducerId = contentInfo1->mProducerId;
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGeometryId = contentInfo1->mGeometryId;
+    valueList.mFileId[0] = contentInfo1->mFileId;
+    valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
     valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mAnalysisTime = analysisTime;
     valueList.mForecastType = contentInfo1->mForecastType;
@@ -2756,6 +2758,8 @@ bool ServiceImplementation::getSpecialValues(
       // Fetching data from the grids.
 
       valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
+      valueList.mFileId[1] = contentInfo2->mFileId;
+      valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
       double_vec valueVector1;
       double_vec valueVector2;
@@ -2922,6 +2926,8 @@ bool ServiceImplementation::getValueVectors(
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
     valueList.mGeometryId = contentInfo1->mGeometryId;
+    valueList.mFileId[0] = contentInfo1->mFileId;
+    valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
     valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mAnalysisTime = analysisTime;
     valueList.mForecastType = contentInfo1->mForecastType;
@@ -3035,6 +3041,8 @@ bool ServiceImplementation::getValueVectors(
         // some time interpolation.
 
         valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
         if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
         {
@@ -3112,6 +3120,8 @@ bool ServiceImplementation::getValueVectors(
         // some level interpolation.
 
         valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
         if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
         {
@@ -3182,6 +3192,12 @@ bool ServiceImplementation::getValueVectors(
           &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden   &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
         valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+        valueList.mFileId[2] = contentInfo3->mFileId;
+        valueList.mMessageIndex[2] = contentInfo3->mMessageIndex;
+        valueList.mFileId[3] = contentInfo4->mFileId;
+        valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
         valueList.mParameterLevel = paramLevel;
 
         if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
@@ -4100,6 +4116,8 @@ bool ServiceImplementation::getPointValuesByHeight(
         valueList.mGenerationId = contentInfo1->mGenerationId;
         valueList.mGenerationFlags = generationFlags;
         valueList.mGeometryId = contentInfo1->mGeometryId;
+        valueList.mFileId[0] = contentInfo1->mFileId;
+        valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
         valueList.mModificationTime = contentInfo1->mModificationTime;
         valueList.mAnalysisTime = analysisTime;
         valueList.mForecastType = contentInfo1->mForecastType;
@@ -4171,6 +4189,8 @@ bool ServiceImplementation::getPointValuesByHeight(
             }
 
             valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+            valueList.mFileId[1] = contentInfo2->mFileId;
+            valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
             if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
             {
@@ -4207,6 +4227,12 @@ bool ServiceImplementation::getPointValuesByHeight(
               &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
           {
             valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+            valueList.mFileId[1] = contentInfo2->mFileId;
+            valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+            valueList.mFileId[2] = contentInfo3->mFileId;
+            valueList.mMessageIndex[2] = contentInfo3->mMessageIndex;
+            valueList.mFileId[3] = contentInfo4->mFileId;
+            valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
 
             if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
             {
@@ -4381,6 +4407,8 @@ bool ServiceImplementation::getPointValues(
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
     valueList.mGeometryId = contentInfo1->mGeometryId;
+    valueList.mFileId[0] = contentInfo1->mFileId;
+    valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
     valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mAnalysisTime = analysisTime;
     valueList.mForecastType = contentInfo1->mForecastType;
@@ -4453,6 +4481,7 @@ bool ServiceImplementation::getPointValues(
         }
 
         valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
         valueList.mParameterLevel = paramLevel;
 
         if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
@@ -4484,6 +4513,8 @@ bool ServiceImplementation::getPointValues(
         // Content records have different times, but most likely the same levels, so we need to do time interpolation.
 
         valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
         if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
         {
@@ -4517,6 +4548,12 @@ bool ServiceImplementation::getPointValues(
           &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
         valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+        valueList.mFileId[2] = contentInfo3->mFileId;
+        valueList.mMessageIndex[2] = contentInfo3->mMessageIndex;
+        valueList.mFileId[3] = contentInfo4->mFileId;
+        valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
         valueList.mParameterLevel = paramLevel;
 
         if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
@@ -4639,6 +4676,8 @@ bool ServiceImplementation::getCircleValues(
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
     valueList.mGeometryId = contentInfo1->mGeometryId;
+    valueList.mFileId[0] = contentInfo1->mFileId;
+    valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
     valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mAnalysisTime = analysisTime;
     valueList.mForecastType = contentInfo1->mForecastType;
@@ -4717,6 +4756,8 @@ bool ServiceImplementation::getCircleValues(
           valueList.mParameterLevelId = pInfo.mParameterLevelId;
 */
         valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
         if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
         {
@@ -4748,6 +4789,8 @@ bool ServiceImplementation::getCircleValues(
       {
         // Content records have the same time but different levels, so we need to level interpolation.
         valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
         valueList.mParameterLevel = paramLevel;
 
         if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
@@ -4782,6 +4825,12 @@ bool ServiceImplementation::getCircleValues(
           &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
         valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+        valueList.mFileId[2] = contentInfo3->mFileId;
+        valueList.mMessageIndex[2] = contentInfo3->mMessageIndex;
+        valueList.mFileId[3] = contentInfo4->mFileId;
+        valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
         valueList.mParameterLevel = paramLevel;
 
         if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
@@ -4905,6 +4954,8 @@ bool ServiceImplementation::getPolygonValues(
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
     valueList.mGeometryId = contentInfo1->mGeometryId;
+    valueList.mFileId[0] = contentInfo1->mFileId;
+    valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
     valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mAnalysisTime = analysisTime;
     valueList.mForecastType = contentInfo1->mForecastType;
@@ -4967,6 +5018,8 @@ bool ServiceImplementation::getPolygonValues(
         // Content records have different times, but most likely the same levels, so we need to do time interpolation.
 
         valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
         if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
         {
@@ -4998,6 +5051,8 @@ bool ServiceImplementation::getPolygonValues(
         // Content records have the same time but different levels, so we need to level interpolation.
 
         valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
         valueList.mParameterLevel = paramLevel;
 
         if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
@@ -5032,6 +5087,12 @@ bool ServiceImplementation::getPolygonValues(
           &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
         valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+        valueList.mFileId[2] = contentInfo3->mFileId;
+        valueList.mMessageIndex[2] = contentInfo3->mMessageIndex;
+        valueList.mFileId[3] = contentInfo4->mFileId;
+        valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
         valueList.mParameterLevel = paramLevel;
 
         if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
@@ -5159,6 +5220,8 @@ bool ServiceImplementation::getIsolineValues(
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
     valueList.mGeometryId = contentInfo1->mGeometryId;
+    valueList.mFileId[0] = contentInfo1->mFileId;
+    valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
     valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mAnalysisTime = analysisTime;
     valueList.mForecastType = contentInfo1->mForecastType;
@@ -5241,6 +5304,8 @@ bool ServiceImplementation::getIsolineValues(
         // some time interpolation.
 
         valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
         if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
         {
@@ -5286,6 +5351,8 @@ bool ServiceImplementation::getIsolineValues(
         // some level interpolation.
 
         valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
         if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
         {
@@ -5334,6 +5401,12 @@ bool ServiceImplementation::getIsolineValues(
           &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
         valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+        valueList.mFileId[2] = contentInfo3->mFileId;
+        valueList.mMessageIndex[2] = contentInfo3->mMessageIndex;
+        valueList.mFileId[3] = contentInfo4->mFileId;
+        valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
 
         if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
         {
@@ -5479,6 +5552,8 @@ bool ServiceImplementation::getIsobandValues(
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
     valueList.mGeometryId = contentInfo1->mGeometryId;
+    valueList.mFileId[0] = contentInfo1->mFileId;
+    valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
     valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mAnalysisTime = analysisTime;
     valueList.mForecastType = contentInfo1->mForecastType;
@@ -5560,6 +5635,8 @@ bool ServiceImplementation::getIsobandValues(
         // some time interpolation.
 
         valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
         if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
         {
@@ -5606,6 +5683,8 @@ bool ServiceImplementation::getIsobandValues(
         // some level interpolation.
 
         valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
         if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
         {
@@ -5654,6 +5733,12 @@ bool ServiceImplementation::getIsobandValues(
           &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
         valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+        valueList.mFileId[2] = contentInfo3->mFileId;
+        valueList.mMessageIndex[2] = contentInfo3->mMessageIndex;
+        valueList.mFileId[3] = contentInfo4->mFileId;
+        valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
 
         if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
         {

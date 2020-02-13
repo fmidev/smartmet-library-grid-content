@@ -24,6 +24,8 @@ class ParameterValues
     uint                    mGenerationId;
     uint                    mGenerationFlags;
     uint                    mGeometryId;
+    uint                    mFileId[4];
+    uint                    mMessageIndex[4];
     std::string             mAnalysisTime;
     std::string             mModificationTime;
 

@@ -531,6 +531,13 @@ void Converter::convert(QueryServer::Corba::CorbaParameterValues& source,QuerySe
     target.mGenerationId = source.generationId;
     target.mGenerationFlags = source.generationFlags;
     target.mGeometryId = source.geometryId;
+
+    for (uint t=0; t<4; t++)
+    {
+      target.mFileId[t] = source.fileId[t];
+      target.mMessageIndex[t] = source.messageIndex[t];
+    }
+
     target.mModificationTime = source.modificationTime;
     target.mAnalysisTime = source.analysisTime;
     target.mParameterKeyType = source.parameterKeyType;
@@ -565,6 +572,13 @@ void Converter::convert(QueryServer::ParameterValues& source,QueryServer::Corba:
     target.generationId = source.mGenerationId;
     target.generationFlags = source.mGenerationFlags;
     target.geometryId = source.mGeometryId;
+
+    for (uint t=0; t<4; t++)
+    {
+      target.fileId[t] = source.mFileId[t];
+      target.messageIndex[t] = source.mMessageIndex[t];
+    }
+
     target.modificationTime = CORBA::string_dup(source.mModificationTime.c_str());
     target.analysisTime = CORBA::string_dup(source.mAnalysisTime.c_str());
     target.parameterKeyType = (::CORBA::Octet)source.mParameterKeyType;

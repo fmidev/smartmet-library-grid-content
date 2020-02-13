@@ -23,6 +23,12 @@ ParameterValues::ParameterValues()
     mForecastType = -1;
     mForecastNumber = -1;
     mFlags = 0;
+
+    for (uint t=0;t<4; t++)
+    {
+      mFileId[t] = 0;
+      mMessageIndex[t] = 0;
+    }
   }
   catch (...)
   {
@@ -57,6 +63,12 @@ ParameterValues::ParameterValues(const ParameterValues& parameterValues)
     mValueList = parameterValues.mValueList;
     mValueVector = parameterValues.mValueVector;
     mValueData = parameterValues.mValueData;
+
+    for (uint t=0;t<4; t++)
+    {
+      mFileId[t] = parameterValues.mFileId[t];
+      mMessageIndex[t] = parameterValues.mMessageIndex[t];
+    }
   }
   catch (...)
   {
@@ -93,6 +105,16 @@ void ParameterValues::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mGenerationId         = " << mGenerationId << "\n";
     stream << space(level) << "- mGenerationFlags      = " << mGenerationFlags << "\n";
     stream << space(level) << "- mGeometryId           = " << mGeometryId << "\n";
+
+    for (uint t=0;t<4; t++)
+    {
+      if (mFileId[t] > 0)
+      {
+        stream << space(level) << "- mFileId               = " << mFileId[t] << "\n";
+        stream << space(level) << "- mMessageIndex         = " << mMessageIndex[t] << "\n";
+      }
+    }
+
     stream << space(level) << "- mModificationTime     = " << mModificationTime << "\n";
     stream << space(level) << "- mAnalysisTime         = " << mAnalysisTime << "\n";
     stream << space(level) << "- mParameterKeyType     = " << C_INT(mParameterKeyType) << "\n";
