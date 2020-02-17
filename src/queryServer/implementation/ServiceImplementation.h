@@ -522,6 +522,7 @@ class ServiceImplementation : public ServiceInterface
      T::GenerationInfoList  mGenerationInfoList;
      time_t                 mGenerationInfoListUpdateTime;
      Producer_map           mProducerMap;
+     time_t                 mProducerMap_updateTime;
      AliasFile              mProducerAliasFile;
      ThreadLock             mThreadLock;
      ContentServer_ptr      mContentServerPtr;

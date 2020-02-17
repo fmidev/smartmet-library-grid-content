@@ -33,6 +33,7 @@ ServiceImplementation::ServiceImplementation()
     mCheckInterval = 5;
     mGenerationInfoListUpdateTime = 0;
     mContentCacheKeyIdx = 0;
+    mProducerMap_updateTime = 0;
   }
   catch (...)
   {
@@ -159,10 +160,28 @@ bool ServiceImplementation::getProducerInfoByName(std::string& name,T::ProducerI
       return true;
     }
 
-    if (mContentServerPtr->getProducerInfoByName(0, name, info) == 0)
+    if ((time(0) - mProducerMap_updateTime) > 120)
     {
-      mProducerMap.insert(std::pair<std::string,T::ProducerInfo>(name,info));
-      return true;
+      T::ProducerInfoList producerInfoList;
+      if (mContentServerPtr->getProducerInfoList(0,producerInfoList) == 0)
+      {
+        mProducerMap.clear();
+        uint len = producerInfoList.getLength();
+        for (uint t=0; t<len; t++)
+        {
+          T::ProducerInfo *pinfo = producerInfoList.getProducerInfoByIndex(t);
+          if (pinfo != nullptr)
+            mProducerMap.insert(std::pair<std::string,T::ProducerInfo>(pinfo->mName,T::ProducerInfo(*pinfo)));
+        }
+        mProducerMap_updateTime = time(0);
+      }
+
+      auto it = mProducerMap.find(name);
+      if (it != mProducerMap.end())
+      {
+        info = it->second;
+        return true;
+      }
     }
     return false;
   }
