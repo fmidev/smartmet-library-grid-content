@@ -1644,6 +1644,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
     std::string analysisTime = query.mAnalysisTime;
     std::set<uint> alternativeRequired;
     uint queryFlags = query.mFlags;
+    int globalGeometryId = 0;
 
     if (producers.size() == 0)
       return Result::NO_PRODUCERS_FOUND;
@@ -1798,6 +1799,9 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
             if (geometryId > 0)
               geomIdList.insert(geometryId);
             else
+            if (globalGeometryId > 0  &&  producerName.empty())
+              geomIdList.insert(globalGeometryId);
+            else
               geomIdList = geometryIdList;
 
             if (qParam->mType != QueryParameter::Type::PointValues &&  geomIdList.size() == 0)
@@ -1819,6 +1823,11 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
               {
                 parameterProducers.insert(std::pair<std::string, uint>(paramName + ":" + producerName, qParam->mValueList[0].mProducerId));
               }
+
+              // If there are no geometry defined, then we should not change the first geometry we'll get
+
+              if (geometryId <= 0  &&  qParam->mValueList[0].mGeometryId > 0)
+                globalGeometryId = qParam->mValueList[0].mGeometryId;
 
 
               if ((query.mFlags & Query::Flags::SameAnalysisTime) != 0  &&  analysisTime != qParam->mValueList[0].mAnalysisTime)
@@ -1965,6 +1974,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
     T::Coordinate_vec coordinates;
     std::string analysisTime = query.mAnalysisTime;
     uint queryFlags = query.mFlags;
+    int globalGeometryId = 0;
     std::set<uint> alternativeRequired;
 
     if (producers.size() == 0)
@@ -2149,6 +2159,9 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
               if (geometryId > 0)
                 geomIdList.insert(geometryId);
               else
+              if (globalGeometryId > 0  &&  producerName.empty())
+                geomIdList.insert(globalGeometryId);
+              else
                 geomIdList = geometryIdList;
 
               if (qParam->mType != QueryParameter::Type::PointValues &&  geomIdList.size() == 0)
@@ -2180,6 +2193,11 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
                 if (producerId == 0)
                   producerId = valueList.mProducerId;
+
+                // If there are no geometry defined, then we should not change the first geometry we'll get
+
+                if (geometryId <= 0  &&  valueList.mGeometryId > 0)
+                  globalGeometryId = valueList.mGeometryId;
 
                 if ((query.mFlags & Query::Flags::SameAnalysisTime) != 0  &&  analysisTime != valueList.mAnalysisTime)
                 {
