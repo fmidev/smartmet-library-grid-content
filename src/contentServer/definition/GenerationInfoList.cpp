@@ -855,6 +855,56 @@ void GenerationInfoList::getGenerationInfoListByProducerId(uint producerId,Gener
 
 
 
+void GenerationInfoList::getGenerationInfoListByProducerIdAndStatus(uint producerId,GenerationInfoList& generationInfoList,uchar generationStatus)
+{
+  FUNCTION_TRACE
+  try
+  {
+    generationInfoList.clear();
+
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+
+    int len =  getLength();
+    int idx = 0;
+
+    if (mComparisonMethod == GenerationInfo::ComparisonMethod::producerId)
+    {
+      GenerationInfo search;
+      search.mProducerId = producerId;
+
+      idx = getClosestIndexNoLock(GenerationInfo::ComparisonMethod::producerId,search);
+      if (idx < 0  || idx >= len)
+        return;
+
+    }
+
+    for (int t=idx; t<len; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr  &&  info->mProducerId == producerId  &&  info->mStatus == generationStatus)
+      {
+        generationInfoList.addGenerationInfo(info->duplicate());
+      }
+      else
+      {
+        if (mComparisonMethod == GenerationInfo::ComparisonMethod::producerId  &&  info->mProducerId > producerId)
+          return;
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 void GenerationInfoList::getGenerationInfoListByAnalysisTime(std::string analysisTime,GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE

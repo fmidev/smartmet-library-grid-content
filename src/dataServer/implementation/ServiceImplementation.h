@@ -42,7 +42,7 @@ class ServiceImplementation : public ServiceInterface
      virtual void   addVirtualContentFactory(VirtualContentFactory *factory);
      virtual void   setVirtualContentEnabled(bool enabled);
      virtual void   setPointCacheEnabled(bool enabled,uint hitsRequired,uint timePeriod);
-     virtual void   setPreload(bool preloadEnabled,std::string preloadFile,bool preloadFileGenerationEnabled,std::string generatedPreloadFile);
+     virtual void   setPreload(bool preloadEnabled,std::string preloadFile,std::string counterFile,bool preloadFileGenerationEnabled,std::string generatedPreloadFile,std::string generatedCounterFile);
 
      virtual void   eventProcessingThread();
      virtual void   requestCounterThread();
@@ -196,6 +196,9 @@ class ServiceImplementation : public ServiceInterface
      GridFileManager      mGridFileManager;
      std::string          mGeneratedPreloadFile;
      std::string          mPreloadFile;
+     std::string          mCounterFile;
+     time_t               mCounterFile_modificationTime;
+     std::string          mGeneratedCounterFile;
      time_t               mPreloadFile_modificationTime;
      PreloadList          mPreloadList;
      PreloadDefList       mPreloadDefList;

@@ -209,7 +209,7 @@ void ServiceImplementation::getGenerationInfoListByProducerId(uint producerId,T:
       }
     }
 
-    mGenerationInfoList.getGenerationInfoListByProducerId(producerId,generationInfoList);
+    mGenerationInfoList.getGenerationInfoListByProducerIdAndStatus(producerId,generationInfoList,T::GenerationInfo::Status::Ready);
   }
   catch (...)
   {

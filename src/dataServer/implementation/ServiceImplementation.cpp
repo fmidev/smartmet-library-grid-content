@@ -93,6 +93,7 @@ ServiceImplementation::ServiceImplementation()
     mPointCacheHitsRequired = 20;
     mPointCacheTimePeriod = 1200;
 
+    mCounterFile_modificationTime = 0;
     mPreloadFileGenerationEnabled = false;
     mPreloadFile_modificationTime = 0;
   }
@@ -182,7 +183,7 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,std:
 
 
 
-void ServiceImplementation::setPreload(bool preloadEnabled,std::string preloadFile,bool preloadFileGenerationEnabled,std::string generatedPreloadFile)
+void ServiceImplementation::setPreload(bool preloadEnabled,std::string preloadFile,std::string counterFile,bool preloadFileGenerationEnabled,std::string generatedPreloadFile,std::string generatedCounterFile)
 {
   FUNCTION_TRACE
   try
@@ -190,12 +191,18 @@ void ServiceImplementation::setPreload(bool preloadEnabled,std::string preloadFi
     mContentPreloadEnabled = preloadEnabled;
     mPreloadFileGenerationEnabled = preloadFileGenerationEnabled;
     mPreloadFile = preloadFile;
+    mCounterFile = counterFile;
     mGeneratedPreloadFile = generatedPreloadFile;
+    mGeneratedCounterFile = generatedCounterFile;
 
     requestCounter.setCountingEnabled(mPreloadFileGenerationEnabled);
 
     if (mContentPreloadEnabled)
+    {
+      mCounterFile_modificationTime = getFileModificationTime(mCounterFile.c_str());
+      requestCounter.loadGeometryHitCounters(mCounterFile.c_str());
       loadPreloadList();
+    }
   }
   catch (...)
   {
@@ -5804,20 +5811,21 @@ void ServiceImplementation::processEvents()
         {
           PRINT_DATA(mDebugLog,"** PRELOAD (%lu) : %s:%u:%s:%u:%u:%d:%d\n",mPreloadList.size(),message->getForecastTime().c_str(),message->getProducerId(),message->getFmiParameterName().c_str(),message->getFmiParameterLevelId(),message->getGridParameterLevel(),message->getForecastType(),message->getForecastNumber());
           message->lockData();
-        }
-          //message->getGridValueByGridPoint(0,0);
 
-/*
-      if (gFile)
-      {
-        if (!gFile->isMemoryMapped())
-          gFile->mapToMemory();
-*/
-        /*
-        GRID::Message *message = gFile->getMessageByIndex(it.second);
-        if (message != nullptr)
-          message->getGridValueByGridPoint(0,0);
-          */
+          T::Dimensions d = message->getGridDimensions();
+          int geometryId = message->getGridGeometryId();
+
+          HitCounter hitCounter = requestCounter.getGeometryHitCounters(geometryId);
+
+          // printf("---- hit counter %lu\n",hitCounter.size());
+
+          for (auto hh = hitCounter.begin(); hh != hitCounter.end(); ++hh)
+          {
+            uint x = hh->first  % d.nx();
+            uint y = hh->first / d.nx();
+            message->getGridValueByGridPoint(x,y);
+          }
+        }
       }
 
       mPreloadList.pop_front();
@@ -5938,6 +5946,7 @@ void ServiceImplementation::processRequestCounters()
   {
     if (requestCounter.getTotalRequests() > 1000000)
     {
+      requestCounter.saveGeometryHitCounters(mGeneratedCounterFile.c_str());
       requestCounter.setCountingEnabled(false);
       requestCounter.resetTotalRequests();
       requestCounter.updateTopCounters();
@@ -6044,6 +6053,7 @@ void ServiceImplementation::processRequestCounters()
         fclose(file);
       }
     }
+
   }
   catch (...)
   {
@@ -6090,6 +6100,14 @@ void ServiceImplementation::requestCounterThread()
 
       if (mPreloadFile_modificationTime != getFileModificationTime(mPreloadFile.c_str()))
         loadPreloadList();
+
+      time_t tt = getFileModificationTime(mCounterFile.c_str());
+
+      if (tt != mCounterFile_modificationTime)
+      {
+        mCounterFile_modificationTime = tt;
+        requestCounter.loadGeometryHitCounters(mCounterFile.c_str());
+      }
     }
 
     mRequestCountingActive = false;
