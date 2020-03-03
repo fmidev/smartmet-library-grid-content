@@ -4354,6 +4354,8 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if ((fileInfo.mFlags & T::FileInfo::Flags::VirtualContent) != 0)
       return;
 
@@ -5396,6 +5398,21 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
           sprintf(tmp,"%u;%s;%u;1;%u;%05u;%d;%d;1",contentInfo.mProducerId,contentInfo.mFmiParameterName.c_str(),contentInfo.mGenerationId,contentInfo.mFmiParameterLevelId,contentInfo.mParameterLevel,contentInfo.mForecastType,contentInfo.mForecastNumber);
           if (mPreloadDefList.find(toLowerString(std::string(tmp))) != mPreloadDefList.end())
             mPreloadList.push_back(std::pair<uint,uint>(contentInfo.mFileId,contentInfo.mMessageIndex));
+        }
+
+        if (mVirtualContentEnabled)
+        {
+          T::ProducerInfo producerInfo;
+          T::GenerationInfo generationInfo;
+          T::FileInfo fileInfo;
+          T::ContentInfoList contentList;
+          contentList.addContentInfo(contentInfo.duplicate());
+
+          mContentServer->getProducerInfoById(mServerSessionId,contentInfo.mProducerId,producerInfo);
+          mContentServer->getGenerationInfoById(mServerSessionId,contentInfo.mGenerationId,generationInfo);
+          mContentServer->getFileInfoById(mServerSessionId,contentInfo.mFileId,fileInfo);
+
+          mVirtualContentManager.addFile(producerInfo,generationInfo,fileInfo,contentList,mGridFileMap);
         }
       }
       catch (...)

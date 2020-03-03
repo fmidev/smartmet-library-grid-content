@@ -534,6 +534,7 @@ class ServiceImplementation : public ServiceInterface
 
      T::ContentInfoList     mCacheContentInfoList[200];
      std::string            mContentCacheKey[200];
+     time_t                 mContentCacheTime[200];
      uint                   mContentCacheKeyIdx;
 
 

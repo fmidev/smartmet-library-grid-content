@@ -186,6 +186,7 @@ GenerationInfoList& GenerationInfoList::operator=(GenerationInfoList& generation
   }
   catch (...)
   {
+    generationInfoList.unlock();
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }

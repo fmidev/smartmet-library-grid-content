@@ -790,7 +790,7 @@ void ServiceImplementation::getParameterMappings(std::string producerName,std::s
 
     mParameterMappingCache.push_front(std::pair<std::string, ParameterMapping_vec>(key, mappings));
     // printf("Cache add %s %d\n",key.c_str(),mParameterMappingCache.size());
-    if (mParameterMappingCache.size() > 20)
+    if (mParameterMappingCache.size() > 100)
       mParameterMappingCache.pop_back();
   }
   catch (...)
@@ -840,7 +840,7 @@ void ServiceImplementation::getParameterMappings(
     mParameterMappingCache.push_front(std::pair<std::string, ParameterMapping_vec>(key, mappings));
     // printf("Cache add %s %d\n",key.c_str(),mParameterMappingCache.size());
 
-    if (mParameterMappingCache.size() > 20)
+    if (mParameterMappingCache.size() > 100)
       mParameterMappingCache.pop_back();
   }
   catch (...)
@@ -2551,7 +2551,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
         idx = (int)i;
     }
 
-    if (idx < 0 || mCacheContentInfoList[idx].getLength() == 0)
+    if (idx < 0 || (mContentCacheTime[idx] + 60) < time(nullptr))
     {
       if (idx < 0)
       {
@@ -2564,6 +2564,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       std::string endTime = "23000101T000000";
 
       mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,mCacheContentInfoList[idx]);
+      mContentCacheTime[idx] = time(nullptr);
     }
 
 
@@ -3426,8 +3427,8 @@ bool ServiceImplementation::getGridFiles(
 
       using namespace SmartMet::GRIB1;
 
-      newGridFile.setGridFile(T::FileTypeValue::Grib1);
-      newMessage = newGridFile.newMessage();
+      //newGridFile.setGridFile(T::FileTypeValue::Grib1);
+      newMessage = newGridFile.newMessage(T::FileTypeValue::Grib1);
 
       // ### Setting default values for the parameters
 
@@ -3552,8 +3553,8 @@ bool ServiceImplementation::getGridFiles(
 
       using namespace SmartMet::GRIB2;
 
-      newGridFile.setGridFile(T::FileTypeValue::Grib2);
-      newMessage = newGridFile.newMessage();
+      //newGridFile.setGridFile(T::FileTypeValue::Grib2);
+      newMessage = newGridFile.newMessage(T::FileTypeValue::Grib2);
 
       // ### Setting default values for the parameters
 

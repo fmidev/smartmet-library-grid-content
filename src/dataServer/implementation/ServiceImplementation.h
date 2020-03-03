@@ -204,6 +204,7 @@ class ServiceImplementation : public ServiceInterface
      PreloadDefList       mPreloadDefList;
      time_t               mLastCacheCheck;
      std::vector<uint>    mFileAdditionList;
+     ThreadLock           mThreadLock;
 
      VirtualContentManager            mVirtualContentManager;
      ContentServer::ServiceInterface* mContentServer;

@@ -2082,17 +2082,17 @@ void VirtualMessage::executeFunctionCall2(std::vector<float>& inOutParameters) c
 
     // Trying to find C++ implementation of the function
 
-    std::cout << "FUNCTION : " << functionName << "\n";
+    //std::cout << "FUNCTION : " << functionName << "\n";
     auto function = mFunctionCollection->getFunction(functionName);
     if (function != nullptr)
     {
-      std::cout << "C++ call\n";
+      //std::cout << "C++ call\n";
       return function->executeFunctionCall2(columns,rows,inOutParameters);
     }
 
     // Calling the LUA implementation of the function
 
-    std::cout << "LUA call\n";
+    //std::cout << "LUA call\n";
     return mLuaFileCollection->executeFunctionCall2(functionName,columns,rows,inOutParameters);
   }
   catch (...)
