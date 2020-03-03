@@ -99,6 +99,22 @@ void  ServiceInterface::setDem(boost::shared_ptr<Fmi::DEM> dem)
 
 
 
+void ServiceInterface::setLandCover(boost::shared_ptr<Fmi::LandCover> landCover)
+{
+  FUNCTION_TRACE
+  try
+  {
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 void ServiceInterface::shutdown()
 {
   FUNCTION_TRACE

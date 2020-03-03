@@ -8,6 +8,7 @@
 #include "../../lua/LuaFileCollection.h"
 
 
+
 namespace SmartMet
 {
 namespace QueryServer
@@ -41,6 +42,7 @@ class ServiceImplementation : public ServiceInterface
      virtual void   shutdown();
 
      virtual void   setDem(boost::shared_ptr<Fmi::DEM> dem);
+     virtual void   setLandCover(boost::shared_ptr<Fmi::LandCover> landCover);
 
 
   protected:
@@ -537,8 +539,8 @@ class ServiceImplementation : public ServiceInterface
      time_t                 mContentCacheTime[200];
      uint                   mContentCacheKeyIdx;
 
-
-     boost::shared_ptr<Fmi::DEM> mDem;
+     boost::shared_ptr<Fmi::LandCover> mLandCover;
+     boost::shared_ptr<Fmi::DEM>       mDem;
 };
 
 

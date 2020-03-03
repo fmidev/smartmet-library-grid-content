@@ -11,6 +11,7 @@
 #include <grid-files/common/Log.h>
 #include <grid-files/common/AttributeList.h>
 #include <gis/DEM.h>
+#include <gis/LandCover.h>
 
 
 namespace SmartMet
@@ -28,6 +29,7 @@ class ServiceInterface
      virtual void   setProcessingLog(Log *processingLog);
      virtual void   shutdown();
      virtual void   setDem(boost::shared_ptr<Fmi::DEM> dem);
+     virtual void   setLandCover(boost::shared_ptr<Fmi::LandCover> landCover);
 
      virtual int    executeQuery(T::SessionId sessionId,Query& query);
      virtual int    getProducerList(T::SessionId sessionId,string_vec& producerList);

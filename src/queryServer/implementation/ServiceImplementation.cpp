@@ -114,6 +114,23 @@ void ServiceImplementation::init(
 
 
 
+void ServiceImplementation::setLandCover(boost::shared_ptr<Fmi::LandCover> landCover)
+{
+  try
+  {
+    mLandCover = landCover;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP, "Operation failed!", nullptr);
+    throw exception;
+  }
+}
+
+
+
+
+
 void ServiceImplementation::setDem(boost::shared_ptr<Fmi::DEM> dem)
 {
   try
@@ -6212,15 +6229,6 @@ void ServiceImplementation::getGridValues(
                             bool a_timeMatchRequired = timeMatchRequired;
                             uchar a_locationType = locationType;
                             double a_radius = radius;
-                            double a_dem = ParamValueMissing;
-                            const char *demStr = queryAttributeList.getAttributeValue("dem");
-                            if (demStr != nullptr)
-                              a_dem = toDouble(demStr);
-
-                            ushort a_coverType = 0;
-                            const char *coverTypeStr = queryAttributeList.getAttributeValue("coverType");
-                            if (coverTypeStr != nullptr)
-                              a_coverType = toUInt16(coverTypeStr);
 
                             // std::cout << "* PARAM " << *param << "\n";
                             std::vector < std::string > paramParts;
@@ -6234,10 +6242,14 @@ void ServiceImplementation::getGridValues(
                               }
                               else if (paramParts[0] == "V")
                               {
-                                if (paramParts[1] == "dem")
-                                  constParams.push_back(C_DOUBLE(a_dem));
-                                else if (paramParts[1] == "coverType")
-                                  constParams.push_back(C_DOUBLE(a_coverType));
+                                double vv = ParamValueMissing;
+                                const char *ss = queryAttributeList.getAttributeValue(paramParts[1].c_str());
+                                if (ss != nullptr)
+                                  vv = toDouble(ss);
+                                else
+                                  vv = getAdditionalValue(paramParts[1],forecastTime,areaCoordinates[0][0].x(),areaCoordinates[0][0].y());
+
+                                constParams.push_back(vv);
                               }
                               if (paramParts[0] == "C")
                               {
@@ -6854,6 +6866,17 @@ void ServiceImplementation::getAdditionalValues(
           val.mValue = mDem->elevation(val.mX, val.mY);
           values.mValueList.addGridValue(val);
         }
+        return;
+      }
+      else
+      if (param == "covertype")
+      {
+        if (mLandCover)
+        {
+          val.mValue = mLandCover->coverType(val.mX, val.mY);
+          values.mValueList.addGridValue(val);
+        }
+        return;
       }
       else
       if (param == "dark")
@@ -7038,9 +7061,17 @@ T::ParamValue ServiceImplementation::getAdditionalValue(
     if (param == "dem")
     {
       if (mDem)
-      {
         return mDem->elevation(x,y);
-      }
+
+      return ParamValueMissing;
+    }
+    else
+    if (param == "covertype")
+    {
+      if (mLandCover)
+        return mLandCover->coverType(x,y);
+
+      return ParamValueMissing;
     }
     else
     if (param == "dark")
