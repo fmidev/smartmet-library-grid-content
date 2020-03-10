@@ -96,6 +96,7 @@ ServiceImplementation::ServiceImplementation()
     mCounterFile_modificationTime = 0;
     mPreloadFileGenerationEnabled = false;
     mPreloadFile_modificationTime = 0;
+    mPreloadMemoryLock = false;
   }
   catch (...)
   {
@@ -183,12 +184,13 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,std:
 
 
 
-void ServiceImplementation::setPreload(bool preloadEnabled,std::string preloadFile,std::string counterFile,bool preloadFileGenerationEnabled,std::string generatedPreloadFile,std::string generatedCounterFile)
+void ServiceImplementation::setPreload(bool preloadEnabled,bool preloadMemoryLock,std::string preloadFile,std::string counterFile,bool preloadFileGenerationEnabled,std::string generatedPreloadFile,std::string generatedCounterFile)
 {
   FUNCTION_TRACE
   try
   {
     mContentPreloadEnabled = preloadEnabled;
+    mPreloadMemoryLock = preloadMemoryLock;
     mPreloadFileGenerationEnabled = preloadFileGenerationEnabled;
     mPreloadFile = preloadFile;
     mCounterFile = counterFile;
@@ -5827,7 +5829,9 @@ void ServiceImplementation::processEvents()
         if (message != nullptr)
         {
           PRINT_DATA(mDebugLog,"** PRELOAD (%lu) : %s:%u:%s:%u:%u:%d:%d\n",mPreloadList.size(),message->getForecastTime().c_str(),message->getProducerId(),message->getFmiParameterName().c_str(),message->getFmiParameterLevelId(),message->getGridParameterLevel(),message->getForecastType(),message->getForecastNumber());
-          message->lockData();
+
+          if (mPreloadMemoryLock)
+            message->lockData();
 
           T::Dimensions d = message->getGridDimensions();
           int geometryId = message->getGridGeometryId();
