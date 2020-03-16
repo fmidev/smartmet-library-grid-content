@@ -4853,7 +4853,8 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
 
     if (len > 0)
     {
-      char buf[len+10];
+      char *buf = new char[len+10];
+
       strcpy(buf,eventInfo.mNote.c_str());
       char *s = buf;
 
@@ -4923,6 +4924,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
           s = nullptr;
         }
       }
+      delete [] buf;
     }
     else
     {
