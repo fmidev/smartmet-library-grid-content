@@ -4881,7 +4881,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
 
     if (len > 0)
     {
-      char buf[len+10];
+      char *buf = new char[len+10];
       strcpy(buf,eventInfo.mNote.c_str());
       char *s = buf;
 
@@ -4908,6 +4908,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
           s = nullptr;
         }
       }
+      delete buf;
     }
     else
     {
