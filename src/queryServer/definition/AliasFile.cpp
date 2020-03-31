@@ -43,6 +43,24 @@ AliasFile::AliasFile(const std::string& filename)
 
 
 
+AliasFile::AliasFile(const std::string& filename,bool duplicatesAllowed)
+{
+  try
+  {
+    mFilename = filename;
+    mDuplicatesAllowed = duplicatesAllowed;
+    mLastModified = 0;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 AliasFile::AliasFile(const AliasFile& aliasFile)
 {
   try
@@ -57,7 +75,6 @@ AliasFile::AliasFile(const AliasFile& aliasFile)
     throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
-
 
 
 

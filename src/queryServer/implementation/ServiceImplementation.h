@@ -36,7 +36,7 @@ class ServiceImplementation : public ServiceInterface
                        string_vec& parameterMappingFiles,
                        string_vec& aliasFiles,
                        std::string producerFile,
-                       std::string prdoucerAliasFile,
+                       string_vec& producerAliasFiles,
                        string_vec& luaFileNames);
 
      virtual void   shutdown();
@@ -525,7 +525,7 @@ class ServiceImplementation : public ServiceInterface
      time_t                 mGenerationInfoListUpdateTime;
      Producer_map           mProducerMap;
      time_t                 mProducerMap_updateTime;
-     AliasFile              mProducerAliasFile;
+     AliasFileCollection    mProducerAliasFileCollection;
      ThreadLock             mThreadLock;
      ContentServer_ptr      mContentServerPtr;
      DataServer_ptr         mDataServerPtr;

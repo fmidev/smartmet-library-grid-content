@@ -69,7 +69,7 @@ void ServiceImplementation::init(
     string_vec& parameterMappingFiles,
     string_vec& aliasFiles,
     std::string producerFile,
-    std::string producerAliasFile,
+    string_vec& producerAliasFiles,
     string_vec& luaFiles)
 {
   FUNCTION_TRACE
@@ -84,7 +84,7 @@ void ServiceImplementation::init(
     mProducerFile = producerFile;
     loadProducerFile();
 
-    mProducerAliasFile.init(producerAliasFile, true);
+    mProducerAliasFileCollection.init(producerAliasFiles, true);
 
     mAliasFileCollection.init(aliasFiles);
     mLuaFileCollection.init(luaFiles);
@@ -170,6 +170,8 @@ bool ServiceImplementation::getProducerInfoByName(std::string& name,T::ProducerI
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     auto it = mProducerMap.find(name);
     if (it != mProducerMap.end())
     {
@@ -217,6 +219,7 @@ void ServiceImplementation::getGenerationInfoListByProducerId(uint producerId,T:
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
     if ((time(0) - mGenerationInfoListUpdateTime) > 120)
     {
       if (mContentServerPtr->getGenerationInfoList(0,mGenerationInfoList) == 0)
@@ -1058,6 +1061,7 @@ bool ServiceImplementation::getAlias(std::string name, std::string& alias)
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
     return mAliasFileCollection.getAlias(name, alias);
   }
   catch (...)
@@ -1238,7 +1242,7 @@ void ServiceImplementation::checkConfigurationUpdates()
 
     mAliasFileCollection.checkUpdates(false);
     mLuaFileCollection.checkUpdates(false);
-    mProducerAliasFile.checkUpdates();
+    mProducerAliasFileCollection.checkUpdates(false);
   }
   catch (...)
   {
@@ -1255,6 +1259,8 @@ void ServiceImplementation::getProducers(Query& query, Producer_vec& producers)
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (query.mProducerNameList.size() == 0)
     {
       producers = mProducerList;
@@ -1272,7 +1278,7 @@ void ServiceImplementation::getProducers(Query& query, Producer_vec& producers)
         else
         {
           std::string alias;
-          if (mProducerAliasFile.getAlias(*pName, alias))
+          if (mProducerAliasFileCollection.getAlias(*pName, alias))
           {
             if (strcasecmp(alias.c_str(), it->first.c_str()) == 0)
             {
@@ -1298,6 +1304,7 @@ void ServiceImplementation::getProducers(std::string producerName, Producer_vec&
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
     for (auto it = mProducerList.begin(); it != mProducerList.end(); ++it)
     {
       if (strcasecmp(producerName.c_str(), it->first.c_str()) == 0)

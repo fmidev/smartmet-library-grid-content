@@ -16,6 +16,7 @@ class AliasFile
   public:
                   AliasFile();
                   AliasFile(const std::string& filename);
+                  AliasFile(const std::string& filename,bool duplicatesAllowed);
                   AliasFile(const AliasFile& aliasFile);
     virtual       ~AliasFile();
 

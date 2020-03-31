@@ -14,6 +14,7 @@ AliasFileCollection::AliasFileCollection()
   {
     mLastCheck = 0;
     mCheckInterval = 10;
+    mDuplicatesAllowed = false;
   }
   catch (...)
   {
@@ -30,6 +31,7 @@ AliasFileCollection::AliasFileCollection(string_vec& filenames)
   try
   {
     mFilenames = filenames;
+    mDuplicatesAllowed = false;
   }
   catch (...)
   {
@@ -47,6 +49,7 @@ AliasFileCollection::AliasFileCollection(const AliasFileCollection& aliasFileCol
   {
     mFilenames = aliasFileCollection.mFilenames;
     mAliasFileList = aliasFileCollection.mAliasFileList;
+    mDuplicatesAllowed = aliasFileCollection.mDuplicatesAllowed;
   }
   catch (...)
   {
@@ -85,7 +88,7 @@ void AliasFileCollection::init()
 
     for (auto it = mFilenames.begin(); it != mFilenames.end(); ++it)
     {
-      mAliasFileList.push_back(AliasFile(*it));
+      mAliasFileList.push_back(AliasFile(*it,mDuplicatesAllowed));
     }
 
     for (auto it = mAliasFileList.begin(); it != mAliasFileList.end(); ++it)
@@ -108,6 +111,24 @@ void AliasFileCollection::init(string_vec& filenames)
   try
   {
     mFilenames = filenames;
+    init();
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+void AliasFileCollection::init(string_vec& filenames,bool duplicatesAllowed)
+{
+  try
+  {
+    mFilenames = filenames;
+    mDuplicatesAllowed = duplicatesAllowed;
     init();
   }
   catch (...)
@@ -161,6 +182,27 @@ bool AliasFileCollection::getAlias(const std::string& name,std::string& alias)
         return true;
     }
     return false;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+void AliasFileCollection::getAliasList(const std::string& name,std::vector<std::string>& aliasList)
+{
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    for (auto it = mAliasFileList.begin(); it != mAliasFileList.end(); ++it)
+    {
+      it->getAliasList(name,aliasList);
+    }
   }
   catch (...)
   {
