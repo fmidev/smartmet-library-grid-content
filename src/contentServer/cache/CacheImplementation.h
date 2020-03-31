@@ -28,6 +28,7 @@ class CacheImplementation : public ServiceInterface
     virtual void    init(T::SessionId sessionId,ServiceInterface *contentStorage,uint contentSortingFlags);
     virtual void    startEventProcessing();
     virtual void    setEventListMaxLength(uint maxLength);
+    virtual void    setRequestForwardEnabled(bool enabled);
     virtual void    shutdown();
     virtual void    synchronize();
 
@@ -218,6 +219,7 @@ class CacheImplementation : public ServiceInterface
     bool                   mReloadActivated;
     bool                   mShutdownRequested;
     bool                   mUpdateInProgress;
+    bool                   mRequestForwardEnabled;
     T::SessionId           mSessionId;
     T::EventId             mLastProcessedEventId;
     T::FileInfoList        mFileInfoList;

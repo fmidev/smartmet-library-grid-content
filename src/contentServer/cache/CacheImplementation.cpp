@@ -53,6 +53,7 @@ CacheImplementation::CacheImplementation()
     mSessionId = 0;
     mShutdownRequested = false;
     mUpdateInProgress = false;
+    mRequestForwardEnabled = false;
     mLastProcessedEventId = 0;
     mDataServerCount = 0xFFFFFFFF;
     mProducerCount = 0xFFFFFFFF;
@@ -197,6 +198,23 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
   catch (...)
   {
     mUpdateInProgress = false;
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void CacheImplementation::setRequestForwardEnabled(bool enabled)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mRequestForwardEnabled = enabled;
+  }
+  catch (...)
+  {
     throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
@@ -490,6 +508,9 @@ int CacheImplementation::_getDataServerInfoById(T::SessionId sessionId,uint serv
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getDataServerInfoById(sessionId,serverId,serverInfo);
 
@@ -520,6 +541,9 @@ int CacheImplementation::_getDataServerInfoByName(T::SessionId sessionId,std::st
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getDataServerInfoByName(sessionId,serverName,serverInfo);;
 
@@ -550,6 +574,9 @@ int CacheImplementation::_getDataServerInfoByIor(T::SessionId sessionId,std::str
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getDataServerInfoByIor(sessionId,serverIor,serverInfo);
 
@@ -580,6 +607,9 @@ int CacheImplementation::_getDataServerInfoList(T::SessionId sessionId,T::Server
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getDataServerInfoList(sessionId,serverInfoList);
 
@@ -608,6 +638,9 @@ int CacheImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& co
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getDataServerInfoCount(sessionId,count);
 
@@ -698,6 +731,9 @@ int CacheImplementation::_getProducerInfoById(T::SessionId sessionId,uint produc
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getProducerInfoById(sessionId,producerId,producerInfo);
 
@@ -750,6 +786,9 @@ int CacheImplementation::_getProducerInfoByName(T::SessionId sessionId,std::stri
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getProducerInfoByName(sessionId,producerName,producerInfo);
 
@@ -780,6 +819,9 @@ int CacheImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getProducerInfoList(sessionId,producerInfoList);
 
@@ -808,6 +850,9 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getProducerInfoListByParameter(sessionId,parameterKeyType,parameterKey,producerInfoList);
 
@@ -914,6 +959,9 @@ int CacheImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getProducerInfoListBySourceId(sessionId,sourceId,producerInfoList);
 
@@ -943,6 +991,9 @@ int CacheImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& coun
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getProducerInfoCount(sessionId,count);
 
@@ -967,6 +1018,9 @@ int CacheImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getProducerNameAndGeometryList(sessionId,list);
 
@@ -1016,6 +1070,9 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getProducerParameterList(sessionId,sourceParameterKeyType,targetParameterKeyType,list);
 
@@ -1338,6 +1395,9 @@ int CacheImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getGenerationIdGeometryIdAndForecastTimeList(sessionId,list);
 
@@ -1378,6 +1438,9 @@ int CacheImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getGenerationInfoListByGeometryId(sessionId,geometryId,generationInfoList);
 
@@ -1416,6 +1479,9 @@ int CacheImplementation::_getGenerationInfoById(T::SessionId sessionId,uint gene
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getGenerationInfoById(sessionId,generationId,generationInfo);
 
@@ -1446,6 +1512,9 @@ int CacheImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::st
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getGenerationInfoByName(sessionId,generationName,generationInfo);
 
@@ -1476,6 +1545,9 @@ int CacheImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Genera
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getGenerationInfoList(sessionId,generationInfoList);
 
@@ -1504,6 +1576,9 @@ int CacheImplementation::_getGenerationInfoListByProducerId(T::SessionId session
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getGenerationInfoListByProducerId(sessionId,producerId,generationInfoList);
 
@@ -1536,6 +1611,9 @@ int CacheImplementation::_getGenerationInfoListByProducerName(T::SessionId sessi
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
    if (mUpdateInProgress)
       return mContentStorage->getGenerationInfoListByProducerName(sessionId,producerName,generationInfoList);
 
@@ -1568,6 +1646,9 @@ int CacheImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getGenerationInfoListBySourceId(sessionId,sourceId,generationInfoList);
 
@@ -1596,6 +1677,9 @@ int CacheImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getLastGenerationInfoByProducerIdAndStatus(sessionId,producerId,generationStatus,generationInfo);
 
@@ -1631,6 +1715,9 @@ int CacheImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessio
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getLastGenerationInfoByProducerNameAndStatus(sessionId,producerName,generationStatus,generationInfo);
 
@@ -1665,6 +1752,9 @@ int CacheImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getGenerationInfoCount(sessionId,count);
 
@@ -2041,6 +2131,9 @@ int CacheImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoById(sessionId,fileId,fileInfo);
 
@@ -2071,6 +2164,9 @@ int CacheImplementation::_getFileInfoByName(T::SessionId sessionId,std::string f
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoByName(sessionId,filename,fileInfo);
 
@@ -2101,6 +2197,9 @@ int CacheImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileI
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoList(sessionId,startFileId,maxRecords,fileInfoList);
 
@@ -2159,6 +2258,9 @@ int CacheImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoListByProducerId(sessionId,producerId,startFileId,maxRecords,fileInfoList);
 
@@ -2191,6 +2293,9 @@ int CacheImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,s
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoListByProducerName(sessionId,producerName,startFileId,maxRecords,fileInfoList);
 
@@ -2223,6 +2328,9 @@ int CacheImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoListByGenerationId(sessionId,generationId,startFileId,maxRecords,fileInfoList);
 
@@ -2255,6 +2363,9 @@ int CacheImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoListByGenerationName(sessionId,generationName,startFileId,maxRecords,fileInfoList);
 
@@ -2287,6 +2398,9 @@ int CacheImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoListByGroupFlags(sessionId,groupFlags,startFileId,maxRecords,fileInfoList);
 
@@ -2315,6 +2429,9 @@ int CacheImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint 
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoListBySourceId(sessionId,sourceId,startFileId,maxRecords,fileInfoList);
 
@@ -2343,6 +2460,9 @@ int CacheImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoCount(sessionId,count);
 
@@ -2367,6 +2487,9 @@ int CacheImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,ui
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoCountByProducerId(sessionId,producerId,count);
 
@@ -2390,6 +2513,9 @@ int CacheImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoCountByGenerationId(sessionId,generationId,count);
 
@@ -2414,6 +2540,9 @@ int CacheImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uint
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoCountBySourceId(sessionId,sourceId,count);
 
@@ -2460,6 +2589,9 @@ int CacheImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getLastEventInfo(sessionId,requestingServerId,eventInfo);
 
@@ -2499,6 +2631,9 @@ int CacheImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getEventInfoList(sessionId,requestingServerId,startEventId,maxRecords,eventInfoList);
 
@@ -2534,6 +2669,9 @@ int CacheImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getEventInfoCount(sessionId,count);
 
@@ -2888,6 +3026,9 @@ int CacheImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentInfo(sessionId,fileId,messageIndex,contentInfo);
 
@@ -2920,6 +3061,9 @@ int CacheImplementation::_getContentList(T::SessionId sessionId,uint startFileId
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentList(sessionId,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
@@ -2948,6 +3092,9 @@ int CacheImplementation::_getContentListByFileId(T::SessionId sessionId,uint fil
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentListByFileId(sessionId,fileId,contentInfoList);
 
@@ -2976,6 +3123,9 @@ int CacheImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentListByFileIdList(sessionId,fileIdList,contentInfoList);
 
@@ -3010,6 +3160,9 @@ int CacheImplementation::_getContentListByFileName(T::SessionId sessionId,std::s
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentListByFileName(sessionId,filename,contentInfoList);
 
@@ -3042,6 +3195,9 @@ int CacheImplementation::_getContentListByServerId(T::SessionId sessionId,uint s
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentListByServerId(sessionId,serverId,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
@@ -3074,6 +3230,9 @@ int CacheImplementation::_getContentListByGroupFlags(T::SessionId sessionId,uint
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentListByGroupFlags(sessionId,groupFlags,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
@@ -3102,6 +3261,9 @@ int CacheImplementation::_getContentListByProducerId(T::SessionId sessionId,uint
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentListByProducerId(sessionId,producerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
@@ -3134,6 +3296,9 @@ int CacheImplementation::_getContentListByProducerName(T::SessionId sessionId,st
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentListByProducerName(sessionId,producerName,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
@@ -3165,6 +3330,9 @@ int CacheImplementation::_getContentListByGenerationId(T::SessionId sessionId,ui
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentListByGenerationId(sessionId,generationId,startFileId,startMessageIndex,maxRecords,requestFlags,contentInfoList);
 
@@ -3201,6 +3369,9 @@ int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentListByGenerationName(sessionId,generationName,startFileId,maxRecords,startMessageIndex,contentInfoList);
 
@@ -3233,6 +3404,9 @@ int CacheImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentListByGenerationIdAndTimeRange(sessionId,generationId,startTime,endTime,contentInfoList);
 
@@ -3265,6 +3439,9 @@ int CacheImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentListByGenerationNameAndTimeRange(sessionId,generationName,startTime,endTime,contentInfoList);
 
@@ -3297,6 +3474,9 @@ int CacheImplementation::_getContentListBySourceId(T::SessionId sessionId,uint s
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentListBySourceId(sessionId,sourceId,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
@@ -3328,6 +3508,9 @@ int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
 
     //printf("getContentListByParameter(%llu,%u,%s,%u,%u,%u,%u,%s,%s,%u)\n",sessionId,(uint)parameterKeyType,parameterKey.c_str(),(uint)parameterLevelIdType,(uint)parameterLevelId,minLevel,maxLevel,startTime.c_str(),endTime.c_str(),requestFlags);
 
+
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
 
     if (mUpdateInProgress)
       return mContentStorage->getContentListByParameter(sessionId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -3415,6 +3598,9 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
@@ -3524,6 +3710,9 @@ int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionI
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
@@ -3612,6 +3801,9 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
@@ -3700,6 +3892,9 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
@@ -3789,6 +3984,9 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
 
@@ -3928,6 +4126,9 @@ int CacheImplementation::_getContentListByRequestCounterKey(T::SessionId session
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentListByRequestCounterKey(sessionId,key,contentInfoList);
 
@@ -4019,6 +4220,9 @@ int CacheImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentGeometryIdListByGenerationId(sessionId,generationId,geometryIdList);
 
@@ -4051,6 +4255,9 @@ int CacheImplementation::_getContentParamListByGenerationId(T::SessionId session
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentParamListByGenerationId(sessionId,generationId,contentParamList);
 
@@ -4110,6 +4317,9 @@ int CacheImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentParamKeyListByGenerationId(sessionId,generationId,parameterKeyType,paramKeyList);
 
@@ -4142,6 +4352,9 @@ int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentTimeListByGenerationId(sessionId,generationId,contentTimeList);
 
@@ -4184,6 +4397,9 @@ int CacheImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentTimeListByGenerationAndGeometryId(sessionId,generationId,geometryId,contentTimeList);
 
@@ -4217,6 +4433,9 @@ int CacheImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentTimeListByProducerId(sessionId,producerId,contentTimeList);
 
@@ -4246,6 +4465,9 @@ int CacheImplementation::_getContentCount(T::SessionId sessionId,uint& count)
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getContentCount(sessionId,count);
 
@@ -4270,6 +4492,9 @@ int CacheImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoLi
   FUNCTION_TRACE
   try
   {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
     if (mUpdateInProgress)
       return mContentStorage->getLevelInfoList(sessionId,levelInfoList);
 
