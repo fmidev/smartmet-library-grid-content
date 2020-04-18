@@ -3,14 +3,14 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 20.4.3
+Version: 20.4.18
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires: boost-devel
+BuildRequires: boost169-devel
 BuildRequires: gcc-c++
 BuildRequires: gdal-devel
 BuildRequires: hiredis-devel
@@ -21,20 +21,20 @@ BuildRequires: make
 BuildRequires: omniORB-devel
 BuildRequires: postgresql95-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 20.2.18
-BuildRequires: smartmet-library-grid-files-devel >= 20.4.3
-BuildRequires: smartmet-library-macgyver-devel >= 20.3.5
-BuildRequires: smartmet-library-spine-devel >= 20.3.9
-Requires: boost-date-time
+BuildRequires: smartmet-library-gis-devel >= 20.4.18
+BuildRequires: smartmet-library-grid-files-devel >= 20.4.18
+BuildRequires: smartmet-library-macgyver-devel >= 20.4.18
+BuildRequires: smartmet-library-spine-devel >= 20.4.18
+Requires: boost169-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
 Requires: postgresql95
-Requires: smartmet-library-gis >= 20.2.18
-Requires: smartmet-library-grid-files >= 20.4.3
-Requires: smartmet-library-macgyver >= 20.3.5
-Requires: smartmet-library-spine >= 20.3.9
+Requires: smartmet-library-gis >= 20.4.18
+Requires: smartmet-library-grid-files >= 20.4.18
+Requires: smartmet-library-macgyver >= 20.4.18
+Requires: smartmet-library-spine >= 20.4.18
 Provides: %{SPECNAME}
 
 %description
@@ -76,6 +76,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Sat Apr 18 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.18-1.fmi
+- Upgrade to Boost 1.69
 * Fri Apr  3 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.3-1.fmi
 - Request forwarding is now configurable
 - Added producer alias handling
