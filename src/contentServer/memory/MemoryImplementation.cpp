@@ -754,6 +754,30 @@ int MemoryImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
 
     producerInfoList.clear();
 
+    char st[100];
+    strcpy(st,parameterKey.c_str());
+
+    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
+    {
+      if (strncasecmp(st,"GRIB-",5) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
+        parameterKey = st+5;
+      }
+      else
+      if (strncasecmp(st,"NB-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
+        parameterKey = st+3;
+      }
+      else
+      if (strncasecmp(st,"NBN-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
+        parameterKey = st+4;
+      }
+    }
+
     T::ContentInfoList contentInfoList;
 
     std::string startTime = "19000101T00000";
@@ -3935,6 +3959,30 @@ int MemoryImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
+    char st[100];
+    strcpy(st,parameterKey.c_str());
+
+    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
+    {
+      if (strncasecmp(st,"GRIB-",5) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
+        parameterKey = st+5;
+      }
+      else
+      if (strncasecmp(st,"NB-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
+        parameterKey = st+3;
+      }
+      else
+      if (strncasecmp(st,"NBN-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
+        parameterKey = st+4;
+      }
+    }
+
     contentInfoList.clear();
 
     switch (parameterKeyType)
@@ -4021,6 +4069,30 @@ int MemoryImplementation::_getContentListByParameterAndGenerationId(T::SessionId
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
+
+    char st[100];
+    strcpy(st,parameterKey.c_str());
+
+    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
+    {
+      if (strncasecmp(st,"GRIB-",5) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
+        parameterKey = st+5;
+      }
+      else
+      if (strncasecmp(st,"NB-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
+        parameterKey = st+3;
+      }
+      else
+      if (strncasecmp(st,"NBN-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
+        parameterKey = st+4;
+      }
+    }
 
     contentInfoList.clear();
 
@@ -4109,6 +4181,30 @@ int MemoryImplementation::_getContentListByParameterAndGenerationName(T::Session
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
+    char st[100];
+    strcpy(st,parameterKey.c_str());
+
+    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
+    {
+      if (strncasecmp(st,"GRIB-",5) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
+        parameterKey = st+5;
+      }
+      else
+      if (strncasecmp(st,"NB-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
+        parameterKey = st+3;
+      }
+      else
+      if (strncasecmp(st,"NBN-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
+        parameterKey = st+4;
+      }
+    }
+
     contentInfoList.clear();
 
     switch (parameterKeyType)
@@ -4195,6 +4291,30 @@ int MemoryImplementation::_getContentListByParameterAndProducerId(T::SessionId s
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
+    char st[100];
+    strcpy(st,parameterKey.c_str());
+
+    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
+    {
+      if (strncasecmp(st,"GRIB-",5) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
+        parameterKey = st+5;
+      }
+      else
+      if (strncasecmp(st,"NB-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
+        parameterKey = st+3;
+      }
+      else
+      if (strncasecmp(st,"NBN-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
+        parameterKey = st+4;
+      }
+    }
+
     contentInfoList.clear();
 
     switch (parameterKeyType)
@@ -4280,6 +4400,30 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
+
+    char st[100];
+    strcpy(st,parameterKey.c_str());
+
+    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
+    {
+      if (strncasecmp(st,"GRIB-",5) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
+        parameterKey = st+5;
+      }
+      else
+      if (strncasecmp(st,"NB-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
+        parameterKey = st+3;
+      }
+      else
+      if (strncasecmp(st,"NBN-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
+        parameterKey = st+4;
+      }
+    }
 
     contentInfoList.clear();
 
@@ -4415,6 +4559,30 @@ int MemoryImplementation::_getContentListByParameterAndProducerName(T::SessionId
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
+
+    char st[100];
+    strcpy(st,parameterKey.c_str());
+
+    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
+    {
+      if (strncasecmp(st,"GRIB-",5) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
+        parameterKey = st+5;
+      }
+      else
+      if (strncasecmp(st,"NB-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
+        parameterKey = st+3;
+      }
+      else
+      if (strncasecmp(st,"NBN-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
+        parameterKey = st+4;
+      }
+    }
 
     contentInfoList.clear();
 

@@ -971,6 +971,29 @@ int RedisImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     producerInfoList.clear();
+    char st[100];
+    strcpy(st,parameterKey.c_str());
+
+    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
+    {
+      if (strncasecmp(st,"GRIB-",5) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
+        parameterKey = st+5;
+      }
+      else
+      if (strncasecmp(st,"NB-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
+        parameterKey = st+3;
+      }
+      else
+      if (strncasecmp(st,"NBN-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
+        parameterKey = st+4;
+      }
+    }
 
     T::ContentInfoList contentInfoList;
     getContentByParameterId(parameterKeyType,parameterKey,contentInfoList);
@@ -4571,6 +4594,30 @@ int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
 
     contentInfoList.clear();
 
+    char st[100];
+    strcpy(st,parameterKey.c_str());
+
+    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
+    {
+      if (strncasecmp(st,"GRIB-",5) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
+        parameterKey = st+5;
+      }
+      else
+      if (strncasecmp(st,"NB-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
+        parameterKey = st+3;
+      }
+      else
+      if (strncasecmp(st,"NBN-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
+        parameterKey = st+4;
+      }
+    }
+
     return getContentByParameterIdAndTimeRange(parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
   }
   catch (...)
@@ -4601,6 +4648,30 @@ int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
       return Result::UNKNOWN_GENERATION_ID;
 
     contentInfoList.clear();
+
+    char st[100];
+    strcpy(st,parameterKey.c_str());
+
+    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
+    {
+      if (strncasecmp(st,"GRIB-",5) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
+        parameterKey = st+5;
+      }
+      else
+      if (strncasecmp(st,"NB-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
+        parameterKey = st+3;
+      }
+      else
+      if (strncasecmp(st,"NBN-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
+        parameterKey = st+4;
+      }
+    }
 
     return getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
   }
@@ -4633,6 +4704,30 @@ int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionI
 
     contentInfoList.clear();
 
+    char st[100];
+    strcpy(st,parameterKey.c_str());
+
+    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
+    {
+      if (strncasecmp(st,"GRIB-",5) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
+        parameterKey = st+5;
+      }
+      else
+      if (strncasecmp(st,"NB-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
+        parameterKey = st+3;
+      }
+      else
+      if (strncasecmp(st,"NBN-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
+        parameterKey = st+4;
+      }
+    }
+
     return getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
   }
   catch (...)
@@ -4661,6 +4756,30 @@ int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId se
     T::ProducerInfo producerInfo;
     if (getProducerById(producerId,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
+
+    char st[100];
+    strcpy(st,parameterKey.c_str());
+
+    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
+    {
+      if (strncasecmp(st,"GRIB-",5) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
+        parameterKey = st+5;
+      }
+      else
+      if (strncasecmp(st,"NB-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
+        parameterKey = st+3;
+      }
+      else
+      if (strncasecmp(st,"NBN-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
+        parameterKey = st+4;
+      }
+    }
 
     contentInfoList.clear();
 
@@ -4692,6 +4811,30 @@ int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     T::GenerationInfo generationInfo;
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
+
+    char st[100];
+    strcpy(st,parameterKey.c_str());
+
+    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
+    {
+      if (strncasecmp(st,"GRIB-",5) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
+        parameterKey = st+5;
+      }
+      else
+      if (strncasecmp(st,"NB-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
+        parameterKey = st+3;
+      }
+      else
+      if (strncasecmp(st,"NBN-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
+        parameterKey = st+4;
+      }
+    }
 
     contentInfoList.clear();
 
@@ -4745,6 +4888,30 @@ int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId 
     T::ProducerInfo producerInfo;
     if (getProducerByName(producerName,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_NAME;
+
+    char st[100];
+    strcpy(st,parameterKey.c_str());
+
+    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
+    {
+      if (strncasecmp(st,"GRIB-",5) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
+        parameterKey = st+5;
+      }
+      else
+      if (strncasecmp(st,"NB-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
+        parameterKey = st+3;
+      }
+      else
+      if (strncasecmp(st,"NBN-",3) == 0)
+      {
+        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
+        parameterKey = st+4;
+      }
+    }
 
     contentInfoList.clear();
 

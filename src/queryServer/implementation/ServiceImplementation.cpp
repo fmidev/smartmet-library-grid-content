@@ -1112,6 +1112,7 @@ bool ServiceImplementation::parseFunction(
           newParam.mParam = fParam->second;
           newParam.mOrigParam = paramStr + " => " + fParam->second;
           newParam.mSymbolicName = fParam->second;
+          newParam.mType = queryParam.mType;
           newParam.mLocationType = queryParam.mLocationType;
           newParam.mFlags = queryParam.mFlags;
           newParam.mGeometryId = queryParam.mGeometryId;
@@ -2600,6 +2601,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
         break;
 */
       case T::ParamKeyTypeValue::FMI_NAME:
+      {
         mCacheContentInfoList[idx].setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
         T::ContentInfo *cInfo = mCacheContentInfoList[idx].getContentInfoByFmiParameterNameAndGenerationId(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
         if (cInfo != nullptr)
@@ -2608,11 +2610,22 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
           return Result::OK;
         }
         mCacheContentInfoList[idx].getContentInfoListByFmiParameterNameAndGenerationId(producerId,generationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentList);
-        break;
-/*
-        case T::ParamKeyTypeValue::GRIB_ID:
-          break;
+      }
+      break;
 
+      case T::ParamKeyTypeValue::GRIB_ID:
+      {
+        mCacheContentInfoList[idx].setComparisonMethod(T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time);
+        T::ContentInfo *cInfo = mCacheContentInfoList[idx].getContentInfoByGribParameterIdAndGenerationId(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
+        if (cInfo != nullptr)
+        {
+          contentInfoList.addContentInfo(cInfo->duplicate());
+          return Result::OK;
+        }
+        mCacheContentInfoList[idx].getContentInfoListByGribParameterIdAndGenerationId(producerId,generationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentList);
+      }
+      break;
+/*
         case T::ParamKeyTypeValue::NEWBASE_ID:
           break;
 
@@ -5997,6 +6010,33 @@ void ServiceImplementation::getGridValues(
             {
               getParameterMappings(producerInfo.mName, parameterKey, producerGeometryId, true, mappings);
             }
+
+            if (mappings.size() == 0 &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+            {
+              ParameterMapping mp;
+              mp.mProducerName = producerInfo.mName;
+              mp.mParameterName = parameterKey;
+              mp.mParameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
+              mp.mParameterKey = parameterKey;
+              mp.mGeometryId = producerGeometryId;
+              mp.mParameterLevelIdType = T::ParamLevelIdTypeValue::ANY;
+              mp.mParameterLevelId = paramLevelId;
+              mp.mParameterLevel = paramLevel;
+              if (paramLevelId <= 0 &&  paramLevel < 0)
+                mp.mParameterLevelIdType = T::ParamLevelIdTypeValue::IGNORE;
+
+              //mp.mAreaInterpolationMethod;
+              //mp.mTimeInterpolationMethod;
+              //mp.mLevelInterpolationMethod;
+              //mp.mGroupFlags;
+              //mp.mSearchEnabled;
+              //mp.mIgnore;
+              //mp.mConversionFunction;
+              //mp.mReverseConversionFunction;
+              //mp.mDefaultPrecision;
+              mappings.push_back(mp);
+            }
+
 
             if (mappings.size() == 0)
               PRINT_DATA(mDebugLog, "    - No parameter mappings '%s:%s:%d:%d:%d' found!\n", producerInfo.mName.c_str(), parameterKey.c_str(), producerGeometryId, paramLevelId, paramLevel);
