@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 20.4.18
+Version: 20.4.30
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -22,7 +22,7 @@ BuildRequires: omniORB-devel
 BuildRequires: postgresql95-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 20.4.18
-BuildRequires: smartmet-library-grid-files-devel >= 20.4.18
+BuildRequires: smartmet-library-grid-files-devel >= 20.4.30
 BuildRequires: smartmet-library-macgyver-devel >= 20.4.18
 BuildRequires: smartmet-library-spine-devel >= 20.4.18
 Requires: boost169-date-time
@@ -32,7 +32,7 @@ Requires: lua-devel
 Requires: omniORB
 Requires: postgresql95
 Requires: smartmet-library-gis >= 20.4.18
-Requires: smartmet-library-grid-files >= 20.4.18
+Requires: smartmet-library-grid-files >= 20.4.30
 Requires: smartmet-library-macgyver >= 20.4.18
 Requires: smartmet-library-spine >= 20.4.18
 Provides: %{SPECNAME}
@@ -76,6 +76,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Apr 30 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.30-1.fmi
+- Improved search with grib-id
+- Integrated corba-server
 * Sat Apr 18 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.18-1.fmi
 - Upgrade to Boost 1.69
 * Fri Apr  3 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.3-1.fmi
