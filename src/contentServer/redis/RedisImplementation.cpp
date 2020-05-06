@@ -4,10 +4,20 @@
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <boost/functional/hash.hpp>
+#include <boost/interprocess/sync/scoped_lock.hpp>
+#include <boost/interprocess/sync/named_mutex.hpp>
+#include <boost/thread/thread_time.hpp>
+#include <fstream>
+#include <iostream>
+#include <cstdio>
+
+using namespace boost::interprocess;
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
+
+#define FUNCTION_NAME static_cast<const char*>(__PRETTY_FUNCTION__)
 
 
 namespace SmartMet
@@ -15,69 +25,27 @@ namespace SmartMet
 namespace ContentServer
 {
 
-
-class RedisModificationLock
+class RedisProcessLock
 {
   public:
-    RedisModificationLock(redisContext *context,std::string& tablePrefix)
+
+    RedisProcessLock(const char *function,uint line,RedisImplementation *redisImplementation)
     {
       FUNCTION_TRACE
-      mRequestId = 0;
-      mContext = context;
-      mTablePrefix = tablePrefix;
-
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"INCR %smodificationRequestOn",tablePrefix.c_str()));
-      if (reply == nullptr)
-        return;
-
-      mRequestId = reply->integer;
-      freeReplyObject(reply);
-
-      bool locked = true;
-      uint counter = 0;
-      while (locked)
-      {
-        counter++;
-
-        reply = static_cast<redisReply*>(redisCommand(mContext,"GET %smodificationRequestOff",tablePrefix.c_str()));
-        if (reply == nullptr)
-          return;
-
-        uint id = 0;
-        if (reply->str != nullptr)
-          id = toInt64(reply->str);
-
-        freeReplyObject(reply);
-
-        if (mRequestId == (id+1) ||  counter > 10000)
-        {
-          //printf("Match %u %u\n",mRequestId,(id+1));
-          locked = false;
-        }
-        else
-        {
-          //printf("Wait %u %u\n",mRequestId,(id+1));
-          time_usleep(0,1000);
-        }
-      }
+      mRedisImplementation = redisImplementation;
+      mRedisImplementation->lock(function,line);
     }
 
 
-    virtual ~RedisModificationLock()
+    virtual ~RedisProcessLock()
     {
       FUNCTION_TRACE
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"SET %smodificationRequestOff %u",mTablePrefix.c_str(),mRequestId));
-      if (reply == nullptr)
-        return;
-
-      freeReplyObject(reply);
+      mRedisImplementation->unlock();
     }
 
   protected:
 
-    redisContext *mContext;
-    uint mRequestId;
-    std::string mTablePrefix;
+    RedisImplementation *mRedisImplementation;
 };
 
 
@@ -103,6 +71,35 @@ RedisImplementation::RedisImplementation()
     mContext = nullptr;
     mStartTime = time(nullptr);
     mRedisPort = 0;
+    uint tryCount = 0;
+    mMutex = nullptr;
+    while (mMutex == nullptr)
+    {
+      mMutex = new named_mutex(open_or_create, "redis_mutex");
+      if (!mMutex->timed_lock(boost::get_system_time() + boost::posix_time::seconds(10)))
+      {
+        tryCount++;
+        if (tryCount == 12)
+        {
+          // Cannot lock the mutex. Maybe it was locked by a faulty process. Let's remove
+          // it and create it again.
+          named_mutex::remove("redis_mutex");
+        }
+
+        delete mMutex;
+        mMutex = nullptr;
+      }
+      else
+      {
+        mMutex->unlock();
+      }
+
+      if (mMutex == nullptr && tryCount >= 10)
+      {
+        throw SmartMet::Spine::Exception(BCP,"Cannot init mutex!");
+      }
+    }
+    mLine = 0;
   }
   catch (...)
   {
@@ -121,6 +118,9 @@ RedisImplementation::~RedisImplementation()
   {
     if (mContext != nullptr)
       redisFree(mContext);
+
+    if (mMutex != nullptr)
+      delete mMutex;
   }
   catch (...)
   {
@@ -129,6 +129,46 @@ RedisImplementation::~RedisImplementation()
   }
 }
 
+
+
+
+void RedisImplementation::lock(const char *function,uint line)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mMutex != nullptr)
+    {
+      if (!mMutex->timed_lock(boost::get_system_time() + boost::posix_time::seconds(120)))
+      {
+        throw SmartMet::Spine::Exception(BCP,"Cannot lock mutex!");
+      }
+      mFunction = function;
+      mLine = line;
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+void RedisImplementation::unlock()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mMutex != nullptr)
+      mMutex->unlock();
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
 
 
 
@@ -282,7 +322,7 @@ int RedisImplementation::_clear(T::SessionId sessionId)
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -290,7 +330,6 @@ int RedisImplementation::_clear(T::SessionId sessionId)
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"DEL %sproducerCounter",mTablePrefix.c_str()));
     if (reply == nullptr)
@@ -431,7 +470,7 @@ int RedisImplementation::_addDataServerInfo(T::SessionId sessionId,T::ServerInfo
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -461,7 +500,6 @@ int RedisImplementation::_addDataServerInfo(T::SessionId sessionId,T::ServerInfo
         return Result::SERVER_IOR_ALREADY_REGISTERED;
     }
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %sdataServers %u %s",mTablePrefix.c_str(),serverInfo.mServerId,serverInfo.getCsv().c_str()));
     if (reply == nullptr)
@@ -491,7 +529,7 @@ int RedisImplementation::_deleteDataServerInfoById(T::SessionId sessionId,uint s
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -503,7 +541,6 @@ int RedisImplementation::_deleteDataServerInfoById(T::SessionId sessionId,uint s
     if (getDataServerById(serverId,serverInfo) != Result::OK)
       return Result::UNKNOWN_SERVER_ID;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteDataServerById(serverInfo.mServerId);
 
@@ -527,7 +564,7 @@ int RedisImplementation::_getDataServerInfoById(T::SessionId sessionId,uint serv
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -552,7 +589,7 @@ int RedisImplementation::_getDataServerInfoByName(T::SessionId sessionId,std::st
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -585,7 +622,7 @@ int RedisImplementation::_getDataServerInfoByIor(T::SessionId sessionId,std::str
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -618,7 +655,7 @@ int RedisImplementation::_getDataServerInfoList(T::SessionId sessionId,T::Server
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -647,7 +684,7 @@ int RedisImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& co
   {
     count = 0;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -685,7 +722,7 @@ int RedisImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -700,7 +737,6 @@ int RedisImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
     if (info != nullptr)
       return Result::PRODUCER_NAME_ALREADY_REGISTERED;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     redisReply *reply = nullptr;
 
@@ -777,7 +813,7 @@ int RedisImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint pro
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -789,7 +825,6 @@ int RedisImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint pro
     if (getProducerById(producerId,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteProducerById(producerInfo.mProducerId,true,true,true);
 
@@ -813,7 +848,7 @@ int RedisImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::s
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -825,7 +860,6 @@ int RedisImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::s
     if (getProducerByName(producerName,producerInfo) != 0)
       return Result::UNKNOWN_PRODUCER_NAME;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteProducerById(producerInfo.mProducerId,true,true,true);
 
@@ -849,7 +883,7 @@ int RedisImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -857,7 +891,6 @@ int RedisImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionI
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     deleteContentBySourceId(sourceId);
     deleteFileListBySourceId(sourceId,false);
@@ -885,7 +918,7 @@ int RedisImplementation::_getProducerInfoById(T::SessionId sessionId,uint produc
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -910,7 +943,7 @@ int RedisImplementation::_getProducerInfoByName(T::SessionId sessionId,std::stri
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -935,7 +968,7 @@ int RedisImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -962,7 +995,7 @@ int RedisImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1029,7 +1062,7 @@ int RedisImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1058,7 +1091,7 @@ int RedisImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& coun
   {
     count = 0;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1096,7 +1129,7 @@ int RedisImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1148,7 +1181,7 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1319,7 +1352,7 @@ int RedisImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1345,7 +1378,6 @@ int RedisImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
       return Result::PERMANENT_STORAGE_ERROR;
     }
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     generationInfo.mGenerationId = reply->integer;
     freeReplyObject(reply);
@@ -1378,7 +1410,7 @@ int RedisImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint g
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1390,7 +1422,6 @@ int RedisImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint g
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     deleteContentByGenerationId(generationInfo.mGenerationId);
     deleteFileListByGenerationId(generationInfo.mGenerationId,false);
@@ -1417,7 +1448,7 @@ int RedisImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std:
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1429,7 +1460,6 @@ int RedisImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std:
     if (getGenerationByName(generationName,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_NAME;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     deleteContentByGenerationId(generationInfo.mGenerationId);
     deleteFileListByGenerationId(generationInfo.mGenerationId,false);
@@ -1456,7 +1486,7 @@ int RedisImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1464,7 +1494,6 @@ int RedisImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionI
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     deleteContentByGenerationIdList(generationIdList);
     deleteFileListByGenerationIdList(generationIdList,false);
@@ -1492,7 +1521,7 @@ int RedisImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sess
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1504,7 +1533,6 @@ int RedisImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sess
     if (getProducerById(producerId,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     deleteContentByProducerId(producerInfo.mProducerId);
     deleteFileListByProducerId(producerInfo.mProducerId,false);
@@ -1531,7 +1559,7 @@ int RedisImplementation::_deleteGenerationInfoListByProducerName(T::SessionId se
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1543,7 +1571,6 @@ int RedisImplementation::_deleteGenerationInfoListByProducerName(T::SessionId se
     if (getProducerByName(producerName,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     deleteContentByProducerId(producerInfo.mProducerId);
     deleteFileListByProducerId(producerInfo.mProducerId,false);
@@ -1570,7 +1597,7 @@ int RedisImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessio
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1578,7 +1605,6 @@ int RedisImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessio
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     deleteContentBySourceId(sourceId);
     deleteFileListBySourceId(sourceId,false);
@@ -1605,7 +1631,7 @@ int RedisImplementation::_getGenerationInfoById(T::SessionId sessionId,uint gene
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1630,7 +1656,7 @@ int RedisImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::st
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1655,7 +1681,7 @@ int RedisImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Genera
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1682,7 +1708,7 @@ int RedisImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1709,7 +1735,7 @@ int RedisImplementation::_getGenerationInfoListByProducerId(T::SessionId session
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1740,7 +1766,7 @@ int RedisImplementation::_getGenerationInfoListByProducerName(T::SessionId sessi
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1771,7 +1797,7 @@ int RedisImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1798,7 +1824,7 @@ int RedisImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1834,7 +1860,7 @@ int RedisImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessio
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1872,7 +1898,7 @@ int RedisImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
   {
     count = 0;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1910,7 +1936,7 @@ int RedisImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1924,7 +1950,6 @@ int RedisImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uin
 
     generationInfo.mStatus = status;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgenerations %u %u",mTablePrefix.c_str(),generationInfo.mGenerationId,generationInfo.mGenerationId));
     if (reply == nullptr)
@@ -1963,7 +1988,7 @@ int RedisImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,s
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -1977,7 +2002,6 @@ int RedisImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,s
 
     generationInfo.mStatus = status;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgenerations %u %u",mTablePrefix.c_str(),generationInfo.mGenerationId,generationInfo.mGenerationId));
     if (reply == nullptr)
@@ -2016,7 +2040,7 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2054,7 +2078,6 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
     {
       // ### Generating a new file-id.
 
-      RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
       redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"INCR %sfileCounter",mTablePrefix.c_str()));
       if (reply == nullptr)
@@ -2105,7 +2128,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2144,8 +2167,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
       // ### Generating a new file-id.
       //printf("** File added %s\n",fileInfo.mName.c_str());
 
-      RedisModificationLock redisModificationLock(mContext,mTablePrefix);
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"INCR %sfileCounter",mTablePrefix.c_str()));
+        redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"INCR %sfileCounter",mTablePrefix.c_str()));
       if (reply == nullptr)
       {
         closeConnection();
@@ -2239,7 +2261,7 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2247,7 +2269,6 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     T::ProducerInfo producerInfo;
     T::GenerationInfo generationInfo;
@@ -2385,7 +2406,7 @@ int RedisImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2397,7 +2418,6 @@ int RedisImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
     if (getFileById(fileId,fileInfo) != Result::OK)
       return Result::UNKNOWN_FILE_ID;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     deleteFilename(fileInfo.mName);
     int result = deleteFileById(fileId,true);
@@ -2422,7 +2442,7 @@ int RedisImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::strin
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2434,7 +2454,6 @@ int RedisImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::strin
     if (fileId == 0)
       return Result::UNKNOWN_FILE_NAME;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     deleteFilename(filename);
     int result = deleteFileById(fileId,true);
@@ -2464,7 +2483,7 @@ int RedisImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2472,7 +2491,6 @@ int RedisImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId,
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteFileListByGroupFlags(groupFlags,true);
 
@@ -2496,7 +2514,7 @@ int RedisImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2508,7 +2526,6 @@ int RedisImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,
     if (getProducerById(producerId,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteFileListByProducerId(producerInfo.mProducerId,true);
 
@@ -2532,7 +2549,7 @@ int RedisImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2544,7 +2561,6 @@ int RedisImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionI
     if (getProducerByName(producerName,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_NAME;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteFileListByProducerId(producerInfo.mProducerId,true);
 
@@ -2568,7 +2584,7 @@ int RedisImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2580,7 +2596,6 @@ int RedisImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteFileListByGenerationId(generationInfo.mGenerationId,true);
 
@@ -2604,7 +2619,7 @@ int RedisImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2616,7 +2631,6 @@ int RedisImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     std::set<uint> fileIdList;
     T::ContentInfoList contentInfoList;
@@ -2666,7 +2680,7 @@ int RedisImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sess
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2674,7 +2688,6 @@ int RedisImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sess
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     T::ContentInfoList contentInfoList;
     int result = getContentByForecastTimeList(forecastTimeList,contentInfoList);
@@ -2710,7 +2723,7 @@ int RedisImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessio
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2722,7 +2735,6 @@ int RedisImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessio
     if (getGenerationByName(generationName,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_NAME;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteFileListByGenerationId(generationInfo.mGenerationId,true);
 
@@ -2746,7 +2758,7 @@ int RedisImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,ui
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2754,7 +2766,6 @@ int RedisImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,ui
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteFileListBySourceId(sourceId,true);
 
@@ -2778,7 +2789,7 @@ int RedisImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2786,7 +2797,6 @@ int RedisImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     for (auto it=fileIdList.begin(); it!=fileIdList.end(); ++it)
     {
@@ -2811,7 +2821,7 @@ int RedisImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2836,7 +2846,7 @@ int RedisImplementation::_getFileInfoByName(T::SessionId sessionId,std::string f
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2865,7 +2875,7 @@ int RedisImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileI
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2892,7 +2902,7 @@ int RedisImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2928,7 +2938,7 @@ int RedisImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2959,7 +2969,7 @@ int RedisImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,s
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2990,7 +3000,7 @@ int RedisImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3021,7 +3031,7 @@ int RedisImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3051,7 +3061,7 @@ int RedisImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3078,7 +3088,7 @@ int RedisImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint 
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3107,7 +3117,7 @@ int RedisImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
   {
     count = 0;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3265,7 +3275,7 @@ int RedisImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& even
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3291,7 +3301,7 @@ int RedisImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3358,7 +3368,7 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3452,7 +3462,7 @@ int RedisImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
   {
     count = 0;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3490,7 +3500,7 @@ int RedisImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3520,7 +3530,6 @@ int RedisImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
       return Result::GENERATION_AND_FILE_DO_NOT_MATCH;
 
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     unsigned long long id = getContentKey(contentInfo.mFileId,contentInfo.mMessageIndex);
 
@@ -3554,7 +3563,7 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
   {
     //printf("ADD CONTENT %u\n",contentInfoList.getLength());
     //contentInfoList.print(std::cout,0,0);
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3562,7 +3571,6 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     T::ProducerInfo producerInfo;
     T::GenerationInfo generationInfo;
@@ -3630,7 +3638,7 @@ int RedisImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,u
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3642,7 +3650,6 @@ int RedisImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,u
     if (getContent(fileId,messageIndex,contentInfo) != Result::OK)
       return Result::UNKNOWN_CONTENT;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteContent(fileId,messageIndex);
 
@@ -3666,7 +3673,7 @@ int RedisImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint 
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3678,7 +3685,6 @@ int RedisImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint 
     if (getFileById(fileId,fileInfo) != Result::OK)
       return Result::UNKNOWN_FILE_ID;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteContentByFileId(fileId);
 
@@ -3702,7 +3708,7 @@ int RedisImplementation::_deleteContentListByFileName(T::SessionId sessionId,std
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3714,7 +3720,6 @@ int RedisImplementation::_deleteContentListByFileName(T::SessionId sessionId,std
     if (fileId == 0)
       return Result::UNKNOWN_FILE_NAME;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteContentByFileId(fileId);
 
@@ -3738,7 +3743,7 @@ int RedisImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3746,7 +3751,6 @@ int RedisImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,u
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteContentByGroupFlags(groupFlags);
 
@@ -3770,7 +3774,7 @@ int RedisImplementation::_deleteContentListByProducerId(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3782,7 +3786,6 @@ int RedisImplementation::_deleteContentListByProducerId(T::SessionId sessionId,u
     if (getProducerById(producerId,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteContentByProducerId(producerId);
 
@@ -3806,7 +3809,7 @@ int RedisImplementation::_deleteContentListByProducerName(T::SessionId sessionId
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3818,7 +3821,6 @@ int RedisImplementation::_deleteContentListByProducerName(T::SessionId sessionId
     if (getProducerByName(producerName,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_NAME;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteContentByProducerId(producerInfo.mProducerId);
 
@@ -3841,7 +3843,7 @@ int RedisImplementation::_deleteContentListByGenerationId(T::SessionId sessionId
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3853,7 +3855,6 @@ int RedisImplementation::_deleteContentListByGenerationId(T::SessionId sessionId
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteContentByGenerationId(generationId);
 
@@ -3877,7 +3878,7 @@ int RedisImplementation::_deleteContentListByGenerationName(T::SessionId session
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3889,7 +3890,6 @@ int RedisImplementation::_deleteContentListByGenerationName(T::SessionId session
     if (getGenerationByName(generationName,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_NAME;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteContentByGenerationId(generationInfo.mGenerationId);
 
@@ -3913,7 +3913,7 @@ int RedisImplementation::_deleteContentListBySourceId(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3921,7 +3921,6 @@ int RedisImplementation::_deleteContentListBySourceId(T::SessionId sessionId,uin
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteContentBySourceId(sourceId);
 
@@ -3945,7 +3944,7 @@ int RedisImplementation::_registerContentList(T::SessionId sessionId,uint server
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3957,7 +3956,6 @@ int RedisImplementation::_registerContentList(T::SessionId sessionId,uint server
     if (serverId > 0)
       sf = (1 << (serverId-1));
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     uint len = contentInfoList.getLength();
     for (uint t=0; t<len; t++)
@@ -4033,7 +4031,7 @@ int RedisImplementation::_registerContentListByFileId(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4043,7 +4041,6 @@ int RedisImplementation::_registerContentListByFileId(T::SessionId sessionId,uin
 
     unsigned long long sf = (1 << (serverId-1));
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     T::ContentInfoList contentInfoList;
     getContentByFileId(fileId,contentInfoList);
@@ -4076,7 +4073,7 @@ int RedisImplementation::_unregisterContentList(T::SessionId sessionId,uint serv
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4084,7 +4081,6 @@ int RedisImplementation::_unregisterContentList(T::SessionId sessionId,uint serv
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     return unregisterContent(serverId);
   }
@@ -4103,7 +4099,7 @@ int RedisImplementation::_unregisterContentListByFileId(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4114,7 +4110,6 @@ int RedisImplementation::_unregisterContentListByFileId(T::SessionId sessionId,u
     unsigned long long sf = (1 << (serverId-1));
     unsigned long long nsf = ~sf;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     T::ContentInfoList contentInfoList;
     getContentByFileId(fileId,contentInfoList);
@@ -4146,7 +4141,7 @@ int RedisImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4171,7 +4166,7 @@ int RedisImplementation::_getContentList(T::SessionId sessionId,uint startFileId
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4198,7 +4193,7 @@ int RedisImplementation::_getContentListByFileId(T::SessionId sessionId,uint fil
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4225,7 +4220,7 @@ int RedisImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4258,7 +4253,7 @@ int RedisImplementation::_getContentListByFileName(T::SessionId sessionId,std::s
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4289,7 +4284,7 @@ int RedisImplementation::_getContentListByGroupFlags(T::SessionId sessionId,uint
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4316,7 +4311,7 @@ int RedisImplementation::_getContentListByProducerId(T::SessionId sessionId,uint
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4347,7 +4342,7 @@ int RedisImplementation::_getContentListByProducerName(T::SessionId sessionId,st
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4378,7 +4373,7 @@ int RedisImplementation::_getContentListByServerId(T::SessionId sessionId,uint s
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4405,7 +4400,7 @@ int RedisImplementation::_getContentListByRequestCounterKey(T::SessionId session
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4432,7 +4427,7 @@ int RedisImplementation::_getContentListByGenerationId(T::SessionId sessionId,ui
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4464,7 +4459,7 @@ int RedisImplementation::_getContentListByGenerationName(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4495,7 +4490,7 @@ int RedisImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4526,7 +4521,7 @@ int RedisImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4557,7 +4552,7 @@ int RedisImplementation::_getContentListBySourceId(T::SessionId sessionId,uint s
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4587,7 +4582,7 @@ int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -4638,7 +4633,7 @@ int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -4693,7 +4688,7 @@ int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -4748,7 +4743,7 @@ int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId se
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -4803,7 +4798,7 @@ int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -4880,7 +4875,7 @@ int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -4932,7 +4927,7 @@ int RedisImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     contentInfoList.clear();
 
@@ -5007,7 +5002,7 @@ int RedisImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -5042,7 +5037,7 @@ int RedisImplementation::_getContentParamListByGenerationId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -5101,7 +5096,7 @@ int RedisImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -5136,7 +5131,7 @@ int RedisImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -5171,7 +5166,7 @@ int RedisImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -5205,7 +5200,7 @@ int RedisImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -5240,7 +5235,7 @@ int RedisImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -5267,7 +5262,7 @@ int RedisImplementation::_getContentCount(T::SessionId sessionId,uint& count)
   {
     count = 0;
 
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -5330,7 +5325,7 @@ int RedisImplementation::_deleteVirtualContent(T::SessionId sessionId)
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -5338,7 +5333,6 @@ int RedisImplementation::_deleteVirtualContent(T::SessionId sessionId)
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteVirtualFiles(true);
 
@@ -5362,7 +5356,7 @@ int RedisImplementation::_updateVirtualContent(T::SessionId sessionId)
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -5370,7 +5364,6 @@ int RedisImplementation::_updateVirtualContent(T::SessionId sessionId)
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    RedisModificationLock redisModificationLock(mContext,mTablePrefix);
 
     int result = deleteVirtualFiles(true);
 
@@ -8476,8 +8469,6 @@ void RedisImplementation::truncateEvents()
 
     if (count > maxEvents)
     {
-      RedisModificationLock redisModificationLock(mContext,mTablePrefix);
-
       reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYRANK %sevents 0 %u",mTablePrefix.c_str(),count-maxEvents+10000));
       if (reply == nullptr)
       {

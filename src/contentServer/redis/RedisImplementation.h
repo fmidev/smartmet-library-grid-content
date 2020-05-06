@@ -4,7 +4,10 @@
 
 #include <hiredis/hiredis.h>
 #include <pthread.h>
+#include <boost/interprocess/sync/scoped_lock.hpp>
+#include <boost/interprocess/sync/named_mutex.hpp>
 
+using namespace boost::interprocess;
 
 
 namespace SmartMet
@@ -20,6 +23,9 @@ class RedisImplementation : public ServiceInterface
 
      virtual void   init(const char *redisAddress,int redisPort,const char *tablePrefix);
      virtual void   shutdown();
+
+     virtual void   lock(const char *function,uint line);
+     virtual void   unlock();
 
    protected:
 
@@ -245,13 +251,16 @@ class RedisImplementation : public ServiceInterface
      int            deleteFilename(std::string filename);
      uint           getFileId(std::string filename);
 
-     ThreadLock     mThreadLock;
      redisContext*  mContext;
      std::string    mTablePrefix;
      time_t         mStartTime;
      T::EventInfo   mLastEvent;
      std::string    mRedisAddress;
      int            mRedisPort;
+     named_mutex    *mMutex;
+     std::string    mFunction;
+     uint           mLine;
+
 };
 
 
