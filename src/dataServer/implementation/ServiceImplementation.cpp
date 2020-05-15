@@ -20,6 +20,8 @@
 #include <grid-files/grid/MessageProcessing.h>
 #include <grid-files/identification/GridDef.h>
 
+#include <signal.h>
+
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
 
@@ -27,6 +29,64 @@ namespace SmartMet
 {
 namespace DataServer
 {
+
+
+bool sigbusActive = false;
+ThreadLock sigbusThreadLock;
+
+
+
+void sigbus_action(int signo, siginfo_t *info, void *extra)
+{
+  sigaction(SIGBUS, nullptr,nullptr);
+
+  ucontext_t *p=(ucontext_t *)extra;
+  //int x;
+  //printf("Signal %d received from parent\n", signo);
+  //printf("siginfo address=%x\n",info->si_addr);
+
+  //x = p->uc_mcontext.gregs[REG_RIP];
+
+  //printf("address = %x\n",x);
+
+  p->uc_mcontext.gregs[REG_RIP] += 6;
+}
+
+
+
+bool isMemoryMappingValid(char *address,long long size)
+{
+  if (address == nullptr || size <= 0)
+    return false;
+
+  AutoThreadLock lock(&sigbusThreadLock);
+
+  sigbusActive = false;
+
+  struct sigaction act;
+  act.sa_handler = NULL;
+  act.sa_sigaction = sigbus_action;
+  sigemptyset (&act.sa_mask);
+  act.sa_flags = 0;
+  act.sa_restorer = nullptr;
+
+  sigaction(SIGBUS, &act,nullptr);
+
+  char *ch1 = address;
+  if (sigbusActive)
+    return false;
+
+  sigaction(SIGBUS, &act,nullptr);
+  char *ch2 = address+size-1;
+  if (sigbusActive)
+    return false;
+
+  sigaction(SIGBUS, nullptr,nullptr);
+  return true;
+}
+
+
+
 
 
 static void* ServiceImplementation_eventProcessingThread(void *arg)
@@ -97,6 +157,7 @@ ServiceImplementation::ServiceImplementation()
     mPreloadFileGenerationEnabled = false;
     mPreloadFile_modificationTime = 0;
     mPreloadMemoryLock = false;
+    mMemoryMapCheckEnabled = false;
   }
   catch (...)
   {
@@ -234,6 +295,20 @@ void ServiceImplementation::setPointCacheEnabled(bool enabled,uint hitsRequired,
 
 
 
+void ServiceImplementation::setMemoryMapCheckEnabled(bool enabled)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mMemoryMapCheckEnabled = enabled;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
 
 void ServiceImplementation::setVirtualContentEnabled(bool enabled)
 {
@@ -316,6 +391,15 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
     GRID::GridFile_sptr gridFile = mGridFileManager.getFileById(fileId);
     if (gridFile)
     {
+      if (mMemoryMapCheckEnabled &&  gridFile->isMemoryMapped())
+      {
+        if (!isMemoryMappingValid(gridFile->getMemoryPtr(),gridFile->getSize()))
+        {
+          mGridFileManager.deleteFileById(fileId);
+          return nullptr;
+        }
+      }
+
       std::string deletionTime = gridFile->getDeletionTime();
       if (deletionTime.empty())
         return gridFile;
