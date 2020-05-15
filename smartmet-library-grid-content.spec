@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 20.4.30
+Version: 20.5.15
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -24,7 +24,7 @@ BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 20.4.18
 BuildRequires: smartmet-library-grid-files-devel >= 20.4.30
 BuildRequires: smartmet-library-macgyver-devel >= 20.4.18
-BuildRequires: smartmet-library-spine-devel >= 20.4.18
+BuildRequires: smartmet-library-spine-devel >= 20.5.12
 Requires: boost169-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
@@ -34,7 +34,7 @@ Requires: postgresql95
 Requires: smartmet-library-gis >= 20.4.18
 Requires: smartmet-library-grid-files >= 20.4.30
 Requires: smartmet-library-macgyver >= 20.4.18
-Requires: smartmet-library-spine >= 20.4.18
+Requires: smartmet-library-spine >= 20.5.12
 Provides: %{SPECNAME}
 
 %description
@@ -76,6 +76,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri May 15 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.5.15-1.fmi
+- Added checks for existence of memory mapped files
 * Thu Apr 30 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.30-1.fmi
 - Improved search with grib-id
 - Integrated corba-server
