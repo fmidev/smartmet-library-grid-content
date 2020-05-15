@@ -30,6 +30,7 @@ namespace SmartMet
 namespace DataServer
 {
 
+#if 0
 
 bool sigbusActive = false;
 ThreadLock sigbusThreadLock;
@@ -84,7 +85,7 @@ bool isMemoryMappingValid(char *address,long long size)
   sigaction(SIGBUS, nullptr,nullptr);
   return true;
 }
-
+#endif
 
 
 
@@ -393,7 +394,8 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
     {
       if (mMemoryMapCheckEnabled &&  gridFile->isMemoryMapped())
       {
-        if (!isMemoryMappingValid(gridFile->getMemoryPtr(),gridFile->getSize()))
+        std::string fname = gridFile->getFileName();
+        if (getFileSize(fname.c_str()) <= 100)
         {
           mGridFileManager.deleteFileById(fileId);
           return nullptr;
