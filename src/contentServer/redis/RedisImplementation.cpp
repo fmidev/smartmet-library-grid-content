@@ -94,7 +94,7 @@ RedisImplementation::RedisImplementation()
         mMutex->unlock();
       }
 
-      if (mMutex == nullptr && tryCount >= 10)
+      if (mMutex == nullptr && tryCount > 12)
       {
         throw SmartMet::Spine::Exception(BCP,"Cannot init mutex!");
       }
