@@ -6,6 +6,7 @@
 #include <boost/functional/hash.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/interprocess/sync/named_mutex.hpp>
+#include <boost/interprocess/permissions.hpp>
 #include <boost/thread/thread_time.hpp>
 #include <fstream>
 #include <iostream>
@@ -72,10 +73,15 @@ RedisImplementation::RedisImplementation()
     mStartTime = time(nullptr);
     mRedisPort = 0;
     uint tryCount = 0;
+
+    permissions allow_all;
+    allow_all.set_unrestricted();
+    umask(0);
+
     mMutex = nullptr;
     while (mMutex == nullptr)
     {
-      mMutex = new named_mutex(open_or_create, "redis_mutex");
+      mMutex = new named_mutex(open_or_create, "redis_mutex",allow_all);
       if (!mMutex->timed_lock(boost::get_system_time() + boost::posix_time::seconds(10)))
       {
         tryCount++;
