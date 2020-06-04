@@ -26,16 +26,6 @@ class LuaFileCollection
     float           executeFunctionCall1(std::string& function,std::vector<float>& parameters);
     double          executeFunctionCall1(std::string& function,std::vector<double>& parameters);
 
-    // Type 2: Takes and returns an vector
-    void            executeFunctionCall2(std::string& function,uint columns,uint rows,std::vector<float>& inOutParameters);
-    void            executeFunctionCall2(std::string& function,uint columns,uint rows,std::vector<float>& inParameters,std::vector<float>& outParameters);
-    void            executeFunctionCall2(std::string& function,uint columns,uint rows,std::vector<double>& inOutParameters);
-    void            executeFunctionCall2(std::string& function,uint columns,uint rows,std::vector<double>& inParameters,std::vector<double>& outParameters);
-
-    // Type 3: Takes two vectors and returns one vector
-    void            executeFunctionCall3(std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters);
-    void            executeFunctionCall3(std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters);
-
     // Type 4: Takes two data vectors and coordinate vector, returns one vector
     void            executeFunctionCall4(std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters);
     void            executeFunctionCall4(std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters);
@@ -59,13 +49,10 @@ class LuaFileCollection
                       short forecastNumber,
                       short interpolationMethod);
 
-    // Type 7: Takes three vectors and returns one vector
-    void            executeFunctionCall7(std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& inParameters3,std::vector<float>& outParameters);
-    void            executeFunctionCall7(std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& inParameters3,std::vector<double>& outParameters);
 
-    // Type 8: Takes four vectors and returns one vector
-    void            executeFunctionCall8(std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& inParameters3,std::vector<float>& inParameters4,std::vector<float>& outParameters);
-    void            executeFunctionCall8(std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& inParameters3,std::vector<double>& inParameters4,std::vector<double>& outParameters);
+    // Type 9: Takes 1 to N vectors and returns one vector
+    void            executeFunctionCall9(std::string& function,uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters);
+    void            executeFunctionCall9(std::string& function,uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters);
 
     void            print(std::ostream& stream,uint level,uint optionFlags);
 

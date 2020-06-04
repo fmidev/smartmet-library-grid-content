@@ -61,7 +61,12 @@ float Function_multiply::executeFunctionCall1(std::vector<float>& parameters)
   try
   {
     if (parameters.size() == 1)
-      return parameters[0] * mMultiplyer;
+    {
+      if (parameters[0] != ParamValueMissing)
+        return parameters[0] * mMultiplyer;
+      else
+        return ParamValueMissing;
+    }
 
     throw Spine::Exception(BCP, "The parameters vector should contain only one value!");
   }
@@ -80,7 +85,12 @@ double Function_multiply::executeFunctionCall1(std::vector<double>& parameters)
   try
   {
     if (parameters.size() == 1)
-      return parameters[0] * mMultiplyer;
+    {
+      if (parameters[0] != ParamValueMissing)
+        return parameters[0] * mMultiplyer;
+      else
+        return ParamValueMissing;
+    }
 
     throw Spine::Exception(BCP, "The parameters vector should contain only one value!");
   }
@@ -91,6 +101,7 @@ double Function_multiply::executeFunctionCall1(std::vector<double>& parameters)
 }
 
 
+#if 0
 
 
 
@@ -101,7 +112,8 @@ void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<
     uint len = inOutParameters.size();
     for (uint t=0; t<len; t++)
     {
-      inOutParameters[t] *= mMultiplyer;
+      if (inOutParameters[t] != ParamValueMissing)
+        inOutParameters[t] *= mMultiplyer;
     }
   }
   catch (...)
@@ -122,7 +134,10 @@ void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<
     outParameters.reserve(inParameters.size());
     for (auto it = inParameters.begin();  it != inParameters.end(); ++it)
     {
-      outParameters.push_back(*it * mMultiplyer);
+      if (*it != ParamValueMissing)
+        outParameters.push_back(*it * mMultiplyer);
+      else
+        outParameters.push_back(ParamValueMissing);
     }
   }
   catch (...)
@@ -143,7 +158,10 @@ void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<
     outParameters.reserve(inParameters.size());
     for (auto it = inParameters.begin();  it != inParameters.end(); ++it)
     {
-      outParameters.push_back(*it * mMultiplyer);
+      if (*it != ParamValueMissing)
+        outParameters.push_back(*it * mMultiplyer);
+      else
+        outParameters.push_back(ParamValueMissing);
     }
   }
   catch (...)
@@ -163,7 +181,8 @@ void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<
     uint len = inOutParameters.size();
     for (uint t=0; t<len; t++)
     {
-      inOutParameters[t] *= mMultiplyer;
+      if (inOutParameters[t] != ParamValueMissing)
+        inOutParameters[t] *= mMultiplyer;
     }
   }
   catch (...)
@@ -187,8 +206,15 @@ void Function_multiply::executeFunctionCall3(uint columns,uint rows,std::vector<
       double a = inParameters1[t];
       double b = inParameters2[t];
 
-      float c = (float)a*b;
-      outParameters.push_back(c);
+      if (a != ParamValueMissing  &&  b != ParamValueMissing)
+      {
+        float c = (float)a*b;
+        outParameters.push_back(c);
+      }
+      else
+      {
+        outParameters.push_back(ParamValueMissing);
+      }
     }
   }
   catch (...)
@@ -210,12 +236,86 @@ void Function_multiply::executeFunctionCall3(uint columns,uint rows,std::vector<
     double a = inParameters1[t];
     double b = inParameters2[t];
 
-    double c = a*b;
-    outParameters.push_back(c);
+    if (a != ParamValueMissing  &&  b != ParamValueMissing)
+    {
+      double c = a*b;
+      outParameters.push_back(c);
+    }
+    else
+    {
+      outParameters.push_back(ParamValueMissing);
+    }
+  }
+}
+
+#endif
+
+
+
+
+void Function_multiply::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+{
+  try
+  {
+    if (inParameters.size() != 1)
+      return;
+
+    uint len = inParameters[0].size();
+    outParameters.reserve(len);
+    for (uint t=0; t<len; t++)
+    {
+      double a = inParameters[0][t];
+
+      if (a != ParamValueMissing)
+      {
+        float c = (float)(a * mMultiplyer);
+        outParameters.push_back(c);
+      }
+      else
+      {
+        outParameters.push_back(ParamValueMissing);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
 
+
+
+
+void Function_multiply::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+{
+  try
+  {
+    if (inParameters.size() != 1)
+      return;
+
+    uint len = inParameters[0].size();
+    outParameters.reserve(len);
+    for (uint t=0; t<len; t++)
+    {
+      double a = inParameters[0][t];
+
+      if (a != ParamValueMissing)
+      {
+        double c = (double)(a * mMultiplyer);
+        outParameters.push_back(c);
+      }
+      else
+      {
+        outParameters.push_back(ParamValueMissing);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
 
 
 

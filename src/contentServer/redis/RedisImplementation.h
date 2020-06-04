@@ -23,6 +23,7 @@ class RedisImplementation : public ServiceInterface
 
      virtual void   init(const char *redisAddress,int redisPort,const char *tablePrefix);
      virtual void   shutdown();
+     virtual void   syncFilenames();
 
      virtual void   lock(const char *function,uint line);
      virtual void   unlock();
@@ -250,6 +251,8 @@ class RedisImplementation : public ServiceInterface
      int            addFilename(std::string filename,uint fileId);
      int            deleteFilename(std::string filename);
      uint           getFileId(std::string filename);
+     void           getFilenames(std::map<std::string,uint>& fileList);
+
 
      redisContext*  mContext;
      std::string    mTablePrefix;

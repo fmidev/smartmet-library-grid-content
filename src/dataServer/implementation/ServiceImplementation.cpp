@@ -2,6 +2,11 @@
 #include "VirtualContentFactory_type1.h"
 #include "VirtualMessage.h"
 #include "../../functions/Function_add.h"
+#include "../../functions/Function_avg.h"
+#include "../../functions/Function_inPrcnt.h"
+#include "../../functions/Function_outPrcnt.h"
+#include "../../functions/Function_min.h"
+#include "../../functions/Function_max.h"
 #include "../../functions/Function_multiply.h"
 #include "../../functions/Function_sequence.h"
 #include "../../functions/Function_hypotenuse.h"
@@ -145,7 +150,7 @@ ServiceImplementation::ServiceImplementation()
     mEventProcessingActive = false;
     mRequestCountingActive = false;
     mContentRegistrationEnabled = false;
-    mVirtualContentEnabled = true;
+    mVirtualContentEnabled = false;
     mContentServerStartTime = 0;
     mLastVirtualFileRegistration = 0;
     mContentPreloadEnabled = true;
@@ -221,6 +226,12 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,std:
     k2f->addFunction(new Functions::Function_add(32.0));
 
     mFunctionCollection.addFunction("K2F",k2f);
+
+    mFunctionCollection.addFunction("AVG",new Functions::Function_avg());
+    mFunctionCollection.addFunction("MIN",new Functions::Function_min());
+    mFunctionCollection.addFunction("MAX",new Functions::Function_max());
+    mFunctionCollection.addFunction("IN_PRCNT",new Functions::Function_inPrcnt());
+    mFunctionCollection.addFunction("OUT_PRCNT",new Functions::Function_outPrcnt());
 
     // Radians to degrees
     mFunctionCollection.addFunction("RAD2DEG",new Functions::Function_multiply((360.0/2*3.1415926535)));
@@ -392,7 +403,7 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
     GRID::GridFile_sptr gridFile = mGridFileManager.getFileById(fileId);
     if (gridFile)
     {
-      if (mMemoryMapCheckEnabled &&  gridFile->isMemoryMapped())
+      if (mMemoryMapCheckEnabled  &&  !gridFile->isVirtual() && gridFile->isMemoryMapped())
       {
         std::string fname = gridFile->getFileName();
         if (getFileSize(fname.c_str()) <= 100)
@@ -4177,6 +4188,8 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
     if (!mVirtualContentEnabled)
       return;
 
+    mLastVirtualFileRegistration = time(nullptr);
+
     std::vector<T::FileAndContent> fileAndContentList;
 
     uint c = 0;
@@ -4405,27 +4418,29 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
 
     registerVirtualFiles(gridFileMap);
 
-    PRINT_DATA(mDebugLog,"* Removing old virtual file registrations\n");
-
     std::set<uint> idList;
     mGridFileManager.getVirtualFiles(idList);
 
+    PRINT_DATA(mDebugLog,"* Removing old virtual file registrations (%lu/%u)\n",idList.size(),fullContentList.getLength());
     if (mVirtualContentEnabled)
     {
+      std::set<uint> fileIdList;
       uint len = fullContentList.getLength();
+      uint testCount = 0;
       for (uint t=0; t<len; t++)
       {
         T::ContentInfo *cInfo = fullContentList.getContentInfoByIndex(t);
         if (cInfo != nullptr  &&  (cInfo->mFlags &  T::ContentInfo::Flags::VirtualContent) != 0)
         {
+          testCount++;
           if (idList.find(cInfo->mFileId) == idList.end())
           {
-            mContentServer->deleteFileInfoById(mServerSessionId,cInfo->mFileId);
+            fileIdList.insert(cInfo->mFileId);
           }
         }
       }
+      mContentServer->deleteFileInfoListByFileIdList(mServerSessionId,fileIdList);
     }
-
   }
   catch (...)
   {
@@ -5613,7 +5628,6 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *n
     if (mGridFileMap.size() > 10000  ||  (mGridFileMap.size() > 0  &&  (mLastVirtualFileRegistration + 60) < time(nullptr)))
     {
       registerVirtualFiles(mGridFileMap);
-      mLastVirtualFileRegistration = time(nullptr);
       mGridFileMap.clear();
     }
 

@@ -77,7 +77,12 @@ float Function_add::executeFunctionCall1(std::vector<float>& parameters)
   try
   {
     if (parameters.size() == 1)
-      return parameters[0] + mValueToAdd;
+    {
+      if (parameters[0] != ParamValueMissing)
+        return parameters[0] + mValueToAdd;
+      else
+        return ParamValueMissing;
+    }
 
     throw Spine::Exception(BCP, "The parameters vector should contain only one value!");
   }
@@ -96,7 +101,12 @@ double Function_add::executeFunctionCall1(std::vector<double>& parameters)
   try
   {
     if (parameters.size() == 1)
-      return parameters[0] + mValueToAdd;
+    {
+      if (parameters[0] != ParamValueMissing)
+        return parameters[0] + mValueToAdd;
+      else
+        return ParamValueMissing;
+    }
 
     throw Spine::Exception(BCP, "The parameters vector should contain only one value!");
   }
@@ -110,99 +120,28 @@ double Function_add::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
-void Function_add::executeFunctionCall2(uint columns,uint rows,std::vector<double>& inOutParameters)
+void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try
   {
-    uint len = inOutParameters.size();
-    for (uint t=0; t<len; t++)
-    {
-      inOutParameters[t] += mValueToAdd;
-    }
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
+    if (inParameters.size() != 1)
+      return;
 
-
-
-
-
-void Function_add::executeFunctionCall2(uint columns,uint rows,std::vector<double>& inParameters,std::vector<double>& outParameters)
-{
-  try
-  {
-    outParameters.reserve(inParameters.size());
-    for (auto it = inParameters.begin();  it != inParameters.end(); ++it)
-    {
-      outParameters.push_back(*it + mValueToAdd);
-    }
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-
-
-
-
-
-void Function_add::executeFunctionCall2(uint columns,uint rows,std::vector<float>& inParameters,std::vector<float>& outParameters)
-{
-  try
-  {
-    outParameters.reserve(inParameters.size());
-    for (auto it = inParameters.begin();  it != inParameters.end(); ++it)
-    {
-      outParameters.push_back(*it + mValueToAdd);
-    }
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-
-
-
-
-
-void Function_add::executeFunctionCall2(uint columns,uint rows,std::vector<float>& inOutParameters)
-{
-  try
-  {
-    uint len = inOutParameters.size();
-    for (uint t=0; t<len; t++)
-    {
-      inOutParameters[t] += mValueToAdd;
-    }
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-
-
-
-
-
-void Function_add::executeFunctionCall3(uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters)
-{
-  try
-  {
-    uint len = inParameters1.size();
+    uint len = inParameters[0].size();
     outParameters.reserve(len);
     for (uint t=0; t<len; t++)
     {
-      double a = inParameters1[t];
-      double b = inParameters2[t];
+      double a = inParameters[0][t];
 
-      float c = (float)a+b;
-      outParameters.push_back(c);
+      if (a != ParamValueMissing)
+      {
+        float c = (float)(a + mValueToAdd);
+        outParameters.push_back(c);
+      }
+      else
+      {
+        outParameters.push_back(ParamValueMissing);
+      }
     }
   }
   catch (...)
@@ -215,20 +154,35 @@ void Function_add::executeFunctionCall3(uint columns,uint rows,std::vector<float
 
 
 
-void Function_add::executeFunctionCall3(uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters)
+void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
-  uint len = inParameters1.size();
-  outParameters.reserve(len);
-  for (uint t=0; t<len; t++)
+  try
   {
-    double a = inParameters1[t];
-    double b = inParameters2[t];
+    if (inParameters.size() != 1)
+      return;
 
-    double c = a+b;
-    outParameters.push_back(c);
+    uint len = inParameters[0].size();
+    outParameters.reserve(len);
+    for (uint t=0; t<len; t++)
+    {
+      double a = inParameters[0][t];
+
+      if (a != ParamValueMissing)
+      {
+        double c = (double)(a + mValueToAdd);
+        outParameters.push_back(c);
+      }
+      else
+      {
+        outParameters.push_back(ParamValueMissing);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
-
 
 
 

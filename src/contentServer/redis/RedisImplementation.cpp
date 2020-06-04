@@ -2068,6 +2068,19 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
     // ### Checking if the filename already exists in the database.
 
     uint fileId = getFileId(fileInfo.mName);
+
+    if (fileId > 0)
+    {
+      T::FileInfo fInfo;
+      if (getFileById(fileId,fInfo) != Result::OK)
+      {
+        // The filename exists, but the actual FileInfo record does not.
+        deleteFilename(fileInfo.mName);
+        fileId = 0;
+        //printf("** Delete filename %s\n",fileInfo.mName.c_str());
+      }
+    }
+
     if (fileId > 0)
     {
       // ### File with the same name already exists. Let's return
@@ -2158,9 +2171,22 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
     uint fileId = getFileId(fileInfo.mName);
     if (fileId > 0)
     {
+      T::FileInfo fInfo;
+      if (getFileById(fileId,fInfo) != Result::OK)
+      {
+        // The filename exists, but the actual FileInfo record does not.
+        deleteFilename(fileInfo.mName);
+        fileId = 0;
+        //printf("** Delete filename %s\n",fileInfo.mName.c_str());
+      }
+    }
+
+    if (fileId > 0)
+    {
       //printf("** File exists %s\n",fileInfo.mName.c_str());
       // ### File with the same name already exists. Let's return
       // ### the current file-id.
+
 
       fileInfo.mFileId = fileId;
 
@@ -2292,10 +2318,25 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
 
       // ### Checking if the filename already exists in the database.
 
+      //printf("CREATE FILE %s\n",ff->mFileInfo.mName.c_str());
+
       uint fileId = getFileId(ff->mFileInfo.mName);
       if (fileId > 0)
       {
-        printf("** File exists %s\n",ff->mFileInfo.mName.c_str());
+        T::FileInfo fInfo;
+        if (getFileById(fileId,fInfo) != Result::OK)
+        {
+          // The filename exists, but the actual FileInfo record does not.
+          deleteFilename(ff->mFileInfo.mName);
+          fileId = 0;
+          //printf("** Delete filename %s\n",ff->mFileInfo.mName.c_str());
+        }
+      }
+
+      if (fileId > 0)
+      {
+        //printf("** File exists %s\n",ff->mFileInfo.mName.c_str());
+
         // ### File with the same name already exists. Let's return
         // ### the current file-id.
 
@@ -2460,13 +2501,19 @@ int RedisImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::strin
     if (fileId == 0)
       return Result::UNKNOWN_FILE_NAME;
 
-
     deleteFilename(filename);
+
+    T::FileInfo fileInfo;
+    if (getFileById(fileId,fileInfo) != Result::OK)
+    {
+      return Result::UNKNOWN_FILE_ID;
+    }
+
     int result = deleteFileById(fileId,true);
 
     if (result == Result::OK)
     {
-      if (strncmp(filename.c_str(),"VIRT-",5) == 0)
+      if (fileInfo.mFileType == T::FileTypeValue::Virtual)
         addEvent(EventType::FILE_DELETED,fileId,T::FileTypeValue::Virtual,0,0);
       else
         addEvent(EventType::FILE_DELETED,fileId,0,0,0);
@@ -2806,8 +2853,13 @@ int RedisImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,
 
     for (auto it=fileIdList.begin(); it!=fileIdList.end(); ++it)
     {
-      deleteFileById(*it,true);
-      addEvent(EventType::FILE_DELETED,*it,0,0,0);
+      T::FileInfo fileInfo;
+      if (getFileById(*it,fileInfo) == Result::OK)
+      {
+        deleteFilename(fileInfo.mName);
+        deleteFileById(*it,true);
+        addEvent(EventType::FILE_DELETED,*it,0,0,0);
+      }
     }
 
     return Result::OK;
@@ -8580,6 +8632,74 @@ int RedisImplementation::deleteFilename(std::string filename)
   }
 }
 
+
+
+
+
+
+void RedisImplementation::getFilenames(std::map<std::string,uint>& fileList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+    if (!isConnectionValid())
+      return;
+
+
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"HGETALL %sfilenames",mTablePrefix.c_str()));
+    if (reply == nullptr)
+    {
+       closeConnection();
+      return;
+    }
+
+    if (reply->type == REDIS_REPLY_ARRAY)
+    {
+      for (uint t = 0; t < reply->elements; t=t+2)
+      {
+        if (reply->element[t] &&  reply->element[t]->str  &&  reply->element[t+1] &&  reply->element[t+1]->str)
+        {
+          std::string name = reply->element[t]->str;
+          uint id = toInt64(reply->element[t+1]->str);
+          fileList.insert(std::pair<std::string,uint>(name,id));
+        }
+      }
+    }
+    freeReplyObject(reply);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void RedisImplementation::syncFilenames()
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::map<std::string,uint> fileList;
+    getFilenames(fileList);
+
+    for (auto it = fileList.begin(); it != fileList.end(); ++it)
+    {
+      T::FileInfo fileInfo;
+      if (getFileById(it->second,fileInfo) != Result::OK)
+      {
+        deleteFilename(it->first);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
 
 
 }

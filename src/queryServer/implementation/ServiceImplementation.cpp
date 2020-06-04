@@ -1578,7 +1578,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
                   T::GridValue rec(lastRec.mX, lastRec.mY, val);
                   pValues.mValueList.addGridValue(rec);
                 }
-                  break;
+                break;
 
                 case 5:
                 {
@@ -1587,7 +1587,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
                   T::GridValue rec(lastRec.mX, lastRec.mY, val);
                   pValues.mValueList.addGridValue(rec);
                 }
-                  break;
+                break;
               }
 
               pValues.mProducerId = producerId;
@@ -6302,7 +6302,7 @@ void ServiceImplementation::getGridValues(
                               {
                                 constParams.push_back(toDouble(paramParts[1].c_str()));
                               }
-                              else if (paramParts[0] == "Q")
+                              else if (paramParts[0] == "Q" ||  paramParts[0] == "P")
                               {
                                 std::vector < std::string > pv;
                                 splitString(paramParts[1], ',', pv);
@@ -6361,6 +6361,10 @@ void ServiceImplementation::getGridValues(
                                   //printf("PARAM : %s %d\n",a_parameterKey.c_str(),valList.mValueList.getLength());
                                   //valList.mValueList.print(std::cout,0,0);
                                   valueList.mFlags = valList.mFlags;
+
+                                  if (paramParts[0] == "Q")
+                                    valList.mFlags |= (1 << 31);
+
                                   valueListVec.push_back(valList);
                                 }
                               }
@@ -6400,7 +6404,9 @@ void ServiceImplementation::getGridValues(
                                   std::vector<double> vec;
                                   splitString(v.mValueString, ';', vec);
 
-                                  params.push_back(vec.size());
+                                  if (vList->mFlags & (1 << 31))
+                                    params.push_back(vec.size());
+
                                   if (vec.size() > 0)
                                   {
                                     for (auto it = vec.begin(); it != vec.end(); ++it)
@@ -6409,9 +6415,18 @@ void ServiceImplementation::getGridValues(
                                 }
                                 else
                                 {
-                                  params.push_back(1);
+                                  if (vList->mFlags & (1 << 31))
+                                    params.push_back(1);
+
                                   params.push_back(v.mValue);
                                 }
+                              }
+                              else
+                              {
+                                if (vList->mFlags & (1 << 31))
+                                  params.push_back(1);
+
+                                params.push_back(ParamValueMissing);
                               }
                             }
 

@@ -152,148 +152,6 @@ double FunctionCollection::executeFunctionCall1(std::string& functionName,std::v
 
 
 
-void FunctionCollection::executeFunctionCall2(std::string& functionName,uint columns,uint rows,std::vector<double>& inOutParameters)
-{
-  try
-  {
-    auto function = getFunction(functionName);
-    if (function == nullptr)
-    {
-      Spine::Exception exception(BCP, "Function not found!");
-      exception.addParameter("Function name",functionName);
-      throw exception;
-    }
-
-    function->executeFunctionCall2(columns,rows,inOutParameters);
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-
-
-
-
-
-void FunctionCollection::executeFunctionCall2(std::string& functionName,uint columns,uint rows,std::vector<double>& inParameters,std::vector<double>& outParameters)
-{
-  try
-  {
-    auto function = getFunction(functionName);
-    if (function == nullptr)
-    {
-      Spine::Exception exception(BCP, "Function not found!");
-      exception.addParameter("Function name",functionName);
-      throw exception;
-    }
-
-    function->executeFunctionCall2(columns,rows,inParameters,outParameters);
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-
-
-
-
-
-void FunctionCollection::executeFunctionCall2(std::string& functionName,uint columns,uint rows,std::vector<float>& inOutParameters)
-{
-  try
-  {
-    auto function = getFunction(functionName);
-    if (function == nullptr)
-    {
-      Spine::Exception exception(BCP, "Function not found!");
-      exception.addParameter("Function name",functionName);
-      throw exception;
-    }
-
-    function->executeFunctionCall2(columns,rows,inOutParameters);
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-
-
-
-
-void FunctionCollection::executeFunctionCall2(std::string& functionName,uint columns,uint rows,std::vector<float>& inParameters,std::vector<float>& outParameters)
-{
-  try
-  {
-    auto function = getFunction(functionName);
-    if (function == nullptr)
-    {
-      Spine::Exception exception(BCP, "Function not found!");
-      exception.addParameter("Function name",functionName);
-      throw exception;
-    }
-
-    function->executeFunctionCall2(columns,rows,inParameters,outParameters);
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-
-
-
-
-void FunctionCollection::executeFunctionCall3(std::string& functionName,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters)
-{
-  try
-  {
-    auto function = getFunction(functionName);
-    if (function == nullptr)
-    {
-      Spine::Exception exception(BCP, "Function not found!");
-      exception.addParameter("Function name",functionName);
-      throw exception;
-    }
-
-    function->executeFunctionCall3(columns,rows,inParameters1,inParameters2,outParameters);
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-
-
-
-
-
-void FunctionCollection::executeFunctionCall3(std::string& functionName,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters)
-{
-  try
-  {
-    auto function = getFunction(functionName);
-    if (function == nullptr)
-    {
-      Spine::Exception exception(BCP, "Function not found!");
-      exception.addParameter("Function name",functionName);
-      throw exception;
-    }
-
-    function->executeFunctionCall3(columns,rows,inParameters1,inParameters2,outParameters);
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-
-
-
-
-
 void FunctionCollection::executeFunctionCall4(std::string& functionName,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters)
 {
   try
@@ -342,7 +200,7 @@ void FunctionCollection::executeFunctionCall4(std::string& functionName,uint col
 
 
 
-void FunctionCollection::executeFunctionCall7(std::string& functionName,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& inParameters3,std::vector<float>& outParameters)
+void FunctionCollection::executeFunctionCall9(std::string& functionName,uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try
   {
@@ -354,7 +212,7 @@ void FunctionCollection::executeFunctionCall7(std::string& functionName,uint col
       throw exception;
     }
 
-    function->executeFunctionCall7(columns,rows,inParameters1,inParameters2,inParameters3,outParameters);
+    function->executeFunctionCall9(columns,rows,inParameters,extParameters,outParameters);
   }
   catch (...)
   {
@@ -366,7 +224,7 @@ void FunctionCollection::executeFunctionCall7(std::string& functionName,uint col
 
 
 
-void FunctionCollection::executeFunctionCall7(std::string& functionName,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& inParameters3,std::vector<double>& outParameters)
+void FunctionCollection::executeFunctionCall9(std::string& functionName,uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
   {
@@ -378,62 +236,13 @@ void FunctionCollection::executeFunctionCall7(std::string& functionName,uint col
       throw exception;
     }
 
-    function->executeFunctionCall7(columns,rows,inParameters1,inParameters2,inParameters3,outParameters);
+    function->executeFunctionCall9(columns,rows,inParameters,extParameters,outParameters);
   }
   catch (...)
   {
     throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
-
-
-
-
-
-void FunctionCollection::executeFunctionCall8(std::string& functionName,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& inParameters3,std::vector<float>& inParameters4,std::vector<float>& outParameters)
-{
-  try
-  {
-    auto function = getFunction(functionName);
-    if (function == nullptr)
-    {
-      Spine::Exception exception(BCP, "Function not found!");
-      exception.addParameter("Function name",functionName);
-      throw exception;
-    }
-
-    function->executeFunctionCall8(columns,rows,inParameters1,inParameters2,inParameters3,inParameters4,outParameters);
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-
-
-
-
-
-void FunctionCollection::executeFunctionCall8(std::string& functionName,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& inParameters3,std::vector<double>& inParameters4,std::vector<double>& outParameters)
-{
-  try
-  {
-    auto function = getFunction(functionName);
-    if (function == nullptr)
-    {
-      Spine::Exception exception(BCP, "Function not found!");
-      exception.addParameter("Function name",functionName);
-      throw exception;
-    }
-
-    function->executeFunctionCall8(columns,rows,inParameters1,inParameters2,inParameters3,inParameters4,outParameters);
-  }
-  catch (...)
-  {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-
 
 
 

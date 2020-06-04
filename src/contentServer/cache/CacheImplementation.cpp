@@ -5385,23 +5385,21 @@ void CacheImplementation::event_fileDeleted(T::EventInfo& eventInfo)
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
+    int cnt = mContentInfoList[0].markDeletedByFileId(eventInfo.mId1);
+    if (cnt > 0)
+      mContentDeleteCount += cnt;
+
+    // printf("--- content delete found  %u\n",cnt);
+
     T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(eventInfo.mId1);
     if (fileInfo != nullptr)
     {
-      mContentInfoList[0].markDeletedByFileId(fileInfo->mFileId);
-      mContentDeleteCount++;
-
-      //if (mDelayedContentDeleteList.find(fileInfo->mFileId) == mDelayedContentDeleteList.end())
-//        mDelayedContentDeleteList.insert(fileInfo->mFileId);
-
-      //for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      //  mContentInfoList[t].deleteContentInfoByFileId(eventInfo.mId1);
-
       mFileInfoList.markFileInfoDeletedById(eventInfo.mId1);
       mFileDeleteCount++;
-
-      //mFileInfoListByName.deleteFileInfoById(eventInfo.mId1);
-      //mFileInfoList.deleteFileInfoById(eventInfo.mId1);
+    }
+    else
+    {
+      // printf("--- file not found\n");
     }
   }
   catch (...)
@@ -5419,7 +5417,7 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: fileUpdated(%u)\n",eventInfo.mEventId,eventInfo.mId1);
+    // printf("EVENT[%llu]: fileUpdated(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
@@ -5792,7 +5790,7 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: contentAdded(%u,%u)\n",eventInfo.mEventId,eventInfo.mId1,eventInfo.mId2);
+    // printf("EVENT[%llu]: contentAdded(%u,%u)\n",eventInfo.mEventId,eventInfo.mId1,eventInfo.mId2);
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 

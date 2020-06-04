@@ -9,12 +9,12 @@ namespace Functions
 {
 
 
-class Function_hypotenuse : public Function
+class Function_min : public Function
 {
   public:
-                      Function_hypotenuse();
-                      Function_hypotenuse(const Function_hypotenuse& function);
-    virtual           ~Function_hypotenuse();
+                      Function_min();
+                      Function_min(const Function_min& function);
+    virtual           ~Function_min();
 
     // Type 1: Takes one or several parameters, returns one value
     virtual float     executeFunctionCall1(std::vector<float>& parameters);
@@ -25,9 +25,7 @@ class Function_hypotenuse : public Function
     virtual void      executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters);
 
     virtual Function* duplicate();
-    virtual void      print(std::ostream& stream,uint level,uint optionFlags);
 };
-
 
 
 }  // namespace Functions

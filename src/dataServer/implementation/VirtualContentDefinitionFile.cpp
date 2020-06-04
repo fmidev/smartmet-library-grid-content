@@ -134,6 +134,36 @@ void VirtualContentDefinitionFile::getContentDefinitions(T::ContentInfo& content
 
     for (auto it = mContentDefList.begin(); it != mContentDefList.end(); ++it)
     {
+      char tmp[1000];
+      char *p = tmp;
+      p += sprintf(p,"%s:%s:%d:%d:%d",contentInfo.mFmiParameterName.c_str(),producerName.c_str(),contentInfo.mGeometryId,
+          contentInfo.mFmiParameterLevelId,contentInfo.mParameterLevel);
+
+      std::string s1 = toLowerString(tmp);
+      std::string s2;
+
+      if (contentInfo.mForecastNumber > 0)
+      {
+        p += sprintf(p,":%d:%d",contentInfo.mForecastType,contentInfo.mForecastNumber);
+        s2 = toLowerString(tmp);
+      }
+      else
+      {
+        p += sprintf(p,":%d",contentInfo.mForecastType);
+        s2 = toLowerString(tmp);
+      }
+
+
+      //if (strcasecmp("ECBSF",producerName.c_str()) == 0)
+      //  printf("FIND [%s]\n",s.c_str());
+
+      if ((contentInfo.mForecastNumber <= 0  &&  it->mSourceParameterNames.find(s1) != it->mSourceParameterNames.end()) ||
+          it->mSourceParameterNames.find(s2) != it->mSourceParameterNames.end())
+      {
+        definitions.push_back(*it);
+        //printf("--- FOUND %lu\n",definitions.size());
+      }
+/*
       for (auto sp = it->mSourceParameters.begin(); sp != it->mSourceParameters.end(); ++sp)
       {
         if (strcasecmp(sp->mParameterName.c_str(),contentInfo.mFmiParameterName.c_str()) == 0)
@@ -159,6 +189,7 @@ void VirtualContentDefinitionFile::getContentDefinitions(T::ContentInfo& content
           }
         }
       }
+      */
     }
   }
   catch (...)
@@ -185,29 +216,33 @@ void VirtualContentDefinitionFile::loadFile()
 
     mContentDefList.clear();
 
-    char st[1000];
+    char st[10000];
 
     while (!feof(file))
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (fgets(st,10000,file) != nullptr  &&  st[0] != '#')
       {
         std::vector<std::string> partList;
         splitString(st,';',partList);
 
-        if (partList.size() >= 4)
+        if (partList.size() >= 5)
         {
           VirtualContentDefinition rec;
           std::vector<std::string> params;
 
           rec.mVirtualParameter.set(partList[0]);
           splitString(partList[1],',',params);
+
           for (auto it = params.begin(); it != params.end(); ++it)
           {
             rec.mSourceParameters.push_back(ParameterDef(*it));
+            //printf("[%s]\n",it->c_str());
+            rec.mSourceParameterNames.insert(toLowerString(*it));
           }
 
           rec.mFunctionName = partList[2];
           rec.mFunctionCallMethod = toInt64(partList[3].c_str());
+          splitString(partList[4],',',rec.mFunctionParameters);
           mContentDefList.push_back(rec);
         }
       }

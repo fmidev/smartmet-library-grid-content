@@ -72,55 +72,30 @@ double Function_hypotenuse::executeFunctionCall1(std::vector<double>& parameters
 
 
 
-void Function_hypotenuse::executeFunctionCall2(uint columns,uint rows,std::vector<double>& inOutParameters)
-{
-  throw Spine::Exception(BCP, "Not implemented!");
-}
 
-
-
-
-
-void Function_hypotenuse::executeFunctionCall2(uint columns,uint rows,std::vector<double>& inParameters,std::vector<double>& outParameters)
-{
-  throw Spine::Exception(BCP, "Not implemented!");
-}
-
-
-
-
-
-void Function_hypotenuse::executeFunctionCall2(uint columns,uint rows,std::vector<float>& inOutParameters)
-{
-  throw Spine::Exception(BCP, "Not implemented!");
-}
-
-
-
-
-
-void Function_hypotenuse::executeFunctionCall2(uint columns,uint rows,std::vector<float>& inParameters,std::vector<float>& outParameters)
-{
-  throw Spine::Exception(BCP, "Not implemented!");
-}
-
-
-
-
-
-void Function_hypotenuse::executeFunctionCall3(uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters)
+void Function_hypotenuse::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try
   {
-    uint len = inParameters1.size();
+    if (inParameters.size() != 2)
+      return;
+
+    uint len = inParameters[0].size();
     outParameters.reserve(len);
     for (uint t=0; t<len; t++)
     {
-      double a = inParameters1[t];
-      double b = inParameters2[t];
+      double a = inParameters[0][t];
+      double b = inParameters[1][t];
 
-      float c = (float)sqrt(a*a+b*b);
-      outParameters.push_back(c);
+      if (a != ParamValueMissing and b != ParamValueMissing)
+      {
+        float c = (float)sqrt(a*a+b*b);
+        outParameters.push_back(c);
+      }
+      else
+      {
+        outParameters.push_back(ParamValueMissing);
+      }
     }
   }
   catch (...)
@@ -133,17 +108,34 @@ void Function_hypotenuse::executeFunctionCall3(uint columns,uint rows,std::vecto
 
 
 
-void Function_hypotenuse::executeFunctionCall3(uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters)
+void Function_hypotenuse::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
-  uint len = inParameters1.size();
-  outParameters.reserve(len);
-  for (uint t=0; t<len; t++)
+  try
   {
-    double a = inParameters1[t];
-    double b = inParameters2[t];
+    if (inParameters.size() != 2)
+      return;
 
-    double c = sqrt(a*a+b*b);
-    outParameters.push_back(c);
+    uint len = inParameters[0].size();
+    outParameters.reserve(len);
+    for (uint t=0; t<len; t++)
+    {
+      double a = inParameters[0][t];
+      double b = inParameters[1][t];
+
+      if (a != ParamValueMissing and b != ParamValueMissing)
+      {
+        double c = (double)sqrt(a*a+b*b);
+        outParameters.push_back(c);
+      }
+      else
+      {
+        outParameters.push_back(ParamValueMissing);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
