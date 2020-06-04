@@ -235,15 +235,34 @@ void VirtualContentDefinitionFile::loadFile()
 
           for (auto it = params.begin(); it != params.end(); ++it)
           {
-            rec.mSourceParameters.push_back(ParameterDef(*it));
-            //printf("[%s]\n",it->c_str());
-            rec.mSourceParameterNames.insert(toLowerString(*it));
+            ParameterDef pdef(*it);
+            std::vector<std::string> numbers;
+            splitString(pdef.mForecastNumber,'-',numbers);
+            if (numbers.size() == 2  &&  numbers[0] > " ")
+            {
+              int startp = toInt64(numbers[0]);
+              int endp = toInt64(numbers[1]);
+              while (startp <= endp)
+              {
+                ParameterDef newdef(pdef);
+                newdef.mForecastNumber = std::to_string(startp);
+                rec.mSourceParameters.push_back(newdef);
+                rec.mSourceParameterNames.insert(toLowerString(newdef.getName()));
+                startp++;
+              }
+            }
+            else
+            {
+              rec.mSourceParameters.push_back(pdef);
+              rec.mSourceParameterNames.insert(toLowerString(*it));
+            }
           }
 
           rec.mFunctionName = partList[2];
           rec.mFunctionCallMethod = toInt64(partList[3].c_str());
           splitString(partList[4],',',rec.mFunctionParameters);
           mContentDefList.push_back(rec);
+          //rec.print(std::cout,0,0);
         }
       }
     }
