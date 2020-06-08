@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 20.5.19
+Version: 20.6.8
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -22,9 +22,9 @@ BuildRequires: omniORB-devel
 BuildRequires: postgresql95-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 20.4.18
-BuildRequires: smartmet-library-grid-files-devel >= 20.4.30
+BuildRequires: smartmet-library-grid-files-devel >= 20.6.8
 BuildRequires: smartmet-library-macgyver-devel >= 20.4.18
-BuildRequires: smartmet-library-spine-devel >= 20.5.12
+BuildRequires: smartmet-library-spine-devel >= 20.5.27
 Requires: boost169-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
@@ -32,9 +32,9 @@ Requires: lua-devel
 Requires: omniORB
 Requires: postgresql95
 Requires: smartmet-library-gis >= 20.4.18
-Requires: smartmet-library-grid-files >= 20.4.30
+Requires: smartmet-library-grid-files >= 20.6.8
 Requires: smartmet-library-macgyver >= 20.4.18
-Requires: smartmet-library-spine >= 20.5.12
+Requires: smartmet-library-spine >= 20.5.27
 Provides: %{SPECNAME}
 
 %description
@@ -76,6 +76,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Jun  8 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.6.8-1.fmi
+- Improved virtual file functionality
+- Improved forecast number handling
 * Tue May 19 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.5.19-1.fmi
 - Allow redis locks from different users
 * Mon May 18 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.5.18-1.fmi
