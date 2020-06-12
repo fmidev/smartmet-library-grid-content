@@ -99,6 +99,31 @@ ParameterDef::ParameterDef(const std::string& paramStr)
 
 
 
+
+std::string ParameterDef::getName()
+{
+  try
+  {
+    std::string name = mParameterName + ":" + mProducerName  + ":" + mGeometryId  + ":" + mLevelId  + ":" + mLevel;
+
+    if (mForecastType > " ")
+      name = name + ":" + mForecastType;
+
+    if (mForecastNumber > " ")
+      name = name + ":" + mForecastNumber;
+
+    return name;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 void ParameterDef::set(const std::string& paramStr)
 {
   try

@@ -722,9 +722,21 @@ uint ContentInfoList::markDeletedByFileId(uint fileId)
     }
 
 
-    // The array is not sorted, so we should just remove the content.
+    // The array is not sorted.
 
-    return deleteContentInfoByFileId(fileId);
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info->mFileId == fileId)
+        {
+          info->mFlags = info->mFlags | T::ContentInfo::Flags::DeletedContent;
+          cnt++;
+        }
+      }
+    }
+    return cnt;
   }
   catch (...)
   {

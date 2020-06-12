@@ -16,12 +16,13 @@ namespace GRID
 
 
 
-VirtualMessage::VirtualMessage(GRID::VirtualGridFile *gridFile,std::vector<SourceMessage>& sourceMessages)
+VirtualMessage::VirtualMessage(GRID::VirtualGridFile *gridFile,DataServer::ParameterDef& paramDef,std::vector<SourceMessage>& sourceMessages)
 {
   FUNCTION_TRACE
   try
   {
     mVirtualGridFile = gridFile;
+    mParamDef = paramDef;
     mSourceMessages = sourceMessages;
     mLuaFileCollection = nullptr;
     mFunctionCallMethod = 0;
@@ -89,7 +90,7 @@ void VirtualMessage::initMessagePtrs() const
 
 
 
-void VirtualMessage::setFunction(Functions::FunctionCollection *functionCollection,Lua::LuaFileCollection *luaFileCollection,std::string functionName,uint functionCallMethod)
+void VirtualMessage::setFunction(Functions::FunctionCollection *functionCollection,Lua::LuaFileCollection *luaFileCollection,std::string functionName,uint functionCallMethod,std::vector<double>& functionParameters)
 {
   FUNCTION_TRACE
   try
@@ -98,6 +99,7 @@ void VirtualMessage::setFunction(Functions::FunctionCollection *functionCollecti
     mLuaFileCollection = luaFileCollection;
     mFunctionName = functionName;
     mFunctionCallMethod = functionCallMethod;
+    mFunctionParameters = functionParameters;
   }
   catch (...)
   {
@@ -181,7 +183,7 @@ short VirtualMessage::getForecastType() const
   try
   {
     initMessagePtrs();
-    return mMessageList[0]->getForecastType();
+    return toInt64(mParamDef.mForecastType);
   }
   catch (...)
   {
@@ -204,7 +206,7 @@ short VirtualMessage::getForecastNumber() const
   try
   {
     initMessagePtrs();
-    return mMessageList[0]->getForecastNumber();
+    return toInt64(mParamDef.mForecastNumber);
   }
   catch (...)
   {
@@ -227,7 +229,7 @@ T::GeometryId VirtualMessage::getGridGeometryId() const
   try
   {
     initMessagePtrs();
-    return mMessageList[0]->getGridGeometryId();
+    return toInt64(mParamDef.mGeometryId);
   }
   catch (...)
   {
@@ -831,80 +833,32 @@ void VirtualMessage::getGridValueByPoint(T::CoordinateType coordinateType,double
   {
     initMessagePtrs();
 
-    T::ParamValue value1 = 0;
-    T::ParamValue value2 = 0;
-    T::ParamValue value3 = 0;
-    T::ParamValue value4 = 0;
-
-    std::vector<double> inParameters1;
-    std::vector<double> inParameters2;
-    std::vector<double> inParameters3;
-    std::vector<double> inParameters4;
     std::vector<double> outParameters;
-    std::vector<float> angles;
-
-    mMessageList[0]->getGridValueByPoint(coordinateType,x,y,interpolationMethod,value1);
-    inParameters1.push_back(value1);
 
     switch (mFunctionCallMethod)
     {
-      case 2:
-        if (mMessageList.size() != 1)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
-
-        executeFunctionCall2(inParameters1,outParameters);
-        break;
-
-      case 3:
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
-
-        mMessageList[1]->getGridValueByPoint(coordinateType,x,y,interpolationMethod,value2);
-        inParameters2.push_back(value2);
-        executeFunctionCall3(inParameters1,inParameters2,outParameters);
-        break;
-
-      case 4:
+      case 9:
       {
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+        if (mMessageList.size() < 1)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters!");
 
-        mMessageList[1]->getGridValueByPoint(coordinateType,x,y,interpolationMethod,value2);
-        inParameters2.push_back(value2);
+        std::vector<std::vector<double>> inParameters;
 
-        float angle = mMessageList[0]->getGridPointAngle(coordinateType,x,y);
-        angles.push_back(angle);
-
-        executeFunctionCall4(inParameters1,inParameters2,angles,outParameters);
+        uint sz = mMessageList.size();
+        for (uint t=0; t<sz; t++)
+        {
+          T::ParamValue val = 0;
+          std::vector<double> inValues;
+          mMessageList[t]->getGridValueByPoint(coordinateType,x,y,interpolationMethod,val);
+          inValues.push_back(val);
+          inParameters.push_back(inValues);
+        }
+        executeFunctionCall9(1,1,inParameters,outParameters);
+        break;
       }
-      break;
-
-      case 7:
-        if (mMessageList.size() != 3)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected three)!");
-
-        mMessageList[1]->getGridValueByPoint(coordinateType,x,y,interpolationMethod,value2);
-        inParameters2.push_back(value2);
-        mMessageList[2]->getGridValueByPoint(coordinateType,x,y,interpolationMethod,value3);
-        inParameters3.push_back(value3);
-        executeFunctionCall7(inParameters1,inParameters2,inParameters3,outParameters);
-        break;
-
-      case 8:
-        if (mMessageList.size() != 4)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected four)!");
-
-        mMessageList[1]->getGridValueByPoint(coordinateType,x,y,interpolationMethod,value2);
-        inParameters2.push_back(value2);
-        mMessageList[2]->getGridValueByPoint(coordinateType,x,y,interpolationMethod,value3);
-        inParameters3.push_back(value3);
-        mMessageList[3]->getGridValueByPoint(coordinateType,x,y,interpolationMethod,value4);
-        inParameters4.push_back(value4);
-        executeFunctionCall8(inParameters1,inParameters2,inParameters3,inParameters4,outParameters);
-        break;
     }
 
-    if (outParameters.size() == inParameters1.size())
+    if (outParameters.size() >= 1)
       value = outParameters[0];
   }
   catch (...)
@@ -926,69 +880,22 @@ void VirtualMessage::getGridValueListByCircle(T::CoordinateType coordinateType,d
 
     switch (mFunctionCallMethod)
     {
-      case 2:
-        if (mMessageList.size() != 1)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
-
-        mMessageList[0]->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList);
-        executeFunctionCall2(valueList);
-        break;
-
-      case 3:
+      case 9:
       {
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+        if (mMessageList.size() < 1)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters!");
 
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        mMessageList[0]->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList1);
-        mMessageList[1]->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList2);
-        executeFunctionCall3(valueList1,valueList2,valueList);
-      }
-      break;
+        std::vector<T::GridValueList> inValueList;
 
-      case 4:
-      {
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+        uint sz = mMessageList.size();
+        for (uint t=0; t<sz; t++)
+        {
+          T::GridValueList valList;
+          mMessageList[t]->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valList);
 
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        mMessageList[0]->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList1);
-        mMessageList[1]->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList2);
-        executeFunctionCall4(coordinateType,valueList1,valueList2,valueList);
-      }
-      break;
-
-      case 7:
-      {
-        if (mMessageList.size() != 3)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected three)!");
-
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        T::GridValueList valueList3;
-        mMessageList[0]->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList1);
-        mMessageList[1]->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList2);
-        mMessageList[2]->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList3);
-        executeFunctionCall7(valueList1,valueList2,valueList3,valueList);
-      }
-      break;
-
-      case 8:
-      {
-        if (mMessageList.size() != 4)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected four)!");
-
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        T::GridValueList valueList3;
-        T::GridValueList valueList4;
-        mMessageList[0]->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList1);
-        mMessageList[1]->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList2);
-        mMessageList[2]->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList3);
-        mMessageList[3]->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valueList4);
-        executeFunctionCall8(valueList1,valueList2,valueList3,valueList4,valueList);
+          inValueList.push_back(valList);
+        }
+        executeFunctionCall9(inValueList,valueList);
       }
       break;
     }
@@ -1012,69 +919,22 @@ void VirtualMessage::getGridValueListByPointList(T::CoordinateType coordinateTyp
 
     switch (mFunctionCallMethod)
     {
-      case 2:
-        if (mMessageList.size() != 1)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
-
-        mMessageList[0]->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList);
-        executeFunctionCall2(valueList);
-        break;
-
-      case 3:
+      case 9:
       {
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+        if (mMessageList.size() < 1)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters!");
 
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        mMessageList[0]->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList1);
-        mMessageList[1]->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList2);
-        executeFunctionCall3(valueList1,valueList2,valueList);
-      }
-      break;
+        std::vector<T::GridValueList> inValueList;
 
-      case 4:
-      {
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+        uint sz = mMessageList.size();
+        for (uint t=0; t<sz; t++)
+        {
+          T::GridValueList valList;
+          mMessageList[t]->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valList);
 
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        mMessageList[0]->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList1);
-        mMessageList[1]->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList2);
-        executeFunctionCall4(coordinateType,valueList1,valueList2,valueList);
-      }
-      break;
-
-      case 7:
-      {
-        if (mMessageList.size() != 3)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected three)!");
-
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        T::GridValueList valueList3;
-        mMessageList[0]->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList1);
-        mMessageList[1]->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList2);
-        mMessageList[2]->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList3);
-        executeFunctionCall7(valueList1,valueList2,valueList3,valueList);
-      }
-      break;
-
-      case 8:
-      {
-        if (mMessageList.size() != 4)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected four)!");
-
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        T::GridValueList valueList3;
-        T::GridValueList valueList4;
-        mMessageList[0]->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList1);
-        mMessageList[1]->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList2);
-        mMessageList[2]->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList3);
-        mMessageList[3]->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valueList4);
-        executeFunctionCall8(valueList1,valueList2,valueList3,valueList4,valueList);
+          inValueList.push_back(valList);
+        }
+        executeFunctionCall9(inValueList,valueList);
       }
       break;
     }
@@ -1098,68 +958,22 @@ void VirtualMessage::getGridValueListByPolygon(T::CoordinateType coordinateType,
 
     switch (mFunctionCallMethod)
     {
-      case 2:
-        if (mMessageList.size() != 1)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
-
-        mMessageList[0]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList);
-        executeFunctionCall2(valueList);
-        break;
-
-      case 3:
+      case 9:
       {
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+        if (mMessageList.size() < 1)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters!");
 
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        mMessageList[0]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList1);
-        mMessageList[1]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList2);
-        executeFunctionCall3(valueList1,valueList2,valueList);
-      }
-      break;
+        std::vector<T::GridValueList> inValueList;
 
-      case 4:
-      {
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+        uint sz = mMessageList.size();
+        for (uint t=0; t<sz; t++)
+        {
+          T::GridValueList valList;
+          mMessageList[t]->getGridValueListByPolygon(coordinateType,polygonPoints,valList);
 
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        mMessageList[0]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList1);
-        mMessageList[1]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList2);
-        executeFunctionCall4(coordinateType,valueList1,valueList2,valueList);
-      }
-      break;
-
-      case 7:
-      {
-        if (mMessageList.size() != 3)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected three)!");
-
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        T::GridValueList valueList3;
-        mMessageList[0]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList1);
-        mMessageList[1]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList2);
-        mMessageList[2]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList3);
-        executeFunctionCall7(valueList1,valueList2,valueList3,valueList);
-      }
-      break;
-
-      case 8:
-      {
-        if (mMessageList.size() != 4)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected four)!");
-
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        T::GridValueList valueList3;
-        T::GridValueList valueList4;
-        mMessageList[0]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList1);
-        mMessageList[1]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList2);
-        mMessageList[2]->getGridValueListByPolygon(coordinateType,polygonPoints,valueList3);
-        executeFunctionCall8(valueList1,valueList2,valueList3,valueList4,valueList);
+          inValueList.push_back(valList);
+        }
+        executeFunctionCall9(inValueList,valueList);
       }
       break;
     }
@@ -1183,69 +997,22 @@ void VirtualMessage::getGridValueListByPolygonPath(T::CoordinateType coordinateT
 
     switch (mFunctionCallMethod)
     {
-      case 2:
-        if (mMessageList.size() != 1)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
-
-        mMessageList[0]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList);
-        executeFunctionCall2(valueList);
-        break;
-
-      case 3:
+      case 9:
       {
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+        if (mMessageList.size() < 1)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters!");
 
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        mMessageList[0]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList1);
-        mMessageList[1]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList2);
-        executeFunctionCall3(valueList1,valueList2,valueList);
-      }
-      break;
+        std::vector<T::GridValueList> inValueList;
 
-      case 4:
-      {
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+        uint sz = mMessageList.size();
+        for (uint t=0; t<sz; t++)
+        {
+          T::GridValueList valList;
+          mMessageList[t]->getGridValueListByPolygonPath(coordinateType,polygonPath,valList);
 
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        mMessageList[0]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList1);
-        mMessageList[1]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList2);
-        executeFunctionCall4(coordinateType,valueList1,valueList2,valueList);
-      }
-      break;
-
-      case 7:
-      {
-        if (mMessageList.size() != 3)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected three)!");
-
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        T::GridValueList valueList3;
-        mMessageList[0]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList1);
-        mMessageList[1]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList2);
-        mMessageList[2]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList3);
-        executeFunctionCall7(valueList1,valueList2,valueList3,valueList);
-      }
-      break;
-
-      case 8:
-      {
-        if (mMessageList.size() != 4)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected four)!");
-
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        T::GridValueList valueList3;
-        T::GridValueList valueList4;
-        mMessageList[0]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList1);
-        mMessageList[1]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList2);
-        mMessageList[2]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList3);
-        mMessageList[3]->getGridValueListByPolygonPath(coordinateType,polygonPath,valueList4);
-        executeFunctionCall8(valueList1,valueList2,valueList3,valueList4,valueList);
+          inValueList.push_back(valList);
+        }
+        executeFunctionCall9(inValueList,valueList);
       }
       break;
     }
@@ -1269,69 +1036,22 @@ void VirtualMessage::getGridValueListByRectangle(T::CoordinateType coordinateTyp
 
     switch (mFunctionCallMethod)
     {
-      case 1:
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
-
-        mMessageList[0]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,gridRectangle,valueList);
-        executeFunctionCall2(valueList);
-        break;
-
-      case 3:
+      case 9:
       {
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+        if (mMessageList.size() < 1)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters!");
 
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        mMessageList[0]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,gridRectangle,valueList1);
-        mMessageList[1]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,gridRectangle,valueList2);
-        executeFunctionCall3(valueList1,valueList2,valueList);
-      }
-      break;
+        std::vector<T::GridValueList> inValueList;
 
-      case 4:
-      {
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+        uint sz = mMessageList.size();
+        for (uint t=0; t<sz; t++)
+        {
+          T::GridValueList valList;
+          mMessageList[t]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,gridRectangle,valList);
 
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        mMessageList[0]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,gridRectangle,valueList1);
-        mMessageList[1]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,gridRectangle,valueList2);
-        executeFunctionCall4(coordinateType,valueList1,valueList2,valueList);
-      }
-      break;
-
-      case 7:
-      {
-        if (mMessageList.size() != 3)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected three)!");
-
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        T::GridValueList valueList3;
-        mMessageList[0]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,gridRectangle,valueList1);
-        mMessageList[1]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,gridRectangle,valueList2);
-        mMessageList[2]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,gridRectangle,valueList3);
-        executeFunctionCall7(valueList1,valueList2,valueList3,valueList);
-      }
-      break;
-
-      case 8:
-      {
-        if (mMessageList.size() != 4)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected four)!");
-
-        T::GridValueList valueList1;
-        T::GridValueList valueList2;
-        T::GridValueList valueList3;
-        T::GridValueList valueList4;
-        mMessageList[0]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,gridRectangle,valueList1);
-        mMessageList[1]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,gridRectangle,valueList2);
-        mMessageList[2]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,gridRectangle,valueList3);
-        mMessageList[3]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,gridRectangle,valueList4);
-        executeFunctionCall8(valueList1,valueList2,valueList3,valueList4,valueList);
+          inValueList.push_back(valList);
+        }
+        executeFunctionCall9(inValueList,valueList);
       }
       break;
     }
@@ -1356,75 +1076,25 @@ void VirtualMessage::getGridValueVector(T::ParamValue_vec& values) const
     if (d.getDimensions() != 2)
       return;
 
+    uint columns = getGridOriginalColumnCount();
+    uint rows = getGridOriginalRowCount();
+
     switch (mFunctionCallMethod)
     {
-      case 2:
-        if (mMessageList.size() != 1)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
-
-        mMessageList[0]->getGridValueVector(values);
-        executeFunctionCall2(values);
-        break;
-
-      case 3:
+      case 9:
       {
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+        if (mMessageList.size() < 1)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters!");
 
-        T::ParamValue_vec values1;
-        T::ParamValue_vec values2;
-        mMessageList[0]->getGridValueVector(values1);
-        mMessageList[1]->getGridValueVector(values2);
-        executeFunctionCall3(values1,values2,values);
-      }
-      break;
-
-      case 4:
-      {
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
-
-        T::ParamValue_vec values1;
-        T::ParamValue_vec values2;
-
-        mMessageList[0]->getGridValueVector(values1);
-        mMessageList[1]->getGridValueVector(values2);
-
-        std::vector<float> angles;
-        getGridPointAngles(angles);
-        executeFunctionCall4(values1,values2,angles,values);
-      }
-      break;
-
-      case 7:
-      {
-        if (mMessageList.size() != 3)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected three)!");
-
-        T::ParamValue_vec values1;
-        T::ParamValue_vec values2;
-        T::ParamValue_vec values3;
-        mMessageList[0]->getGridValueVector(values1);
-        mMessageList[1]->getGridValueVector(values2);
-        mMessageList[2]->getGridValueVector(values3);
-        executeFunctionCall7(values1,values2,values3,values);
-      }
-      break;
-
-      case 8:
-      {
-        if (mMessageList.size() != 4)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected four)!");
-
-        T::ParamValue_vec values1;
-        T::ParamValue_vec values2;
-        T::ParamValue_vec values3;
-        T::ParamValue_vec values4;
-        mMessageList[0]->getGridValueVector(values1);
-        mMessageList[1]->getGridValueVector(values2);
-        mMessageList[2]->getGridValueVector(values3);
-        mMessageList[3]->getGridValueVector(values4);
-        executeFunctionCall8(values1,values2,values3,values4,values);
+        std::vector<std::vector<float>> valueList;
+        uint sz = mMessageList.size();
+        for (uint t=0; t<sz; t++)
+        {
+          T::ParamValue_vec val;
+          mMessageList[t]->getGridValueVector(val);
+          valueList.push_back(val);
+        }
+        executeFunctionCall9(columns,rows,valueList,values);
       }
       break;
     }
@@ -1450,73 +1120,25 @@ void VirtualMessage::getGridOriginalValueVector(T::ParamValue_vec& values) const
     if (d.getDimensions() != 2)
       return;
 
+    uint columns = getGridOriginalColumnCount();
+    uint rows = getGridOriginalRowCount();
+
     switch (mFunctionCallMethod)
     {
-      case 2:
-        if (mMessageList.size() != 1)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
-
-        mMessageList[0]->getGridOriginalValueVector(values);
-        executeFunctionCall2(values);
-        break;
-
-      case 3:
+      case 9:
       {
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+        if (mMessageList.size() < 1)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters!");
 
-        T::ParamValue_vec values1;
-        T::ParamValue_vec values2;
-        mMessageList[0]->getGridOriginalValueVector(values1);
-        mMessageList[1]->getGridOriginalValueVector(values2);
-        executeFunctionCall3(values1,values2,values);
-      }
-      break;
-
-      case 4:
-      {
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
-
-        T::ParamValue_vec values1;
-        T::ParamValue_vec values2;
-        mMessageList[0]->getGridOriginalValueVector(values1);
-        mMessageList[1]->getGridOriginalValueVector(values2);
-        std::vector<float> angles;
-        getGridPointAngles(angles);
-        executeFunctionCall4(values1,values2,angles,values);
-      }
-      break;
-
-      case 7:
-      {
-        if (mMessageList.size() != 3)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected three)!");
-
-        T::ParamValue_vec values1;
-        T::ParamValue_vec values2;
-        T::ParamValue_vec values3;
-        mMessageList[0]->getGridOriginalValueVector(values1);
-        mMessageList[1]->getGridOriginalValueVector(values2);
-        mMessageList[2]->getGridOriginalValueVector(values3);
-        executeFunctionCall7(values1,values2,values3,values);
-      }
-      break;
-
-      case 8:
-      {
-        if (mMessageList.size() != 4)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected four)!");
-
-        T::ParamValue_vec values1;
-        T::ParamValue_vec values2;
-        T::ParamValue_vec values3;
-        T::ParamValue_vec values4;
-        mMessageList[0]->getGridOriginalValueVector(values1);
-        mMessageList[1]->getGridOriginalValueVector(values2);
-        mMessageList[2]->getGridOriginalValueVector(values3);
-        mMessageList[3]->getGridOriginalValueVector(values4);
-        executeFunctionCall8(values1,values2,values3,values4,values);
+        std::vector<std::vector<float>> valueList;
+        uint sz = mMessageList.size();
+        for (uint t=0; t<sz; t++)
+        {
+          T::ParamValue_vec val;
+          mMessageList[t]->getGridOriginalValueVector(val);
+          valueList.push_back(val);
+        }
+        executeFunctionCall9(columns,rows,valueList,values);
       }
       break;
     }
@@ -1537,7 +1159,7 @@ T::ParamLevel VirtualMessage::getGridParameterLevel() const
   try
   {
     initMessagePtrs();
-    return mMessageList[0]->getGridParameterLevel();
+    return toInt64(mParamDef.mLevel);
   }
   catch (...)
   {
@@ -1555,7 +1177,7 @@ T::ParamLevelId VirtualMessage::getGridParameterLevelId() const
   try
   {
     initMessagePtrs();
-    return mMessageList[0]->getGridParameterLevelId();
+    return toInt64(mParamDef.mLevelId);
   }
   catch (...)
   {
@@ -1613,78 +1235,28 @@ T::ParamValue VirtualMessage::getGridValueByGridPoint(uint grid_i,uint grid_j) c
 
     initMessagePtrs();
     T::ParamValue_vec values;
-
     T::Dimensions d = getGridDimensions();
+
     if (d.getDimensions() != 2)
       return ParamValueMissing;
 
     switch (mFunctionCallMethod)
     {
-      case 2:
-        if (mMessageList.size() != 1)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected one)!");
-
-        values.push_back(mMessageList[0]->getGridValueByGridPoint(grid_i,grid_j));
-        executeFunctionCall2(values);
-        break;
-
-      case 3:
+      case 9:
       {
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
+        if (mMessageList.size() < 1)
+          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters!");
 
-        T::ParamValue_vec values1;
-        T::ParamValue_vec values2;
-        values1.push_back(mMessageList[0]->getGridValueByGridPoint(grid_i,grid_j));
-        values2.push_back(mMessageList[1]->getGridValueByGridPoint(grid_i,grid_j));
-        executeFunctionCall3(values1,values2,values);
-      }
-      break;
+        std::vector<std::vector<T::ParamValue>> inParameters;
 
-      case 4:
-      {
-        if (mMessageList.size() != 2)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected two)!");
-
-        T::ParamValue_vec values1;
-        T::ParamValue_vec values2;
-        values1.push_back(mMessageList[0]->getGridValueByGridPoint(grid_i,grid_j));
-        values2.push_back(mMessageList[1]->getGridValueByGridPoint(grid_i,grid_j));
-        std::vector<float> angles;
-        getGridPointAngles(angles);
-        executeFunctionCall4(values1,values2,angles,values);
-      }
-      break;
-
-      case 7:
-      {
-        if (mMessageList.size() != 3)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected three)!");
-
-        T::ParamValue_vec values1;
-        T::ParamValue_vec values2;
-        T::ParamValue_vec values3;
-        values1.push_back(mMessageList[0]->getGridValueByGridPoint(grid_i,grid_j));
-        values2.push_back(mMessageList[1]->getGridValueByGridPoint(grid_i,grid_j));
-        values3.push_back(mMessageList[2]->getGridValueByGridPoint(grid_i,grid_j));
-        executeFunctionCall7(values1,values2,values3,values);
-      }
-      break;
-
-      case 8:
-      {
-        if (mMessageList.size() != 4)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters (expected four)!");
-
-        T::ParamValue_vec values1;
-        T::ParamValue_vec values2;
-        T::ParamValue_vec values3;
-        T::ParamValue_vec values4;
-        values1.push_back(mMessageList[0]->getGridValueByGridPoint(grid_i,grid_j));
-        values2.push_back(mMessageList[1]->getGridValueByGridPoint(grid_i,grid_j));
-        values3.push_back(mMessageList[2]->getGridValueByGridPoint(grid_i,grid_j));
-        values4.push_back(mMessageList[3]->getGridValueByGridPoint(grid_i,grid_j));
-        executeFunctionCall8(values1,values2,values3,values4,values);
+        uint sz = mMessageList.size();
+        for (uint t=0; t<sz; t++)
+        {
+          T::ParamValue_vec inValues;
+          inValues.push_back(mMessageList[t]->getGridValueByGridPoint(grid_i,grid_j));
+          inParameters.push_back(inValues);
+        }
+        executeFunctionCall9(1,1,inParameters,values);
       }
       break;
 
@@ -1913,14 +1485,14 @@ bool VirtualMessage::isGridGlobal() const
 
 
 
-double VirtualMessage::executeFunctionCall1(std::vector<double>& parameters) const
+void VirtualMessage::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,std::vector<float>& outParameters) const
 {
   FUNCTION_TRACE
   try
   {
-    if (mMessageList.size() != 1)
+    if (mMessageList.size() < 1)
     {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 1)!");
+      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids!");
       exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
       throw exception;
     }
@@ -1928,16 +1500,16 @@ double VirtualMessage::executeFunctionCall1(std::vector<double>& parameters) con
     std::string functionName = mFunctionName;
 
     // Trying to find C++ implementation of the function
-
     auto function = mFunctionCollection->getFunction(functionName);
     if (function != nullptr)
     {
-      return function->executeFunctionCall1(parameters);
+      function->executeFunctionCall9(columns,rows,inParameters,mFunctionParameters,outParameters);
+      return;
     }
 
     // Calling the LUA implementation of the function
 
-    return mLuaFileCollection->executeFunctionCall1(functionName,parameters);
+    mLuaFileCollection->executeFunctionCall9(functionName,columns,rows,inParameters,mFunctionParameters,outParameters);
   }
   catch (...)
   {
@@ -1949,34 +1521,31 @@ double VirtualMessage::executeFunctionCall1(std::vector<double>& parameters) con
 
 
 
-void VirtualMessage::executeFunctionCall2(std::vector<double>& inOutParameters) const
+void VirtualMessage::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,std::vector<double>& outParameters) const
 {
   FUNCTION_TRACE
   try
   {
-    if (mMessageList.size() != 1)
+    if (mMessageList.size() < 1)
     {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 1)!");
+      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids!");
       exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
       throw exception;
     }
 
-
     std::string functionName = mFunctionName;
-    uint columns = getGridOriginalColumnCount();
-    uint rows = getGridOriginalRowCount();
 
     // Trying to find C++ implementation of the function
-
     auto function = mFunctionCollection->getFunction(functionName);
     if (function != nullptr)
     {
-      return function->executeFunctionCall2(columns,rows,inOutParameters);
+      function->executeFunctionCall9(columns,rows,inParameters,mFunctionParameters,outParameters);
+      return;
     }
 
     // Calling the LUA implementation of the function
 
-    return mLuaFileCollection->executeFunctionCall2(functionName,columns,rows,inOutParameters);
+    mLuaFileCollection->executeFunctionCall9(functionName,columns,rows,inParameters,mFunctionParameters,outParameters);
   }
   catch (...)
   {
@@ -1987,732 +1556,46 @@ void VirtualMessage::executeFunctionCall2(std::vector<double>& inOutParameters) 
 
 
 
-
-void VirtualMessage::executeFunctionCall2(std::vector<double>& inParameters,std::vector<double>& outParameters) const
+void VirtualMessage::executeFunctionCall9(std::vector<T::GridValueList>& inValueList,T::GridValueList& outValueList) const
 {
   FUNCTION_TRACE
   try
   {
-    if (mMessageList.size() != 1)
+    if (mMessageList.size() < 1)
     {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 1)!");
+      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids!");
       exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
       throw exception;
     }
 
-    std::string functionName = mFunctionName;
-    uint columns = getGridOriginalColumnCount();
-    uint rows = getGridOriginalRowCount();
-
-    // Trying to find C++ implementation of the function
-
-    auto function = mFunctionCollection->getFunction(functionName);
-    if (function != nullptr)
-    {
-      return function->executeFunctionCall2(columns,rows,inParameters,outParameters);
-    }
-
-    // Calling the LUA implementation of the function
-
-    return mLuaFileCollection->executeFunctionCall2(functionName,columns,rows,inParameters,outParameters);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
-  }
-}
-
-
-
-
-
-void VirtualMessage::executeFunctionCall2(std::vector<float>& inParameters,std::vector<float>& outParameters) const
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mMessageList.size() != 1)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 1)!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
-      throw exception;
-    }
-
-    std::string functionName = mFunctionName;
-    uint columns = getGridOriginalColumnCount();
-    uint rows = getGridOriginalRowCount();
-
-    // Trying to find C++ implementation of the function
-
-    auto function = mFunctionCollection->getFunction(functionName);
-    if (function != nullptr)
-    {
-      return function->executeFunctionCall2(columns,rows,inParameters,outParameters);
-    }
-
-    // Calling the LUA implementation of the function
-
-    return mLuaFileCollection->executeFunctionCall2(functionName,columns,rows,inParameters,outParameters);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
-  }
-}
-
-
-
-
-
-void VirtualMessage::executeFunctionCall2(std::vector<float>& inOutParameters) const
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mMessageList.size() != 1)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 1)!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
-      throw exception;
-    }
-
-    std::string functionName = mFunctionName;
-    uint columns = getGridOriginalColumnCount();
-    uint rows = getGridOriginalRowCount();
-
-    // Trying to find C++ implementation of the function
-
-    //std::cout << "FUNCTION : " << functionName << "\n";
-    auto function = mFunctionCollection->getFunction(functionName);
-    if (function != nullptr)
-    {
-      //std::cout << "C++ call\n";
-      return function->executeFunctionCall2(columns,rows,inOutParameters);
-    }
-
-    // Calling the LUA implementation of the function
-
-    //std::cout << "LUA call\n";
-    return mLuaFileCollection->executeFunctionCall2(functionName,columns,rows,inOutParameters);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
-  }
-}
-
-
-
-
-
-void VirtualMessage::executeFunctionCall2(T::GridValueList& valueList) const
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mMessageList.size() != 1)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 1)!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
-      throw exception;
-    }
-
-    std::vector<double> inParameters;
+    std::vector<std::vector<double>> inParameters;
     std::vector<double> outParameters;
 
-    uint len = valueList.getLength();
+    uint sz = inValueList.size();
+    for (uint t=0; t<sz; t++)
+    {
+      uint len = inValueList[t].getLength();
+      std::vector<double> params;
+
+      for (uint i=0; i<len; i++)
+      {
+        T::GridValue value;
+        inValueList[t].getGridValueByIndex(i,value);
+        params.push_back(value.mValue);
+      }
+      inParameters.push_back(params);
+    }
+
+    executeFunctionCall9(inValueList[0].getLength(),1,inParameters,outParameters);
+
+    uint len = outParameters.size();
     for (uint t=0; t<len; t++)
     {
       T::GridValue value;
-      valueList.getGridValueByIndex(t,value);
-      inParameters.push_back(value.mValue);
-    }
-
-    executeFunctionCall2(inParameters,outParameters);
-
-    if (outParameters.size() == inParameters.size())
-    {
-      for (uint t=0; t<len; t++)
-      {
-        T::GridValue value;
-        valueList.getGridValueByIndex(t,value);
-        value.mValue = outParameters[t];
-      }
-    }
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
-  }
-}
-
-
-
-
-
-void VirtualMessage::executeFunctionCall3(std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& outParameters) const
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mMessageList.size() != 2)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 2)!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
-      throw exception;
-    }
-
-    std::string functionName = mFunctionName;
-    uint columns = getGridOriginalColumnCount();
-    uint rows = getGridOriginalRowCount();
-
-    // Trying to find C++ implementation of the function
-
-    auto function = mFunctionCollection->getFunction(functionName);
-    if (function != nullptr)
-    {
-      return function->executeFunctionCall3(columns,rows,inParameters1,inParameters2,outParameters);
-    }
-
-    // Calling the LUA implementation of the function
-
-    return mLuaFileCollection->executeFunctionCall3(functionName,columns,rows,inParameters1,inParameters2,outParameters);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
-  }
-}
-
-
-
-
-
-void VirtualMessage::executeFunctionCall3(std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& outParameters) const
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mMessageList.size() != 2)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 2)!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
-      throw exception;
-    }
-
-    std::string functionName = mFunctionName;
-    uint columns = getGridOriginalColumnCount();
-    uint rows = getGridOriginalRowCount();
-
-    // Trying to find C++ implementation of the function
-
-    auto function = mFunctionCollection->getFunction(functionName);
-    if (function != nullptr)
-    {
-      return function->executeFunctionCall3(columns,rows,inParameters1,inParameters2,outParameters);
-    }
-
-    // Calling the LUA implementation of the function
-
-    return mLuaFileCollection->executeFunctionCall3(functionName,columns,rows,inParameters1,inParameters2,outParameters);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
-  }
-}
-
-
-
-
-
-void VirtualMessage::executeFunctionCall3(T::GridValueList& inValueList1,T::GridValueList& inValueList2,T::GridValueList& outValueList) const
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mMessageList.size() != 2)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 2)!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
-      throw exception;
-    }
-
-    std::vector<double> inParameters1;
-    std::vector<double> inParameters2;
-    std::vector<double> outParameters;
-
-    uint len1 = inValueList1.getLength();
-    uint len2 = inValueList2.getLength();
-
-    if (len1 != len2)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Input parameters must have the same number of values!");
-      exception.addParameter("NumOfValues(param1)",std::to_string(len1));
-      exception.addParameter("NumOfValues(param2)",std::to_string(len2));
-      throw exception;
-    }
-
-    for (uint t=0; t<len1; t++)
-    {
-      T::GridValue value1;
-      inValueList1.getGridValueByIndex(t,value1);
-      inParameters1.push_back(value1.mValue);
-
-      T::GridValue value2;
-      inValueList2.getGridValueByIndex(t,value2);
-      inParameters2.push_back(value2.mValue);
-    }
-
-    executeFunctionCall3(inParameters1,inParameters2,outParameters);
-
-    if (outParameters.size() == inParameters1.size())
-    {
-      for (uint t=0; t<len1; t++)
-      {
-        T::GridValue value;
-        inValueList1.getGridValueByIndex(t,value);
-        T::GridValue newValue(value);
-        newValue.mValue = outParameters[t];
-        outValueList.addGridValue(newValue);
-      }
-    }
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
-  }
-}
-
-
-
-
-
-void VirtualMessage::executeFunctionCall4(std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters) const
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mMessageList.size() != 2)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 2)!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
-      throw exception;
-    }
-
-    std::string functionName = mFunctionName;
-    uint columns = getGridOriginalColumnCount();
-    uint rows = getGridOriginalRowCount();
-
-    // Trying to find C++ implementation of the function
-
-    auto function = mFunctionCollection->getFunction(functionName);
-    if (function != nullptr)
-    {
-      return function->executeFunctionCall4(columns,rows,inParameters1,inParameters2,angles,outParameters);
-    }
-
-    // Calling the LUA implementation of the function
-
-    return mLuaFileCollection->executeFunctionCall4(functionName,columns,rows,inParameters1,inParameters2,angles,outParameters);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
-  }
-}
-
-
-
-
-
-void VirtualMessage::executeFunctionCall4(std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters) const
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mMessageList.size() != 2)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 2)!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
-      throw exception;
-    }
-
-    std::string functionName = mFunctionName;
-    uint columns = getGridOriginalColumnCount();
-    uint rows = getGridOriginalRowCount();
-
-    // Trying to find C++ implementation of the function
-
-    auto function = mFunctionCollection->getFunction(functionName);
-    if (function != nullptr)
-    {
-      return function->executeFunctionCall4(columns,rows,inParameters1,inParameters2,angles,outParameters);
-    }
-
-    // Calling the LUA implementation of the function
-
-    return mLuaFileCollection->executeFunctionCall4(functionName,columns,rows,inParameters1,inParameters2,angles,outParameters);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
-  }
-}
-
-
-
-
-
-void VirtualMessage::executeFunctionCall4(T::CoordinateType coordinateType,T::GridValueList& inValueList1,T::GridValueList& inValueList2,T::GridValueList& outValueList) const
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mMessageList.size() != 2)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 2)!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
-      throw exception;
-    }
-
-    std::vector<double> inParameters1;
-    std::vector<double> inParameters2;
-    std::vector<float> angles;
-    std::vector<double> outParameters;
-
-    uint len1 = inValueList1.getLength();
-    uint len2 = inValueList2.getLength();
-
-    if (len1 != len2)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Input parameters must have the same number of values!");
-      exception.addParameter("NumOfValues(param1)",std::to_string(len1));
-      exception.addParameter("NumOfValues(param2)",std::to_string(len2));
-      throw exception;
-    }
-
-    for (uint t=0; t<len1; t++)
-    {
-      T::GridValue value1;
-      inValueList1.getGridValueByIndex(t,value1);
-      inParameters1.push_back(value1.mValue);
-      float angle = mMessageList[0]->getGridPointAngle(coordinateType,value1.mX,value1.mY);
-      angles.push_back(angle);
-
-      T::GridValue value2;
-      inValueList2.getGridValueByIndex(t,value2);
-      inParameters2.push_back(value2.mValue);
-    }
-
-    executeFunctionCall4(inParameters1,inParameters2,angles,outParameters);
-
-    if (outParameters.size() == inParameters1.size())
-    {
-      for (uint t=0; t<len1; t++)
-      {
-        T::GridValue value;
-        inValueList1.getGridValueByIndex(t,value);
-        T::GridValue newValue(value);
-        newValue.mValue = outParameters[t];
-        outValueList.addGridValue(newValue);
-      }
-    }
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
-  }
-}
-
-
-
-
-void VirtualMessage::executeFunctionCall7(std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& inParameters3,std::vector<float>& outParameters) const
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mMessageList.size() != 3)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 3)!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
-      throw exception;
-    }
-
-    std::string functionName = mFunctionName;
-    uint columns = getGridOriginalColumnCount();
-    uint rows = getGridOriginalRowCount();
-
-    // Trying to find C++ implementation of the function
-
-    auto function = mFunctionCollection->getFunction(functionName);
-    if (function != nullptr)
-    {
-      return function->executeFunctionCall7(columns,rows,inParameters1,inParameters2,inParameters3,outParameters);
-    }
-
-    // Calling the LUA implementation of the function
-
-    return mLuaFileCollection->executeFunctionCall7(functionName,columns,rows,inParameters1,inParameters2,inParameters3,outParameters);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
-  }
-}
-
-
-
-
-
-void VirtualMessage::executeFunctionCall7(std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& inParameters3,std::vector<double>& outParameters) const
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mMessageList.size() != 3)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 3)!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
-      throw exception;
-    }
-
-    std::string functionName = mFunctionName;
-    uint columns = getGridOriginalColumnCount();
-    uint rows = getGridOriginalRowCount();
-
-    // Trying to find C++ implementation of the function
-
-    auto function = mFunctionCollection->getFunction(functionName);
-    if (function != nullptr)
-    {
-      return function->executeFunctionCall7(columns,rows,inParameters1,inParameters2,inParameters3,outParameters);
-    }
-
-    // Calling the LUA implementation of the function
-
-    return mLuaFileCollection->executeFunctionCall7(functionName,columns,rows,inParameters1,inParameters2,inParameters3,outParameters);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
-  }
-}
-
-
-
-
-
-void VirtualMessage::executeFunctionCall7(T::GridValueList& inValueList1,T::GridValueList& inValueList2,T::GridValueList& inValueList3,T::GridValueList& outValueList) const
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mMessageList.size() != 3)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 3)!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
-      throw exception;
-    }
-
-    std::vector<double> inParameters1;
-    std::vector<double> inParameters2;
-    std::vector<double> inParameters3;
-    std::vector<double> outParameters;
-
-    uint len1 = inValueList1.getLength();
-    uint len2 = inValueList2.getLength();
-    uint len3 = inValueList3.getLength();
-
-    if (len1 != len2 || len1 != len3)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Input parameters must have the same number of values!");
-      exception.addParameter("NumOfValues(param1)",std::to_string(len1));
-      exception.addParameter("NumOfValues(param2)",std::to_string(len2));
-      exception.addParameter("NumOfValues(param3)",std::to_string(len3));
-      throw exception;
-    }
-
-    for (uint t=0; t<len1; t++)
-    {
-      T::GridValue value1;
-      inValueList1.getGridValueByIndex(t,value1);
-      inParameters1.push_back(value1.mValue);
-
-      T::GridValue value2;
-      inValueList2.getGridValueByIndex(t,value2);
-      inParameters2.push_back(value2.mValue);
-
-      T::GridValue value3;
-      inValueList3.getGridValueByIndex(t,value3);
-      inParameters3.push_back(value3.mValue);
-    }
-
-    executeFunctionCall7(inParameters1,inParameters2,inParameters3,outParameters);
-
-    if (outParameters.size() == inParameters1.size())
-    {
-      for (uint t=0; t<len1; t++)
-      {
-        T::GridValue value;
-        inValueList1.getGridValueByIndex(t,value);
-        T::GridValue newValue(value);
-        newValue.mValue = outParameters[t];
-        outValueList.addGridValue(newValue);
-      }
-    }
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
-  }
-}
-
-
-
-
-
-void VirtualMessage::executeFunctionCall8(std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& inParameters3,std::vector<float>& inParameters4,std::vector<float>& outParameters) const
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mMessageList.size() != 4)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 4)!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
-      throw exception;
-    }
-
-    std::string functionName = mFunctionName;
-    uint columns = getGridOriginalColumnCount();
-    uint rows = getGridOriginalRowCount();
-
-    // Trying to find C++ implementation of the function
-
-    auto function = mFunctionCollection->getFunction(functionName);
-    if (function != nullptr)
-    {
-      return function->executeFunctionCall8(columns,rows,inParameters1,inParameters2,inParameters3,inParameters4,outParameters);
-    }
-
-    // Calling the LUA implementation of the function
-
-    return mLuaFileCollection->executeFunctionCall8(functionName,columns,rows,inParameters1,inParameters2,inParameters3,inParameters4,outParameters);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
-  }
-}
-
-
-
-
-
-void VirtualMessage::executeFunctionCall8(std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& inParameters3,std::vector<double>& inParameters4,std::vector<double>& outParameters) const
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mMessageList.size() != 4)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 4)!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
-      throw exception;
-    }
-
-    std::string functionName = mFunctionName;
-    uint columns = getGridOriginalColumnCount();
-    uint rows = getGridOriginalRowCount();
-
-    // Trying to find C++ implementation of the function
-
-    auto function = mFunctionCollection->getFunction(functionName);
-    if (function != nullptr)
-    {
-      return function->executeFunctionCall8(columns,rows,inParameters1,inParameters2,inParameters3,inParameters4,outParameters);
-    }
-
-    // Calling the LUA implementation of the function
-
-    return mLuaFileCollection->executeFunctionCall8(functionName,columns,rows,inParameters1,inParameters2,inParameters3,inParameters4,outParameters);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
-  }
-}
-
-
-
-
-
-void VirtualMessage::executeFunctionCall8(T::GridValueList& inValueList1,T::GridValueList& inValueList2,T::GridValueList& inValueList3,T::GridValueList& inValueList4,T::GridValueList& outValueList) const
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mMessageList.size() != 4)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids (expected 4)!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
-      throw exception;
-    }
-
-    std::vector<double> inParameters1;
-    std::vector<double> inParameters2;
-    std::vector<double> inParameters3;
-    std::vector<double> inParameters4;
-    std::vector<double> outParameters;
-
-    uint len1 = inValueList1.getLength();
-    uint len2 = inValueList2.getLength();
-    uint len3 = inValueList3.getLength();
-    uint len4 = inValueList4.getLength();
-
-    if (len1 != len2 || len1 != len3 || len1 != len4)
-    {
-      SmartMet::Spine::Exception exception(BCP,"Input parameters must have the same number of values!");
-      exception.addParameter("NumOfValues(param1)",std::to_string(len1));
-      exception.addParameter("NumOfValues(param2)",std::to_string(len2));
-      exception.addParameter("NumOfValues(param3)",std::to_string(len3));
-      exception.addParameter("NumOfValues(param4)",std::to_string(len4));
-      throw exception;
-    }
-
-    for (uint t=0; t<len1; t++)
-    {
-      T::GridValue value1;
-      inValueList1.getGridValueByIndex(t,value1);
-      inParameters1.push_back(value1.mValue);
-
-      T::GridValue value2;
-      inValueList2.getGridValueByIndex(t,value2);
-      inParameters2.push_back(value2.mValue);
-
-      T::GridValue value3;
-      inValueList3.getGridValueByIndex(t,value3);
-      inParameters3.push_back(value3.mValue);
-
-      T::GridValue value4;
-      inValueList4.getGridValueByIndex(t,value4);
-      inParameters4.push_back(value4.mValue);
-    }
-
-    executeFunctionCall8(inParameters1,inParameters2,inParameters3,inParameters4,outParameters);
-
-    if (outParameters.size() == inParameters1.size())
-    {
-      for (uint t=0; t<len1; t++)
-      {
-        T::GridValue value;
-        inValueList1.getGridValueByIndex(t,value);
-        T::GridValue newValue(value);
-        newValue.mValue = outParameters[t];
-        outValueList.addGridValue(newValue);
-      }
+      inValueList[0].getGridValueByIndex(t,value);
+      T::GridValue newValue(value);
+      newValue.mValue = outParameters[t];
+      outValueList.addGridValue(newValue);
     }
   }
   catch (...)
