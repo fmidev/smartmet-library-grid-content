@@ -59,6 +59,7 @@ class FileInfoList
     uint           getLength();
     bool           getReleaseObjects();
     void           increaseSize(uint newSize);
+    void           increaseSizeNoLock(uint newSize);
     void           markFileInfoDeletedById(uint fileId);
     void           setComparisonMethod(uint comparisonMethod);
     void           setReleaseObjects(bool releaseObjects);

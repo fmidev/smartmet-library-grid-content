@@ -182,12 +182,13 @@ void FileInfoList::addFileInfo(FileInfo *fileInfo)
   FUNCTION_TRACE
   try
   {
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+
     if (mArray == nullptr  ||  mLength == mSize)
     {
-      increaseSize(mSize + mSize/5 + 10);
+      increaseSizeNoLock(mSize + mSize/5 + 10);
     }
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == FileInfo::ComparisonMethod::none)
     {
@@ -256,7 +257,7 @@ void FileInfoList::addFileInfoListNoLock(FileInfoList& fileInfoList)
     {
       if (mArray == nullptr  ||  mLength == mSize  ||  (mLength + len2) > mSize)
       {
-        increaseSize(len1 + len2);
+        increaseSizeNoLock(len1 + len2);
       }
 
       for (uint t=0; t<len2; t++)
@@ -381,6 +382,23 @@ void FileInfoList::increaseSize(uint newSize)
   try
   {
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    increaseSizeNoLock(newSize);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void FileInfoList::increaseSizeNoLock(uint newSize)
+{
+  FUNCTION_TRACE
+  try
+  {
     if (mArray == nullptr)
     {
       mSize = newSize;
