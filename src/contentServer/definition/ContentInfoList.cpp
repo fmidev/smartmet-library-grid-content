@@ -6916,11 +6916,11 @@ void ContentInfoList::sort(uint comparisonMethod)
   FUNCTION_TRACE
   try
   {
-    if (mArray == nullptr || mLength == 0)
-      return;
-
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     mComparisonMethod = comparisonMethod;
+
+    if (mArray == nullptr || mLength == 0)
+      return;
 
     AutoThreadLock globalLock(&ContentInfoList_sortLock);
     contentInfo_comparisonMethod = comparisonMethod;

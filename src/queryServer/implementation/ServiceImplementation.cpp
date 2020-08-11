@@ -1776,7 +1776,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
             if (qParam->mTimestepsBefore > 0)
             {
-              auto ss = boost::posix_time::from_iso_string(startTime) - boost::posix_time::seconds(((qParam->mTimestepsBefore + 1) * qParam->mTimestepSizeInMinutes * 60));
+              auto ss = Fmi::TimeParser::parse_iso(startTime) - boost::posix_time::seconds(((qParam->mTimestepsBefore + 1) * qParam->mTimestepSizeInMinutes * 60));
               startTime = Fmi::to_iso_string(ss);
 
               // time_t ss = utcTimeToTimeT(startTime) - ((qParam->mTimestepsBefore+1) *
@@ -1785,7 +1785,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
             if (qParam->mTimestepsAfter > 0)
             {
-              auto ss = boost::posix_time::from_iso_string(endTime) - boost::posix_time::seconds((qParam->mTimestepsAfter * qParam->mTimestepSizeInMinutes * 60));
+              auto ss = Fmi::TimeParser::parse_iso(endTime) - boost::posix_time::seconds((qParam->mTimestepsAfter * qParam->mTimestepSizeInMinutes * 60));
               endTime = Fmi::to_iso_string(ss);
 
               // time_t ss = utcTimeToTimeT(endTime) + (qParam->mTimestepsAfter *
@@ -2105,7 +2105,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
             {
               // time_t ss = utcTimeToTimeT(*fTime) - ((qParam->mTimestepsBefore+1) *
               // qParam->mTimestepSizeInMinutes * 60);
-              auto ss = boost::posix_time::from_iso_string(*fTime) - boost::posix_time::seconds(((qParam->mTimestepsBefore + 1) * qParam->mTimestepSizeInMinutes * 60));
+              auto ss = Fmi::TimeParser::parse_iso(*fTime) - boost::posix_time::seconds(((qParam->mTimestepsBefore + 1) * qParam->mTimestepSizeInMinutes * 60));
 
               for (uint t = 0; t < qParam->mTimestepsBefore; t++)
               {
@@ -2123,7 +2123,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
             if (qParam->mTimestepsAfter > 0)
             {
               // time_t ss = utcTimeToTimeT(*fTime);
-              auto ss = boost::posix_time::from_iso_string(*fTime);
+              auto ss = Fmi::TimeParser::parse_iso(*fTime);
 
               for (uint t = 0; t < qParam->mTimestepsAfter; t++)
               {
@@ -2516,7 +2516,7 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
 {
   try
   {
-    boost::local_time::local_date_time utcTime(boost::posix_time::from_iso_string(forecastTime), nullptr);
+    boost::local_time::local_date_time utcTime(Fmi::TimeParser::parse_iso(forecastTime), nullptr);
 
     uint vLen = valueList.getLength();
     for (uint i = 0; i < vLen; i++)
@@ -6913,7 +6913,7 @@ void ServiceImplementation::getAdditionalValues(
   {
 
     std::string param = toLowerString(parameterName);
-    boost::local_time::local_date_time utcTime(boost::posix_time::from_iso_string(values.mForecastTime), nullptr);
+    boost::local_time::local_date_time utcTime(Fmi::TimeParser::parse_iso(values.mForecastTime), nullptr);
 
     for (auto c = coordinates.begin(); c != coordinates.end(); ++c)
     {
@@ -7118,7 +7118,7 @@ T::ParamValue ServiceImplementation::getAdditionalValue(
   try
   {
     std::string param = toLowerString(parameterName);
-    boost::local_time::local_date_time utcTime(boost::posix_time::from_iso_string(forecastTime), nullptr);
+    boost::local_time::local_date_time utcTime(Fmi::TimeParser::parse_iso(forecastTime), nullptr);
 
     if (param == "dem")
     {

@@ -42,7 +42,8 @@ enum Result
   GENERATION_AND_FILE_DO_NOT_MATCH            = -1063,
   UNKNOWN_PARAMETER_NAME                      = -1080,
   UNKNOWN_PARAMETER_KEY_TYPE                  = -1081,
-  CONTENT_ALREADY_EXISTS                      = -1100
+  CONTENT_ALREADY_EXISTS                      = -1100,
+  CONTENT_ADDITION_FAILED                     = -1101
 };
 
 

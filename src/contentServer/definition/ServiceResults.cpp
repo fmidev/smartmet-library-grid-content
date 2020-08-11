@@ -112,6 +112,9 @@ std::string getResultString(int resultCode)
 
       case Result::CONTENT_ALREADY_EXISTS:
         return std::string("Content already exists!");
+
+      case CONTENT_ADDITION_FAILED:
+        return std::string("Content addition failed!");
     }
 
     return std::string("Unknown result code : ") + std::to_string(resultCode);

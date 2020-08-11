@@ -3035,6 +3035,8 @@ int MemoryImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoL
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
+    T::ContentInfoList list;
+    list.setReleaseObjects(false);
     uint len = contentInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -3070,14 +3072,16 @@ int MemoryImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoL
         //printf("-- add content %u\n",info->mFileId);
 
         T::ContentInfo *cInfo = info->duplicate();
-        for (int t=0; t<CONTENT_LIST_COUNT; t++)
-        {
-          if (mContentInfoListEnabled[t])
-            mContentInfoList[t].addContentInfo(cInfo);
-        }
-
+        mContentInfoList[0].addContentInfo(cInfo);
         addEvent(EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,info->mServerFlags);
+        list.addContentInfo(cInfo);
       }
+    }
+
+    for (int t=1; t<CONTENT_LIST_COUNT; t++)
+    {
+      if (mContentInfoListEnabled[t])
+        mContentInfoList[t].addContentInfoList(list);
     }
 
     return Result::OK;

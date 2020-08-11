@@ -36,7 +36,8 @@ enum class Implementation
   Cache = 2,
   CorbaClient = 3,
   HttpClient = 4,
-  Memory = 5
+  Memory = 5,
+  Postgres = 6
 };
 
 
