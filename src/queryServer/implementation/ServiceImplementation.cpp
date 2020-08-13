@@ -170,7 +170,29 @@ bool ServiceImplementation::getProducerInfoByName(std::string& name,T::ProducerI
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    time_t currentTime = time(0);
+
+    if ((currentTime - mProducerMap_updateTime) > 120)
+    {
+      AutoThreadLock lock(&mThreadLock);
+
+      if ((currentTime - mProducerMap_updateTime) > 120)
+      {
+        T::ProducerInfoList producerInfoList;
+        if (mContentServerPtr->getProducerInfoList(0,producerInfoList) == 0)
+        {
+          mProducerMap.clear();
+          uint len = producerInfoList.getLength();
+          for (uint t=0; t<len; t++)
+          {
+            T::ProducerInfo *pinfo = producerInfoList.getProducerInfoByIndex(t);
+            if (pinfo != nullptr)
+              mProducerMap.insert(std::pair<std::string,T::ProducerInfo>(pinfo->mName,T::ProducerInfo(*pinfo)));
+          }
+          mProducerMap_updateTime = time(0);
+        }
+      }
+    }
 
     auto it = mProducerMap.find(name);
     if (it != mProducerMap.end())
@@ -179,29 +201,6 @@ bool ServiceImplementation::getProducerInfoByName(std::string& name,T::ProducerI
       return true;
     }
 
-    if ((time(0) - mProducerMap_updateTime) > 120)
-    {
-      T::ProducerInfoList producerInfoList;
-      if (mContentServerPtr->getProducerInfoList(0,producerInfoList) == 0)
-      {
-        mProducerMap.clear();
-        uint len = producerInfoList.getLength();
-        for (uint t=0; t<len; t++)
-        {
-          T::ProducerInfo *pinfo = producerInfoList.getProducerInfoByIndex(t);
-          if (pinfo != nullptr)
-            mProducerMap.insert(std::pair<std::string,T::ProducerInfo>(pinfo->mName,T::ProducerInfo(*pinfo)));
-        }
-        mProducerMap_updateTime = time(0);
-      }
-
-      auto it = mProducerMap.find(name);
-      if (it != mProducerMap.end())
-      {
-        info = it->second;
-        return true;
-      }
-    }
     return false;
   }
   catch (...)
@@ -219,13 +218,17 @@ void ServiceImplementation::getGenerationInfoListByProducerId(uint producerId,T:
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
-    if ((time(0) - mGenerationInfoListUpdateTime) > 120)
+    time_t currentTime = time(0);
+    if ((currentTime - mGenerationInfoListUpdateTime) > 120)
     {
-      if (mContentServerPtr->getGenerationInfoList(0,mGenerationInfoList) == 0)
+      AutoThreadLock lock(&mThreadLock);
+      if ((currentTime - mGenerationInfoListUpdateTime) > 120)
       {
-        mGenerationInfoList.sort(T::GenerationInfo::ComparisonMethod::producerId);
-        mGenerationInfoListUpdateTime = time(0);
+        if (mContentServerPtr->getGenerationInfoList(0,mGenerationInfoList) == 0)
+        {
+          mGenerationInfoList.sort(T::GenerationInfo::ComparisonMethod::producerId);
+          mGenerationInfoListUpdateTime = time(0);
+        }
       }
     }
 
@@ -2155,9 +2158,17 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
         uint gflags = generationFlags;
 
+        int ftLen = forecastTimeList.size();
+        qParam->mValueList.reserve(ftLen);
+        for (int f=0; f<ftLen; f++)
+          qParam->mValueList.emplace_back();
+
+        int a=ftLen-1;
         for (auto fTime = forecastTimeList.rbegin(); fTime != forecastTimeList.rend(); ++fTime)
         {
-          ParameterValues valueList;
+          ParameterValues *valueList = &qParam->mValueList[a];
+          a--;
+
           try
           {
             if (producerId == 0)
@@ -2199,63 +2210,63 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
               getGridValues(qParam->mType,tmpProducers, geomIdList, producerId, analysisTime, gflags, reverseGenerations, paramName, paramLevelId, paramLevel, forecastType,
                   forecastNumber,queryFlags,parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, *fTime, false, qParam->mLocationType,
-                  query.mCoordinateType, query.mAreaCoordinates, qParam->mContourLowValues, qParam->mContourHighValues, query.mAttributeList,query.mRadius,qParam->mPrecision,valueList,qParam->mCoordinates);
+                  query.mCoordinateType, query.mAreaCoordinates, qParam->mContourLowValues, qParam->mContourHighValues, query.mAttributeList,query.mRadius,qParam->mPrecision,*valueList,qParam->mCoordinates);
 
-              if (producerId == 0 && valueList.mProducerId != 0)
+              if (producerId == 0 && valueList->mProducerId != 0)
               {
-                parameterProducers.insert(std::pair<std::string, uint>(paramName + ":" + producerName, valueList.mProducerId));
+                parameterProducers.insert(std::pair<std::string, uint>(paramName + ":" + producerName, valueList->mProducerId));
               }
 
-              if (valueList.mValueList.getLength() == 0  || ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0  &&  (valueList.mFlags & ParameterValues::Flags::DataAvailable) == 0))
+              if (valueList->mValueList.getLength() == 0  || ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0  &&  (valueList->mFlags & ParameterValues::Flags::DataAvailable) == 0))
               {
                 if (alternativeRequired.find(qParam->mAlternativeParamId) == alternativeRequired.end())
                   alternativeRequired.insert(qParam->mAlternativeParamId);
               }
 
-              if (valueList.mValueList.getLength() > 0  || ((parameterFlags & QueryParameter::Flags::NoReturnValues) != 0  &&  (valueList.mFlags & ParameterValues::Flags::DataAvailable) != 0))
+              if (valueList->mValueList.getLength() > 0  || ((parameterFlags & QueryParameter::Flags::NoReturnValues) != 0  &&  (valueList->mFlags & ParameterValues::Flags::DataAvailable) != 0))
               {
                 // We have got some values. We should not change the producer anymore.
 
                 if (producerId == 0)
-                  producerId = valueList.mProducerId;
+                  producerId = valueList->mProducerId;
 
                 // If there are no geometry defined, then we should not change the first geometry we'll get
 
-                if (geometryId <= 0  &&  valueList.mGeometryId > 0)
-                  globalGeometryId = valueList.mGeometryId;
+                if (geometryId <= 0  &&  valueList->mGeometryId > 0)
+                  globalGeometryId = valueList->mGeometryId;
 
-                if ((query.mFlags & Query::Flags::SameAnalysisTime) != 0  &&  analysisTime != valueList.mAnalysisTime)
+                if ((query.mFlags & Query::Flags::SameAnalysisTime) != 0  &&  analysisTime != valueList->mAnalysisTime)
                 {
                   // The query requires that we use the same analysis time with all parameters
-                  analysisTime = valueList.mAnalysisTime;
+                  analysisTime = valueList->mAnalysisTime;
                   queryFlags = queryFlags | Query::Flags::AnalysisTimeMatchRequired;
                 }
 
                 if (timeInterpolationMethod == T::TimeInterpolationMethod::Forbidden || (qParam->mFlags & QueryParameter::Flags::SameAnalysisTime) != 0 || (query.mFlags & Query::Flags::SameAnalysisTime) != 0 )
                 {
                   // If the time interpolation is forbidden or same analysisTime is required, we should no change the generation.
-                  gflags = valueList.mGenerationFlags;
+                  gflags = valueList->mGenerationFlags;
                 }
                 else
                 {
                   // We should use this generation or older.
                   if (generationFlags == 0)
-                    gflags = valueList.mGenerationFlags + (valueList.mGenerationFlags << 1);
+                    gflags = valueList->mGenerationFlags + (valueList->mGenerationFlags << 1);
                 }
 
                 // We should not change the forecast number.
                 if (forecastType < 0  &&  forecastNumber < 0)
                 {
-                  forecastType = valueList.mForecastType;
-                  forecastNumber = valueList.mForecastNumber;
+                  forecastType = valueList->mForecastType;
+                  forecastNumber = valueList->mForecastNumber;
                 }
 
-                uint len = valueList.mValueList.getLength();
+                uint len = valueList->mValueList.getLength();
                 if (coordinates.size() == 0  &&  len > 0)
                 {
                   for (uint s = 0; s<len; s++)
                   {
-                    T::GridValue *val = valueList.mValueList.getGridValuePtrByIndex(s);
+                    T::GridValue *val = valueList->mValueList.getGridValuePtrByIndex(s);
                     coordinates.push_back(T::Coordinate(val->mX,val->mY));
                   }
                 }
@@ -2269,14 +2280,13 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
             exception.printError();
           }
 
-          if (valueList.mValueList.getLength() == 0)
-            valueList.mForecastTime = *fTime;
+          if (valueList->mValueList.getLength() == 0)
+            valueList->mForecastTime = *fTime;
 
           if (additionalTimeList.find(*fTime) != additionalTimeList.end())
-            valueList.mFlags = valueList.mFlags | QueryServer::ParameterValues::Flags::AggregationValue;
+            valueList->mFlags = valueList->mFlags | QueryServer::ParameterValues::Flags::AggregationValue;
 
-          qParam->mValueList.insert(qParam->mValueList.begin(),valueList);
-          //qParam->mValueList.push_back(valueList);
+          // qParam->mValueList.insert(qParam->mValueList.begin(),valueList);
         }
       }
     }
@@ -2559,10 +2569,23 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    time_t currentTime = time(nullptr);
 
-    char key[100];
-    sprintf(key,"%u:%u:%s:%d:%d:%d:%d:%d:%d",generationId,parameterKeyType,parameterKey.c_str(),parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId);
+    //char key[100];
+    //sprintf(key,"%u:%u:%s:%d:%d:%d:%d:%d:%d",generationId,parameterKeyType,parameterKey.c_str(),parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId);
+
+    std::size_t hash = 0;
+    boost::hash_combine(hash,producerId);
+    boost::hash_combine(hash,generationId);
+    boost::hash_combine(hash,parameterKeyType);
+    boost::hash_combine(hash,parameterKey);
+    boost::hash_combine(hash,parameterLevelIdType);
+    boost::hash_combine(hash,parameterLevelId);
+    boost::hash_combine(hash,level);
+    boost::hash_combine(hash,forecastType);
+    boost::hash_combine(hash,forecastNumber);
+    boost::hash_combine(hash,geometryId);
+
 
     int idx = -1;
     uint endp = 200;
@@ -2572,28 +2595,32 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     for (uint t=0; t<endp && idx < 0; t++)
     {
       int i = (mContentCacheKeyIdx-t) % 200;
-      if (mContentCacheKey[i] == key)
+      if (mContentCacheKey[i] == hash)
         idx = (int)i;
     }
 
-    if (idx < 0 || (mContentCacheTime[idx] + 60) < time(nullptr))
+
+    if (idx < 0 || (mContentCacheTime[idx] + 60) < currentTime)
     {
-      if (idx < 0)
+      AutoThreadLock lock(&mThreadLock);
+
+      if (idx < 0 || (mContentCacheTime[idx] + 60) < currentTime)
       {
-        idx = mContentCacheKeyIdx % 200;
-        mContentCacheKey[idx] = key;
-        mContentCacheKeyIdx++;
+        if (idx < 0)
+        {
+          idx = mContentCacheKeyIdx % 200;
+          mContentCacheKey[idx] = hash;
+          mContentCacheKeyIdx++;
+        }
+
+        std::string startTime = "13000101T000000";
+        std::string endTime = "23000101T000000";
+
+        mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,mCacheContentInfoList[idx]);
+        mContentCacheTime[idx] = time(nullptr);
       }
-
-      std::string startTime = "13000101T000000";
-      std::string endTime = "23000101T000000";
-
-      mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,mCacheContentInfoList[idx]);
-      mContentCacheTime[idx] = time(nullptr);
     }
 
-
-    T::ContentInfoList contentList;
     switch (parameterKeyType)
     {
 /*
@@ -2609,7 +2636,9 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
           contentInfoList.addContentInfo(cInfo->duplicate());
           return Result::OK;
         }
-        mCacheContentInfoList[idx].getContentInfoListByFmiParameterNameAndGenerationId(producerId,generationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentList);
+        mCacheContentInfoList[idx].getContentInfoListByFmiParameterNameAndGenerationId2(producerId,generationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
+        if (contentInfoList.getLength() == 0)
+          mCacheContentInfoList[idx].getContentInfoListByFmiParameterNameAndGenerationId(producerId,generationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
       }
       break;
 
@@ -2622,7 +2651,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
           contentInfoList.addContentInfo(cInfo->duplicate());
           return Result::OK;
         }
-        mCacheContentInfoList[idx].getContentInfoListByGribParameterIdAndGenerationId(producerId,generationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentList);
+        mCacheContentInfoList[idx].getContentInfoListByGribParameterIdAndGenerationId(producerId,generationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
       }
       break;
 /*
@@ -2645,7 +2674,6 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
           return Result::UNKNOWN_PARAMETER_KEY_TYPE;
 */
     }
-    contentInfoList = contentList;
     return Result::OK;
   }
   catch (...)

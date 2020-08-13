@@ -535,7 +535,7 @@ class ServiceImplementation : public ServiceInterface
      ThreadLock             mParameterMappingCacheThreadLock;
 
      T::ContentInfoList     mCacheContentInfoList[200];
-     std::string            mContentCacheKey[200];
+     std::size_t            mContentCacheKey[200];
      time_t                 mContentCacheTime[200];
      uint                   mContentCacheKeyIdx;
 

@@ -172,6 +172,23 @@ T::TimeString VirtualMessage::getForecastTime() const
 
 
 
+time_t VirtualMessage::getForecastTimeT() const
+{
+  FUNCTION_TRACE
+  try
+  {
+    initMessagePtrs();
+    return mMessageList[0]->getForecastTimeT();
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
 /*! \brief The method returns the forecast type of the current grid.
 
         \return   The forecast type.

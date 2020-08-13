@@ -413,12 +413,11 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
         }
       }
 
-      std::string deletionTime = gridFile->getDeletionTime();
-      if (deletionTime.empty())
+      time_t deletionTime = gridFile->getDeletionTime();
+      if (deletionTime == 0)
         return gridFile;
 
-      time_t delTime = utcTimeToTimeT(deletionTime);
-      if ((time(nullptr) + 120) > delTime)
+      if ((time(nullptr) + 120) > deletionTime)
       {
         // The grid file will be deleted soon. We should not access it anymore.
         return nullptr;
@@ -2872,7 +2871,9 @@ int ServiceImplementation::getGridIsobandsByTimeAndGridImpl(T::SessionId session
 
       message1->getGridValueVectorByCoordinateList(T::CoordinateTypeValue::LATLON_COORDINATES,gridLatLonCoordinates,areaInterpolationMethod,values1);
       message2->getGridValueVectorByCoordinateList(T::CoordinateTypeValue::LATLON_COORDINATES,gridLatLonCoordinates,areaInterpolationMethod,values2);
-      timeInterpolation(values1,values2,message1->getForecastTime(),message2->getForecastTime(),newTime,timeInterpolationMethod,gridValues);
+
+      time_t tt = utcTimeToTimeT(newTime);
+      timeInterpolation(values1,values2,message1->getForecastTimeT(),message2->getForecastTimeT(),tt,timeInterpolationMethod,gridValues);
 
       T::Coordinate_vec *coordinatePtr = &gridCoordinates;
 
@@ -4076,7 +4077,9 @@ int ServiceImplementation::getGridIsolinesByTimeAndGridImpl(T::SessionId session
 
       message1->getGridValueVectorByCoordinateList(T::CoordinateTypeValue::LATLON_COORDINATES,gridLatLonCoordinates,areaInterpolationMethod,values1);
       message2->getGridValueVectorByCoordinateList(T::CoordinateTypeValue::LATLON_COORDINATES,gridLatLonCoordinates,areaInterpolationMethod,values2);
-      timeInterpolation(values1,values2,message1->getForecastTime(),message2->getForecastTime(),newTime,timeInterpolationMethod,gridValues);
+
+      time_t tt = utcTimeToTimeT(newTime);
+      timeInterpolation(values1,values2,message1->getForecastTimeT(),message2->getForecastTimeT(),tt,timeInterpolationMethod,gridValues);
 
       T::Coordinate_vec *coordinatePtr = &gridCoordinates;
 

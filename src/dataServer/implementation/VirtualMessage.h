@@ -32,6 +32,7 @@ class VirtualMessage : public Message
     virtual uint                    getFileId() const;
     virtual void                    getAttributeList(std::string prefix,T::AttributeList& attributeList) const;
     virtual T::TimeString           getForecastTime() const;
+    virtual time_t                  getForecastTimeT() const;
     virtual short                   getForecastType() const;
     virtual short                   getForecastNumber() const;
 
