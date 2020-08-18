@@ -219,10 +219,12 @@ void ServiceImplementation::getGenerationInfoListByProducerId(uint producerId,T:
   try
   {
     time_t currentTime = time(0);
-    if ((currentTime - mGenerationInfoListUpdateTime) > 120)
+    time_t diff = (currentTime - mGenerationInfoListUpdateTime);
+    if (diff > 120)
     {
       AutoThreadLock lock(&mThreadLock);
-      if ((currentTime - mGenerationInfoListUpdateTime) > 120)
+      diff = (currentTime - mGenerationInfoListUpdateTime);
+      if (diff > 120)
       {
         if (mContentServerPtr->getGenerationInfoList(0,mGenerationInfoList) == 0)
         {
@@ -231,6 +233,11 @@ void ServiceImplementation::getGenerationInfoListByProducerId(uint producerId,T:
         }
       }
     }
+
+    diff = (currentTime - mGenerationInfoListUpdateTime);
+
+    if (diff < 115)
+      generationInfoList.setReleaseObjects(false);
 
     mGenerationInfoList.getGenerationInfoListByProducerIdAndStatus(producerId,generationInfoList,T::GenerationInfo::Status::Ready);
   }
@@ -671,7 +678,7 @@ void ServiceImplementation::getGeometryIdListByGeometryId(T::GeometryId gridGeom
 
 
 
-bool ServiceImplementation::getParameterFunctionInfo(std::string paramStr, std::string& function, std::string& functionParams)
+bool ServiceImplementation::getParameterFunctionInfo(std::string& paramStr, std::string& function, std::string& functionParams)
 {
   FUNCTION_TRACE
   try
@@ -727,7 +734,7 @@ bool ServiceImplementation::getParameterFunctionInfo(std::string paramStr, std::
 
 
 
-bool ServiceImplementation::getFunctionParams(std::string functionParamsStr, FunctionParam_vec& functionParams)
+bool ServiceImplementation::getFunctionParams(std::string& functionParamsStr, FunctionParam_vec& functionParams)
 {
   FUNCTION_TRACE
   try
@@ -786,7 +793,7 @@ bool ServiceImplementation::getFunctionParams(std::string functionParamsStr, Fun
 
 
 
-void ServiceImplementation::getParameterMappings(std::string producerName,std::string parameterName,T::GeometryId geometryId, bool onlySearchEnabled, ParameterMapping_vec& mappings)
+void ServiceImplementation::getParameterMappings(std::string& producerName,std::string& parameterName,T::GeometryId geometryId, bool onlySearchEnabled, ParameterMapping_vec& mappings)
 {
   try
   {
@@ -827,8 +834,8 @@ void ServiceImplementation::getParameterMappings(std::string producerName,std::s
 
 
 void ServiceImplementation::getParameterMappings(
-    std::string producerName,
-    std::string parameterName,
+    std::string& producerName,
+    std::string& parameterName,
     T::GeometryId geometryId,
     T::ParamLevelIdType levelIdType,
     T::ParamLevelId levelId,
@@ -877,7 +884,7 @@ void ServiceImplementation::getParameterMappings(
 
 
 void ServiceImplementation::getParameterStringInfo(
-    std::string param,
+    std::string& param,
     std::string& key,
     T::GeometryId& geometryId,
     T::ParamLevelId& paramLevelId,
@@ -914,7 +921,7 @@ void ServiceImplementation::getParameterStringInfo(
 
 
 void ServiceImplementation::getParameterStringInfo(
-    std::string param,
+    std::string& param,
     std::string& key,
     T::GeometryId& geometryId,
     T::ParamLevelId& paramLevelId,
@@ -1059,7 +1066,7 @@ void ServiceImplementation::getParameterStringInfo(
 
 
 
-bool ServiceImplementation::getAlias(std::string name, std::string& alias)
+bool ServiceImplementation::getAlias(std::string& name, std::string& alias)
 {
   FUNCTION_TRACE
   try
@@ -1079,7 +1086,7 @@ bool ServiceImplementation::getAlias(std::string name, std::string& alias)
 
 bool ServiceImplementation::parseFunction(
     QueryParameter& queryParam,
-    std::string paramStr,
+    std::string& paramStr,
     std::string& function,
     FunctionParam_vec& functionParams,
     uint recursionCounter,
@@ -1303,7 +1310,7 @@ void ServiceImplementation::getProducers(Query& query, Producer_vec& producers)
 
 
 
-void ServiceImplementation::getProducers(std::string producerName, Producer_vec& producers)
+void ServiceImplementation::getProducers(std::string& producerName, Producer_vec& producers)
 {
   FUNCTION_TRACE
   try
@@ -1779,7 +1786,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
             if (qParam->mTimestepsBefore > 0)
             {
-              auto ss = Fmi::TimeParser::parse_iso(startTime) - boost::posix_time::seconds(((qParam->mTimestepsBefore + 1) * qParam->mTimestepSizeInMinutes * 60));
+              auto ss = toTimeStamp(startTime) - boost::posix_time::seconds(((qParam->mTimestepsBefore + 1) * qParam->mTimestepSizeInMinutes * 60));
               startTime = Fmi::to_iso_string(ss);
 
               // time_t ss = utcTimeToTimeT(startTime) - ((qParam->mTimestepsBefore+1) *
@@ -1788,7 +1795,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
             if (qParam->mTimestepsAfter > 0)
             {
-              auto ss = Fmi::TimeParser::parse_iso(endTime) - boost::posix_time::seconds((qParam->mTimestepsAfter * qParam->mTimestepSizeInMinutes * 60));
+              auto ss = toTimeStamp(endTime) - boost::posix_time::seconds((qParam->mTimestepsAfter * qParam->mTimestepSizeInMinutes * 60));
               endTime = Fmi::to_iso_string(ss);
 
               // time_t ss = utcTimeToTimeT(endTime) + (qParam->mTimestepsAfter *
@@ -2108,7 +2115,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
             {
               // time_t ss = utcTimeToTimeT(*fTime) - ((qParam->mTimestepsBefore+1) *
               // qParam->mTimestepSizeInMinutes * 60);
-              auto ss = Fmi::TimeParser::parse_iso(*fTime) - boost::posix_time::seconds(((qParam->mTimestepsBefore + 1) * qParam->mTimestepSizeInMinutes * 60));
+              auto ss = toTimeStamp(*fTime) - boost::posix_time::seconds(((qParam->mTimestepsBefore + 1) * qParam->mTimestepSizeInMinutes * 60));
 
               for (uint t = 0; t < qParam->mTimestepsBefore; t++)
               {
@@ -2126,7 +2133,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
             if (qParam->mTimestepsAfter > 0)
             {
               // time_t ss = utcTimeToTimeT(*fTime);
-              auto ss = Fmi::TimeParser::parse_iso(*fTime);
+              auto ss = toTimeStamp(*fTime);
 
               for (uint t = 0; t < qParam->mTimestepsAfter; t++)
               {
@@ -2444,7 +2451,7 @@ bool ServiceImplementation::conversionFunction(std::string& conversionFunction, 
 
 
 
-void ServiceImplementation::executeConversion(std::string& function, std::vector<std::string>& functionParams,std::string forecastTime,T::Coordinate_vec& coordinates,T::ParamValue_vec& valueList, T::ParamValue_vec& newValueList)
+void ServiceImplementation::executeConversion(std::string& function, std::vector<std::string>& functionParams,std::string& forecastTime,T::Coordinate_vec& coordinates,T::ParamValue_vec& valueList, T::ParamValue_vec& newValueList)
 {
   try
   {
@@ -2522,11 +2529,11 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
 
 
 
-void ServiceImplementation::executeConversion(std::string& function, std::vector<std::string>& functionParams,std::string forecastTime,T::GridValueList& valueList)
+void ServiceImplementation::executeConversion(std::string& function, std::vector<std::string>& functionParams,std::string& forecastTime,T::GridValueList& valueList)
 {
   try
   {
-    boost::local_time::local_date_time utcTime(Fmi::TimeParser::parse_iso(forecastTime), nullptr);
+    boost::local_time::local_date_time utcTime(toTimeStamp(forecastTime), nullptr);
 
     uint vLen = valueList.getLength();
     for (uint i = 0; i < vLen; i++)
@@ -2565,7 +2572,7 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
 
 
 
-int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint producerId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string forecastTime,T::ContentInfoList& contentInfoList)
+int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint producerId,uint generationId,T::ParamKeyType parameterKeyType,std::string& parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string& forecastTime,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -2690,10 +2697,10 @@ bool ServiceImplementation::getSpecialValues(
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     uint generationId,
-    std::string analysisTime,
+    std::string& analysisTime,
     uint generationFlags,
     ParameterMapping& pInfo,
-    std::string forecastTime,
+    std::string& forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -2958,10 +2965,10 @@ bool ServiceImplementation::getValueVectors(
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     uint generationId,
-    std::string analysisTime,
+    std::string& analysisTime,
     uint generationFlags,
     ParameterMapping& pInfo,
-    std::string forecastTime,
+    std::string& forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -3380,10 +3387,10 @@ bool ServiceImplementation::getGridFiles(
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     uint generationId,
-    std::string analysisTime,
+    std::string& analysisTime,
     uint generationFlags,
     ParameterMapping& pInfo,
-    std::string forecastTime,
+    std::string& forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -4028,10 +4035,10 @@ bool ServiceImplementation::getPointValuesByHeight(
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     uint generationId,
-    std::string analysisTime,
+    std::string& analysisTime,
     uint generationFlags,
     ParameterMapping& pInfo,
-    std::string forecastTime,
+    std::string& forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -4396,10 +4403,10 @@ bool ServiceImplementation::getPointValues(
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     uint generationId,
-    std::string analysisTime,
+    std::string& analysisTime,
     uint generationFlags,
     ParameterMapping& pInfo,
-    std::string forecastTime,
+    std::string& forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -4702,10 +4709,10 @@ bool ServiceImplementation::getCircleValues(
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     uint generationId,
-    std::string analysisTime,
+    std::string& analysisTime,
     uint generationFlags,
     ParameterMapping& pInfo,
-    std::string forecastTime,
+    std::string& forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -4979,10 +4986,10 @@ bool ServiceImplementation::getPolygonValues(
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     uint generationId,
-    std::string analysisTime,
+    std::string& analysisTime,
     uint generationFlags,
     ParameterMapping& pInfo,
-    std::string forecastTime,
+    std::string& forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -5242,10 +5249,10 @@ bool ServiceImplementation::getIsolineValues(
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     uint generationId,
-    std::string analysisTime,
+    std::string& analysisTime,
     uint generationFlags,
     ParameterMapping& pInfo,
-    std::string forecastTime,
+    std::string& forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -5567,10 +5574,10 @@ bool ServiceImplementation::getIsobandValues(
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     uint generationId,
-    std::string analysisTime,
+    std::string& analysisTime,
     uint generationFlags,
     ParameterMapping& pInfo,
-    std::string forecastTime,
+    std::string& forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -5900,10 +5907,10 @@ void ServiceImplementation::getGridValues(
     Producer_vec& producers,
     std::set<T::GeometryId>& geometryIdList,
     uint producerId,
-    std::string analysisTime,
+    std::string& analysisTime,
     uint generationFlags,
     bool reverseGenerations,
-    std::string parameterKey,
+    std::string& parameterKey,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -6553,9 +6560,9 @@ void ServiceImplementation::getGridValues(
     Producer_vec& producers,
     std::set<T::GeometryId>& geometryIdList,
     uint producerId,
-    std::string analysisTime,
+    std::string& analysisTime,
     uint generationFlags,
-    std::string parameterKey,
+    std::string& parameterKey,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -6941,7 +6948,7 @@ void ServiceImplementation::getAdditionalValues(
   {
 
     std::string param = toLowerString(parameterName);
-    boost::local_time::local_date_time utcTime(Fmi::TimeParser::parse_iso(values.mForecastTime), nullptr);
+    boost::local_time::local_date_time utcTime(toTimeStamp(values.mForecastTime), nullptr);
 
     for (auto c = coordinates.begin(); c != coordinates.end(); ++c)
     {
@@ -7137,8 +7144,8 @@ void ServiceImplementation::getAdditionalValues(
 
 
 T::ParamValue ServiceImplementation::getAdditionalValue(
-    std::string parameterName,
-    std::string forecastTime,
+    std::string& parameterName,
+    std::string& forecastTime,
     double x,
     double y)
 {
@@ -7146,7 +7153,7 @@ T::ParamValue ServiceImplementation::getAdditionalValue(
   try
   {
     std::string param = toLowerString(parameterName);
-    boost::local_time::local_date_time utcTime(Fmi::TimeParser::parse_iso(forecastTime), nullptr);
+    boost::local_time::local_date_time utcTime(toTimeStamp(forecastTime), nullptr);
 
     if (param == "dem")
     {

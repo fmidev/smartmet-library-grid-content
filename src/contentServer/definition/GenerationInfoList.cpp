@@ -837,7 +837,10 @@ void GenerationInfoList::getGenerationInfoListByProducerId(uint producerId,Gener
       GenerationInfo *info = mArray[t];
       if (info != nullptr  &&  info->mProducerId == producerId)
       {
-        generationInfoList.addGenerationInfo(info->duplicate());
+        if (generationInfoList.getReleaseObjects())
+          generationInfoList.addGenerationInfo(info->duplicate());
+        else
+          generationInfoList.addGenerationInfo(info);
       }
       else
       {
@@ -887,7 +890,10 @@ void GenerationInfoList::getGenerationInfoListByProducerIdAndStatus(uint produce
       GenerationInfo *info = mArray[t];
       if (info != nullptr  &&  info->mProducerId == producerId  &&  info->mStatus == generationStatus)
       {
-        generationInfoList.addGenerationInfo(info->duplicate());
+        if (generationInfoList.getReleaseObjects())
+          generationInfoList.addGenerationInfo(info->duplicate());
+        else
+          generationInfoList.addGenerationInfo(info);
       }
       else
       {
@@ -921,7 +927,12 @@ void GenerationInfoList::getGenerationInfoListByAnalysisTime(std::string analysi
     {
       GenerationInfo *info = mArray[t];
       if (info != nullptr  &&  info->mAnalysisTime == analysisTime)
-        generationInfoList.addGenerationInfo(info->duplicate());
+      {
+        if (generationInfoList.getReleaseObjects())
+          generationInfoList.addGenerationInfo(info->duplicate());
+        else
+          generationInfoList.addGenerationInfo(info);
+      }
     }
   }
   catch (...)
@@ -1069,7 +1080,12 @@ void GenerationInfoList::getGenerationInfoListBySourceId(uint sourceId,Generatio
     {
       GenerationInfo *info = mArray[t];
       if (info != nullptr  &&  info->mSourceId == sourceId)
-        generationInfoList.addGenerationInfo(info->duplicate());
+      {
+        if (generationInfoList.getReleaseObjects())
+          generationInfoList.addGenerationInfo(info->duplicate());
+        else
+          generationInfoList.addGenerationInfo(info);
+      }
     }
   }
   catch (...)
@@ -1115,6 +1131,40 @@ uint GenerationInfoList::getSize() const
 
 
 
+bool GenerationInfoList::getReleaseObjects()
+{
+  FUNCTION_TRACE
+  try
+  {
+    return mReleaseObjects;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void GenerationInfoList::setReleaseObjects(bool releaseObjects)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mReleaseObjects = releaseObjects;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTimes,bool reverseOrder)
 {
   FUNCTION_TRACE
@@ -1134,6 +1184,7 @@ void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTime
       newList.insert(info->mAnalysisTime);
     }
 
+    analysisTimes.reserve(sz);
     if (!reverseOrder)
     {
       for (auto it = newList.begin(); it != newList.end(); ++it)

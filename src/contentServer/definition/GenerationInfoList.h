@@ -49,8 +49,10 @@ class GenerationInfoList
     GenerationInfo*     getLastGenerationInfoByProducerIdAndStatus(uint producerId,uchar generationStatus);
     uint                getLength();
     ModificationLock*   getModificationLockPtr();
+    bool                getReleaseObjects();
     uint                getSize() const;
     void                setModificationLockPtr(ModificationLock* modificationLockPtr);
+    void                setReleaseObjects(bool releaseObjects);
     void                lock();
     void                unlock();
     void                setComparisonMethod(uint comparisonMethod);
