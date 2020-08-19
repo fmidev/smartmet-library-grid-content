@@ -243,7 +243,7 @@ int GenerationInfo::compare(uint comparisonMethod,GenerationInfo *generationInfo
         return strcasecmp(mName.c_str(),generationInfo->mName.c_str());
 
       case GenerationInfo::ComparisonMethod::analysisTime_generationId:
-        res = strcasecmp(mAnalysisTime.c_str(),generationInfo->mAnalysisTime.c_str());
+        res = strcmp(mAnalysisTime.c_str(),generationInfo->mAnalysisTime.c_str());
         if (res != 0)
           return res;
         return num_compare(mGenerationId,generationInfo->mGenerationId);
