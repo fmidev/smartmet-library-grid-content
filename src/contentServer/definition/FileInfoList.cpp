@@ -110,12 +110,14 @@ FileInfoList::~FileInfoList()
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     if (mArray != nullptr)
     {
-      for (uint t=0; t<mLength; t++)
+      if (mReleaseObjects)
       {
-        if (mArray[t] != nullptr  &&  mReleaseObjects)
+        for (uint t=0; t<mLength; t++)
         {
-          delete(mArray[t]);
-          mArray[t] = nullptr;
+          if (mArray[t] != nullptr)
+          {
+            delete(mArray[t]);
+          }
         }
       }
       delete[] mArray;
@@ -352,12 +354,14 @@ void FileInfoList::clear()
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     if (mArray != nullptr)
     {
-      for (uint t=0; t<mLength; t++)
+      if (mReleaseObjects)
       {
-        if (mArray[t] != nullptr  &&  mReleaseObjects)
+        for (uint t=0; t<mLength; t++)
         {
-          delete(mArray[t]);
-          mArray[t] = nullptr;
+          if (mArray[t] != nullptr  &&  mReleaseObjects)
+          {
+            delete(mArray[t]);
+          }
         }
       }
       delete[] mArray;

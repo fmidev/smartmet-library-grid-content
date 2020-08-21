@@ -1,5 +1,6 @@
 #include "ParameterMappingFile.h"
 #include <grid-files/common/GeneralFunctions.h>
+#include <macgyver/StringConversion.h>
 
 
 namespace SmartMet
@@ -143,7 +144,7 @@ ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
   {
     AutoThreadLock lock(&mThreadLock);
 
-    std::string key = toLowerString(mapping.mProducerName + ":" + mapping.mParameterName + ":" + std::to_string(mapping.mGeometryId));
+    std::string key = toLowerString(mapping.mProducerName + ":" + mapping.mParameterName + ":" + Fmi::to_string(mapping.mGeometryId));
 
     auto s = mMappingSearch.find(key);
     if (s == mMappingSearch.end())
@@ -181,7 +182,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
   {
     AutoThreadLock lock(&mThreadLock);
 
-    std::string key = toLowerString(producerName + ":" + parameterName + ":" + std::to_string(geometryId));
+    std::string key = toLowerString(producerName + ":" + parameterName + ":" + Fmi::to_string(geometryId));
 
     auto s = mMappingSearch.find(key);
     if (s == mMappingSearch.end())
@@ -262,7 +263,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
   {
     AutoThreadLock lock(&mThreadLock);
 
-    std::string key = toLowerString(producerName + ":" + parameterName + ":" + std::to_string(geometryId));
+    std::string key = toLowerString(producerName + ":" + parameterName + ":" + Fmi::to_string(geometryId));
 
     auto s = mMappingSearch.find(key);
     if (s == mMappingSearch.end())
@@ -458,7 +459,7 @@ void ParameterMappingFile::loadFile()
 
           //rec.print(std::cout,0,0);
 
-          std::string key = toLowerString(rec.mProducerName + ":" + rec.mParameterName + ":" + std::to_string(rec.mGeometryId));
+          std::string key = toLowerString(rec.mProducerName + ":" + rec.mParameterName + ":" + Fmi::to_string(rec.mGeometryId));
 
           auto s = mMappingSearch.find(key);
           if (s != mMappingSearch.end())

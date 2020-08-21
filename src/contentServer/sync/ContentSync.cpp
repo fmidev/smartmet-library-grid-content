@@ -1,6 +1,7 @@
 #include "ContentSync.h"
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/common/GeneralFunctions.h>
+#include <macgyver/StringConversion.h>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -602,7 +603,7 @@ void ContentSync::updateProducers(ServiceInterface *targetInterface)
           if (result != 0)
           {
             SmartMet::Spine::Exception exception(BCP,"Cannot delete the producer information from the target data storage!");
-            exception.addParameter("ProducerId",std::to_string(targetProducer->mProducerId));
+            exception.addParameter("ProducerId",Fmi::to_string(targetProducer->mProducerId));
             exception.addParameter("ProducerName",targetProducer->mName);
             exception.addParameter("Result",getResultString(result));
             throw exception;
@@ -633,7 +634,7 @@ void ContentSync::updateProducers(ServiceInterface *targetInterface)
           if (result != 0)
           {
             SmartMet::Spine::Exception exception(BCP,"Cannot add the producer information into the target data storage!");
-            exception.addParameter("ProducerId",std::to_string(sourceProducer->mProducerId));
+            exception.addParameter("ProducerId",Fmi::to_string(sourceProducer->mProducerId));
             exception.addParameter("ProducerName",sourceProducer->mName);
             exception.addParameter("Result",getResultString(result));
             throw exception;
@@ -676,7 +677,7 @@ void ContentSync::updateGenerations(ServiceInterface *targetInterface)
           if (result != 0)
           {
             SmartMet::Spine::Exception exception(BCP,"Cannot delete the generation information from the target data storage!");
-            exception.addParameter("GenerationId",std::to_string(targetGeneration->mGenerationId));
+            exception.addParameter("GenerationId",Fmi::to_string(targetGeneration->mGenerationId));
             exception.addParameter("GenerationName",targetGeneration->mName);
             exception.addParameter("Result",getResultString(result));
             throw exception;
@@ -766,7 +767,7 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
           if (result != 0)
           {
             SmartMet::Spine::Exception exception(BCP,"Cannot delete the generation information from the target data storage!");
-            exception.addParameter("FileId",std::to_string(targetFile->mFileId));
+            exception.addParameter("FileId",Fmi::to_string(targetFile->mFileId));
             exception.addParameter("FileName",targetFile->mName);
             exception.addParameter("Result",getResultString(result));
             throw exception;
@@ -896,7 +897,7 @@ void ContentSync::updateContent(ServiceInterface *targetInterface)
           if (result != 0)
           {
             SmartMet::Spine::Exception exception(BCP,"Cannot delete the generation information from the target data storage!");
-            exception.addParameter("FileId",std::to_string(targetContent->mFileId));
+            exception.addParameter("FileId",Fmi::to_string(targetContent->mFileId));
             exception.addParameter("Result",getResultString(result));
             throw exception;
           }

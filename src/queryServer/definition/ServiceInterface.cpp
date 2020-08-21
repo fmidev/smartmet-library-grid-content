@@ -3,6 +3,7 @@
 #include <grid-files/common/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/ShowFunction.h>
+#include <macgyver/StringConversion.h>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -323,9 +324,9 @@ int ServiceInterface::_getParameterValueByPointAndTime(T::SessionId sessionId,st
     attributeList.addAttribute("timesteps","1");
     attributeList.addAttribute("producer",producer);
     attributeList.addAttribute("param",parameter);
-    attributeList.addAttribute("areaInterpolationMethod",std::to_string(areaInterpolationMethod));
-    attributeList.addAttribute("timeInterpolationMethod",std::to_string(timeInterpolationMethod));
-    attributeList.addAttribute("levelInterpolationMethod",std::to_string(levelInterpolationMethod));
+    attributeList.addAttribute("areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
+    attributeList.addAttribute("timeInterpolationMethod",Fmi::to_string(timeInterpolationMethod));
+    attributeList.addAttribute("levelInterpolationMethod",Fmi::to_string(levelInterpolationMethod));
 
     QueryConfigurator configurator;
 
@@ -344,9 +345,9 @@ int ServiceInterface::_getParameterValueByPointAndTime(T::SessionId sessionId,st
       return result;
 
 
-    if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  query.mQueryParameterList[0].mValueList[0].mValueList.getLength() == 1)
+    if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  query.mQueryParameterList[0].mValueList.begin()->mValueList.getLength() == 1)
     {
-      auto valuePtr = query.mQueryParameterList[0].mValueList[0].mValueList.getGridValuePtrByIndex(0);
+      auto valuePtr = query.mQueryParameterList[0].mValueList.begin()->mValueList.getGridValuePtrByIndex(0);
       if (valuePtr != nullptr)
       {
         value = valuePtr->mValue;
@@ -378,9 +379,9 @@ int ServiceInterface::_getParameterValuesByPointListAndTime(T::SessionId session
     attributeList.addAttribute("timesteps","1");
     attributeList.addAttribute("producer",producer);
     attributeList.addAttribute("param",parameter);
-    attributeList.addAttribute("areaInterpolationMethod",std::to_string(areaInterpolationMethod));
-    attributeList.addAttribute("timeInterpolationMethod",std::to_string(timeInterpolationMethod));
-    attributeList.addAttribute("levelInterpolationMethod",std::to_string(levelInterpolationMethod));
+    attributeList.addAttribute("areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
+    attributeList.addAttribute("timeInterpolationMethod",Fmi::to_string(timeInterpolationMethod));
+    attributeList.addAttribute("levelInterpolationMethod",Fmi::to_string(levelInterpolationMethod));
 
     QueryConfigurator configurator;
 
@@ -396,12 +397,12 @@ int ServiceInterface::_getParameterValuesByPointListAndTime(T::SessionId session
     if (result != 0)
       return result;
 
-    if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  query.mQueryParameterList[0].mValueList[0].mValueList.getLength() == coordinates.size())
+    if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  query.mQueryParameterList[0].mValueList.begin()->mValueList.getLength() == coordinates.size())
     {
-      uint len = query.mQueryParameterList[0].mValueList[0].mValueList.getLength();
+      uint len = query.mQueryParameterList[0].mValueList.begin()->mValueList.getLength();
       for (uint t=0; t<len; t++)
       {
-        auto valuePtr = query.mQueryParameterList[0].mValueList[0].mValueList.getGridValuePtrByIndex(t);
+        auto valuePtr = query.mQueryParameterList[0].mValueList.begin()->mValueList.getGridValuePtrByIndex(t);
         if (valuePtr != nullptr)
           valueList.push_back(valuePtr->mValue);
         else
@@ -440,9 +441,9 @@ int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId session
     attributeList.addAttribute("timelist",tmp);
     attributeList.addAttribute("producer",producer);
     attributeList.addAttribute("param",parameter);
-    attributeList.addAttribute("areaInterpolationMethod",std::to_string(areaInterpolationMethod));
-    attributeList.addAttribute("timeInterpolationMethod",std::to_string(timeInterpolationMethod));
-    attributeList.addAttribute("levelInterpolationMethod",std::to_string(levelInterpolationMethod));
+    attributeList.addAttribute("areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
+    attributeList.addAttribute("timeInterpolationMethod",Fmi::to_string(timeInterpolationMethod));
+    attributeList.addAttribute("levelInterpolationMethod",Fmi::to_string(levelInterpolationMethod));
 
     QueryConfigurator configurator;
 
@@ -463,9 +464,9 @@ int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId session
     uint len =  query.mForecastTimeList.size();
     if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == len)
     {
-      for (uint t=0; t<len; t++)
+      for (auto it = query.mQueryParameterList[0].mValueList.begin(); it != query.mQueryParameterList[0].mValueList.end(); ++it)
       {
-        auto valuePtr = query.mQueryParameterList[0].mValueList[t].mValueList.getGridValuePtrByIndex(0);
+        auto valuePtr = it->mValueList.getGridValuePtrByIndex(0);
         if (valuePtr != nullptr)
           values.push_back(valuePtr->mValue);
         else
@@ -525,9 +526,9 @@ int ServiceInterface::_getParameterValueVectorByGeometryAndTime(T::SessionId ses
       return result;
 
 
-    if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  query.mQueryParameterList[0].mValueList[0].mValueList.getLength() == 1)
+    if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  query.mQueryParameterList[0].mValueList.begin()->mValueList.getLength() == 1)
     {
-      values = query.mQueryParameterList[0].mValueList[0].mValueVector;
+      values = query.mQueryParameterList[0].mValueList.begin()->mValueVector;
     }
 
     return 0;

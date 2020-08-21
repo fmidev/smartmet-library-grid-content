@@ -1,5 +1,6 @@
 #include "ServiceResults.h"
 #include <grid-files/common/Exception.h>
+#include <macgyver/StringConversion.h>
 
 
 namespace SmartMet
@@ -117,7 +118,7 @@ std::string getResultString(int resultCode)
         return std::string("Content addition failed!");
     }
 
-    return std::string("Unknown result code : ") + std::to_string(resultCode);
+    return std::string("Unknown result code : ") + Fmi::to_string(resultCode);
   }
   catch (...)
   {

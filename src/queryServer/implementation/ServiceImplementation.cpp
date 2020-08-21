@@ -236,8 +236,8 @@ void ServiceImplementation::getGenerationInfoListByProducerId(uint producerId,T:
 
     diff = (currentTime - mGenerationInfoListUpdateTime);
 
-    if (diff < 115)
-      generationInfoList.setReleaseObjects(false);
+    //if (diff < 115)
+    //  generationInfoList.setReleaseObjects(false);
 
     mGenerationInfoList.getGenerationInfoListByProducerIdAndStatus(producerId,generationInfoList,T::GenerationInfo::Status::Ready);
   }
@@ -797,7 +797,7 @@ void ServiceImplementation::getParameterMappings(std::string& producerName,std::
 {
   try
   {
-    std::string key = producerName + ":" + parameterName + ":" + std::to_string(geometryId) + ":" + std::to_string(C_INT(onlySearchEnabled));
+    std::string key = producerName + ":" + parameterName + ":" + Fmi::to_string(geometryId) + ":" + Fmi::to_string(C_INT(onlySearchEnabled));
 
     AutoThreadLock lock(&mParameterMappingCacheThreadLock);
 
@@ -845,8 +845,8 @@ void ServiceImplementation::getParameterMappings(
 {
   try
   {
-    std::string key = producerName + ":" + parameterName + ":" + std::to_string(geometryId) + ":" + std::to_string(levelIdType) + ":" + std::to_string(levelId) + ":" + std::to_string(level) + ":"
-        + std::to_string(onlySearchEnabled);
+    std::string key = producerName + ":" + parameterName + ":" + Fmi::to_string(geometryId) + ":" + Fmi::to_string(levelIdType) + ":" + Fmi::to_string(levelId) + ":" + Fmi::to_string(level) + ":"
+        + Fmi::to_string(onlySearchEnabled);
 
     AutoThreadLock lock(&mParameterMappingCacheThreadLock);
 
@@ -2458,8 +2458,8 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
     if (valueList.size() != coordinates.size())
     {
       SmartMet::Spine::Exception exception(BCP, "The number of values is not the same as the number of coordinates!");
-      exception.addParameter("valueList.size",std::to_string(valueList.size()));
-      exception.addParameter("coordinates.size",std::to_string(coordinates.size()));
+      exception.addParameter("valueList.size",Fmi::to_string(valueList.size()));
+      exception.addParameter("coordinates.size",Fmi::to_string(coordinates.size()));
       throw exception;
     }
 
@@ -2637,12 +2637,14 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       case T::ParamKeyTypeValue::FMI_NAME:
       {
         mCacheContentInfoList[idx].setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
+        /*
         T::ContentInfo *cInfo = mCacheContentInfoList[idx].getContentInfoByFmiParameterNameAndGenerationId(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
         if (cInfo != nullptr)
         {
           contentInfoList.addContentInfo(cInfo->duplicate());
           return Result::OK;
         }
+        */
         mCacheContentInfoList[idx].getContentInfoListByFmiParameterNameAndGenerationId2(producerId,generationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
         if (contentInfoList.getLength() == 0)
           mCacheContentInfoList[idx].getContentInfoListByFmiParameterNameAndGenerationId(producerId,generationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
@@ -3048,9 +3050,9 @@ bool ServiceImplementation::getValueVectors(
     else
       valueList.mParameterLevelId = pInfo.mParameterLevelId;
 
-    queryAttributeList.setAttribute("grid.timeInterpolationMethod",std::to_string(timeInterpolationMethod));
-    queryAttributeList.setAttribute("grid.areaInterpolationMethod",std::to_string(areaInterpolationMethod));
-    queryAttributeList.setAttribute("grid.levelInterpolationMethod",std::to_string(levelInterpolationMethod));
+    queryAttributeList.setAttribute("grid.timeInterpolationMethod",Fmi::to_string(timeInterpolationMethod));
+    queryAttributeList.setAttribute("grid.areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
+    queryAttributeList.setAttribute("grid.levelInterpolationMethod",Fmi::to_string(levelInterpolationMethod));
 
     if (contentLen == 1)
     {
@@ -3798,9 +3800,9 @@ bool ServiceImplementation::getGridFiles(
     ulonglong sz = 2 * numOfBytes;
 
 
-    queryAttributeList.setAttribute("grid.timeInterpolationMethod",std::to_string(timeInterpolationMethod));
-    queryAttributeList.setAttribute("grid.areaInterpolationMethod",std::to_string(areaInterpolationMethod));
-    queryAttributeList.setAttribute("grid.levelInterpolationMethod",std::to_string(levelInterpolationMethod));
+    queryAttributeList.setAttribute("grid.timeInterpolationMethod",Fmi::to_string(timeInterpolationMethod));
+    queryAttributeList.setAttribute("grid.areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
+    queryAttributeList.setAttribute("grid.levelInterpolationMethod",Fmi::to_string(levelInterpolationMethod));
 
     if (contentLen == 1)
     {
@@ -5342,8 +5344,8 @@ bool ServiceImplementation::getIsolineValues(
     else
       valueList.mParameterLevelId = pInfo.mParameterLevelId;
 
-    queryAttributeList.setAttribute("grid.timeInterpolationMethod",std::to_string(timeInterpolationMethod));
-    queryAttributeList.setAttribute("grid.areaInterpolationMethod",std::to_string(areaInterpolationMethod));
+    queryAttributeList.setAttribute("grid.timeInterpolationMethod",Fmi::to_string(timeInterpolationMethod));
+    queryAttributeList.setAttribute("grid.areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
 
 
     if (contentLen == 1)
@@ -5378,7 +5380,7 @@ bool ServiceImplementation::getIsolineValues(
           {
             SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsolinesByGeometry / getGridIsolinesByGrid / getGridIsolines");
-            exception.addParameter("LocationType",std::to_string(locationType));
+            exception.addParameter("LocationType",Fmi::to_string(locationType));
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
@@ -5440,7 +5442,7 @@ bool ServiceImplementation::getIsolineValues(
           {
             SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsolinesByTimeAndGeometry / getGridIsolinesByTimeAndGrid / getGridIsolinesByTime");
-            exception.addParameter("LocationType",std::to_string(locationType));
+            exception.addParameter("LocationType",Fmi::to_string(locationType));
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
@@ -5487,7 +5489,7 @@ bool ServiceImplementation::getIsolineValues(
           {
             SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsolinesByLevelAndGeometry / getGridIsolinesByLevelAndGrid / getGridIsolinesByLevel");
-            exception.addParameter("LocationType",std::to_string(locationType));
+            exception.addParameter("LocationType",Fmi::to_string(locationType));
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
@@ -5541,7 +5543,7 @@ bool ServiceImplementation::getIsolineValues(
           {
             SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsolinesByTimeLevelAndGeometry / getGridIsolinesByTimeLevelAndGrid / getGridIsolinesByTimeAndLevel");
-            exception.addParameter("LocationType",std::to_string(locationType));
+            exception.addParameter("LocationType",Fmi::to_string(locationType));
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
@@ -5674,8 +5676,8 @@ bool ServiceImplementation::getIsobandValues(
     else
       valueList.mParameterLevelId = pInfo.mParameterLevelId;
 
-    queryAttributeList.setAttribute("grid.timeInterpolationMethod",std::to_string(timeInterpolationMethod));
-    queryAttributeList.setAttribute("grid.areaInterpolationMethod",std::to_string(areaInterpolationMethod));
+    queryAttributeList.setAttribute("grid.timeInterpolationMethod",Fmi::to_string(timeInterpolationMethod));
+    queryAttributeList.setAttribute("grid.areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
 
     if (contentLen == 1)
     {
@@ -5709,7 +5711,7 @@ bool ServiceImplementation::getIsobandValues(
           {
             SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsobandsByGeometry / getGridIsobandsByGrid / getGridIsobands");
-            exception.addParameter("LocationType",std::to_string(locationType));
+            exception.addParameter("LocationType",Fmi::to_string(locationType));
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
@@ -5771,7 +5773,7 @@ bool ServiceImplementation::getIsobandValues(
           {
             SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsobandsByTimeAndGeometry / getGridIsobandsByTimeAndGrid / getGridIsobandsByTime");
-            exception.addParameter("LocationType",std::to_string(locationType));
+            exception.addParameter("LocationType",Fmi::to_string(locationType));
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
@@ -5819,7 +5821,7 @@ bool ServiceImplementation::getIsobandValues(
           {
             SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsobandsByLevelAndGeometry / getGridIsobandsByLevelAndGrid / getGridIsobandsByLevel");
-            exception.addParameter("LocationType",std::to_string(locationType));
+            exception.addParameter("LocationType",Fmi::to_string(locationType));
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
@@ -5873,7 +5875,7 @@ bool ServiceImplementation::getIsobandValues(
           {
             SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsobandsByTimeLevelAndGeometry / getGridIsobandsByTimeLevelAndGrid / getGridIsobandsByTimeAndLevel");
-            exception.addParameter("LocationType",std::to_string(locationType));
+            exception.addParameter("LocationType",Fmi::to_string(locationType));
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
@@ -7242,7 +7244,7 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
       T::ContentInfo* contentInfo = contentList.getContentInfoByIndex(t);
 
       bool found = false;
-      std::string cacheKey = std::to_string(contentInfo->mGenerationId) + ":" + contentInfo->mForecastTime + ":" + std::to_string(contentInfo->mFmiParameterLevelId) + ":" + std::to_string(contentInfo->mParameterLevel) + std::to_string(x) + std::to_string(y);
+      std::string cacheKey = Fmi::to_string(contentInfo->mGenerationId) + ":" + contentInfo->mForecastTime + ":" + Fmi::to_string(contentInfo->mFmiParameterLevelId) + ":" + Fmi::to_string(contentInfo->mParameterLevel) + Fmi::to_string(x) + Fmi::to_string(y);
       if (mLevelHeightCache.size() > 0)
       {
         AutoThreadLock lock(&mHeightCacheThreadLock);

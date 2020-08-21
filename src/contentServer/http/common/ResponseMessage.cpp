@@ -1,6 +1,7 @@
 #include "ResponseMessage.h"
 #include <grid-files/common/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
+#include <macgyver/StringConversion.h>
 
 
 namespace SmartMet
@@ -136,7 +137,7 @@ void ResponseMessage::addLine(int line)
 {
   try
   {
-    mLines.push_back(std::to_string(line));
+    mLines.push_back(Fmi::to_string(line));
   }
   catch (...)
   {
@@ -152,7 +153,7 @@ void ResponseMessage::addLine(uint line)
 {
   try
   {
-    mLines.push_back(std::to_string(line));
+    mLines.push_back(Fmi::to_string(line));
   }
   catch (...)
   {
@@ -215,7 +216,7 @@ void ResponseMessage::addLine(const char *key,int line)
 {
   try
   {
-    mLines.push_back(std::string(key) + "=" + std::to_string(line));
+    mLines.push_back(std::string(key) + "=" + Fmi::to_string(line));
   }
   catch (...)
   {
@@ -231,7 +232,7 @@ void ResponseMessage::addLine(const char *key,uint line)
 {
   try
   {
-    mLines.push_back(std::string(key) + "=" + std::to_string(line));
+    mLines.push_back(std::string(key) + "=" + Fmi::to_string(line));
   }
   catch (...)
   {

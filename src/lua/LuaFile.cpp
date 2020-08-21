@@ -1,5 +1,6 @@
 #include "LuaFile.h"
 #include <grid-files/common/GeneralFunctions.h>
+#include <macgyver/StringConversion.h>
 
 
 namespace SmartMet
@@ -211,7 +212,7 @@ float LuaFile::executeFunctionCall1(std::string& function,std::vector<float>& pa
       exception.addDetail("or the return values that this 'executeFunction' is using.");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
-      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+      exception.addParameter("LUA Function Type",Fmi::to_string(a->second.mType));
       throw exception;
     }
 
@@ -298,7 +299,7 @@ double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& 
       exception.addDetail("or the return values that this 'executeFunction' is using.");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
-      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+      exception.addParameter("LUA Function Type",Fmi::to_string(a->second.mType));
       throw exception;
     }
 
@@ -385,7 +386,7 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
       exception.addDetail("or the return values that this 'executeFunction' is using.");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
-      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+      exception.addParameter("LUA Function Type",Fmi::to_string(a->second.mType));
       throw exception;
     }
 
@@ -396,16 +397,16 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
     if (pLen1 != pLen2)
     {
       Spine::Exception exception(BCP, "Input parameters should have the same number of values!");
-      exception.addParameter("NumOfValues(inParameters1)",std::to_string(pLen1));
-      exception.addParameter("NumOfValues(inParameters2)",std::to_string(pLen2));
+      exception.addParameter("NumOfValues(inParameters1)",Fmi::to_string(pLen1));
+      exception.addParameter("NumOfValues(inParameters2)",Fmi::to_string(pLen2));
       throw exception;
     }
 
     if (pLen1 != aLen)
     {
       Spine::Exception exception(BCP, "There should be as many angles as grid values!");
-      exception.addParameter("NumOfValues",std::to_string(pLen1));
-      exception.addParameter("NumOfAngles",std::to_string(aLen));
+      exception.addParameter("NumOfValues",Fmi::to_string(pLen1));
+      exception.addParameter("NumOfAngles",Fmi::to_string(aLen));
       throw exception;
     }
 
@@ -497,7 +498,7 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
       exception.addDetail("or the return values that this 'executeFunction' is using.");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
-      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+      exception.addParameter("LUA Function Type",Fmi::to_string(a->second.mType));
       throw exception;
     }
 
@@ -508,15 +509,15 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
     if (pLen1 != pLen2)
     {
       Spine::Exception exception(BCP, "Input parameters should have the same number of values!");
-      exception.addParameter("NumOfValues(inParameters1)",std::to_string(pLen1));
-      exception.addParameter("NumOfValues(inParameters2)",std::to_string(pLen2));
+      exception.addParameter("NumOfValues(inParameters1)",Fmi::to_string(pLen1));
+      exception.addParameter("NumOfValues(inParameters2)",Fmi::to_string(pLen2));
       throw exception;
     }
     if (pLen1 != aLen)
     {
       Spine::Exception exception(BCP, "There should be as many angles as grid values!");
-      exception.addParameter("NumOfValues",std::to_string(pLen1));
-      exception.addParameter("NumOfAngles",std::to_string(aLen));
+      exception.addParameter("NumOfValues",Fmi::to_string(pLen1));
+      exception.addParameter("NumOfAngles",Fmi::to_string(aLen));
       throw exception;
     }
     lua_getglobal(L,a->second.mFunctionName.c_str());
@@ -607,7 +608,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
       exception.addDetail("or the return values that this 'executeFunction' is using.");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
-      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+      exception.addParameter("LUA Function Type",Fmi::to_string(a->second.mType));
       throw exception;
     }
 
@@ -695,7 +696,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
       exception.addDetail("or the return values that this 'executeFunction' is using.");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
-      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+      exception.addParameter("LUA Function Type",Fmi::to_string(a->second.mType));
       throw exception;
     }
 
@@ -783,7 +784,7 @@ std::string LuaFile::executeFunctionCall6(std::string& function,std::vector<std:
       exception.addDetail("or the return values that this 'executeFunction' is using.");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
-      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+      exception.addParameter("LUA Function Type",Fmi::to_string(a->second.mType));
       throw exception;
     }
 
@@ -853,14 +854,14 @@ std::string LuaFile::executeFunctionCall6(
     std::vector<std::string> params;
     params.push_back(producerName);
     params.push_back(parameterName);
-    params.push_back(std::to_string(parameterKeyType));
+    params.push_back(Fmi::to_string(parameterKeyType));
     params.push_back(parameterKey);
-    params.push_back(std::to_string(parameterLevelIdType));
-    params.push_back(std::to_string(parameterLevelId));
-    params.push_back(std::to_string(parameterLevel));
-    params.push_back(std::to_string(forecastType));
-    params.push_back(std::to_string(forecastNumber));
-    params.push_back(std::to_string(interpolationMethod));
+    params.push_back(Fmi::to_string(parameterLevelIdType));
+    params.push_back(Fmi::to_string(parameterLevelId));
+    params.push_back(Fmi::to_string(parameterLevel));
+    params.push_back(Fmi::to_string(forecastType));
+    params.push_back(Fmi::to_string(forecastNumber));
+    params.push_back(Fmi::to_string(interpolationMethod));
 
     return executeFunctionCall6(function,params);
 
@@ -886,7 +887,7 @@ std::string LuaFile::executeFunctionCall6(
       exception.addDetail("or the return values that this 'executeFunction' is using.");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
-      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+      exception.addParameter("LUA Function Type",Fmi::to_string(a->second.mType));
       throw exception;
     }
 
@@ -964,7 +965,7 @@ void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,
       exception.addDetail("or the return values that this 'executeFunction' is using.");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
-      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+      exception.addParameter("LUA Function Type",Fmi::to_string(a->second.mType));
       throw exception;
     }
 
@@ -975,9 +976,9 @@ void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,
     if (pLen1 != pLen2 || pLen1 != pLen3)
     {
       Spine::Exception exception(BCP, "Input parameters should have the same number of values!");
-      exception.addParameter("NumOfValues(inParameters1)",std::to_string(pLen1));
-      exception.addParameter("NumOfValues(inParameters2)",std::to_string(pLen2));
-      exception.addParameter("NumOfValues(inParameters3)",std::to_string(pLen3));
+      exception.addParameter("NumOfValues(inParameters1)",Fmi::to_string(pLen1));
+      exception.addParameter("NumOfValues(inParameters2)",Fmi::to_string(pLen2));
+      exception.addParameter("NumOfValues(inParameters3)",Fmi::to_string(pLen3));
       throw exception;
     }
 
@@ -1069,7 +1070,7 @@ void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,
       exception.addDetail("or the return values that this 'executeFunction' is using.");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
-      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+      exception.addParameter("LUA Function Type",Fmi::to_string(a->second.mType));
       throw exception;
     }
 
@@ -1080,9 +1081,9 @@ void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,
     if (pLen1 != pLen2 || pLen1 != pLen3)
     {
       Spine::Exception exception(BCP, "Input parameters should have the same number of values!");
-      exception.addParameter("NumOfValues(inParameters1)",std::to_string(pLen1));
-      exception.addParameter("NumOfValues(inParameters2)",std::to_string(pLen2));
-      exception.addParameter("NumOfValues(inParameters3)",std::to_string(pLen3));
+      exception.addParameter("NumOfValues(inParameters1)",Fmi::to_string(pLen1));
+      exception.addParameter("NumOfValues(inParameters2)",Fmi::to_string(pLen2));
+      exception.addParameter("NumOfValues(inParameters3)",Fmi::to_string(pLen3));
       throw exception;
     }
 
@@ -1173,7 +1174,7 @@ void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,
       exception.addDetail("or the return values that this 'executeFunction' is using.");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
-      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+      exception.addParameter("LUA Function Type",Fmi::to_string(a->second.mType));
       throw exception;
     }
 
@@ -1185,10 +1186,10 @@ void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,
     if (pLen1 != pLen2 || pLen1 != pLen3 || pLen1 != pLen4)
     {
       Spine::Exception exception(BCP, "Input parameters should have the same number of values!");
-      exception.addParameter("NumOfValues(inParameters1)",std::to_string(pLen1));
-      exception.addParameter("NumOfValues(inParameters2)",std::to_string(pLen2));
-      exception.addParameter("NumOfValues(inParameters3)",std::to_string(pLen3));
-      exception.addParameter("NumOfValues(inParameters4)",std::to_string(pLen4));
+      exception.addParameter("NumOfValues(inParameters1)",Fmi::to_string(pLen1));
+      exception.addParameter("NumOfValues(inParameters2)",Fmi::to_string(pLen2));
+      exception.addParameter("NumOfValues(inParameters3)",Fmi::to_string(pLen3));
+      exception.addParameter("NumOfValues(inParameters4)",Fmi::to_string(pLen4));
       throw exception;
     }
 
@@ -1287,7 +1288,7 @@ void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,
       exception.addDetail("or the return values that this 'executeFunction' is using.");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
-      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+      exception.addParameter("LUA Function Type",Fmi::to_string(a->second.mType));
       throw exception;
     }
 
@@ -1299,10 +1300,10 @@ void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,
     if (pLen1 != pLen2 || pLen1 != pLen3 || pLen1 != pLen4)
     {
       Spine::Exception exception(BCP, "Input parameters should have the same number of values!");
-      exception.addParameter("NumOfValues(inParameters1)",std::to_string(pLen1));
-      exception.addParameter("NumOfValues(inParameters2)",std::to_string(pLen2));
-      exception.addParameter("NumOfValues(inParameters3)",std::to_string(pLen3));
-      exception.addParameter("NumOfValues(inParameters4)",std::to_string(pLen4));
+      exception.addParameter("NumOfValues(inParameters1)",Fmi::to_string(pLen1));
+      exception.addParameter("NumOfValues(inParameters2)",Fmi::to_string(pLen2));
+      exception.addParameter("NumOfValues(inParameters3)",Fmi::to_string(pLen3));
+      exception.addParameter("NumOfValues(inParameters4)",Fmi::to_string(pLen4));
       throw exception;
     }
 
@@ -1401,7 +1402,7 @@ void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,
       exception.addDetail("or the return values that this 'executeFunction' is using.");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
-      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+      exception.addParameter("LUA Function Type",Fmi::to_string(a->second.mType));
       throw exception;
     }
 
@@ -1500,7 +1501,7 @@ void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,
       exception.addDetail("or the return values that this 'executeFunction' is using.");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
-      exception.addParameter("LUA Function Type",std::to_string(a->second.mType));
+      exception.addParameter("LUA Function Type",Fmi::to_string(a->second.mType));
       throw exception;
     }
 

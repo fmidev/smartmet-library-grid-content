@@ -24,6 +24,7 @@
 #include <grid-files/grid/PhysicalGridFile.h>
 #include <grid-files/grid/MessageProcessing.h>
 #include <grid-files/identification/GridDef.h>
+#include <macgyver/StringConversion.h>
 
 #include <signal.h>
 
@@ -510,8 +511,8 @@ int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,T::Valu
             catch (...)
             {
               SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-              exception.addParameter("FileId",std::to_string(rec->mFileId));
-              exception.addParameter("MessageIndex",std::to_string(rec->mMessageIndex));
+              exception.addParameter("FileId",Fmi::to_string(rec->mFileId));
+              exception.addParameter("MessageIndex",Fmi::to_string(rec->mMessageIndex));
               rec->mResult = Result::UNEXPECTED_EXCEPTION;
               std::string st = exception.getStackTrace();
               PRINT_DATA(mDebugLog,"%s",st.c_str());
@@ -799,8 +800,8 @@ int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint file
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId",std::to_string(fileId));
-       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -847,10 +848,10 @@ int ServiceImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,u
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -897,10 +898,10 @@ int ServiceImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,ui
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -964,14 +965,14 @@ int ServiceImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId session
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
-       exception.addParameter("FileId3",std::to_string(fileId3));
-       exception.addParameter("MessageIndex3",std::to_string(messageIndex3));
-       exception.addParameter("FileId4",std::to_string(fileId4));
-       exception.addParameter("MessageIndex4",std::to_string(messageIndex4));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
+       exception.addParameter("FileId3",Fmi::to_string(fileId3));
+       exception.addParameter("MessageIndex3",Fmi::to_string(messageIndex3));
+       exception.addParameter("FileId4",Fmi::to_string(fileId4));
+       exception.addParameter("MessageIndex4",Fmi::to_string(messageIndex4));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -1007,8 +1008,8 @@ int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,uint fileI
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId",std::to_string(fileId));
-       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -1055,10 +1056,10 @@ int ServiceImplementation::_getGridValueVectorByLevel(T::SessionId sessionId,uin
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -1105,10 +1106,10 @@ int ServiceImplementation::_getGridValueVectorByTime(T::SessionId sessionId,uint
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -1155,10 +1156,10 @@ int ServiceImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId se
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -1205,10 +1206,10 @@ int ServiceImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId ses
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -1245,8 +1246,8 @@ int ServiceImplementation::_getGridValueVectorByCoordinateList(T::SessionId sess
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId",std::to_string(fileId));
-       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -1293,10 +1294,10 @@ int ServiceImplementation::_getGridValueVectorByLevelAndCoordinateList(T::Sessio
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -1343,10 +1344,10 @@ int ServiceImplementation::_getGridValueVectorByTimeAndCoordinateList(T::Session
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -1410,14 +1411,14 @@ int ServiceImplementation::_getGridValueVectorByTimeAndLevel(T::SessionId sessio
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
-       exception.addParameter("FileId3",std::to_string(fileId3));
-       exception.addParameter("MessageIndex3",std::to_string(messageIndex3));
-       exception.addParameter("FileId4",std::to_string(fileId4));
-       exception.addParameter("MessageIndex4",std::to_string(messageIndex4));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
+       exception.addParameter("FileId3",Fmi::to_string(fileId3));
+       exception.addParameter("MessageIndex3",Fmi::to_string(messageIndex3));
+       exception.addParameter("FileId4",Fmi::to_string(fileId4));
+       exception.addParameter("MessageIndex4",Fmi::to_string(messageIndex4));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -1481,14 +1482,14 @@ int ServiceImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionI
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
-       exception.addParameter("FileId3",std::to_string(fileId3));
-       exception.addParameter("MessageIndex3",std::to_string(messageIndex3));
-       exception.addParameter("FileId4",std::to_string(fileId4));
-       exception.addParameter("MessageIndex4",std::to_string(messageIndex4));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
+       exception.addParameter("FileId3",Fmi::to_string(fileId3));
+       exception.addParameter("MessageIndex3",Fmi::to_string(messageIndex3));
+       exception.addParameter("FileId4",Fmi::to_string(fileId4));
+       exception.addParameter("MessageIndex4",Fmi::to_string(messageIndex4));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -1552,14 +1553,14 @@ int ServiceImplementation::_getGridValueVectorByTimeLevelAndCoordinateList(T::Se
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
-       exception.addParameter("FileId3",std::to_string(fileId3));
-       exception.addParameter("MessageIndex3",std::to_string(messageIndex3));
-       exception.addParameter("FileId4",std::to_string(fileId4));
-       exception.addParameter("MessageIndex4",std::to_string(messageIndex4));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
+       exception.addParameter("FileId3",Fmi::to_string(fileId3));
+       exception.addParameter("MessageIndex3",Fmi::to_string(messageIndex3));
+       exception.addParameter("FileId4",Fmi::to_string(fileId4));
+       exception.addParameter("MessageIndex4",Fmi::to_string(messageIndex4));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -1596,8 +1597,8 @@ int ServiceImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId",std::to_string(fileId));
-       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -1634,8 +1635,8 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId",std::to_string(fileId));
-       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -1683,10 +1684,10 @@ int ServiceImplementation::_getGridValueListByTimeAndCircle(T::SessionId session
     catch (...)
     {
       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-      exception.addParameter("FileId1",std::to_string(fileId1));
-      exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-      exception.addParameter("FileId2",std::to_string(fileId2));
-      exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+      exception.addParameter("FileId1",Fmi::to_string(fileId1));
+      exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+      exception.addParameter("FileId2",Fmi::to_string(fileId2));
+      exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
       std::string st = exception.getStackTrace();
       PRINT_DATA(mDebugLog,"%s",st.c_str());
       return Result::UNEXPECTED_EXCEPTION;
@@ -1734,10 +1735,10 @@ int ServiceImplementation::_getGridValueListByLevelAndCircle(T::SessionId sessio
     catch (...)
     {
       SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-      exception.addParameter("FileId1",std::to_string(fileId1));
-      exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-      exception.addParameter("FileId2",std::to_string(fileId2));
-      exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+      exception.addParameter("FileId1",Fmi::to_string(fileId1));
+      exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+      exception.addParameter("FileId2",Fmi::to_string(fileId2));
+      exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
       std::string st = exception.getStackTrace();
       PRINT_DATA(mDebugLog,"%s",st.c_str());
       return Result::UNEXPECTED_EXCEPTION;
@@ -1801,14 +1802,14 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndCircle(T::SessionId se
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
-       exception.addParameter("FileId3",std::to_string(fileId3));
-       exception.addParameter("MessageIndex3",std::to_string(messageIndex3));
-       exception.addParameter("FileId4",std::to_string(fileId4));
-       exception.addParameter("MessageIndex4",std::to_string(messageIndex4));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
+       exception.addParameter("FileId3",Fmi::to_string(fileId3));
+       exception.addParameter("MessageIndex3",Fmi::to_string(messageIndex3));
+       exception.addParameter("FileId4",Fmi::to_string(fileId4));
+       exception.addParameter("MessageIndex4",Fmi::to_string(messageIndex4));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -1879,8 +1880,8 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId",std::to_string(fileId));
-       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -1918,8 +1919,8 @@ int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,u
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId",std::to_string(fileId));
-       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -1966,10 +1967,10 @@ int ServiceImplementation::_getGridValueListByLevelAndPointList(T::SessionId ses
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2016,10 +2017,10 @@ int ServiceImplementation::_getGridValueListByTimeAndPointList(T::SessionId sess
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2083,14 +2084,14 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndPointList(T::SessionId
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
-       exception.addParameter("FileId3",std::to_string(fileId3));
-       exception.addParameter("MessageIndex3",std::to_string(messageIndex3));
-       exception.addParameter("FileId4",std::to_string(fileId4));
-       exception.addParameter("MessageIndex4",std::to_string(messageIndex4));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
+       exception.addParameter("FileId3",Fmi::to_string(fileId3));
+       exception.addParameter("MessageIndex3",Fmi::to_string(messageIndex3));
+       exception.addParameter("FileId4",Fmi::to_string(fileId4));
+       exception.addParameter("MessageIndex4",Fmi::to_string(messageIndex4));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2127,8 +2128,8 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId",std::to_string(fileId));
-       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2175,10 +2176,10 @@ int ServiceImplementation::_getGridValueListByLevelAndPolygon(T::SessionId sessi
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2225,10 +2226,10 @@ int ServiceImplementation::_getGridValueListByTimeAndPolygon(T::SessionId sessio
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2291,10 +2292,10 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndPolygon(T::SessionId s
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2331,8 +2332,8 @@ int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId",std::to_string(fileId));
-       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2379,10 +2380,10 @@ int ServiceImplementation::_getGridValueListByTimeAndPolygonPath(T::SessionId se
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2429,10 +2430,10 @@ int ServiceImplementation::_getGridValueListByLevelAndPolygonPath(T::SessionId s
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2496,10 +2497,10 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndPolygonPath(T::Session
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2538,8 +2539,8 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,u
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId",std::to_string(fileId));
-       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2577,8 +2578,8 @@ int ServiceImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,uin
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId",std::to_string(fileId));
-       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2616,8 +2617,8 @@ int ServiceImplementation::_getGridIsobands(T::SessionId sessionId,uint fileId,u
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId",std::to_string(fileId));
-       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2655,8 +2656,8 @@ int ServiceImplementation::_getGridIsobandsByGeometry(T::SessionId sessionId,uin
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId",std::to_string(fileId));
-       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2694,8 +2695,8 @@ int ServiceImplementation::_getGridIsobandsByGrid(T::SessionId sessionId,uint fi
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId",std::to_string(fileId));
-       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2742,10 +2743,10 @@ int ServiceImplementation::_getGridIsobandsByLevel(T::SessionId sessionId,uint f
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId1));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex1));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2792,10 +2793,10 @@ int ServiceImplementation::_getGridIsobandsByTime(T::SessionId sessionId,uint fi
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId1));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex1));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2892,13 +2893,13 @@ int ServiceImplementation::getGridIsobandsByTimeAndGridImpl(T::SessionId session
           break;
       }
 
-      attributeList.setAttribute("grid.timeInterpolationMethod",std::to_string(timeInterpolationMethod));
-      attributeList.setAttribute("grid.areaInterpolationMethod",std::to_string(areaInterpolationMethod));
-      attributeList.setAttribute("grid.width",std::to_string(gridWidth));
-      attributeList.setAttribute("grid.height",std::to_string(gridHeight));
-      attributeList.setAttribute("grid.original.reverseYDirection",std::to_string((int)message1->reverseYDirection()));
-      attributeList.setAttribute("grid.original.reverseXDirection",std::to_string((int)message1->reverseXDirection()));
-      attributeList.setAttribute("contour.coordinateType",std::to_string(coordinateType));
+      attributeList.setAttribute("grid.timeInterpolationMethod",Fmi::to_string(timeInterpolationMethod));
+      attributeList.setAttribute("grid.areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
+      attributeList.setAttribute("grid.width",Fmi::to_string(gridWidth));
+      attributeList.setAttribute("grid.height",Fmi::to_string(gridHeight));
+      attributeList.setAttribute("grid.original.reverseYDirection",Fmi::to_string((int)message1->reverseYDirection()));
+      attributeList.setAttribute("grid.original.reverseXDirection",Fmi::to_string((int)message1->reverseXDirection()));
+      attributeList.setAttribute("contour.coordinateType",Fmi::to_string(coordinateType));
 
       getIsobands(gridValues,coordinatePtr,gridWidth,gridHeight,contourLowValues,contourHighValues,areaInterpolationMethod,smooth_size,smooth_degree,contours);
 
@@ -2907,10 +2908,10 @@ int ServiceImplementation::getGridIsobandsByTimeAndGridImpl(T::SessionId session
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId1));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex1));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -2959,10 +2960,10 @@ int ServiceImplementation::_getGridIsobandsByLevelAndGeometry(T::SessionId sessi
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId1));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex1));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -3012,10 +3013,10 @@ int ServiceImplementation::_getGridIsobandsByTimeAndGeometry(T::SessionId sessio
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId1));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex1));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -3069,10 +3070,10 @@ int ServiceImplementation::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId1));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex1));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -3125,10 +3126,10 @@ int ServiceImplementation::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId1));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex1));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -3192,14 +3193,14 @@ int ServiceImplementation::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
-       exception.addParameter("FileId3",std::to_string(fileId3));
-       exception.addParameter("MessageIndex3",std::to_string(messageIndex3));
-       exception.addParameter("FileId4",std::to_string(fileId4));
-       exception.addParameter("MessageIndex4",std::to_string(messageIndex4));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
+       exception.addParameter("FileId3",Fmi::to_string(fileId3));
+       exception.addParameter("MessageIndex3",Fmi::to_string(messageIndex3));
+       exception.addParameter("FileId4",Fmi::to_string(fileId4));
+       exception.addParameter("MessageIndex4",Fmi::to_string(messageIndex4));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -3263,14 +3264,14 @@ int ServiceImplementation::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId s
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
-       exception.addParameter("FileId3",std::to_string(fileId3));
-       exception.addParameter("MessageIndex3",std::to_string(messageIndex3));
-       exception.addParameter("FileId4",std::to_string(fileId4));
-       exception.addParameter("MessageIndex4",std::to_string(messageIndex4));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
+       exception.addParameter("FileId3",Fmi::to_string(fileId3));
+       exception.addParameter("MessageIndex3",Fmi::to_string(messageIndex3));
+       exception.addParameter("FileId4",Fmi::to_string(fileId4));
+       exception.addParameter("MessageIndex4",Fmi::to_string(messageIndex4));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -3340,14 +3341,14 @@ int ServiceImplementation::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessi
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
-       exception.addParameter("FileId3",std::to_string(fileId3));
-       exception.addParameter("MessageIndex3",std::to_string(messageIndex3));
-       exception.addParameter("FileId4",std::to_string(fileId4));
-       exception.addParameter("MessageIndex4",std::to_string(messageIndex4));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
+       exception.addParameter("FileId3",Fmi::to_string(fileId3));
+       exception.addParameter("MessageIndex3",Fmi::to_string(messageIndex3));
+       exception.addParameter("FileId4",Fmi::to_string(fileId4));
+       exception.addParameter("MessageIndex4",Fmi::to_string(messageIndex4));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -3411,14 +3412,14 @@ int ServiceImplementation::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
-       exception.addParameter("FileId3",std::to_string(fileId3));
-       exception.addParameter("MessageIndex3",std::to_string(messageIndex3));
-       exception.addParameter("FileId4",std::to_string(fileId4));
-       exception.addParameter("MessageIndex4",std::to_string(messageIndex4));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
+       exception.addParameter("FileId3",Fmi::to_string(fileId3));
+       exception.addParameter("MessageIndex3",Fmi::to_string(messageIndex3));
+       exception.addParameter("FileId4",Fmi::to_string(fileId4));
+       exception.addParameter("MessageIndex4",Fmi::to_string(messageIndex4));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -3482,14 +3483,14 @@ int ServiceImplementation::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId s
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
-       exception.addParameter("FileId3",std::to_string(fileId3));
-       exception.addParameter("MessageIndex3",std::to_string(messageIndex3));
-       exception.addParameter("FileId4",std::to_string(fileId4));
-       exception.addParameter("MessageIndex4",std::to_string(messageIndex4));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
+       exception.addParameter("FileId3",Fmi::to_string(fileId3));
+       exception.addParameter("MessageIndex3",Fmi::to_string(messageIndex3));
+       exception.addParameter("FileId4",Fmi::to_string(fileId4));
+       exception.addParameter("MessageIndex4",Fmi::to_string(messageIndex4));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -3527,8 +3528,8 @@ int ServiceImplementation::_getGridIsolines(T::SessionId sessionId,uint fileId,u
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId",std::to_string(fileId));
-       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -3566,8 +3567,8 @@ int ServiceImplementation::_getGridIsolinesByGeometry(T::SessionId sessionId,uin
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId",std::to_string(fileId));
-       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -3605,8 +3606,8 @@ int ServiceImplementation::_getGridIsolinesByGrid(T::SessionId sessionId,uint fi
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId",std::to_string(fileId));
-       exception.addParameter("MessageIndex",std::to_string(messageIndex));
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -3653,10 +3654,10 @@ int ServiceImplementation::_getGridIsolinesByLevel(T::SessionId sessionId,uint f
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId1));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex1));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -3703,10 +3704,10 @@ int ServiceImplementation::_getGridIsolinesByTime(T::SessionId sessionId,uint fi
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId1));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex1));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -3753,10 +3754,10 @@ int ServiceImplementation::_getGridIsolinesByLevelAndGeometry(T::SessionId sessi
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId1));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex1));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -3804,10 +3805,10 @@ int ServiceImplementation::_getGridIsolinesByTimeAndGeometry(T::SessionId sessio
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId1));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex1));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -3861,10 +3862,10 @@ int ServiceImplementation::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId1));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex1));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -3917,10 +3918,10 @@ int ServiceImplementation::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId1));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex1));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -3990,14 +3991,14 @@ int ServiceImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessi
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId2));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex2));
-       exception.addParameter("FileId3",std::to_string(fileId3));
-       exception.addParameter("MessageIndex3",std::to_string(messageIndex3));
-       exception.addParameter("FileId4",std::to_string(fileId4));
-       exception.addParameter("MessageIndex4",std::to_string(messageIndex4));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
+       exception.addParameter("FileId3",Fmi::to_string(fileId3));
+       exception.addParameter("MessageIndex3",Fmi::to_string(messageIndex3));
+       exception.addParameter("FileId4",Fmi::to_string(fileId4));
+       exception.addParameter("MessageIndex4",Fmi::to_string(messageIndex4));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -4098,13 +4099,13 @@ int ServiceImplementation::getGridIsolinesByTimeAndGridImpl(T::SessionId session
           break;
       }
 
-      attributeList.setAttribute("grid.timeInterpolationMethod",std::to_string(timeInterpolationMethod));
-      attributeList.setAttribute("grid.areaInterpolationMethod",std::to_string(areaInterpolationMethod));
-      attributeList.setAttribute("grid.width",std::to_string(gridWidth));
-      attributeList.setAttribute("grid.height",std::to_string(gridHeight));
-      attributeList.setAttribute("grid.original.reverseYDirection",std::to_string((int)message1->reverseYDirection()));
-      attributeList.setAttribute("grid.original.reverseXDirection",std::to_string((int)message1->reverseXDirection()));
-      attributeList.setAttribute("contour.coordinateType",std::to_string(coordinateType));
+      attributeList.setAttribute("grid.timeInterpolationMethod",Fmi::to_string(timeInterpolationMethod));
+      attributeList.setAttribute("grid.areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
+      attributeList.setAttribute("grid.width",Fmi::to_string(gridWidth));
+      attributeList.setAttribute("grid.height",Fmi::to_string(gridHeight));
+      attributeList.setAttribute("grid.original.reverseYDirection",Fmi::to_string((int)message1->reverseYDirection()));
+      attributeList.setAttribute("grid.original.reverseXDirection",Fmi::to_string((int)message1->reverseXDirection()));
+      attributeList.setAttribute("contour.coordinateType",Fmi::to_string(coordinateType));
 
       getIsolines(gridValues,coordinatePtr,gridWidth,gridHeight,contourValues,areaInterpolationMethod,smooth_size,smooth_degree,contours);
 
@@ -4113,10 +4114,10 @@ int ServiceImplementation::getGridIsolinesByTimeAndGridImpl(T::SessionId session
     catch (...)
     {
        SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-       exception.addParameter("FileId1",std::to_string(fileId1));
-       exception.addParameter("MessageIndex1",std::to_string(messageIndex1));
-       exception.addParameter("FileId2",std::to_string(fileId1));
-       exception.addParameter("MessageIndex2",std::to_string(messageIndex1));
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;
@@ -4668,7 +4669,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
   catch (...)
   {
     SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
-    exception.addParameter("FileId",std::to_string(fileInfo.mFileId));
+    exception.addParameter("FileId",Fmi::to_string(fileInfo.mFileId));
     exception.addParameter("Filename",mDataDir + "/" + fileInfo.mName);
     throw exception;
   }

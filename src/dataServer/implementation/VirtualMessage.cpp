@@ -2,6 +2,7 @@
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/common/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
+#include <macgyver/StringConversion.h>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -1510,7 +1511,7 @@ void VirtualMessage::executeFunctionCall9(uint columns,uint rows,std::vector<std
     if (mMessageList.size() < 1)
     {
       SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
+      exception.addParameter("NumberOfGrids",Fmi::to_string(mMessageList.size()));
       throw exception;
     }
 
@@ -1546,7 +1547,7 @@ void VirtualMessage::executeFunctionCall9(uint columns,uint rows,std::vector<std
     if (mMessageList.size() < 1)
     {
       SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
+      exception.addParameter("NumberOfGrids",Fmi::to_string(mMessageList.size()));
       throw exception;
     }
 
@@ -1581,7 +1582,7 @@ void VirtualMessage::executeFunctionCall9(std::vector<T::GridValueList>& inValue
     if (mMessageList.size() < 1)
     {
       SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids!");
-      exception.addParameter("NumberOfGrids",std::to_string(mMessageList.size()));
+      exception.addParameter("NumberOfGrids",Fmi::to_string(mMessageList.size()));
       throw exception;
     }
 

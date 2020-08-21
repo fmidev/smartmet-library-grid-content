@@ -1,5 +1,6 @@
 #include "VirtualContentDefinitionFile.h"
 #include <grid-files/common/GeneralFunctions.h>
+#include <macgyver/StringConversion.h>
 
 
 namespace SmartMet
@@ -245,7 +246,7 @@ void VirtualContentDefinitionFile::loadFile()
               while (startp <= endp)
               {
                 ParameterDef newdef(pdef);
-                newdef.mForecastNumber = std::to_string(startp);
+                newdef.mForecastNumber = Fmi::to_string(startp);
                 rec.mSourceParameters.push_back(newdef);
                 rec.mSourceParameterNames.insert(toLowerString(newdef.getName()));
                 startp++;

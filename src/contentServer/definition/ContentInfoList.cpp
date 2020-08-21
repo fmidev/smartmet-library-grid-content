@@ -164,12 +164,13 @@ ContentInfoList::~ContentInfoList()
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     if (mArray != nullptr)
     {
-      for (uint t=0; t<mSize; t++)
+      if (mReleaseObjects)
       {
-        if (mArray[t] != nullptr  &&  mReleaseObjects)
-          delete mArray[t];
-
-        mArray[t] = nullptr;
+        for (uint t=0; t<mSize; t++)
+        {
+          if (mArray[t] != nullptr)
+            delete mArray[t];
+        }
       }
 
       delete[] mArray;
@@ -536,12 +537,13 @@ void ContentInfoList::clear()
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     if (mArray != nullptr)
     {
-      for (uint t=0; t<mSize; t++)
+      if (mReleaseObjects)
       {
-        if (mArray[t] != nullptr  &&  mReleaseObjects)
-          delete mArray[t];
-
-        mArray[t] = nullptr;
+        for (uint t=0; t<mSize; t++)
+        {
+          if (mArray[t] != nullptr)
+            delete mArray[t];
+        }
       }
 
       delete[] mArray;
@@ -4218,7 +4220,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
 
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) < 0)
         idx++;
 
       uint t = C_UINT(idx);
@@ -4250,6 +4252,36 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                   {
+                    if (info->mForecastTime == forecastTime)
+                    {
+                      if (info->mParameterLevel == level || parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE)
+                      {
+                        if (contentInfoList.getReleaseObjects())
+                          contentInfoList.addContentInfo(info->duplicate());
+                        else
+                          contentInfoList.addContentInfo(info);
+
+                        return;
+                      }
+                      else
+                      if (info->mParameterLevel < level)
+                      {
+                        if (sameTimePrevLevel == nullptr || sameTimePrevLevel->mParameterLevel < info->mParameterLevel)
+                        {
+                          sameTimePrevLevel = info;
+                        }
+                      }
+                      else
+                      if (info->mParameterLevel > level)
+                      {
+                        if (sameTimeNextLevel == nullptr || sameTimeNextLevel->mParameterLevel > info->mParameterLevel)
+                        {
+                          sameTimeNextLevel = info;
+                          t = mLength;
+                        }
+                      }
+                    }
+                    else
                     if (info->mForecastTime < forecastTime)
                     {
                       if (info->mParameterLevel == level || parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE)
@@ -4304,35 +4336,6 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
                           t = mLength;
                         }
                       }
-                    }
-                    else
-                    if (info->mForecastTime == forecastTime)
-                    {
-                      if (info->mParameterLevel == level || parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE)
-                      {
-                        if (contentInfoList.getReleaseObjects())
-                          contentInfoList.addContentInfo(info->duplicate());
-                        else
-                          contentInfoList.addContentInfo(info);
-                      }
-                      else
-                      if (info->mParameterLevel < level)
-                      {
-                        if (sameTimePrevLevel == nullptr || sameTimePrevLevel->mParameterLevel < info->mParameterLevel)
-                        {
-                          sameTimePrevLevel = info;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel > level)
-                      {
-                        if (sameTimeNextLevel == nullptr || sameTimeNextLevel->mParameterLevel > info->mParameterLevel)
-                        {
-                          sameTimeNextLevel = info;
-                          t = mLength;
-                        }
-                      }
-
                     }
                   }
                 }
