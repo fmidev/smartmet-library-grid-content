@@ -213,7 +213,7 @@ bool ServiceImplementation::getProducerInfoByName(std::string& name,T::ProducerI
 
 
 
-void ServiceImplementation::getGenerationInfoListByProducerId(uint producerId,T::GenerationInfoList& generationInfoList)
+CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(uint producerId)
 {
   FUNCTION_TRACE
   try
@@ -230,6 +230,7 @@ void ServiceImplementation::getGenerationInfoListByProducerId(uint producerId,T:
         {
           mGenerationInfoList.sort(T::GenerationInfo::ComparisonMethod::producerId);
           mGenerationInfoListUpdateTime = time(0);
+          mProducerGenerationListCache.clear();
         }
       }
     }
@@ -239,7 +240,25 @@ void ServiceImplementation::getGenerationInfoListByProducerId(uint producerId,T:
     //if (diff < 115)
     //  generationInfoList.setReleaseObjects(false);
 
-    mGenerationInfoList.getGenerationInfoListByProducerIdAndStatus(producerId,generationInfoList,T::GenerationInfo::Status::Ready);
+    auto gl = mProducerGenerationListCache.find(producerId);
+    if (gl != mProducerGenerationListCache.end())
+      return gl->second;
+
+    CacheEntry_sptr cacheEntry(new CacheEntry);
+
+    T::GenerationInfoList_sptr generationInfoList(new T::GenerationInfoList());
+    mGenerationInfoList.getGenerationInfoListByProducerIdAndStatus(producerId,*generationInfoList,T::GenerationInfo::Status::Ready);
+
+    StringVector_sptr analysisTimes(new std::vector<std::string>());
+    generationInfoList->sort(T::GenerationInfo::ComparisonMethod::analysisTime_generationId);
+    generationInfoList->getAnalysisTimes(*analysisTimes,true);
+
+    cacheEntry->generationInfoList = generationInfoList;
+    cacheEntry->analysisTimes = analysisTimes;
+
+    mProducerGenerationListCache.insert(std::pair<uint,CacheEntry_sptr>(producerId,cacheEntry));
+
+    return cacheEntry;
   }
   catch (...)
   {
@@ -2593,15 +2612,14 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     boost::hash_combine(hash,forecastNumber);
     boost::hash_combine(hash,geometryId);
 
-
     int idx = -1;
-    uint endp = 200;
-    if (mContentCacheKeyIdx < 200)
+    uint endp = CONTENT_CACHE_SIZE;
+    if (mContentCacheKeyIdx < CONTENT_CACHE_SIZE)
       endp = mContentCacheKeyIdx;
 
     for (uint t=0; t<endp && idx < 0; t++)
     {
-      int i = (mContentCacheKeyIdx-t) % 200;
+      int i = (mContentCacheKeyIdx-t) % CONTENT_CACHE_SIZE;
       if (mContentCacheKey[i] == hash)
         idx = (int)i;
     }
@@ -2615,7 +2633,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       {
         if (idx < 0)
         {
-          idx = mContentCacheKeyIdx % 200;
+          idx = mContentCacheKeyIdx % CONTENT_CACHE_SIZE;
           mContentCacheKey[idx] = hash;
           mContentCacheKeyIdx++;
         }
@@ -2623,10 +2641,15 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
         std::string startTime = "13000101T000000";
         std::string endTime = "23000101T000000";
 
+        //printf("CACHE %u\n",mContentCacheKeyIdx);
+
+        //mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-1,-1,-1,startTime,endTime,0,mCacheContentInfoList[idx]);
         mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,mCacheContentInfoList[idx]);
         mContentCacheTime[idx] = time(nullptr);
       }
     }
+//    else
+//      printf("HIT\n");
 
     switch (parameterKeyType)
     {
@@ -6013,17 +6036,23 @@ void ServiceImplementation::getGridValues(
 
           // Reading generations supported by the current producer.
 
-          T::GenerationInfoList generationInfoList;
-          getGenerationInfoListByProducerId(producerInfo.mProducerId, generationInfoList);
+          //T::GenerationInfoList generationInfoList;
+          auto cacheEntry = getGenerationInfoListByProducerId(producerInfo.mProducerId);
 
-          uint gLen = generationInfoList.getLength();
+          uint gLen = cacheEntry->generationInfoList->getLength();
           if (gLen == 0)
             PRINT_DATA(mDebugLog, "    - No generations found for the current producer!\n");
 
           // Sorting generation analysis times.
 
-          std::vector < std::string > analysisTimes;
-          generationInfoList.getAnalysisTimes(analysisTimes, !reverseGenerations);
+          std::vector <std::string> analysisTimesVec;
+          std::vector <std::string> *analysisTimes = cacheEntry->analysisTimes.get();
+          if (reverseGenerations)
+          {
+            cacheEntry->generationInfoList->getAnalysisTimes(analysisTimesVec,false);
+            analysisTimes = &analysisTimesVec;
+
+          }
 
           // Going through all the parameter mapping files, until we find a match.
 
@@ -6085,10 +6114,10 @@ void ServiceImplementation::getGridValues(
 
               PRINT_DATA(mDebugLog, "  - Going through the generations from the newest to the oldest.\n");
 
-              uint gLen = analysisTimes.size();
+              uint gLen = analysisTimes->size();
               for (uint g = 0; g < gLen; g++)
               {
-                PRINT_DATA(mDebugLog, "    * %s\n", analysisTimes[g].c_str());
+                PRINT_DATA(mDebugLog, "    * %s\n", (*analysisTimes)[g].c_str());
 
                 uint gflags = 1 << g;
 
@@ -6096,24 +6125,24 @@ void ServiceImplementation::getGridValues(
 
                 if (analysisTime.length() > 0)
                 {
-                  if (analysisTime == analysisTimes[g])
+                  if (analysisTime == (*analysisTimes)[g])
                   {
                     generationValid = true;
                   }
                   else
                   if ((queryFlags & Query::Flags::AnalysisTimeMatchRequired) == 0)
                   {
-                    if (g == 0  &&  analysisTimes[g] < analysisTime)
+                    if (g == 0  &&  (*analysisTimes)[g] < analysisTime)
                     {
                       generationValid = true;
                     }
                     else
-                    if ((g+1) == gLen  &&  analysisTimes[g] > analysisTime)
+                    if ((g+1) == gLen  &&  (*analysisTimes)[g] > analysisTime)
                     {
                       generationValid = true;
                     }
                     else
-                    if (analysisTimes[g] > analysisTime  &&  (g+1) < gLen  &&  analysisTimes[g+1] < analysisTime)
+                    if ((*analysisTimes)[g] > analysisTime  &&  (g+1) < gLen  &&  (*analysisTimes)[g+1] < analysisTime)
                     {
                       generationValid = true;
                     }
@@ -6127,7 +6156,7 @@ void ServiceImplementation::getGridValues(
 
                 if (generationValid)
                 {
-                  T::GenerationInfo* generationInfo = generationInfoList.getGenerationInfoByAnalysisTime(analysisTimes[g]);
+                  T::GenerationInfo* generationInfo = cacheEntry->generationInfoList->getGenerationInfoByAnalysisTime((*analysisTimes)[g]);
 
                   PRINT_DATA(mDebugLog, "      - Going through the parameter mappings\n");
                   for (auto pInfo = mappings.begin(); pInfo != mappings.end(); ++pInfo)
@@ -6675,15 +6704,15 @@ void ServiceImplementation::getGridValues(
 
           // Reading generations supported by the current producer.
 
-          T::GenerationInfoList generationInfoList;
-          getGenerationInfoListByProducerId(producerInfo.mProducerId, generationInfoList);
-
-          uint gLen = generationInfoList.getLength();
+          //T::GenerationInfoList generationInfoList;
+          //getGenerationInfoListByProducerId(producerInfo.mProducerId, generationInfoList);
+          auto cacheEntry = getGenerationInfoListByProducerId(producerInfo.mProducerId);
+          uint gLen = cacheEntry->generationInfoList->getLength();
 
           //generationInfoList.print(std::cout,0,0);
           if (gLen > 0)
           {
-            generationInfoList.sort(T::GenerationInfo::ComparisonMethod::analysisTime_generationId);
+            //generationInfoList->sort(T::GenerationInfo::ComparisonMethod::analysisTime_generationId);
             //generationInfoList.print(std::cout,0,0);
 
             ParameterMapping_vec mappings;
@@ -6740,8 +6769,8 @@ void ServiceImplementation::getGridValues(
                     c++;
 
                     bool generationValid = false;
-                    T::GenerationInfo* gInfo = generationInfoList.getGenerationInfoByIndex(g);
-                    T::GenerationInfo* gNext = generationInfoList.getGenerationInfoByIndex(g+1);
+                    T::GenerationInfo* gInfo = cacheEntry->generationInfoList->getGenerationInfoByIndex(g);
+                    T::GenerationInfo* gNext = cacheEntry->generationInfoList->getGenerationInfoByIndex(g+1);
 
                     if (analysisTime.length() > 0)
                     {

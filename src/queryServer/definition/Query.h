@@ -21,6 +21,8 @@ class Query
     QueryParameter*     getQueryParameterPtr(const std::string& param);
     QueryParameter*     getQueryParameterPtr(uint id);
     uint                getValuesPerTimeStep();
+    std::size_t         getHash();
+    void                getResultProducerIdList(std::set<uint>& producerIdList);
     void                removeTemporaryParameters();
     void                print(std::ostream& stream,uint level,uint optionFlags);
 

@@ -21,6 +21,7 @@ class QueryParameter
                                 QueryParameter(const QueryParameter& queryParameter);
     virtual                     ~QueryParameter();
 
+    std::size_t                 getHash();
     QueryParameter*             duplicate();
     void                        print(std::ostream& stream,uint level,uint optionFlags);
 

@@ -14,6 +14,8 @@ namespace SmartMet
 namespace QueryServer
 {
 
+#define CONTENT_CACHE_SIZE 1000
+
 typedef std::vector<std::pair<std::string,T::GeometryId>>   Producer_vec;
 typedef std::map<std::string,T::ProducerInfo>               Producer_map;
 typedef ContentServer::ServiceInterface*                    ContentServer_ptr;
@@ -21,7 +23,17 @@ typedef DataServer::ServiceInterface*                       DataServer_ptr;
 typedef std::vector<std::pair<std::string,int>>             LevelHeightCache;
 typedef std::pair<std::string,ParameterMapping_vec>         ParameterMappingCacheRec;
 typedef std::list<ParameterMappingCacheRec>                 ParameterMappingCache;
+typedef std::shared_ptr<std::vector<std::string>>           StringVector_sptr;
 
+class CacheEntry
+{
+  public:
+    T::GenerationInfoList_sptr generationInfoList;
+    StringVector_sptr          analysisTimes;
+};
+
+typedef std::shared_ptr<CacheEntry>                         CacheEntry_sptr;
+typedef std::map<uint,CacheEntry_sptr>                      ProducerGenarationListCache;
 
 class ServiceImplementation : public ServiceInterface
 {
@@ -488,7 +500,6 @@ class ServiceImplementation : public ServiceInterface
                        ParameterValues& values);
 
      bool           getProducerInfoByName(std::string& name,T::ProducerInfo& info);
-     void           getGenerationInfoListByProducerId(uint producerId,T::GenerationInfoList& generationInfoList);
 
      int            getContentListByParameterGenerationIdAndForecastTime(
                        T::SessionId sessionId,
@@ -504,6 +515,8 @@ class ServiceImplementation : public ServiceInterface
                        T::GeometryId geometryId,
                        std::string& forecastTime,
                        T::ContentInfoList& contentInfoList);
+
+     CacheEntry_sptr getGenerationInfoListByProducerId(uint producerId);
 
 
   private:
@@ -534,13 +547,15 @@ class ServiceImplementation : public ServiceInterface
      ThreadLock             mHeightCacheThreadLock;
      ThreadLock             mParameterMappingCacheThreadLock;
 
-     T::ContentInfoList     mCacheContentInfoList[200];
-     std::size_t            mContentCacheKey[200];
-     time_t                 mContentCacheTime[200];
+     T::ContentInfoList     mCacheContentInfoList[CONTENT_CACHE_SIZE];
+     std::size_t            mContentCacheKey[CONTENT_CACHE_SIZE];
+     time_t                 mContentCacheTime[CONTENT_CACHE_SIZE];
      uint                   mContentCacheKeyIdx;
 
      boost::shared_ptr<Fmi::LandCover> mLandCover;
      boost::shared_ptr<Fmi::DEM>       mDem;
+     ProducerGenarationListCache       mProducerGenerationListCache;
+
 };
 
 

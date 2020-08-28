@@ -1,5 +1,6 @@
 #include "QueryParameter.h"
 #include <grid-files/common/GeneralFunctions.h>
+#include <boost/functional/hash.hpp>
 
 
 namespace SmartMet
@@ -104,6 +105,70 @@ QueryParameter::~QueryParameter()
   {
     SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
+  }
+}
+
+
+
+
+
+std::size_t QueryParameter::getHash()
+{
+  try
+  {
+    std::size_t hash = 0;
+    boost::hash_combine(hash,mId);
+    boost::hash_combine(hash,mAlternativeParamId);
+    boost::hash_combine(hash,mType);
+    boost::hash_combine(hash,mLocationType);
+    boost::hash_combine(hash,mParam);
+    boost::hash_combine(hash,mOrigParam);
+    boost::hash_combine(hash,mSymbolicName);
+    boost::hash_combine(hash,mParameterKeyType);
+    boost::hash_combine(hash,mParameterKey);
+    boost::hash_combine(hash,mProducerName);
+    boost::hash_combine(hash,mGeometryId);
+    boost::hash_combine(hash,mParameterLevelIdType);
+    boost::hash_combine(hash,mParameterLevelId);
+    boost::hash_combine(hash,mParameterLevel);
+    boost::hash_combine(hash,mForecastType );
+    boost::hash_combine(hash,mForecastNumber);
+    boost::hash_combine(hash,mAreaInterpolationMethod);
+    boost::hash_combine(hash,mTimeInterpolationMethod);
+    boost::hash_combine(hash,mLevelInterpolationMethod);
+
+    for (auto it = mContourLowValues.begin(); it != mContourLowValues.end(); ++it)
+      boost::hash_combine(hash,*it);
+
+    for (auto it = mContourHighValues.begin(); it != mContourHighValues.end(); ++it)
+      boost::hash_combine(hash,*it);
+
+    for (auto it = mContourColors.begin(); it != mContourColors.end(); ++it)
+      boost::hash_combine(hash,*it);
+
+    boost::hash_combine(hash,mProducerId);
+    boost::hash_combine(hash,mGenerationFlags);
+    boost::hash_combine(hash,mTimestepsBefore);
+    boost::hash_combine(hash,mTimestepsAfter);
+    boost::hash_combine(hash,mTimestepSizeInMinutes);
+
+    //mValueList = queryParameter.mValueList;
+
+    boost::hash_combine(hash,mPrecision);
+    //boost::hash_combine(hash,mTemporary);
+    //boost::hash_combine(hash,mFunction);
+    //mFunctionParams = queryParameter.mFunctionParams;
+    //boost::hash_combine(hash,mFlags);
+
+    //mCoordinates = queryParameter.mCoordinates;
+
+    boost::hash_combine(hash,mAttributeList.getHash());
+
+    return hash;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

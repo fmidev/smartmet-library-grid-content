@@ -1,6 +1,7 @@
 #include "Query.h"
 #include <grid-files/common/GeneralFunctions.h>
 #include <time.h>
+#include <boost/functional/hash.hpp>
 
 
 namespace SmartMet
@@ -77,6 +78,63 @@ Query::~Query()
   {
     SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
+  }
+}
+
+
+
+
+
+std::size_t Query::getHash()
+{
+  try
+  {
+    std::size_t hash = 0;
+    boost::hash_combine(hash,mSearchType);
+
+    for (auto it = mProducerNameList.begin(); it != mProducerNameList.end(); ++it)
+      boost::hash_combine(hash,*it);
+
+    for (auto it = mForecastTimeList.begin(); it != mForecastTimeList.end(); ++it)
+      boost::hash_combine(hash,*it);
+
+    boost::hash_combine(hash,mAttributeList.getHash());
+    boost::hash_combine(hash,mCoordinateType);
+
+    for (auto coordinates = mAreaCoordinates.begin(); coordinates != mAreaCoordinates.end(); ++coordinates)
+    {
+      for (auto it = coordinates->begin(); it != coordinates->end(); ++it)
+      {
+        boost::hash_combine(hash,it->x());
+        boost::hash_combine(hash,it->y());
+      }
+    }
+
+    boost::hash_combine(hash,mRadius);
+
+    for (auto it = mQueryParameterList.begin(); it != mQueryParameterList.end(); ++it)
+      boost::hash_combine(hash,it->getHash());
+
+    boost::hash_combine(hash,mTimezone);
+    boost::hash_combine(hash,mStartTime);
+    boost::hash_combine(hash,mEndTime);
+    boost::hash_combine(hash,mTimesteps);
+    boost::hash_combine(hash,mTimestepSizeInMinutes);
+    boost::hash_combine(hash,mAnalysisTime);
+
+    for (auto it = mGeometryIdList.begin(); it != mGeometryIdList.end(); ++it)
+      boost::hash_combine(hash,*it);
+
+    boost::hash_combine(hash,mLanguage);
+    boost::hash_combine(hash,mGenerationFlags);
+    boost::hash_combine(hash,mFlags);
+    boost::hash_combine(hash,mMaxParameterValues);
+
+    return hash;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -162,6 +220,29 @@ QueryParameter* Query::getQueryParameterPtr(uint id)
         return &(*it);
     }
     return nullptr;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+void Query::getResultProducerIdList(std::set<uint>& producerIdList)
+{
+  try
+  {
+    for (auto param = mQueryParameterList.begin(); param != mQueryParameterList.end(); ++param)
+    {
+      for (auto val = param->mValueList.begin(); val != param->mValueList.end(); val++)
+      {
+        if (producerIdList.find(val->mProducerId) == producerIdList.end())
+          producerIdList.insert(val->mProducerId);
+      }
+    }
   }
   catch (...)
   {
