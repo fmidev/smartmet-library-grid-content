@@ -2686,6 +2686,28 @@ int ServiceInterface::getContentCount(T::SessionId sessionId,uint& count)
 
 
 
+int ServiceInterface::getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash)
+{
+  FUNCTION_TRACE
+  try
+  {
+    unsigned long long timeStart = getTime();
+    int result = _getHashByProducerId(sessionId,producerId,hash);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%llu);result %d;time %f;",__FUNCTION__,sessionId,producerId,hash,result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
 {
   FUNCTION_TRACE
@@ -3806,11 +3828,19 @@ int ServiceInterface::_getContentCount(T::SessionId sessionId,uint& count)
 
 
 
-int ServiceInterface::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
+int ServiceInterface::_getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash)
 {
   throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
 }
 
+
+
+
+
+int ServiceInterface::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
+{
+  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+}
 
 
 

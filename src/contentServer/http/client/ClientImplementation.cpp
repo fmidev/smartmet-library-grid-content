@@ -4058,6 +4058,38 @@ int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 
 
 
+int ClientImplementation::_getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getHashByProducerId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("producerId",producerId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+      hash = response.getLineValueByKey("hash");
+    else
+      hash = 0;
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
 {
   try

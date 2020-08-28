@@ -2881,6 +2881,30 @@ int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 
 
 
+int ClientImplementation::_getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Spine::Exception(BCP, "The client is not initialized!");
+
+    ::CORBA::ULongLong corbaHash = 0;
+
+    int result = mService->getHashByProducerId(sessionId,producerId,corbaHash);
+
+    if (result == 0)
+      hash = corbaHash;
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
 int ClientImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
 {
   try

@@ -285,7 +285,7 @@ void GridFileManager::deleteFilesByCheckTime(time_t checkTime)
 
     for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
     {
-      if (it->second->getCheckTime() < checkTime)
+      if (it->second->getCheckTime() < checkTime  &&  !it->second->isVirtual())
         idList.push_back(it->first);
     }
 

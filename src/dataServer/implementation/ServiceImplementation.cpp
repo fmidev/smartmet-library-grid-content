@@ -30,7 +30,6 @@
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
-
 namespace SmartMet
 {
 namespace DataServer
@@ -4443,7 +4442,8 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
           }
         }
       }
-      mContentServer->deleteFileInfoListByFileIdList(mServerSessionId,fileIdList);
+      if (fileIdList.size() > 0)
+        mContentServer->deleteFileInfoListByFileIdList(mServerSessionId,fileIdList);
     }
   }
   catch (...)

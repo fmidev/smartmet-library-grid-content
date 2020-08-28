@@ -780,6 +780,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getHashByProducerId") == 0)
+    {
+      getHashByProducerId(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"getLevelInfoList") == 0)
     {
       getLevelInfoList(request,response);
@@ -7073,6 +7079,51 @@ void ServerInterface::getContentCount(T::RequestMessage& request,T::ResponseMess
     if (result == Result::OK)
     {
       response.addLine("count",count);
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void ServerInterface::getHashByProducerId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint producerId = 0;
+    if (!request.getLineByKey("producerId",producerId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: producerId");
+      return;
+    }
+
+    ulonglong hash = 0;
+
+    int result = mService->getHashByProducerId(sessionId,producerId,hash);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      response.addLine("hash",hash);
     }
     else
     {

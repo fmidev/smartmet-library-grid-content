@@ -49,14 +49,17 @@ ContentInfoList::ContentInfoList()
     mModificationLockPtr = &mModificationLock;
     mReleaseObjects = true;
     mComparisonMethod = ContentInfo::ComparisonMethod::none;
-    mSize = 100;
+    mSize = 0;
     mLength = 0;
+    mArray = nullptr;
+    /*
     mArray = new ContentInfoPtr[100];
 
     for (uint t=0; t<100; t++)
     {
       mArray[t] = nullptr;
     }
+    */
   }
   catch (...)
   {
@@ -161,24 +164,20 @@ ContentInfoList::~ContentInfoList()
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
-    if (mArray != nullptr)
-    {
-      if (mReleaseObjects)
-      {
-        for (uint t=0; t<mSize; t++)
-        {
-          if (mArray[t] != nullptr)
-            delete mArray[t];
-        }
-      }
+    if (mArray == nullptr)
+      return;
 
-      delete[] mArray;
+    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    if (mReleaseObjects  && mLength > 0)
+    {
+      for (uint t=0; t<mLength; t++)
+      {
+        if (mArray[t] != nullptr)
+          delete mArray[t];
+      }
     }
 
-    mArray = nullptr;
-    mSize = 0;
-    mLength = 0;
+    delete[] mArray;
   }
   catch (...)
   {
@@ -302,7 +301,7 @@ ContentInfo* ContentInfoList::addContentInfo(ContentInfo *contentInfo)
 
     if (mArray == nullptr  ||  mLength == mSize)
     {
-      increaseSize(mSize + mSize/5 + 10);
+      increaseSize(mSize + mSize/5 + 50);
     }
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::none)
@@ -535,20 +534,15 @@ void ContentInfoList::clear()
       return;
 
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
-    if (mArray != nullptr)
+    if (mReleaseObjects &&  mLength > 0)
     {
-      if (mReleaseObjects)
+      for (uint t=0; t<mSize; t++)
       {
-        for (uint t=0; t<mSize; t++)
-        {
-          if (mArray[t] != nullptr)
-            delete mArray[t];
-        }
+        if (mArray[t] != nullptr)
+          delete mArray[t];
       }
-
-      delete[] mArray;
     }
-
+    delete[] mArray;
     mArray = nullptr;
     mSize = 0;
     mLength = 0;
@@ -746,6 +740,75 @@ uint ContentInfoList::markDeletedByFileId(uint fileId)
   }
 }
 
+
+
+
+
+uint ContentInfoList::markDeletedByGenerationId(uint generationId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+
+    uint cnt = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info->mGenerationId == generationId)
+        {
+          info->mFlags = info->mFlags | T::ContentInfo::Flags::DeletedContent;
+          cnt++;
+        }
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+uint ContentInfoList::markDeletedByProducerId(uint producerId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+
+    uint cnt = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info->mProducerId == producerId)
+        {
+          info->mFlags = info->mFlags | T::ContentInfo::Flags::DeletedContent;
+          cnt++;
+        }
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
 
 
 
@@ -6350,7 +6413,7 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,ContentInfo
     ContentInfo contentInfo;
     contentInfo.mProducerId = producerId;
 
-    int startIdx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
+    int startIdx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::producer_file_message,contentInfo);
     if (startIdx < 0)
       startIdx = 0;
 
@@ -6439,6 +6502,70 @@ void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint gene
           return;
       }
     }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+std::size_t ContentInfoList::getHashByProducerId(uint producerId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::size_t hash = 0;
+
+    if (mArray == nullptr ||  mLength == 0)
+      return hash;
+
+    if (mComparisonMethod != ContentInfo::ComparisonMethod::producer_file_message)
+    {
+      // If the records are not sorted according to fileId and messageIndex then the startFileId parameter
+      // is used as the start index in the list.
+
+      for (uint t=0; t<mLength; t++)
+      {
+        ContentInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId)
+        {
+          boost::hash_combine(hash,info->mFileId);
+          boost::hash_combine(hash,info->mMessageIndex);
+        }
+      }
+      return hash;
+    }
+
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    ContentInfo contentInfo;
+    contentInfo.mProducerId = producerId;
+
+    int startIdx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::producer_file_message,contentInfo);
+    if (startIdx < 0)
+      startIdx = 0;
+
+    for (uint t=startIdx; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      {
+        if (info->mProducerId == producerId)
+        {
+          boost::hash_combine(hash,info->mFileId);
+          boost::hash_combine(hash,info->mMessageIndex);
+        }
+        else
+        {
+          if (C_INT(t) > startIdx)
+            return hash;
+        }
+      }
+    }
+    return hash;
   }
   catch (...)
   {

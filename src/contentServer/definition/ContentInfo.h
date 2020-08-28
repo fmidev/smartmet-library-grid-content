@@ -80,7 +80,7 @@ class ContentInfo
         static const uint generationId_starttime_file_message             = 14;
         static const uint fmiName_fmiLevelId_level_starttime_file_message = 15;
         static const uint starttime_generationId_file_message             = 16;
-        static const uint producer_file_message                       = 17;
+        static const uint producer_file_message                           = 17;
     };
 
     class Flags
@@ -89,7 +89,7 @@ class ContentInfo
         static const uint PredefinedContent       = 0x00000001;
         static const uint VirtualContent          = 0x00000002;
         static const uint PreloadRequired         = 0x00000004;
-        static const uint DeletedContent          = 0x80000000;
+        static const uint DeletedContent          = 0x00010000;
     };
 };
 

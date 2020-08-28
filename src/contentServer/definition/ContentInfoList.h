@@ -48,6 +48,8 @@ class ContentInfoList
     uint                deleteMarkedContent();
     uint                deleteVirtualContent();
     uint                markDeletedByFileId(uint fileId);
+    uint                markDeletedByGenerationId(uint generationId);
+    uint                markDeletedByProducerId(uint fileId);
 
     void                keepContentInfoByGeometryIdList(std::set<T::GeometryId>& geometryIdList);
     void                keepContentInfoByGeometryId(T::GeometryId geometryId);
@@ -132,6 +134,7 @@ class ContentInfoList
     void                getParamLevelInfoListByFmiParameterId(T::ParamId fmiParameterId,ParameterLevelInfoList& parameterLevelInfoList);
 
     void                getLevelInfoList(T::LevelInfoList& levelInfoList);
+    std::size_t         getHashByProducerId(uint producerId);
 
     uint                getLength()const;
     ModificationLock*   getModificationLockPtr();

@@ -6,6 +6,7 @@
 #include <grid-files/common/AutoReadLock.h>
 #include <grid-files/common/AutoThreadLock.h>
 #include <grid-files/common/ShowFunction.h>
+#include <boost/functional/hash.hpp>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
@@ -47,12 +48,15 @@ FileInfoList::FileInfoList()
     mReleaseObjects = true;
     mSize = 100;
     mLength = 0;
+    mArray = nullptr;
+    /*
     mArray = new FileInfoPtr[100];
 
     for (uint t=0; t<100; t++)
     {
       mArray[t] = nullptr;
     }
+    */
   }
   catch (...)
   {
@@ -107,22 +111,21 @@ FileInfoList::~FileInfoList()
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr)
+      return;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
-    if (mArray != nullptr)
+    if (mReleaseObjects)
     {
-      if (mReleaseObjects)
+      for (uint t=0; t<mLength; t++)
       {
-        for (uint t=0; t<mLength; t++)
+        if (mArray[t] != nullptr)
         {
-          if (mArray[t] != nullptr)
-          {
-            delete(mArray[t]);
-          }
+          delete(mArray[t]);
         }
       }
-      delete[] mArray;
     }
-    mArray = nullptr;
+    delete[] mArray;
   }
   catch (...)
   {
@@ -188,7 +191,7 @@ void FileInfoList::addFileInfo(FileInfo *fileInfo)
 
     if (mArray == nullptr  ||  mLength == mSize)
     {
-      increaseSizeNoLock(mSize + mSize/5 + 10);
+      increaseSizeNoLock(mSize + mSize/5 + 50);
     }
 
 
@@ -352,21 +355,15 @@ void FileInfoList::clear()
       return;
 
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
-    if (mArray != nullptr)
+    if (mReleaseObjects && mLength > 0)
     {
-      if (mReleaseObjects)
+      for (uint t=0; t<mLength; t++)
       {
-        for (uint t=0; t<mLength; t++)
-        {
-          if (mArray[t] != nullptr  &&  mReleaseObjects)
-          {
-            delete(mArray[t]);
-          }
-        }
+        if (mArray[t] != nullptr)
+          delete(mArray[t]);
       }
-      delete[] mArray;
     }
-
+    delete[] mArray;
     mSize = 0;
     mLength = 0;
     mArray = nullptr;
@@ -827,6 +824,39 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,
           return;
       }
     }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+std::size_t FileInfoList::getHashByProducerId(uint producerId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::size_t hash = 0;
+
+    if (mArray == nullptr ||  mLength == 0)
+      return hash;
+
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    uint sz = getLength();
+
+    for (uint t=0; t<sz; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mProducerId == producerId)
+      {
+        boost::hash_combine(hash,info->mFileId);
+      }
+    }
+    return hash;
   }
   catch (...)
   {

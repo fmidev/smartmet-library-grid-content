@@ -3366,6 +3366,36 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getHashByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::ULongLong& hash)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == nullptr)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    hash = 0;
+    ulonglong sHash = 0;
+
+    int result = mService->getHashByProducerId(sessionId,producerId,sHash);
+
+    if (result == 0)
+      hash = static_cast<::CORBA::ULongLong>(sHash);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::getLevelInfoList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaLevelInfoList_out levelInfoList)
 {
   FUNCTION_TRACE

@@ -5,6 +5,7 @@
 #include <grid-files/common/AutoThreadLock.h>
 #include <grid-files/common/AutoReadLock.h>
 #include <grid-files/common/ShowFunction.h>
+#include <boost/functional/hash.hpp>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
@@ -42,14 +43,17 @@ GenerationInfoList::GenerationInfoList()
     mModificationLockPtr = &mModificationLock;
     mReleaseObjects = true;
     mComparisonMethod = GenerationInfo::ComparisonMethod::none;
-    mSize = 100;
+    mSize = 0;
     mLength = 0;
+    mArray = nullptr;
+    /*
     mArray = new GenerationInfoPtr[100];
 
     for (uint t=0; t<100; t++)
     {
       mArray[t] = nullptr;
     }
+    */
   }
   catch (...)
   {
@@ -111,23 +115,19 @@ GenerationInfoList::~GenerationInfoList()
   FUNCTION_TRACE
   try
   {
+    if (mArray == nullptr)
+      return;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
-    if (mArray != nullptr)
+    if (mReleaseObjects && mLength > 0)
     {
-      for (uint t=0; t<mSize; t++)
+      for (uint t=0; t<mLength; t++)
       {
         if (mArray[t] != nullptr  &&  mReleaseObjects)
           delete mArray[t];
-
-        mArray[t] = nullptr;
       }
-
-      delete[] mArray;
     }
-
-    mArray = nullptr;
-    mSize = 0;
-    mLength = 0;
+    delete[] mArray;
   }
   catch (...)
   {
@@ -377,19 +377,17 @@ void GenerationInfoList::clear()
       return;
 
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
-    if (mArray != nullptr)
+    if (mReleaseObjects && mLength > 0)
     {
-      for (uint t=0; t<mSize; t++)
+      for (uint t=0; t<mLength; t++)
       {
-        if (mArray[t] != nullptr  &&  mReleaseObjects)
+        if (mArray[t] != nullptr)
           delete mArray[t];
 
         mArray[t] = nullptr;
       }
-
-      delete[] mArray;
     }
-
+    delete[] mArray;
     mArray = nullptr;
     mSize = 0;
     mLength = 0;
@@ -848,6 +846,56 @@ void GenerationInfoList::getGenerationInfoListByProducerId(uint producerId,Gener
           return;
       }
     }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+std::size_t GenerationInfoList::getHashByProducerId(uint producerId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::size_t hash = 0;
+    if (mArray == nullptr ||  mLength == 0)
+      return hash;
+
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+
+    int len =  getLength();
+    int idx = 0;
+
+    if (mComparisonMethod == GenerationInfo::ComparisonMethod::producerId)
+    {
+      GenerationInfo search;
+      search.mProducerId = producerId;
+
+      idx = getClosestIndexNoLock(GenerationInfo::ComparisonMethod::producerId,search);
+      if (idx < 0  || idx >= len)
+        return hash;
+
+    }
+
+    for (int t=idx; t<len; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr  &&  info->mProducerId == producerId)
+      {
+        boost::hash_combine(hash,info->mGenerationId);
+      }
+      else
+      {
+        if (mComparisonMethod == GenerationInfo::ComparisonMethod::producerId  &&  info->mProducerId > producerId)
+          return hash;
+      }
+    }
+    return hash;
   }
   catch (...)
   {

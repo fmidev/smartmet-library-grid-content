@@ -48,6 +48,7 @@ class GenerationInfoList
     GenerationInfo*     getLastGenerationInfoByProducerId(uint producerId);
     GenerationInfo*     getLastGenerationInfoByProducerIdAndStatus(uint producerId,uchar generationStatus);
     uint                getLength();
+    std::size_t         getHashByProducerId(uint producerId);
     ModificationLock*   getModificationLockPtr();
     bool                getReleaseObjects();
     uint                getSize() const;
@@ -75,6 +76,7 @@ class GenerationInfoList
 
 };
 
+typedef std::shared_ptr<GenerationInfoList> GenerationInfoList_sptr;
 
 
 }

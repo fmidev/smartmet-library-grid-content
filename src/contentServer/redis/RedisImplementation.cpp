@@ -5072,7 +5072,7 @@ int RedisImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
     geometryIdList.clear();
 
     T::ContentInfoList contentInfoList;
-    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
+    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,10000000,contentInfoList);
 
     contentInfoList.getContentGeometryIdListByGenerationId(generationInfo.mProducerId,generationId,geometryIdList);
     return res;
@@ -5107,7 +5107,7 @@ int RedisImplementation::_getContentParamListByGenerationId(T::SessionId session
     contentParamList.clear();
 
     T::ContentInfoList contentInfoList;
-    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
+    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,10000000,contentInfoList);
 
     contentInfoList.sort(T::ContentInfo::ComparisonMethod::fmiName_fmiLevelId_level_starttime_file_message);
     uint len = contentInfoList.getLength();
@@ -5166,7 +5166,7 @@ int RedisImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
     paramKeyList.clear();
 
     T::ContentInfoList contentInfoList;
-    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
+    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,10000000,contentInfoList);
     contentInfoList.getContentParamKeyListByGenerationId(generationInfo.mProducerId,generationId,parameterKeyType,paramKeyList);
 
     return res;
@@ -5201,7 +5201,7 @@ int RedisImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
     contentTimeList.clear();
 
     T::ContentInfoList contentInfoList;
-    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
+    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,10000000,contentInfoList);
     contentInfoList.getForecastTimeListByGenerationId(generationInfo.mProducerId,generationId,contentTimeList);
 
     return res;
@@ -5236,7 +5236,7 @@ int RedisImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
     contentTimeList.clear();
 
     T::ContentInfoList contentInfoList;
-    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,1000000,contentInfoList);
+    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,10000000,contentInfoList);
     contentInfoList.getForecastTimeListByGenerationAndGeometry(generationInfo.mProducerId,generationId,geometryId,contentTimeList);
     return res;
   }
@@ -5270,7 +5270,7 @@ int RedisImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,
     contentTimeList.clear();
 
     T::ContentInfoList contentInfoList;
-    int res = getContentByProducerId(producerId,0,0,1000000,contentInfoList);
+    int res = getContentByProducerId(producerId,0,0,10000000,contentInfoList);
     contentInfoList.getForecastTimeListByProducerId(producerId,contentTimeList);
 
     return res;
@@ -5341,6 +5341,55 @@ int RedisImplementation::_getContentCount(T::SessionId sessionId,uint& count)
       count = reply->integer;
 
     freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash)
+{
+  FUNCTION_TRACE
+  try
+  {
+    hash = 0;
+
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    T::GenerationInfoList generationInfoList;
+    int res = getGenerationListByProducerId(producerId,generationInfoList);
+    if (res != Result::OK)
+      return res;
+
+    T::FileInfoList fileInfoList;
+    res = getFileListByProducerId(producerId,0,10000000,fileInfoList);
+    if (res != Result::OK)
+      return res;
+
+    T::ContentInfoList contentInfoList;
+    res = getContentByProducerId(producerId,0,0,10000000,contentInfoList);
+    if (res != Result::OK)
+      return res;
+
+    std::size_t generationHash = generationInfoList.getHashByProducerId(producerId);
+    std::size_t fileHash = fileInfoList.getHashByProducerId(producerId);
+    std::size_t contentHash = contentInfoList.getHashByProducerId(producerId);
+
+    std::size_t h = 0;
+    boost::hash_combine(h,generationHash);
+    boost::hash_combine(h,fileHash);
+    boost::hash_combine(h,contentHash);
+
+    hash = h;
     return Result::OK;
   }
   catch (...)

@@ -147,6 +147,7 @@ class ServerInterface
     virtual void getContentTimeListByGenerationAndGeometryId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentTimeListByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentCount(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getHashByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
 
     virtual void getLevelInfoList(T::RequestMessage& request,T::ResponseMessage& response);
 

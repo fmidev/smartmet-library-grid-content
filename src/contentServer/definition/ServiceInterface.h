@@ -181,6 +181,7 @@ class ServiceInterface
      virtual int    getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList);
 
      virtual int    getContentCount(T::SessionId sessionId,uint& count);
+     virtual int    getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash);
 
      virtual int    getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList);
 
@@ -317,6 +318,7 @@ class ServiceInterface
      virtual int    _getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList);
 
      virtual int    _getContentCount(T::SessionId sessionId,uint& count);
+     virtual int    _getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash);
 
      virtual int    _getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList);
 

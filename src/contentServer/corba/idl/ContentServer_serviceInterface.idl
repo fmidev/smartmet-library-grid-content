@@ -144,6 +144,7 @@ interface ServiceInterface
   long  getContentTimeListByProducerId(in long long sessionId,in unsigned long producerId,out CorbaStringList contentTimeList);
 
   long  getContentCount(in long long sessionId,out unsigned long count);
+  long  getHashByProducerId(in long long sessionId,in unsigned long producerId,out unsigned long long hash);
 
   long  getLevelInfoList(in long long sessionId,out CorbaLevelInfoList levelInfoList);
 

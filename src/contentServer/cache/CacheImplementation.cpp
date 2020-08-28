@@ -4637,6 +4637,43 @@ int CacheImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 
 
 
+int CacheImplementation::_getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
+    if (mUpdateInProgress)
+      return mContentStorage->getHashByProducerId(sessionId,producerId,hash);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    std::size_t generationHash = mGenerationInfoList.getHashByProducerId(producerId);
+    std::size_t fileHash = mFileInfoList.getHashByProducerId(producerId);
+    std::size_t contentHash = mContentInfoList[0].getHashByProducerId(producerId);
+
+    std::size_t h = 0;
+    boost::hash_combine(h,generationHash);
+    boost::hash_combine(h,fileHash);
+    boost::hash_combine(h,contentHash);
+
+    hash = h;
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
 {
   FUNCTION_TRACE
@@ -4998,13 +5035,14 @@ void CacheImplementation::event_producerAdded(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: producerAdded(%u)\n",eventInfo.mEventId,eventInfo.mId1);
+     printf("EVENT[%llu]: producerAdded(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo producerInfo;
     if (mContentStorage->getProducerInfoById(mSessionId,eventInfo.mId1,producerInfo) == Result::OK)
     {
+      producerInfo.print(std::cout,0,0);
       mProducerInfoList.addProducerInfo(producerInfo.duplicate());
     }
   }
@@ -6150,6 +6188,9 @@ void CacheImplementation::processEvents(bool eventThread)
       int result = mContentStorage->getLastEventInfo(mSessionId,0,eventInfo);
       if (result != Result::OK)
         return;
+
+      if (eventThread  &&  mContentStorageStartTime == 0)
+        mContentStorageStartTime = eventInfo.mServerTime;
 
       if (eventThread  &&  mContentStorageStartTime < eventInfo.mServerTime)
       {
