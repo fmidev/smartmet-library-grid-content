@@ -17,6 +17,27 @@ namespace ContentServer
 {
 
 
+
+static void* MemoryImplementation_syncProcessingThread(void *arg)
+{
+  try
+  {
+    MemoryImplementation *service = (MemoryImplementation*)arg;
+    service->syncProcessingThread();
+    return nullptr;
+  }
+  catch (...)
+  {
+    Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+    exception.printError();
+    exit(-1);
+  }
+}
+
+
+
+
+
 MemoryImplementation::MemoryImplementation()
 {
   FUNCTION_TRACE
@@ -27,8 +48,10 @@ MemoryImplementation::MemoryImplementation()
 
     mContentLoadEnabled = false;
     mContentSaveEnabled = false;
+    mContentSyncEnabled = false;
     mContentSaveInterval = 60;
     mContentSortingFlags = 0;
+    mEventsEnabled = true;
 
     mMaxProducerId = 0;
     mMaxGenerationId = 0;
@@ -60,7 +83,10 @@ MemoryImplementation::MemoryImplementation()
       mContentInfoListEnabled[t] = true;
     }
 
-
+    mProducerStorage_modificationTime = 0;
+    mGenerationStorage_modificationTime = 0;
+    mFileStorage_modificationTime = 0;
+    mContentStorage_modificationTime = 0;
   }
   catch (...)
   {
@@ -89,13 +115,23 @@ MemoryImplementation::~MemoryImplementation()
 
 
 
-void MemoryImplementation::init(bool contentLoadEnabled,bool contentSaveEnabled,std::string contentDir,uint contentSaveInterval,uint contentSortingFlags)
+void MemoryImplementation::init(bool contentLoadEnabled,bool contentSaveEnabled,bool contentSyncEnabled,bool eventsEnabled,std::string contentDir,uint contentSaveInterval,uint contentSortingFlags)
 {
   FUNCTION_TRACE
   try
   {
+    if (contentSaveEnabled && contentSyncEnabled)
+      throw SmartMet::Spine::Exception(BCP,"Content save and sync cannot be set at the same time!");
+
+    mEventsEnabled = eventsEnabled;
+
     mContentLoadEnabled = contentLoadEnabled;
     mContentSaveEnabled = contentSaveEnabled;
+    mContentSyncEnabled = contentSyncEnabled;
+
+    if (mContentSyncEnabled)
+      mContentLoadEnabled = true;
+
     mContentDir = contentDir;
     mContentSaveInterval = contentSaveInterval;
     mContentSortingFlags = contentSortingFlags;
@@ -149,6 +185,9 @@ void MemoryImplementation::init(bool contentLoadEnabled,bool contentSaveEnabled,
       mContentInfoList[7].sort(T::ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time);
 
     mUpdateInProgress = false;
+
+    if (mContentSyncEnabled)
+      startSyncProcessing();
   }
   catch (...)
   {
@@ -188,6 +227,105 @@ bool MemoryImplementation::isSessionValid(T::SessionId sessionId)
   catch (...)
   {
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void MemoryImplementation::startSyncProcessing()
+{
+  FUNCTION_TRACE
+  try
+  {
+    pthread_create(&mThread,nullptr,MemoryImplementation_syncProcessingThread,this);
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void MemoryImplementation::syncProcessingThread()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mContentSyncEnabled)
+      return;
+
+    char filename[200];
+    time_t delay = 10;
+    while (!mShutdownRequested)
+    {
+      try
+      {
+
+        time_t tt = time(0) - delay;
+
+        sprintf(filename,"%s/producers.csv",mContentDir.c_str());
+        time_t t1 = getFileModificationTime(filename);
+
+        sprintf(filename,"%s/generations.csv",mContentDir.c_str());
+        time_t t2 = getFileModificationTime(filename);
+
+        sprintf(filename,"%s/files.csv",mContentDir.c_str());
+        time_t t3 = getFileModificationTime(filename);
+
+        sprintf(filename,"%s/content.csv",mContentDir.c_str());
+        time_t t4 = getFileModificationTime(filename);
+
+        time_t max = t1;
+        if (t2 > max)
+          max = t2;
+
+        if (t3 > max)
+          max = t3;
+
+        if (t4 > max)
+          max = t4;
+
+        if (max < tt && (mProducerStorage_modificationTime != t1 || mGenerationStorage_modificationTime != t2 || mFileStorage_modificationTime != t3 || mContentStorage_modificationTime != t4))
+        {
+          while (!syncProducerList()) sleep(10);
+          while (!syncGenerationList()) sleep(10);
+          while (!syncFileList()) sleep(10);
+          while (!syncContentList()) sleep(10);
+        }
+        sleep(10);
+      }
+      catch (...)
+      {
+        Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+        exception.printError();
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void MemoryImplementation::setEventListMaxLength(uint maxLength)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mEventInfoList.setMaxLength(maxLength);
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
 
@@ -2872,6 +3010,9 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
+    if (!mEventsEnabled)
+      return Result::DATA_NOT_FOUND;
+
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     eventInfoList.clear();
@@ -2891,7 +3032,6 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
     while (event != nullptr)
     {
       T::EventInfo *eventInfo = new T::EventInfo(*event);
-
       if (eventInfo->mType == EventType::FILE_ADDED)
       {
 
@@ -2935,6 +3075,7 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
       event = event->nextItem;
     }
 
+    // eventInfoList.print(std::cout,0,0);
     return Result::OK;
   }
   catch (...)
@@ -5005,6 +5146,37 @@ int MemoryImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 
 
 
+int MemoryImplementation::_getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    std::size_t generationHash = mGenerationInfoList.getHashByProducerId(producerId);
+    std::size_t fileHash = mFileInfoList.getHashByProducerId(producerId);
+    std::size_t contentHash = mContentInfoList[0].getHashByProducerId(producerId);
+
+    std::size_t h = 0;
+    boost::hash_combine(h,generationHash);
+    boost::hash_combine(h,fileHash);
+    boost::hash_combine(h,contentHash);
+
+    hash = h;
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 int MemoryImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
 {
   FUNCTION_TRACE
@@ -5094,6 +5266,9 @@ T::EventId MemoryImplementation::addEvent(uint eventType,uint id1,uint id2,uint 
   {
     saveData();
 
+    if (!mEventsEnabled)
+      return 0;
+
     mMaxEventId++;
     T::EventId eventId = mMaxEventId;
 
@@ -5149,6 +5324,8 @@ void MemoryImplementation::readProducerList()
       }
     }
     fclose(file);
+
+    mProducerStorage_modificationTime = getFileModificationTime(filename);
   }
   catch (...)
   {
@@ -5197,6 +5374,7 @@ void MemoryImplementation::readGenerationList()
       }
     }
     fclose(file);
+    mGenerationStorage_modificationTime = getFileModificationTime(filename);
   }
   catch (...)
   {
@@ -5245,6 +5423,7 @@ void MemoryImplementation::readFileList()
       }
     }
     fclose(file);
+    mFileStorage_modificationTime = getFileModificationTime(filename);
   }
   catch (...)
   {
@@ -5289,6 +5468,7 @@ void MemoryImplementation::readContentList()
       }
     }
     fclose(file);
+    mContentStorage_modificationTime = getFileModificationTime(filename);
   }
   catch (...)
   {
@@ -5384,6 +5564,474 @@ void MemoryImplementation::saveData()
     throw Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
+
+
+
+
+
+bool MemoryImplementation::syncProducerList()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mContentSyncEnabled)
+      return true;
+
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    uint len = mProducerInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ProducerInfo *info = mProducerInfoList.getProducerInfoByIndex(t);
+      info->mFlags = info->mFlags & 0x7FFFFFFF;
+    }
+
+    char filename[200];
+    sprintf(filename,"%s/producers.csv",mContentDir.c_str());
+    FILE *file = fopen(filename,"re");
+    if (file == nullptr)
+      return true;
+
+    char st[1000];
+
+    while (!feof(file))
+    {
+      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      {
+        char *p = strstr(st,"\n");
+        if (p != nullptr)
+          *p = '\0';
+
+        T::ProducerInfo *rec = new T::ProducerInfo();
+        rec->setCsv(st);
+
+        if (rec->mProducerId > mMaxProducerId)
+          mMaxProducerId = rec->mProducerId;
+
+        T::ProducerInfo *info = mProducerInfoList.getProducerInfoById(rec->mProducerId);
+        if (info != nullptr)
+        {
+          info->mFlags = info->mFlags | 0x80000000;
+          delete rec;
+        }
+        else
+        {
+          rec->mFlags = rec->mFlags | 0x80000000;
+          mProducerInfoList.addProducerInfo(rec);
+          addEvent(EventType::PRODUCER_ADDED,rec->mProducerId,0,0,0);
+          printf("ADD PRODUCER\n");
+          rec->print(std::cout,0,0);
+        }
+      }
+    }
+    fclose(file);
+
+    std::vector<uint> idList;
+    mProducerInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ProducerInfo *info = mProducerInfoList.getProducerInfoByIndex(t);
+      if ((info->mFlags &  0x80000000) == 0)
+      {
+        // The producer is not in the csv-file anymore. We should delete it.
+        idList.push_back(info->mProducerId);
+      }
+      info->mFlags = info->mFlags & 0x7FFFFFFF;
+    }
+
+    int count = 0;
+    for (auto it = idList.begin(); it != idList.end(); ++it)
+    {
+      mProducerInfoList.deleteProducerInfoById(*it);
+      mGenerationInfoList.deleteGenerationInfoListByProducerId(*it);
+      mFileInfoListByName.deleteFileInfoByProducerId(*it);
+      mFileInfoList.deleteFileInfoByProducerId(*it);
+      count += mContentInfoList[0].markDeletedByProducerId(*it);
+      addEvent(EventType::PRODUCER_DELETED,*it,0,0,0);
+    }
+
+    if (count > 0)
+    {
+      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+      {
+        if (mContentInfoListEnabled[t])
+          mContentInfoList[t].deleteMarkedContent();
+      }
+    }
+
+    mProducerStorage_modificationTime = getFileModificationTime(filename);
+    return true;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+bool MemoryImplementation::syncGenerationList()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mContentSyncEnabled)
+      return true;
+
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    uint len = mGenerationInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoByIndex(t);
+      info->mFlags = info->mFlags & 0x7FFFFFFF;
+    }
+
+    char filename[200];
+    sprintf(filename,"%s/generations.csv",mContentDir.c_str());
+    FILE *file = fopen(filename,"re");
+    if (file == nullptr)
+      return true;
+
+    char st[1000];
+
+    while (!feof(file))
+    {
+      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      {
+        char *p = strstr(st,"\n");
+        if (p != nullptr)
+          *p = '\0';
+
+        T::GenerationInfo *rec = new T::GenerationInfo();
+        rec->setCsv(st);
+
+        if (rec->mGenerationId > mMaxGenerationId)
+          mMaxGenerationId = rec->mGenerationId;
+
+        T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(rec->mGenerationId);
+        if (info != nullptr)
+        {
+          info->mFlags = info->mFlags | 0x80000000;
+          delete rec;
+        }
+        else
+        {
+          T::ProducerInfo *pInfo = mProducerInfoList.getProducerInfoById(rec->mProducerId);
+          if (pInfo != nullptr)
+          {
+            rec->mFlags = rec->mFlags | 0x80000000;
+            mGenerationInfoList.addGenerationInfo(rec);
+            addEvent(EventType::GENERATION_ADDED,rec->mGenerationId,0,0,0);
+          }
+          else
+          {
+            // Invalid producer
+            delete rec;
+          }
+        }
+      }
+    }
+    fclose(file);
+
+    std::vector<uint> idList;
+    mGenerationInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoByIndex(t);
+      if ((info->mFlags &  0x80000000) == 0)
+      {
+        // The generation is not in the csv-file anymore. We should delete it.
+        idList.push_back(info->mGenerationId);
+      }
+      info->mFlags = info->mFlags & 0x7FFFFFFF;
+    }
+
+    int count = 0;
+    for (auto it = idList.begin(); it != idList.end(); ++it)
+    {
+      mGenerationInfoList.deleteGenerationInfoById(*it);
+      mFileInfoListByName.deleteFileInfoByGenerationId(*it);
+      mFileInfoList.deleteFileInfoByGenerationId(*it);
+      count += mContentInfoList[0].markDeletedByGenerationId(*it);
+      addEvent(EventType::GENERATION_DELETED,*it,0,0,0);
+    }
+
+    if (count > 0)
+    {
+      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+      {
+        if (mContentInfoListEnabled[t])
+          mContentInfoList[t].deleteMarkedContent();
+      }
+    }
+
+    mGenerationStorage_modificationTime = getFileModificationTime(filename);
+    return true;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+bool MemoryImplementation::syncFileList()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mContentSyncEnabled)
+      return true;
+
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    T::EventId startEventId = mMaxEventId;
+    uint maxLen = 1000000000;
+    if (mEventsEnabled)
+      maxLen = 3*mEventInfoList.getMaxLength() / 4;
+
+    uint len = mFileInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::FileInfo *info = mFileInfoList.getFileInfoByIndex(t);
+      info->mFlags = info->mFlags & 0x7FFFFFFF;
+    }
+
+    char filename[200];
+    sprintf(filename,"%s/files.csv",mContentDir.c_str());
+    FILE *file = fopen(filename,"re");
+    if (file == nullptr)
+      return true;
+
+    char st[1000];
+
+    while (!feof(file))
+    {
+      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      {
+        char *p = strstr(st,"\n");
+        if (p != nullptr)
+          *p = '\0';
+
+        T::FileInfo *rec = new T::FileInfo();
+        rec->setCsv(st);
+
+        if (rec->mFileId > mMaxFileId)
+          mMaxFileId = rec->mFileId;
+
+        T::FileInfo *info = mFileInfoList.getFileInfoById(rec->mFileId);
+        if (info != nullptr)
+        {
+          info->mFlags = info->mFlags | 0x80000000;
+          delete rec;
+        }
+        else
+        {
+          T::GenerationInfo *gInfo = mGenerationInfoList.getGenerationInfoById(rec->mGenerationId);
+          if (gInfo != nullptr)
+          {
+            rec->mFlags = rec->mFlags | 0x80000000;
+            mFileInfoList.addFileInfo(rec);
+            mFileInfoListByName.addFileInfo(rec);
+            addEvent(EventType::FILE_ADDED,rec->mFileId,rec->mFileType,0,0);
+
+            if ((mMaxEventId - startEventId) > maxLen)
+              return false;
+          }
+          else
+          {
+            // Invalid generation
+
+            delete rec;
+          }
+        }
+      }
+    }
+    fclose(file);
+
+    std::vector<uint> idList;
+    std::vector<std::string> nameList;
+    mFileInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::FileInfo *info = mFileInfoList.getFileInfoByIndex(t);
+      if ((info->mFlags &  0x80000000) == 0  &&  (info->mFlags & T::FileInfo::Flags::VirtualContent) == 0)
+      {
+        // The file is not in the csv-file anymore. We should delete it.
+        idList.push_back(info->mFileId);
+        nameList.push_back(info->mName);
+      }
+      info->mFlags = info->mFlags & 0x7FFFFFFF;
+    }
+
+    for (auto name = nameList.begin(); name != nameList.end(); ++name)
+      mFileInfoListByName.deleteFileInfoByName(*name);
+
+    int count = 0;
+    for (auto it = idList.begin(); it != idList.end(); ++it)
+    {
+      mFileInfoList.deleteFileInfoById(*it);
+      count += mContentInfoList[0].markDeletedByFileId(*it);
+      addEvent(EventType::FILE_DELETED,*it,0,0,0);
+      if ((mMaxEventId - startEventId) > maxLen)
+      {
+        if (count > 0)
+        {
+          for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+          {
+            if (mContentInfoListEnabled[t])
+              mContentInfoList[t].deleteMarkedContent();
+          }
+        }
+        return false;
+      }
+    }
+
+    if (count > 0)
+    {
+      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+      {
+        if (mContentInfoListEnabled[t])
+          mContentInfoList[t].deleteMarkedContent();
+      }
+    }
+
+    mFileStorage_modificationTime = getFileModificationTime(filename);
+    return true;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+bool MemoryImplementation::syncContentList()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mContentSyncEnabled)
+      return true;
+
+    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    T::EventId startEventId = mMaxEventId;
+    uint maxLen = 1000000000;
+    if (mEventsEnabled)
+      maxLen = 3*mEventInfoList.getMaxLength() / 4;
+
+    uint len = mContentInfoList[0].getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *info = mContentInfoList[0].getContentInfoByIndex(t);
+      info->mFlags = info->mFlags & 0x7FFFFFFF;
+    }
+
+    T::ContentInfoList contentToAdd;
+    contentToAdd.setReleaseObjects(false);
+
+    char filename[200];
+    sprintf(filename,"%s/content.csv",mContentDir.c_str());
+    FILE *file = fopen(filename,"re");
+    if (file == nullptr)
+      return true;
+
+    char st[1000];
+
+    while (!feof(file))
+    {
+      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      {
+        char *p = strstr(st,"\n");
+        if (p != nullptr)
+          *p = '\0';
+
+        T::ContentInfo *rec = new T::ContentInfo();
+        rec->setCsv(st);
+
+        T::ContentInfo *info = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(rec->mFileId,rec->mMessageIndex);
+        if (info != nullptr)
+        {
+          info->mFlags = info->mFlags | 0x80000000;
+          delete rec;
+        }
+        else
+        {
+          T::FileInfo *fInfo = mFileInfoList.getFileInfoById(rec->mFileId);
+          if (fInfo != nullptr)
+          {
+            rec->mFlags = rec->mFlags | 0x80000000;
+            contentToAdd.addContentInfo(rec);
+            mContentInfoList[0].addContentInfo(rec);
+            addEvent(EventType::CONTENT_ADDED,rec->mFileId,rec->mMessageIndex,0,rec->mServerFlags);
+            if ((mMaxEventId - startEventId) > maxLen)
+              return false;
+          }
+          else
+          {
+            // Invalid file
+            delete rec;
+          }
+        }
+      }
+    }
+    fclose(file);
+
+    for (int t=1; t<CONTENT_LIST_COUNT; t++)
+    {
+      if (mContentInfoListEnabled[t])
+        mContentInfoList[t].addContentInfoList(contentToAdd);
+    }
+
+    std::vector<uint> idList;
+    mContentInfoList[0].getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *info = mContentInfoList[0].getContentInfoByIndex(t);
+      if ((info->mFlags &  0x80000000) == 0  &&  (info->mFlags & T::ContentInfo::Flags::VirtualContent) == 0)
+      {
+        // The generation is not in the csv-file anymore. We should delete it.
+        info->mFlags = info->mFlags | T::ContentInfo::Flags::DeletedContent;
+        addEvent(EventType::CONTENT_DELETED,info->mFileId,info->mMessageIndex,0,0);
+        if ((mMaxEventId - startEventId) > maxLen)
+        {
+          info->mFlags = info->mFlags & 0x7FFFFFFF;
+          for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+          {
+            if (mContentInfoListEnabled[t])
+              mContentInfoList[t].deleteMarkedContent();
+          }
+          return false;
+        }
+      }
+      info->mFlags = info->mFlags & 0x7FFFFFFF;
+    }
+
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+    {
+      if (mContentInfoListEnabled[t])
+        mContentInfoList[t].deleteMarkedContent();
+    }
+    mContentStorage_modificationTime = getFileModificationTime(filename);
+    return true;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
 
 
 

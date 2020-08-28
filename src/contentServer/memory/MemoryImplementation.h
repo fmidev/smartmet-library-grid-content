@@ -21,8 +21,11 @@ class MemoryImplementation : public ServiceInterface
                     MemoryImplementation();
      virtual        ~MemoryImplementation();
 
-     virtual void   init(bool contentLoadEnabled,bool contentSaveEnabled,std::string contentDir,uint contentSaveInterval,uint contentSortingFlags);
+     virtual void   init(bool contentLoadEnabled,bool contentSaveEnabled,bool contentSyncEnabled,bool eventsEnabled,std::string contentDir,uint contentSaveInterval,uint contentSortingFlags);
      virtual void   shutdown();
+     virtual void   startSyncProcessing();
+     virtual void   syncProcessingThread();
+     virtual void   setEventListMaxLength(uint maxLength);
 
    protected:
 
@@ -154,6 +157,7 @@ class MemoryImplementation : public ServiceInterface
      virtual int    _getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList);
 
      virtual int    _getContentCount(T::SessionId sessionId,uint& count);
+     virtual int    _getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash);
 
      virtual int    _getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList);
 
@@ -171,6 +175,11 @@ class MemoryImplementation : public ServiceInterface
      virtual void   readProducerList();
      virtual void   readGenerationList();
      virtual void   readDataServerList();
+
+     virtual bool   syncProducerList();
+     virtual bool   syncGenerationList();
+     virtual bool   syncFileList();
+     virtual bool   syncContentList();
 
      bool                   mReloadActivated;
      bool                   mShutdownRequested;
@@ -190,9 +199,11 @@ class MemoryImplementation : public ServiceInterface
      pthread_t              mThread;
      ThreadLock             mEventProcessingLock;
      ModificationLock       mModificationLock;
+     bool                   mEventsEnabled;
 
      bool                   mContentLoadEnabled;
      bool                   mContentSaveEnabled;
+     bool                   mContentSyncEnabled;
      std::string            mContentDir;
      time_t                 mLastSaveTime;
      uint                   mContentSaveInterval;
@@ -208,6 +219,11 @@ class MemoryImplementation : public ServiceInterface
      uint                   mMaxGenerationId;
      uint                   mMaxFileId;
      T::EventId             mMaxEventId;
+
+     time_t                 mProducerStorage_modificationTime;
+     time_t                 mGenerationStorage_modificationTime;
+     time_t                 mFileStorage_modificationTime;
+     time_t                 mContentStorage_modificationTime;
 };
 
 
