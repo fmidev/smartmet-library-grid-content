@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 20.8.21
-Release: 2%{?dist}.fmi
+Version: 20.8.31
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -22,9 +22,9 @@ BuildRequires: omniORB-devel
 BuildRequires: postgresql95-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 20.8.21
-BuildRequires: smartmet-library-grid-files-devel >= 20.8.21
-BuildRequires: smartmet-library-macgyver-devel >= 20.8.21
-BuildRequires: smartmet-library-spine-devel >= 20.8.21
+BuildRequires: smartmet-library-grid-files-devel >= 20.8.31
+BuildRequires: smartmet-library-macgyver-devel >= 20.8.26
+BuildRequires: smartmet-library-spine-devel >= 20.8.26
 Requires: boost169-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
@@ -32,9 +32,9 @@ Requires: lua-devel
 Requires: omniORB
 Requires: postgresql95
 Requires: smartmet-library-gis >= 20.8.21
-Requires: smartmet-library-grid-files >= 20.8.21
-Requires: smartmet-library-macgyver >= 20.8.21
-Requires: smartmet-library-spine >= 20.8.21
+Requires: smartmet-library-grid-files >= 20.8.31
+Requires: smartmet-library-macgyver >= 20.8.26
+Requires: smartmet-library-spine >= 20.8.26
 Provides: %{SPECNAME}
 
 %description
@@ -76,6 +76,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Aug 31 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.31-1.fmi
+- New service methods and performance optimizations
+- Added automatic content synchronization from CSV files
 * Fri Aug 21 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.21-2.fmi
 - Use Fmi::to_string instead of std::to_string for speed
 * Fri Aug 21 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.21-1.fmi
