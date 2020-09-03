@@ -46,7 +46,7 @@ FileInfoList::FileInfoList()
     mModificationLockPtr = &mModificationLock;
     mComparisonMethod = FileInfo::ComparisonMethod::none;
     mReleaseObjects = true;
-    mSize = 100;
+    mSize = 0;
     mLength = 0;
     mArray = nullptr;
     /*
