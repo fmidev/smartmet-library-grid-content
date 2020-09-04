@@ -3099,7 +3099,9 @@ bool ServiceImplementation::getValueVectors(
                 {
                   uint width = 0;
                   uint height = 0;
-                  Identification::gridDef.getGridLatLonCoordinatesByGeometry(queryAttributeList,coordinates,width,height);
+                  T::Coordinate_svec sCoordinates(new T::Coordinate_vec());
+                  Identification::gridDef.getGridLatLonCoordinatesByGeometry(queryAttributeList,sCoordinates,width,height);
+                  coordinates = *sCoordinates;
                 }
               }
               break;
@@ -3193,7 +3195,9 @@ bool ServiceImplementation::getValueVectors(
                 {
                   uint width = 0;
                   uint height = 0;
-                  Identification::gridDef.getGridLatLonCoordinatesByGeometry(queryAttributeList,coordinates,width,height);
+                  T::Coordinate_svec sCoordinates(new T::Coordinate_vec());
+                  Identification::gridDef.getGridLatLonCoordinatesByGeometry(queryAttributeList,sCoordinates,width,height);
+                  coordinates = *sCoordinates;
                 }
               }
               break;
@@ -3274,7 +3278,9 @@ bool ServiceImplementation::getValueVectors(
                 {
                   uint width = 0;
                   uint height = 0;
-                  Identification::gridDef.getGridLatLonCoordinatesByGeometry(queryAttributeList,coordinates,width,height);
+                  T::Coordinate_svec sCoordinates(new T::Coordinate_vec());
+                  Identification::gridDef.getGridLatLonCoordinatesByGeometry(queryAttributeList,sCoordinates,width,height);
+                  coordinates = *sCoordinates;
                 }
               }
               break;
@@ -3349,7 +3355,9 @@ bool ServiceImplementation::getValueVectors(
                 {
                   uint width = 0;
                   uint height = 0;
-                  Identification::gridDef.getGridLatLonCoordinatesByGeometry(queryAttributeList,coordinates,width,height);
+                  T::Coordinate_svec sCoordinates(new T::Coordinate_vec());
+                  Identification::gridDef.getGridLatLonCoordinatesByGeometry(queryAttributeList,sCoordinates,width,height);
+                  coordinates = *sCoordinates;
                 }
               }
               break;
@@ -3807,8 +3815,8 @@ bool ServiceImplementation::getGridFiles(
 
     newMessage->initSpatialReference();
 
-    T::Coordinate_vec coordinates = newMessage->getGridLatLonCoordinates();
-    if (coordinates.size() == 0)
+    T::Coordinate_svec coordinates = newMessage->getGridLatLonCoordinates();
+    if (coordinates->size() == 0)
     {
       PRINT_DATA(mDebugLog, "-- No coordinates available\n");
       return false;
@@ -3833,7 +3841,7 @@ bool ServiceImplementation::getGridFiles(
       {
         // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
-        int result = mDataServerPtr->getGridValueVectorByCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,coordinateType,coordinates,areaInterpolationMethod,valueVector);
+        int result = mDataServerPtr->getGridValueVectorByCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,coordinateType,*coordinates,areaInterpolationMethod,valueVector);
 
         if (result != 0)
         {
@@ -3848,7 +3856,7 @@ bool ServiceImplementation::getGridFiles(
 
         if (conversionByFunction)
         {
-           executeConversion(function, functionParams, forecastTime, coordinates, valueVector, newValueVector);
+           executeConversion(function, functionParams, forecastTime, *coordinates, valueVector, newValueVector);
            newMessage->setGridValues(newValueVector);
         }
         else
@@ -3898,7 +3906,7 @@ bool ServiceImplementation::getGridFiles(
         // are before and after the current forecast time. This means that we should do
         // some time interpolation.
 
-        int result = mDataServerPtr->getGridValueVectorByTimeAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,forecastTime,coordinateType,coordinates,queryAttributeList,valueVector);
+        int result = mDataServerPtr->getGridValueVectorByTimeAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,forecastTime,coordinateType,*coordinates,queryAttributeList,valueVector);
 
         if (result != 0)
         {
@@ -3912,7 +3920,7 @@ bool ServiceImplementation::getGridFiles(
 
         if (conversionByFunction)
         {
-           executeConversion(function, functionParams, forecastTime, coordinates, valueVector, newValueVector);
+           executeConversion(function, functionParams, forecastTime, *coordinates, valueVector, newValueVector);
            newMessage->setGridValues(newValueVector);
         }
         else
@@ -3948,7 +3956,7 @@ bool ServiceImplementation::getGridFiles(
         // are before and after the current level. This means that we should do
         // some level interpolation.
 
-        int result = mDataServerPtr->getGridValueVectorByLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,coordinateType,coordinates,queryAttributeList,valueVector);
+        int result = mDataServerPtr->getGridValueVectorByLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,coordinateType,*coordinates,queryAttributeList,valueVector);
         if (result != 0)
         {
           SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
@@ -3963,7 +3971,7 @@ bool ServiceImplementation::getGridFiles(
 
         if (conversionByFunction)
         {
-           executeConversion(function, functionParams, forecastTime, coordinates, valueVector, newValueVector);
+           executeConversion(function, functionParams, forecastTime, *coordinates, valueVector, newValueVector);
            newMessage->setGridValues(newValueVector);
         }
         else
@@ -3999,7 +4007,7 @@ bool ServiceImplementation::getGridFiles(
           contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&  contentInfo3->mParameterLevel < paramLevel  &&  contentInfo4->mParameterLevel > paramLevel
           &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
-        int result = mDataServerPtr->getGridValueVectorByTimeLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,forecastTime,paramLevel,coordinateType,coordinates,queryAttributeList,valueVector);
+        int result = mDataServerPtr->getGridValueVectorByTimeLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,forecastTime,paramLevel,coordinateType,*coordinates,queryAttributeList,valueVector);
         if (result != 0)
         {
           SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
@@ -4014,7 +4022,7 @@ bool ServiceImplementation::getGridFiles(
 
         if (conversionByFunction)
         {
-           executeConversion(function, functionParams, forecastTime, coordinates, valueVector, newValueVector);
+           executeConversion(function, functionParams, forecastTime, *coordinates, valueVector, newValueVector);
            newMessage->setGridValues(newValueVector);
         }
         else
