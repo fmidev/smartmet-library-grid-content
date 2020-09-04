@@ -563,7 +563,7 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileI
     {
       case T::CoordinateTypeValue::UNKNOWN:
       case T::CoordinateTypeValue::LATLON_COORDINATES:
-        coordinates.mCoordinateList = message->getGridLatLonCoordinates();
+        coordinates.mCoordinateList = *message->getGridLatLonCoordinates();
         break;
 
       case T::CoordinateTypeValue::GRID_COORDINATES:
@@ -578,7 +578,7 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileI
         break;
 
       case T::CoordinateTypeValue::ORIGINAL_COORDINATES:
-        coordinates.mCoordinateList = message->getGridOriginalCoordinates();
+        coordinates.mCoordinateList = *message->getGridOriginalCoordinates();
         break;
     }
 

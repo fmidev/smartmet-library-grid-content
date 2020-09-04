@@ -267,7 +267,7 @@ T::GeometryId VirtualMessage::getGridGeometryId() const
         \return   The grid coordinates.
 */
 
-T::Coordinate_vec VirtualMessage::getGridCoordinates() const
+T::Coordinate_svec VirtualMessage::getGridCoordinates() const
 {
   FUNCTION_TRACE
   try
@@ -292,7 +292,7 @@ T::Coordinate_vec VirtualMessage::getGridCoordinates() const
         \return   The grid latlon coordinates.
 */
 
-T::Coordinate_vec VirtualMessage::getGridLatLonCoordinates() const
+T::Coordinate_svec VirtualMessage::getGridLatLonCoordinates() const
 {
   FUNCTION_TRACE
   try

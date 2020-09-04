@@ -37,8 +37,8 @@ class VirtualMessage : public Message
     virtual short                   getForecastNumber() const;
 
     virtual T::GeometryId           getGridGeometryId() const;
-    virtual T::Coordinate_vec       getGridCoordinates() const;
-    virtual T::Coordinate_vec       getGridLatLonCoordinates() const;
+    virtual T::Coordinate_svec      getGridCoordinates() const;
+    virtual T::Coordinate_svec      getGridLatLonCoordinates() const;
     virtual T::Dimensions           getGridDimensions() const;
     virtual T::Hash                 getGridHash() const;
     virtual bool                    getGridLatLonCoordinatesByGridPoint(uint grid_i,uint grid_j,double& lat,double& lon) const;
