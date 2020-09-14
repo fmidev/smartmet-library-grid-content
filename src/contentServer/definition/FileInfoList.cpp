@@ -17,20 +17,30 @@ namespace T
 {
 
 
-ThreadLock FileInfoList_sortLock;
 
-uint fileInfo_comparisonMethod = FileInfo::ComparisonMethod::fileId;
-
-
-
-int fileInfo_compare(const void *_val1,const void *_val2)
+int fileInfo_compare_1(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
     FileInfoPtr *obj1 = const_cast<FileInfoPtr*>(reinterpret_cast<const FileInfoPtr *>(_val1));
     FileInfoPtr *obj2 = const_cast<FileInfoPtr*>(reinterpret_cast<const FileInfoPtr *>(_val2));
 
-    return (*obj1)->compare(fileInfo_comparisonMethod,(*obj2));
+    return (*obj1)->compare(1,(*obj2));
+  }
+  return 0;
+}
+
+
+
+
+int fileInfo_compare_2(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    FileInfoPtr *obj1 = const_cast<FileInfoPtr*>(reinterpret_cast<const FileInfoPtr *>(_val1));
+    FileInfoPtr *obj2 = const_cast<FileInfoPtr*>(reinterpret_cast<const FileInfoPtr *>(_val2));
+
+    return (*obj1)->compare(2,(*obj2));
   }
   return 0;
 }
@@ -49,14 +59,8 @@ FileInfoList::FileInfoList()
     mSize = 0;
     mLength = 0;
     mArray = nullptr;
-    /*
-    mArray = new FileInfoPtr[100];
+    mModificationLock.setLockingEnabled(false);
 
-    for (uint t=0; t<100; t++)
-    {
-      mArray[t] = nullptr;
-    }
-    */
   }
   catch (...)
   {
@@ -75,6 +79,7 @@ FileInfoList::FileInfoList(FileInfoList& fileInfoList)
   {
     mModificationLockPtr = &mModificationLock;
     mReleaseObjects = true;
+    mModificationLock.setLockingEnabled(false);
 
     if (fileInfoList.getModificationLockPtr() != mModificationLockPtr)
       fileInfoList.lock();
@@ -1824,19 +1829,32 @@ void FileInfoList::setReleaseObjects(bool releaseObjects)
 
 
 
+void FileInfoList::setLockingEnabled(bool lockingEnabled)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mModificationLock.setLockingEnabled(lockingEnabled);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 void FileInfoList::setComparisonMethod(uint comparisonMethod)
 {
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
-    mComparisonMethod = comparisonMethod;
-    if (mArray == nullptr ||  mLength == 0)
+    if (mComparisonMethod == comparisonMethod)
       return;
 
-    fileInfo_comparisonMethod = comparisonMethod;
-
-    qsort(mArray,mLength,sizeof(FileInfoPtr),fileInfo_compare);
+    sort(comparisonMethod);
   }
   catch (...)
   {
@@ -1853,17 +1871,24 @@ void FileInfoList::sort(uint comparisonMethod)
   FUNCTION_TRACE
   try
   {
+    if (mComparisonMethod == comparisonMethod)
+      return;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     mComparisonMethod = comparisonMethod;
 
-    if (mArray == nullptr || mLength == 0)
+    if (mArray == nullptr || mLength < 2)
       return;
 
-    AutoThreadLock globalLock(&FileInfoList_sortLock);
+    switch(comparisonMethod)
+    {
+      case 1:
+        qsort(mArray,mLength,sizeof(FileInfoPtr),fileInfo_compare_1);
+        break;
 
-    fileInfo_comparisonMethod = comparisonMethod;
-
-    qsort(mArray,mLength,sizeof(FileInfoPtr),fileInfo_compare);
+      case 2:
+        qsort(mArray,mLength,sizeof(FileInfoPtr),fileInfo_compare_2);
+    };
   }
   catch (...)
   {

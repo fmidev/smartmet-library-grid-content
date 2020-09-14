@@ -67,10 +67,14 @@ CacheImplementation::CacheImplementation()
     mFileDeleteCount = 0;
     mDelayedContentAdditionTime = 0;
 
+    mProducerInfoList.setLockingEnabled(true);
+    mGenerationInfoList.setLockingEnabled(true);
     mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
+    mFileInfoList.setLockingEnabled(true);
 
     mFileInfoListByName.setReleaseObjects(false);
     mFileInfoListByName.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
+    mFileInfoListByName.setLockingEnabled(true);
 
     mFileInfoList.setModificationLockPtr(&mFileModificationLock);
     mFileInfoListByName.setModificationLockPtr(&mFileModificationLock);
@@ -79,10 +83,12 @@ CacheImplementation::CacheImplementation()
     mContentInfoListEnabled[0] = true;
 
     mContentInfoList[0].setModificationLockPtr(&mContentModificationLock);
+    mContentInfoList[0].setLockingEnabled(true);
 
     for (int t=1; t<CONTENT_LIST_COUNT; t++)
     {
       mContentInfoList[t].setModificationLockPtr(&mContentModificationLock);
+      mContentInfoList[t].setLockingEnabled(true);
       mContentInfoList[t].setReleaseObjects(false);
       mContentInfoListEnabled[t] = false;
     }
@@ -1103,6 +1109,174 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
+    list.clear();
+
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    T::ProducerInfoList producerList = mProducerInfoList;
+    std::map<uint,T::ProducerInfo*> producers;
+    uint plen = producerList.getLength();
+    for (uint t=0; t<plen; t++)
+    {
+      auto prod = producerList.getProducerInfoByIndex(t);
+      producers.insert(std::pair<uint,T::ProducerInfo*>(prod->mProducerId,prod));
+    }
+
+
+    std::set<std::size_t> tmpList;
+
+    uint len = mContentInfoList[0].getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *contentInfo = mContentInfoList[0].getContentInfoByIndex(t);
+      std::string sourceParamKey;
+      std::string targetParamKey;
+      T::ParamLevelIdType paramLevelIdType = T::ParamLevelIdTypeValue::FMI;
+      T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
+
+      switch (sourceParameterKeyType)
+      {
+        case T::ParamKeyTypeValue::FMI_ID:
+          sourceParamKey = contentInfo->mFmiParameterId;
+          break;
+
+        case T::ParamKeyTypeValue::FMI_NAME:
+          sourceParamKey = contentInfo->mFmiParameterName;
+          break;
+
+        case T::ParamKeyTypeValue::GRIB_ID:
+          sourceParamKey = contentInfo->mGribParameterId;
+          break;
+
+        case T::ParamKeyTypeValue::NEWBASE_ID:
+          sourceParamKey = contentInfo->mNewbaseParameterId;
+          break;
+
+        case T::ParamKeyTypeValue::NEWBASE_NAME:
+          sourceParamKey = contentInfo->mNewbaseParameterName;
+          break;
+
+        case T::ParamKeyTypeValue::CDM_ID:
+          sourceParamKey = contentInfo->mCdmParameterId;
+          break;
+
+        case T::ParamKeyTypeValue::CDM_NAME:
+          sourceParamKey = contentInfo->mCdmParameterName;
+          break;
+
+        default:
+          break;
+      }
+
+
+      switch (targetParameterKeyType)
+      {
+        case T::ParamKeyTypeValue::FMI_ID:
+          targetParamKey = contentInfo->mFmiParameterId;
+          break;
+
+        case T::ParamKeyTypeValue::FMI_NAME:
+          targetParamKey = contentInfo->mFmiParameterName;
+          break;
+
+        case T::ParamKeyTypeValue::GRIB_ID:
+          targetParamKey = contentInfo->mGribParameterId;
+          break;
+
+        case T::ParamKeyTypeValue::NEWBASE_ID:
+          targetParamKey = contentInfo->mNewbaseParameterId;
+          break;
+
+        case T::ParamKeyTypeValue::NEWBASE_NAME:
+          targetParamKey = contentInfo->mNewbaseParameterName;
+          break;
+
+        case T::ParamKeyTypeValue::CDM_ID:
+          targetParamKey = contentInfo->mCdmParameterId;
+          break;
+
+        case T::ParamKeyTypeValue::CDM_NAME:
+          targetParamKey = contentInfo->mCdmParameterName;
+          break;
+
+        default:
+          break;
+      }
+
+      if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
+      {
+        std::size_t seed = 0;
+        boost::hash_combine(seed,contentInfo->mProducerId);
+        boost::hash_combine(seed,sourceParamKey);
+        boost::hash_combine(seed,targetParameterKeyType);
+        boost::hash_combine(seed,targetParamKey);
+        boost::hash_combine(seed,contentInfo->mGeometryId);
+        boost::hash_combine(seed,paramLevelIdType);
+        boost::hash_combine(seed,paramLevelId);
+        boost::hash_combine(seed,contentInfo->mParameterLevel);
+        boost::hash_combine(seed,contentInfo->mForecastType);
+        boost::hash_combine(seed,contentInfo->mForecastNumber);
+
+
+        if (tmpList.find(seed) == tmpList.end())
+        {
+          tmpList.insert(seed);
+
+          auto it = producers.find(contentInfo->mProducerId);
+          if (it != producers.end())
+          {
+            char tmp[200];
+            char *p = tmp;
+            p += sprintf(p,"%s;%s;%d;%s;%d;%d;%d;%05d;%d;%d",
+                  it->second->mName.c_str(),
+                  sourceParamKey.c_str(),
+                  targetParameterKeyType,
+                  targetParamKey.c_str(),
+                  contentInfo->mGeometryId,
+                  paramLevelIdType,
+                  paramLevelId,
+                  contentInfo->mParameterLevel,
+                  contentInfo->mForecastType,
+                  contentInfo->mForecastNumber);
+
+            if ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
+              p += sprintf(p,";1");
+            else
+              p += sprintf(p,";0");
+
+            list.insert(std::string(tmp));
+          }
+        }
+      }
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+#if 0
+int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
+    if (mUpdateInProgress)
+      return mContentStorage->getProducerParameterList(sessionId,sourceParameterKeyType,targetParameterKeyType,list);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     list.clear();
@@ -1208,6 +1382,167 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
         {
           std::size_t seed = 0;
           boost::hash_combine(seed,producerInfo->mName);
+          boost::hash_combine(seed,sourceParamKey);
+          boost::hash_combine(seed,targetParameterKeyType);
+          boost::hash_combine(seed,targetParamKey);
+          boost::hash_combine(seed,contentInfo->mGeometryId);
+          boost::hash_combine(seed,paramLevelIdType);
+          boost::hash_combine(seed,paramLevelId);
+          boost::hash_combine(seed,contentInfo->mParameterLevel);
+          boost::hash_combine(seed,contentInfo->mForecastType);
+          boost::hash_combine(seed,contentInfo->mForecastNumber);
+
+
+          if (tmpList.find(seed) == tmpList.end())
+          {
+            tmpList.insert(seed);
+
+            char tmp[200];
+            char *p = tmp;
+            p += sprintf(p,"%s;%s;%d;%s;%d;%d;%d;%05d;%d;%d",
+                  producerInfo->mName.c_str(),
+                  sourceParamKey.c_str(),
+                  targetParameterKeyType,
+                  targetParamKey.c_str(),
+                  contentInfo->mGeometryId,
+                  paramLevelIdType,
+                  paramLevelId,
+                  contentInfo->mParameterLevel,
+                  contentInfo->mForecastType,
+                  contentInfo->mForecastNumber);
+
+            if ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
+              p += sprintf(p,";1");
+            else
+              p += sprintf(p,";0");
+
+            list.insert(std::string(tmp));
+          }
+        }
+      }
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+#endif
+
+
+
+
+
+int CacheImplementation::_getProducerParameterListByProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
+    if (mUpdateInProgress)
+      return mContentStorage->getProducerParameterList(sessionId,sourceParameterKeyType,targetParameterKeyType,list);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    list.clear();
+
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
+    if (producerInfo == nullptr)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    std::set<std::size_t> tmpList;
+
+    uint len = mContentInfoList[0].getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *contentInfo = mContentInfoList[0].getContentInfoByIndex(t);
+      if (contentInfo->mProducerId == producerId)
+      {
+        std::string sourceParamKey;
+        std::string targetParamKey;
+        T::ParamLevelIdType paramLevelIdType = T::ParamLevelIdTypeValue::FMI;
+        T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
+
+        switch (sourceParameterKeyType)
+        {
+          case T::ParamKeyTypeValue::FMI_ID:
+            sourceParamKey = contentInfo->mFmiParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::FMI_NAME:
+            sourceParamKey = contentInfo->mFmiParameterName;
+            break;
+
+          case T::ParamKeyTypeValue::GRIB_ID:
+            sourceParamKey = contentInfo->mGribParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::NEWBASE_ID:
+            sourceParamKey = contentInfo->mNewbaseParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::NEWBASE_NAME:
+            sourceParamKey = contentInfo->mNewbaseParameterName;
+            break;
+
+          case T::ParamKeyTypeValue::CDM_ID:
+            sourceParamKey = contentInfo->mCdmParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::CDM_NAME:
+            sourceParamKey = contentInfo->mCdmParameterName;
+            break;
+
+          default:
+            break;
+        }
+
+
+        switch (targetParameterKeyType)
+        {
+          case T::ParamKeyTypeValue::FMI_ID:
+            targetParamKey = contentInfo->mFmiParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::FMI_NAME:
+            targetParamKey = contentInfo->mFmiParameterName;
+            break;
+
+          case T::ParamKeyTypeValue::GRIB_ID:
+            targetParamKey = contentInfo->mGribParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::NEWBASE_ID:
+            targetParamKey = contentInfo->mNewbaseParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::NEWBASE_NAME:
+            targetParamKey = contentInfo->mNewbaseParameterName;
+            break;
+
+          case T::ParamKeyTypeValue::CDM_ID:
+            targetParamKey = contentInfo->mCdmParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::CDM_NAME:
+            targetParamKey = contentInfo->mCdmParameterName;
+            break;
+
+          default:
+            break;
+        }
+
+        if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
+        {
+          std::size_t seed = 0;
+          boost::hash_combine(seed,contentInfo->mProducerId);
           boost::hash_combine(seed,sourceParamKey);
           boost::hash_combine(seed,targetParameterKeyType);
           boost::hash_combine(seed,targetParamKey);
@@ -5035,7 +5370,7 @@ void CacheImplementation::event_producerAdded(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-     printf("EVENT[%llu]: producerAdded(%u)\n",eventInfo.mEventId,eventInfo.mId1);
+    // printf("EVENT[%llu]: producerAdded(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
@@ -6399,7 +6734,10 @@ void CacheImplementation::saveData()
         mProducerInfoList.writeToFile(mSaveDir + "/producer.csv");
 
       if (mGenerationCount != mGenerationInfoList.getLength())
-        mGenerationInfoList.writeToFile(mSaveDir + "/generations.csv");
+      {
+        std::string filename = mSaveDir + "/generations.csv";
+        mGenerationInfoList.writeToFile(filename);
+      }
 
       if (mFileCount != mFileInfoList.getLength())
         mFileInfoList.writeToFile(mSaveDir + "/files.csv");

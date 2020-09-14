@@ -62,6 +62,7 @@ class FileInfoList
     void           increaseSize(uint newSize);
     void           increaseSizeNoLock(uint newSize);
     void           markFileInfoDeletedById(uint fileId);
+    void           setLockingEnabled(bool lockingEnabled);
     void           setComparisonMethod(uint comparisonMethod);
     void           setReleaseObjects(bool releaseObjects);
     void           sort(uint comparisonMethod);

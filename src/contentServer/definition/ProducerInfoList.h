@@ -2,7 +2,8 @@
 
 #include "ProducerInfo.h"
 
-#include <grid-files/common/ThreadLock.h>
+#include <grid-files/common/AutoWriteLock.h>
+#include <grid-files/common/AutoReadLock.h>
 #include <vector>
 
 
@@ -33,6 +34,7 @@ class ProducerInfoList
     ProducerInfo*     getProducerInfoByIndexNoCheck(uint index);
     void              getProducerInfoListBySourceId(uint sourceId,ProducerInfoList& producerInfoList);
     uint              getLength();
+    void              setLockingEnabled(bool lockingEnabled);
     void              sortByName();
     void              lock();
     void              unlock();
@@ -41,7 +43,7 @@ class ProducerInfoList
 
   protected:
 
-    ThreadLock        mThreadLock;
+    ModificationLock  mModificationLock;
     ProducerInfo_pvec mList;
 };
 

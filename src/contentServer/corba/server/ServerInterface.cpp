@@ -659,6 +659,37 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getProducerParameterListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId,::CORBA::Octet sourceParameterKeyType, ::CORBA::Octet targetParameterKeyType, SmartMet::ContentServer::Corba::CorbaStringList_out list)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::set<std::string> sList;
+    ContentServer::Corba::CorbaStringList *corbaList = new ContentServer::Corba::CorbaStringList();
+    list = corbaList;
+
+    if (mService == nullptr)
+      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getProducerParameterListByProducerId(sessionId,producerId,sourceParameterKeyType,targetParameterKeyType,sList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sList,*corbaList);
+
+    return result;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::addGenerationInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaGenerationInfo& generationInfo)
 {
   FUNCTION_TRACE

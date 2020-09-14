@@ -735,6 +735,45 @@ int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
 
 
 
+int ClientImplementation::_getProducerParameterListByProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getProducerParameterListByProducerId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("producerId",producerId);
+    request.addLine("sourceParameterKeyType",sourceParameterKeyType);
+    request.addLine("targetParameterKeyType",targetParameterKeyType);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      string_vec lines;
+      uint len = response.getLinesByKey("line",lines);
+      for (uint t=0; t<len; t++)
+      {
+        list.insert(lines[t]);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
   try

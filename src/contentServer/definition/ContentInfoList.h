@@ -148,6 +148,7 @@ class ContentInfoList
 
     uint                getComparisonMethod();
     void                setComparisonMethod(uint comparisonMethod);
+    void                setLockingEnabled(bool lockingEnabled);
     void                setReleaseObjects(bool releaseObjects);
     void                sort(uint comparisonMethod);
 

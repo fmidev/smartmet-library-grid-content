@@ -18,6 +18,7 @@ ProducerInfoList::ProducerInfoList()
   FUNCTION_TRACE
   try
   {
+    mModificationLock.setLockingEnabled(false);
   }
   catch (...)
   {
@@ -34,6 +35,7 @@ ProducerInfoList::ProducerInfoList(ProducerInfoList& producerInfoList)
   FUNCTION_TRACE
   try
   {
+    mModificationLock.setLockingEnabled(false);
     producerInfoList.lock();
     uint sz = producerInfoList.getLength();
     for (uint t=0; t<sz; t++)
@@ -60,7 +62,7 @@ ProducerInfoList::~ProducerInfoList()
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoWriteLock lock(&mModificationLock);
     std::size_t sz = mList.size();
     for (std::size_t t=0; t<sz; t++)
       delete(mList[t]);
@@ -88,7 +90,7 @@ ProducerInfoList& ProducerInfoList::operator=(ProducerInfoList& producerInfoList
 
     clear();
 
-    AutoThreadLock lock(&mThreadLock);
+    AutoWriteLock lock(&mModificationLock);
     uint sz = producerInfoList.getLength();
     for (uint t=0; t<sz; t++)
     {
@@ -113,7 +115,7 @@ void ProducerInfoList::addProducerInfo(ProducerInfo *producerInfo)
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoWriteLock lock(&mModificationLock);
     mList.push_back(producerInfo);
   }
   catch (...)
@@ -131,7 +133,7 @@ void ProducerInfoList::clear()
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoWriteLock lock(&mModificationLock);
     std::size_t sz = mList.size();
     for (std::size_t t=0; t<sz; t++)
       delete(mList[t]);
@@ -153,7 +155,7 @@ bool ProducerInfoList::deleteProducerInfoById(uint producerId)
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoWriteLock lock(&mModificationLock);
     uint sz = getLength();
     for (uint t=0; t<sz; t++)
     {
@@ -182,7 +184,7 @@ void ProducerInfoList::deleteProducerInfoListBySourceId(uint sourceId)
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoWriteLock lock(&mModificationLock);
     int sz = getLength()-1;
     for (int t=sz; t>=0; t--)
     {
@@ -209,7 +211,7 @@ ProducerInfo* ProducerInfoList::getProducerInfoById(uint producerId)
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
     uint sz = getLength();
     for (uint t=0; t<sz; t++)
     {
@@ -234,7 +236,7 @@ ProducerInfo* ProducerInfoList::getProducerInfoByName(std::string producerName)
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
     uint sz = getLength();
     for (uint t=0; t<sz; t++)
     {
@@ -259,7 +261,7 @@ ProducerInfo* ProducerInfoList::getProducerInfoByIndex(uint index)
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
     if (index >= mList.size())
       return nullptr;
 
@@ -299,7 +301,7 @@ void ProducerInfoList::getProducerInfoListBySourceId(uint sourceId,ProducerInfoL
   {
     producerInfoList.clear();
 
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
     uint sz = getLength();
     for (uint t=0; t<sz; t++)
     {
@@ -341,7 +343,7 @@ void ProducerInfoList::sortByName()
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoWriteLock lock(&mModificationLock);
 
     std::vector<ProducerInfo*>  newList;
     std::set<std::string> nameList;
@@ -378,7 +380,7 @@ void ProducerInfoList::lock()
   FUNCTION_TRACE
   try
   {
-    return mThreadLock.lock();
+    mModificationLock.lock();
   }
   catch (...)
   {
@@ -395,7 +397,7 @@ void ProducerInfoList::unlock()
   FUNCTION_TRACE
   try
   {
-    return mThreadLock.unlock();
+    mModificationLock.unlock();
   }
   catch (...)
   {
@@ -407,12 +409,28 @@ void ProducerInfoList::unlock()
 
 
 
+void ProducerInfoList::setLockingEnabled(bool lockingEnabled)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mModificationLock.setLockingEnabled(lockingEnabled);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
 void ProducerInfoList::writeToFile(std::string filename)
 {
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
 
     FILE *file = fopen(filename.c_str(),"we");
     if (file == nullptr)
@@ -444,7 +462,7 @@ void ProducerInfoList::print(std::ostream& stream,uint level,uint optionFlags)
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
     stream << space(level) << "ProducerInfoList\n";
     std::size_t sz = mList.size();
     for (std::size_t t=0; t<sz; t++)

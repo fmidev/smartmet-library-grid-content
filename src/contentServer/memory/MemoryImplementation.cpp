@@ -69,17 +69,23 @@ MemoryImplementation::MemoryImplementation()
     mReloadActivated = false;
     mLastSaveTime = time(nullptr);
 
+    mProducerInfoList.setLockingEnabled(true);
+    mGenerationInfoList.setLockingEnabled(true);
     mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
+    mFileInfoList.setLockingEnabled(true);
 
     mFileInfoListByName.setReleaseObjects(false);
     mFileInfoListByName.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
+    mFileInfoListByName.setLockingEnabled(true);
 
     mContentInfoList[0].setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
     mContentInfoListEnabled[0] = true;
+    mContentInfoList[0].setLockingEnabled(true);
 
     for (int t=1; t<CONTENT_LIST_COUNT; t++)
     {
       mContentInfoList[t].setReleaseObjects(false);
+      mContentInfoList[t].setLockingEnabled(true);
       mContentInfoListEnabled[t] = true;
     }
 
@@ -1109,38 +1115,188 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     list.clear();
 
-    T::ContentInfoList cList;
-    cList.setReleaseObjects(false);
-    cList = mContentInfoList[0];
-    cList.sort(T::ContentInfo::ComparisonMethod::producer_file_message);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    T::ProducerInfoList producerList = mProducerInfoList;
+    std::map<uint,T::ProducerInfo*> producers;
+    uint plen = producerList.getLength();
+    for (uint t=0; t<plen; t++)
+    {
+      auto prod = producerList.getProducerInfoByIndex(t);
+      producers.insert(std::pair<uint,T::ProducerInfo*>(prod->mProducerId,prod));
+    }
+
 
     std::set<std::size_t> tmpList;
 
-    uint producerId = 0;
-    T::ProducerInfo *producerInfo = nullptr;
-
-    uint len = cList.getLength();
+    uint len = mContentInfoList[0].getLength();
     for (uint t=0; t<len; t++)
     {
-      T::ContentInfo *contentInfo = cList.getContentInfoByIndex(t);
+      T::ContentInfo *contentInfo = mContentInfoList[0].getContentInfoByIndex(t);
       std::string sourceParamKey;
       std::string targetParamKey;
       T::ParamLevelIdType paramLevelIdType = T::ParamLevelIdTypeValue::FMI;
       T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
 
-      if (contentInfo->mProducerId != producerId)
+      switch (sourceParameterKeyType)
       {
-        producerInfo = mProducerInfoList.getProducerInfoById(contentInfo->mProducerId);
-        if (producerInfo != nullptr)
-          producerId = producerInfo->mProducerId;
+        case T::ParamKeyTypeValue::FMI_ID:
+          sourceParamKey = contentInfo->mFmiParameterId;
+          break;
+
+        case T::ParamKeyTypeValue::FMI_NAME:
+          sourceParamKey = contentInfo->mFmiParameterName;
+          break;
+
+        case T::ParamKeyTypeValue::GRIB_ID:
+          sourceParamKey = contentInfo->mGribParameterId;
+          break;
+
+        case T::ParamKeyTypeValue::NEWBASE_ID:
+          sourceParamKey = contentInfo->mNewbaseParameterId;
+          break;
+
+        case T::ParamKeyTypeValue::NEWBASE_NAME:
+          sourceParamKey = contentInfo->mNewbaseParameterName;
+          break;
+
+        case T::ParamKeyTypeValue::CDM_ID:
+          sourceParamKey = contentInfo->mCdmParameterId;
+          break;
+
+        case T::ParamKeyTypeValue::CDM_NAME:
+          sourceParamKey = contentInfo->mCdmParameterName;
+          break;
+
+        default:
+          break;
       }
 
-      if (producerInfo != nullptr  &&  producerInfo->mProducerId == contentInfo->mProducerId)
+
+      switch (targetParameterKeyType)
       {
+        case T::ParamKeyTypeValue::FMI_ID:
+          targetParamKey = contentInfo->mFmiParameterId;
+          break;
+
+        case T::ParamKeyTypeValue::FMI_NAME:
+          targetParamKey = contentInfo->mFmiParameterName;
+          break;
+
+        case T::ParamKeyTypeValue::GRIB_ID:
+          targetParamKey = contentInfo->mGribParameterId;
+          break;
+
+        case T::ParamKeyTypeValue::NEWBASE_ID:
+          targetParamKey = contentInfo->mNewbaseParameterId;
+          break;
+
+        case T::ParamKeyTypeValue::NEWBASE_NAME:
+          targetParamKey = contentInfo->mNewbaseParameterName;
+          break;
+
+        case T::ParamKeyTypeValue::CDM_ID:
+          targetParamKey = contentInfo->mCdmParameterId;
+          break;
+
+        case T::ParamKeyTypeValue::CDM_NAME:
+          targetParamKey = contentInfo->mCdmParameterName;
+          break;
+
+        default:
+          break;
+      }
+
+      if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
+      {
+        std::size_t seed = 0;
+        boost::hash_combine(seed,contentInfo->mProducerId);
+        boost::hash_combine(seed,sourceParamKey);
+        boost::hash_combine(seed,targetParameterKeyType);
+        boost::hash_combine(seed,targetParamKey);
+        boost::hash_combine(seed,contentInfo->mGeometryId);
+        boost::hash_combine(seed,paramLevelIdType);
+        boost::hash_combine(seed,paramLevelId);
+        boost::hash_combine(seed,contentInfo->mParameterLevel);
+        boost::hash_combine(seed,contentInfo->mForecastType);
+        boost::hash_combine(seed,contentInfo->mForecastNumber);
+
+
+        if (tmpList.find(seed) == tmpList.end())
+        {
+          tmpList.insert(seed);
+
+          auto it = producers.find(contentInfo->mProducerId);
+          if (it != producers.end())
+          {
+            char tmp[200];
+            char *p = tmp;
+            p += sprintf(p,"%s;%s;%d;%s;%d;%d;%d;%05d;%d;%d",
+                  it->second->mName.c_str(),
+                  sourceParamKey.c_str(),
+                  targetParameterKeyType,
+                  targetParamKey.c_str(),
+                  contentInfo->mGeometryId,
+                  paramLevelIdType,
+                  paramLevelId,
+                  contentInfo->mParameterLevel,
+                  contentInfo->mForecastType,
+                  contentInfo->mForecastNumber);
+
+            if ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
+              p += sprintf(p,";1");
+            else
+              p += sprintf(p,";0");
+
+            list.insert(std::string(tmp));
+          }
+        }
+      }
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+int MemoryImplementation::_getProducerParameterListByProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    list.clear();
+
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
+    if (producerInfo == nullptr)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    std::set<std::size_t> tmpList;
+
+    uint len = mContentInfoList[0].getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *contentInfo = mContentInfoList[0].getContentInfoByIndex(t);
+      if (contentInfo->mProducerId == producerId)
+      {
+        std::string sourceParamKey;
+        std::string targetParamKey;
+        T::ParamLevelIdType paramLevelIdType = T::ParamLevelIdTypeValue::FMI;
+        T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
+
         switch (sourceParameterKeyType)
         {
           case T::ParamKeyTypeValue::FMI_ID:
@@ -1210,10 +1366,10 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
             break;
         }
 
-        if (sourceParamKey.length() > 0  &&  targetParamKey.length() > 0)
+        if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
         {
           std::size_t seed = 0;
-          boost::hash_combine(seed,producerInfo->mName);
+          boost::hash_combine(seed,contentInfo->mProducerId);
           boost::hash_combine(seed,sourceParamKey);
           boost::hash_combine(seed,targetParameterKeyType);
           boost::hash_combine(seed,targetParamKey);
@@ -5543,7 +5699,10 @@ void MemoryImplementation::saveData()
           mProducerInfoList.writeToFile(mContentDir + "/producers.csv");
 
         if (mGenerationCount != mGenerationInfoList.getLength())
-          mGenerationInfoList.writeToFile(mContentDir + "/generations.csv");
+        {
+          std::string filename = mContentDir + "/generations.csv";
+          mGenerationInfoList.writeToFile(filename);
+        }
 
         if (mFileCount != mFileInfoList.getLength())
           mFileInfoList.writeToFile(mContentDir + "/files.csv");

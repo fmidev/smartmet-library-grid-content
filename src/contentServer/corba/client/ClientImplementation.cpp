@@ -692,6 +692,30 @@ int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
 
 
 
+int ClientImplementation::_getProducerParameterListByProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Spine::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaStringList_var corbaList;
+
+    int result = mService->getProducerParameterListByProducerId(sessionId,producerId,(CORBA::Octet)sourceParameterKeyType,(CORBA::Octet)targetParameterKeyType,corbaList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaList,list);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
 int ClientImplementation::_addGenerationInfo(T::SessionId sessionId, T::GenerationInfo& generationInfo)
 {
   try

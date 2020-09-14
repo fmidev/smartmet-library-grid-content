@@ -220,6 +220,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getProducerParameterListByProducerId") == 0)
+    {
+      getProducerParameterListByProducerId(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"addGenerationInfo") == 0)
     {
       addGenerationInfo(request,response);
@@ -1694,6 +1700,70 @@ void ServerInterface::getProducerParameterList(T::RequestMessage& request,T::Res
     std::set<std::string> list;
 
     int result = mService->getProducerParameterList(sessionId,sourceParameterKeyType,targetParameterKeyType,list);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      for (auto it=list.begin(); it!=list.end(); ++it)
+      {
+        response.addLine("line",*it);
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void ServerInterface::getProducerParameterListByProducerId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint producerId = 0;
+    if (!request.getLineByKey("producerId",producerId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: producerId");
+      return;
+    }
+
+    int sourceParameterKeyType = 0;
+    if (!request.getLineByKey("sourceParameterKeyType",sourceParameterKeyType))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sourceParameterKeyType");
+      return;
+    }
+
+    int targetParameterKeyType = 0;
+    if (!request.getLineByKey("targetParameterKeyType",targetParameterKeyType))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: targetParameterKeyType");
+      return;
+    }
+
+    std::set<std::string> list;
+
+    int result = mService->getProducerParameterListByProducerId(sessionId,producerId,sourceParameterKeyType,targetParameterKeyType,list);
 
     response.addLine("result",result);
     if (result == Result::OK)

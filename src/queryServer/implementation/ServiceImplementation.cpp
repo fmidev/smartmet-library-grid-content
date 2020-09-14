@@ -12,6 +12,16 @@
 #include <macgyver/Astronomy.h>
 #include <macgyver/CharsetTools.h>
 #include <boost/functional/hash.hpp>
+#include "../../functions/Function_add.h"
+#include "../../functions/Function_avg.h"
+#include "../../functions/Function_div.h"
+#include "../../functions/Function_min.h"
+#include "../../functions/Function_max.h"
+#include "../../functions/Function_mul.h"
+#include "../../functions/Function_multiply.h"
+#include "../../functions/Function_sequence.h"
+#include "../../functions/Function_sum.h"
+#include "../../functions/Function_hypotenuse.h"
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
@@ -88,6 +98,27 @@ void ServiceImplementation::init(
 
     mAliasFileCollection.init(aliasFiles);
     mLuaFileCollection.init(luaFiles);
+
+    mFunctionCollection.addFunction("K2C",new Functions::Function_add(-273.15));
+    Functions::Function_sequence *k2f = new Functions::Function_sequence();
+    k2f->addFunction(new Functions::Function_add(-273.15));
+    k2f->addFunction(new Functions::Function_multiply(1.8));
+    k2f->addFunction(new Functions::Function_add(32.0));
+    mFunctionCollection.addFunction("K2F",k2f);
+
+    mFunctionCollection.addFunction("SUM",new Functions::Function_sum());
+    mFunctionCollection.addFunction("DIV",new Functions::Function_div());
+    mFunctionCollection.addFunction("MUL",new Functions::Function_mul());
+
+    mFunctionCollection.addFunction("AVG",new Functions::Function_avg());
+    mFunctionCollection.addFunction("MIN",new Functions::Function_min());
+    mFunctionCollection.addFunction("MAX",new Functions::Function_max());
+
+    // Radians to degrees
+    mFunctionCollection.addFunction("RAD2DEG",new Functions::Function_multiply((360.0/2*3.1415926535)));
+
+    // Degrees to radians
+    mFunctionCollection.addFunction("DEG2RAD",new Functions::Function_multiply((2*3.1415926535/360.0)));
 
     mParameterMappingFiles = parameterMappingFiles;
 
@@ -256,6 +287,7 @@ CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(uint pr
     cacheEntry->generationInfoList = generationInfoList;
     cacheEntry->analysisTimes = analysisTimes;
 
+    AutoThreadLock lock(&mThreadLock);
     mProducerGenerationListCache.insert(std::pair<uint,CacheEntry_sptr>(producerId,cacheEntry));
 
     return cacheEntry;
@@ -816,13 +848,18 @@ void ServiceImplementation::getParameterMappings(std::string& producerName,std::
 {
   try
   {
-    std::string key = producerName + ":" + parameterName + ":" + Fmi::to_string(geometryId) + ":" + Fmi::to_string(C_INT(onlySearchEnabled));
+    std::size_t hash = 0;
+    boost::hash_combine(hash,producerName);
+    boost::hash_combine(hash,parameterName);
+    boost::hash_combine(hash,geometryId);
+    boost::hash_combine(hash,onlySearchEnabled);
+
 
     AutoThreadLock lock(&mParameterMappingCacheThreadLock);
 
     for (auto it = mParameterMappingCache.begin(); it != mParameterMappingCache.end(); ++it)
     {
-      if (it->first == key)
+      if (it->first == hash)
       {
         mappings = it->second;
         // printf("Cache match %s %s %d
@@ -837,9 +874,9 @@ void ServiceImplementation::getParameterMappings(std::string& producerName,std::
       //printf("Get mappings [%s][%s][%d] %lu\n",producerName.c_str(),parameterName.c_str(),geometryId,mappings.size());
     }
 
-    mParameterMappingCache.push_front(std::pair<std::string, ParameterMapping_vec>(key, mappings));
+    mParameterMappingCache.push_front(std::pair<std::size_t, ParameterMapping_vec>(hash, mappings));
     // printf("Cache add %s %d\n",key.c_str(),mParameterMappingCache.size());
-    if (mParameterMappingCache.size() > 100)
+    if (mParameterMappingCache.size() > 200)
       mParameterMappingCache.pop_back();
   }
   catch (...)
@@ -864,14 +901,20 @@ void ServiceImplementation::getParameterMappings(
 {
   try
   {
-    std::string key = producerName + ":" + parameterName + ":" + Fmi::to_string(geometryId) + ":" + Fmi::to_string(levelIdType) + ":" + Fmi::to_string(levelId) + ":" + Fmi::to_string(level) + ":"
-        + Fmi::to_string(onlySearchEnabled);
+    std::size_t hash = 0;
+    boost::hash_combine(hash,producerName);
+    boost::hash_combine(hash,parameterName);
+    boost::hash_combine(hash,geometryId);
+    boost::hash_combine(hash,levelIdType);
+    boost::hash_combine(hash,levelId);
+    boost::hash_combine(hash,level);
+    boost::hash_combine(hash,onlySearchEnabled);
 
     AutoThreadLock lock(&mParameterMappingCacheThreadLock);
 
     for (auto it = mParameterMappingCache.begin(); it != mParameterMappingCache.end(); ++it)
     {
-      if (it->first == key)
+      if (it->first == hash)
       {
         mappings = it->second;
         // printf("Cache match %s %s %d
@@ -886,10 +929,10 @@ void ServiceImplementation::getParameterMappings(
       //printf("Get mappings [%s][%s][%d] [%d][%d][%d] %lu\n",producerName.c_str(),parameterName.c_str(),geometryId,levelIdType, levelId, level,mappings.size());
     }
 
-    mParameterMappingCache.push_front(std::pair<std::string, ParameterMapping_vec>(key, mappings));
+    mParameterMappingCache.push_front(std::pair<std::size_t, ParameterMapping_vec>(hash, mappings));
     // printf("Cache add %s %d\n",key.c_str(),mParameterMappingCache.size());
 
-    if (mParameterMappingCache.size() > 100)
+    if (mParameterMappingCache.size() > 200)
       mParameterMappingCache.pop_back();
   }
   catch (...)
@@ -1793,8 +1836,8 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
         // printf("**** PARAM %s  => %d %d\n",qParam->mParam.c_str(),paramLevelId,paramLevel);
 
-        if (paramName.substr(0, 1) == "$")
-          paramName = paramName.substr(1);
+        if (paramName.c_str()[0] == '$')
+          paramName = paramName.c_str()+1;
 
         try
         {
@@ -2120,8 +2163,8 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
         getParameterStringInfo(qParam->mParam, paramName, geometryId,paramLevelId, paramLevel, forecastType, forecastNumber, producerName, producerId, generationFlags, areaInterpolationMethod,
             timeInterpolationMethod, levelInterpolationMethod);
 
-        if (paramName.substr(0, 1) == "$")
-          paramName = paramName.substr(1);
+        if (paramName.c_str()[0] == '$')
+          paramName = paramName.c_str() + 1;
 
         std::set < std::string > forecastTimeList = timeList;
         std::set < std::string > additionalTimeList;
@@ -2353,10 +2396,11 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
           uint cnt = 0;
           for (auto it = qParam->mValueList.begin(); it != qParam->mValueList.end() && !found; ++it)
           {
-            if (it->mForecastTime < *tt)
+            int cmp = strcmp(it->mForecastTime.c_str(),tt->c_str());
+            if (cmp < 0)
               cnt++;
             else
-            if (it->mForecastTime == *tt)
+            if (cmp == 0)
             {
               found = true;
               if (it->mValueList.getLength() == 0)
@@ -2482,6 +2526,8 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
       throw exception;
     }
 
+    auto functionPtr = mFunctionCollection.getFunction(function);
+
     int size = valueList.size();
     newValueList.reserve(size);
     for (int t=0; t<size; t++)
@@ -2503,7 +2549,13 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
         else
           parameters.push_back(toDouble(fp->c_str()));
       }
-      T::ParamValue newValue = mLuaFileCollection.executeFunctionCall1(function, parameters);
+
+      T::ParamValue newValue;
+      if (functionPtr)
+        functionPtr->executeFunctionCall1(parameters);
+      else
+        newValue = mLuaFileCollection.executeFunctionCall1(function, parameters);
+
       newValueList.push_back(newValue);
     }
   }
@@ -2522,6 +2574,7 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
 {
   try
   {
+    auto functionPtr = mFunctionCollection.getFunction(function);
     int size = valueList.size();
     newValueList.reserve(size);
     for (int t=0; t<size; t++)
@@ -2534,7 +2587,12 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
         else
           parameters.push_back(toDouble(fp->c_str()));
       }
-      T::ParamValue newValue = mLuaFileCollection.executeFunctionCall1(function, parameters);
+      T::ParamValue newValue;
+      if (functionPtr)
+        newValue = functionPtr->executeFunctionCall1(parameters);
+      else
+        newValue = mLuaFileCollection.executeFunctionCall1(function, parameters);
+
       newValueList.push_back(newValue);
     }
   }
@@ -2553,6 +2611,7 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
   try
   {
     boost::local_time::local_date_time utcTime(toTimeStamp(forecastTime), nullptr);
+    auto functionPtr = mFunctionCollection.getFunction(function);
 
     uint vLen = valueList.getLength();
     for (uint i = 0; i < vLen; i++)
@@ -2577,7 +2636,10 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
           else
             parameters.push_back(toDouble(fp->c_str()));
         }
-        gv->mValue = mLuaFileCollection.executeFunctionCall1(function, parameters);
+        if (functionPtr)
+          gv->mValue = functionPtr->executeFunctionCall1(parameters);
+        else
+          gv->mValue = mLuaFileCollection.executeFunctionCall1(function, parameters);
       }
     }
   }
@@ -6728,6 +6790,32 @@ void ServiceImplementation::getGridValues(
               getParameterMappings(producerInfo.mName, parameterKey, producerGeometryId, T::ParamLevelIdTypeValue::ANY, paramLevelId, paramLevel, false, mappings);
             else
               getParameterMappings(producerInfo.mName, parameterKey, producerGeometryId, true, mappings);
+
+            if (mappings.size() == 0 &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+            {
+              ParameterMapping mp;
+              mp.mProducerName = producerInfo.mName;
+              mp.mParameterName = parameterKey;
+              mp.mParameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
+              mp.mParameterKey = parameterKey;
+              mp.mGeometryId = producerGeometryId;
+              mp.mParameterLevelIdType = T::ParamLevelIdTypeValue::ANY;
+              mp.mParameterLevelId = paramLevelId;
+              mp.mParameterLevel = paramLevel;
+              if (paramLevelId <= 0 &&  paramLevel < 0)
+                mp.mParameterLevelIdType = T::ParamLevelIdTypeValue::IGNORE;
+
+              //mp.mAreaInterpolationMethod;
+              //mp.mTimeInterpolationMethod;
+              //mp.mLevelInterpolationMethod;
+              //mp.mGroupFlags;
+              //mp.mSearchEnabled;
+              //mp.mIgnore;
+              //mp.mConversionFunction;
+              //mp.mReverseConversionFunction;
+              //mp.mDefaultPrecision;
+              mappings.push_back(mp);
+            }
 
             if (mappings.size() > 0)
             {

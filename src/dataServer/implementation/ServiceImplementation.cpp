@@ -3,12 +3,15 @@
 #include "VirtualMessage.h"
 #include "../../functions/Function_add.h"
 #include "../../functions/Function_avg.h"
+#include "../../functions/Function_div.h"
 #include "../../functions/Function_inPrcnt.h"
 #include "../../functions/Function_outPrcnt.h"
 #include "../../functions/Function_min.h"
 #include "../../functions/Function_max.h"
+#include "../../functions/Function_mul.h"
 #include "../../functions/Function_multiply.h"
 #include "../../functions/Function_sequence.h"
+#include "../../functions/Function_sum.h"
 #include "../../functions/Function_hypotenuse.h"
 #include "../../functions/Function_windDir.h"
 #include "../../functions/Function_vectorU.h"
@@ -220,12 +223,14 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,std:
     mFunctionCollection.addFunction("K2C",new Functions::Function_add(-273.15));
 
     Functions::Function_sequence *k2f = new Functions::Function_sequence();
-
     k2f->addFunction(new Functions::Function_add(-273.15));
     k2f->addFunction(new Functions::Function_multiply(1.8));
     k2f->addFunction(new Functions::Function_add(32.0));
-
     mFunctionCollection.addFunction("K2F",k2f);
+
+    mFunctionCollection.addFunction("SUM",new Functions::Function_sum());
+    mFunctionCollection.addFunction("DIV",new Functions::Function_div());
+    mFunctionCollection.addFunction("MUL",new Functions::Function_mul());
 
     mFunctionCollection.addFunction("AVG",new Functions::Function_avg());
     mFunctionCollection.addFunction("MIN",new Functions::Function_min());

@@ -16,22 +16,61 @@ namespace T
 {
 
 
-ThreadLock GenerationInfoList_sortLock;
-uint generationInfo_comparisonMethod = 0;
 
-
-
-int generationInfo_compare(const void *_val1,const void *_val2)
+int generationInfo_compare_1(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
     GenerationInfoPtr *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
     GenerationInfoPtr *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
 
-    return (*obj1)->compare(generationInfo_comparisonMethod,(*obj2));
+    return (*obj1)->compare(1,(*obj2));
   }
   return 0;
 }
+
+
+
+int generationInfo_compare_2(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    GenerationInfoPtr *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
+    GenerationInfoPtr *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
+
+    return (*obj1)->compare(2,(*obj2));
+  }
+  return 0;
+}
+
+
+
+int generationInfo_compare_3(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    GenerationInfoPtr *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
+    GenerationInfoPtr *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
+
+    return (*obj1)->compare(3,(*obj2));
+  }
+  return 0;
+}
+
+
+
+int generationInfo_compare_4(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    GenerationInfoPtr *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
+    GenerationInfoPtr *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
+
+    return (*obj1)->compare(4,(*obj2));
+  }
+  return 0;
+}
+
 
 
 
@@ -46,14 +85,7 @@ GenerationInfoList::GenerationInfoList()
     mSize = 0;
     mLength = 0;
     mArray = nullptr;
-    /*
-    mArray = new GenerationInfoPtr[100];
-
-    for (uint t=0; t<100; t++)
-    {
-      mArray[t] = nullptr;
-    }
-    */
+    mModificationLock.setLockingEnabled(false);
   }
   catch (...)
   {
@@ -70,6 +102,7 @@ GenerationInfoList::GenerationInfoList(GenerationInfoList& generationInfoList)
   FUNCTION_TRACE
   try
   {
+    mModificationLock.setLockingEnabled(false);
     mModificationLockPtr = &mModificationLock;
     if (generationInfoList.getModificationLockPtr() != mModificationLockPtr)
       generationInfoList.lock();
@@ -734,7 +767,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(std::string 
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr  &&  strcasecmp(info->mAnalysisTime.c_str(),analysisTime.c_str()) == 0)
+      if (info != nullptr  &&  strcmp(info->mAnalysisTime.c_str(),analysisTime.c_str()) == 0)
         return info;
     }
     return nullptr;
@@ -761,7 +794,7 @@ int GenerationInfoList::getGenerationInfoIndexByAnalysisTime(std::string analysi
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr  &&  strcasecmp(info->mAnalysisTime.c_str(),analysisTime.c_str()) == 0)
+      if (info != nullptr  &&  strcmp(info->mAnalysisTime.c_str(),analysisTime.c_str()) == 0)
         return t;
 
     }
@@ -1258,19 +1291,12 @@ void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTime
 
 
 
-void GenerationInfoList::setComparisonMethod(uint comparisonMethod)
+void GenerationInfoList::setLockingEnabled(bool lockingEnabled)
 {
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
-    mComparisonMethod = comparisonMethod;
-    if (mLength == 0)
-      return;
-
-    generationInfo_comparisonMethod = comparisonMethod;
-
-    qsort(mArray,mLength,sizeof(GenerationInfoPtr),generationInfo_compare);
+    mModificationLock.setLockingEnabled(lockingEnabled);
   }
   catch (...)
   {
@@ -1281,21 +1307,56 @@ void GenerationInfoList::setComparisonMethod(uint comparisonMethod)
 
 
 
+
+void GenerationInfoList::setComparisonMethod(uint comparisonMethod)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mComparisonMethod == comparisonMethod)
+      return;
+
+    sort(comparisonMethod);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 void GenerationInfoList::sort(uint comparisonMethod)
 {
   FUNCTION_TRACE
   try
   {
+    if (mComparisonMethod == comparisonMethod)
+      return;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     mComparisonMethod = comparisonMethod;
 
-    if (mArray == nullptr || mLength == 0)
+    if (mArray == nullptr || mLength < 2)
       return;
 
-    AutoThreadLock globalLock(&GenerationInfoList_sortLock);
-    generationInfo_comparisonMethod = comparisonMethod;
-
-    qsort(mArray,mLength,sizeof(GenerationInfoPtr),generationInfo_compare);
+    switch (comparisonMethod)
+    {
+      case 1:
+        qsort(mArray,mLength,sizeof(GenerationInfoPtr),generationInfo_compare_1);
+        break;
+      case 2:
+        qsort(mArray,mLength,sizeof(GenerationInfoPtr),generationInfo_compare_2);
+        break;
+      case 3:
+        qsort(mArray,mLength,sizeof(GenerationInfoPtr),generationInfo_compare_3);
+        break;
+      case 4:
+        qsort(mArray,mLength,sizeof(GenerationInfoPtr),generationInfo_compare_4);
+        break;
+    }
   }
   catch (...)
   {

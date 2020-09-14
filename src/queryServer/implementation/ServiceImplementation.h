@@ -6,6 +6,7 @@
 #include "../../dataServer/definition/ServiceInterface.h"
 #include "../../contentServer/definition/ServiceInterface.h"
 #include "../../lua/LuaFileCollection.h"
+#include "../../functions/FunctionCollection.h"
 
 
 
@@ -21,7 +22,7 @@ typedef std::map<std::string,T::ProducerInfo>               Producer_map;
 typedef ContentServer::ServiceInterface*                    ContentServer_ptr;
 typedef DataServer::ServiceInterface*                       DataServer_ptr;
 typedef std::vector<std::pair<std::string,int>>             LevelHeightCache;
-typedef std::pair<std::string,ParameterMapping_vec>         ParameterMappingCacheRec;
+typedef std::pair<std::size_t,ParameterMapping_vec>         ParameterMappingCacheRec;
 typedef std::list<ParameterMappingCacheRec>                 ParameterMappingCache;
 typedef std::shared_ptr<std::vector<std::string>>           StringVector_sptr;
 
@@ -552,6 +553,7 @@ class ServiceImplementation : public ServiceInterface
      time_t                 mContentCacheTime[CONTENT_CACHE_SIZE];
      uint                   mContentCacheKeyIdx;
 
+     Functions::FunctionCollection     mFunctionCollection;
      boost::shared_ptr<Fmi::LandCover> mLandCover;
      boost::shared_ptr<Fmi::DEM>       mDem;
      ProducerGenarationListCache       mProducerGenerationListCache;

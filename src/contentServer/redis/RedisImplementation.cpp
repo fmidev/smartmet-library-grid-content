@@ -1195,7 +1195,7 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
     list.clear();
 
     T::ContentInfoList cList;
-    getContent(0,0,10000000,cList);
+    getContent(0,0,20000000,cList);
     cList.sort(T::ContentInfo::ComparisonMethod::producer_file_message);
 
     std::set<std::size_t> tmpList;
@@ -1320,6 +1320,165 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
             char *p = tmp;
             p += sprintf(p,"%s;%s;%d;%s;%d;%d;%d;%05d;%d;%d",
                   producerInfo->mName.c_str(),
+                  sourceParamKey.c_str(),
+                  targetParameterKeyType,
+                  targetParamKey.c_str(),
+                  contentInfo->mGeometryId,
+                  paramLevelIdType,
+                  paramLevelId,
+                  contentInfo->mParameterLevel,
+                  contentInfo->mForecastType,
+                  contentInfo->mForecastNumber);
+
+            if ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
+              p += sprintf(p,";1");
+            else
+              p += sprintf(p,";0");
+
+            list.insert(std::string(tmp));
+          }
+        }
+      }
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_getProducerParameterListByProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ProducerInfo producerInfo;
+    if (getProducerById(producerId,producerInfo) != Result::OK)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    list.clear();
+
+    T::ContentInfoList cList;
+    getContent(0,0,20000000,cList);
+    cList.sort(T::ContentInfo::ComparisonMethod::producer_file_message);
+
+    std::set<std::size_t> tmpList;
+
+
+    uint len = cList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *contentInfo = cList.getContentInfoByIndex(t);
+      std::string sourceParamKey;
+      std::string targetParamKey;
+      T::ParamLevelIdType paramLevelIdType = T::ParamLevelIdTypeValue::FMI;
+      T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
+
+      if (contentInfo->mProducerId == producerId)
+      {
+        switch (sourceParameterKeyType)
+        {
+          case T::ParamKeyTypeValue::FMI_ID:
+            sourceParamKey = contentInfo->mFmiParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::FMI_NAME:
+            sourceParamKey = contentInfo->mFmiParameterName;
+            break;
+
+          case T::ParamKeyTypeValue::GRIB_ID:
+            sourceParamKey = contentInfo->mGribParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::NEWBASE_ID:
+            sourceParamKey = contentInfo->mNewbaseParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::NEWBASE_NAME:
+            sourceParamKey = contentInfo->mNewbaseParameterName;
+            break;
+
+          case T::ParamKeyTypeValue::CDM_ID:
+            sourceParamKey = contentInfo->mCdmParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::CDM_NAME:
+            sourceParamKey = contentInfo->mCdmParameterName;
+            break;
+
+          default:
+            break;
+        }
+
+
+        switch (targetParameterKeyType)
+        {
+          case T::ParamKeyTypeValue::FMI_ID:
+            targetParamKey = contentInfo->mFmiParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::FMI_NAME:
+            targetParamKey = contentInfo->mFmiParameterName;
+            break;
+
+          case T::ParamKeyTypeValue::GRIB_ID:
+            targetParamKey = contentInfo->mGribParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::NEWBASE_ID:
+            targetParamKey = contentInfo->mNewbaseParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::NEWBASE_NAME:
+            targetParamKey = contentInfo->mNewbaseParameterName;
+            break;
+
+          case T::ParamKeyTypeValue::CDM_ID:
+            targetParamKey = contentInfo->mCdmParameterId;
+            break;
+
+          case T::ParamKeyTypeValue::CDM_NAME:
+            targetParamKey = contentInfo->mCdmParameterName;
+            break;
+
+          default:
+            break;
+        }
+
+        if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
+        {
+          std::size_t seed = 0;
+          boost::hash_combine(seed,contentInfo->mProducerId);
+          boost::hash_combine(seed,sourceParamKey);
+          boost::hash_combine(seed,targetParameterKeyType);
+          boost::hash_combine(seed,targetParamKey);
+          boost::hash_combine(seed,contentInfo->mGeometryId);
+          boost::hash_combine(seed,paramLevelIdType);
+          boost::hash_combine(seed,paramLevelId);
+          boost::hash_combine(seed,contentInfo->mParameterLevel);
+          boost::hash_combine(seed,contentInfo->mForecastType);
+          boost::hash_combine(seed,contentInfo->mForecastNumber);
+
+
+          if (tmpList.find(seed) == tmpList.end())
+          {
+            tmpList.insert(seed);
+
+            char tmp[200];
+            char *p = tmp;
+            p += sprintf(p,"%s;%s;%d;%s;%d;%d;%d;%05d;%d;%d",
+                  producerInfo.mName.c_str(),
                   sourceParamKey.c_str(),
                   targetParameterKeyType,
                   targetParamKey.c_str(),
@@ -5000,7 +5159,7 @@ int RedisImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
     fileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
 
     T::ContentInfoList contentList;
-    getContent(0,0,10000000,contentList);
+    getContent(0,0,20000000,contentList);
 
     uint cLen = contentList.getLength();
     for (uint c=0; c<cLen; c++)
@@ -5410,7 +5569,7 @@ int RedisImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoLi
       return Result::INVALID_SESSION;
 
     T::ContentInfoList contentList;
-    getContent(0,0,10000000,contentList);
+    getContent(0,0,20000000,contentList);
 
     levelInfoList.clear();
 

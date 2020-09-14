@@ -20,24 +20,282 @@ namespace T
 {
 
 
-ThreadLock ContentInfoList_sortLock;
-
-uint contentInfo_comparisonMethod = ContentInfo::ComparisonMethod::none;
-
-
-
-int contentInfo_compare(const void *_val1,const void *_val2)
+int contentInfo_compare_1(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
     ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
     ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
-    return (*obj1)->compare(contentInfo_comparisonMethod,(*obj2));
+    return (*obj1)->compare(1,(*obj2));
   }
   return 0;
 }
 
+
+
+int contentInfo_compare_2(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(2,(*obj2));
+  }
+  return 0;
+}
+
+
+
+int contentInfo_compare_3(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(3,(*obj2));
+  }
+  return 0;
+}
+
+
+int contentInfo_compare_4(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(4,(*obj2));
+  }
+  return 0;
+}
+
+
+int contentInfo_compare_5(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(5,(*obj2));
+  }
+  return 0;
+}
+
+
+
+int contentInfo_compare_6(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(6,(*obj2));
+  }
+  return 0;
+}
+
+
+
+int contentInfo_compare_7(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(7,(*obj2));
+  }
+  return 0;
+}
+
+
+
+int contentInfo_compare_8(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(8,(*obj2));
+  }
+  return 0;
+}
+
+
+
+
+int contentInfo_compare_9(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(9,(*obj2));
+  }
+  return 0;
+}
+
+
+
+int contentInfo_compare_10(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(10,(*obj2));
+  }
+  return 0;
+}
+
+
+
+
+int contentInfo_compare_11(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(11,(*obj2));
+  }
+  return 0;
+}
+
+
+
+int contentInfo_compare_12(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(12,(*obj2));
+  }
+  return 0;
+}
+
+
+
+int contentInfo_compare_13(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(13,(*obj2));
+  }
+  return 0;
+}
+
+
+int contentInfo_compare_14(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(14,(*obj2));
+  }
+  return 0;
+}
+
+
+int contentInfo_compare_15(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(15,(*obj2));
+  }
+  return 0;
+}
+
+
+
+int contentInfo_compare_16(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(16,(*obj2));
+  }
+  return 0;
+}
+
+
+
+int contentInfo_compare_17(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(17,(*obj2));
+  }
+  return 0;
+}
+
+
+
+int contentInfo_compare_18(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(18,(*obj2));
+  }
+  return 0;
+}
+
+
+
+
+int contentInfo_compare_19(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(19,(*obj2));
+  }
+  return 0;
+}
+
+
+
+int contentInfo_compare_20(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+
+    return (*obj1)->compare(20,(*obj2));
+  }
+  return 0;
+}
 
 
 
@@ -52,14 +310,7 @@ ContentInfoList::ContentInfoList()
     mSize = 0;
     mLength = 0;
     mArray = nullptr;
-    /*
-    mArray = new ContentInfoPtr[100];
-
-    for (uint t=0; t<100; t++)
-    {
-      mArray[t] = nullptr;
-    }
-    */
+    mModificationLock.setLockingEnabled(false);
   }
   catch (...)
   {
@@ -77,6 +328,7 @@ ContentInfoList::ContentInfoList(ContentInfoList& contentInfoList)
   try
   {
     mModificationLockPtr = &mModificationLock;
+    mModificationLock.setLockingEnabled(false);
     if (contentInfoList.getModificationLockPtr() != mModificationLockPtr)
       contentInfoList.lock();
 
@@ -122,7 +374,7 @@ ContentInfoList::ContentInfoList(const ContentInfoList& contentInfoList)
   try
   {
     mModificationLockPtr = &mModificationLock;
-    //contentInfoList.lock();
+    mModificationLock.setLockingEnabled(false);
 
     mReleaseObjects = true;
     mArray = nullptr;
@@ -146,11 +398,9 @@ ContentInfoList::ContentInfoList(const ContentInfoList& contentInfoList)
         }
       }
     }
-    //contentInfoList.unlock();
   }
   catch (...)
   {
-    //contentInfoList.unlock();
     throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
   }
 }
@@ -297,11 +547,14 @@ ContentInfo* ContentInfoList::addContentInfo(ContentInfo *contentInfo)
   FUNCTION_TRACE
   try
   {
+    if (contentInfo == nullptr)
+      throw SmartMet::Spine::Exception(BCP,"The 'contentInfo' parameter points to NULL!");
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mArray == nullptr  ||  mLength == mSize)
     {
-      increaseSize(mSize + mSize/5 + 50);
+      increaseSize(mSize + mSize/4 + 100);
     }
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::none)
@@ -2640,7 +2893,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  strcasecmp(info->mGribParameterId.c_str(),gribParameter.c_str()) == 0)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  strcmp(info->mGribParameterId.c_str(),gribParameter.c_str()) == 0)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -2684,7 +2937,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
 
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) != 0)
         idx++;
 
       uint t = idx;
@@ -2697,7 +2950,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (strcasecmp(info->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) == 0)
+          if (strcmp(info->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) == 0)
           {
             if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
             {
@@ -2809,7 +3062,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
 
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) != 0)
         idx++;
 
       uint t = C_UINT(idx);
@@ -2829,7 +3082,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (strcasecmp(info->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) == 0)
+          if (strcmp(info->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) == 0)
           {
             if (info->mGenerationId == generationId)
             {
@@ -3095,7 +3348,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
 
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) != 0)
         idx++;
 
       uint t = C_UINT(idx);
@@ -3108,7 +3361,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (strcasecmp(info->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) == 0)
+          if (strcmp(info->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) == 0)
           {
             if (info->mGenerationId == generationId)
             {
@@ -3228,7 +3481,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
 
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) != 0)
         idx++;
 
       uint t = C_UINT(idx);
@@ -3241,7 +3494,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (strcasecmp(info->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) == 0)
+          if (strcmp(info->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) == 0)
           {
             if (info->mProducerId == producerId)
             {
@@ -3384,7 +3637,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
       //searchInfo.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
         idx++;
 
       uint t = C_UINT(idx);
@@ -3397,7 +3650,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (strcasecmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
+          if (strcmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
           {
             if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
             {
@@ -3505,7 +3758,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint pro
       searchInfo.mGenerationId = generationId;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
         idx++;
 
       uint t = C_UINT(idx);
@@ -3518,7 +3771,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint pro
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (strcasecmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
+          if (strcmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
           {
             if (info->mGenerationId == generationId)
             {
@@ -3634,7 +3887,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
       //searchInfo.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
         idx++;
 
       uint t = C_UINT(idx);
@@ -3647,7 +3900,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (strcasecmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
+          if (strcmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
           {
             if (info->mProducerId == producerId)
             {
@@ -4822,7 +5075,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
       //searchInfo.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
         idx++;
 
       uint t = C_UINT(idx);
@@ -4835,7 +5088,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (strcasecmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
+          if (strcmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
           {
             if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
             {
@@ -4943,7 +5196,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
       searchInfo.mProducerId = producerId;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
         idx++;
 
       uint t = C_UINT(idx);
@@ -4956,7 +5209,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (strcasecmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
+          if (strcmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
           {
             if (info->mGenerationId == generationId)
             {
@@ -5072,7 +5325,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
       //searchInfo.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
         idx++;
 
       uint t = C_UINT(idx);
@@ -5085,7 +5338,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (strcasecmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
+          if (strcmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
           {
             if (info->mProducerId == producerId)
             {
@@ -7299,6 +7552,23 @@ uint ContentInfoList::getComparisonMethod()
 
 
 
+void ContentInfoList::setLockingEnabled(bool lockingEnabled)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mModificationLock.setLockingEnabled(lockingEnabled);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 void ContentInfoList::setComparisonMethod(uint comparisonMethod)
 {
   FUNCTION_TRACE
@@ -7307,14 +7577,7 @@ void ContentInfoList::setComparisonMethod(uint comparisonMethod)
     if (mComparisonMethod == comparisonMethod)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
-    mComparisonMethod = comparisonMethod;
-    if (mArray == nullptr ||  mLength == 0)
-      return;
-
-    contentInfo_comparisonMethod = comparisonMethod;
-
-    qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare);
+    sort(comparisonMethod);
   }
   catch (...)
   {
@@ -7330,16 +7593,79 @@ void ContentInfoList::sort(uint comparisonMethod)
   FUNCTION_TRACE
   try
   {
+    if (mComparisonMethod == comparisonMethod)
+      return;
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     mComparisonMethod = comparisonMethod;
 
-    if (mArray == nullptr || mLength == 0)
+    if (mArray == nullptr || mLength < 2)
       return;
 
-    AutoThreadLock globalLock(&ContentInfoList_sortLock);
-    contentInfo_comparisonMethod = comparisonMethod;
+    switch (mComparisonMethod)
+    {
+      case 1:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_1);
+        break;
+      case 2:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_2);
+        break;
+      case 3:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_3);
+        break;
+      case 4:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_4);
+        break;
+      case 5:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_5);
+        break;
+      case 6:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_6);
+        break;
+      case 7:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_7);
+        break;
+      case 8:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_8);
+        break;
+      case 9:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_9);
+        break;
+      case 10:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_10);
+        break;
+      case 11:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_11);
+        break;
+      case 12:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_12);
+        break;
+      case 13:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_13);
+        break;
+      case 14:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_14);
+        break;
+      case 15:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_15);
+        break;
+      case 16:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_16);
+        break;
+      case 17:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_17);
+        break;
+      case 18:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_18);
+        break;
+      case 19:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_19);
+        break;
+      case 20:
+        qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_20);
+        break;
+    }
 
-    qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare);
   }
   catch (...)
   {

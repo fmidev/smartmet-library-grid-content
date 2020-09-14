@@ -53,6 +53,7 @@ class RedisImplementation : public ServiceInterface
      virtual int    _getProducerInfoCount(T::SessionId sessionId,uint& count);
      virtual int    _getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list);
      virtual int    _getProducerParameterList(T::SessionId sessionId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list);
+     virtual int    _getProducerParameterListByProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list);
 
      virtual int    _addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo);
      virtual int    _deleteGenerationInfoById(T::SessionId sessionId,uint generationId);

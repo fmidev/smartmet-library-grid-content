@@ -21,7 +21,12 @@ LuaFile::LuaFile()
 {
   try
   {
-    mLuaState = nullptr;
+    for (uint t=0; t<NUM_OF_LUA_HANDLES; t++)
+    {
+      mLuaState[t] = nullptr;
+      mStateKey[t] = 0;
+    }
+
     mLastModified = 0;
   }
   catch (...)
@@ -39,7 +44,12 @@ LuaFile::LuaFile(const std::string& filename)
   try
   {
     mFilename = filename;
-    mLuaState = nullptr;
+    for (uint t=0; t<NUM_OF_LUA_HANDLES; t++)
+    {
+      mLuaState[t] = nullptr;
+      mStateKey[t] = 0;
+    }
+
     mLastModified = 0;
   }
   catch (...)
@@ -58,7 +68,12 @@ LuaFile::LuaFile(const LuaFile& luaFile)
   {
     mFilename = luaFile.mFilename;
     mFunctions = luaFile.mFunctions;
-    mLuaState = luaFile.mLuaState;
+    for (uint t=0; t<NUM_OF_LUA_HANDLES; t++)
+    {
+      mLuaState[t] = nullptr;
+      mStateKey[t] = 0;
+    }
+
     mLastModified = luaFile.mLastModified;
   }
   catch (...)
@@ -75,8 +90,11 @@ LuaFile::~LuaFile()
 {
   try
   {
-    if (mLuaState != nullptr)
-      lua_close((lua_State*)mLuaState);
+    for (uint t=0; t<NUM_OF_LUA_HANDLES; t++)
+    {
+      if (mLuaState[t] != nullptr)
+        lua_close((lua_State*)mLuaState[t]);
+    }
   }
   catch (...)
   {
@@ -93,7 +111,7 @@ void LuaFile::init()
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoWriteLock lock(&mModificationLock);
 
     loadFile();
     mFunctions.clear();
@@ -128,20 +146,91 @@ void LuaFile::init(const std::string& filename)
 
 
 
+void* LuaFile::getLuaState(ulonglong key)
+{
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+    while (true)
+    {
+      for (uint t=0; t<NUM_OF_LUA_HANDLES; t++)
+      {
+        if (mStateKey[t] == 0)
+        {
+          mStateKey[t] = key;
+          return mLuaState[t];
+        }
+      }
+      time_usleep(0,100);
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Initialization failed!", nullptr);
+  }
+}
+
+
+
+
+
+void LuaFile::releaseLuaState(ulonglong key)
+{
+  try
+  {
+    for (uint t=0; t<NUM_OF_LUA_HANDLES; t++)
+    {
+      if (mStateKey[t] == key)
+      {
+        mStateKey[t] = 0;
+        return;
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Initialization failed!", nullptr);
+  }
+}
+
+
+
+
 bool LuaFile::checkUpdates()
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoWriteLock lock(&mModificationLock);
 
     time_t tt = getFileModificationTime(mFilename.c_str());
 
     if (tt != mLastModified  &&  (tt+3) < time(nullptr))
     {
-      if (mLuaState != nullptr)
+      // Waiting until all states are free.
+      bool ind = false;
+      while (!ind)
       {
-        lua_close((lua_State*)mLuaState);
-        mLuaState = nullptr;
+        uint count = 0;
+        for (uint t=0; t<NUM_OF_LUA_HANDLES; t++)
+        {
+          if (mStateKey[t] == 0)
+            count++;
+        }
+
+        if (count == NUM_OF_LUA_HANDLES)
+          ind = true;
+        else
+          time_usleep(0,100);
+      }
+
+
+      for (uint t=0; t<NUM_OF_LUA_HANDLES; t++)
+      {
+        if (mLuaState[t] != nullptr)
+        {
+          lua_close((lua_State*)mLuaState[t]);
+          mLuaState[t] = nullptr;
+        }
       }
 
       loadFile();
@@ -168,7 +257,7 @@ uint LuaFile::getFunction(const std::string& functionName,std::string& function)
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
 
     auto a = mFunctions.find(toLowerString(functionName));
     if (a != mFunctions.end())
@@ -192,9 +281,8 @@ float LuaFile::executeFunctionCall1(std::string& function,std::vector<float>& pa
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
-
-    lua_State *L = (lua_State*)mLuaState;
+    LuaHandle luaHandle(this);
+    lua_State *L = (lua_State*)luaHandle.getState();
 
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
@@ -260,7 +348,6 @@ float LuaFile::executeFunctionCall1(std::string& function,std::vector<float>& pa
         exception.addParameter("Error Message",message.c_str());
         throw exception;
       }
-
       return value;
     }
     return 0;
@@ -279,9 +366,8 @@ double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& 
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
-
-    lua_State *L = (lua_State*)mLuaState;
+    LuaHandle luaHandle(this);
+    lua_State *L = (lua_State*)luaHandle.getState();
 
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
@@ -347,7 +433,6 @@ double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& 
         exception.addParameter("Error Message",message.c_str());
         throw exception;
       }
-
       return value;
     }
     return 0;
@@ -366,9 +451,8 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
-
-    lua_State *L = (lua_State*)mLuaState;
+    LuaHandle luaHandle(this);
+    lua_State *L = (lua_State*)luaHandle.getState();
 
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
@@ -478,9 +562,8 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
-
-    lua_State *L = (lua_State*)mLuaState;
+    LuaHandle luaHandle(this);
+    lua_State *L = (lua_State*)luaHandle.getState();
 
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
@@ -588,9 +671,8 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
-
-    lua_State *L = (lua_State*)mLuaState;
+    LuaHandle luaHandle(this);
+    lua_State *L = (lua_State*)luaHandle.getState();
 
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
@@ -676,9 +758,8 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
-
-    lua_State *L = (lua_State*)mLuaState;
+    LuaHandle luaHandle(this);
+    lua_State *L = (lua_State*)luaHandle.getState();
 
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
@@ -764,9 +845,8 @@ std::string LuaFile::executeFunctionCall6(std::string& function,std::vector<std:
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
-
-    lua_State *L = (lua_State*)mLuaState;
+    LuaHandle luaHandle(this);
+    lua_State *L = (lua_State*)luaHandle.getState();
 
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
@@ -867,9 +947,8 @@ std::string LuaFile::executeFunctionCall6(
 
 
 #if 0
-    AutoThreadLock lock(&mThreadLock);
-
-    lua_State *L = (lua_State*)mLuaState;
+    LuaHandle luaHandle(this);
+    lua_State *L = (lua_State*)luaHandle.getState();
 
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
@@ -945,9 +1024,8 @@ void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
-
-    lua_State *L = (lua_State*)mLuaState;
+    LuaHandle luaHandle(this);
+    lua_State *L = (lua_State*)luaHandle.getState();
 
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
@@ -1050,9 +1128,8 @@ void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
-
-    lua_State *L = (lua_State*)mLuaState;
+    LuaHandle luaHandle(this);
+    lua_State *L = (lua_State*)luaHandle.getState();
 
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
@@ -1154,9 +1231,8 @@ void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
-
-    lua_State *L = (lua_State*)mLuaState;
+    LuaHandle luaHandle(this);
+    lua_State *L = (lua_State*)luaHandle.getState();
 
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
@@ -1268,9 +1344,8 @@ void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
-
-    lua_State *L = (lua_State*)mLuaState;
+    LuaHandle luaHandle(this);
+    lua_State *L = (lua_State*)luaHandle.getState();
 
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
@@ -1382,9 +1457,8 @@ void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
-
-    lua_State *L = (lua_State*)mLuaState;
+    LuaHandle luaHandle(this);
+    lua_State *L = (lua_State*)luaHandle.getState();
 
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
@@ -1481,9 +1555,8 @@ void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
-
-    lua_State *L = (lua_State*)mLuaState;
+    LuaHandle luaHandle(this);
+    lua_State *L = (lua_State*)luaHandle.getState();
 
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
@@ -1599,22 +1672,25 @@ void LuaFile::loadFile()
 {
   try
   {
-    if (mLuaState != nullptr)
+    for (uint t=0; t<NUM_OF_LUA_HANDLES; t++)
     {
-      lua_close((lua_State*)mLuaState);
-      mLuaState = nullptr;
-    }
+      if (mLuaState[t] != nullptr)
+      {
+        lua_close((lua_State*)mLuaState[t]);
+        mLuaState[t] = nullptr;
+      }
 
-    mLuaState = (lua_State*)luaL_newstate();
-    luaL_openlibs((lua_State*)mLuaState);
+      mLuaState[t] = luaL_newstate();
+      luaL_openlibs((lua_State*)mLuaState[t]);
 
-    if (luaL_dofile((lua_State*)mLuaState,mFilename.c_str()) != 0)
-    {
-      Spine::Exception exception(BCP, "Cannot load a LUA file!");
-      exception.addParameter("Filename",mFilename);
-      exception.addParameter("Lua message",lua_tostring((lua_State*)mLuaState, -1));
-      lua_pop((lua_State*)mLuaState, 1);
-      throw exception;
+      if (luaL_dofile((lua_State*)mLuaState[t],mFilename.c_str()) != 0)
+      {
+        Spine::Exception exception(BCP, "Cannot load a LUA file!");
+        exception.addParameter("Filename",mFilename);
+        exception.addParameter("Lua message",lua_tostring((lua_State*)mLuaState[t], -1));
+        lua_pop((lua_State*)mLuaState[t], 1);
+        throw exception;
+      }
     }
 
     mLastModified = getFileModificationTime(mFilename.c_str());
@@ -1632,7 +1708,7 @@ void LuaFile::loadFunctionList(uint type)
 {
   try
   {
-    lua_State *L = (lua_State*)mLuaState;
+    lua_State *L =(lua_State*)mLuaState[0];
 
     lua_getglobal(L,"getFunctionNames");
     lua_pushinteger(L,type);

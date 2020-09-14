@@ -52,6 +52,7 @@ class GenerationInfoList
     ModificationLock*   getModificationLockPtr();
     bool                getReleaseObjects();
     uint                getSize() const;
+    void                setLockingEnabled(bool lockingEnabled);
     void                setModificationLockPtr(ModificationLock* modificationLockPtr);
     void                setReleaseObjects(bool releaseObjects);
     void                lock();
@@ -73,7 +74,6 @@ class GenerationInfoList
     ModificationLock*   mModificationLockPtr;
     bool                mReleaseObjects;
     uint                mComparisonMethod;
-
 };
 
 typedef std::shared_ptr<GenerationInfoList> GenerationInfoList_sptr;
