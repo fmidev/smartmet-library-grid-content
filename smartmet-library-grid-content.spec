@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 20.9.7
+Version: 20.9.14
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -22,9 +22,9 @@ BuildRequires: omniORB-devel
 BuildRequires: postgresql95-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 20.8.21
-BuildRequires: smartmet-library-grid-files-devel >= 20.9.7
+BuildRequires: smartmet-library-grid-files-devel >= 20.9.14
 BuildRequires: smartmet-library-macgyver-devel >= 20.9.3
-BuildRequires: smartmet-library-spine-devel >= 20.9.4
+BuildRequires: smartmet-library-spine-devel >= 20.9.8
 Requires: boost169-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
@@ -32,9 +32,9 @@ Requires: lua-devel
 Requires: omniORB
 Requires: postgresql95
 Requires: smartmet-library-gis >= 20.8.21
-Requires: smartmet-library-grid-files >= 20.9.7
+Requires: smartmet-library-grid-files >= 20.9.14
 Requires: smartmet-library-macgyver >= 20.9.3
-Requires: smartmet-library-spine >= 20.9.4
+Requires: smartmet-library-spine >= 20.9.8
 Provides: %{SPECNAME}
 
 %description
@@ -76,6 +76,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Sep 14 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.9.14-1.fmi
+- GRID file support ABI changed
 * Mon Sep  7 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.9.7-1.fmi
 - Updated grid coordinate processing and caching
 * Thu Sep  3 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.9.3-1.fmi
