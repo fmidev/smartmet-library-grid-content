@@ -2862,7 +2862,7 @@ bool ServiceImplementation::getSpecialValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime || timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest)
+      if (contentInfo1->mForecastTime == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
       {
         // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
@@ -3141,7 +3141,7 @@ bool ServiceImplementation::getValueVectors(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime || timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest)
+      if (contentInfo1->mForecastTime == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
       {
         // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
@@ -3899,7 +3899,7 @@ bool ServiceImplementation::getGridFiles(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime || timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest)
+      if (contentInfo1->mForecastTime == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
       {
         // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
@@ -4336,7 +4336,7 @@ bool ServiceImplementation::getPointValuesByHeight(
 
         if (contentLen == 1)
         {
-          if (contentInfo1->mForecastTime == fTime || timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest)
+          if (contentInfo1->mForecastTime == fTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
           {
             // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
@@ -4626,7 +4626,7 @@ bool ServiceImplementation::getPointValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == fTime || timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest)
+      if (contentInfo1->mForecastTime == fTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
       {
         // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
@@ -4895,7 +4895,7 @@ bool ServiceImplementation::getCircleValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime || timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest)
+      if (contentInfo1->mForecastTime == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
       {
         // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
@@ -5174,7 +5174,7 @@ bool ServiceImplementation::getPolygonValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime || timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest)
+      if (contentInfo1->mForecastTime == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
       {
         // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
@@ -5443,7 +5443,7 @@ bool ServiceImplementation::getIsolineValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime || timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest)
+      if (contentInfo1->mForecastTime == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
       {
         // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
@@ -5774,7 +5774,7 @@ bool ServiceImplementation::getIsobandValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime || timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest)
+      if (contentInfo1->mForecastTime == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
       {
         // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
