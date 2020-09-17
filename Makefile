@@ -284,7 +284,7 @@ obj_and_lib: objdir $(LIBFILE)
 
 
 $(LIBFILE): $(OBJFILES)
-	$(CXX) $(CFLAGS) -shared -rdynamic -o $(LIBFILE) $(OBJFILES) $(LIBS)
+	$(CC) $(LDFLAGS) -shared -rdynamic -o $(LIBFILE) $(OBJFILES) $(LIBS)
 
 clean: delete_stubs
 	rm -f src/*~ src/*/*~ src/*/*/*~
