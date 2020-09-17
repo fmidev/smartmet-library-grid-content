@@ -260,28 +260,29 @@ all:
 ifneq ($(CORBA), disabled)
 	$(MAKE) create_stubs;
 endif
-	$(MAKE) obj_and_lib;
+	$(MAKE) objdir
+	$(MAKE) $(LIBFILE)
 
 debug:
 ifneq ($(CORBA), disabled)
 	$(MAKE) create_stubs;
 endif
-	$(MAKE) obj_and_lib;
+	$(MAKE) objdir
+	$(MAKE) $(LIBFILE)
 
 release:
 ifneq ($(CORBA), disabled)
 	$(MAKE) create_stubs;
 endif
-	$(MAKE) obj_and_lib;
+	$(MAKE) objdir
+	$(MAKE) $(LIBFILE)
 
 profile:
 ifneq ($(CORBA), disabled)
 	$(MAKE) create_stubs;
 endif
-	$(MAKE) obj_and_lib;
-
-obj_and_lib: objdir $(LIBFILE)
-
+	$(MAKE) objdir
+	$(MAKE) $(LIBFILE)
 
 $(LIBFILE): $(OBJFILES)
 	$(CC) $(LDFLAGS) -shared -rdynamic -o $(LIBFILE) $(OBJFILES) $(LIBS)
