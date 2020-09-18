@@ -30,6 +30,8 @@ namespace SmartMet
 namespace QueryServer
 {
 
+
+
 ServiceImplementation::ServiceImplementation()
 {
   FUNCTION_TRACE
@@ -42,7 +44,6 @@ ServiceImplementation::ServiceImplementation()
     mLastConfiguratonCheck = 0;
     mCheckInterval = 5;
     mGenerationInfoListUpdateTime = 0;
-    mContentCacheKeyIdx = 0;
     mProducerMap_updateTime = 0;
   }
   catch (...)
@@ -406,6 +407,8 @@ int ServiceImplementation::_getProducerList(T::SessionId sessionId, string_vec& 
 
     producerList.clear();
     std::string prev;
+
+    AutoReadLock lock(&mProducerListModificationLock);
     for (auto it = mProducerList.begin(); it != mProducerList.end(); ++it)
     {
       if (it->first != prev)
@@ -430,6 +433,11 @@ void ServiceImplementation::loadProducerFile()
   FUNCTION_TRACE
   try
   {
+    AutoWriteLock lock(&mProducerListModificationLock);
+
+    if (mProducerFileModificationTime == getFileModificationTime(mProducerFile.c_str()))
+      return;
+
     FILE* file = fopen(mProducerFile.c_str(), "re");
     if (file == nullptr)
     {
@@ -854,30 +862,25 @@ void ServiceImplementation::getParameterMappings(std::string& producerName,std::
     boost::hash_combine(hash,geometryId);
     boost::hash_combine(hash,onlySearchEnabled);
 
-
-    AutoThreadLock lock(&mParameterMappingCacheThreadLock);
-
-    for (auto it = mParameterMappingCache.begin(); it != mParameterMappingCache.end(); ++it)
     {
-      if (it->first == hash)
+      AutoReadLock lock(&mParameterMappingCacheModificationLock);
+      auto it = mParameterMappingCache.find(hash);
+      if (it != mParameterMappingCache.end())
       {
         mappings = it->second;
-        // printf("Cache match %s %s %d
-        // %d\n",key.c_str(),it->first.c_str(),mappings.size(),mParameterMappingCache.size());
         return;
+      }
+
+      for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
+      {
+        m->getMappings(producerName, parameterName, geometryId, onlySearchEnabled, mappings);
+        //printf("Get mappings [%s][%s][%d] %lu\n",producerName.c_str(),parameterName.c_str(),geometryId,mappings.size());
       }
     }
 
-    for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
-    {
-      m->getMappings(producerName, parameterName, geometryId, onlySearchEnabled, mappings);
-      //printf("Get mappings [%s][%s][%d] %lu\n",producerName.c_str(),parameterName.c_str(),geometryId,mappings.size());
-    }
-
-    mParameterMappingCache.push_front(std::pair<std::size_t, ParameterMapping_vec>(hash, mappings));
-    // printf("Cache add %s %d\n",key.c_str(),mParameterMappingCache.size());
-    if (mParameterMappingCache.size() > 200)
-      mParameterMappingCache.pop_back();
+    AutoWriteLock lock(&mParameterMappingCacheModificationLock);
+    if (mParameterMappingCache.find(hash) == mParameterMappingCache.end())
+      mParameterMappingCache.insert(std::pair<std::size_t, ParameterMapping_vec>(hash, mappings));
   }
   catch (...)
   {
@@ -910,30 +913,25 @@ void ServiceImplementation::getParameterMappings(
     boost::hash_combine(hash,level);
     boost::hash_combine(hash,onlySearchEnabled);
 
-    AutoThreadLock lock(&mParameterMappingCacheThreadLock);
-
-    for (auto it = mParameterMappingCache.begin(); it != mParameterMappingCache.end(); ++it)
     {
-      if (it->first == hash)
+      AutoReadLock lock(&mParameterMappingCacheModificationLock);
+      auto it = mParameterMappingCache.find(hash);
+      if (it != mParameterMappingCache.end())
       {
         mappings = it->second;
-        // printf("Cache match %s %s %d
-        // %d\n",key.c_str(),it->first.c_str(),mappings.size(),mParameterMappingCache.size());
         return;
+      }
+
+      for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
+      {
+        m->getMappings(producerName, parameterName, geometryId, onlySearchEnabled, mappings);
+        //printf("Get mappings [%s][%s][%d] %lu\n",producerName.c_str(),parameterName.c_str(),geometryId,mappings.size());
       }
     }
 
-    for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
-    {
-      m->getMappings(producerName, parameterName, geometryId, levelIdType, levelId, level, onlySearchEnabled, mappings);
-      //printf("Get mappings [%s][%s][%d] [%d][%d][%d] %lu\n",producerName.c_str(),parameterName.c_str(),geometryId,levelIdType, levelId, level,mappings.size());
-    }
-
-    mParameterMappingCache.push_front(std::pair<std::size_t, ParameterMapping_vec>(hash, mappings));
-    // printf("Cache add %s %d\n",key.c_str(),mParameterMappingCache.size());
-
-    if (mParameterMappingCache.size() > 200)
-      mParameterMappingCache.pop_back();
+    AutoWriteLock lock(&mParameterMappingCacheModificationLock);
+    if (mParameterMappingCache.find(hash) == mParameterMappingCache.end())
+      mParameterMappingCache.insert(std::pair<std::size_t, ParameterMapping_vec>(hash, mappings));
   }
   catch (...)
   {
@@ -1301,13 +1299,15 @@ void ServiceImplementation::checkConfigurationUpdates()
       time_t t1 = getFileModificationTime(mProducerFile.c_str());
 
       if (mProducerFileModificationTime != t1 && (mLastConfiguratonCheck - t1) > 3)
+      {
         loadProducerFile();
+      }
 
       for (auto it = mParameterMappings.begin(); it != mParameterMappings.end(); ++it)
       {
         if (it->checkUpdates())
         {
-          AutoThreadLock lock(&mParameterMappingCacheThreadLock);
+          AutoWriteLock lock(&mParameterMappingCacheModificationLock);
           mParameterMappingCache.clear();
         }
       }
@@ -1332,7 +1332,7 @@ void ServiceImplementation::getProducers(Query& query, Producer_vec& producers)
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mProducerListModificationLock);
 
     if (query.mProducerNameList.size() == 0)
     {
@@ -1377,7 +1377,7 @@ void ServiceImplementation::getProducers(std::string& producerName, Producer_vec
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mProducerListModificationLock);
     for (auto it = mProducerList.begin(); it != mProducerList.end(); ++it)
     {
       if (strcasecmp(producerName.c_str(), it->first.c_str()) == 0)
@@ -2653,15 +2653,57 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
 
 
 
-int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint producerId,uint generationId,T::ParamKeyType parameterKeyType,std::string& parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string& forecastTime,T::ContentInfoList& contentInfoList)
+ulonglong ServiceImplementation::getProducerHash(uint producerId)
 {
+  FUNCTION_TRACE
   try
   {
     time_t currentTime = time(nullptr);
+    ulonglong hash = 0;
 
-    //char key[100];
-    //sprintf(key,"%u:%u:%s:%d:%d:%d:%d:%d:%d",generationId,parameterKeyType,parameterKey.c_str(),parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId);
+    auto rec = mProducerHashMap.find(producerId);
+    if (rec != mProducerHashMap.end())
+    {
+      if ((currentTime - rec->second.checkTime) > 120)
+      {
+        rec->second.checkTime = currentTime;
+        int result = mContentServerPtr->getHashByProducerId(0,producerId,hash);
+        if (result == 0)
+          rec->second.hash = hash;
+        else
+          rec->second.hash = 0;
+      }
+      return rec->second.hash;
+    }
 
+    int result = mContentServerPtr->getHashByProducerId(0,producerId,hash);
+    if (result == 0)
+    {
+      HashRec hrec;
+      hrec.checkTime = currentTime;
+      hrec.hash = hash;
+
+      mProducerHashMap.insert(std::pair<uint,HashRec>(producerId,hrec));
+      return hash;
+    }
+
+    return 0;
+  }
+  catch (...)
+  {
+    SmartMet::Spine::Exception exception(BCP, "Operation failed!", nullptr);
+    throw exception;
+  }
+}
+
+
+
+
+
+int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint producerId,uint generationId,T::ParamKeyType parameterKeyType,std::string& parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string& forecastTime,std::shared_ptr<T::ContentInfoList>& contentInfoList)
+{
+  try
+  {
     std::size_t hash = 0;
     boost::hash_combine(hash,producerId);
     boost::hash_combine(hash,generationId);
@@ -2674,104 +2716,147 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     boost::hash_combine(hash,forecastNumber);
     boost::hash_combine(hash,geometryId);
 
-    int idx = -1;
-    uint endp = CONTENT_CACHE_SIZE;
-    if (mContentCacheKeyIdx < CONTENT_CACHE_SIZE)
-      endp = mContentCacheKeyIdx;
 
-    for (uint t=0; t<endp && idx < 0; t++)
+    std::size_t hash2 = hash;
+    boost::hash_combine(hash2,forecastTime);
+    auto producerHash = getProducerHash(producerId);
+
     {
-      int i = (mContentCacheKeyIdx-t) % CONTENT_CACHE_SIZE;
-      if (mContentCacheKey[i] == hash)
-        idx = (int)i;
+      AutoReadLock readLock(&mContentSearchCacheModificationLock);
+      auto it = mContentSearchCache.find(hash2);
+      if (it != mContentSearchCache.end()  &&  it->second.producerHash == producerHash)
+      {
+        contentInfoList = it->second.contentInfoList;
+        return Result::OK;
+      }
     }
 
+    ContentCacheEntry rec;
+    ContentCacheEntry *entry = &rec;
 
-    if (idx < 0 || (mContentCacheTime[idx] + 60) < currentTime)
     {
-      AutoThreadLock lock(&mThreadLock);
-
-      if (idx < 0 || (mContentCacheTime[idx] + 60) < currentTime)
+      AutoReadLock readLock(&mContentCacheModificationLock);
+      auto cc = mContentCache.find(hash);
+      if (cc != mContentCache.end())
       {
-        if (idx < 0)
-        {
-          idx = mContentCacheKeyIdx % CONTENT_CACHE_SIZE;
-          mContentCacheKey[idx] = hash;
-          mContentCacheKeyIdx++;
-        }
+        entry = &cc->second;
+      }
+      else
+      {
+        // No cache entry available
 
         std::string startTime = "13000101T000000";
         std::string endTime = "23000101T000000";
 
-        //printf("CACHE %u\n",mContentCacheKeyIdx);
+        mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,rec.contentInfoList);
+        rec.generationId = generationId;
+        rec.producerHash = producerHash;
 
-        //mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-1,-1,-1,startTime,endTime,0,mCacheContentInfoList[idx]);
-        mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,mCacheContentInfoList[idx]);
-        mContentCacheTime[idx] = time(nullptr);
+        switch (parameterKeyType)
+        {
+          case T::ParamKeyTypeValue::FMI_ID:
+            break;
+          case T::ParamKeyTypeValue::FMI_NAME:
+            rec.contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
+            break;
+          case T::ParamKeyTypeValue::GRIB_ID:
+            rec.contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time);
+            break;
+        }
       }
     }
-//    else
-//      printf("HIT\n");
 
-    switch (parameterKeyType)
+    if (entry->producerHash != producerHash)
     {
-/*
-      case T::ParamKeyTypeValue::FMI_ID:
-        break;
-*/
-      case T::ParamKeyTypeValue::FMI_NAME:
+      // Producer hash does not match
+      AutoWriteLock lock(&mContentCacheModificationLock);
+      if (entry->producerHash != producerHash)
       {
-        mCacheContentInfoList[idx].setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
-        /*
-        T::ContentInfo *cInfo = mCacheContentInfoList[idx].getContentInfoByFmiParameterNameAndGenerationId(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
-        if (cInfo != nullptr)
+        std::string startTime = "13000101T000000";
+        std::string endTime = "23000101T000000";
+
+        mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,entry->contentInfoList);
+        entry->producerHash = producerHash;
+        entry->generationId = generationId;
+
+        switch (parameterKeyType)
         {
-          contentInfoList.addContentInfo(cInfo->duplicate());
-          return Result::OK;
+          case T::ParamKeyTypeValue::FMI_ID:
+            break;
+          case T::ParamKeyTypeValue::FMI_NAME:
+            entry->contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
+            break;
+          case T::ParamKeyTypeValue::GRIB_ID:
+            entry->contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time);
+            break;
         }
-        */
-        mCacheContentInfoList[idx].getContentInfoListByFmiParameterNameAndGenerationId2(producerId,generationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
-        if (contentInfoList.getLength() == 0)
-          mCacheContentInfoList[idx].getContentInfoListByFmiParameterNameAndGenerationId(producerId,generationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
       }
-      break;
-
-      case T::ParamKeyTypeValue::GRIB_ID:
-      {
-        mCacheContentInfoList[idx].setComparisonMethod(T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time);
-        T::ContentInfo *cInfo = mCacheContentInfoList[idx].getContentInfoByGribParameterIdAndGenerationId(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
-        if (cInfo != nullptr)
-        {
-          contentInfoList.addContentInfo(cInfo->duplicate());
-          return Result::OK;
-        }
-        mCacheContentInfoList[idx].getContentInfoListByGribParameterIdAndGenerationId(producerId,generationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
-      }
-      break;
-/*
-        case T::ParamKeyTypeValue::NEWBASE_ID:
-          break;
-
-        case T::ParamKeyTypeValue::NEWBASE_NAME:
-          break;
-
-        case T::ParamKeyTypeValue::CDM_ID:
-          break;
-
-        case T::ParamKeyTypeValue::CDM_NAME:
-          break;
-
-        case T::ParamKeyTypeValue::BUILD_IN:
-          break;
-
-        default:
-          return Result::UNKNOWN_PARAMETER_KEY_TYPE;
-*/
     }
+
+    std::shared_ptr<T::ContentInfoList> cList(new T::ContentInfoList());
+
+    {
+      AutoReadLock readLock(&mContentCacheModificationLock);
+      switch (parameterKeyType)
+      {
+        case T::ParamKeyTypeValue::FMI_NAME:
+        {
+          entry->contentInfoList.getContentInfoListByFmiParameterNameAndGenerationId2(producerId,generationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
+          if (cList->getLength() == 0)
+            entry->contentInfoList.getContentInfoListByFmiParameterNameAndGenerationId(producerId,generationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
+        }
+        break;
+
+        case T::ParamKeyTypeValue::GRIB_ID:
+        {
+          T::ContentInfo *cInfo = entry->contentInfoList.getContentInfoByGribParameterIdAndGenerationId(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
+          if (cInfo != nullptr)
+          {
+            contentInfoList->addContentInfo(cInfo->duplicate());
+            return Result::OK;
+          }
+          entry->contentInfoList.getContentInfoListByGribParameterIdAndGenerationId(producerId,generationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
+        }
+        break;
+      }
+
+      contentInfoList = cList;
+      AutoWriteLock lock(&mContentSearchCacheModificationLock);
+      if (mContentSearchCache.size() > 1000000)
+        mContentSearchCache.clear();
+
+      auto rr = mContentSearchCache.find(hash2);
+      if (rr == mContentSearchCache.end())
+      {
+        ContentSearchCacheEntry rc;
+        rc.contentInfoList = cList;
+        rc.producerHash = producerHash;
+        rc.generationId = generationId;
+        mContentSearchCache.insert(std::pair<std::size_t,ContentSearchCacheEntry>(hash2,rc));
+      }
+      else
+      {
+        rr->second.contentInfoList = cList;
+        rr->second.producerHash = producerHash;
+        rr->second.generationId = generationId;
+      }
+    }
+
+    if (entry == &rec)
+    {
+      AutoWriteLock lock(&mContentCacheModificationLock);
+      if (mContentCache.size() > 10000)
+        mContentCache.clear();
+
+      if (mContentCache.find(hash) == mContentCache.end())
+        mContentCache.insert(std::pair<std::size_t,ContentCacheEntry>(hash,rec));
+    }
+
     return Result::OK;
   }
   catch (...)
   {
+    mContentCacheModificationLock.writeUnlock();
     throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
   }
 }
@@ -2813,7 +2898,7 @@ bool ServiceImplementation::getSpecialValues(
     std::vector < std::string > functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
-    T::ContentInfoList contentList;
+    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
     int result = getContentListByParameterGenerationIdAndForecastTime(0,producerInfo.mProducerId,generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
     if (result != 0)
@@ -2824,21 +2909,21 @@ bool ServiceImplementation::getSpecialValues(
       throw exception;
     }
 
-    PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList.getLength());
+    PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
     if (mDebugLog != nullptr)
     {
       std::stringstream stream;
-      contentList.print(stream, 0, 4);
+      contentList->print(stream, 0, 4);
       PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
     }
 
-    uint contentLen = contentList.getLength();
+    uint contentLen = contentList->getLength();
     if (contentLen == 0)
       return false;
 
-    T::ContentInfo* contentInfo1 = contentList.getContentInfoByIndex(0);
-    T::ContentInfo* contentInfo2 = contentList.getContentInfoByIndex(1);
+    T::ContentInfo* contentInfo1 = contentList->getContentInfoByIndex(0);
+    T::ContentInfo* contentInfo2 = contentList->getContentInfoByIndex(1);
 
     valueList.mParameterKeyType = pInfo.mParameterKeyType;
     valueList.mParameterKey = pInfo.mParameterKey;
@@ -3084,7 +3169,7 @@ bool ServiceImplementation::getValueVectors(
     std::string startTime = forecastTime;
     std::string endTime = forecastTime;
 
-    T::ContentInfoList contentList;
+    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
     int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
 
@@ -3096,23 +3181,23 @@ bool ServiceImplementation::getValueVectors(
       throw exception;
     }
 
-    PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList.getLength());
+    PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
     if (mDebugLog != nullptr)
     {
       std::stringstream stream;
-      contentList.print(stream, 0, 4);
+      contentList->print(stream, 0, 4);
       PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
     }
 
-    uint contentLen = contentList.getLength();
+    uint contentLen = contentList->getLength();
     if (contentLen == 0)
       return false;
 
-    T::ContentInfo* contentInfo1 = contentList.getContentInfoByIndex(0);
-    T::ContentInfo* contentInfo2 = contentList.getContentInfoByIndex(1);
-    T::ContentInfo* contentInfo3 = contentList.getContentInfoByIndex(2);
-    T::ContentInfo* contentInfo4 = contentList.getContentInfoByIndex(3);
+    T::ContentInfo* contentInfo1 = contentList->getContentInfoByIndex(0);
+    T::ContentInfo* contentInfo2 = contentList->getContentInfoByIndex(1);
+    T::ContentInfo* contentInfo3 = contentList->getContentInfoByIndex(2);
+    T::ContentInfo* contentInfo4 = contentList->getContentInfoByIndex(3);
 
     valueList.mParameterKeyType = pInfo.mParameterKeyType;
     valueList.mParameterKey = pInfo.mParameterKey;
@@ -3514,7 +3599,7 @@ bool ServiceImplementation::getGridFiles(
     std::string startTime = forecastTime;
     std::string endTime = forecastTime;
 
-    T::ContentInfoList contentList;
+    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
     int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
 
@@ -3526,23 +3611,23 @@ bool ServiceImplementation::getGridFiles(
       throw exception;
     }
 
-    PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList.getLength());
+    PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
     if (mDebugLog != nullptr)
     {
       std::stringstream stream;
-      contentList.print(stream, 0, 4);
+      contentList->print(stream, 0, 4);
       PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
     }
 
-    uint contentLen = contentList.getLength();
+    uint contentLen = contentList->getLength();
     if (contentLen == 0)
       return false;
 
-    T::ContentInfo* contentInfo1 = contentList.getContentInfoByIndex(0);
-    T::ContentInfo* contentInfo2 = contentList.getContentInfoByIndex(1);
-    T::ContentInfo* contentInfo3 = contentList.getContentInfoByIndex(2);
-    T::ContentInfo* contentInfo4 = contentList.getContentInfoByIndex(3);
+    T::ContentInfo* contentInfo1 = contentList->getContentInfoByIndex(0);
+    T::ContentInfo* contentInfo2 = contentList->getContentInfoByIndex(1);
+    T::ContentInfo* contentInfo3 = contentList->getContentInfoByIndex(2);
+    T::ContentInfo* contentInfo4 = contentList->getContentInfoByIndex(3);
 
     valueList.mParameterKeyType = pInfo.mParameterKeyType;
     valueList.mParameterKey = pInfo.mParameterKey;
@@ -4541,7 +4626,7 @@ bool ServiceImplementation::getPointValues(
 
     std::string fTime = forecastTime;
 
-    T::ContentInfoList contentList;
+    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
     if (climatologyParam)
     {
       T::ContentInfoList contentList2;
@@ -4574,16 +4659,16 @@ bool ServiceImplementation::getPointValues(
       throw exception;
     }
 
-    PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList.getLength());
+    PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
     if (mDebugLog != nullptr)
     {
       std::stringstream stream;
-      contentList.print(stream, 0, 4);
+      contentList->print(stream, 0, 4);
       PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
     }
 
-    uint contentLen = contentList.getLength();
+    uint contentLen = contentList->getLength();
     if (contentLen == 0)
       return false;
 
@@ -4596,12 +4681,12 @@ bool ServiceImplementation::getPointValues(
         iplMethod = T::LevelInterpolationMethod::Logarithmic;
     }
 
-    // contentList.print(std::cout,0,0);
+    // contentList->print(std::cout,0,0);
 
-    T::ContentInfo* contentInfo1 = contentList.getContentInfoByIndex(0);
-    T::ContentInfo* contentInfo2 = contentList.getContentInfoByIndex(1);
-    T::ContentInfo* contentInfo3 = contentList.getContentInfoByIndex(2);
-    T::ContentInfo* contentInfo4 = contentList.getContentInfoByIndex(3);
+    T::ContentInfo* contentInfo1 = contentList->getContentInfoByIndex(0);
+    T::ContentInfo* contentInfo2 = contentList->getContentInfoByIndex(1);
+    T::ContentInfo* contentInfo3 = contentList->getContentInfoByIndex(2);
+    T::ContentInfo* contentInfo4 = contentList->getContentInfoByIndex(3);
 
     valueList.mParameterKeyType = pInfo.mParameterKeyType;
     valueList.mParameterKey = pInfo.mParameterKey;
@@ -4833,7 +4918,7 @@ bool ServiceImplementation::getCircleValues(
     std::vector < std::string > functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
-    T::ContentInfoList contentList;
+    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
     int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
     if (result != 0)
@@ -4844,16 +4929,16 @@ bool ServiceImplementation::getCircleValues(
       throw exception;
     }
 
-    PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList.getLength());
+    PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
     if (mDebugLog != nullptr)
     {
       std::stringstream stream;
-      contentList.print(stream, 0, 4);
+      contentList->print(stream, 0, 4);
       PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
     }
 
-    uint contentLen = contentList.getLength();
+    uint contentLen = contentList->getLength();
 
     if (contentLen == 0)
       return false;
@@ -4867,10 +4952,10 @@ bool ServiceImplementation::getCircleValues(
         iplMethod = T::LevelInterpolationMethod::Logarithmic;
     }
 
-    T::ContentInfo* contentInfo1 = contentList.getContentInfoByIndex(0);
-    T::ContentInfo* contentInfo2 = contentList.getContentInfoByIndex(1);
-    T::ContentInfo* contentInfo3 = contentList.getContentInfoByIndex(2);
-    T::ContentInfo* contentInfo4 = contentList.getContentInfoByIndex(3);
+    T::ContentInfo* contentInfo1 = contentList->getContentInfoByIndex(0);
+    T::ContentInfo* contentInfo2 = contentList->getContentInfoByIndex(1);
+    T::ContentInfo* contentInfo3 = contentList->getContentInfoByIndex(2);
+    T::ContentInfo* contentInfo4 = contentList->getContentInfoByIndex(3);
 
     valueList.mParameterKeyType = pInfo.mParameterKeyType;
     valueList.mParameterKey = pInfo.mParameterKey;
@@ -5108,7 +5193,7 @@ bool ServiceImplementation::getPolygonValues(
     std::vector < std::string > functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
-    T::ContentInfoList contentList;
+    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
     int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
     if (result != 0)
@@ -5119,16 +5204,16 @@ bool ServiceImplementation::getPolygonValues(
       throw exception;
     }
 
-    PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList.getLength());
+    PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
     if (mDebugLog != nullptr)
     {
       std::stringstream stream;
-      contentList.print(stream, 0, 4);
+      contentList->print(stream, 0, 4);
       PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
     }
 
-    uint contentLen = contentList.getLength();
+    uint contentLen = contentList->getLength();
 
     if (contentLen == 0)
       return false;
@@ -5145,10 +5230,10 @@ bool ServiceImplementation::getPolygonValues(
 
     // We found content information close to the current forecast time
 
-    T::ContentInfo* contentInfo1 = contentList.getContentInfoByIndex(0);
-    T::ContentInfo* contentInfo2 = contentList.getContentInfoByIndex(1);
-    T::ContentInfo* contentInfo3 = contentList.getContentInfoByIndex(2);
-    T::ContentInfo* contentInfo4 = contentList.getContentInfoByIndex(3);
+    T::ContentInfo* contentInfo1 = contentList->getContentInfoByIndex(0);
+    T::ContentInfo* contentInfo2 = contentList->getContentInfoByIndex(1);
+    T::ContentInfo* contentInfo3 = contentList->getContentInfoByIndex(2);
+    T::ContentInfo* contentInfo4 = contentList->getContentInfoByIndex(3);
 
     valueList.mParameterKeyType = pInfo.mParameterKeyType;
     valueList.mParameterKey = pInfo.mParameterKey;
@@ -5385,7 +5470,7 @@ bool ServiceImplementation::getIsolineValues(
     std::string startTime = forecastTime;
     std::string endTime = forecastTime;
 
-    T::ContentInfoList contentList;
+    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
     int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
 
@@ -5397,23 +5482,23 @@ bool ServiceImplementation::getIsolineValues(
       throw exception;
     }
 
-    PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList.getLength());
+    PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
     if (mDebugLog != nullptr)
     {
       std::stringstream stream;
-      contentList.print(stream, 0, 4);
+      contentList->print(stream, 0, 4);
       PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
     }
 
-    uint contentLen = contentList.getLength();
+    uint contentLen = contentList->getLength();
     if (contentLen == 0)
       return false;
 
-    T::ContentInfo* contentInfo1 = contentList.getContentInfoByIndex(0);
-    T::ContentInfo* contentInfo2 = contentList.getContentInfoByIndex(1);
-    T::ContentInfo* contentInfo3 = contentList.getContentInfoByIndex(2);
-    T::ContentInfo* contentInfo4 = contentList.getContentInfoByIndex(3);
+    T::ContentInfo* contentInfo1 = contentList->getContentInfoByIndex(0);
+    T::ContentInfo* contentInfo2 = contentList->getContentInfoByIndex(1);
+    T::ContentInfo* contentInfo3 = contentList->getContentInfoByIndex(2);
+    T::ContentInfo* contentInfo4 = contentList->getContentInfoByIndex(3);
 
     valueList.mParameterKeyType = pInfo.mParameterKeyType;
     valueList.mParameterKey = pInfo.mParameterKey;
@@ -5718,7 +5803,7 @@ bool ServiceImplementation::getIsobandValues(
     std::string startTime = forecastTime;
     std::string endTime = forecastTime;
 
-    T::ContentInfoList contentList;
+    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
     int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
 
@@ -5730,23 +5815,23 @@ bool ServiceImplementation::getIsobandValues(
       throw exception;
     }
 
-    PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList.getLength());
+    PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
     if (mDebugLog != nullptr)
     {
       std::stringstream stream;
-      contentList.print(stream, 0, 4);
+      contentList->print(stream, 0, 4);
       PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
     }
 
-    uint contentLen = contentList.getLength();
+    uint contentLen = contentList->getLength();
     if (contentLen == 0)
       return false;
 
-    T::ContentInfo* contentInfo1 = contentList.getContentInfoByIndex(0);
-    T::ContentInfo* contentInfo2 = contentList.getContentInfoByIndex(1);
-    T::ContentInfo* contentInfo3 = contentList.getContentInfoByIndex(2);
-    T::ContentInfo* contentInfo4 = contentList.getContentInfoByIndex(3);
+    T::ContentInfo* contentInfo1 = contentList->getContentInfoByIndex(0);
+    T::ContentInfo* contentInfo2 = contentList->getContentInfoByIndex(1);
+    T::ContentInfo* contentInfo3 = contentList->getContentInfoByIndex(2);
+    T::ContentInfo* contentInfo4 = contentList->getContentInfoByIndex(3);
 
     valueList.mParameterKeyType = pInfo.mParameterKeyType;
     valueList.mParameterKey = pInfo.mParameterKey;
@@ -7396,7 +7481,7 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
         T::ParamLevelId levelId = contentInfo->mFmiParameterLevelId;
         T::ParamLevel level = contentInfo->mParameterLevel;
 
-        T::ContentInfoList cList;
+        std::shared_ptr<T::ContentInfoList> cList(new T::ContentInfoList());
         int result = getContentListByParameterGenerationIdAndForecastTime(0, contentInfo->mProducerId, contentInfo->mGenerationId, paramKeyType, paramKey, levelIdType,
           levelId, level, -1, -1, contentInfo->mGeometryId, contentInfo->mForecastTime, cList);
 
@@ -7410,9 +7495,9 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
 
         //cList.print(std::cout,0,0);
 
-        if (cList.getLength() == 1)
+        if (cList->getLength() == 1)
         {
-          T::ContentInfo* cInfo = cList.getContentInfoByIndex(0);
+          T::ContentInfo* cInfo = cList->getContentInfoByIndex(0);
           T::ParamValue value;
           int result = mDataServerPtr->getGridValueByPoint(0, cInfo->mFileId, cInfo->mMessageIndex, coordinateType,x,y,T::AreaInterpolationMethod::Linear,value);
           if (result != 0)

@@ -4554,7 +4554,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
         mInfo.mProducerId = info->mProducerId;
         mInfo.mGenerationId = info->mGenerationId;
         mInfo.mFmiParameterId = info->mFmiParameterId;
-        mInfo.mFmiParameterName = info->mFmiParameterName;
+        mInfo.mFmiParameterName = info->getFmiParameterName();
         mInfo.mFmiParameterLevelId = info->mFmiParameterLevelId;
         mInfo.mParameterLevel = info->mParameterLevel;
         mInfo.mForecastType = info->mForecastType;
@@ -4568,21 +4568,21 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
         if (mContentPreloadEnabled)
         {
           char tmp[200];
-          sprintf(tmp,"%u;%s;%u;1;%u;%05u;%d;%d;1",info->mProducerId,info->mFmiParameterName.c_str(),info->mGeometryId,info->mFmiParameterLevelId,info->mParameterLevel,info->mForecastType,info->mForecastNumber);
+          sprintf(tmp,"%u;%s;%u;1;%u;%05u;%d;%d;1",info->mProducerId,info->getFmiParameterName().c_str(),info->mGeometryId,info->mFmiParameterLevelId,info->mParameterLevel,info->mForecastType,info->mForecastNumber);
           //printf("FIND %s\n",tmp);
           if (mPreloadDefList.find(toLowerString(std::string(tmp))) != mPreloadDefList.end())
             mPreloadList.push_back(std::pair<uint,uint>(info->mFileId,info->mMessageIndex));
         }
 /*
         {
-          printf("PRELOAD %s\n",info->mFmiParameterName.c_str());
+          printf("PRELOAD %s\n",info->getFmiParameterName().c_str());
 
           if (!gFile)
             gFile = getGridFile(fileInfo.mFileId);
 
           if (gFile)
           {
-            printf("** PRELOAD %s\n",info->mFmiParameterName.c_str());
+            printf("** PRELOAD %s\n",info->getFmiParameterName().c_str());
             GRID::Message *message = gFile->getMessageByIndex(info->mMessageIndex);
             if (message != nullptr)
               message->lockData();
@@ -4646,7 +4646,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
         contentInfo->mMessageIndex = m;
         contentInfo->mForecastTime = message->getForecastTime();
         contentInfo->mFmiParameterId = message->getFmiParameterId();
-        contentInfo->mFmiParameterName = message->getFmiParameterName();
+        contentInfo->setFmiParameterName(message->getFmiParameterName());
         contentInfo->mGribParameterId = message->getGribParameterId();
         contentInfo->mFmiParameterLevelId = message->getFmiParameterLevelId();
         contentInfo->mGrib1ParameterLevelId = message->getGrib1ParameterLevelId();
@@ -5494,7 +5494,7 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
         mInfo.mProducerId = contentInfo.mProducerId;
         mInfo.mGenerationId = contentInfo.mGenerationId;
         mInfo.mFmiParameterId = contentInfo.mFmiParameterId;
-        mInfo.mFmiParameterName = contentInfo.mFmiParameterName;
+        mInfo.mFmiParameterName = contentInfo.getFmiParameterName();
         mInfo.mFmiParameterLevelId = contentInfo.mFmiParameterLevelId;
         mInfo.mParameterLevel = contentInfo.mParameterLevel;
         mInfo.mForecastType = contentInfo.mForecastType;
@@ -5508,7 +5508,7 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
         if (mContentPreloadEnabled)
         {
           char tmp[200];
-          sprintf(tmp,"%u;%s;%u;1;%u;%05u;%d;%d;1",contentInfo.mProducerId,contentInfo.mFmiParameterName.c_str(),contentInfo.mGenerationId,contentInfo.mFmiParameterLevelId,contentInfo.mParameterLevel,contentInfo.mForecastType,contentInfo.mForecastNumber);
+          sprintf(tmp,"%u;%s;%u;1;%u;%05u;%d;%d;1",contentInfo.mProducerId,contentInfo.getFmiParameterName().c_str(),contentInfo.mGenerationId,contentInfo.mFmiParameterLevelId,contentInfo.mParameterLevel,contentInfo.mForecastType,contentInfo.mForecastNumber);
           if (mPreloadDefList.find(toLowerString(std::string(tmp))) != mPreloadDefList.end())
             mPreloadList.push_back(std::pair<uint,uint>(contentInfo.mFileId,contentInfo.mMessageIndex));
         }
@@ -6122,7 +6122,7 @@ void ServiceImplementation::processRequestCounters()
           if (info != nullptr)
           {
             char tmp[100];
-            sprintf(tmp,"%u;%s;%u;%u;%u;%d;%d;1",info->mProducerId,info->mFmiParameterName.c_str(),info->mGeometryId,info->mFmiParameterLevelId,info->mParameterLevel,info->mForecastType,info->mForecastNumber);
+            sprintf(tmp,"%u;%s;%u;%u;%u;%d;%d;1",info->mProducerId,info->getFmiParameterName().c_str(),info->mGeometryId,info->mFmiParameterLevelId,info->mParameterLevel,info->mForecastType,info->mForecastNumber);
 
             if (preloadList.find(tmp) == preloadList.end())
             {
@@ -6130,7 +6130,7 @@ void ServiceImplementation::processRequestCounters()
               auto producer = producerInfoList.getProducerInfoById(info->mProducerId);
               if (producer != nullptr)
               {
-                sprintf(tmp,"%s;%s;%u;1;%u;%05u;%d;%d;1",producer->mName.c_str(),info->mFmiParameterName.c_str(),info->mGeometryId,info->mFmiParameterLevelId,info->mParameterLevel,info->mForecastType,info->mForecastNumber);
+                sprintf(tmp,"%s;%s;%u;1;%u;%05u;%d;%d;1",producer->mName.c_str(),info->getFmiParameterName().c_str(),info->mGeometryId,info->mFmiParameterLevelId,info->mParameterLevel,info->mForecastType,info->mForecastNumber);
                 preloadList2.insert(tmp);
               }
             }

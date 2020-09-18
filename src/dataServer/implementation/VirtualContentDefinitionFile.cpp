@@ -137,7 +137,7 @@ void VirtualContentDefinitionFile::getContentDefinitions(T::ContentInfo& content
     {
       char tmp[1000];
       char *p = tmp;
-      p += sprintf(p,"%s:%s:%d:%d:%d",contentInfo.mFmiParameterName.c_str(),producerName.c_str(),contentInfo.mGeometryId,
+      p += sprintf(p,"%s:%s:%d:%d:%d",contentInfo.getFmiParameterName().c_str(),producerName.c_str(),contentInfo.mGeometryId,
           contentInfo.mFmiParameterLevelId,contentInfo.mParameterLevel);
 
       std::string s1 = toLowerString(tmp);
@@ -167,7 +167,7 @@ void VirtualContentDefinitionFile::getContentDefinitions(T::ContentInfo& content
 /*
       for (auto sp = it->mSourceParameters.begin(); sp != it->mSourceParameters.end(); ++sp)
       {
-        if (strcasecmp(sp->mParameterName.c_str(),contentInfo.mFmiParameterName.c_str()) == 0)
+        if (strcasecmp(sp->mParameterName.c_str(),contentInfo.getFmiParameterName().c_str()) == 0)
         {
           if (sp->mProducerName == "" || strcasecmp(sp->mProducerName.c_str(),producerName.c_str()) == 0)
           {

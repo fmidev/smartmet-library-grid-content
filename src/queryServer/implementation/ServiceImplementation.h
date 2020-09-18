@@ -15,15 +15,12 @@ namespace SmartMet
 namespace QueryServer
 {
 
-#define CONTENT_CACHE_SIZE 1000
-
 typedef std::vector<std::pair<std::string,T::GeometryId>>   Producer_vec;
 typedef std::map<std::string,T::ProducerInfo>               Producer_map;
 typedef ContentServer::ServiceInterface*                    ContentServer_ptr;
 typedef DataServer::ServiceInterface*                       DataServer_ptr;
 typedef std::vector<std::pair<std::string,int>>             LevelHeightCache;
-typedef std::pair<std::size_t,ParameterMapping_vec>         ParameterMappingCacheRec;
-typedef std::list<ParameterMappingCacheRec>                 ParameterMappingCache;
+typedef std::map<size_t,ParameterMapping_vec>               ParameterMappingCache;
 typedef std::shared_ptr<std::vector<std::string>>           StringVector_sptr;
 
 class CacheEntry
@@ -33,8 +30,38 @@ class CacheEntry
     StringVector_sptr          analysisTimes;
 };
 
-typedef std::shared_ptr<CacheEntry>                         CacheEntry_sptr;
-typedef std::map<uint,CacheEntry_sptr>                      ProducerGenarationListCache;
+typedef std::shared_ptr<CacheEntry> CacheEntry_sptr;
+typedef std::map<uint,CacheEntry_sptr> ProducerGenarationListCache;
+
+class ContentCacheEntry
+{
+  public:
+    T::ContentInfoList contentInfoList;
+    ulonglong producerHash;
+    uint generationId;
+};
+typedef std::map<std::size_t,ContentCacheEntry> ContentCache;
+
+
+class ContentSearchCacheEntry
+{
+  public:
+    std::shared_ptr<T::ContentInfoList> contentInfoList;
+    ulonglong producerHash;
+    uint generationId;
+};
+typedef std::map<std::size_t,ContentSearchCacheEntry> ContentSearchCache;
+
+
+struct HashRec
+{
+  time_t checkTime;
+  ulonglong hash;
+};
+
+typedef std::map<uint,HashRec> ProducerHash_map;
+
+
 
 class ServiceImplementation : public ServiceInterface
 {
@@ -502,6 +529,8 @@ class ServiceImplementation : public ServiceInterface
 
      bool           getProducerInfoByName(std::string& name,T::ProducerInfo& info);
 
+     ulonglong      getProducerHash(uint producerId);
+
      int            getContentListByParameterGenerationIdAndForecastTime(
                        T::SessionId sessionId,
                        uint producerId,
@@ -515,7 +544,7 @@ class ServiceImplementation : public ServiceInterface
                        T::ForecastNumber forecastNumber,
                        T::GeometryId geometryId,
                        std::string& forecastTime,
-                       T::ContentInfoList& contentInfoList);
+                       std::shared_ptr<T::ContentInfoList>& contentInfoList);
 
      CacheEntry_sptr getGenerationInfoListByProducerId(uint producerId);
 
@@ -535,6 +564,8 @@ class ServiceImplementation : public ServiceInterface
      std::string            mProducerFile;
      time_t                 mProducerFileModificationTime;
      Producer_vec           mProducerList;
+     ModificationLock       mProducerListModificationLock;
+     ProducerHash_map       mProducerHashMap;
      T::GenerationInfoList  mGenerationInfoList;
      time_t                 mGenerationInfoListUpdateTime;
      Producer_map           mProducerMap;
@@ -546,12 +577,14 @@ class ServiceImplementation : public ServiceInterface
      uint                   mCheckInterval;
      LevelHeightCache       mLevelHeightCache;
      ThreadLock             mHeightCacheThreadLock;
-     ThreadLock             mParameterMappingCacheThreadLock;
+     ModificationLock       mParameterMappingCacheModificationLock;
 
-     T::ContentInfoList     mCacheContentInfoList[CONTENT_CACHE_SIZE];
-     std::size_t            mContentCacheKey[CONTENT_CACHE_SIZE];
-     time_t                 mContentCacheTime[CONTENT_CACHE_SIZE];
-     uint                   mContentCacheKeyIdx;
+     ModificationLock       mContentCacheModificationLock;
+     ContentCache           mContentCache;
+
+     ModificationLock       mContentSearchCacheModificationLock;
+     ContentSearchCache     mContentSearchCache;
+
 
      Functions::FunctionCollection     mFunctionCollection;
      boost::shared_ptr<Fmi::LandCover> mLandCover;

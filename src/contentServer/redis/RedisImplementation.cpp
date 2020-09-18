@@ -1235,7 +1235,7 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
             break;
 
           case T::ParamKeyTypeValue::FMI_NAME:
-            sourceParamKey = contentInfo->mFmiParameterName;
+            sourceParamKey = contentInfo->getFmiParameterName();
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
@@ -1270,7 +1270,7 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
             break;
 
           case T::ParamKeyTypeValue::FMI_NAME:
-            targetParamKey = contentInfo->mFmiParameterName;
+            targetParamKey = contentInfo->getFmiParameterName();
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
@@ -1394,7 +1394,7 @@ int RedisImplementation::_getProducerParameterListByProducerId(T::SessionId sess
             break;
 
           case T::ParamKeyTypeValue::FMI_NAME:
-            sourceParamKey = contentInfo->mFmiParameterName;
+            sourceParamKey = contentInfo->getFmiParameterName();
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
@@ -1429,7 +1429,7 @@ int RedisImplementation::_getProducerParameterListByProducerId(T::SessionId sess
             break;
 
           case T::ParamKeyTypeValue::FMI_NAME:
-            targetParamKey = contentInfo->mFmiParameterName;
+            targetParamKey = contentInfo->getFmiParameterName();
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
@@ -5277,7 +5277,7 @@ int RedisImplementation::_getContentParamListByGenerationId(T::SessionId session
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
 
       if (prev == nullptr ||
-          info->mFmiParameterName != prev->mFmiParameterName ||
+          info->getFmiParameterName() != prev->getFmiParameterName() ||
           info->mFmiParameterLevelId != prev->mFmiParameterLevelId ||
           info->mParameterLevel != prev->mParameterLevel ||
           info->mForecastType != prev->mForecastType ||

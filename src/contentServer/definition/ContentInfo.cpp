@@ -168,6 +168,54 @@ ContentInfo& ContentInfo::operator=(const ContentInfo& contentInfo)
 
 
 
+const std::string& ContentInfo::getFmiParameterName()
+{
+  try
+  {
+    return mFmiParameterName;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfo::setFmiParameterName(const char *name)
+{
+  try
+  {
+    mFmiParameterName = toUpperString(name);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfo::setFmiParameterName(const std::string& name)
+{
+  try
+  {
+    mFmiParameterName = toUpperString(name);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 std::string ContentInfo::getCsv()
 {
   try
@@ -300,7 +348,7 @@ void ContentInfo::setCsv(const char *csv)
       mGroupFlags = toInt64(field[7]);
       mForecastTime = field[8];
       mFmiParameterId = field[9];
-      mFmiParameterName = field[10];
+      mFmiParameterName = toUpperString(field[10]);
       mGribParameterId = field[11];
       mCdmParameterId = field[12];
       mCdmParameterName = field[13];
@@ -429,7 +477,7 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return num_compare(mMessageIndex,contentInfo->mMessageIndex);
 
       case ContentInfo::ComparisonMethod::gribId_producer_generation_level_time:
-        res = strcasecmp(mGribParameterId.c_str(),contentInfo->mGribParameterId.c_str());
+        res = strcmp(mGribParameterId.c_str(),contentInfo->mGribParameterId.c_str());
         if (res != 0)
           return res;
         res = num_compare(mProducerId,contentInfo->mProducerId);
@@ -465,7 +513,7 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time:
-        res = strcasecmp(mFmiParameterId.c_str(),contentInfo->mFmiParameterId.c_str());
+        res = strcmp(mFmiParameterId.c_str(),contentInfo->mFmiParameterId.c_str());
         if (res != 0)
           return res;
         res = num_compare(mProducerId,contentInfo->mProducerId);
@@ -498,7 +546,7 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return num_compare(mMessageIndex,contentInfo->mMessageIndex);
 
       case ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time:
-        res = strcasecmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
+        res = strcmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
         if (res != 0)
           return res;
         res = num_compare(mProducerId,contentInfo->mProducerId);
@@ -534,7 +582,7 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time:
-        res = strcasecmp(mNewbaseParameterId.c_str(),contentInfo->mNewbaseParameterId.c_str());
+        res = strcmp(mNewbaseParameterId.c_str(),contentInfo->mNewbaseParameterId.c_str());
         if (res != 0)
           return res;
         res = num_compare(mProducerId,contentInfo->mProducerId);
@@ -687,7 +735,7 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return num_compare(mMessageIndex,contentInfo->mMessageIndex);
 
       case ContentInfo::ComparisonMethod::fmiName_starttime_level_file_message:
-        res = strcasecmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
+        res = strcmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
         if (res != 0)
           return res;
         res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
@@ -705,7 +753,7 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::fmiId_fmiLevelId_level_starttime_file_message:
-        res = strcasecmp(mFmiParameterId.c_str(),contentInfo->mFmiParameterId.c_str());
+        res = strcmp(mFmiParameterId.c_str(),contentInfo->mFmiParameterId.c_str());
         if (res != 0)
           return res;
         res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
@@ -738,7 +786,7 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         if (res != 0)
           return res;
-        res = strcasecmp(mFmiParameterId.c_str(),contentInfo->mFmiParameterId.c_str());
+        res = strcmp(mFmiParameterId.c_str(),contentInfo->mFmiParameterId.c_str());
         if (res != 0)
           return res;
         res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
@@ -768,7 +816,7 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         if (res != 0)
           return res;
-        res = strcasecmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
+        res = strcmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
         if (res != 0)
           return res;
         res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
@@ -810,7 +858,7 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::fmiName_fmiLevelId_level_starttime_file_message:
-        res = strcasecmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
+        res = strcmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
         if (res != 0)
           return res;
         res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);

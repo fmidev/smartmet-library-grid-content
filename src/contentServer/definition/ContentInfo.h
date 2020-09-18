@@ -23,6 +23,10 @@ class ContentInfo
     std::string        getCsv();
     std::string        getCsvHeader();
     ulonglong          getRequestCounterKey();
+    const std::string& getFmiParameterName();
+    void               setFmiParameterName(const char *name);
+    void               setFmiParameterName(const std::string& name);
+
     void               setCsv(const char *csv);
     void               setCsv(std::string csv);
     int                compare(uint comparisonMethod,ContentInfo *contentInfo);
@@ -39,7 +43,6 @@ class ContentInfo
     uint               mGroupFlags;
     std::string        mForecastTime;
     T::ParamId         mFmiParameterId;
-    std::string        mFmiParameterName;
     T::ParamId         mGribParameterId;
     T::ParamId         mCdmParameterId;
     std::string        mCdmParameterName;
@@ -59,6 +62,12 @@ class ContentInfo
     T::GeometryId      mGeometryId;
     std::string        mModificationTime;
 
+
+  protected:
+
+    std::string        mFmiParameterName;
+
+  public:
 
     class ComparisonMethod
     {

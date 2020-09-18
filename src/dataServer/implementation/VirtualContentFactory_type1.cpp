@@ -227,7 +227,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
 
               if (cInfo == nullptr || (contentList.getLength() == 1  &&  cInfo->mForecastTime != contentInfo.mForecastTime))
               {
-                 printf("**** Not found : %s (%s) (%s)\n",contentDef->mVirtualParameter.mParameterName.c_str(),producerInfo.mName.c_str(),contentInfo.mFmiParameterName.c_str());
+                 printf("**** Not found : %s (%s) (%s)\n",contentDef->mVirtualParameter.mParameterName.c_str(),producerInfo.mName.c_str(),contentInfo.getFmiParameterName().c_str());
                 // contentDef->print(std::cout,2,0);
                 //contentInfo.print(std::cout,2,0);
                 //if (cInfo != nullptr)
@@ -274,7 +274,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
               }
             }
 
-            //printf("**** VIRTUAL CONTENT : %s (%s) (%s) (%d)\n",contentDef->mVirtualParameter.mParameterName.c_str(),producerInfo.mName.c_str(),contentInfo.mFmiParameterName.c_str(),(int)componentsFound);
+            //printf("**** VIRTUAL CONTENT : %s (%s) (%s) (%d)\n",contentDef->mVirtualParameter.mParameterName.c_str(),producerInfo.mName.c_str(),contentInfo.getFmiParameterName().c_str(),(int)componentsFound);
 
             if (!fileExists &&  componentsFound  &&  filename[0] != '\0')
             {
@@ -310,7 +310,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
               newContentInfo->mGroupFlags = contentInfo.mGroupFlags;
               newContentInfo->mForecastTime = contentInfo.mForecastTime;
               newContentInfo->mFmiParameterId = def.mFmiParameterId;
-              newContentInfo->mFmiParameterName = def.mParameterName;
+              newContentInfo->setFmiParameterName(def.mParameterName);
               newContentInfo->mGribParameterId = "";
               newContentInfo->mCdmParameterId = "";
               newContentInfo->mCdmParameterName = "";

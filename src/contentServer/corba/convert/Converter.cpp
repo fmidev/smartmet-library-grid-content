@@ -58,7 +58,7 @@ void Converter::convert(T::ContentInfo& source,ContentServer::Corba::CorbaConten
     target.forecastType = source.mForecastType;
     target.forecastNumber = source.mForecastNumber;
     target.fmiParameterId = CORBA::string_dup(source.mFmiParameterId.c_str());
-    target.fmiParameterName = CORBA::string_dup(source.mFmiParameterName.c_str());
+    target.fmiParameterName = CORBA::string_dup(source.getFmiParameterName().c_str());
     target.gribParameterId = CORBA::string_dup(source.mGribParameterId.c_str());
     target.cdmParameterId = CORBA::string_dup(source.mCdmParameterId.c_str());
     target.cdmParameterName = CORBA::string_dup(source.mCdmParameterName.c_str());
@@ -102,7 +102,7 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::
     target.mForecastType = source.forecastType;
     target.mForecastNumber = source.forecastNumber;
     target.mFmiParameterId = source.fmiParameterId;
-    target.mFmiParameterName = source.fmiParameterName;
+    target.setFmiParameterName(source.fmiParameterName);
     target.mGribParameterId = source.gribParameterId;
     target.mCdmParameterId = source.cdmParameterId;
     target.mCdmParameterName = source.cdmParameterName;

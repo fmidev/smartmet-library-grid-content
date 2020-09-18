@@ -1147,7 +1147,7 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
           break;
 
         case T::ParamKeyTypeValue::FMI_NAME:
-          sourceParamKey = contentInfo->mFmiParameterName;
+          sourceParamKey = contentInfo->getFmiParameterName();
           break;
 
         case T::ParamKeyTypeValue::GRIB_ID:
@@ -1182,7 +1182,7 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
           break;
 
         case T::ParamKeyTypeValue::FMI_NAME:
-          targetParamKey = contentInfo->mFmiParameterName;
+          targetParamKey = contentInfo->getFmiParameterName();
           break;
 
         case T::ParamKeyTypeValue::GRIB_ID:
@@ -1304,7 +1304,7 @@ int MemoryImplementation::_getProducerParameterListByProducerId(T::SessionId ses
             break;
 
           case T::ParamKeyTypeValue::FMI_NAME:
-            sourceParamKey = contentInfo->mFmiParameterName;
+            sourceParamKey = contentInfo->getFmiParameterName();
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
@@ -1339,7 +1339,7 @@ int MemoryImplementation::_getProducerParameterListByProducerId(T::SessionId ses
             break;
 
           case T::ParamKeyTypeValue::FMI_NAME:
-            targetParamKey = contentInfo->mFmiParameterName;
+            targetParamKey = contentInfo->getFmiParameterName();
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
@@ -5101,7 +5101,7 @@ int MemoryImplementation::_getContentParamListByGenerationId(T::SessionId sessio
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
 
       if (prev == nullptr ||
-          info->mFmiParameterName != prev->mFmiParameterName ||
+          info->getFmiParameterName() != prev->getFmiParameterName() ||
           info->mFmiParameterLevelId != prev->mFmiParameterLevelId ||
           info->mParameterLevel != prev->mParameterLevel ||
           info->mForecastType != prev->mForecastType ||

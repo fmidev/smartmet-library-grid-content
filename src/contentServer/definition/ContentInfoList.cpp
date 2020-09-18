@@ -1260,7 +1260,7 @@ void ContentInfoList::getLevelInfoList(T::LevelInfoList& levelInfoList)
       {
         std::size_t seed = 0;
         boost::hash_combine(seed,info->mProducerId);
-        boost::hash_combine(seed,info->mFmiParameterName);
+        boost::hash_combine(seed,info->getFmiParameterName());
         boost::hash_combine(seed,info->mFmiParameterLevelId);
         boost::hash_combine(seed,info->mGrib1ParameterLevelId);
         boost::hash_combine(seed,info->mGrib2ParameterLevelId);
@@ -1269,7 +1269,7 @@ void ContentInfoList::getLevelInfoList(T::LevelInfoList& levelInfoList)
         if (list.find(seed) == list.end())
         {
           list.insert(seed);
-          levelInfoList.addLevelInfo(new T::LevelInfo(info->mProducerId,info->mFmiParameterName,info->mFmiParameterLevelId,info->mGrib1ParameterLevelId,info->mGrib2ParameterLevelId,info->mParameterLevel));
+          levelInfoList.addLevelInfo(new T::LevelInfo(info->mProducerId,info->getFmiParameterName(),info->mFmiParameterLevelId,info->mGrib1ParameterLevelId,info->mGrib2ParameterLevelId,info->mParameterLevel));
         }
       }
     }
@@ -2249,7 +2249,7 @@ ContentInfo* ContentInfoList::getContentInfoByParameterLevelInfo(T::ParameterLev
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mParameterLevel == levelInfo.mLevel)
       {
         if ((levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_ID  &&  info->mFmiParameterId == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_NAME  &&  info->mFmiParameterName == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_NAME  &&  info->getFmiParameterName() == levelInfo.mParameterKey) ||
             (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  &&  info->mNewbaseParameterId == levelInfo.mParameterKey) ||
             (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME  &&  info->mNewbaseParameterName == levelInfo.mParameterKey) ||
             (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::CDM_ID  &&  info->mCdmParameterId == levelInfo.mParameterKey) ||
@@ -2300,7 +2300,7 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelIn
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mParameterLevel == levelInfo.mLevel)
       {
         if ((levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_ID  &&  info->mFmiParameterId == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_NAME  &&  info->mFmiParameterName == levelInfo.mParameterKey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_NAME  &&  info->getFmiParameterName() == levelInfo.mParameterKey) ||
             (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  &&  info->mNewbaseParameterId == levelInfo.mParameterKey) ||
             (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME  &&  info->mNewbaseParameterName == levelInfo.mParameterKey) ||
             (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::CDM_ID  &&  info->mCdmParameterId == levelInfo.mParameterKey) ||
@@ -2513,10 +2513,10 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint producerId,uint 
             break;
 
           case T::ParamKeyTypeValue::FMI_NAME:
-            if (info->mFmiParameterName > " ")
+            if (info->getFmiParameterName() > " ")
             {
-              if (paramKeyList.find(info->mFmiParameterName) == paramKeyList.end())
-                paramKeyList.insert(info->mFmiParameterName);
+              if (paramKeyList.find(info->getFmiParameterName()) == paramKeyList.end())
+                paramKeyList.insert(info->getFmiParameterName());
             }
             else
             if (info->mNewbaseParameterId > " ")
@@ -4008,16 +4008,16 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
       // ### This search is possible only if the content list is sorted as we want.
 
       ContentInfo searchInfo;
-      searchInfo.mFmiParameterName = fmiParameterName;
+      searchInfo.setFmiParameterName(fmiParameterName);
       //searchInfo.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) != 0)
         idx++;
 
       uint t = C_UINT(idx);
 
-      //printf("INDEX %u %s %u\n",idx,mArray[t]->mFmiParameterName.c_str(),mArray[t]->mParameterLevel);
+      //printf("INDEX %u %s %u\n",idx,mArray[t]->getFmiParameterName().c_str(),mArray[t]->mParameterLevel);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -4027,8 +4027,8 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          //printf("-- INDEX %u %s %u\n",idx,mArray[t]->mFmiParameterName.c_str(),mArray[t]->mParameterLevel);
-          if (strcasecmp(info->mFmiParameterName.c_str(),fmiParameterName.c_str()) == 0)
+          //printf("-- INDEX %u %s %u\n",idx,mArray[t]->getFmiParameterName().c_str(),mArray[t]->mParameterLevel);
+          if (strcmp(info->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) == 0)
           {
             if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
             {
@@ -4128,7 +4128,7 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(ui
     searchInfo.mGenerationId = generationId;
     searchInfo.mProducerId = producerId;
     searchInfo.mForecastTime = forecastTime;
-    searchInfo.mFmiParameterName = fmiParameterName;
+    searchInfo.setFmiParameterName(fmiParameterName);
     searchInfo.mFmiParameterLevelId = parameterLevelId;
     searchInfo.mParameterLevel = level;
     searchInfo.mForecastType = forecastType;
@@ -4145,7 +4145,7 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(ui
 
         if (searchInfo.mGenerationId == cInfo->mGenerationId &&
             searchInfo.mForecastTime == cInfo->mForecastTime &&
-            searchInfo.mFmiParameterName == cInfo->mFmiParameterName &&
+            searchInfo.getFmiParameterName() == cInfo->getFmiParameterName() &&
             searchInfo.mFmiParameterLevelId == cInfo->mFmiParameterLevelId &&
             searchInfo.mParameterLevel == cInfo->mParameterLevel &&
             (searchInfo.mForecastType < 0 || searchInfo.mForecastType == cInfo->mForecastType) &&
@@ -4246,12 +4246,12 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
       // ### This search is possible only if the content list is sorted as we want.
 
       ContentInfo searchInfo;
-      searchInfo.mFmiParameterName = fmiParameterName;
+      searchInfo.setFmiParameterName(fmiParameterName);
       searchInfo.mProducerId = producerId;
       searchInfo.mGenerationId = generationId;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) != 0)
         idx++;
 
       uint t = C_UINT(idx);
@@ -4271,7 +4271,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (strcasecmp(info->mFmiParameterName.c_str(),fmiParameterName.c_str()) == 0)
+          if (strcmp(info->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) == 0)
           {
             if (info->mGenerationId == generationId)
             {
@@ -4528,7 +4528,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
       // ### This search is possible only if the content list is sorted as we want.
 
       ContentInfo searchInfo;
-      searchInfo.mFmiParameterName = fmiParameterName;
+      searchInfo.setFmiParameterName(fmiParameterName);
       searchInfo.mProducerId = producerId;
       searchInfo.mGenerationId = generationId;
       searchInfo.mParameterLevel = level;
@@ -4536,7 +4536,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
 
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) < 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) < 0)
         idx++;
 
       uint t = C_UINT(idx);
@@ -4555,7 +4555,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (strcasecmp(info->mFmiParameterName.c_str(),fmiParameterName.c_str()) == 0)
+          if (strcmp(info->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) == 0)
           {
             if (info->mGenerationId == generationId)
             {
@@ -4813,12 +4813,12 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
       // ### This search is possible only if the content list is sorted as we want.
 
       ContentInfo searchInfo;
-      searchInfo.mFmiParameterName = fmiParameterName;
+      searchInfo.setFmiParameterName(fmiParameterName);
       searchInfo.mGenerationId = generationId;
       searchInfo.mProducerId = producerId;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) != 0)
         idx++;
 
       uint t = C_UINT(idx);
@@ -4831,7 +4831,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (strcasecmp(info->mFmiParameterName.c_str(),fmiParameterName.c_str()) == 0)
+          if (strcmp(info->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) == 0)
           {
             if (info->mGenerationId == generationId)
             {
@@ -4942,12 +4942,12 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
       // ### This search is possible only if the content list is sorted as we want.
 
       ContentInfo searchInfo;
-      searchInfo.mFmiParameterName = fmiParameterName;
+      searchInfo.setFmiParameterName(fmiParameterName);
       searchInfo.mProducerId = producerId;
       //searchInfo.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mFmiParameterName.c_str(),fmiParameterName.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) != 0)
         idx++;
 
       uint t = C_UINT(idx);
@@ -4960,7 +4960,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (strcasecmp(info->mFmiParameterName.c_str(),fmiParameterName.c_str()) == 0)
+          if (strcmp(info->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) == 0)
           {
             if (info->mProducerId == producerId)
             {
