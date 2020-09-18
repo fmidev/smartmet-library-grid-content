@@ -5018,7 +5018,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
           s = nullptr;
         }
       }
-      delete buf;
+      delete [] buf;
     }
     else
     {

@@ -45,32 +45,14 @@ endif
 # Boost 1.69
 
 ifneq "$(wildcard /usr/include/boost169)" ""
-  INCLUDES += -I/usr/include/boost169
+  INCLUDES += -isystem /usr/include/boost169
   LIBS += -L/usr/lib64/boost169
 endif
 
 
-ifeq ($(CXX), clang++)
+FLAGS = -std=c++11 -fdiagnostics-color=always -fPIC -MD -fno-omit-frame-pointer -Wall -W -Wno-unused-parameter $(CORBA_FLAGS)
 
- FLAGS = \
-	-std=c++11 -fPIC -MD -fno-omit-frame-pointer \
-	-Weverything \
-	-Wno-c++98-compat \
-	-Wno-float-equal \
-	-Wno-padded \
-	-Wno-missing-prototypes \
-	$(CORBA_FLAGS)
-
- INCLUDES += \
-	-isystem $(includedir) \
-	-isystem $(includedir)/smartmet \
-	-isystem $(includedir)/smartmet/grid-files
-
-else
-
- FLAGS = -std=c++11 -fdiagnostics-color=always -fPIC -MD -fno-omit-frame-pointer -Wall -W -Wno-unused-parameter $(CORBA_FLAGS)
-
- FLAGS_DEBUG = \
+FLAGS_DEBUG = \
 	-Wcast-align \
 	-Winline \
 	-Wno-multichar \
@@ -84,18 +66,15 @@ else
 	-Wno-unknown-pragmas \
 	-Wno-inline
 
- FLAGS_RELEASE = -Wuninitialized
+FLAGS_RELEASE = -Wuninitialized
 
- INCLUDES += \
-	-I$(includedir) \
+INCLUDES += \
 	-I$(includedir)/smartmet \
-	-I /usr/include/lua \
-	-I /usr/include/postgresql \
-	-I /usr/pgsql-9.5/include \
+	-isystem /usr/include/lua \
+	-isystem /usr/include/postgresql \
+	-isystem /usr/pgsql-9.5/include \
 	$(pkg-config --cflags icu-i18n) \
 	$(CORBA_INCLUDE)
-
-endif
 
 # Compile options in detault, debug and profile modes
 
@@ -281,31 +260,32 @@ all:
 ifneq ($(CORBA), disabled)
 	$(MAKE) create_stubs;
 endif
-	$(MAKE) obj_and_lib;
+	$(MAKE) objdir
+	$(MAKE) $(LIBFILE)
 
 debug:
 ifneq ($(CORBA), disabled)
 	$(MAKE) create_stubs;
 endif
-	$(MAKE) obj_and_lib;
+	$(MAKE) objdir
+	$(MAKE) $(LIBFILE)
 
 release:
 ifneq ($(CORBA), disabled)
 	$(MAKE) create_stubs;
 endif
-	$(MAKE) obj_and_lib;
+	$(MAKE) objdir
+	$(MAKE) $(LIBFILE)
 
 profile:
 ifneq ($(CORBA), disabled)
 	$(MAKE) create_stubs;
 endif
-	$(MAKE) obj_and_lib;
-
-obj_and_lib: objdir $(LIBFILE)
-
+	$(MAKE) objdir
+	$(MAKE) $(LIBFILE)
 
 $(LIBFILE): $(OBJFILES)
-	$(CXX) $(CFLAGS) -shared -rdynamic -o $(LIBFILE) $(OBJFILES) $(LIBS)
+	$(CC) $(LDFLAGS) -shared -rdynamic -o $(LIBFILE) $(OBJFILES) $(LIBS)
 
 clean: delete_stubs
 	rm -f src/*~ src/*/*~ src/*/*/*~
