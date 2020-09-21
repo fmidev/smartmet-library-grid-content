@@ -2,6 +2,7 @@
 #include <grid-files/common/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/AutoThreadLock.h>
+#include <boost/functional/hash.hpp>
 
 
 namespace SmartMet
@@ -229,6 +230,38 @@ ServerInfo* ServerInfoList::getServerInfoById(uint serverId)
         return info;
     }
     return nullptr;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
+std::size_t ServerInfoList::getHash()
+{
+  try
+  {
+    std::size_t hash = 0;
+
+    AutoThreadLock lock(&mThreadLock);
+    uint sz = getLength();
+    for (uint t=0; t<sz; t++)
+    {
+      ServerInfo *info = getServerInfoByIndexNoCheck(t);
+      if (info != nullptr)
+      {
+        boost::hash_combine(hash,info->mServerId);
+        boost::hash_combine(hash,info->mName);
+        boost::hash_combine(hash,info->mServerIor);
+        boost::hash_combine(hash,info->mType);
+        boost::hash_combine(hash,info->mFlags);
+      }
+    }
+    return hash;
   }
   catch (...)
   {

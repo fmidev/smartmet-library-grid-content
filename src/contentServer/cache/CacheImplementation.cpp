@@ -45,6 +45,7 @@ CacheImplementation::CacheImplementation()
   try
   {
     mImplementationType = Implementation::Cache;
+    mSSI = 0;
 
     mContentStorage = nullptr;
     mContentStorageStartTime = 0;
@@ -65,33 +66,32 @@ CacheImplementation::CacheImplementation()
     mReloadActivated = false;
     mContentDeleteCount = 0;
     mFileDeleteCount = 0;
-    mDelayedContentAdditionTime = 0;
 
-    mProducerInfoList.setLockingEnabled(true);
-    mGenerationInfoList.setLockingEnabled(true);
-    mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
-    mFileInfoList.setLockingEnabled(true);
+    for (uint s=0; s<2; s++)
+    {
+      mSearchStructure[s].mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
 
-    mFileInfoListByName.setReleaseObjects(false);
-    mFileInfoListByName.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
-    mFileInfoListByName.setLockingEnabled(true);
+      mSearchStructure[s].mFileInfoListByName.setReleaseObjects(false);
+      mSearchStructure[s].mFileInfoListByName.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
+
+      mSearchStructure[s].mContentInfoList[0].setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
+      mContentInfoListEnabled[0] = true;
+
+      for (int t=1; t<CONTENT_LIST_COUNT; t++)
+      {
+        mSearchStructure[s].mContentInfoList[t].setReleaseObjects(false);
+        mContentInfoListEnabled[t] = false;
+      }
+    }
 
     mFileInfoList.setModificationLockPtr(&mFileModificationLock);
-    mFileInfoListByName.setModificationLockPtr(&mFileModificationLock);
+    mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
 
-    mContentInfoList[0].setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
-    mContentInfoListEnabled[0] = true;
+    mContentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
+    mContentInfoList.setModificationLockPtr(&mContentModificationLock);
+    mContentInfoList.setLockingEnabled(true);
 
-    mContentInfoList[0].setModificationLockPtr(&mContentModificationLock);
-    mContentInfoList[0].setLockingEnabled(true);
-
-    for (int t=1; t<CONTENT_LIST_COUNT; t++)
-    {
-      mContentInfoList[t].setModificationLockPtr(&mContentModificationLock);
-      mContentInfoList[t].setLockingEnabled(true);
-      mContentInfoList[t].setReleaseObjects(false);
-      mContentInfoListEnabled[t] = false;
-    }
+    mDataSwapTime = 0;
   }
   catch (...)
   {
@@ -153,52 +153,24 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
       readGenerationList();
       readFileList();
 
-      mFileInfoListByName = mFileInfoList;
-
       mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
-      mFileInfoListByName.sort(T::FileInfo::ComparisonMethod::fileName);
 
       mContentInfoListEnabled[0] = true;
-
       mContentInfoListEnabled[1] = true;
-
-      readContentList();
-
       for (int t=1; t<CONTENT_LIST_COUNT; t++)
       {
         if ((mContentSortingFlags & (1 << t)) != 0)
           mContentInfoListEnabled[t] = true;
         else
           mContentInfoListEnabled[t] = false;
-
-        if (mContentInfoListEnabled[t])
-          mContentInfoList[t] = mContentInfoList[0];
       }
-      mContentInfoList[0].sort(T::ContentInfo::ComparisonMethod::file_message);
 
-      if (mContentInfoListEnabled[1])
-        mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time);
-
-      if (mContentInfoListEnabled[2])
-        mContentInfoList[2].sort(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
-
-      if (mContentInfoListEnabled[3])
-        mContentInfoList[3].sort(T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time);
-
-      if (mContentInfoListEnabled[4])
-        mContentInfoList[4].sort(T::ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time);
-
-      if (mContentInfoListEnabled[5])
-        mContentInfoList[5].sort(T::ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time);
-
-      if (mContentInfoListEnabled[6])
-        mContentInfoList[6].sort(T::ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time);
-
-      if (mContentInfoListEnabled[7])
-        mContentInfoList[7].sort(T::ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time);
+      readContentList();
 
       mUpdateInProgress = false;
     }
+    swapData();
+
     PRINT_DATA(mDebugLog,"* Init end\n");
   }
   catch (...)
@@ -256,10 +228,8 @@ void CacheImplementation::synchronize()
     while (mLastProcessedEventId < eventInfo.mEventId)
       sleep(1);
 
-    while (mDelayedFileAddList.size() > 0  ||  mDelayedContentAddList.size() > 0 || mFileDeleteCount > 0 || mContentDeleteCount > 0)
+    while (mFileDeleteCount > 0 || mContentDeleteCount > 0)
     {
-      mDelayedFileAdditionTime = time(nullptr) - 1000;
-      mDelayedContentAdditionTime = time(nullptr) - 1000;
       sleep(1);
     }
   }
@@ -386,15 +356,12 @@ void CacheImplementation::reloadData()
       mFileCount = 0xFFFFFFFF;
       mContentCount = 0xFFFFFFFF;
 
-      mFileInfoListByName.clear();
       mFileInfoList.clear();
       mProducerInfoList.clear();
       mGenerationInfoList.clear();
       mDataServerInfoList.clear();
       mEventInfoList.clear();
-
-      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-        mContentInfoList[t].clear();
+      mContentInfoList.clear();
 
       T::EventInfo eventInfo;
       mContentStorage->getLastEventInfo(mSessionId,0,eventInfo);
@@ -407,41 +374,11 @@ void CacheImplementation::reloadData()
       readGenerationList();
       readFileList();
 
-      mFileInfoListByName = mFileInfoList;
-
       mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
-      mFileInfoListByName.sort(T::FileInfo::ComparisonMethod::fileName);
 
       readContentList();
 
-      for (int t=1; t<CONTENT_LIST_COUNT; t++)
-      {
-        if (mContentInfoListEnabled[t])
-          mContentInfoList[t] = mContentInfoList[0];
-      }
-
-      mContentInfoList[0].sort(T::ContentInfo::ComparisonMethod::file_message);
-
-      if (mContentInfoListEnabled[1])
-        mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time);
-
-      if (mContentInfoListEnabled[2])
-        mContentInfoList[2].sort(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
-
-      if (mContentInfoListEnabled[3])
-        mContentInfoList[3].sort(T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time);
-
-      if (mContentInfoListEnabled[4])
-        mContentInfoList[4].sort(T::ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time);
-
-      if (mContentInfoListEnabled[5])
-        mContentInfoList[5].sort(T::ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time);
-
-      if (mContentInfoListEnabled[6])
-        mContentInfoList[6].sort(T::ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time);
-
-      if (mContentInfoListEnabled[7])
-        mContentInfoList[7].sort(T::ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time);
+      mContentInfoList.sort(T::ContentInfo::ComparisonMethod::file_message);
 
       mUpdateInProgress = false;
 
@@ -520,12 +457,10 @@ int CacheImplementation::_getDataServerInfoById(T::SessionId sessionId,uint serv
     if (mUpdateInProgress)
       return mContentStorage->getDataServerInfoById(sessionId,serverId,serverInfo);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::ServerInfo *info = mDataServerInfoList.getServerInfoById(serverId);
+    T::ServerInfo *info = mSearchStructure[mSSI].mDataServerInfoList.getServerInfoById(serverId);
     if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
@@ -553,12 +488,10 @@ int CacheImplementation::_getDataServerInfoByName(T::SessionId sessionId,std::st
     if (mUpdateInProgress)
       return mContentStorage->getDataServerInfoByName(sessionId,serverName,serverInfo);;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::ServerInfo *info = mDataServerInfoList.getServerInfoByName(serverName);
+    T::ServerInfo *info = mSearchStructure[mSSI].mDataServerInfoList.getServerInfoByName(serverName);
     if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
@@ -586,12 +519,10 @@ int CacheImplementation::_getDataServerInfoByIor(T::SessionId sessionId,std::str
     if (mUpdateInProgress)
       return mContentStorage->getDataServerInfoByIor(sessionId,serverIor,serverInfo);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::ServerInfo *info = mDataServerInfoList.getServerInfoByIor(serverIor);
+    T::ServerInfo *info = mSearchStructure[mSSI].mDataServerInfoList.getServerInfoByIor(serverIor);
     if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
@@ -619,14 +550,12 @@ int CacheImplementation::_getDataServerInfoList(T::SessionId sessionId,T::Server
     if (mUpdateInProgress)
       return mContentStorage->getDataServerInfoList(sessionId,serverInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     serverInfoList.clear();
 
-    serverInfoList = mDataServerInfoList;
+    serverInfoList = mSearchStructure[mSSI].mDataServerInfoList;
     return Result::OK;
   }
   catch (...)
@@ -653,7 +582,7 @@ int CacheImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& co
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    count = mDataServerInfoList.getLength();
+    count = mSearchStructure[mSSI].mDataServerInfoList.getLength();
     return Result::OK;
   }
   catch (...)
@@ -743,12 +672,10 @@ int CacheImplementation::_getProducerInfoById(T::SessionId sessionId,uint produc
     if (mUpdateInProgress)
       return mContentStorage->getProducerInfoById(sessionId,producerId,producerInfo);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::ProducerInfo *info = mProducerInfoList.getProducerInfoById(producerId);
+    T::ProducerInfo *info = mSearchStructure[mSSI].mProducerInfoList.getProducerInfoById(producerId);
     if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
@@ -798,12 +725,10 @@ int CacheImplementation::_getProducerInfoByName(T::SessionId sessionId,std::stri
     if (mUpdateInProgress)
       return mContentStorage->getProducerInfoByName(sessionId,producerName,producerInfo);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::ProducerInfo *info = mProducerInfoList.getProducerInfoByName(producerName);
+    T::ProducerInfo *info = mSearchStructure[mSSI].mProducerInfoList.getProducerInfoByName(producerName);
     if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
@@ -831,14 +756,12 @@ int CacheImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
     if (mUpdateInProgress)
       return mContentStorage->getProducerInfoList(sessionId,producerInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     producerInfoList.clear();
 
-    producerInfoList = mProducerInfoList;
+    producerInfoList = mSearchStructure[mSSI].mProducerInfoList;
     return Result::OK;
   }
   catch (...)
@@ -861,8 +784,6 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
 
     if (mUpdateInProgress)
       return mContentStorage->getProducerInfoListByParameter(sessionId,parameterKeyType,parameterKey,producerInfoList);
-
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -902,51 +823,51 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
     {
       case T::ParamKeyTypeValue::FMI_ID:
         if (mContentInfoListEnabled[1])
-          mContentInfoList[1].getContentInfoListByFmiParameterId(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[1].getContentInfoListByFmiParameterId(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByFmiParameterId(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByFmiParameterId(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyTypeValue::FMI_NAME:
         if (mContentInfoListEnabled[2])
-          mContentInfoList[2].getContentInfoListByFmiParameterName(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[2].getContentInfoListByFmiParameterName(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByFmiParameterName(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByFmiParameterName(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyTypeValue::GRIB_ID:
         if (mContentInfoListEnabled[3])
-          mContentInfoList[3].getContentInfoListByGribParameterId(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[3].getContentInfoListByGribParameterId(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByGribParameterId(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByGribParameterId(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyTypeValue::NEWBASE_ID:
         if (mContentInfoListEnabled[4])
-          mContentInfoList[4].getContentInfoListByNewbaseParameterId(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[4].getContentInfoListByNewbaseParameterId(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByNewbaseParameterId(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByNewbaseParameterId(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyTypeValue::NEWBASE_NAME:
         if (mContentInfoListEnabled[5])
-          mContentInfoList[5].getContentInfoListByNewbaseParameterName(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[5].getContentInfoListByNewbaseParameterName(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByNewbaseParameterName(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByNewbaseParameterName(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyTypeValue::CDM_ID:
         if (mContentInfoListEnabled[6])
-          mContentInfoList[6].getContentInfoListByCdmParameterId(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[6].getContentInfoListByCdmParameterId(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByCdmParameterId(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByCdmParameterId(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyTypeValue::CDM_NAME:
         if (mContentInfoListEnabled[7])
-          mContentInfoList[7].getContentInfoListByCdmParameterName(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[7].getContentInfoListByCdmParameterName(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByCdmParameterName(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByCdmParameterName(parameterKey,T::ParamLevelIdTypeValue::IGNORE,0,0,0,-2,-2,-2,startTime,endTime,0,contentInfoList);
         break;
 
       case T::ParamKeyTypeValue::BUILD_IN:
@@ -967,7 +888,7 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
         prevProducerId = info->mProducerId;
         producerIdList.insert(info->mProducerId);
 
-        T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(info->mProducerId);
+        T::ProducerInfo *producerInfo = mSearchStructure[mSSI].mProducerInfoList.getProducerInfoById(info->mProducerId);
         if (producerInfo != nullptr)
           producerInfoList.addProducerInfo(producerInfo->duplicate());
       }
@@ -995,14 +916,12 @@ int CacheImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,u
     if (mUpdateInProgress)
       return mContentStorage->getProducerInfoListBySourceId(sessionId,sourceId,producerInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     producerInfoList.clear();
 
-    mProducerInfoList.getProducerInfoListBySourceId(sourceId,producerInfoList);
+    mSearchStructure[mSSI].mProducerInfoList.getProducerInfoListBySourceId(sourceId,producerInfoList);
 
     return Result::OK;
   }
@@ -1030,7 +949,7 @@ int CacheImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& coun
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    count = mProducerInfoList.getLength();
+    count = mSearchStructure[mSSI].mProducerInfoList.getLength();
     return Result::OK;
   }
   catch (...)
@@ -1057,22 +976,20 @@ int CacheImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     list.clear();
 
-    uint pLen = mProducerInfoList.getLength();
+    uint pLen = mSearchStructure[mSSI].mProducerInfoList.getLength();
 
     for (uint p=0; p<pLen; p++)
     {
-      T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByIndex(p);
+      T::ProducerInfo *producerInfo = mSearchStructure[mSSI].mProducerInfoList.getProducerInfoByIndex(p);
 
       std::set<uint> geometryIdList;
 
-      uint len = mContentInfoList[0].getLength();
+      uint len = mSearchStructure[mSSI].mContentInfoList[0].getLength();
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *contentInfo = mContentInfoList[0].getContentInfoByIndex(t);
+        T::ContentInfo *contentInfo = mSearchStructure[mSSI].mContentInfoList[0].getContentInfoByIndex(t);
         if (producerInfo->mProducerId == contentInfo->mProducerId  &&  geometryIdList.find(contentInfo->mGeometryId) == geometryIdList.end())
         {
           char tmp[100];
@@ -1111,9 +1028,7 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
 
     list.clear();
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    T::ProducerInfoList producerList = mProducerInfoList;
+    T::ProducerInfoList producerList = mSearchStructure[mSSI].mProducerInfoList;
     std::map<uint,T::ProducerInfo*> producers;
     uint plen = producerList.getLength();
     for (uint t=0; t<plen; t++)
@@ -1125,10 +1040,10 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
 
     std::set<std::size_t> tmpList;
 
-    uint len = mContentInfoList[0].getLength();
+    uint len = mSearchStructure[mSSI].mContentInfoList[0].getLength();
     for (uint t=0; t<len; t++)
     {
-      T::ContentInfo *contentInfo = mContentInfoList[0].getContentInfoByIndex(t);
+      T::ContentInfo *contentInfo = mSearchStructure[mSSI].mContentInfoList[0].getContentInfoByIndex(t);
       std::string sourceParamKey;
       std::string targetParamKey;
       T::ParamLevelIdType paramLevelIdType = T::ParamLevelIdTypeValue::FMI;
@@ -1277,13 +1192,11 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     list.clear();
 
     T::ContentInfoList cList;
     cList.setReleaseObjects(false);
-    cList = mContentInfoList[0];
+    cList = mSearchStructure[mSSI].mContentInfoList[0];
     cList.sort(T::ContentInfo::ComparisonMethod::producer_file_message);
 
     std::set<std::size_t> tmpList;
@@ -1302,7 +1215,7 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
 
       if (contentInfo->mProducerId != producerId)
       {
-        producerInfo = mProducerInfoList.getProducerInfoById(contentInfo->mProducerId);
+        producerInfo = mSearchStructure[mSSI].mProducerInfoList.getProducerInfoById(contentInfo->mProducerId);
         if (producerInfo != nullptr)
           producerId = producerInfo->mProducerId;
       }
@@ -1451,18 +1364,16 @@ int CacheImplementation::_getProducerParameterListByProducerId(T::SessionId sess
 
     list.clear();
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
+    T::ProducerInfo *producerInfo = mSearchStructure[mSSI].mProducerInfoList.getProducerInfoById(producerId);
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     std::set<std::size_t> tmpList;
 
-    uint len = mContentInfoList[0].getLength();
+    uint len = mSearchStructure[mSSI].mContentInfoList[0].getLength();
     for (uint t=0; t<len; t++)
     {
-      T::ContentInfo *contentInfo = mContentInfoList[0].getContentInfoByIndex(t);
+      T::ContentInfo *contentInfo = mSearchStructure[mSSI].mContentInfoList[0].getContentInfoByIndex(t);
       if (contentInfo->mProducerId == producerId)
       {
         std::string sourceParamKey;
@@ -1760,17 +1671,15 @@ int CacheImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
     if (mUpdateInProgress)
       return mContentStorage->getGenerationIdGeometryIdAndForecastTimeList(sessionId,list);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     list.clear();
 
-    uint len = mContentInfoList[0].getLength();
+    uint len = mSearchStructure[mSSI].mContentInfoList[0].getLength();
     for (uint t=0; t<len; t++)
     {
-      T::ContentInfo *info = mContentInfoList[0].getContentInfoByIndex(t);
+      T::ContentInfo *info = mSearchStructure[mSSI].mContentInfoList[0].getContentInfoByIndex(t);
       char st[200];
       sprintf(st,"%u;%u;%u;%d;%d;%s;%s;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->mForecastTime.c_str(),info->mModificationTime.c_str());
       std::string str = st;
@@ -1803,8 +1712,6 @@ int CacheImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
     if (mUpdateInProgress)
       return mContentStorage->getGenerationInfoListByGeometryId(sessionId,geometryId,generationInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1812,11 +1719,11 @@ int CacheImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
 
     std::set<uint> idList;
 
-    mContentInfoList[0].getGenerationIdListByGeometryId(geometryId,idList);
+    mSearchStructure[mSSI].mContentInfoList[0].getGenerationIdListByGeometryId(geometryId,idList);
 
     for (auto it=idList.begin(); it!=idList.end(); ++it)
     {
-      T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(*it);
+      T::GenerationInfo *generationInfo = mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoById(*it);
       if (generationInfo != nullptr)
         generationInfoList.addGenerationInfo(generationInfo->duplicate());
     }
@@ -1844,12 +1751,10 @@ int CacheImplementation::_getGenerationInfoById(T::SessionId sessionId,uint gene
     if (mUpdateInProgress)
       return mContentStorage->getGenerationInfoById(sessionId,generationId,generationInfo);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(generationId);
+    T::GenerationInfo *info = mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoById(generationId);
     if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
@@ -1877,12 +1782,10 @@ int CacheImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::st
     if (mUpdateInProgress)
       return mContentStorage->getGenerationInfoByName(sessionId,generationName,generationInfo);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoByName(generationName);
+    T::GenerationInfo *info = mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoByName(generationName);
     if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
@@ -1910,14 +1813,12 @@ int CacheImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Genera
     if (mUpdateInProgress)
       return mContentStorage->getGenerationInfoList(sessionId,generationInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     generationInfoList.clear();
 
-    generationInfoList = mGenerationInfoList;
+    generationInfoList = mSearchStructure[mSSI].mGenerationInfoList;
     return Result::OK;
   }
   catch (...)
@@ -1941,18 +1842,16 @@ int CacheImplementation::_getGenerationInfoListByProducerId(T::SessionId session
     if (mUpdateInProgress)
       return mContentStorage->getGenerationInfoListByProducerId(sessionId,producerId,generationInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
+    T::ProducerInfo *producerInfo = mSearchStructure[mSSI].mProducerInfoList.getProducerInfoById(producerId);
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     generationInfoList.clear();
 
-    mGenerationInfoList.getGenerationInfoListByProducerId(producerId,generationInfoList);
+    mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoListByProducerId(producerId,generationInfoList);
     return Result::OK;
   }
   catch (...)
@@ -1976,18 +1875,16 @@ int CacheImplementation::_getGenerationInfoListByProducerName(T::SessionId sessi
    if (mUpdateInProgress)
       return mContentStorage->getGenerationInfoListByProducerName(sessionId,producerName,generationInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
+    T::ProducerInfo *producerInfo = mSearchStructure[mSSI].mProducerInfoList.getProducerInfoByName(producerName);
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
     generationInfoList.clear();
 
-    mGenerationInfoList.getGenerationInfoListByProducerId(producerInfo->mProducerId,generationInfoList);
+    mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoListByProducerId(producerInfo->mProducerId,generationInfoList);
     return Result::OK;
   }
   catch (...)
@@ -2011,14 +1908,12 @@ int CacheImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId
     if (mUpdateInProgress)
       return mContentStorage->getGenerationInfoListBySourceId(sessionId,sourceId,generationInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     generationInfoList.clear();
 
-    mGenerationInfoList.getGenerationInfoListBySourceId(sourceId,generationInfoList);
+    mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoListBySourceId(sourceId,generationInfoList);
     return Result::OK;
   }
   catch (...)
@@ -2042,17 +1937,15 @@ int CacheImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
     if (mUpdateInProgress)
       return mContentStorage->getLastGenerationInfoByProducerIdAndStatus(sessionId,producerId,generationStatus,generationInfo);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
+    T::ProducerInfo *producerInfo = mSearchStructure[mSSI].mProducerInfoList.getProducerInfoById(producerId);
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
 
-    T::GenerationInfo *info = mGenerationInfoList.getLastGenerationInfoByProducerIdAndStatus(producerId,generationStatus);
+    T::GenerationInfo *info = mSearchStructure[mSSI].mGenerationInfoList.getLastGenerationInfoByProducerIdAndStatus(producerId,generationStatus);
     if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
@@ -2080,16 +1973,14 @@ int CacheImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessio
     if (mUpdateInProgress)
       return mContentStorage->getLastGenerationInfoByProducerNameAndStatus(sessionId,producerName,generationStatus,generationInfo);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
+    T::ProducerInfo *producerInfo = mSearchStructure[mSSI].mProducerInfoList.getProducerInfoByName(producerName);
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
-    T::GenerationInfo *info = mGenerationInfoList.getLastGenerationInfoByProducerIdAndStatus(producerInfo->mProducerId,generationStatus);
+    T::GenerationInfo *info = mSearchStructure[mSSI].mGenerationInfoList.getLastGenerationInfoByProducerIdAndStatus(producerInfo->mProducerId,generationStatus);
     if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
@@ -2120,7 +2011,7 @@ int CacheImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    count = mGenerationInfoList.getLength();
+    count = mSearchStructure[mSSI].mGenerationInfoList.getLength();
     return Result::OK;
   }
   catch (...)
@@ -2496,12 +2387,10 @@ int CacheImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoById(sessionId,fileId,fileInfo);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::FileInfo *info = mFileInfoList.getFileInfoById(fileId);
+    T::FileInfo *info = mSearchStructure[mSSI].mFileInfoList.getFileInfoById(fileId);
     if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
@@ -2529,12 +2418,10 @@ int CacheImplementation::_getFileInfoByName(T::SessionId sessionId,std::string f
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoByName(sessionId,filename,fileInfo);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::FileInfo *info = mFileInfoListByName.getFileInfoByName(filename);
+    T::FileInfo *info = mSearchStructure[mSSI].mFileInfoListByName.getFileInfoByName(filename);
     if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
@@ -2562,14 +2449,12 @@ int CacheImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileI
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoList(sessionId,startFileId,maxRecords,fileInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     fileInfoList.clear();
 
-    mFileInfoList.getFileInfoList(startFileId,maxRecords,fileInfoList);
+    mSearchStructure[mSSI].mFileInfoList.getFileInfoList(startFileId,maxRecords,fileInfoList);
     return Result::OK;
   }
   catch (...)
@@ -2590,13 +2475,11 @@ int CacheImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     fileInfoList.clear();
 
     for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
     {
-      T::FileInfo *info = mFileInfoList.getFileInfoById(*it);
+      T::FileInfo *info = mSearchStructure[mSSI].mFileInfoList.getFileInfoById(*it);
       if (info != nullptr)
         fileInfoList.addFileInfo(info->duplicate());
     }
@@ -2623,18 +2506,16 @@ int CacheImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uin
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoListByProducerId(sessionId,producerId,startFileId,maxRecords,fileInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     fileInfoList.clear();
 
-    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
+    T::ProducerInfo *producerInfo = mSearchStructure[mSSI].mProducerInfoList.getProducerInfoById(producerId);
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
-    mFileInfoList.getFileInfoListByProducerId(producerId,startFileId,maxRecords,fileInfoList);
+    mSearchStructure[mSSI].mFileInfoList.getFileInfoListByProducerId(producerId,startFileId,maxRecords,fileInfoList);
     return Result::OK;
   }
   catch (...)
@@ -2658,18 +2539,16 @@ int CacheImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,s
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoListByProducerName(sessionId,producerName,startFileId,maxRecords,fileInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
+    T::ProducerInfo *producerInfo = mSearchStructure[mSSI].mProducerInfoList.getProducerInfoByName(producerName);
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
     fileInfoList.clear();
 
-    mFileInfoList.getFileInfoListByProducerId(producerInfo->mProducerId,startFileId,maxRecords,fileInfoList);
+    mSearchStructure[mSSI].mFileInfoList.getFileInfoListByProducerId(producerInfo->mProducerId,startFileId,maxRecords,fileInfoList);
     return Result::OK;
   }
   catch (...)
@@ -2693,18 +2572,16 @@ int CacheImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,u
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoListByGenerationId(sessionId,generationId,startFileId,maxRecords,fileInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
+    T::GenerationInfo *generationInfo = mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
     fileInfoList.clear();
 
-    mFileInfoList.getFileInfoListByGenerationId(generationId,startFileId,maxRecords,fileInfoList);
+    mSearchStructure[mSSI].mFileInfoList.getFileInfoListByGenerationId(generationId,startFileId,maxRecords,fileInfoList);
     return Result::OK;
   }
   catch (...)
@@ -2728,18 +2605,16 @@ int CacheImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoListByGenerationName(sessionId,generationName,startFileId,maxRecords,fileInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
+    T::GenerationInfo *generationInfo = mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoByName(generationName);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
     fileInfoList.clear();
 
-    mFileInfoList.getFileInfoListByGenerationId(generationInfo->mGenerationId,startFileId,maxRecords,fileInfoList);
+    mSearchStructure[mSSI].mFileInfoList.getFileInfoListByGenerationId(generationInfo->mGenerationId,startFileId,maxRecords,fileInfoList);
     return Result::OK;
   }
   catch (...)
@@ -2763,14 +2638,12 @@ int CacheImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,uin
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoListByGroupFlags(sessionId,groupFlags,startFileId,maxRecords,fileInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     fileInfoList.clear();
 
-    mFileInfoList.getFileInfoListByGroupFlags(groupFlags,startFileId,maxRecords,fileInfoList);
+    mSearchStructure[mSSI].mFileInfoList.getFileInfoListByGroupFlags(groupFlags,startFileId,maxRecords,fileInfoList);
     return Result::OK;
   }
   catch (...)
@@ -2794,14 +2667,12 @@ int CacheImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint 
     if (mUpdateInProgress)
       return mContentStorage->getFileInfoListBySourceId(sessionId,sourceId,startFileId,maxRecords,fileInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     fileInfoList.clear();
 
-    mFileInfoList.getFileInfoListBySourceId(sourceId,startFileId,maxRecords,fileInfoList);
+    mSearchStructure[mSSI].mFileInfoList.getFileInfoListBySourceId(sourceId,startFileId,maxRecords,fileInfoList);
     return Result::OK;
   }
   catch (...)
@@ -2828,7 +2699,7 @@ int CacheImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    count = mFileInfoList.getLength();
+    count = mSearchStructure[mSSI].mFileInfoList.getLength();
     return Result::OK;
   }
   catch (...)
@@ -2855,7 +2726,7 @@ int CacheImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,ui
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    count = mFileInfoList.getFileInfoCountByProducerId(producerId);
+    count = mSearchStructure[mSSI].mFileInfoList.getFileInfoCountByProducerId(producerId);
     return Result::OK;
   }
   catch (...)
@@ -2881,7 +2752,7 @@ int CacheImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    count = mFileInfoList.getFileInfoCountByGenerationId(generationId);
+    count = mSearchStructure[mSSI].mFileInfoList.getFileInfoCountByGenerationId(generationId);
     return Result::OK;
   }
   catch (...)
@@ -2908,7 +2779,7 @@ int CacheImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uint
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    count = mFileInfoList.getFileInfoCountBySourceId(sourceId);
+    count = mSearchStructure[mSSI].mFileInfoList.getFileInfoCountBySourceId(sourceId);
     return Result::OK;
   }
   catch (...)
@@ -2961,7 +2832,7 @@ int CacheImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
 
     if (requestingServerId != 0)
     {
-      T::ServerInfo *info = mDataServerInfoList.getServerInfoById(requestingServerId);
+      T::ServerInfo *info = mSearchStructure[mSSI].mDataServerInfoList.getServerInfoById(requestingServerId);
       if (info != nullptr)
         info->mLastCall = time(nullptr);
     }
@@ -3005,7 +2876,7 @@ int CacheImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
 
     if (requestingServerId != 0)
     {
-      T::ServerInfo *info = mDataServerInfoList.getServerInfoById(requestingServerId);
+      T::ServerInfo *info = mSearchStructure[mSSI].mDataServerInfoList.getServerInfoById(requestingServerId);
       if (info != nullptr)
         info->mLastCall = time(nullptr);
     }
@@ -3391,12 +3262,10 @@ int CacheImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint
     if (mUpdateInProgress)
       return mContentStorage->getContentInfo(sessionId,fileId,messageIndex,contentInfo);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(fileId,messageIndex);
+    T::ContentInfo *cInfo = mSearchStructure[mSSI].mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(fileId,messageIndex);
     if (cInfo != nullptr)
     {
       contentInfo = *cInfo;
@@ -3426,14 +3295,12 @@ int CacheImplementation::_getContentList(T::SessionId sessionId,uint startFileId
     if (mUpdateInProgress)
       return mContentStorage->getContentList(sessionId,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     contentInfoList.clear();
 
-    mContentInfoList[0].getContentInfoList(startFileId,startMessageIndex,maxRecords,contentInfoList);
+    mSearchStructure[mSSI].mContentInfoList[0].getContentInfoList(startFileId,startMessageIndex,maxRecords,contentInfoList);
     return Result::OK;
   }
   catch (...)
@@ -3457,14 +3324,12 @@ int CacheImplementation::_getContentListByFileId(T::SessionId sessionId,uint fil
     if (mUpdateInProgress)
       return mContentStorage->getContentListByFileId(sessionId,fileId,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     contentInfoList.clear();
 
-    mContentInfoList[0].getContentInfoListByFileId(fileId,contentInfoList);
+    mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByFileId(fileId,contentInfoList);
     return Result::OK;
   }
   catch (...)
@@ -3488,8 +3353,6 @@ int CacheImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
     if (mUpdateInProgress)
       return mContentStorage->getContentListByFileIdList(sessionId,fileIdList,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3498,7 +3361,7 @@ int CacheImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
     for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
     {
       T::ContentInfoList contentList;
-      mContentInfoList[0].getContentInfoListByFileId(*it,contentList);
+      mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByFileId(*it,contentList);
       contentInfoList.addContentInfoList(contentList);
     }
 
@@ -3525,18 +3388,16 @@ int CacheImplementation::_getContentListByFileName(T::SessionId sessionId,std::s
     if (mUpdateInProgress)
       return mContentStorage->getContentListByFileName(sessionId,filename,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::FileInfo *fileInfo = mFileInfoListByName.getFileInfoByName(filename);
+    T::FileInfo *fileInfo = mSearchStructure[mSSI].mFileInfoListByName.getFileInfoByName(filename);
     if (fileInfo == nullptr)
       return Result::UNKNOWN_FILE_NAME;
 
     contentInfoList.clear();
 
-    mContentInfoList[0].getContentInfoListByFileId(fileInfo->mFileId,contentInfoList);
+    mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByFileId(fileInfo->mFileId,contentInfoList);
     return Result::OK;
   }
   catch (...)
@@ -3560,18 +3421,16 @@ int CacheImplementation::_getContentListByServerId(T::SessionId sessionId,uint s
     if (mUpdateInProgress)
       return mContentStorage->getContentListByServerId(sessionId,serverId,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::ServerInfo *info = mDataServerInfoList.getServerInfoById(serverId);
+    T::ServerInfo *info = mSearchStructure[mSSI].mDataServerInfoList.getServerInfoById(serverId);
     if (info == nullptr)
       return Result::UNKNOWN_SERVER_ID;
 
     contentInfoList.clear();
 
-    mContentInfoList[0].getContentInfoListByServerId(serverId,startFileId,startMessageIndex,maxRecords,contentInfoList);
+    mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByServerId(serverId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     return Result::OK;
   }
   catch (...)
@@ -3595,14 +3454,12 @@ int CacheImplementation::_getContentListByGroupFlags(T::SessionId sessionId,uint
     if (mUpdateInProgress)
       return mContentStorage->getContentListByGroupFlags(sessionId,groupFlags,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     contentInfoList.clear();
 
-    mContentInfoList[0].getContentInfoListByGroupFlags(groupFlags,startFileId,startMessageIndex,maxRecords,contentInfoList);
+    mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByGroupFlags(groupFlags,startFileId,startMessageIndex,maxRecords,contentInfoList);
     return Result::OK;
   }
   catch (...)
@@ -3626,18 +3483,16 @@ int CacheImplementation::_getContentListByProducerId(T::SessionId sessionId,uint
     if (mUpdateInProgress)
       return mContentStorage->getContentListByProducerId(sessionId,producerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
+    T::ProducerInfo *producerInfo = mSearchStructure[mSSI].mProducerInfoList.getProducerInfoById(producerId);
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
     contentInfoList.clear();
 
-    mContentInfoList[0].getContentInfoListByProducerId(producerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
+    mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByProducerId(producerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     return Result::OK;
   }
   catch (...)
@@ -3661,18 +3516,16 @@ int CacheImplementation::_getContentListByProducerName(T::SessionId sessionId,st
     if (mUpdateInProgress)
       return mContentStorage->getContentListByProducerName(sessionId,producerName,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
+    T::ProducerInfo *producerInfo = mSearchStructure[mSSI].mProducerInfoList.getProducerInfoByName(producerName);
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
     contentInfoList.clear();
 
-    mContentInfoList[0].getContentInfoListByProducerId(producerInfo->mProducerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
+    mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByProducerId(producerInfo->mProducerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     return Result::OK;
   }
   catch (...)
@@ -3695,21 +3548,19 @@ int CacheImplementation::_getContentListByGenerationId(T::SessionId sessionId,ui
     if (mUpdateInProgress)
       return mContentStorage->getContentListByGenerationId(sessionId,generationId,startFileId,startMessageIndex,maxRecords,requestFlags,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
+    T::GenerationInfo *generationInfo = mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
     contentInfoList.clear();
 
     if (requestFlags < CONTENT_LIST_COUNT  &&  mContentInfoListEnabled[requestFlags])
-      mContentInfoList[requestFlags].getContentInfoListByGenerationId(generationInfo->mProducerId,generationId,startFileId,startMessageIndex,maxRecords,contentInfoList);
+      mSearchStructure[mSSI].mContentInfoList[requestFlags].getContentInfoListByGenerationId(generationInfo->mProducerId,generationId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     else
-      mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mProducerId,generationId,startFileId,startMessageIndex,maxRecords,contentInfoList);
+      mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mProducerId,generationId,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
     return Result::OK;
   }
@@ -3734,18 +3585,16 @@ int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,
     if (mUpdateInProgress)
       return mContentStorage->getContentListByGenerationName(sessionId,generationName,startFileId,maxRecords,startMessageIndex,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
+    T::GenerationInfo *generationInfo = mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoByName(generationName);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
     contentInfoList.clear();
 
-    mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,startFileId,startMessageIndex,maxRecords,contentInfoList);
+    mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     return Result::OK;
   }
   catch (...)
@@ -3769,9 +3618,7 @@ int CacheImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
     if (mUpdateInProgress)
       return mContentStorage->getContentListByGenerationIdAndTimeRange(sessionId,generationId,startTime,endTime,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
+    T::GenerationInfo *generationInfo = mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
@@ -3780,7 +3627,7 @@ int CacheImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
 
     contentInfoList.clear();
 
-    mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mProducerId,generationId,startTime,endTime,contentInfoList);
+    mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mProducerId,generationId,startTime,endTime,contentInfoList);
     return Result::OK;
   }
   catch (...)
@@ -3804,18 +3651,16 @@ int CacheImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
     if (mUpdateInProgress)
       return mContentStorage->getContentListByGenerationNameAndTimeRange(sessionId,generationName,startTime,endTime,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
+    T::GenerationInfo *generationInfo = mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoByName(generationName);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
     contentInfoList.clear();
 
-    mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,startTime,endTime,contentInfoList);
+    mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,startTime,endTime,contentInfoList);
     return Result::OK;
   }
   catch (...)
@@ -3839,14 +3684,12 @@ int CacheImplementation::_getContentListBySourceId(T::SessionId sessionId,uint s
     if (mUpdateInProgress)
       return mContentStorage->getContentListBySourceId(sessionId,sourceId,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     contentInfoList.clear();
 
-    mContentInfoList[0].getContentInfoListBySourceId(sourceId,startFileId,startMessageIndex,maxRecords,contentInfoList);
+    mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListBySourceId(sourceId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     return Result::OK;
   }
   catch (...)
@@ -3873,8 +3716,6 @@ int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
 
     if (mUpdateInProgress)
       return mContentStorage->getContentListByParameter(sessionId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
-
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3909,52 +3750,52 @@ int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
     {
       case T::ParamKeyTypeValue::FMI_ID:
         if (mContentInfoListEnabled[1])
-          mContentInfoList[1].getContentInfoListByFmiParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[1].getContentInfoListByFmiParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByFmiParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByFmiParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::FMI_NAME:
         if (mContentInfoListEnabled[2])
-          mContentInfoList[2].getContentInfoListByFmiParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[2].getContentInfoListByFmiParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByFmiParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByFmiParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
 
       case T::ParamKeyTypeValue::GRIB_ID:
         if (mContentInfoListEnabled[3])
-          mContentInfoList[3].getContentInfoListByGribParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[3].getContentInfoListByGribParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByGribParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByGribParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::NEWBASE_ID:
         if (mContentInfoListEnabled[4])
-          mContentInfoList[4].getContentInfoListByNewbaseParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[4].getContentInfoListByNewbaseParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByNewbaseParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByNewbaseParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::NEWBASE_NAME:
         if (mContentInfoListEnabled[5])
-          mContentInfoList[5].getContentInfoListByNewbaseParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[5].getContentInfoListByNewbaseParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByNewbaseParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByNewbaseParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::CDM_ID:
         if (mContentInfoListEnabled[6])
-          mContentInfoList[6].getContentInfoListByCdmParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[6].getContentInfoListByCdmParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByCdmParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByCdmParameterId(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::CDM_NAME:
         if (mContentInfoListEnabled[7])
-          mContentInfoList[7].getContentInfoListByCdmParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[7].getContentInfoListByCdmParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByCdmParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByCdmParameterName(parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::BUILD_IN:
@@ -3987,12 +3828,10 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
     if (mUpdateInProgress)
       return mContentStorage->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
+    T::GenerationInfo *generationInfo = mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
@@ -4027,52 +3866,52 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
     {
       case T::ParamKeyTypeValue::FMI_ID:
         if (mContentInfoListEnabled[1])
-          mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::FMI_NAME:
         if (mContentInfoListEnabled[2])
-          mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
         return Result::OK;
 
       case T::ParamKeyTypeValue::GRIB_ID:
         if (mContentInfoListEnabled[3])
-          mContentInfoList[3].getContentInfoListByGribParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[3].getContentInfoListByGribParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByGribParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByGribParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::NEWBASE_ID:
         if (mContentInfoListEnabled[4])
-          mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByNewbaseParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByNewbaseParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::NEWBASE_NAME:
         if (mContentInfoListEnabled[5])
-          mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByNewbaseParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByNewbaseParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::CDM_ID:
         if (mContentInfoListEnabled[6])
-          mContentInfoList[6].getContentInfoListByCdmParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[6].getContentInfoListByCdmParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByCdmParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByCdmParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::CDM_NAME:
         if (mContentInfoListEnabled[7])
-          mContentInfoList[7].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[7].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::BUILD_IN:
@@ -4105,12 +3944,10 @@ int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionI
     if (mUpdateInProgress)
       return mContentStorage->getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
+    T::GenerationInfo *generationInfo = mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoByName(generationName);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
@@ -4144,51 +3981,51 @@ int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionI
     {
       case T::ParamKeyTypeValue::FMI_ID:
         if (mContentInfoListEnabled[1])
-          mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::FMI_NAME:
         if (mContentInfoListEnabled[2])
-          mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::GRIB_ID:
         if (mContentInfoListEnabled[3])
-          mContentInfoList[3].getContentInfoListByGribParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[3].getContentInfoListByGribParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByGribParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByGribParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::NEWBASE_ID:
         if (mContentInfoListEnabled[4])
-          mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByNewbaseParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByNewbaseParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::NEWBASE_NAME:
         if (mContentInfoListEnabled[5])
-          mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByNewbaseParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByNewbaseParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::CDM_ID:
         if (mContentInfoListEnabled[6])
-          mContentInfoList[6].getContentInfoListByCdmParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[6].getContentInfoListByCdmParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByCdmParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByCdmParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::CDM_NAME:
         if (mContentInfoListEnabled[7])
-          mContentInfoList[7].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[7].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::BUILD_IN:
@@ -4220,12 +4057,10 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
     if (mUpdateInProgress)
       return mContentStorage->getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
+    T::ProducerInfo *producerInfo = mSearchStructure[mSSI].mProducerInfoList.getProducerInfoById(producerId);
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
@@ -4259,51 +4094,51 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
     {
       case T::ParamKeyTypeValue::FMI_ID:
         if (mContentInfoListEnabled[1])
-          mContentInfoList[1].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[1].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::FMI_NAME:
         if (mContentInfoListEnabled[2])
-          mContentInfoList[2].getContentInfoListByFmiParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[2].getContentInfoListByFmiParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByFmiParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByFmiParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::GRIB_ID:
         if (mContentInfoListEnabled[3])
-          mContentInfoList[3].getContentInfoListByGribParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[3].getContentInfoListByGribParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByGribParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByGribParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::NEWBASE_ID:
         if (mContentInfoListEnabled[4])
-          mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByNewbaseParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByNewbaseParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::NEWBASE_NAME:
         if (mContentInfoListEnabled[5])
-          mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByNewbaseParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByNewbaseParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::CDM_ID:
         if (mContentInfoListEnabled[6])
-          mContentInfoList[6].getContentInfoListByCdmParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[6].getContentInfoListByCdmParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByCdmParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByCdmParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::CDM_NAME:
         if (mContentInfoListEnabled[7])
-          mContentInfoList[7].getContentInfoListByCdmParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[7].getContentInfoListByCdmParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByCdmParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByCdmParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::BUILD_IN:
@@ -4335,12 +4170,10 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
     if (mUpdateInProgress)
       return mContentStorage->getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
+    T::ProducerInfo *producerInfo = mSearchStructure[mSSI].mProducerInfoList.getProducerInfoByName(producerName);
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
@@ -4374,51 +4207,51 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
     {
       case T::ParamKeyTypeValue::FMI_ID:
         if (mContentInfoListEnabled[1])
-          mContentInfoList[1].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[1].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::FMI_NAME:
         if (mContentInfoListEnabled[2])
-          mContentInfoList[2].getContentInfoListByFmiParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[2].getContentInfoListByFmiParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByFmiParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByFmiParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::GRIB_ID:
         if (mContentInfoListEnabled[3])
-          mContentInfoList[3].getContentInfoListByGribParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[3].getContentInfoListByGribParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByGribParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByGribParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::NEWBASE_ID:
         if (mContentInfoListEnabled[4])
-          mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByNewbaseParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByNewbaseParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::NEWBASE_NAME:
         if (mContentInfoListEnabled[5])
-          mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByNewbaseParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByNewbaseParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::CDM_ID:
         if (mContentInfoListEnabled[6])
-          mContentInfoList[6].getContentInfoListByCdmParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[6].getContentInfoListByCdmParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByCdmParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByCdmParameterIdAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::CDM_NAME:
         if (mContentInfoListEnabled[7])
-          mContentInfoList[7].getContentInfoListByCdmParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[7].getContentInfoListByCdmParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          mContentInfoList[0].getContentInfoListByCdmParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByCdmParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::BUILD_IN:
@@ -4451,12 +4284,10 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     if (mUpdateInProgress)
       return mContentStorage->getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
+    T::GenerationInfo *generationInfo = mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
@@ -4506,64 +4337,64 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     {
       case T::ParamKeyTypeValue::FMI_ID:
         if (mContentInfoListEnabled[1])
-          mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+          mSearchStructure[mSSI].mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         else
-          mContentInfoList[0].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         break;
 
       case T::ParamKeyTypeValue::FMI_NAME:
         if (mContentInfoListEnabled[2])
         {
-          T::ContentInfo *cInfo = mContentInfoList[2].getContentInfoByFmiParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
+          T::ContentInfo *cInfo = mSearchStructure[mSSI].mContentInfoList[2].getContentInfoByFmiParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
           if (cInfo != nullptr)
           {
             contentInfoList.addContentInfo(cInfo->duplicate());
             return Result::OK;
           }
-          //mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
-          mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentList);
+          //mSearchStructure[mSSI].mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+          mSearchStructure[mSSI].mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentList);
           //contentList.print(std::cout,0,0);
         }
         else
         {
           //printf("Not sorted\n");
-          mContentInfoList[0].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         }
         break;
 
       case T::ParamKeyTypeValue::GRIB_ID:
         if (mContentInfoListEnabled[3])
-          mContentInfoList[3].getContentInfoListByGribParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+          mSearchStructure[mSSI].mContentInfoList[3].getContentInfoListByGribParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         else
-          mContentInfoList[0].getContentInfoListByGribParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByGribParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         break;
 
       case T::ParamKeyTypeValue::NEWBASE_ID:
         if (mContentInfoListEnabled[4])
-          mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+          mSearchStructure[mSSI].mContentInfoList[4].getContentInfoListByNewbaseParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         else
-          mContentInfoList[0].getContentInfoListByNewbaseParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByNewbaseParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         break;
 
       case T::ParamKeyTypeValue::NEWBASE_NAME:
         if (mContentInfoListEnabled[5])
-          mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+          mSearchStructure[mSSI].mContentInfoList[5].getContentInfoListByNewbaseParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         else
-          mContentInfoList[0].getContentInfoListByNewbaseParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByNewbaseParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         break;
 
       case T::ParamKeyTypeValue::CDM_ID:
         if (mContentInfoListEnabled[6])
-          mContentInfoList[6].getContentInfoListByCdmParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+          mSearchStructure[mSSI].mContentInfoList[6].getContentInfoListByCdmParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         else
-          mContentInfoList[0].getContentInfoListByCdmParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByCdmParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         break;
 
       case T::ParamKeyTypeValue::CDM_NAME:
         if (mContentInfoListEnabled[7])
-          mContentInfoList[7].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+          mSearchStructure[mSSI].mContentInfoList[7].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         else
-          mContentInfoList[0].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
+          mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByCdmParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         break;
 
       case T::ParamKeyTypeValue::BUILD_IN:
@@ -4617,14 +4448,12 @@ int CacheImplementation::_getContentListByRequestCounterKey(T::SessionId session
     if (mUpdateInProgress)
       return mContentStorage->getContentListByRequestCounterKey(sessionId,key,contentInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     contentInfoList.clear();
 
-    mContentInfoList[0].getContentInfoListByRequestCounterKey(key,contentInfoList);;
+    mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByRequestCounterKey(key,contentInfoList);;
 
     return Result::OK;
   }
@@ -4643,21 +4472,19 @@ int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     contentInfoList.clear();
 
-    uint cLen = mContentInfoList[0].getLength();
+    uint cLen = mSearchStructure[mSSI].mContentInfoList[0].getLength();
     for (uint c=0; c<cLen; c++)
     {
-      T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByIndex(c);
+      T::ContentInfo *cInfo = mSearchStructure[mSSI].mContentInfoList[0].getContentInfoByIndex(c);
       T::ContentInfo *cError = nullptr;
       if (cInfo != nullptr)
       {
-        T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(cInfo->mFileId);
+        T::FileInfo *fileInfo = mSearchStructure[mSSI].mFileInfoList.getFileInfoById(cInfo->mFileId);
         if (fileInfo == nullptr)
         {
           PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : File missing (%u)! *****\n",cInfo->mFileId);
@@ -4666,7 +4493,7 @@ int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
 
         if (cError == nullptr)
         {
-          T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(cInfo->mGenerationId);
+          T::GenerationInfo *generationInfo = mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoById(cInfo->mGenerationId);
           if (generationInfo == nullptr)
           {
             PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Generation missing (%u)! *****\n",cInfo->mGenerationId);
@@ -4676,7 +4503,7 @@ int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
 
         if (cError == nullptr)
         {
-          T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(cInfo->mProducerId);
+          T::ProducerInfo *producerInfo = mSearchStructure[mSSI].mProducerInfoList.getProducerInfoById(cInfo->mProducerId);
           if (producerInfo == nullptr)
           {
             PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Producer missing (%u)! *****\n",cInfo->mProducerId);
@@ -4714,15 +4541,13 @@ int CacheImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
+    T::GenerationInfo *generationInfo = mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     geometryIdList.clear();
 
-    mContentInfoList[0].getContentGeometryIdListByGenerationId(generationInfo->mProducerId,generationId,geometryIdList);
+    mSearchStructure[mSSI].mContentInfoList[0].getContentGeometryIdListByGenerationId(generationInfo->mProducerId,generationId,geometryIdList);
     return Result::OK;
   }
   catch (...)
@@ -4749,16 +4574,14 @@ int CacheImplementation::_getContentParamListByGenerationId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
+    T::GenerationInfo *generationInfo = mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
-
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     contentParamList.clear();
 
     T::ContentInfoList contentInfoList;
-    mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mProducerId,generationId,0,0,1000000,contentInfoList);
+    mSearchStructure[mSSI].mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mProducerId,generationId,0,0,1000000,contentInfoList);
     contentInfoList.sort(T::ContentInfo::ComparisonMethod::fmiName_fmiLevelId_level_starttime_file_message);
     uint len = contentInfoList.getLength();
     T::ContentInfo *prev = nullptr;
@@ -4811,15 +4634,13 @@ int CacheImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
+    T::GenerationInfo *generationInfo = mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     paramKeyList.clear();
 
-    mContentInfoList[0].getContentParamKeyListByGenerationId(generationInfo->mProducerId,generationId,parameterKeyType,paramKeyList);
+    mSearchStructure[mSSI].mContentInfoList[0].getContentParamKeyListByGenerationId(generationInfo->mProducerId,generationId,parameterKeyType,paramKeyList);
     return Result::OK;
   }
   catch (...)
@@ -4846,18 +4667,16 @@ int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
+    T::GenerationInfo *generationInfo = mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
-
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     contentTimeList.clear();
 
     auto it = mContentTimeCache.find(generationId);
     if (it == mContentTimeCache.end())
     {
-      mContentInfoList[0].getForecastTimeListByGenerationId(generationInfo->mProducerId,generationId,contentTimeList);
+      mSearchStructure[mSSI].mContentInfoList[0].getForecastTimeListByGenerationId(generationInfo->mProducerId,generationId,contentTimeList);
       mContentTimeCache.insert(std::pair<uint,std::set<std::string>>(generationId,contentTimeList));
     }
     else
@@ -4891,15 +4710,13 @@ int CacheImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
+    T::GenerationInfo *generationInfo = mSearchStructure[mSSI].mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     contentTimeList.clear();
 
-    mContentInfoList[0].getForecastTimeListByGenerationAndGeometry(generationInfo->mProducerId,generationId,geometryId,contentTimeList);
+    mSearchStructure[mSSI].mContentInfoList[0].getForecastTimeListByGenerationAndGeometry(generationInfo->mProducerId,generationId,geometryId,contentTimeList);
 
     return Result::OK;
   }
@@ -4927,11 +4744,9 @@ int CacheImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
     contentTimeList.clear();
 
-    mContentInfoList[0].getForecastTimeListByProducerId(producerId,contentTimeList);
+    mSearchStructure[mSSI].mContentInfoList[0].getForecastTimeListByProducerId(producerId,contentTimeList);
 
     return Result::OK;
   }
@@ -4959,7 +4774,7 @@ int CacheImplementation::_getContentCount(T::SessionId sessionId,uint& count)
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    count = mContentInfoList[0].getLength();
+    count = mSearchStructure[mSSI].mContentInfoList[0].getLength();
     return Result::OK;
   }
   catch (...)
@@ -4986,9 +4801,9 @@ int CacheImplementation::_getHashByProducerId(T::SessionId sessionId,uint produc
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    std::size_t generationHash = mGenerationInfoList.getHashByProducerId(producerId);
-    std::size_t fileHash = mFileInfoList.getHashByProducerId(producerId);
-    std::size_t contentHash = mContentInfoList[0].getHashByProducerId(producerId);
+    std::size_t generationHash = mSearchStructure[mSSI].mGenerationInfoList.getHashByProducerId(producerId);
+    std::size_t fileHash = mSearchStructure[mSSI].mFileInfoList.getHashByProducerId(producerId);
+    std::size_t contentHash = mSearchStructure[mSSI].mContentInfoList[0].getHashByProducerId(producerId);
 
     std::size_t h = 0;
     boost::hash_combine(h,generationHash);
@@ -5025,7 +4840,7 @@ int CacheImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoLi
 
     levelInfoList.clear();
 
-    mContentInfoList[0].getLevelInfoList(levelInfoList);
+    mSearchStructure[mSSI].mContentInfoList[0].getLevelInfoList(levelInfoList);
     return Result::OK;
   }
   catch (...)
@@ -5197,7 +5012,7 @@ void CacheImplementation::readContentList()
     if (mContentStorage == nullptr)
       return;
 
-    mContentInfoList[0].clear();
+    mContentInfoList.clear();
 
     uint startFileId = 0;
     uint startMessageIndex = 0;
@@ -5222,7 +5037,7 @@ void CacheImplementation::readContentList()
         startMessageIndex = contentInfo->mMessageIndex + 1;
 
         T::ContentInfo *newContentInfo = contentInfo->duplicate();
-        if (mContentInfoList[0].addContentInfo(newContentInfo) != newContentInfo)
+        if (mContentInfoList.addContentInfo(newContentInfo) != newContentInfo)
           delete newContentInfo;
       }
     }
@@ -5276,15 +5091,12 @@ void CacheImplementation::event_clear(T::EventInfo& eventInfo)
 
     mContentTimeCache.clear();
 
-    mFileInfoListByName.clear();
     mFileInfoList.clear();
     mProducerInfoList.clear();
     mGenerationInfoList.clear();
     mDataServerInfoList.clear();
     mEventInfoList.clear();
-
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].clear();
+    mContentInfoList.clear();
   }
   catch (...)
   {
@@ -5302,57 +5114,6 @@ void CacheImplementation::event_contentServerReload(T::EventInfo& eventInfo)
   try
   {
     // printf("EVENT[%llu]: reload\n",eventInfo.mEventId);
-#if 0
-    if (mContentStorage != nullptr)
-    {
-      AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
-
-      mUpdateInProgress = true;
-      mLastProcessedEventId = 0;
-
-      mFileInfoListByName.clear();
-      mFileInfoList.clear();
-      mProducerInfoList.clear();
-      mGenerationInfoList.clear();
-      mDataServerInfoList.clear();
-      mContentServerInfoList.clear();
-      mEventInfoList.clear();
-
-      for (int t=CONTENT_LIST_COUNT; t>=0; t--)
-        mContentInfoList[t].clear();
-
-      mMaxFileId = 0;
-      mMaxGenerationId = 0;
-      mMaxEventId = 0;
-
-      T::EventInfo eventInfo;
-      mUpdateInProgress = true;
-      mContentStorage->getLastEventInfo(mSessionId,0,0,eventInfo);
-
-      mLastProcessedEventId = eventInfo.mEventId;
-      mContentStorageStartTime = eventInfo.mServerTime;
-
-      readDataServerList();
-      readProducerList();
-      readGenerationList();
-      readFileList();
-
-      mFileInfoListByName = mFileInfoList;
-
-      mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
-      mFileInfoListByName.sort(T::FileInfo::ComparisonMethod::fileName);
-
-      readContentList();
-
-      for (int t=1; t<CONTENT_LIST_COUNT; t++)
-        mContentInfoList[t] = mContentInfoList[0];
-
-      mContentInfoList[0].sort(T::ContentInfo::ComparisonMethod::file_message);
-      mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time);
-      mContentInfoList[2].sort(T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time);
-      mUpdateInProgress = false;
-    }
-#endif
   }
   catch (...)
   {
@@ -5377,7 +5138,7 @@ void CacheImplementation::event_producerAdded(T::EventInfo& eventInfo)
     T::ProducerInfo producerInfo;
     if (mContentStorage->getProducerInfoById(mSessionId,eventInfo.mId1,producerInfo) == Result::OK)
     {
-      producerInfo.print(std::cout,0,0);
+      //producerInfo.print(std::cout,0,0);
       mProducerInfoList.addProducerInfo(producerInfo.duplicate());
     }
   }
@@ -5400,13 +5161,7 @@ void CacheImplementation::event_producerDeleted(T::EventInfo& eventInfo)
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-    {
-      if (mContentInfoListEnabled[t])
-        mContentInfoList[t].deleteContentInfoByProducerId(eventInfo.mId1);
-    }
-
-    mFileInfoListByName.deleteFileInfoByProducerId(eventInfo.mId1);
+    mContentInfoList.deleteContentInfoByProducerId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoByProducerId(eventInfo.mId1);
     mProducerInfoList.deleteProducerInfoById(eventInfo.mId1);
   }
@@ -5429,13 +5184,7 @@ void CacheImplementation::event_producerListDeletedBySourceId(T::EventInfo& even
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-    {
-      if (mContentInfoListEnabled[t])
-        mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
-    }
-
-    mFileInfoListByName.deleteFileInfoBySourceId(eventInfo.mId1);
+    mContentInfoList.deleteContentInfoBySourceId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoBySourceId(eventInfo.mId1);
     mGenerationInfoList.deleteGenerationInfoListBySourceId(eventInfo.mId1);
     mProducerInfoList.deleteProducerInfoListBySourceId(eventInfo.mId1);
@@ -5488,15 +5237,8 @@ void CacheImplementation::event_generationDeleted(T::EventInfo& eventInfo)
     if (it != mContentTimeCache.end())
       mContentTimeCache.erase(eventInfo.mId1);
 
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-    {
-      if (mContentInfoListEnabled[t])
-        mContentInfoList[t].deleteContentInfoByGenerationId(eventInfo.mId1);
-    }
-
-    mFileInfoListByName.deleteFileInfoByGenerationId(eventInfo.mId1);
+    mContentInfoList.deleteContentInfoByGenerationId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoByGenerationId(eventInfo.mId1);
-
     mGenerationInfoList.deleteGenerationInfoById(eventInfo.mId1);
   }
   catch (...)
@@ -5539,13 +5281,7 @@ void CacheImplementation::event_generationListDeletedByProducerId(T::EventInfo& 
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-    {
-      if (mContentInfoListEnabled[t])
-        mContentInfoList[t].deleteContentInfoByProducerId(eventInfo.mId1);
-    }
-
-    mFileInfoListByName.deleteFileInfoByProducerId(eventInfo.mId1);
+    mContentInfoList.deleteContentInfoByProducerId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoByProducerId(eventInfo.mId1);
     mGenerationInfoList.deleteGenerationInfoListByProducerId(eventInfo.mId1);
   }
@@ -5568,13 +5304,7 @@ void CacheImplementation::event_generationListDeletedBySourceId(T::EventInfo& ev
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-    {
-      if (mContentInfoListEnabled[t])
-        mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
-    }
-
-    mFileInfoListByName.deleteFileInfoBySourceId(eventInfo.mId1);
+    mContentInfoList.deleteContentInfoBySourceId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoBySourceId(eventInfo.mId1);
     mGenerationInfoList.deleteGenerationInfoListBySourceId(eventInfo.mId1);
   }
@@ -5620,9 +5350,6 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
             if (mFileInfoList.getFileInfoById(fileInfo->mFileId) == nullptr)
             {
               mFileInfoList.addFileInfo(fileInfo);
-              if (mDelayedFileAddList.find(fileInfo->mFileId) == mDelayedFileAddList.end())
-                mDelayedFileAddList.insert(fileInfo->mFileId);
-              //mFileInfoListByName.addFileInfo(fileInfo);
             }
             else
             {
@@ -5634,7 +5361,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
             T::ContentInfo *contentInfo = new T::ContentInfo();
             contentInfo->setCsv(s);
             //printf("%s\n",s);
-            if (mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(contentInfo->mFileId,contentInfo->mMessageIndex) == nullptr)
+            if (mContentInfoList.getContentInfoByFileIdAndMessageIndex(contentInfo->mFileId,contentInfo->mMessageIndex) == nullptr)
             {
               auto it = mContentTimeCache.find(contentInfo->mGenerationId);
               if (it != mContentTimeCache.end())
@@ -5643,16 +5370,8 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
                   it->second.insert(contentInfo->mForecastTime);
               }
 
-              if (mContentInfoList[0].addContentInfo(contentInfo) == contentInfo)
+              if (mContentInfoList.addContentInfo(contentInfo) == contentInfo)
               {
-                // Addition ok
-                if (mContentSortingFlags > 1)
-                {
-                  ulonglong fid = C_UINT64(contentInfo->mFileId);
-                  ulonglong id = (fid << 32) + contentInfo->mMessageIndex;
-                  if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
-                    mDelayedContentAddList.insert(id);
-                }
               }
               else
               {
@@ -5681,9 +5400,6 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
       {
         T::FileInfo *fInfo = fileInfo.duplicate();
         mFileInfoList.addFileInfo(fInfo);
-        if (mDelayedFileAddList.find(fileInfo.mFileId) == mDelayedFileAddList.end())
-          mDelayedFileAddList.insert(fileInfo.mFileId);
-        //mFileInfoListByName.addFileInfo(fInfo);
 
         if (eventInfo.mId3 > 0)
         {
@@ -5696,7 +5412,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
               for (uint c=0; c<len; c++)
               {
                 T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
-                T::ContentInfo *oInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
+                T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
                 if (oInfo == nullptr  ||  (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
                 {
                   if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
@@ -5714,16 +5430,8 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
                         it->second.insert(cInfo->mForecastTime);
                     }
 
-                    if (mContentInfoList[0].addContentInfo(cInfo) == cInfo)
+                    if (mContentInfoList.addContentInfo(cInfo) == cInfo)
                     {
-                      // Addition ok
-                      if (mContentSortingFlags > 1)
-                      {
-                        ulonglong fid = C_UINT64(cInfo->mFileId);
-                        ulonglong id = (fid << 32) + cInfo->mMessageIndex;
-                        if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
-                          mDelayedContentAddList.insert(id);
-                      }
                     }
                     else
                     {
@@ -5758,7 +5466,7 @@ void CacheImplementation::event_fileDeleted(T::EventInfo& eventInfo)
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    int cnt = mContentInfoList[0].markDeletedByFileId(eventInfo.mId1);
+    int cnt = mContentInfoList.markDeletedByFileId(eventInfo.mId1);
     if (cnt > 0)
       mContentDeleteCount += cnt;
 
@@ -5800,14 +5508,10 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
       T::FileInfo *info = mFileInfoList.getFileInfoById(eventInfo.mId1);
       if (info != nullptr)
       {
-        mContentDeleteCount += mContentInfoList[0].markDeletedByFileId(info->mFileId);
+        mContentDeleteCount += mContentInfoList.markDeletedByFileId(info->mFileId);
 
 /*
-        for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-        {
-          if (mContentInfoListEnabled[t])
-            mContentInfoList[t].deleteContentInfoByFileId(eventInfo.mId1);
-        }
+        mContentInfoList.deleteContentInfoByFileId(eventInfo.mId1);
 */
         *info = fileInfo;
       }
@@ -5815,7 +5519,6 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
       {
         T::FileInfo *fInfo = fileInfo.duplicate();
         mFileInfoList.addFileInfo(fInfo);
-        mFileInfoListByName.addFileInfo(fInfo);
       }
 
       if ((fileInfo.mFlags & T::FileInfo::Flags::PredefinedContent) != 0)
@@ -5827,7 +5530,7 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
           for (uint c=0; c<len; c++)
           {
             T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
-            T::ContentInfo *oInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
+            T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
             if (oInfo == nullptr  ||  (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
             {
               if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
@@ -5838,16 +5541,8 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
               {
                 T::ContentInfo *cInfo = info->duplicate();
 
-                if (mContentInfoList[0].addContentInfo(cInfo) == cInfo)
+                if (mContentInfoList.addContentInfo(cInfo) == cInfo)
                 {
-                  // Addition ok
-                  if (mContentSortingFlags > 1)
-                  {
-                    ulonglong fid = C_UINT64(cInfo->mFileId);
-                    ulonglong id = (fid << 32) + cInfo->mMessageIndex;
-                    if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
-                      mDelayedContentAddList.insert(id);
-                  }
                 }
                 else
                 {
@@ -5880,13 +5575,7 @@ void CacheImplementation::event_fileListDeletedByGroupFlags(T::EventInfo& eventI
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-    {
-      if (mContentInfoListEnabled[t])
-        mContentInfoList[t].deleteContentInfoByGroupFlags(eventInfo.mId1);
-    }
-
-    mFileInfoListByName.deleteFileInfoByGroupFlags(eventInfo.mId1);
+    mContentInfoList.deleteContentInfoByGroupFlags(eventInfo.mId1);
     mFileInfoList.deleteFileInfoByGroupFlags(eventInfo.mId1);
   }
   catch (...)
@@ -5908,13 +5597,7 @@ void CacheImplementation::event_fileListDeletedByProducerId(T::EventInfo& eventI
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-    {
-      if (mContentInfoListEnabled[t])
-        mContentInfoList[t].deleteContentInfoByProducerId(eventInfo.mId1);
-    }
-
-    mFileInfoListByName.deleteFileInfoByProducerId(eventInfo.mId1);
+    mContentInfoList.deleteContentInfoByProducerId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoByProducerId(eventInfo.mId1);
   }
   catch (...)
@@ -5936,13 +5619,7 @@ void CacheImplementation::event_fileListDeletedByGenerationId(T::EventInfo& even
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-    {
-      if (mContentInfoListEnabled[t])
-        mContentInfoList[t].deleteContentInfoByGenerationId(eventInfo.mId1);
-    }
-
-    mFileInfoListByName.deleteFileInfoByGenerationId(eventInfo.mId1);
+    mContentInfoList.deleteContentInfoByGenerationId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoByGenerationId(eventInfo.mId1);
   }
   catch (...)
@@ -5965,13 +5642,7 @@ void CacheImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventInf
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-    {
-      if (mContentInfoListEnabled[t])
-        mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
-    }
-
-    mFileInfoListByName.deleteFileInfoBySourceId(eventInfo.mId1);
+    mContentInfoList.deleteContentInfoBySourceId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoBySourceId(eventInfo.mId1);
   }
   catch (...)
@@ -5992,12 +5663,7 @@ void CacheImplementation::event_contentListDeletedByFileId(T::EventInfo& eventIn
     // printf("EVENT[%llu]: contentListDeletedByFileId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-    {
-      if (mContentInfoListEnabled[t])
-        mContentInfoList[t].deleteContentInfoByFileId(eventInfo.mId1);
-    }
+    mContentInfoList.deleteContentInfoByFileId(eventInfo.mId1);
   }
   catch (...)
   {
@@ -6017,12 +5683,7 @@ void CacheImplementation::event_contentListDeletedByGroupFlags(T::EventInfo& eve
     // printf("EVENT[%llu]: contentListDeletedByGroupFlags(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-    {
-      if (mContentInfoListEnabled[t])
-        mContentInfoList[t].deleteContentInfoByGroupFlags(eventInfo.mId1);
-    }
+    mContentInfoList.deleteContentInfoByGroupFlags(eventInfo.mId1);
   }
   catch (...)
   {
@@ -6042,12 +5703,7 @@ void CacheImplementation::event_contentListDeletedByProducerId(T::EventInfo& eve
     // printf("EVENT[%llu]: contentListDeletedByProducerId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-    {
-      if (mContentInfoListEnabled[t])
-        mContentInfoList[t].deleteContentInfoByProducerId(eventInfo.mId1);
-    }
+    mContentInfoList.deleteContentInfoByProducerId(eventInfo.mId1);
   }
   catch (...)
   {
@@ -6067,12 +5723,7 @@ void CacheImplementation::event_contentListDeletedBySourceId(T::EventInfo& event
     // printf("EVENT[%llu]: contentListDeletedBySourceId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-    {
-      if (mContentInfoListEnabled[t])
-        mContentInfoList[t].deleteContentInfoBySourceId(eventInfo.mId1);
-    }
+    mContentInfoList.deleteContentInfoBySourceId(eventInfo.mId1);
   }
   catch (...)
   {
@@ -6092,11 +5743,7 @@ void CacheImplementation::event_contentListDeletedByGenerationId(T::EventInfo& e
     // printf("EVENT[%llu]: contentListDeletedByGenerationId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-    {
-      mContentInfoList[t].deleteContentInfoByGenerationId(eventInfo.mId1);
-    }
+    mContentInfoList.deleteContentInfoByGenerationId(eventInfo.mId1);
   }
   catch (...)
   {
@@ -6143,7 +5790,7 @@ void CacheImplementation::event_dataServerDeleted(T::EventInfo& eventInfo)
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    mContentInfoList[0].unregisterContentInfoByServerId(eventInfo.mId1);
+    mContentInfoList.unregisterContentInfoByServerId(eventInfo.mId1);
     mContentCount = 0xFFFFFFFF;
 
     mDataServerInfoList.deleteServerInfoById(eventInfo.mId1);
@@ -6167,7 +5814,7 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    T::ContentInfo *oInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
+    T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
     if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
     {
       // printf("ALREADY IN CACHE %u:%u\n",eventInfo.mId1,eventInfo.mId2);
@@ -6187,7 +5834,7 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
 
     //contentInfo.print(std::cout,0,0);
 
-    if (mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(contentInfo.mFileId,contentInfo.mMessageIndex) == nullptr)
+    if (mContentInfoList.getContentInfoByFileIdAndMessageIndex(contentInfo.mFileId,contentInfo.mMessageIndex) == nullptr)
     {
       auto it = mContentTimeCache.find(contentInfo.mGenerationId);
       if (it != mContentTimeCache.end())
@@ -6197,40 +5844,15 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
       }
 
       T::ContentInfo *cInfo = contentInfo.duplicate();
-      if (mContentInfoList[0].addContentInfo(cInfo) == cInfo)
+      if (mContentInfoList.addContentInfo(cInfo) == cInfo)
       {
         // Addition ok
-
-        if (mContentSortingFlags > 1)
-        {
-          ulonglong fid = C_UINT64(cInfo->mFileId);
-          ulonglong id = (fid << 32) + cInfo->mMessageIndex;
-          if (mDelayedContentAddList.find(id) == mDelayedContentAddList.end())
-            mDelayedContentAddList.insert(id);
-        }
       }
       else
       {
         // Additon failed. The content probably exists
         delete cInfo;
       }
-
-#if 0
-      T::ContentInfo *aInfo = mContentInfoList[0].addContentInfo(cInfo);
-      if (aInfo != cInfo)
-      {
-        // Addition failed. The content probably exists
-        delete cInfo;
-      }
-
-      for (int t=1; t<CONTENT_LIST_COUNT; t++)
-      {
-        if (mContentInfoListEnabled[t])
-        {
-          mContentInfoList[t].addContentInfo(aInfo);
-        }
-      }
-#endif
     }
   }
   catch (...)
@@ -6252,14 +5874,10 @@ void CacheImplementation::event_contentDeleted(T::EventInfo& eventInfo)
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    T::ContentInfo *contentInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
+    T::ContentInfo *contentInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
     if (contentInfo != nullptr)
     {
-      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      {
-        if (mContentInfoListEnabled[t])
-          mContentInfoList[t].deleteContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
-      }
+       mContentInfoList.deleteContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
     }
   }
   catch (...)
@@ -6289,7 +5907,7 @@ void CacheImplementation::event_contentRegistered(T::EventInfo& eventInfo)
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    T::ContentInfo *info = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
+    T::ContentInfo *info = mContentInfoList.getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
     if (info != nullptr)
     {
       info->mServerFlags = info->mServerFlags | sf;
@@ -6314,13 +5932,7 @@ void CacheImplementation::event_deleteVirtualContent(T::EventInfo& eventInfo)
     PRINT_DATA(mDebugLog,"Delete virtual content event received\n");
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-    {
-      if (mContentInfoListEnabled[t])
-        mContentInfoList[t].deleteVirtualContent();
-    }
-
-    mFileInfoListByName.deleteVirtualFiles();
+    mContentInfoList.deleteVirtualContent();
     mFileInfoList.deleteVirtualFiles();
   }
   catch (...)
@@ -6341,13 +5953,7 @@ void CacheImplementation::event_updateVirtualContent(T::EventInfo& eventInfo)
     PRINT_DATA(mDebugLog,"Update virtual content event received\n");
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-    {
-      if (mContentInfoListEnabled[t])
-        mContentInfoList[t].deleteVirtualContent();
-    }
-
-    mFileInfoListByName.deleteVirtualFiles();
+    mContentInfoList.deleteVirtualContent();
     mFileInfoList.deleteVirtualFiles();
   }
   catch (...)
@@ -6513,6 +6119,9 @@ void CacheImplementation::processEvents(bool eventThread)
       return;
     }
 
+    if (mFileDeleteCount == 0  &&  mContentDeleteCount == 0)
+      swapData();
+
     AutoThreadLock eventLock(&mEventProcessingLock);
 
     uint len = 1000;
@@ -6583,7 +6192,6 @@ void CacheImplementation::processEvents(bool eventThread)
     {
       PRINT_DATA(mDebugLog,"* Deleting files that were marked to be deleted : %u\n",mFileDeleteCount);
 
-      mFileInfoListByName.deleteMarkedFiles();
       mFileInfoList.deleteMarkedFiles();
       mFileDeleteCount = 0;
     }
@@ -6591,81 +6199,9 @@ void CacheImplementation::processEvents(bool eventThread)
     if (mContentDeleteCount > 0)
     {
       PRINT_DATA(mDebugLog,"* Deleting content that was marked to be deleted : %u\n",mContentDeleteCount);
-      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      {
-        mContentInfoList[t].deleteMarkedContent();
-      }
+      mContentInfoList.deleteMarkedContent();
       mContentDeleteCount = 0;
     }
-
-    time_t timeNow = time(nullptr);
-
-    if (mDelayedFileAddList.size() > 1000000 || (mDelayedFileAddList.size() > 0  &&  (timeNow - mDelayedFileAdditionTime)  > 30))
-    {
-      PRINT_DATA(mDebugLog,"* Adding files that were waiting the addition : %ld\n",mDelayedFileAddList.size());
-
-      T::FileInfoList list;
-      list.setReleaseObjects(false);
-
-      AutoWriteLock lock(&mFileModificationLock,__FILE__,__LINE__);
-
-      for (auto id = mDelayedFileAddList.begin(); id != mDelayedFileAddList.end(); ++id)
-      {
-        T::FileInfo *fInfo = mFileInfoList.getFileInfoByIdNoLock(*id);
-        if (fInfo != nullptr &&  (fInfo->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
-          list.addFileInfo(fInfo);
-      }
-
-      mFileInfoListByName.addFileInfoListNoLock(list);
-      mDelayedFileAddList.clear();
-      PRINT_DATA(mDebugLog,"  -- File addition ready\n");
-
-      mDelayedFileAdditionTime = time(nullptr);
-      timeNow = time(nullptr);
-    }
-
-
-    if (mDelayedContentAddList.size() > 1000000 || (mDelayedContentAddList.size() > 0  &&  (timeNow - mDelayedContentAdditionTime)  > 30))
-    {
-      PRINT_DATA(mDebugLog,"* Adding content that was waiting the addition : %ld\n",mDelayedContentAddList.size());
-
-      T::ContentInfoList list;
-      list.setReleaseObjects(false);
-
-      // We have to lock the content list 0 for the whole operation, because
-      // other content lists are using the same pointers.
-
-      AutoWriteLock lock(&mContentModificationLock,__FILE__,__LINE__);
-
-      for (auto id = mDelayedContentAddList.begin(); id != mDelayedContentAddList.end(); ++id)
-      {
-        uint fileId = (*id >> 32) & 0xFFFFFFFF;
-        uint messageIndex = *id & 0xFFFFFFFF;
-
-        T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndexNoLock(fileId,messageIndex);
-        if (cInfo != nullptr &&  (cInfo->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-          list.addContentInfo(cInfo);
-      }
-
-      for (int t=1; t<CONTENT_LIST_COUNT; t++)
-      {
-        if (mContentInfoListEnabled[t])
-        {
-          PRINT_DATA(mDebugLog,"  -- Adding content to content list %u (%u + %u)\n",t,mContentInfoList[t].getLength(),list.getLength());
-
-          mContentInfoList[t].addContentInfoListNoLock(list);
-        }
-      }
-
-      mDelayedContentAddList.clear();
-
-      PRINT_DATA(mDebugLog,"  -- Content addition ready\n");
-      mDelayedContentAdditionTime = time(nullptr);
-
-      //for (int t=0; t<CONTENT_LIST_COUNT; t++)
-      //  printf("contentList[%u] = %u\n",t,mContentInfoList[t].getLength());
-    }
-
 
     for (auto it = mContentTimeCache.begin();  it != mContentTimeCache.end(); ++it)
     {
@@ -6742,14 +6278,14 @@ void CacheImplementation::saveData()
       if (mFileCount != mFileInfoList.getLength())
         mFileInfoList.writeToFile(mSaveDir + "/files.csv");
 
-      if (mContentCount != mContentInfoList[0].getLength())
-        mContentInfoList[0].writeToFile(mSaveDir + "/content.csv");
+      if (mContentCount != mContentInfoList.getLength())
+        mContentInfoList.writeToFile(mSaveDir + "/content.csv");
 
       mDataServerCount = mDataServerInfoList.getLength();
       mProducerCount = mProducerInfoList.getLength();
       mGenerationCount = mGenerationInfoList.getLength();
-      mFileCount= mFileInfoList.getLength();
-      mContentCount = mContentInfoList[0].getLength();
+      mFileCount = mFileInfoList.getLength();
+      mContentCount = mContentInfoList.getLength();
     }
   }
   catch (...)
@@ -6759,6 +6295,126 @@ void CacheImplementation::saveData()
 }
 
 
+
+
+
+void CacheImplementation::swapData()
+{
+  //FUNCTION_TRACE
+  try
+  {
+    int diff = time(nullptr) - mDataSwapTime;
+
+    if (diff < 60)
+    {
+      SearchStructure *ss = &mSearchStructure[1];
+      if (mSSI == 1)
+        ss = &mSearchStructure[0];
+
+      if (diff > 30  &&  ss->mProducerInfoList.getLength() > 0)
+      {
+        // Releasing memory
+
+        ss->mDataServerInfoList.clear();
+        ss->mProducerInfoList.clear();
+        ss->mGenerationInfoList.clear();
+        ss->mFileInfoListByName.clear();
+        ss->mFileInfoList.clear();
+
+        for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+          ss->mContentInfoList[t].clear();
+      }
+
+      return;
+    }
+
+
+    printf("###### SWAP DATA ######\n");
+
+    SearchStructure *ss = &mSearchStructure[1];
+    SearchStructure *st = &mSearchStructure[0];
+    if (mSSI == 1)
+    {
+      ss = &mSearchStructure[0];
+      st = &mSearchStructure[1];
+    }
+
+    if (st->mDataServerInfoList.getHash() == mDataServerInfoList.getHash() &&
+        st->mProducerInfoList.getHash() == mProducerInfoList.getHash() &&
+        st->mGenerationInfoList.getHash() == mGenerationInfoList.getHash() &&
+        st->mFileInfoList.getHash() == mFileInfoList.getHash() &&
+        st->mContentInfoList[0].getHash() == mContentInfoList.getHash())
+    {
+      // Nothing has changed. No swapping needed.
+
+      printf("---- swap not needed\n");
+      mDataSwapTime = time(nullptr);
+      return;
+    }
+
+    ss->mDataServerInfoList.clear();
+    ss->mProducerInfoList.clear();
+    ss->mGenerationInfoList.clear();
+    ss->mFileInfoListByName.clear();
+    ss->mFileInfoList.clear();
+
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+      ss->mContentInfoList[t].clear();
+
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+
+    ss->mDataServerInfoList = mDataServerInfoList;
+    ss->mProducerInfoList = mProducerInfoList;
+    ss->mGenerationInfoList = mGenerationInfoList;
+    ss->mFileInfoList = mFileInfoList;
+    ss->mFileInfoListByName = ss->mFileInfoList;
+    ss->mContentInfoList[0] = mContentInfoList;
+
+    ss->mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
+    ss->mFileInfoListByName.sort(T::FileInfo::ComparisonMethod::fileName);
+
+
+    for (int t=1; t<CONTENT_LIST_COUNT; t++)
+    {
+      if (mContentInfoListEnabled[t])
+        ss->mContentInfoList[t] = ss->mContentInfoList[0];
+    }
+
+    ss->mContentInfoList[0].sort(T::ContentInfo::ComparisonMethod::file_message);
+
+    if (mContentInfoListEnabled[1])
+      ss->mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time);
+
+    if (mContentInfoListEnabled[2])
+      ss->mContentInfoList[2].sort(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
+
+    if (mContentInfoListEnabled[3])
+      ss->mContentInfoList[3].sort(T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time);
+
+    if (mContentInfoListEnabled[4])
+      ss->mContentInfoList[4].sort(T::ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time);
+
+    if (mContentInfoListEnabled[5])
+      ss->mContentInfoList[5].sort(T::ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time);
+
+    if (mContentInfoListEnabled[6])
+      ss->mContentInfoList[6].sort(T::ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time);
+
+    if (mContentInfoListEnabled[7])
+      ss->mContentInfoList[7].sort(T::ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time);
+
+    if (mSSI == 1)
+      mSSI = 0;
+    else
+      mSSI = 1;
+
+    mDataSwapTime = time(nullptr);
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
 
 
 }

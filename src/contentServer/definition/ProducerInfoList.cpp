@@ -3,6 +3,7 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/AutoThreadLock.h>
 #include <grid-files/common/ShowFunction.h>
+#include <boost/functional/hash.hpp>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
@@ -253,6 +254,38 @@ ProducerInfo* ProducerInfoList::getProducerInfoByName(std::string producerName)
 }
 
 
+
+
+
+std::size_t ProducerInfoList::getHash()
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::size_t hash = 0;
+
+    AutoReadLock lock(&mModificationLock);
+    uint sz = getLength();
+    for (uint t=0; t<sz; t++)
+    {
+      ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
+      if (info != nullptr)
+      {
+        boost::hash_combine(hash,info->mProducerId);
+        boost::hash_combine(hash,info->mName);
+        boost::hash_combine(hash,info->mTitle);
+        boost::hash_combine(hash,info->mDescription);
+        boost::hash_combine(hash,info->mFlags);
+        boost::hash_combine(hash,info->mSourceId);
+      }
+    }
+    return hash;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
 
 
 

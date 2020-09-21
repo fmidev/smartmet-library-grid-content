@@ -840,6 +840,39 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,
 
 
 
+std::size_t FileInfoList::getHash()
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::size_t hash = 0;
+
+    if (mArray == nullptr ||  mLength == 0)
+      return hash;
+
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    uint sz = getLength();
+
+    for (uint t=0; t<sz; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
+      {
+        boost::hash_combine(hash,info->mFileId);
+      }
+    }
+    return hash;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 std::size_t FileInfoList::getHashByProducerId(uint producerId)
 {
   FUNCTION_TRACE

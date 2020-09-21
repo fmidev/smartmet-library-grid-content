@@ -34,6 +34,7 @@ class ProducerInfoList
     ProducerInfo*     getProducerInfoByIndexNoCheck(uint index);
     void              getProducerInfoListBySourceId(uint sourceId,ProducerInfoList& producerInfoList);
     uint              getLength();
+    std::size_t       getHash();
     void              setLockingEnabled(bool lockingEnabled);
     void              sortByName();
     void              lock();

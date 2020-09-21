@@ -134,6 +134,7 @@ class ContentInfoList
     void                getParamLevelInfoListByFmiParameterId(T::ParamId fmiParameterId,ParameterLevelInfoList& parameterLevelInfoList);
 
     void                getLevelInfoList(T::LevelInfoList& levelInfoList);
+    std::size_t         getHash();
     std::size_t         getHashByProducerId(uint producerId);
 
     uint                getLength()const;

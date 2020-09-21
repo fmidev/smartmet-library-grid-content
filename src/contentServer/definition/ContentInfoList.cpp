@@ -6766,6 +6766,39 @@ void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint gene
 
 
 
+std::size_t ContentInfoList::getHash()
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::size_t hash = 0;
+
+    if (mArray == nullptr ||  mLength == 0)
+      return hash;
+
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      {
+        boost::hash_combine(hash,info->mFileId);
+        boost::hash_combine(hash,info->mMessageIndex);
+      }
+    }
+    return hash;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 std::size_t ContentInfoList::getHashByProducerId(uint producerId)
 {
   FUNCTION_TRACE

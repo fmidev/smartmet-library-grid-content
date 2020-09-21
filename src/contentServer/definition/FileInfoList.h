@@ -56,6 +56,7 @@ class FileInfoList
     void           getFileInfoListByGenerationId(uint generationId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
     void           getFileInfoListBySourceId(uint sourceId,FileInfoList& fileInfoList);
     void           getFileInfoListBySourceId(uint sourceId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
+    std::size_t    getHash();
     std::size_t    getHashByProducerId(uint producerId);
     uint           getLength();
     bool           getReleaseObjects();

@@ -890,6 +890,38 @@ void GenerationInfoList::getGenerationInfoListByProducerId(uint producerId,Gener
 
 
 
+std::size_t GenerationInfoList::getHash()
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::size_t hash = 0;
+    if (mArray == nullptr ||  mLength == 0)
+      return hash;
+
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+
+    int len = getLength();
+    for (int t=0; t<len; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        boost::hash_combine(hash,info->mGenerationId);
+      }
+    }
+    return hash;
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+  }
+}
+
+
+
+
+
 std::size_t GenerationInfoList::getHashByProducerId(uint producerId)
 {
   FUNCTION_TRACE

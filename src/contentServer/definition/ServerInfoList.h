@@ -32,6 +32,7 @@ class ServerInfoList
     ServerInfo*     getServerInfoByIor(std::string serverIor);
     ServerInfo*     getServerInfoByName(std::string serverName);
     ServerInfo*     getPreviousServerInfoById(uint serverId);
+    std::size_t     getHash();
     uint            getLength();
     void            lock();
     void            unlock();
