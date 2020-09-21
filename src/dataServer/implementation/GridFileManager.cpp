@@ -339,7 +339,7 @@ void GridFileManager::getVirtualFiles(std::set<uint>& idList)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
     {
@@ -363,7 +363,7 @@ GRID::GridFile_sptr GridFileManager::getFileById(uint fileId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     auto it = mFileList.find(fileId);
 
@@ -393,7 +393,7 @@ GRID::GridFile_sptr GridFileManager::getFileByIdNoMapping(uint fileId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     auto it = mFileList.find(fileId);
 
