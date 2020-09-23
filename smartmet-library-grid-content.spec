@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 20.9.21
+Version: 20.9.23
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -22,9 +22,9 @@ BuildRequires: omniORB-devel
 BuildRequires: postgresql95-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 20.8.21
-BuildRequires: smartmet-library-grid-files-devel >= 20.9.18
+BuildRequires: smartmet-library-grid-files-devel >= 20.9.23
 BuildRequires: smartmet-library-macgyver-devel >= 20.9.18
-BuildRequires: smartmet-library-spine-devel >= 20.9.14
+BuildRequires: smartmet-library-spine-devel >= 20.9.23
 Requires: boost169-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
@@ -32,9 +32,9 @@ Requires: lua-devel
 Requires: omniORB
 Requires: postgresql95
 Requires: smartmet-library-gis >= 20.8.21
-Requires: smartmet-library-grid-files >= 20.9.18
+Requires: smartmet-library-grid-files >= 20.9.23
 Requires: smartmet-library-macgyver >= 20.9.18
-Requires: smartmet-library-spine >= 20.9.14
+Requires: smartmet-library-spine >= 20.9.23
 Provides: %{SPECNAME}
 
 %description
@@ -76,6 +76,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Sep 23 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.9.23-1.fmi
+- Avoid locking by using copied data structures for R/O operations
+- Use Fmi::Exception instead of Spine::Exception
 * Mon Sep 21 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.9.21-1.fmi
 - Fixed WriteLock to ReadLock in getFileById
 * Fri Sep 18 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.9.18-1.fmi
