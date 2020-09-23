@@ -15,7 +15,7 @@ Function_min::Function_min()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -31,7 +31,7 @@ Function_min::Function_min(const Function_min& function)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -46,7 +46,7 @@ Function_min::~Function_min()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -71,7 +71,7 @@ float Function_min::executeFunctionCall1(std::vector<float>& parameters)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -95,7 +95,7 @@ double Function_min::executeFunctionCall1(std::vector<double>& parameters)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -130,7 +130,7 @@ void Function_min::executeFunctionCall9(uint columns,uint rows,std::vector<std::
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -163,7 +163,7 @@ void Function_min::executeFunctionCall9(uint columns,uint rows,std::vector<std::
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -178,7 +178,7 @@ Function* Function_min::duplicate()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

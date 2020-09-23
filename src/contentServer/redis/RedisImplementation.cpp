@@ -1,5 +1,5 @@
 #include "RedisImplementation.h"
-#include <grid-files/common/Exception.h>
+#include <macgyver/Exception.h>
 #include <grid-files/common/AutoThreadLock.h>
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/common/GeneralFunctions.h>
@@ -102,14 +102,14 @@ RedisImplementation::RedisImplementation()
 
       if (mMutex == nullptr && tryCount > 12)
       {
-        throw SmartMet::Spine::Exception(BCP,"Cannot init mutex!");
+        throw Fmi::Exception(BCP,"Cannot init mutex!");
       }
     }
     mLine = 0;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -130,7 +130,7 @@ RedisImplementation::~RedisImplementation()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -147,7 +147,7 @@ void RedisImplementation::lock(const char *function,uint line)
     {
       if (!mMutex->timed_lock(boost::get_system_time() + boost::posix_time::seconds(120)))
       {
-        throw SmartMet::Spine::Exception(BCP,"Cannot lock mutex!");
+        throw Fmi::Exception(BCP,"Cannot lock mutex!");
       }
       mFunction = function;
       mLine = line;
@@ -155,7 +155,7 @@ void RedisImplementation::lock(const char *function,uint line)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -172,7 +172,7 @@ void RedisImplementation::unlock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -191,13 +191,13 @@ void RedisImplementation::init(const char *redisAddress,int redisPort,const char
     openConnection();
 
     if (mContext == nullptr)
-      throw SmartMet::Spine::Exception(BCP,"Cannot connect to Redis!");
+      throw Fmi::Exception(BCP,"Cannot connect to Redis!");
 
     resetContentRegistrations();
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -240,7 +240,7 @@ int RedisImplementation::openConnection()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -261,7 +261,7 @@ void RedisImplementation::closeConnection()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -278,7 +278,7 @@ void RedisImplementation::shutdown()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -295,7 +295,7 @@ bool RedisImplementation::isSessionValid(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -315,7 +315,7 @@ bool RedisImplementation::isConnectionValid()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -443,7 +443,7 @@ int RedisImplementation::_clear(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -463,7 +463,7 @@ int RedisImplementation::_reload(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -522,7 +522,7 @@ int RedisImplementation::_addDataServerInfo(T::SessionId sessionId,T::ServerInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -557,7 +557,7 @@ int RedisImplementation::_deleteDataServerInfoById(T::SessionId sessionId,uint s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -582,7 +582,7 @@ int RedisImplementation::_getDataServerInfoById(T::SessionId sessionId,uint serv
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -615,7 +615,7 @@ int RedisImplementation::_getDataServerInfoByName(T::SessionId sessionId,std::st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -648,7 +648,7 @@ int RedisImplementation::_getDataServerInfoByIor(T::SessionId sessionId,std::str
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -675,7 +675,7 @@ int RedisImplementation::_getDataServerInfoList(T::SessionId sessionId,T::Server
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -715,7 +715,7 @@ int RedisImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& co
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -806,7 +806,7 @@ int RedisImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -841,7 +841,7 @@ int RedisImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint pro
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -876,7 +876,7 @@ int RedisImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -911,7 +911,7 @@ int RedisImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -936,7 +936,7 @@ int RedisImplementation::_getProducerInfoById(T::SessionId sessionId,uint produc
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -961,7 +961,7 @@ int RedisImplementation::_getProducerInfoByName(T::SessionId sessionId,std::stri
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -988,7 +988,7 @@ int RedisImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1055,7 +1055,7 @@ int RedisImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1082,7 +1082,7 @@ int RedisImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1122,7 +1122,7 @@ int RedisImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& coun
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1174,7 +1174,7 @@ int RedisImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1345,7 +1345,7 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1504,7 +1504,7 @@ int RedisImplementation::_getProducerParameterListByProducerId(T::SessionId sess
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1562,7 +1562,7 @@ int RedisImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1600,7 +1600,7 @@ int RedisImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint g
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1638,7 +1638,7 @@ int RedisImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1673,7 +1673,7 @@ int RedisImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1711,7 +1711,7 @@ int RedisImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1749,7 +1749,7 @@ int RedisImplementation::_deleteGenerationInfoListByProducerName(T::SessionId se
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1783,7 +1783,7 @@ int RedisImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1808,7 +1808,7 @@ int RedisImplementation::_getGenerationInfoById(T::SessionId sessionId,uint gene
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1833,7 +1833,7 @@ int RedisImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1860,7 +1860,7 @@ int RedisImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Genera
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1887,7 +1887,7 @@ int RedisImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1918,7 +1918,7 @@ int RedisImplementation::_getGenerationInfoListByProducerId(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1949,7 +1949,7 @@ int RedisImplementation::_getGenerationInfoListByProducerName(T::SessionId sessi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1976,7 +1976,7 @@ int RedisImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2013,7 +2013,7 @@ int RedisImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2049,7 +2049,7 @@ int RedisImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2088,7 +2088,7 @@ int RedisImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2140,7 +2140,7 @@ int RedisImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2192,7 +2192,7 @@ int RedisImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2293,7 +2293,7 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2439,7 +2439,7 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2599,7 +2599,7 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2635,7 +2635,7 @@ int RedisImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2682,7 +2682,7 @@ int RedisImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::strin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2713,7 +2713,7 @@ int RedisImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2748,7 +2748,7 @@ int RedisImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2783,7 +2783,7 @@ int RedisImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2818,7 +2818,7 @@ int RedisImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2879,7 +2879,7 @@ int RedisImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2922,7 +2922,7 @@ int RedisImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2957,7 +2957,7 @@ int RedisImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2988,7 +2988,7 @@ int RedisImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3025,7 +3025,7 @@ int RedisImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3050,7 +3050,7 @@ int RedisImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3079,7 +3079,7 @@ int RedisImplementation::_getFileInfoByName(T::SessionId sessionId,std::string f
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3106,7 +3106,7 @@ int RedisImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3142,7 +3142,7 @@ int RedisImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3173,7 +3173,7 @@ int RedisImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3204,7 +3204,7 @@ int RedisImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3235,7 +3235,7 @@ int RedisImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3266,7 +3266,7 @@ int RedisImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3292,7 +3292,7 @@ int RedisImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3319,7 +3319,7 @@ int RedisImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3359,7 +3359,7 @@ int RedisImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3399,7 +3399,7 @@ int RedisImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3439,7 +3439,7 @@ int RedisImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3479,7 +3479,7 @@ int RedisImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3505,7 +3505,7 @@ int RedisImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& even
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3572,7 +3572,7 @@ int RedisImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3664,7 +3664,7 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3704,7 +3704,7 @@ int RedisImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3765,7 +3765,7 @@ int RedisImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3842,7 +3842,7 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3877,7 +3877,7 @@ int RedisImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3912,7 +3912,7 @@ int RedisImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3947,7 +3947,7 @@ int RedisImplementation::_deleteContentListByFileName(T::SessionId sessionId,std
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3978,7 +3978,7 @@ int RedisImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4013,7 +4013,7 @@ int RedisImplementation::_deleteContentListByProducerId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4048,7 +4048,7 @@ int RedisImplementation::_deleteContentListByProducerName(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4082,7 +4082,7 @@ int RedisImplementation::_deleteContentListByGenerationId(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4117,7 +4117,7 @@ int RedisImplementation::_deleteContentListByGenerationName(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4148,7 +4148,7 @@ int RedisImplementation::_deleteContentListBySourceId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4235,7 +4235,7 @@ int RedisImplementation::_registerContentList(T::SessionId sessionId,uint server
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4277,7 +4277,7 @@ int RedisImplementation::_registerContentListByFileId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4303,7 +4303,7 @@ int RedisImplementation::_unregisterContentList(T::SessionId sessionId,uint serv
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4345,7 +4345,7 @@ int RedisImplementation::_unregisterContentListByFileId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4370,7 +4370,7 @@ int RedisImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4397,7 +4397,7 @@ int RedisImplementation::_getContentList(T::SessionId sessionId,uint startFileId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4424,7 +4424,7 @@ int RedisImplementation::_getContentListByFileId(T::SessionId sessionId,uint fil
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4457,7 +4457,7 @@ int RedisImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4488,7 +4488,7 @@ int RedisImplementation::_getContentListByFileName(T::SessionId sessionId,std::s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4515,7 +4515,7 @@ int RedisImplementation::_getContentListByGroupFlags(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4546,7 +4546,7 @@ int RedisImplementation::_getContentListByProducerId(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4577,7 +4577,7 @@ int RedisImplementation::_getContentListByProducerName(T::SessionId sessionId,st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4604,7 +4604,7 @@ int RedisImplementation::_getContentListByServerId(T::SessionId sessionId,uint s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4631,7 +4631,7 @@ int RedisImplementation::_getContentListByRequestCounterKey(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4662,7 +4662,7 @@ int RedisImplementation::_getContentListByGenerationId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4694,7 +4694,7 @@ int RedisImplementation::_getContentListByGenerationName(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4725,7 +4725,7 @@ int RedisImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4756,7 +4756,7 @@ int RedisImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4783,7 +4783,7 @@ int RedisImplementation::_getContentListBySourceId(T::SessionId sessionId,uint s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4834,7 +4834,7 @@ int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4889,7 +4889,7 @@ int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4944,7 +4944,7 @@ int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4999,7 +4999,7 @@ int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId se
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5076,7 +5076,7 @@ int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5131,7 +5131,7 @@ int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5203,7 +5203,7 @@ int RedisImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5238,7 +5238,7 @@ int RedisImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5297,7 +5297,7 @@ int RedisImplementation::_getContentParamListByGenerationId(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5332,7 +5332,7 @@ int RedisImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5367,7 +5367,7 @@ int RedisImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5401,7 +5401,7 @@ int RedisImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5436,7 +5436,7 @@ int RedisImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5464,7 +5464,7 @@ int RedisImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5504,7 +5504,7 @@ int RedisImplementation::_getContentCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5553,7 +5553,7 @@ int RedisImplementation::_getHashByProducerId(T::SessionId sessionId,uint produc
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5578,7 +5578,7 @@ int RedisImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoLi
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5609,7 +5609,7 @@ int RedisImplementation::_deleteVirtualContent(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5642,7 +5642,7 @@ int RedisImplementation::_updateVirtualContent(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5679,7 +5679,7 @@ int RedisImplementation::deleteDataServerById(uint serverId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5714,7 +5714,7 @@ int RedisImplementation::getDataServerById(uint serverId,T::ServerInfo& serverIn
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5755,7 +5755,7 @@ int RedisImplementation::getDataServerList(T::ServerInfoList& serverInfoList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5793,7 +5793,7 @@ int RedisImplementation::deleteProducerById(uint producerId,bool deleteGeneratio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5823,7 +5823,7 @@ int RedisImplementation::deleteProducerListBySourceId(uint sourceId,bool deleteG
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5861,7 +5861,7 @@ int RedisImplementation::getProducerById(uint producerId,T::ProducerInfo& produc
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5905,7 +5905,7 @@ int RedisImplementation::getProducerByName(std::string producerName,T::ProducerI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5946,7 +5946,7 @@ int RedisImplementation::getProducerList(T::ProducerInfoList& producerInfoList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5989,7 +5989,7 @@ int RedisImplementation::getProducerListBySourceId(uint sourceId,T::ProducerInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6027,7 +6027,7 @@ int RedisImplementation::getGenerationById(uint generationId,T::GenerationInfo& 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6071,7 +6071,7 @@ int RedisImplementation::getGenerationByName(std::string generationName,T::Gener
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6112,7 +6112,7 @@ int RedisImplementation::getGenerationList(T::GenerationInfoList& generationInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6174,7 +6174,7 @@ int RedisImplementation::getGenerationListByGeometryId(T::GeometryId geometryId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6217,7 +6217,7 @@ int RedisImplementation::getGenerationListByProducerId(uint producerId,T::Genera
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6260,7 +6260,7 @@ int RedisImplementation::getGenerationListBySourceId(uint sourceId,T::Generation
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6295,7 +6295,7 @@ int RedisImplementation::deleteGenerationById(uint generationId,bool deleteFiles
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6325,7 +6325,7 @@ int RedisImplementation::deleteGenerationListByProducerId(uint producerId,bool d
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6355,7 +6355,7 @@ int RedisImplementation::deleteGenerationListBySourceId(uint sourceId,bool delet
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6387,7 +6387,7 @@ int RedisImplementation::deleteFileById(uint fileId,bool deleteContent)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6420,7 +6420,7 @@ int RedisImplementation::deleteFileListByGroupFlags(uint groupFlags,bool deleteC
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6453,7 +6453,7 @@ int RedisImplementation::deleteFileListByGenerationId(uint generationId,bool del
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6486,7 +6486,7 @@ int RedisImplementation::deleteFileListByGenerationIdList(std::set<uint>& genera
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6527,7 +6527,7 @@ int RedisImplementation::getFileById(uint fileId,T::FileInfo& fileInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6570,7 +6570,7 @@ int RedisImplementation::getFileList(uint startFileId,uint maxRecords,T::FileInf
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6645,7 +6645,7 @@ int RedisImplementation::getFileListByGenerationId(uint generationId,uint startF
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6720,7 +6720,7 @@ int RedisImplementation::getFileListByGenerationIdList(std::set<uint>& generatio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6794,7 +6794,7 @@ int RedisImplementation::getFileListByGroupFlags(uint groupFlags,uint startFileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6827,7 +6827,7 @@ int RedisImplementation::deleteFileListByProducerId(uint producerId,bool deleteC
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6860,7 +6860,7 @@ int RedisImplementation::deleteFileListBySourceId(uint sourceId,bool deleteConte
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6934,7 +6934,7 @@ int RedisImplementation::getFileListByProducerId(uint producerId,uint startFileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7008,7 +7008,7 @@ int RedisImplementation::getFileListBySourceId(uint sourceId,uint startFileId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7082,7 +7082,7 @@ int RedisImplementation::getVirtualFiles(uint startFileId,uint maxRecords,T::Fil
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7115,7 +7115,7 @@ int RedisImplementation::deleteVirtualFiles(bool deleteContent)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7146,7 +7146,7 @@ int RedisImplementation::deleteContent(uint fileId,uint messageIndex)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7175,7 +7175,7 @@ int RedisImplementation::deleteContentByFileId(uint fileId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7204,7 +7204,7 @@ int RedisImplementation::deleteContentByProducerId(uint producerId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7233,7 +7233,7 @@ int RedisImplementation::deleteContentByGenerationId(uint generationId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7262,7 +7262,7 @@ int RedisImplementation::deleteContentByGenerationIdList(std::set<uint>& generat
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7291,7 +7291,7 @@ int RedisImplementation::deleteContentByGroupFlags(uint groupFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7320,7 +7320,7 @@ int RedisImplementation::deleteContentBySourceId(uint sourceId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7349,7 +7349,7 @@ int RedisImplementation::removeVirtualContent()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7390,7 +7390,7 @@ int RedisImplementation::setContent(T::ContentInfo& contentInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7435,7 +7435,7 @@ int RedisImplementation::getContent(uint fileId,uint messageIndex,T::ContentInfo
         contentInfo.setCsv(reply->element[t]->str);
         contentInfo.print(std::cout,0,0);
       }
-      SmartMet::Spine::Exception exception(BCP,"Got multiple records - expected one");
+      Fmi::Exception exception(BCP,"Got multiple records - expected one");
       exception.addParameter("FileId",std::to_string(fileId));
       exception.addParameter("MessageIndex",std::to_string(messageIndex));
       exception.printError();
@@ -7446,7 +7446,7 @@ int RedisImplementation::getContent(uint fileId,uint messageIndex,T::ContentInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7491,7 +7491,7 @@ int RedisImplementation::getContent(uint startFileId,uint startMessageIndex,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7561,7 +7561,7 @@ int RedisImplementation::getGenerationTimeAndGeometryList(std::set<std::string>&
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7640,7 +7640,7 @@ int RedisImplementation::getContentByGenerationId(uint generationId,uint startFi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7719,7 +7719,7 @@ int RedisImplementation::getContentByGenerationIdList(std::set<uint>& generation
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7798,7 +7798,7 @@ int RedisImplementation::getContentByGroupFlags(uint groupFlags,uint startFileId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7871,7 +7871,7 @@ int RedisImplementation::getContentByRequestCounterKey(ulonglong key,T::ContentI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7950,7 +7950,7 @@ int RedisImplementation::getVirtualContent(uint startFileId,uint startMessageInd
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -7998,7 +7998,7 @@ int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyTyp
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -8059,7 +8059,7 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -8126,7 +8126,7 @@ int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -8192,7 +8192,7 @@ int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::P
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -8235,7 +8235,7 @@ int RedisImplementation::getContentByGenerationIdAndTimeRange(uint generationId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -8295,7 +8295,7 @@ int RedisImplementation::getContentByForecastTimeList(std::vector<T::ForecastTim
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -8376,7 +8376,7 @@ int RedisImplementation::getContentByProducerId(uint producerId,uint startFileId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -8456,7 +8456,7 @@ int RedisImplementation::getContentByServerId(uint serverId,uint startFileId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -8537,7 +8537,7 @@ int RedisImplementation::getContentBySourceId(uint sourceId,uint startFileId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -8589,7 +8589,7 @@ int RedisImplementation::getContentByFileId(uint fileId,T::ContentInfoList& cont
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -8625,7 +8625,7 @@ int RedisImplementation::unregisterContent(uint serverId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -8653,7 +8653,7 @@ void RedisImplementation::resetContentRegistrations()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -8698,7 +8698,7 @@ T::EventId RedisImplementation::addEvent(uint eventType,uint id1,uint id2,uint i
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -8746,7 +8746,7 @@ void RedisImplementation::truncateEvents()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -8775,7 +8775,7 @@ int RedisImplementation::addFilename(std::string filename,uint fileId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -8807,7 +8807,7 @@ uint RedisImplementation::getFileId(std::string filename)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -8836,7 +8836,7 @@ int RedisImplementation::deleteFilename(std::string filename)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -8878,7 +8878,7 @@ void RedisImplementation::getFilenames(std::map<std::string,uint>& fileList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -8905,7 +8905,7 @@ void RedisImplementation::syncFilenames()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 

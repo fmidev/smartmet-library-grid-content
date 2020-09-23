@@ -1,7 +1,7 @@
 #include "ClientImplementation.h"
 #include "../convert/Converter.h"
 
-#include <grid-files/common/Exception.h>
+#include <macgyver/Exception.h>
 
 
 namespace SmartMet
@@ -14,33 +14,33 @@ namespace Corba
 #define CATCH_EXCEPTION \
   catch (CORBA::TRANSIENT&)\
   {\
-    Spine::Exception exception(BCP, "Caught system exception TRANSIENT -- unable to connect the server!");\
+    Fmi::Exception exception(BCP, "Caught system exception TRANSIENT -- unable to connect the server!");\
     throw exception;\
   }\
   catch (CORBA::SystemException& ex)\
   {\
     char msg[500];\
     sprintf(msg, "Caught a CORBA::%s\n", ex._name());\
-    Spine::Exception exception(BCP, msg);\
+    Fmi::Exception exception(BCP, msg);\
     throw exception;\
   }\
   catch (CORBA::Exception& ex)\
   {\
     char msg[500];\
     sprintf(msg, "Exception CORBA::%s\n", ex._name());\
-    Spine::Exception exception(BCP, msg);\
+    Fmi::Exception exception(BCP, msg);\
     throw exception;\
   }\
   catch (omniORB::fatalException& fe)\
   {\
     char msg[500];\
     sprintf(msg, "Caught omniORB::fatalException:%s\n", fe.errmsg());\
-    Spine::Exception exception(BCP, msg);\
+    Fmi::Exception exception(BCP, msg);\
     throw exception;\
   }\
   catch (...)\
   {\
-    throw Spine::Exception(BCP, exception_operation_failed, nullptr);\
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);\
   }
 
 
@@ -55,7 +55,7 @@ ClientImplementation::ClientImplementation()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -71,7 +71,7 @@ ClientImplementation::~ClientImplementation()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -97,7 +97,7 @@ void ClientImplementation::init(std::string serviceIor)
 
     if (CORBA::is_nil(mService))
     {
-      SmartMet::Spine::Exception exception(BCP,"Can't narrow reference to type DataServer::Corba::ServiceInterace (or it was nil)!");
+      Fmi::Exception exception(BCP,"Can't narrow reference to type DataServer::Corba::ServiceInterace (or it was nil)!");
       throw exception;
     }
 
@@ -117,7 +117,7 @@ int ClientImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileId
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaGridCoordinates_var corbaGridCoordinates;
 
@@ -140,7 +140,7 @@ int ClientImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint m
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaGridData_var corbaGridData;
 
@@ -163,7 +163,7 @@ int ClientImplementation::_getGridAttributeList(T::SessionId sessionId,uint file
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList;
 
@@ -186,7 +186,7 @@ int ClientImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
   try
   {
     if (!mInitialized)
-      throw Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     ::CORBA::ULong corbaCount = 0;
 
@@ -209,7 +209,7 @@ int ClientImplementation::_getGridMessageBytes(T::SessionId sessionId,uint fileI
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaByteData_var corbaMessageBytes;
     DataServer::Corba::CorbaULongList_var corbaMessageSections;
@@ -237,7 +237,7 @@ int ClientImplementation::_getGridMessagePreloadCount(T::SessionId sessionId,uin
   try
   {
     if (!mInitialized)
-      throw Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     ::CORBA::ULong corbaCount = 0;
 
@@ -259,7 +259,7 @@ int ClientImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileI
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     SmartMet::DataServer::Corba::CorbaParamValue corbaValue;
 
@@ -282,7 +282,7 @@ int ClientImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,ui
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     SmartMet::DataServer::Corba::CorbaParamValue corbaValue;
 
@@ -305,7 +305,7 @@ int ClientImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,uin
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     SmartMet::DataServer::Corba::CorbaParamValue corbaValue;
 
@@ -328,7 +328,7 @@ int ClientImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId sessionI
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     SmartMet::DataServer::Corba::CorbaParamValue corbaValue;
 
@@ -351,7 +351,7 @@ int ClientImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint 
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
 
@@ -375,7 +375,7 @@ int ClientImplementation::_getGridValueListByLevelAndCircle(T::SessionId session
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
 
@@ -399,7 +399,7 @@ int ClientImplementation::_getGridValueListByTimeAndCircle(T::SessionId sessionI
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
 
@@ -423,7 +423,7 @@ int ClientImplementation::_getGridValueListByTimeLevelAndCircle(T::SessionId ses
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
 
@@ -447,7 +447,7 @@ int ClientImplementation::_getGridValueListByPointList(T::SessionId sessionId,ui
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaCoordinateList_var corbaPointList = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
@@ -474,7 +474,7 @@ int ClientImplementation::_getGridValueListByLevelAndPointList(T::SessionId sess
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaCoordinateList_var corbaPointList = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
@@ -501,7 +501,7 @@ int ClientImplementation::_getGridValueListByTimeAndPointList(T::SessionId sessi
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaCoordinateList_var corbaPointList = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
@@ -528,7 +528,7 @@ int ClientImplementation::_getGridValueListByTimeLevelAndPointList(T::SessionId 
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaCoordinateList_var corbaPointList = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
@@ -555,7 +555,7 @@ int ClientImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaCoordinateList_var corbaPolygonPoints = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
@@ -582,7 +582,7 @@ int ClientImplementation::_getGridValueListByLevelAndPolygon(T::SessionId sessio
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaCoordinateList_var corbaPolygonPoints = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
@@ -609,7 +609,7 @@ int ClientImplementation::_getGridValueListByTimeAndPolygon(T::SessionId session
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaCoordinateList_var corbaPolygonPoints = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
@@ -636,7 +636,7 @@ int ClientImplementation::_getGridValueListByTimeLevelAndPolygon(T::SessionId se
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaCoordinateList_var corbaPolygonPoints = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
@@ -663,7 +663,7 @@ int ClientImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaPolygonPath_var corbaPolygonPath = new DataServer::Corba::CorbaPolygonPath();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
@@ -689,7 +689,7 @@ int ClientImplementation::_getGridValueListByLevelAndPolygonPath(T::SessionId se
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaPolygonPath_var corbaPolygonPath = new DataServer::Corba::CorbaPolygonPath();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
@@ -715,7 +715,7 @@ int ClientImplementation::_getGridValueListByTimeAndPolygonPath(T::SessionId ses
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaPolygonPath_var corbaPolygonPath = new DataServer::Corba::CorbaPolygonPath();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
@@ -741,7 +741,7 @@ int ClientImplementation::_getGridValueListByTimeLevelAndPolygonPath(T::SessionI
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaPolygonPath_var corbaPolygonPath = new DataServer::Corba::CorbaPolygonPath();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
@@ -767,7 +767,7 @@ int ClientImplementation::_getGridValueListByRectangle(T::SessionId sessionId,ui
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
 
@@ -790,7 +790,7 @@ int ClientImplementation::_getGridValueVector(T::SessionId sessionId,uint fileId
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
 
@@ -813,7 +813,7 @@ int ClientImplementation::_getGridValueVectorByLevel(T::SessionId sessionId,uint
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
 
@@ -836,7 +836,7 @@ int ClientImplementation::_getGridValueVectorByTime(T::SessionId sessionId,uint 
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
 
@@ -859,7 +859,7 @@ int ClientImplementation::_getGridValueVectorByLevelAndCoordinateList(T::Session
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
     DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
@@ -890,7 +890,7 @@ int ClientImplementation::_getGridValueVectorByTimeAndCoordinateList(T::SessionI
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
     DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
@@ -921,7 +921,7 @@ int ClientImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId ses
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
@@ -950,7 +950,7 @@ int ClientImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId sess
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
@@ -979,7 +979,7 @@ int ClientImplementation::_getGridValueVectorByCoordinateList(T::SessionId sessi
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
     DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
@@ -1005,7 +1005,7 @@ int ClientImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,u
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
@@ -1034,7 +1034,7 @@ int ClientImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
 
@@ -1057,7 +1057,7 @@ int ClientImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,uint
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaDoubleList_var corbaValueVector;
 
@@ -1081,7 +1081,7 @@ int ClientImplementation::_getGridValueVectorByTimeAndLevel(T::SessionId session
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
 
@@ -1105,7 +1105,7 @@ int ClientImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
@@ -1135,7 +1135,7 @@ int ClientImplementation::_getGridValueVectorByTimeLevelAndCoordinateList(T::Ses
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
@@ -1166,7 +1166,7 @@ int ClientImplementation::_getGridIsobands(T::SessionId sessionId,uint fileId,ui
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
@@ -1199,7 +1199,7 @@ int ClientImplementation::_getGridIsobandsByGeometry(T::SessionId sessionId,uint
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
@@ -1232,7 +1232,7 @@ int ClientImplementation::_getGridIsobandsByGrid(T::SessionId sessionId,uint fil
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
@@ -1267,7 +1267,7 @@ int ClientImplementation::_getGridIsobandsByLevel(T::SessionId sessionId,uint fi
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
@@ -1300,7 +1300,7 @@ int ClientImplementation::_getGridIsobandsByTime(T::SessionId sessionId,uint fil
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
@@ -1333,7 +1333,7 @@ int ClientImplementation::_getGridIsobandsByLevelAndGeometry(T::SessionId sessio
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
@@ -1366,7 +1366,7 @@ int ClientImplementation::_getGridIsobandsByTimeAndGeometry(T::SessionId session
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
@@ -1399,7 +1399,7 @@ int ClientImplementation::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId,
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
@@ -1434,7 +1434,7 @@ int ClientImplementation::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,u
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
@@ -1469,7 +1469,7 @@ int ClientImplementation::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
@@ -1502,7 +1502,7 @@ int ClientImplementation::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId se
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
@@ -1535,7 +1535,7 @@ int ClientImplementation::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessio
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
@@ -1569,7 +1569,7 @@ int ClientImplementation::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
@@ -1600,7 +1600,7 @@ int ClientImplementation::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId se
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
@@ -1631,7 +1631,7 @@ int ClientImplementation::_getGridIsolines(T::SessionId sessionId,uint fileId,ui
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
@@ -1662,7 +1662,7 @@ int ClientImplementation::_getGridIsolinesByGeometry(T::SessionId sessionId,uint
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
@@ -1693,7 +1693,7 @@ int ClientImplementation::_getGridIsolinesByGrid(T::SessionId sessionId,uint fil
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
@@ -1726,7 +1726,7 @@ int ClientImplementation::_getGridIsolinesByLevel(T::SessionId sessionId,uint fi
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
@@ -1757,7 +1757,7 @@ int ClientImplementation::_getGridIsolinesByTime(T::SessionId sessionId,uint fil
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
@@ -1788,7 +1788,7 @@ int ClientImplementation::_getGridIsolinesByLevelAndGeometry(T::SessionId sessio
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
@@ -1819,7 +1819,7 @@ int ClientImplementation::_getGridIsolinesByTimeAndGeometry(T::SessionId session
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
@@ -1850,7 +1850,7 @@ int ClientImplementation::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId,
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
@@ -1883,7 +1883,7 @@ int ClientImplementation::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,u
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
@@ -1916,7 +1916,7 @@ int ClientImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessio
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
@@ -1948,7 +1948,7 @@ int ClientImplementation::_getMultipleGridValues(T::SessionId sessionId,T::Value
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP,"The client is not initialized!");
+      throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaValueRecordList_var corbaValueRecordList = new DataServer::Corba::CorbaValueRecordList();
     DataServer::Corba::Converter::convert(valueRecordList,corbaValueRecordList);

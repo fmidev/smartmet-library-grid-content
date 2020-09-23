@@ -1,7 +1,7 @@
 #include "VirtualContentFactory.h"
 #include "VirtualMessage.h"
 #include <grid-files/common/ShowFunction.h>
-#include <grid-files/common/Exception.h>
+#include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 
 
@@ -24,7 +24,7 @@ VirtualContentFactory::VirtualContentFactory()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -40,7 +40,7 @@ VirtualContentFactory::~VirtualContentFactory()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -58,7 +58,7 @@ void VirtualContentFactory::setContentServer(ContentServer::ServiceInterface* co
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -75,7 +75,7 @@ void VirtualContentFactory::setGridFileManager(GridFileManager* GridFileManager)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -92,7 +92,7 @@ void VirtualContentFactory::setLuaFileCollection(Lua::LuaFileCollection *luaFile
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -109,7 +109,7 @@ void VirtualContentFactory::setFunctionCollection(Functions::FunctionCollection 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -131,7 +131,7 @@ void VirtualContentFactory::addFile(T::ProducerInfo& producerInfo,T::GenerationI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -147,7 +147,7 @@ void VirtualContentFactory::addContent(T::ProducerInfo& producerInfo,T::Generati
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 

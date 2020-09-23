@@ -1,5 +1,5 @@
 #include "ParameterLevelInfoList.h"
-#include <grid-files/common/Exception.h>
+#include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 
 
@@ -16,7 +16,7 @@ ParameterLevelInfoList::ParameterLevelInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -38,7 +38,7 @@ ParameterLevelInfoList::ParameterLevelInfoList(ParameterLevelInfoList& parameter
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -58,7 +58,7 @@ ParameterLevelInfoList::~ParameterLevelInfoList()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -87,7 +87,7 @@ ParameterLevelInfoList& ParameterLevelInfoList::operator=(ParameterLevelInfoList
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -103,7 +103,7 @@ void ParameterLevelInfoList::addParameterLevelInfo(ParameterLevelInfo* parameter
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -123,7 +123,7 @@ void ParameterLevelInfoList::clear()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -142,7 +142,7 @@ ParameterLevelInfo* ParameterLevelInfoList::getParameterLevelInfoByIndex(uint in
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -157,7 +157,7 @@ ParameterLevelInfo* ParameterLevelInfoList::getParameterLevelInfoByIndexNoCheck(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -190,7 +190,7 @@ ParameterLevelInfo* ParameterLevelInfoList::getParameterLevelInfo(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -206,7 +206,7 @@ uint ParameterLevelInfoList::getLength()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -225,7 +225,7 @@ void ParameterLevelInfoList::print(std::ostream& stream,uint level,uint optionFl
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 

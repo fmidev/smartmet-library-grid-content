@@ -1,6 +1,6 @@
 #include "ServiceInterface.h"
 #include "QueryConfigurator.h"
-#include <grid-files/common/Exception.h>
+#include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/ShowFunction.h>
 #include <macgyver/StringConversion.h>
@@ -25,7 +25,7 @@ ServiceInterface::ServiceInterface()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -41,7 +41,7 @@ ServiceInterface::~ServiceInterface()
   }
   catch (...)
   {
-    Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+    Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     exception.printError();
   }
 }
@@ -59,7 +59,7 @@ void ServiceInterface::setDebugLog(Log *debugLog)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -76,7 +76,7 @@ void ServiceInterface::setProcessingLog(Log *processingLog)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -92,7 +92,7 @@ void  ServiceInterface::setDem(boost::shared_ptr<Fmi::DEM> dem)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -108,7 +108,7 @@ void ServiceInterface::setLandCover(boost::shared_ptr<Fmi::LandCover> landCover)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -124,7 +124,7 @@ void ServiceInterface::shutdown()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -146,7 +146,7 @@ int ServiceInterface::executeQuery(T::SessionId sessionId,Query& query)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -168,7 +168,7 @@ int ServiceInterface::getProducerList(T::SessionId sessionId,string_vec& produce
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -190,7 +190,7 @@ int ServiceInterface::getValuesByGridPoint(T::SessionId sessionId,T::ContentInfo
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -212,7 +212,7 @@ int ServiceInterface::getParameterValueByPointAndTime(T::SessionId sessionId,std
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -234,7 +234,7 @@ int ServiceInterface::getParameterValuesByPointListAndTime(T::SessionId sessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -256,7 +256,7 @@ int ServiceInterface::getParameterValuesByPointAndTimeList(T::SessionId sessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -278,7 +278,7 @@ int ServiceInterface::getParameterValueVectorByGeometryAndTime(T::SessionId sess
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -288,7 +288,7 @@ int ServiceInterface::getParameterValueVectorByGeometryAndTime(T::SessionId sess
 
 int ServiceInterface::_executeQuery(T::SessionId sessionId,Query& query)
 {
-  throw Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -297,7 +297,7 @@ int ServiceInterface::_executeQuery(T::SessionId sessionId,Query& query)
 
 int ServiceInterface::_getProducerList(T::SessionId sessionId,string_vec& producerList)
 {
-  throw Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -306,7 +306,7 @@ int ServiceInterface::_getProducerList(T::SessionId sessionId,string_vec& produc
 
 int ServiceInterface::_getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::GridPointValueList& valueList)
 {
-  throw Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -360,7 +360,7 @@ int ServiceInterface::_getParameterValueByPointAndTime(T::SessionId sessionId,st
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -413,7 +413,7 @@ int ServiceInterface::_getParameterValuesByPointListAndTime(T::SessionId session
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -485,7 +485,7 @@ int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId session
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -535,7 +535,7 @@ int ServiceInterface::_getParameterValueVectorByGeometryAndTime(T::SessionId ses
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 

@@ -33,6 +33,7 @@ class GenerationInfoList
     int                 getClosestIndex(uint comparisonMethod,GenerationInfo& generationInfo);
     int                 getClosestIndexNoLock(uint comparisonMethod,GenerationInfo& generationInfo);
     GenerationInfo*     getGenerationInfoById(uint generationId);
+    bool                getGenerationInfoById(uint generationId,GenerationInfo& generationInfo);
     GenerationInfo*     getGenerationInfoByIndex(uint index);
     GenerationInfo*     getGenerationInfoByIndexNoCheck(uint index);
     GenerationInfo*     getGenerationInfoByName(std::string generationName);
@@ -48,6 +49,7 @@ class GenerationInfoList
     GenerationInfo*     getLastGenerationInfoByProducerId(uint producerId);
     GenerationInfo*     getLastGenerationInfoByProducerIdAndStatus(uint producerId,uchar generationStatus);
     uint                getLength();
+    std::size_t         getHash();
     std::size_t         getHashByProducerId(uint producerId);
     ModificationLock*   getModificationLockPtr();
     bool                getReleaseObjects();

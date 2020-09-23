@@ -1,7 +1,8 @@
 #include "ServerInfoList.h"
-#include <grid-files/common/Exception.h>
+#include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/AutoThreadLock.h>
+#include <boost/functional/hash.hpp>
 
 
 namespace SmartMet
@@ -17,7 +18,7 @@ ServerInfoList::ServerInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -42,7 +43,7 @@ ServerInfoList::ServerInfoList(ServerInfoList& serverInfoList)
   catch (...)
   {
     serverInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -62,7 +63,7 @@ ServerInfoList::~ServerInfoList()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -94,7 +95,7 @@ ServerInfoList& ServerInfoList::operator=(ServerInfoList& serverInfoList)
   catch (...)
   {
     serverInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -110,7 +111,7 @@ void ServerInfoList::addServerInfo(ServerInfo* serverInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -130,7 +131,7 @@ void ServerInfoList::clear()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -158,7 +159,7 @@ bool ServerInfoList::deleteServerInfoById(uint serverId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -208,7 +209,7 @@ ServerInfo* ServerInfoList::getPreviousServerInfoById(uint serverId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -232,7 +233,39 @@ ServerInfo* ServerInfoList::getServerInfoById(uint serverId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+std::size_t ServerInfoList::getHash()
+{
+  try
+  {
+    std::size_t hash = 0;
+
+    AutoThreadLock lock(&mThreadLock);
+    uint sz = getLength();
+    for (uint t=0; t<sz; t++)
+    {
+      ServerInfo *info = getServerInfoByIndexNoCheck(t);
+      if (info != nullptr)
+      {
+        boost::hash_combine(hash,info->mServerId);
+        boost::hash_combine(hash,info->mName);
+        boost::hash_combine(hash,info->mServerIor);
+        boost::hash_combine(hash,info->mType);
+        boost::hash_combine(hash,info->mFlags);
+      }
+    }
+    return hash;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -252,7 +285,7 @@ ServerInfo* ServerInfoList::getServerInfoByIndex(uint index)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -267,7 +300,7 @@ ServerInfo* ServerInfoList::getServerInfoByIndexNoCheck(uint index)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -290,7 +323,7 @@ ServerInfo*  ServerInfoList::getServerInfoByIor(std::string serverIor)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -313,7 +346,7 @@ ServerInfo*  ServerInfoList::getServerInfoByName(std::string serverName)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -328,7 +361,7 @@ uint ServerInfoList::getLength()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -344,7 +377,7 @@ void ServerInfoList::lock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -360,7 +393,7 @@ void ServerInfoList::unlock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -377,7 +410,7 @@ void ServerInfoList::writeToFile(std::string filename)
     FILE *file = fopen(filename.c_str(),"we");
     if (file == nullptr)
     {
-      SmartMet::Spine::Exception exception(BCP,"Cannot create the file!");
+      Fmi::Exception exception(BCP,"Cannot create the file!");
       exception.addParameter("Filename",filename);
       throw exception;
     }
@@ -392,7 +425,7 @@ void ServerInfoList::writeToFile(std::string filename)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -411,7 +444,7 @@ void ServerInfoList::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 

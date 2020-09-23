@@ -15,7 +15,7 @@ Function_sequence::Function_sequence()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -34,7 +34,7 @@ Function_sequence::Function_sequence(const Function_sequence& function)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -52,7 +52,7 @@ Function_sequence::~Function_sequence()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -69,7 +69,7 @@ void Function_sequence::addFunction(Function *function)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -82,7 +82,7 @@ float Function_sequence::executeFunctionCall1(std::vector<float>& parameters)
   try
   {
     if (parameters.size() != 1)
-      throw Spine::Exception(BCP, "The parameters vector should contain only one value!");
+      throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");
 
     double val = parameters[0];
 
@@ -97,7 +97,7 @@ float Function_sequence::executeFunctionCall1(std::vector<float>& parameters)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -110,7 +110,7 @@ double Function_sequence::executeFunctionCall1(std::vector<double>& parameters)
   try
   {
     if (parameters.size() != 1)
-      throw Spine::Exception(BCP, "The parameters vector should contain only one value!");
+      throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");
 
     double val = parameters[0];
 
@@ -125,7 +125,7 @@ double Function_sequence::executeFunctionCall1(std::vector<double>& parameters)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -141,7 +141,7 @@ Function* Function_sequence::duplicate()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

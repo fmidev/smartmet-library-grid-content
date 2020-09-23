@@ -92,7 +92,7 @@ struct CorbaParameterValues
   string                  forecastTime;
   unsigned long           producerId;
   unsigned long           generationId;
-  unsigned long           generationFlags;
+  unsigned long long      generationFlags;
   unsigned long           geometryId;
   unsigned long           fileId[4];
   unsigned long           messageIndex[4];
@@ -140,7 +140,7 @@ struct CorbaQueryParameter
   CorbaParamValueList      contourHighValues;
   CorbaULongList           contourColors;
   unsigned long            producerId;
-  unsigned long            generationFlags;
+  unsigned long long       generationFlags;
   short                    precision;
   unsigned long            timestepsBefore;
   unsigned long            timestepsAfter;
@@ -176,7 +176,7 @@ struct CorbaQuery
   double                   radius;
   CorbaQueryParameterList  queryParameterList;
   string                   language;
-  unsigned long            generationFlags;
+  unsigned long long       generationFlags;
   unsigned long            flags;
   unsigned long            maxParameterValues;
 };

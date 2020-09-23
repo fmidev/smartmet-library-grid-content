@@ -16,7 +16,7 @@ VirtualContentDefinitionFile::VirtualContentDefinitionFile()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -32,7 +32,7 @@ VirtualContentDefinitionFile::VirtualContentDefinitionFile(std::string filename)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -49,7 +49,7 @@ VirtualContentDefinitionFile::VirtualContentDefinitionFile(const VirtualContentD
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -64,7 +64,7 @@ VirtualContentDefinitionFile::~VirtualContentDefinitionFile()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -82,7 +82,7 @@ void VirtualContentDefinitionFile::init()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -99,7 +99,7 @@ void VirtualContentDefinitionFile::init(std::string filename)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -120,7 +120,7 @@ void VirtualContentDefinitionFile::checkUpdates()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -195,7 +195,7 @@ void VirtualContentDefinitionFile::getContentDefinitions(T::ContentInfo& content
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -210,7 +210,7 @@ void VirtualContentDefinitionFile::loadFile()
     FILE *file = fopen(mFilename.c_str(),"re");
     if (file == nullptr)
     {
-      Spine::Exception exception(BCP,"Cannot open the definition file!");
+      Fmi::Exception exception(BCP,"Cannot open the definition file!");
       exception.addParameter("Filename",mFilename);
       throw exception;
     }
@@ -273,7 +273,7 @@ void VirtualContentDefinitionFile::loadFile()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -294,7 +294,7 @@ void VirtualContentDefinitionFile::print(std::ostream& stream,uint level,uint op
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

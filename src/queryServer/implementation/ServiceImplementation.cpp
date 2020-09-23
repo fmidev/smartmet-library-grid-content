@@ -1,5 +1,5 @@
 #include "ServiceImplementation.h"
-#include <grid-files/common/Exception.h>
+#include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/InterpolationFunctions.h>
 #include <grid-files/common/ShowFunction.h>
@@ -31,6 +31,24 @@ namespace QueryServer
 {
 
 
+static void* queryServer_updateThread(void *arg)
+{
+  try
+  {
+    ServiceImplementation *service = static_cast<ServiceImplementation*>(arg);
+    service->updateProcessing();
+    return nullptr;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+    exception.printError();
+    exit(-1);
+  }
+}
+
+
+
 
 ServiceImplementation::ServiceImplementation()
 {
@@ -39,16 +57,21 @@ ServiceImplementation::ServiceImplementation()
   {
     mContentServerPtr = nullptr;
     mDataServerPtr = nullptr;
-    mFunctionParamId = 0;
-    mProducerFileModificationTime = 0;
-    mLastConfiguratonCheck = 0;
-    mCheckInterval = 5;
-    mGenerationInfoListUpdateTime = 0;
+    mFunctionParamId = 1000;
+    mProducerFile_modificationTime = 0;
+    mParameterMapping_checkTime = 0;
+    mProducerFile_checkTime = 0;
+    mProducerFile_checkInterval = 30;
+    mParameterMapping_checkInterval = 30;
+    mGenerationInfoList_checkInterval = 120;
+    mProducerMap_checkInterval = 120;
+    mGenerationInfoList_checkTime = 0;
     mProducerMap_updateTime = 0;
+    mShutdownRequested = false;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -64,7 +87,7 @@ ServiceImplementation::~ServiceImplementation()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -135,10 +158,12 @@ void ServiceImplementation::init(
       it->init();
       //it->print(std::cout,0,0);
     }
+
+    startUpdateProcessing();
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -154,7 +179,7 @@ void ServiceImplementation::setLandCover(boost::shared_ptr<Fmi::LandCover> landC
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP, "Operation failed!", nullptr);
+    Fmi::Exception exception(BCP, "Operation failed!", nullptr);
     throw exception;
   }
 }
@@ -171,7 +196,7 @@ void ServiceImplementation::setDem(boost::shared_ptr<Fmi::DEM> dem)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP, "Operation failed!", nullptr);
+    Fmi::Exception exception(BCP, "Operation failed!", nullptr);
     throw exception;
   }
 }
@@ -185,11 +210,12 @@ void ServiceImplementation::shutdown()
   FUNCTION_TRACE
   try
   {
+    mShutdownRequested = true;
     exit(0);
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -202,29 +228,7 @@ bool ServiceImplementation::getProducerInfoByName(std::string& name,T::ProducerI
   FUNCTION_TRACE
   try
   {
-    time_t currentTime = time(0);
-
-    if ((currentTime - mProducerMap_updateTime) > 120)
-    {
-      AutoThreadLock lock(&mThreadLock);
-
-      if ((currentTime - mProducerMap_updateTime) > 120)
-      {
-        T::ProducerInfoList producerInfoList;
-        if (mContentServerPtr->getProducerInfoList(0,producerInfoList) == 0)
-        {
-          mProducerMap.clear();
-          uint len = producerInfoList.getLength();
-          for (uint t=0; t<len; t++)
-          {
-            T::ProducerInfo *pinfo = producerInfoList.getProducerInfoByIndex(t);
-            if (pinfo != nullptr)
-              mProducerMap.insert(std::pair<std::string,T::ProducerInfo>(pinfo->mName,T::ProducerInfo(*pinfo)));
-          }
-          mProducerMap_updateTime = time(0);
-        }
-      }
-    }
+    AutoReadLock lock(&mProducerMap_modificationLock);
 
     auto it = mProducerMap.find(name);
     if (it != mProducerMap.end())
@@ -237,7 +241,7 @@ bool ServiceImplementation::getProducerInfoByName(std::string& name,T::ProducerI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -250,35 +254,17 @@ CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(uint pr
   FUNCTION_TRACE
   try
   {
-    time_t currentTime = time(0);
-    time_t diff = (currentTime - mGenerationInfoListUpdateTime);
-    if (diff > 120)
     {
-      AutoThreadLock lock(&mThreadLock);
-      diff = (currentTime - mGenerationInfoListUpdateTime);
-      if (diff > 120)
-      {
-        if (mContentServerPtr->getGenerationInfoList(0,mGenerationInfoList) == 0)
-        {
-          mGenerationInfoList.sort(T::GenerationInfo::ComparisonMethod::producerId);
-          mGenerationInfoListUpdateTime = time(0);
-          mProducerGenerationListCache.clear();
-        }
-      }
+      AutoReadLock lock(&mProducerGenerationListCacheModificationLock);
+      auto gl = mProducerGenerationListCache.find(producerId);
+      if (gl != mProducerGenerationListCache.end())
+        return gl->second;
     }
-
-    diff = (currentTime - mGenerationInfoListUpdateTime);
-
-    //if (diff < 115)
-    //  generationInfoList.setReleaseObjects(false);
-
-    auto gl = mProducerGenerationListCache.find(producerId);
-    if (gl != mProducerGenerationListCache.end())
-      return gl->second;
 
     CacheEntry_sptr cacheEntry(new CacheEntry);
 
     T::GenerationInfoList_sptr generationInfoList(new T::GenerationInfoList());
+    AutoReadLock readLock(&mGenerationInfoList_modificationLock);
     mGenerationInfoList.getGenerationInfoListByProducerIdAndStatus(producerId,*generationInfoList,T::GenerationInfo::Status::Ready);
 
     StringVector_sptr analysisTimes(new std::vector<std::string>());
@@ -288,14 +274,14 @@ CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(uint pr
     cacheEntry->generationInfoList = generationInfoList;
     cacheEntry->analysisTimes = analysisTimes;
 
-    AutoThreadLock lock(&mThreadLock);
+    AutoWriteLock lock(&mProducerGenerationListCacheModificationLock);
     mProducerGenerationListCache.insert(std::pair<uint,CacheEntry_sptr>(producerId,cacheEntry));
 
     return cacheEntry;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -309,11 +295,6 @@ int ServiceImplementation::_executeQuery(T::SessionId sessionId, Query& query)
   FUNCTION_TRACE
   try
   {
-    // Checking if the configuration files have changed. If so, the
-    // changes will be loaded automatically.
-
-    checkConfigurationUpdates();
-
     // query.print(std::cout,0,0);
 
     if (mDebugLog != nullptr)
@@ -349,7 +330,7 @@ int ServiceImplementation::_executeQuery(T::SessionId sessionId, Query& query)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -366,11 +347,11 @@ void convertCoordinatesToLatLon(std::string urn,T::AreaCoordinates& coordinates,
 
     OGRSpatialReference sr;
     if (sr.importFromURN(urn.c_str()) != OGRERR_NONE)
-      throw SmartMet::Spine::Exception(BCP, "Invalid crs '" + urn + "'!");
+      throw Fmi::Exception(BCP, "Invalid crs '" + urn + "'!");
 
     OGRCoordinateTransformation *tranformation = OGRCreateCoordinateTransformation(&sr,&sr_latlon);
     if (tranformation == nullptr)
-      throw SmartMet::Spine::Exception(BCP,"Cannot create coordinate transformation!");
+      throw Fmi::Exception(BCP,"Cannot create coordinate transformation!");
 
     for (auto cc = coordinates.begin(); cc != coordinates.end(); ++cc)
     {
@@ -391,7 +372,7 @@ void convertCoordinatesToLatLon(std::string urn,T::AreaCoordinates& coordinates,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 #endif
@@ -403,12 +384,10 @@ int ServiceImplementation::_getProducerList(T::SessionId sessionId, string_vec& 
   FUNCTION_TRACE
   try
   {
-    checkConfigurationUpdates();
-
     producerList.clear();
     std::string prev;
 
-    AutoReadLock lock(&mProducerListModificationLock);
+    AutoReadLock lock(&mProducerList_modificationLock);
     for (auto it = mProducerList.begin(); it != mProducerList.end(); ++it)
     {
       if (it->first != prev)
@@ -420,7 +399,7 @@ int ServiceImplementation::_getProducerList(T::SessionId sessionId, string_vec& 
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -433,15 +412,15 @@ void ServiceImplementation::loadProducerFile()
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mProducerListModificationLock);
+    AutoWriteLock lock(&mProducerList_modificationLock);
 
-    if (mProducerFileModificationTime == getFileModificationTime(mProducerFile.c_str()))
+    if (mProducerFile_modificationTime == getFileModificationTime(mProducerFile.c_str()))
       return;
 
     FILE* file = fopen(mProducerFile.c_str(), "re");
     if (file == nullptr)
     {
-      SmartMet::Spine::Exception exception(BCP, "Cannot open the producer file!");
+      Fmi::Exception exception(BCP, "Cannot open the producer file!");
       exception.addParameter("Filename", mProducerFile);
       throw exception;
     }
@@ -485,11 +464,11 @@ void ServiceImplementation::loadProducerFile()
     }
     fclose(file);
 
-    mProducerFileModificationTime = getFileModificationTime(mProducerFile.c_str());
+    mProducerFile_modificationTime = getFileModificationTime(mProducerFile.c_str());
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -521,7 +500,7 @@ void ServiceImplementation::getGeometryIdListByCoordinates(Producer_vec& produce
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -576,7 +555,7 @@ void ServiceImplementation::getGeometryIdListByCoordinates(T::AreaCoordinates& c
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 #endif
@@ -628,7 +607,7 @@ void ServiceImplementation::getGeometryIdListByCoordinates(uint gridWidth,uint g
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -729,7 +708,7 @@ void ServiceImplementation::getGeometryIdListByGeometryId(T::GeometryId gridGeom
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, exception_operation_failed, nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -785,7 +764,7 @@ bool ServiceImplementation::getParameterFunctionInfo(std::string& paramStr, std:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -840,11 +819,15 @@ bool ServiceImplementation::getFunctionParams(std::string& functionParamsStr, Fu
       mFunctionParamId++;
       functionParams.push_back(std::pair<uint, std::string>(mFunctionParamId, std::string(tmp)));
     }
+
+    if (mFunctionParamId > 4000000000)
+      mFunctionParamId = 1000;
+
     return containsFunction;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -863,7 +846,7 @@ void ServiceImplementation::getParameterMappings(std::string& producerName,std::
     boost::hash_combine(hash,onlySearchEnabled);
 
     {
-      AutoReadLock lock(&mParameterMappingCacheModificationLock);
+      AutoReadLock lock(&mParameterMappingCache_modificationLock);
       auto it = mParameterMappingCache.find(hash);
       if (it != mParameterMappingCache.end())
       {
@@ -878,13 +861,13 @@ void ServiceImplementation::getParameterMappings(std::string& producerName,std::
       }
     }
 
-    AutoWriteLock lock(&mParameterMappingCacheModificationLock);
+    AutoWriteLock lock(&mParameterMappingCache_modificationLock);
     if (mParameterMappingCache.find(hash) == mParameterMappingCache.end())
       mParameterMappingCache.insert(std::pair<std::size_t, ParameterMapping_vec>(hash, mappings));
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -914,7 +897,7 @@ void ServiceImplementation::getParameterMappings(
     boost::hash_combine(hash,onlySearchEnabled);
 
     {
-      AutoReadLock lock(&mParameterMappingCacheModificationLock);
+      AutoReadLock lock(&mParameterMappingCache_modificationLock);
       auto it = mParameterMappingCache.find(hash);
       if (it != mParameterMappingCache.end())
       {
@@ -929,13 +912,13 @@ void ServiceImplementation::getParameterMappings(
       }
     }
 
-    AutoWriteLock lock(&mParameterMappingCacheModificationLock);
+    AutoWriteLock lock(&mParameterMappingCache_modificationLock);
     if (mParameterMappingCache.find(hash) == mParameterMappingCache.end())
       mParameterMappingCache.insert(std::pair<std::size_t, ParameterMapping_vec>(hash, mappings));
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -953,7 +936,7 @@ void ServiceImplementation::getParameterStringInfo(
     T::ForecastNumber& forecastNumber,
     std::string& producerName,
     uint& producerId,
-    uint& generationFlags,
+    ulonglong& generationFlags,
     short& areaInterpolationMethod,
     short& timeInterpolationMethod,
     short& levelInterpolationMethod)
@@ -972,7 +955,7 @@ void ServiceImplementation::getParameterStringInfo(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -990,7 +973,7 @@ void ServiceImplementation::getParameterStringInfo(
     std::vector<T::ForecastNumber>& forecastNumberVec,
     std::string& producerName,
     uint& producerId,
-    uint& generationFlags,
+    ulonglong& generationFlags,
     short& areaInterpolationMethod,
     short& timeInterpolationMethod,
     short& levelInterpolationMethod)
@@ -1118,7 +1101,7 @@ void ServiceImplementation::getParameterStringInfo(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -1131,12 +1114,11 @@ bool ServiceImplementation::getAlias(std::string& name, std::string& alias)
   FUNCTION_TRACE
   try
   {
-    AutoThreadLock lock(&mThreadLock);
     return mAliasFileCollection.getAlias(name, alias);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -1157,7 +1139,7 @@ bool ServiceImplementation::parseFunction(
   {
     if (recursionCounter > 20)
     {
-      SmartMet::Spine::Exception exception(BCP, "The recursion is too deep!");
+      Fmi::Exception exception(BCP, "The recursion is too deep!");
       exception.addDetail("It seems that the function parsing is in a continuous loop.");
       exception.addDetail("The reason for this is most likely that some aliases refer to each other.");
       exception.addParameter("ParamStr", paramStr);
@@ -1235,7 +1217,7 @@ bool ServiceImplementation::parseFunction(
         p += sprintf(p, "LIST{");
         for (size_t t = 0; t < sz; t++)
         {
-          p += sprintf(p, "%s:%s:%d:%d:%d:%d:%d:%u", paramName.c_str(), producerName.c_str(), queryParam.mGeometryId, queryParam.mParameterLevelId, queryParam.mParameterLevel, queryParam.mForecastType,
+          p += sprintf(p, "%s:%s:%d:%d:%d:%d:%d:%llu", paramName.c_str(), producerName.c_str(), queryParam.mGeometryId, queryParam.mParameterLevelId, queryParam.mParameterLevel, queryParam.mForecastType,
               forecastNumberVec[t], queryParam.mGenerationFlags);
 
           if (queryParam.mAreaInterpolationMethod >= 0)
@@ -1276,52 +1258,12 @@ bool ServiceImplementation::parseFunction(
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP, "Parsing failed!", nullptr);
+    Fmi::Exception exception(BCP, "Parsing failed!", nullptr);
     exception.addParameter("ParamStr", paramStr);
     throw exception;
   }
 }
 
-
-
-
-
-void ServiceImplementation::checkConfigurationUpdates()
-{
-  FUNCTION_TRACE
-  try
-  {
-    AutoThreadLock lock(&mThreadLock);
-
-    if ((time(nullptr) - mLastConfiguratonCheck) > mCheckInterval)
-    {
-      mLastConfiguratonCheck = time(nullptr);
-      time_t t1 = getFileModificationTime(mProducerFile.c_str());
-
-      if (mProducerFileModificationTime != t1 && (mLastConfiguratonCheck - t1) > 3)
-      {
-        loadProducerFile();
-      }
-
-      for (auto it = mParameterMappings.begin(); it != mParameterMappings.end(); ++it)
-      {
-        if (it->checkUpdates())
-        {
-          AutoWriteLock lock(&mParameterMappingCacheModificationLock);
-          mParameterMappingCache.clear();
-        }
-      }
-    }
-
-    mAliasFileCollection.checkUpdates(false);
-    mLuaFileCollection.checkUpdates(false);
-    mProducerAliasFileCollection.checkUpdates(false);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
 
 
 
@@ -1332,7 +1274,7 @@ void ServiceImplementation::getProducers(Query& query, Producer_vec& producers)
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mProducerListModificationLock);
+    AutoReadLock lock(&mProducerList_modificationLock);
 
     if (query.mProducerNameList.size() == 0)
     {
@@ -1364,7 +1306,7 @@ void ServiceImplementation::getProducers(Query& query, Producer_vec& producers)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -1377,7 +1319,7 @@ void ServiceImplementation::getProducers(std::string& producerName, Producer_vec
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mProducerListModificationLock);
+    AutoReadLock lock(&mProducerList_modificationLock);
     for (auto it = mProducerList.begin(); it != mProducerList.end(); ++it)
     {
       if (strcasecmp(producerName.c_str(), it->first.c_str()) == 0)
@@ -1388,7 +1330,7 @@ void ServiceImplementation::getProducers(std::string& producerName, Producer_vec
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -1439,7 +1381,7 @@ void ServiceImplementation::updateQueryParameters(Query& query)
           p += sprintf(p, "LIST{");
           for (size_t t = 0; t < sz; t++)
           {
-            p += sprintf(p, "%s:%s:%d:%d:%d:%d:%d:%u", qParam->mParameterKey.c_str(), qParam->mProducerName.c_str(), qParam->mGeometryId, qParam->mParameterLevelId, qParam->mParameterLevel, qParam->mForecastType,
+            p += sprintf(p, "%s:%s:%d:%d:%d:%d:%d:%llu", qParam->mParameterKey.c_str(), qParam->mProducerName.c_str(), qParam->mGeometryId, qParam->mParameterLevelId, qParam->mParameterLevel, qParam->mForecastType,
                 forecastNumberVec[t], qParam->mGenerationFlags);
 
             if (qParam->mAreaInterpolationMethod >= 0)
@@ -1519,7 +1461,7 @@ void ServiceImplementation::updateQueryParameters(Query& query)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -1566,6 +1508,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
               std::vector<double> valueList;
               if (q != nullptr)
               {
+                // printf("FOUND %u %s\n",it->first,q->mParam.c_str());
                 if (tCount < q->mValueList.size())
                 {
                   if (producerId == 0 && q->mValueList[tCount].mProducerId > 0)
@@ -1578,9 +1521,8 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
                   T::GridValue rec;
                   if (q->mValueList[tCount].mValueList.getGridValueByIndex(v,rec))
                   {
-                    if (/*qParam->mAreaInterpolationMethod == T::AreaInterpolationMethod::External
-                     &&*/
-                    rec.mValueString.length() > 0)
+                    // rec.print(std::cout,0,0);
+                    if (rec.mValueString.length() > 0)
                     {
                       splitString(rec.mValueString, ';', valueList);
                     }
@@ -1613,7 +1555,6 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
 
               if (valueList.size() == 0)
               {
-                //printf("** PUSH %f\n",a);
                 parameters.push_back(a);
                 areaParameters.push_back(a);
 
@@ -1624,7 +1565,6 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
               {
                 for (auto aa = valueList.begin(); aa != valueList.end(); ++aa)
                 {
-                  //printf("-- PUSH %f\n",*aa);
                   parameters.push_back(*aa);
                   areaParameters.push_back(*aa);
 
@@ -1720,7 +1660,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -1823,7 +1763,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
         uint parameterFlags = qParam->mFlags;
         uint producerId = qParam->mProducerId;
         std::string producerName = qParam->mProducerName;
-        uint generationFlags = qParam->mGenerationFlags;
+        ulonglong generationFlags = qParam->mGenerationFlags;
         int geometryId = qParam->mGeometryId;
         if (generationFlags == 0)
           generationFlags = query.mGenerationFlags;
@@ -1959,7 +1899,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
         }
         catch (...)
         {
-          SmartMet::Spine::Exception exception(BCP, "Operation failed!", nullptr);
+          Fmi::Exception exception(BCP, "Operation failed!", nullptr);
           exception.printError();
         }
       }
@@ -2051,7 +1991,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -2135,9 +2075,9 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
     // That's why the coordinates are defined as a vector of coordinate vectors.
 
     std::set < std::string > timeList;
-    for (auto fTime = query.mForecastTimeList.begin(); fTime != query.mForecastTimeList.end(); ++fTime)
+    for (const auto &fTime : query.mForecastTimeList)
     {
-      timeList.insert(*fTime);
+      timeList.insert(fTime);
     }
 
     for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
@@ -2155,7 +2095,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
         uint parameterFlags = qParam->mFlags;
         std::string producerName = qParam->mProducerName;
         uint producerId = qParam->mProducerId;
-        uint generationFlags = qParam->mGenerationFlags;
+        ulonglong generationFlags = qParam->mGenerationFlags;
         int geometryId = qParam->mGeometryId;
         if (generationFlags == 0)
           generationFlags = query.mGenerationFlags;
@@ -2171,13 +2111,13 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
         if (qParam->mTimestepsBefore > 0 || qParam->mTimestepsAfter > 0)
         {
-          for (auto fTime = timeList.begin(); fTime != timeList.end(); ++fTime)
+          for (const auto &fTime : timeList)
           {
             if (qParam->mTimestepsBefore > 0)
             {
               // time_t ss = utcTimeToTimeT(*fTime) - ((qParam->mTimestepsBefore+1) *
               // qParam->mTimestepSizeInMinutes * 60);
-              auto ss = toTimeStamp(*fTime) - boost::posix_time::seconds(((qParam->mTimestepsBefore + 1) * qParam->mTimestepSizeInMinutes * 60));
+              auto ss = toTimeStamp(fTime) - boost::posix_time::seconds(((qParam->mTimestepsBefore + 1) * qParam->mTimestepSizeInMinutes * 60));
 
               for (uint t = 0; t < qParam->mTimestepsBefore; t++)
               {
@@ -2195,7 +2135,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
             if (qParam->mTimestepsAfter > 0)
             {
               // time_t ss = utcTimeToTimeT(*fTime);
-              auto ss = toTimeStamp(*fTime);
+              auto ss = toTimeStamp(fTime);
 
               for (uint t = 0; t < qParam->mTimestepsAfter; t++)
               {
@@ -2225,7 +2165,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
         // is not defined. It is possible that the newest generation do not contain
         // the requested timestep when the generation is still under construction.
 
-        uint gflags = generationFlags;
+        ulonglong gflags = generationFlags;
 
         int ftLen = forecastTimeList.size();
         qParam->mValueList.reserve(ftLen);
@@ -2345,7 +2285,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
           }
           catch (...)
           {
-            SmartMet::Spine::Exception exception(BCP, "Operation failed!", nullptr);
+            Fmi::Exception exception(BCP, "Operation failed!", nullptr);
             exception.printError();
           }
 
@@ -2384,9 +2324,9 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
     query.mForecastTimeList.clear();
 
-    for (auto tt = timeList.begin(); tt != timeList.end(); ++tt)
+    for (const auto &tt : timeList)
     {
-      query.mForecastTimeList.insert(*tt);
+      query.mForecastTimeList.insert(tt);
 
       for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
       {
@@ -2396,7 +2336,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
           uint cnt = 0;
           for (auto it = qParam->mValueList.begin(); it != qParam->mValueList.end() && !found; ++it)
           {
-            int cmp = strcmp(it->mForecastTime.c_str(),tt->c_str());
+            int cmp = strcmp(it->mForecastTime.c_str(),tt.c_str());
             if (cmp < 0)
               cnt++;
             else
@@ -2416,14 +2356,14 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
             // with an empty value list.
 
             ParameterValues pValues;
-            pValues.mForecastTime = *tt;
+            pValues.mForecastTime = tt;
 
             if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN)
               pValues.mFlags = pValues.mFlags | QueryServer::ParameterValues::Flags::AdditionalValue;
 
             getAdditionalValues(qParam->mSymbolicName,query.mCoordinateType,coordinates,pValues);
 
-            if (additionalTimeList.find(*tt) != additionalTimeList.end())
+            if (additionalTimeList.find(tt) != additionalTimeList.end())
               pValues.mFlags = pValues.mFlags | QueryServer::ParameterValues::Flags::AggregationValue;
 
             qParam->mValueList.insert(qParam->mValueList.begin() + cnt, pValues);
@@ -2440,7 +2380,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -2460,8 +2400,6 @@ int ServiceImplementation::_getValuesByGridPoint(
   FUNCTION_TRACE
   try
   {
-    checkConfigurationUpdates();
-
     uint len = contentInfoList.getLength();
     for (uint c = 0; c < len; c++)
     {
@@ -2481,7 +2419,7 @@ int ServiceImplementation::_getValuesByGridPoint(
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -2506,7 +2444,7 @@ bool ServiceImplementation::conversionFunction(std::string& conversionFunction, 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -2520,7 +2458,7 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
   {
     if (valueList.size() != coordinates.size())
     {
-      SmartMet::Spine::Exception exception(BCP, "The number of values is not the same as the number of coordinates!");
+      Fmi::Exception exception(BCP, "The number of values is not the same as the number of coordinates!");
       exception.addParameter("valueList.size",Fmi::to_string(valueList.size()));
       exception.addParameter("coordinates.size",Fmi::to_string(coordinates.size()));
       throw exception;
@@ -2561,7 +2499,7 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -2598,7 +2536,7 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -2645,7 +2583,7 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -2691,7 +2629,7 @@ ulonglong ServiceImplementation::getProducerHash(uint producerId)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP, "Operation failed!", nullptr);
+    Fmi::Exception exception(BCP, "Operation failed!", nullptr);
     throw exception;
   }
 }
@@ -2722,7 +2660,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     auto producerHash = getProducerHash(producerId);
 
     {
-      AutoReadLock readLock(&mContentSearchCacheModificationLock);
+      AutoReadLock readLock(&mContentSearchCache_modificationLock);
       auto it = mContentSearchCache.find(hash2);
       if (it != mContentSearchCache.end()  &&  it->second.producerHash == producerHash)
       {
@@ -2735,7 +2673,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     ContentCacheEntry *entry = &rec;
 
     {
-      AutoReadLock readLock(&mContentCacheModificationLock);
+      AutoReadLock readLock(&mContentCache_modificationLock);
       auto cc = mContentCache.find(hash);
       if (cc != mContentCache.end())
       {
@@ -2769,7 +2707,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     if (entry->producerHash != producerHash)
     {
       // Producer hash does not match
-      AutoWriteLock lock(&mContentCacheModificationLock);
+      AutoWriteLock lock(&mContentCache_modificationLock);
       if (entry->producerHash != producerHash)
       {
         std::string startTime = "13000101T000000";
@@ -2796,7 +2734,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     std::shared_ptr<T::ContentInfoList> cList(new T::ContentInfoList());
 
     {
-      AutoReadLock readLock(&mContentCacheModificationLock);
+      AutoReadLock readLock(&mContentCache_modificationLock);
       switch (parameterKeyType)
       {
         case T::ParamKeyTypeValue::FMI_NAME:
@@ -2821,7 +2759,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       }
 
       contentInfoList = cList;
-      AutoWriteLock lock(&mContentSearchCacheModificationLock);
+      AutoWriteLock lock(&mContentSearchCache_modificationLock);
       if (mContentSearchCache.size() > 1000000)
         mContentSearchCache.clear();
 
@@ -2844,7 +2782,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
     if (entry == &rec)
     {
-      AutoWriteLock lock(&mContentCacheModificationLock);
+      AutoWriteLock lock(&mContentCache_modificationLock);
       if (mContentCache.size() > 10000)
         mContentCache.clear();
 
@@ -2856,8 +2794,8 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
   }
   catch (...)
   {
-    mContentCacheModificationLock.writeUnlock();
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    mContentCache_modificationLock.writeUnlock();
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -2870,7 +2808,7 @@ bool ServiceImplementation::getSpecialValues(
     T::GeometryId producerGeometryId,
     uint generationId,
     std::string& analysisTime,
-    uint generationFlags,
+    ulonglong generationFlags,
     ParameterMapping& pInfo,
     std::string& forecastTime,
     T::ParamLevelId paramLevelId,
@@ -2903,7 +2841,7 @@ bool ServiceImplementation::getSpecialValues(
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
     if (result != 0)
     {
-      SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
+      Fmi::Exception exception(BCP, "ContentServer returns an error!");
       exception.addParameter("Service", "getContentListByParameterGenerationIdAndForecastTime");
       exception.addParameter("Message", ContentServer::getResultString(result));
       throw exception;
@@ -2959,7 +2897,7 @@ bool ServiceImplementation::getSpecialValues(
           int result = mDataServerPtr->getGridValueVectorByPoint(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, coordinateType, x, y, areaInterpolationMethod, valueVector);
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueVectorByPoint");
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
@@ -3025,7 +2963,7 @@ bool ServiceImplementation::getSpecialValues(
     {
       if (!(contentInfo1->mForecastTime < forecastTime && contentInfo2->mForecastTime > forecastTime))
       {
-        SmartMet::Spine::Exception exception(BCP, "Unexpected result!");
+        Fmi::Exception exception(BCP, "Unexpected result!");
         exception.addDetail("The given forecast time should been between the found content times.");
         exception.addParameter("Content 1 ForecastTime", contentInfo1->mForecastTime);
         exception.addParameter("Content 2 ForecastTime", contentInfo2->mForecastTime);
@@ -3051,7 +2989,7 @@ bool ServiceImplementation::getSpecialValues(
         int result1 = mDataServerPtr->getGridValueVectorByPoint(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, coordinateType, x, y, areaInterpolationMethod, valueVector1);
         if (result1 != 0)
         {
-          SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+          Fmi::Exception exception(BCP, "DataServer returns an error!");
           exception.addParameter("Service", "getGridValueBlockByPoint");
           exception.addParameter("Message", DataServer::getResultString(result1));
           std::string errorMsg = exception.getStackTrace();
@@ -3062,7 +3000,7 @@ bool ServiceImplementation::getSpecialValues(
         int result2 = mDataServerPtr->getGridValueVectorByPoint(0, contentInfo2->mFileId, contentInfo2->mMessageIndex, coordinateType, x, y, areaInterpolationMethod, valueVector2);
         if (result2 != 0)
         {
-          SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+          Fmi::Exception exception(BCP, "DataServer returns an error!");
           exception.addParameter("Service", "getGridValueVectorByPoint");
           exception.addParameter("Message", DataServer::getResultString(result2));
           std::string errorMsg = exception.getStackTrace();
@@ -3125,7 +3063,7 @@ bool ServiceImplementation::getSpecialValues(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -3138,7 +3076,7 @@ bool ServiceImplementation::getValueVectors(
     T::GeometryId producerGeometryId,
     uint generationId,
     std::string& analysisTime,
-    uint generationFlags,
+    ulonglong generationFlags,
     ParameterMapping& pInfo,
     std::string& forecastTime,
     T::ParamLevelId paramLevelId,
@@ -3175,7 +3113,7 @@ bool ServiceImplementation::getValueVectors(
 
     if (result != 0)
     {
-      SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
+      Fmi::Exception exception(BCP, "ContentServer returns an error!");
       exception.addParameter("Service", "getContentListByParameterGenerationIdAndForecastTime");
       exception.addParameter("Message", ContentServer::getResultString(result));
       throw exception;
@@ -3280,7 +3218,7 @@ bool ServiceImplementation::getValueVectors(
 
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueVector");
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
@@ -3376,7 +3314,7 @@ bool ServiceImplementation::getValueVectors(
 
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueVectorByTimeAndGeometry");
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
@@ -3555,7 +3493,7 @@ bool ServiceImplementation::getValueVectors(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -3568,7 +3506,7 @@ bool ServiceImplementation::getGridFiles(
     T::GeometryId producerGeometryId,
     uint generationId,
     std::string& analysisTime,
-    uint generationFlags,
+    ulonglong generationFlags,
     ParameterMapping& pInfo,
     std::string& forecastTime,
     T::ParamLevelId paramLevelId,
@@ -3605,7 +3543,7 @@ bool ServiceImplementation::getGridFiles(
 
     if (result != 0)
     {
-      SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
+      Fmi::Exception exception(BCP, "ContentServer returns an error!");
       exception.addParameter("Service", "getContentListByParameterGenerationIdAndForecastTime");
       exception.addParameter("Message", ContentServer::getResultString(result));
       throw exception;
@@ -3653,7 +3591,7 @@ bool ServiceImplementation::getGridFiles(
     result = mDataServerPtr->getGridAttributeList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,attrList);
     if (result != 0)
     {
-      SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+      Fmi::Exception exception(BCP, "DataServer returns an error!");
       exception.addParameter("Service", "getGridAttributeList");
       exception.addParameter("Message", DataServer::getResultString(result));
       std::string errorMsg = exception.getStackTrace();
@@ -3954,7 +3892,7 @@ bool ServiceImplementation::getGridFiles(
     }
     else
     {
-      SmartMet::Spine::Exception exception(BCP, "No valid grib type and version found!");
+      Fmi::Exception exception(BCP, "No valid grib type and version found!");
       std::string errorMsg = exception.getStackTrace();
       PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
       return false;
@@ -3992,7 +3930,7 @@ bool ServiceImplementation::getGridFiles(
 
         if (result != 0)
         {
-          SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+          Fmi::Exception exception(BCP, "DataServer returns an error!");
           exception.addParameter("Service", "getGridValueVectorByCoordinateList");
           exception.addParameter("Message", DataServer::getResultString(result));
           std::string errorMsg = exception.getStackTrace();
@@ -4057,7 +3995,7 @@ bool ServiceImplementation::getGridFiles(
 
         if (result != 0)
         {
-          SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+          Fmi::Exception exception(BCP, "DataServer returns an error!");
           exception.addParameter("Service", "getGridValueVectorByTimeAndCoordinateList");
           exception.addParameter("Message", DataServer::getResultString(result));
           std::string errorMsg = exception.getStackTrace();
@@ -4106,7 +4044,7 @@ bool ServiceImplementation::getGridFiles(
         int result = mDataServerPtr->getGridValueVectorByLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,coordinateType,*coordinates,queryAttributeList,valueVector);
         if (result != 0)
         {
-          SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+          Fmi::Exception exception(BCP, "DataServer returns an error!");
           exception.addParameter("Service", "getGridValueVectorByLevelAndCoordinateList");
           exception.addParameter("Message", DataServer::getResultString(result));
           std::string errorMsg = exception.getStackTrace();
@@ -4157,7 +4095,7 @@ bool ServiceImplementation::getGridFiles(
         int result = mDataServerPtr->getGridValueVectorByTimeLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,forecastTime,paramLevel,coordinateType,*coordinates,queryAttributeList,valueVector);
         if (result != 0)
         {
-          SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+          Fmi::Exception exception(BCP, "DataServer returns an error!");
           exception.addParameter("Service", "getGridValueVectorByTimeLevelAndCoordinateList");
           exception.addParameter("Message", DataServer::getResultString(result));
           std::string errorMsg = exception.getStackTrace();
@@ -4203,7 +4141,7 @@ bool ServiceImplementation::getGridFiles(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -4216,7 +4154,7 @@ bool ServiceImplementation::getPointValuesByHeight(
     T::GeometryId producerGeometryId,
     uint generationId,
     std::string& analysisTime,
-    uint generationFlags,
+    ulonglong generationFlags,
     ParameterMapping& pInfo,
     std::string& forecastTime,
     T::ParamLevelId paramLevelId,
@@ -4255,7 +4193,7 @@ bool ServiceImplementation::getPointValuesByHeight(
     int result = mContentServerPtr->getContentListByParameterAndGenerationId(0,generationId,pInfo.mParameterKeyType, pInfo.mParameterKey,T::ParamLevelIdTypeValue::IGNORE,0,-1000000000,1000000000,forecastType,forecastNumber,producerGeometryId,startTime,endTime,0,tmpContentList);
     if (result != 0)
     {
-      SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
+      Fmi::Exception exception(BCP, "ContentServer returns an error!");
       exception.addParameter("Service", "getContentListByParameterGenerationId");
       exception.addParameter("Message", ContentServer::getResultString(result));
       throw exception;
@@ -4433,7 +4371,7 @@ bool ServiceImplementation::getPointValuesByHeight(
               int result = mDataServerPtr->getGridValueByPoint(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, coordinateType,coordinate->x(),coordinate->y(),areaInterpolationMethod, value);
               if (result != 0)
               {
-                SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+                Fmi::Exception exception(BCP, "DataServer returns an error!");
                 exception.addParameter("Service", "getGridValueListByPointList");
                 exception.addParameter("Message", DataServer::getResultString(result));
                 std::string errorMsg = exception.getStackTrace();
@@ -4492,7 +4430,7 @@ bool ServiceImplementation::getPointValuesByHeight(
 
               if (result != 0)
               {
-                SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+                Fmi::Exception exception(BCP, "DataServer returns an error!");
                 exception.addParameter("Service", "getGridValueListByLevelAndPointList");
                 exception.addParameter("Message", DataServer::getResultString(result));
                 std::string errorMsg = exception.getStackTrace();
@@ -4537,7 +4475,7 @@ bool ServiceImplementation::getPointValuesByHeight(
 
               if (result != 0)
               {
-                SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+                Fmi::Exception exception(BCP, "DataServer returns an error!");
                 exception.addParameter("Service", "getGridValueListByLevelAndPointList");
                 exception.addParameter("Message", DataServer::getResultString(result));
                 std::string errorMsg = exception.getStackTrace();
@@ -4571,7 +4509,7 @@ bool ServiceImplementation::getPointValuesByHeight(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -4584,7 +4522,7 @@ bool ServiceImplementation::getPointValues(
     T::GeometryId producerGeometryId,
     uint generationId,
     std::string& analysisTime,
-    uint generationFlags,
+    ulonglong generationFlags,
     ParameterMapping& pInfo,
     std::string& forecastTime,
     T::ParamLevelId paramLevelId,
@@ -4635,7 +4573,7 @@ bool ServiceImplementation::getPointValues(
 
       if (result != 0)
       {
-        SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
+        Fmi::Exception exception(BCP, "ContentServer returns an error!");
         exception.addParameter("Service", "getContentListByParameterAndGenerationId");
         exception.addParameter("Message", ContentServer::getResultString(result));
         throw exception;
@@ -4653,7 +4591,7 @@ bool ServiceImplementation::getPointValues(
 
     if (result != 0)
     {
-      SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
+      Fmi::Exception exception(BCP, "ContentServer returns an error!");
       exception.addParameter("Service", "getContentListByParameterGenerationIdAndForecastTime");
       exception.addParameter("Message", ContentServer::getResultString(result));
       throw exception;
@@ -4722,7 +4660,7 @@ bool ServiceImplementation::getPointValues(
           int result = mDataServerPtr->getGridValueListByPointList(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, coordinateType,areaCoordinates[0],areaInterpolationMethod, valueList.mValueList);
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByPointList");
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
@@ -4779,7 +4717,7 @@ bool ServiceImplementation::getPointValues(
           int result = mDataServerPtr->getGridValueListByLevelAndPointList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,coordinateType,areaCoordinates[0],areaInterpolationMethod,iplMethod,valueList.mValueList);
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByLevelAndPointList");
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
@@ -4811,7 +4749,7 @@ bool ServiceImplementation::getPointValues(
           int result = mDataServerPtr->getGridValueListByTimeAndPointList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,forecastTime,coordinateType,areaCoordinates[0],areaInterpolationMethod,timeInterpolationMethod,valueList.mValueList);
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByTimeAndPointList");
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
@@ -4855,7 +4793,7 @@ bool ServiceImplementation::getPointValues(
 
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByLevelAndPointList");
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
@@ -4877,7 +4815,7 @@ bool ServiceImplementation::getPointValues(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -4890,7 +4828,7 @@ bool ServiceImplementation::getCircleValues(
     T::GeometryId producerGeometryId,
     uint generationId,
     std::string& analysisTime,
-    uint generationFlags,
+    ulonglong generationFlags,
     ParameterMapping& pInfo,
     std::string& forecastTime,
     T::ParamLevelId paramLevelId,
@@ -4923,7 +4861,7 @@ bool ServiceImplementation::getCircleValues(
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
     if (result != 0)
     {
-      SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
+      Fmi::Exception exception(BCP, "ContentServer returns an error!");
       exception.addParameter("Service", "getContentListByParameterGenerationIdAndForecastTime");
       exception.addParameter("Message", ContentServer::getResultString(result));
       throw exception;
@@ -4991,7 +4929,7 @@ bool ServiceImplementation::getCircleValues(
           int result = mDataServerPtr->getGridValueListByCircle(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, coordinateType, x, y, radius, valueList.mValueList);
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByCircle");
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
@@ -5055,7 +4993,7 @@ bool ServiceImplementation::getCircleValues(
           int result = mDataServerPtr->getGridValueListByTimeAndCircle(0,contentInfo1->mFileId,contentInfo1->mMessageIndex,contentInfo2->mFileId,contentInfo2->mMessageIndex,forecastTime,coordinateType,x,y,radius,timeInterpolationMethod,valueList.mValueList);
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByTimeAndCircle");
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
@@ -5088,7 +5026,7 @@ bool ServiceImplementation::getCircleValues(
           int result = mDataServerPtr->getGridValueListByLevelAndCircle(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,coordinateType,x,y,radius,iplMethod,valueList.mValueList);
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByLevelAndCircle");
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
@@ -5132,7 +5070,7 @@ bool ServiceImplementation::getCircleValues(
 
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByTimeLevelAndCircle");
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
@@ -5154,7 +5092,7 @@ bool ServiceImplementation::getCircleValues(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -5167,7 +5105,7 @@ bool ServiceImplementation::getPolygonValues(
     T::GeometryId producerGeometryId,
     uint generationId,
     std::string& analysisTime,
-    uint generationFlags,
+    ulonglong generationFlags,
     ParameterMapping& pInfo,
     std::string& forecastTime,
     T::ParamLevelId paramLevelId,
@@ -5198,7 +5136,7 @@ bool ServiceImplementation::getPolygonValues(
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
     if (result != 0)
     {
-      SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
+      Fmi::Exception exception(BCP, "ContentServer returns an error!");
       exception.addParameter("Service", "getContentListByParameterGenerationIdAndForecastTime");
       exception.addParameter("Message", ContentServer::getResultString(result));
       throw exception;
@@ -5270,7 +5208,7 @@ bool ServiceImplementation::getPolygonValues(
           int result = mDataServerPtr->getGridValueListByPolygonPath(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, coordinateType, areaCoordinates, valueList.mValueList);
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByPolygonPath");
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
@@ -5316,7 +5254,7 @@ bool ServiceImplementation::getPolygonValues(
           int result = mDataServerPtr->getGridValueListByTimeAndPolygonPath(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,forecastTime,coordinateType,areaCoordinates,timeInterpolationMethod,valueList.mValueList);
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByTimeAndPolygonPath");
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
@@ -5350,7 +5288,7 @@ bool ServiceImplementation::getPolygonValues(
           int result = mDataServerPtr->getGridValueListByLevelAndPolygonPath(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,coordinateType,areaCoordinates,iplMethod,valueList.mValueList);
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByLevelAndPolygonPath");
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
@@ -5394,7 +5332,7 @@ bool ServiceImplementation::getPolygonValues(
 
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByTimeLevelAndPolygonPath");
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
@@ -5417,7 +5355,7 @@ bool ServiceImplementation::getPolygonValues(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -5430,7 +5368,7 @@ bool ServiceImplementation::getIsolineValues(
     T::GeometryId producerGeometryId,
     uint generationId,
     std::string& analysisTime,
-    uint generationFlags,
+    ulonglong generationFlags,
     ParameterMapping& pInfo,
     std::string& forecastTime,
     T::ParamLevelId paramLevelId,
@@ -5476,7 +5414,7 @@ bool ServiceImplementation::getIsolineValues(
 
     if (result != 0)
     {
-      SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
+      Fmi::Exception exception(BCP, "ContentServer returns an error!");
       exception.addParameter("Service", "getContentListByParameterGenerationIdAndForecastTime");
       exception.addParameter("Message", ContentServer::getResultString(result));
       throw exception;
@@ -5556,7 +5494,7 @@ bool ServiceImplementation::getIsolineValues(
 
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsolinesByGeometry / getGridIsolinesByGrid / getGridIsolines");
             exception.addParameter("LocationType",Fmi::to_string(locationType));
             exception.addParameter("Message", DataServer::getResultString(result));
@@ -5618,7 +5556,7 @@ bool ServiceImplementation::getIsolineValues(
 
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsolinesByTimeAndGeometry / getGridIsolinesByTimeAndGrid / getGridIsolinesByTime");
             exception.addParameter("LocationType",Fmi::to_string(locationType));
             exception.addParameter("Message", DataServer::getResultString(result));
@@ -5665,7 +5603,7 @@ bool ServiceImplementation::getIsolineValues(
 
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsolinesByLevelAndGeometry / getGridIsolinesByLevelAndGrid / getGridIsolinesByLevel");
             exception.addParameter("LocationType",Fmi::to_string(locationType));
             exception.addParameter("Message", DataServer::getResultString(result));
@@ -5719,7 +5657,7 @@ bool ServiceImplementation::getIsolineValues(
 
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsolinesByTimeLevelAndGeometry / getGridIsolinesByTimeLevelAndGrid / getGridIsolinesByTimeAndLevel");
             exception.addParameter("LocationType",Fmi::to_string(locationType));
             exception.addParameter("Message", DataServer::getResultString(result));
@@ -5742,7 +5680,7 @@ bool ServiceImplementation::getIsolineValues(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -5755,7 +5693,7 @@ bool ServiceImplementation::getIsobandValues(
     T::GeometryId producerGeometryId,
     uint generationId,
     std::string& analysisTime,
-    uint generationFlags,
+    ulonglong generationFlags,
     ParameterMapping& pInfo,
     std::string& forecastTime,
     T::ParamLevelId paramLevelId,
@@ -5809,7 +5747,7 @@ bool ServiceImplementation::getIsobandValues(
 
     if (result != 0)
     {
-      SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
+      Fmi::Exception exception(BCP, "ContentServer returns an error!");
       exception.addParameter("Service", "getContentListByParameterGenerationIdAndForecastTime");
       exception.addParameter("Message", ContentServer::getResultString(result));
       throw exception;
@@ -5887,7 +5825,7 @@ bool ServiceImplementation::getIsobandValues(
 
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsobandsByGeometry / getGridIsobandsByGrid / getGridIsobands");
             exception.addParameter("LocationType",Fmi::to_string(locationType));
             exception.addParameter("Message", DataServer::getResultString(result));
@@ -5949,7 +5887,7 @@ bool ServiceImplementation::getIsobandValues(
 
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsobandsByTimeAndGeometry / getGridIsobandsByTimeAndGrid / getGridIsobandsByTime");
             exception.addParameter("LocationType",Fmi::to_string(locationType));
             exception.addParameter("Message", DataServer::getResultString(result));
@@ -5997,7 +5935,7 @@ bool ServiceImplementation::getIsobandValues(
 
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsobandsByLevelAndGeometry / getGridIsobandsByLevelAndGrid / getGridIsobandsByLevel");
             exception.addParameter("LocationType",Fmi::to_string(locationType));
             exception.addParameter("Message", DataServer::getResultString(result));
@@ -6051,7 +5989,7 @@ bool ServiceImplementation::getIsobandValues(
 
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsobandsByTimeLevelAndGeometry / getGridIsobandsByTimeLevelAndGrid / getGridIsobandsByTimeAndLevel");
             exception.addParameter("LocationType",Fmi::to_string(locationType));
             exception.addParameter("Message", DataServer::getResultString(result));
@@ -6074,7 +6012,7 @@ bool ServiceImplementation::getIsobandValues(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -6088,7 +6026,7 @@ void ServiceImplementation::getGridValues(
     std::set<T::GeometryId>& geometryIdList,
     uint producerId,
     std::string& analysisTime,
-    uint generationFlags,
+    ulonglong generationFlags,
     bool reverseGenerations,
     std::string& parameterKey,
     T::ParamLevelId paramLevelId,
@@ -6126,7 +6064,7 @@ void ServiceImplementation::getGridValues(
       PRINT_DATA(mDebugLog, "  - geometryIdList           : %lu items\n", geometryIdList.size());
       PRINT_DATA(mDebugLog, "  - producerId               : %u\n", producerId);
       PRINT_DATA(mDebugLog, "  - analysisTime             : %s\n", analysisTime.c_str());
-      PRINT_DATA(mDebugLog, "  - generationFlags          : %08x\n", generationFlags);
+      PRINT_DATA(mDebugLog, "  - generationFlags          : %llu\n", generationFlags);
       PRINT_DATA(mDebugLog, "  - reverseGenerations       : %d\n", reverseGenerations);
       PRINT_DATA(mDebugLog, "  - parameterKey             : %s\n", parameterKey.c_str());
       PRINT_DATA(mDebugLog, "  - paramLevelId             : %d\n", paramLevelId);
@@ -6150,7 +6088,7 @@ void ServiceImplementation::getGridValues(
 
     if (queryType != QueryParameter::Type::GridFile  &&  areaCoordinates.size() == 0  &&  queryAttributeList.getAttributeValue("grid.geometryId") == nullptr  &&  queryAttributeList.getAttributeValue("grid.geometryString") == nullptr  &&  queryAttributeList.getAttributeValue("grid.urn") == nullptr  &&  queryAttributeList.getAttributeValue("grid.crs") == nullptr)
     {
-      SmartMet::Spine::Exception exception(BCP, "No areaCoordinates defined!");
+      Fmi::Exception exception(BCP, "No areaCoordinates defined!");
       throw exception;
     }
 
@@ -6160,7 +6098,7 @@ void ServiceImplementation::getGridValues(
       {
         if (areaCoordinates[t].size() < 3)
         {
-          SmartMet::Spine::Exception exception(BCP, "Polygon definition requires at least 3 areaCoordinates!");
+          Fmi::Exception exception(BCP, "Polygon definition requires at least 3 areaCoordinates!");
           throw exception;
         }
       }
@@ -6481,7 +6419,7 @@ void ServiceImplementation::getGridValues(
                           {
                             uint a_producerId = producerId;
                             std::string a_analysisTime = analysisTime;
-                            uint a_generationFlags = generationFlags;
+                            ulonglong a_generationFlags = generationFlags;
                             bool a_reverseGenerations = reverseGenerations;
                             std::string a_parameterKey = parameterKey;
                             T::ParamLevelId a_paramLevelId = paramLevelId;
@@ -6733,7 +6671,7 @@ void ServiceImplementation::getGridValues(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -6747,7 +6685,7 @@ void ServiceImplementation::getGridValues(
     std::set<T::GeometryId>& geometryIdList,
     uint producerId,
     std::string& analysisTime,
-    uint generationFlags,
+    ulonglong generationFlags,
     std::string& parameterKey,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
@@ -6787,7 +6725,7 @@ void ServiceImplementation::getGridValues(
       PRINT_DATA(mDebugLog, "  - geometryIdList           : %lu items\n", geometryIdList.size());
       PRINT_DATA(mDebugLog, "  - producerId               : %u\n", producerId);
       PRINT_DATA(mDebugLog, "  - analysisTime             : %s\n", analysisTime.c_str());
-      PRINT_DATA(mDebugLog, "  - generationFlags          : %08x\n", generationFlags);
+      PRINT_DATA(mDebugLog, "  - generationFlags          : %llu\n", generationFlags);
       PRINT_DATA(mDebugLog, "  - parameterKey             : %s\n", parameterKey.c_str());
       PRINT_DATA(mDebugLog, "  - paramLevelId             : %d\n", paramLevelId);
       PRINT_DATA(mDebugLog, "  - paramLevel               : %d\n", paramLevel);
@@ -6813,7 +6751,7 @@ void ServiceImplementation::getGridValues(
 
     if (queryType != QueryParameter::Type::GridFile  &&  areaCoordinates.size() == 0  &&  queryAttributeList.getAttributeValue("grid.geometryId") == nullptr  &&  queryAttributeList.getAttributeValue("grid.geometryString") == nullptr  &&  queryAttributeList.getAttributeValue("grid.urn") == nullptr  &&  queryAttributeList.getAttributeValue("grid.crs") == nullptr)
     {
-      SmartMet::Spine::Exception exception(BCP, "No areaCoordinates defined!");
+      Fmi::Exception exception(BCP, "No areaCoordinates defined!");
       throw exception;
     }
 
@@ -6823,7 +6761,7 @@ void ServiceImplementation::getGridValues(
       {
         if (areaCoordinates[t].size() < 3)
         {
-          SmartMet::Spine::Exception exception(BCP, "Area definition requires at least 3 areaCoordinates!");
+          Fmi::Exception exception(BCP, "Area definition requires at least 3 areaCoordinates!");
           throw exception;
         }
       }
@@ -6923,7 +6861,7 @@ void ServiceImplementation::getGridValues(
 
                 if (result != 0)
                 {
-                  SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
+                  Fmi::Exception exception(BCP, "ContentServer returns an error!");
                   exception.addParameter("Service", "getContentListByParameterAndProducerId");
                   exception.addParameter("Message", ContentServer::getResultString(result));
                   throw exception;
@@ -7141,7 +7079,7 @@ void ServiceImplementation::getGridValues(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -7347,7 +7285,7 @@ void ServiceImplementation::getAdditionalValues(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -7435,7 +7373,7 @@ T::ParamValue ServiceImplementation::getAdditionalValue(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -7457,7 +7395,7 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
       std::string cacheKey = Fmi::to_string(contentInfo->mGenerationId) + ":" + contentInfo->mForecastTime + ":" + Fmi::to_string(contentInfo->mFmiParameterLevelId) + ":" + Fmi::to_string(contentInfo->mParameterLevel) + Fmi::to_string(x) + Fmi::to_string(y);
       if (mLevelHeightCache.size() > 0)
       {
-        AutoThreadLock lock(&mHeightCacheThreadLock);
+        AutoReadLock lock(&mHeightCache_modificationLock);
 
         for (auto cc = mLevelHeightCache.rbegin(); cc != mLevelHeightCache.rend(); ++cc)
         {
@@ -7487,7 +7425,7 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
 
         if (result != 0)
         {
-          SmartMet::Spine::Exception exception(BCP, "ContentServer returns an error!");
+          Fmi::Exception exception(BCP, "ContentServer returns an error!");
           exception.addParameter("Service", "getContentListByParameterGenerationIdAndForecastTime");
           exception.addParameter("Message", ContentServer::getResultString(result));
           throw exception;
@@ -7502,7 +7440,7 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
           int result = mDataServerPtr->getGridValueByPoint(0, cInfo->mFileId, cInfo->mMessageIndex, coordinateType,x,y,T::AreaInterpolationMethod::Linear,value);
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP, "DataServer returns an error!");
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueByPoint");
             exception.addParameter("Message", DataServer::getResultString(result));
             std::string errorMsg = exception.getStackTrace();
@@ -7518,7 +7456,7 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
             newContentInfo->mParameterLevel = (T::ParamLevel)(value/9.80665);
             newContentList.addContentInfo(newContentInfo);
 
-            AutoThreadLock lock(&mHeightCacheThreadLock);
+            AutoWriteLock lock(&mHeightCache_modificationLock);
             if (mLevelHeightCache.size() >= 5000)
               mLevelHeightCache.erase(mLevelHeightCache.begin(), mLevelHeightCache.begin() + 1000);
 
@@ -7530,10 +7468,221 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, exception_operation_failed, nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
+
+
+
+
+void ServiceImplementation::checkProducerMapUpdates()
+{
+  FUNCTION_TRACE
+  try
+  {
+    time_t currentTime = time(nullptr);
+    if ((currentTime - mProducerMap_updateTime) < mProducerMap_checkInterval)
+      return;
+
+    AutoWriteLock lock(&mProducerMap_modificationLock);
+    T::ProducerInfoList producerInfoList;
+    if (mContentServerPtr->getProducerInfoList(0,producerInfoList) == 0)
+    {
+       mProducerMap.clear();
+       uint len = producerInfoList.getLength();
+       for (uint t=0; t<len; t++)
+       {
+         T::ProducerInfo *pinfo = producerInfoList.getProducerInfoByIndex(t);
+         if (pinfo != nullptr)
+           mProducerMap.insert(std::pair<std::string,T::ProducerInfo>(pinfo->mName,T::ProducerInfo(*pinfo)));
+       }
+       mProducerMap_updateTime = time(nullptr);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::checkGenerationUpdates()
+{
+  FUNCTION_TRACE
+  try
+  {
+    time_t currentTime = time(nullptr);
+    if ((currentTime - mGenerationInfoList_checkTime) < mGenerationInfoList_checkInterval)
+      return;
+
+    AutoWriteLock lock(&mGenerationInfoList_modificationLock);
+    if (mContentServerPtr->getGenerationInfoList(0,mGenerationInfoList) == 0)
+    {
+      mGenerationInfoList.sort(T::GenerationInfo::ComparisonMethod::producerId);
+      mGenerationInfoList_checkTime = time(nullptr);
+
+      AutoWriteLock cacheLock(&mProducerGenerationListCacheModificationLock);
+      mProducerGenerationListCache.clear();
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::checkProducerFileUpdates()
+{
+  FUNCTION_TRACE
+  try
+  {
+    time_t currentTime = time(nullptr);
+    if ((currentTime - mProducerFile_checkTime) < mProducerFile_checkInterval)
+      return;
+
+    mProducerFile_checkTime = time(nullptr);
+    time_t t1 = getFileModificationTime(mProducerFile.c_str());
+
+    if (mProducerFile_modificationTime != t1 && (mProducerFile_checkTime - t1) > 3)
+    {
+      loadProducerFile();
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::checkParameterMappingUpdates()
+{
+  FUNCTION_TRACE
+  try
+  {
+    time_t currentTime = time(nullptr);
+    if ((currentTime - mParameterMapping_checkTime) < mParameterMapping_checkInterval)
+      return;
+
+    mParameterMapping_checkTime = time(nullptr);
+    for (auto it = mParameterMappings.begin(); it != mParameterMappings.end(); ++it)
+    {
+      if (it->checkUpdates())
+      {
+         AutoWriteLock lock(&mParameterMappingCache_modificationLock);
+         mParameterMappingCache.clear();
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::updateProcessing()
+{
+  try
+  {
+    while (!mShutdownRequested)
+    {
+      try
+      {
+        checkProducerMapUpdates();
+      }
+      catch (...)
+      {
+      }
+
+      try
+      {
+        checkGenerationUpdates();
+      }
+      catch (...)
+      {
+      }
+
+      try
+      {
+        checkProducerFileUpdates();
+      }
+      catch (...)
+      {
+      }
+
+      try
+      {
+        checkParameterMappingUpdates();
+      }
+      catch (...)
+      {
+      }
+
+      try
+      {
+        mLuaFileCollection.checkUpdates(false);
+      }
+      catch (...)
+      {
+      }
+
+      try
+      {
+        mProducerAliasFileCollection.checkUpdates(false);
+      }
+      catch (...)
+      {
+      }
+
+      try
+      {
+        mAliasFileCollection.checkUpdates(false);
+      }
+      catch (...)
+      {
+      }
+
+      sleep(1);
+    }
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP, "Operation failed!", nullptr);
+    throw exception;
+  }
+}
+
+
+
+
+
+void ServiceImplementation::startUpdateProcessing()
+{
+  try
+  {
+    pthread_create(&mThread,nullptr,queryServer_updateThread,this);
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP, "Operation failed!", nullptr);
+    throw exception;
+  }
+}
 
 }  // namespace QueryServer
 }  // namespace SmartMet

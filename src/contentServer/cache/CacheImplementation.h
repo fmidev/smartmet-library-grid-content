@@ -19,6 +19,18 @@ namespace ContentServer
 typedef std::map<uint,std::set<std::string>> ContentTimeCache;
 
 
+class SearchStructure
+{
+  public:
+    T::ServerInfoList      mDataServerInfoList;
+    T::ProducerInfoList    mProducerInfoList;
+    T::GenerationInfoList  mGenerationInfoList;
+    T::FileInfoList        mFileInfoList;
+    T::FileInfoList        mFileInfoListByName;
+    T::ContentInfoList     mContentInfoList[CONTENT_LIST_COUNT];
+};
+
+
 class CacheImplementation : public ServiceInterface
 {
   public:
@@ -218,6 +230,8 @@ class CacheImplementation : public ServiceInterface
     virtual void    reloadData();
     virtual void    saveData();
 
+    virtual void    swapData();
+
     bool                   mReloadActivated;
     bool                   mShutdownRequested;
     bool                   mUpdateInProgress;
@@ -225,25 +239,18 @@ class CacheImplementation : public ServiceInterface
     T::SessionId           mSessionId;
     T::EventId             mLastProcessedEventId;
     T::FileInfoList        mFileInfoList;
-    T::FileInfoList        mFileInfoListByName;
     T::ProducerInfoList    mProducerInfoList;
     T::GenerationInfoList  mGenerationInfoList;
     T::ServerInfoList      mDataServerInfoList;
+    T::ContentInfoList     mContentInfoList;
     T::EventInfoList       mEventInfoList;
-    T::ContentInfoList     mContentInfoList[CONTENT_LIST_COUNT];
     bool                   mContentInfoListEnabled[CONTENT_LIST_COUNT];
-    std::set<ulonglong>    mDelayedContentAddList;
-    std::set<uint>         mDelayedFileAddList;
     time_t                 mStartTime;
     pthread_t              mThread;
     ThreadLock             mEventProcessingLock;
     ModificationLock       mModificationLock;
-    ModificationLock       mContentModificationLock;
-    ModificationLock       mFileModificationLock;
     ServiceInterface*      mContentStorage;
     time_t                 mContentStorageStartTime;
-    time_t                 mDelayedFileAdditionTime;
-    time_t                 mDelayedContentAdditionTime;
     bool                   mSaveEnabled;
     std::string            mSaveDir;
     uint                   mContentSortingFlags;
@@ -255,6 +262,10 @@ class CacheImplementation : public ServiceInterface
     uint                   mContentDeleteCount;
     uint                   mFileDeleteCount;
     ContentTimeCache       mContentTimeCache;
+
+    SearchStructure        mSearchStructure[2];
+    uint                   mSSI;
+    time_t                 mDataSwapTime;
 };
 
 

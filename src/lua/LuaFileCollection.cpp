@@ -12,11 +12,11 @@ LuaFileCollection::LuaFileCollection()
   try
   {
     mLastCheck = 0;
-    mCheckInterval = 10;
+    mCheckInterval = 30;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Constructor failed!", nullptr);
+    throw Fmi::Exception(BCP, "Constructor failed!", nullptr);
   }
 }
 
@@ -32,7 +32,7 @@ LuaFileCollection::LuaFileCollection(const string_vec& filenames)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Constructor failed!", nullptr);
+    throw Fmi::Exception(BCP, "Constructor failed!", nullptr);
   }
 }
 
@@ -49,7 +49,7 @@ LuaFileCollection::LuaFileCollection(const LuaFileCollection& luaFileCollection)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Copy constructor failed!", nullptr);
+    throw Fmi::Exception(BCP, "Copy constructor failed!", nullptr);
   }
 }
 
@@ -64,7 +64,7 @@ LuaFileCollection::~LuaFileCollection()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -77,7 +77,7 @@ void LuaFileCollection::init()
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoWriteLock lock(&mModificationLock);
 
     for (auto it = mFilenames.begin(); it != mFilenames.end(); ++it)
     {
@@ -91,7 +91,7 @@ void LuaFileCollection::init()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Initialization failed!", nullptr);
+    throw Fmi::Exception(BCP, "Initialization failed!", nullptr);
   }
 }
 
@@ -108,7 +108,7 @@ void LuaFileCollection::init(const string_vec& filenames)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Initialization failed!", nullptr);
+    throw Fmi::Exception(BCP, "Initialization failed!", nullptr);
   }
 }
 
@@ -120,11 +120,12 @@ bool LuaFileCollection::checkUpdates(bool force)
   try
   {
     bool result = false;
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
 
     time_t tt = time(nullptr);
     if (force ||  (tt-mLastCheck) > mCheckInterval)
     {
+
       for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
       {
         if (it->checkUpdates())
@@ -136,7 +137,7 @@ bool LuaFileCollection::checkUpdates(bool force)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Update check failed!", nullptr);
+    throw Fmi::Exception(BCP, "Update check failed!", nullptr);
   }
 }
 
@@ -148,7 +149,7 @@ uint LuaFileCollection::getFunction(const std::string& functionName,std::string&
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
 
     for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
     {
@@ -160,7 +161,7 @@ uint LuaFileCollection::getFunction(const std::string& functionName,std::string&
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function searching failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function searching failed!", nullptr);
   }
 }
 
@@ -171,7 +172,7 @@ bool LuaFileCollection::getFunction(const std::string& functionName,const uint f
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
 
     for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
     {
@@ -182,7 +183,7 @@ bool LuaFileCollection::getFunction(const std::string& functionName,const uint f
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function searching failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function searching failed!", nullptr);
   }
 }
 
@@ -194,7 +195,7 @@ std::string LuaFileCollection::executeFunctionCall5(std::string& function,std::s
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
     for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
     {
       std::string functionName;
@@ -205,13 +206,13 @@ std::string LuaFileCollection::executeFunctionCall5(std::string& function,std::s
       }
     }
 
-    Spine::Exception exception(BCP, "Unknown LUA function!");
+    Fmi::Exception exception(BCP, "Unknown LUA function!");
     exception.addParameter("Function",function);
     throw exception;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -223,7 +224,7 @@ std::string LuaFileCollection::executeFunctionCall5(std::string& function,std::s
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
     for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
     {
       std::string functionName;
@@ -234,13 +235,13 @@ std::string LuaFileCollection::executeFunctionCall5(std::string& function,std::s
       }
     }
 
-    Spine::Exception exception(BCP, "Unknown LUA function!");
+    Fmi::Exception exception(BCP, "Unknown LUA function!");
     exception.addParameter("Function",function);
     throw exception;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -252,7 +253,7 @@ float LuaFileCollection::executeFunctionCall1(std::string& function,std::vector<
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
     for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
     {
       std::string functionName;
@@ -263,13 +264,13 @@ float LuaFileCollection::executeFunctionCall1(std::string& function,std::vector<
       }
     }
 
-    Spine::Exception exception(BCP, "Unknown LUA function!");
+    Fmi::Exception exception(BCP, "Unknown LUA function!");
     exception.addParameter("Function",function);
     throw exception;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -281,7 +282,7 @@ double LuaFileCollection::executeFunctionCall1(std::string& function,std::vector
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
     for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
     {
       std::string functionName;
@@ -292,13 +293,13 @@ double LuaFileCollection::executeFunctionCall1(std::string& function,std::vector
       }
     }
 
-    Spine::Exception exception(BCP, "Unknown LUA function!");
+    Fmi::Exception exception(BCP, "Unknown LUA function!");
     exception.addParameter("Function",function);
     throw exception;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -310,7 +311,7 @@ void LuaFileCollection::executeFunctionCall4(std::string& function,uint columns,
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
     for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
     {
       std::string functionName;
@@ -322,13 +323,13 @@ void LuaFileCollection::executeFunctionCall4(std::string& function,uint columns,
       }
     }
 
-    Spine::Exception exception(BCP, "Unknown LUA function!");
+    Fmi::Exception exception(BCP, "Unknown LUA function!");
     exception.addParameter("Function",function);
     throw exception;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -340,7 +341,7 @@ void LuaFileCollection::executeFunctionCall4(std::string& function,uint columns,
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
     for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
     {
       std::string functionName;
@@ -352,13 +353,13 @@ void LuaFileCollection::executeFunctionCall4(std::string& function,uint columns,
       }
     }
 
-    Spine::Exception exception(BCP, "Unknown LUA function!");
+    Fmi::Exception exception(BCP, "Unknown LUA function!");
     exception.addParameter("Function",function);
     throw exception;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -370,7 +371,7 @@ std::string LuaFileCollection::executeFunctionCall6(std::string& function,std::v
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
     for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
     {
       std::string functionName;
@@ -381,13 +382,13 @@ std::string LuaFileCollection::executeFunctionCall6(std::string& function,std::v
       }
     }
 
-    Spine::Exception exception(BCP, "Unknown LUA function!");
+    Fmi::Exception exception(BCP, "Unknown LUA function!");
     exception.addParameter("Function",function);
     throw exception;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -410,7 +411,7 @@ std::string LuaFileCollection::executeFunctionCall6(
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
     for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
     {
       std::string functionName;
@@ -423,13 +424,13 @@ std::string LuaFileCollection::executeFunctionCall6(
       }
     }
 
-    Spine::Exception exception(BCP, "Unknown LUA function!");
+    Fmi::Exception exception(BCP, "Unknown LUA function!");
     exception.addParameter("Function",function);
     throw exception;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -442,7 +443,7 @@ void LuaFileCollection::executeFunctionCall9(std::string& function,uint columns,
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
     for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
     {
       std::string functionName;
@@ -454,13 +455,13 @@ void LuaFileCollection::executeFunctionCall9(std::string& function,uint columns,
       }
     }
 
-    Spine::Exception exception(BCP, "Unknown LUA function!");
+    Fmi::Exception exception(BCP, "Unknown LUA function!");
     exception.addParameter("Function",function);
     throw exception;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -472,7 +473,7 @@ void LuaFileCollection::executeFunctionCall9(std::string& function,uint columns,
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
     for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
     {
       std::string functionName;
@@ -484,13 +485,13 @@ void LuaFileCollection::executeFunctionCall9(std::string& function,uint columns,
       }
     }
 
-    Spine::Exception exception(BCP, "Unknown LUA function!");
+    Fmi::Exception exception(BCP, "Unknown LUA function!");
     exception.addParameter("Function",function);
     throw exception;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -509,7 +510,7 @@ void LuaFileCollection::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

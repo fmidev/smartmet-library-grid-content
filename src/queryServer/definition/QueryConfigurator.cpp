@@ -22,7 +22,7 @@ QueryConfigurator::QueryConfigurator()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -38,7 +38,7 @@ QueryConfigurator::~QueryConfigurator()
   }
   catch (...)
   {
-    Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+    Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     exception.printError();
   }
 }
@@ -63,7 +63,7 @@ void QueryConfigurator::configure(Query& query,T::AttributeList& attributeList)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -83,7 +83,7 @@ void QueryConfigurator::configureMisc(Query& query,T::AttributeList& attributeLi
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -104,7 +104,7 @@ void QueryConfigurator::configureProducer(Query& query,T::AttributeList& attribu
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -125,7 +125,7 @@ void QueryConfigurator::configureGeneration(Query& query,T::AttributeList& attri
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -330,7 +330,7 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -358,7 +358,7 @@ void QueryConfigurator::configureLocation(Query& query,T::AttributeList& attribu
       std::vector<double> coordinateList;
       splitString(lonlatStr,',',coordinateList);
       if (coordinateList.size() != 2)
-        throw Spine::Exception(BCP, "Invalid number of coordinates in 'lonlat' parameter!");
+        throw Fmi::Exception(BCP, "Invalid number of coordinates in 'lonlat' parameter!");
 
       T::Coordinate_vec coordinates;
       coordinates.push_back(T::Coordinate(coordinateList[0],coordinateList[1]));
@@ -370,7 +370,7 @@ void QueryConfigurator::configureLocation(Query& query,T::AttributeList& attribu
       std::vector<double> coordinateList;
       splitString(latlonStr,',',coordinateList);
       if (coordinateList.size() != 2)
-        throw Spine::Exception(BCP, "Invalid number of coordinates in 'latlon' parameter!");
+        throw Fmi::Exception(BCP, "Invalid number of coordinates in 'latlon' parameter!");
 
       T::Coordinate_vec coordinates;
       coordinates.push_back(T::Coordinate(coordinateList[1],coordinateList[0]));
@@ -387,7 +387,7 @@ void QueryConfigurator::configureLocation(Query& query,T::AttributeList& attribu
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -491,7 +491,7 @@ void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attri
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -546,7 +546,7 @@ void QueryConfigurator::configureParameter(Query& query,QueryParameter& param,T:
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

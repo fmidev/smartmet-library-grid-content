@@ -1,5 +1,5 @@
 #include "ServiceResults.h"
-#include <grid-files/common/Exception.h>
+#include <macgyver/Exception.h>
 #include <macgyver/StringConversion.h>
 
 
@@ -35,7 +35,7 @@ std::string getResultString(int resultCode)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 

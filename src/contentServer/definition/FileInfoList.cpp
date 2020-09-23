@@ -1,6 +1,6 @@
 #include "FileInfoList.h"
 
-#include <grid-files/common/Exception.h>
+#include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/AutoWriteLock.h>
 #include <grid-files/common/AutoReadLock.h>
@@ -64,7 +64,7 @@ FileInfoList::FileInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -103,7 +103,7 @@ FileInfoList::FileInfoList(FileInfoList& fileInfoList)
   catch (...)
   {
     fileInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -134,7 +134,7 @@ FileInfoList::~FileInfoList()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -179,7 +179,7 @@ FileInfoList& FileInfoList::operator=(FileInfoList& fileInfoList)
   catch (...)
   {
     fileInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -229,7 +229,7 @@ void FileInfoList::addFileInfo(FileInfo *fileInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -247,7 +247,7 @@ void FileInfoList::addFileInfoList(FileInfoList& fileInfoList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -344,7 +344,7 @@ void FileInfoList::addFileInfoListNoLock(FileInfoList& fileInfoList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -375,7 +375,7 @@ void FileInfoList::clear()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -392,7 +392,7 @@ void FileInfoList::increaseSize(uint newSize)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -437,7 +437,7 @@ void FileInfoList::increaseSizeNoLock(uint newSize)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -469,7 +469,7 @@ FileInfo* FileInfoList::getFileInfoById(uint fileId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -499,7 +499,7 @@ FileInfo* FileInfoList::getFileInfoByIdNoLock(uint fileId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -531,7 +531,7 @@ void FileInfoList::markFileInfoDeletedById(uint fileId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -552,7 +552,7 @@ int FileInfoList::getClosestIndex(uint comparisonMethod,FileInfo& fileInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -628,7 +628,7 @@ int FileInfoList::getClosestIndexNoLock(uint comparisonMethod,FileInfo& fileInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -669,7 +669,7 @@ FileInfo* FileInfoList::getFileInfoByName(std::string filename)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -696,7 +696,7 @@ FileInfo* FileInfoList::getFileInfoByIndex(uint index)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -715,7 +715,7 @@ void FileInfoList::getFileInfoList(uint startFileId,uint maxRecords,FileInfoList
 
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
     {
-      std::cout << CODE_LOCATION << " : Not supported when the records are not ordered by the 'fileId' field!\n";
+      std::cerr << __FILE__ << ":" << __LINE__ << ": Not supported when the records are not ordered by the 'fileId' field!\n";
       return;
     }
 
@@ -746,7 +746,7 @@ void FileInfoList::getFileInfoList(uint startFileId,uint maxRecords,FileInfoList
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -781,7 +781,7 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,FileInfoList& fil
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -801,7 +801,7 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,
 
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
     {
-      std::cout << CODE_LOCATION << " : Not supported when the records are not ordered by the 'fileId' field!\n";
+      std::cerr << __FILE__ << ":" << __LINE__ << ": Not supported when the records are not ordered by the 'fileId' field!\n";
       return;
     }
 
@@ -832,7 +832,40 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+std::size_t FileInfoList::getHash()
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::size_t hash = 0;
+
+    if (mArray == nullptr ||  mLength == 0)
+      return hash;
+
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    uint sz = getLength();
+
+    for (uint t=0; t<sz; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
+      {
+        boost::hash_combine(hash,info->mFileId);
+      }
+    }
+    return hash;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -865,7 +898,7 @@ std::size_t FileInfoList::getHashByProducerId(uint producerId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -900,7 +933,7 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,FileInfoList&
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -920,7 +953,7 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFil
 
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
     {
-      std::cout << CODE_LOCATION << " : Not supported when the records are not ordered by the 'fileId' field!\n";
+      std::cerr << __FILE__ << ":" << __LINE__ << ": Not supported when the records are not ordered by the 'fileId' field!\n";
       return;
     }
 
@@ -951,7 +984,7 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFil
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -986,7 +1019,7 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,FileInfoList& fil
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1006,7 +1039,7 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,
 
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
     {
-      std::cout << CODE_LOCATION << " : Not supported when the records are not ordered by the 'fileId' field!\n";
+      std::cerr << __FILE__ << ":" << __LINE__ << ": Not supported when the records are not ordered by the 'fileId' field!\n";
       return;
     }
 
@@ -1037,7 +1070,7 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1072,7 +1105,7 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,FileInfoList& fileInf
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1092,7 +1125,7 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,uint
 
     if (mComparisonMethod != FileInfo::ComparisonMethod::fileId)
     {
-      std::cout << CODE_LOCATION << " : Not supported when the records are not ordered by the 'fileId' field!\n";
+      std::cerr << __FILE__ << ":" << __LINE__ << ": Not supported when the records are not ordered by the 'fileId' field!\n";
       return;
     }
 
@@ -1123,7 +1156,7 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1154,7 +1187,7 @@ uint FileInfoList::getFileInfoCountByProducerId(uint producerId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1185,7 +1218,7 @@ uint FileInfoList::getFileInfoCountByGenerationId(uint generationId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1216,7 +1249,7 @@ uint FileInfoList::getFileInfoCountBySourceId(uint sourceId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1233,7 +1266,7 @@ FileInfo* FileInfoList::getFileInfoByIndexNoCheck(uint index)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1249,7 +1282,7 @@ uint FileInfoList::getLength()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1291,7 +1324,7 @@ bool FileInfoList::deleteFileInfoById(uint fileId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1333,7 +1366,7 @@ bool FileInfoList::deleteFileInfoByName(std::string filename)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1375,7 +1408,7 @@ uint FileInfoList::deleteFileInfoByGroupFlags(uint groupFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1418,7 +1451,7 @@ uint FileInfoList::deleteFileInfoByProducerId(uint producerId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1462,7 +1495,7 @@ uint FileInfoList::deleteMarkedFiles()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1505,7 +1538,7 @@ uint FileInfoList::deleteFileInfoByGenerationId(uint generationId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1548,7 +1581,7 @@ uint FileInfoList::deleteFileInfoByGenerationIdList(std::set<uint>& generationId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1585,7 +1618,7 @@ bool FileInfoList::deleteFileInfoByIndex(uint index)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1629,7 +1662,7 @@ uint FileInfoList::deleteFileInfoBySourceId(uint sourceId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1673,7 +1706,7 @@ uint FileInfoList::deleteFileInfoByFileIdList(std::set<uint>& fileIdList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1717,7 +1750,7 @@ uint FileInfoList::deleteVirtualFiles()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1737,7 +1770,7 @@ void FileInfoList::setModificationLockPtr(ModificationLock* modificationLockPtr)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1754,7 +1787,7 @@ ModificationLock* FileInfoList::getModificationLockPtr()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1771,7 +1804,7 @@ void FileInfoList::lock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1788,7 +1821,7 @@ void FileInfoList::unlock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1805,7 +1838,7 @@ bool FileInfoList::getReleaseObjects()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1821,7 +1854,7 @@ void FileInfoList::setReleaseObjects(bool releaseObjects)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1838,7 +1871,7 @@ void FileInfoList::setLockingEnabled(bool lockingEnabled)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1858,7 +1891,7 @@ void FileInfoList::setComparisonMethod(uint comparisonMethod)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1892,7 +1925,7 @@ void FileInfoList::sort(uint comparisonMethod)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1909,7 +1942,7 @@ void FileInfoList::writeToFile(std::string filename)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1927,7 +1960,7 @@ void FileInfoList::writeToFile(std::string filename,const char *filemode)
     FILE *file = fopen(filename.c_str(),filemode);
     if (file == nullptr)
     {
-      SmartMet::Spine::Exception exception(BCP,"Cannot create the file!");
+      Fmi::Exception exception(BCP,"Cannot create the file!");
       exception.addParameter("Filename",filename);
       throw exception;
     }
@@ -1941,7 +1974,7 @@ void FileInfoList::writeToFile(std::string filename,const char *filemode)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1961,7 +1994,7 @@ void FileInfoList::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 

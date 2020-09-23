@@ -15,7 +15,7 @@ Function_inPrcnt::Function_inPrcnt()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -31,7 +31,7 @@ Function_inPrcnt::Function_inPrcnt(const Function_inPrcnt& function)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -46,7 +46,7 @@ Function_inPrcnt::~Function_inPrcnt()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -93,7 +93,7 @@ void Function_inPrcnt::executeFunctionCall9(uint columns,uint rows,std::vector<s
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -139,7 +139,7 @@ void Function_inPrcnt::executeFunctionCall9(uint columns,uint rows,std::vector<s
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -154,7 +154,7 @@ Function* Function_inPrcnt::duplicate()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

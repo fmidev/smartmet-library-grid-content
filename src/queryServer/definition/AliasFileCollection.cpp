@@ -18,7 +18,7 @@ AliasFileCollection::AliasFileCollection()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -35,7 +35,7 @@ AliasFileCollection::AliasFileCollection(string_vec& filenames)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -53,7 +53,7 @@ AliasFileCollection::AliasFileCollection(const AliasFileCollection& aliasFileCol
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -68,7 +68,7 @@ AliasFileCollection::~AliasFileCollection()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -84,7 +84,7 @@ void AliasFileCollection::init()
     if (mAliasFileList.size() > 0)
       return; // Already initialized
 
-    AutoThreadLock lock(&mThreadLock);
+    AutoWriteLock lock(&mModificationLock);
 
     for (auto it = mFilenames.begin(); it != mFilenames.end(); ++it)
     {
@@ -98,7 +98,7 @@ void AliasFileCollection::init()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -115,7 +115,7 @@ void AliasFileCollection::init(string_vec& filenames)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -133,7 +133,7 @@ void AliasFileCollection::init(string_vec& filenames,bool duplicatesAllowed)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -146,7 +146,7 @@ bool AliasFileCollection::checkUpdates(bool force)
   try
   {
     bool result = false;
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
 
     time_t tt = time(nullptr);
     if (force ||  (tt-mLastCheck) > mCheckInterval)
@@ -162,7 +162,7 @@ bool AliasFileCollection::checkUpdates(bool force)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -174,7 +174,7 @@ bool AliasFileCollection::getAlias(const std::string& name,std::string& alias)
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
 
     for (auto it = mAliasFileList.begin(); it != mAliasFileList.end(); ++it)
     {
@@ -185,7 +185,7 @@ bool AliasFileCollection::getAlias(const std::string& name,std::string& alias)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -197,7 +197,7 @@ void AliasFileCollection::getAliasList(const std::string& name,std::vector<std::
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
 
     for (auto it = mAliasFileList.begin(); it != mAliasFileList.end(); ++it)
     {
@@ -206,7 +206,7 @@ void AliasFileCollection::getAliasList(const std::string& name,std::vector<std::
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -239,7 +239,7 @@ bool AliasFileCollection::replaceAlias(const std::string& name,std::string& alia
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -251,6 +251,8 @@ void AliasFileCollection::print(std::ostream& stream,uint level,uint optionFlags
 {
   try
   {
+    AutoReadLock lock(&mModificationLock);
+
     stream << space(level) << "AliasFileCollection\n";
     for (auto it = mAliasFileList.begin(); it != mAliasFileList.end(); ++it)
     {
@@ -259,7 +261,7 @@ void AliasFileCollection::print(std::ostream& stream,uint level,uint optionFlags
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

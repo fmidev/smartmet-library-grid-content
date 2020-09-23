@@ -30,12 +30,12 @@ class AliasFileCollection
 
   protected:
 
-    AliasFile_vec mAliasFileList;
-    string_vec    mFilenames;
-    ThreadLock    mThreadLock;
-    time_t        mLastCheck;
-    uint          mCheckInterval;
-    bool          mDuplicatesAllowed;
+    AliasFile_vec     mAliasFileList;
+    string_vec        mFilenames;
+    ModificationLock  mModificationLock;
+    time_t            mLastCheck;
+    uint              mCheckInterval;
+    bool              mDuplicatesAllowed;
 };
 
 
