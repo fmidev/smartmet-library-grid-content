@@ -48,7 +48,7 @@ class QueryParameter
     T::ParamValue_vec           mContourHighValues;
     Color_vec                   mContourColors;
     uint                        mProducerId;
-    uint                        mGenerationFlags;
+    ulonglong                   mGenerationFlags;
     short                       mPrecision;
     bool                        mTemporary;
     std::string                 mFunction;

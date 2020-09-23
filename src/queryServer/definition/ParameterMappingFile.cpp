@@ -17,7 +17,7 @@ ParameterMappingFile::ParameterMappingFile(const std::string& filename)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -34,7 +34,7 @@ ParameterMappingFile::ParameterMappingFile(const ParameterMappingFile& mappingFi
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -49,7 +49,7 @@ ParameterMappingFile::~ParameterMappingFile()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -62,12 +62,12 @@ void ParameterMappingFile::init()
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoWriteLock lock(&mModificationLock);
     loadFile();
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -79,10 +79,11 @@ bool ParameterMappingFile::checkUpdates()
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
-
     time_t tt = getFileModificationTime(mFilename.c_str());
+    if (tt == mLastModified  ||  (tt+3) >= time(nullptr))
+      return false;
 
+    AutoWriteLock lock(&mModificationLock);
     if (tt != mLastModified  &&  (tt+3) < time(nullptr))
     {
       loadFile();
@@ -92,7 +93,7 @@ bool ParameterMappingFile::checkUpdates()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -108,7 +109,7 @@ std::string ParameterMappingFile::getFilename()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -120,7 +121,7 @@ uint ParameterMappingFile::getNumberOfMappings()
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
     uint cnt = 0;
     for (auto it = mMappingSearch.begin(); it != mMappingSearch.end(); ++it)
     {
@@ -130,7 +131,7 @@ uint ParameterMappingFile::getNumberOfMappings()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -142,8 +143,7 @@ ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
-
+    AutoReadLock lock(&mModificationLock);
     std::string key = toLowerString(mapping.mProducerName + ":" + mapping.mParameterName + ":" + Fmi::to_string(mapping.mGeometryId));
 
     auto s = mMappingSearch.find(key);
@@ -168,7 +168,7 @@ ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -180,8 +180,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
-
+    AutoReadLock lock(&mModificationLock);
     std::string key = toLowerString(producerName + ":" + parameterName + ":" + Fmi::to_string(geometryId));
 
     auto s = mMappingSearch.find(key);
@@ -206,7 +205,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -218,7 +217,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
 
     std::string key = toLowerString(producerName + ":" + parameterName + ":");
     int len = strlen(key.c_str());
@@ -249,7 +248,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -261,7 +260,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
 
     std::string key = toLowerString(producerName + ":" + parameterName + ":" + Fmi::to_string(geometryId));
 
@@ -297,7 +296,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -309,7 +308,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
 
     std::string key = toLowerString(producerName + ":" + parameterName + ":");
     int len = strlen(key.c_str());
@@ -349,7 +348,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -364,7 +363,7 @@ void ParameterMappingFile::loadFile()
     FILE *file = fopen(mFilename.c_str(),"re");
     if (file == nullptr)
     {
-      Spine::Exception exception(BCP,"Cannot open the mapping file!");
+      Fmi::Exception exception(BCP,"Cannot open the mapping file!");
       exception.addParameter("Filename",mFilename);
       throw exception;
     }
@@ -482,7 +481,7 @@ void ParameterMappingFile::loadFile()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -494,6 +493,8 @@ void ParameterMappingFile::print(std::ostream& stream,uint level,uint optionFlag
 {
   try
   {
+    AutoReadLock lock(&mModificationLock);
+
     for (auto it = mMappingSearch.begin(); it != mMappingSearch.end(); ++it)
     {
       stream << it->first << "\n";
@@ -505,7 +506,7 @@ void ParameterMappingFile::print(std::ostream& stream,uint level,uint optionFlag
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

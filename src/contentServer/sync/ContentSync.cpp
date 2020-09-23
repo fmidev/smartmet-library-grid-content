@@ -24,7 +24,7 @@ ContentSync::ContentSync()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -40,7 +40,7 @@ ContentSync::~ContentSync()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -82,7 +82,7 @@ void ContentSync::synchronize(T::SessionId sessionId,ServiceInterface *sourceInt
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -123,7 +123,7 @@ void ContentSync::synchronize(T::SessionId sessionId,const char *sourceDir,Servi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -141,14 +141,14 @@ void ContentSync::readSourceProducers(ServiceInterface *sourceInterface)
     int result = sourceInterface->getProducerInfoList(mSessionId,mSourceProducerList);
     if (result != 0)
     {
-      SmartMet::Spine::Exception exception(BCP,"Cannot read the producer list from the source data storage!");
+      Fmi::Exception exception(BCP,"Cannot read the producer list from the source data storage!");
       exception.addParameter("Result",getResultString(result));
       throw exception;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -166,14 +166,14 @@ void ContentSync::readSourceGenerations(ServiceInterface *sourceInterface)
     int result = sourceInterface->getGenerationInfoList(mSessionId,mSourceGenerationList);
     if (result != 0)
     {
-      SmartMet::Spine::Exception exception(BCP,"Cannot read the generation list from the source data storage!");
+      Fmi::Exception exception(BCP,"Cannot read the generation list from the source data storage!");
       exception.addParameter("Result",getResultString(result));
       throw exception;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -197,7 +197,7 @@ void ContentSync::readSourceFiles(ServiceInterface *sourceInterface)
       int result = sourceInterface->getFileInfoListBySourceId(mSessionId,mSourceId,startFileId,maxRecords,fileList);
       if (result != 0)
       {
-        SmartMet::Spine::Exception exception(BCP,"Cannot read the file list from the source data storage!");
+        Fmi::Exception exception(BCP,"Cannot read the file list from the source data storage!");
         exception.addParameter("Result",getResultString(result));
         throw exception;
       }
@@ -214,7 +214,7 @@ void ContentSync::readSourceFiles(ServiceInterface *sourceInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -240,7 +240,7 @@ void ContentSync::readSourceContent(ServiceInterface *sourceInterface)
       int result = sourceInterface->getContentListBySourceId(mSessionId,mSourceId,startFileId,startMessageIndex,maxRecords,contentList);
       if (result != 0)
       {
-        SmartMet::Spine::Exception exception(BCP,"Cannot read the content list from the source data storage!");
+        Fmi::Exception exception(BCP,"Cannot read the content list from the source data storage!");
         exception.addParameter("Result",getResultString(result));
         throw exception;
       }
@@ -260,7 +260,7 @@ void ContentSync::readSourceContent(ServiceInterface *sourceInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -281,7 +281,7 @@ void ContentSync::readSourceProducers(const char *sourceDir)
     FILE *file = fopen(filename,"re");
     if (file == nullptr)
     {
-      SmartMet::Spine::Exception exception(BCP,"Cannot open the file!");
+      Fmi::Exception exception(BCP,"Cannot open the file!");
       exception.addParameter("Filename",filename);
       throw exception;
     }
@@ -303,7 +303,7 @@ void ContentSync::readSourceProducers(const char *sourceDir)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -324,7 +324,7 @@ void ContentSync::readSourceGenerations(const char *sourceDir)
     FILE *file = fopen(filename,"re");
     if (file == nullptr)
     {
-      SmartMet::Spine::Exception exception(BCP,"Cannot open the file!");
+      Fmi::Exception exception(BCP,"Cannot open the file!");
       exception.addParameter("Filename",filename);
       throw exception;
     }
@@ -346,7 +346,7 @@ void ContentSync::readSourceGenerations(const char *sourceDir)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -367,7 +367,7 @@ void ContentSync::readSourceFiles(const char *sourceDir)
     FILE *file = fopen(filename,"re");
     if (file == nullptr)
     {
-      SmartMet::Spine::Exception exception(BCP,"Cannot open the file!");
+      Fmi::Exception exception(BCP,"Cannot open the file!");
       exception.addParameter("Filename",filename);
       throw exception;
     }
@@ -389,7 +389,7 @@ void ContentSync::readSourceFiles(const char *sourceDir)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -410,7 +410,7 @@ void ContentSync::readSourceContent(const char *sourceDir)
     FILE *file = fopen(filename,"re");
     if (file == nullptr)
     {
-      SmartMet::Spine::Exception exception(BCP,"Cannot open the file!");
+      Fmi::Exception exception(BCP,"Cannot open the file!");
       exception.addParameter("Filename",filename);
       throw exception;
     }
@@ -432,7 +432,7 @@ void ContentSync::readSourceContent(const char *sourceDir)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -450,14 +450,14 @@ void ContentSync::readTargetProducers(ServiceInterface *targetInterface)
     int result = targetInterface->getProducerInfoList(mSessionId,mTargetProducerList);
     if (result != 0)
     {
-      SmartMet::Spine::Exception exception(BCP,"Cannot read the producer list from the target data storage!");
+      Fmi::Exception exception(BCP,"Cannot read the producer list from the target data storage!");
       exception.addParameter("Result",getResultString(result));
       throw exception;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -475,14 +475,14 @@ void ContentSync::readTargetGenerations(ServiceInterface *targetInterface)
     int result = targetInterface->getGenerationInfoList(mSessionId,mTargetGenerationList);
     if (result != 0)
     {
-      SmartMet::Spine::Exception exception(BCP,"Cannot read the generation list from the target data storage!");
+      Fmi::Exception exception(BCP,"Cannot read the generation list from the target data storage!");
       exception.addParameter("Result",getResultString(result));
       throw exception;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -507,7 +507,7 @@ void ContentSync::readTargetFiles(ServiceInterface *targetInterface)
       int result = targetInterface->getFileInfoList(mSessionId,startFileId,maxRecords,fileList);
       if (result != 0)
       {
-        SmartMet::Spine::Exception exception(BCP,"Cannot read the file list from the target data storage!");
+        Fmi::Exception exception(BCP,"Cannot read the file list from the target data storage!");
         exception.addParameter("Result",getResultString(result));
         throw exception;
       }
@@ -525,7 +525,7 @@ void ContentSync::readTargetFiles(ServiceInterface *targetInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -551,7 +551,7 @@ void ContentSync::readTargetContent(ServiceInterface *targetInterface)
       int result = targetInterface->getContentListBySourceId(mSessionId,mTargetId,startFileId,startMessageIndex,maxRecords,contentList);
       if (result != 0)
       {
-        SmartMet::Spine::Exception exception(BCP,"Cannot read the content list from the target data storage!");
+        Fmi::Exception exception(BCP,"Cannot read the content list from the target data storage!");
         exception.addParameter("Result",getResultString(result));
         throw exception;
       }
@@ -571,7 +571,7 @@ void ContentSync::readTargetContent(ServiceInterface *targetInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -602,7 +602,7 @@ void ContentSync::updateProducers(ServiceInterface *targetInterface)
           int result = targetInterface->deleteProducerInfoById(mSessionId,targetProducer->mProducerId);
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP,"Cannot delete the producer information from the target data storage!");
+            Fmi::Exception exception(BCP,"Cannot delete the producer information from the target data storage!");
             exception.addParameter("ProducerId",Fmi::to_string(targetProducer->mProducerId));
             exception.addParameter("ProducerName",targetProducer->mName);
             exception.addParameter("Result",getResultString(result));
@@ -633,7 +633,7 @@ void ContentSync::updateProducers(ServiceInterface *targetInterface)
           int result = targetInterface->addProducerInfo(mSessionId,producer);
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP,"Cannot add the producer information into the target data storage!");
+            Fmi::Exception exception(BCP,"Cannot add the producer information into the target data storage!");
             exception.addParameter("ProducerId",Fmi::to_string(sourceProducer->mProducerId));
             exception.addParameter("ProducerName",sourceProducer->mName);
             exception.addParameter("Result",getResultString(result));
@@ -645,7 +645,7 @@ void ContentSync::updateProducers(ServiceInterface *targetInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -676,7 +676,7 @@ void ContentSync::updateGenerations(ServiceInterface *targetInterface)
           int result = targetInterface->deleteGenerationInfoById(mSessionId,targetGeneration->mGenerationId);
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP,"Cannot delete the generation information from the target data storage!");
+            Fmi::Exception exception(BCP,"Cannot delete the generation information from the target data storage!");
             exception.addParameter("GenerationId",Fmi::to_string(targetGeneration->mGenerationId));
             exception.addParameter("GenerationName",targetGeneration->mName);
             exception.addParameter("Result",getResultString(result));
@@ -706,7 +706,7 @@ void ContentSync::updateGenerations(ServiceInterface *targetInterface)
             int result = targetInterface->getProducerInfoByName(mSessionId,sourceProducer->mName,targetProducer);
             if (result != 0)
             {
-              SmartMet::Spine::Exception exception(BCP,"The producer information not found from the target data storage!");
+              Fmi::Exception exception(BCP,"The producer information not found from the target data storage!");
               exception.addParameter("ProducerName",sourceProducer->mName);
               exception.addParameter("Result",getResultString(result));
               throw exception;
@@ -720,7 +720,7 @@ void ContentSync::updateGenerations(ServiceInterface *targetInterface)
             result = targetInterface->addGenerationInfo(mSessionId,generationInfo);
             if (result != 0)
             {
-              SmartMet::Spine::Exception exception(BCP,"Cannot add the generation information into the target data storage!");
+              Fmi::Exception exception(BCP,"Cannot add the generation information into the target data storage!");
               exception.addParameter("GenerationName",generationInfo.mName);
               exception.addParameter("Result",getResultString(result));
               throw exception;
@@ -732,7 +732,7 @@ void ContentSync::updateGenerations(ServiceInterface *targetInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -766,7 +766,7 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
           int result = targetInterface->deleteFileInfoById(mSessionId,targetFile->mFileId);
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP,"Cannot delete the generation information from the target data storage!");
+            Fmi::Exception exception(BCP,"Cannot delete the generation information from the target data storage!");
             exception.addParameter("FileId",Fmi::to_string(targetFile->mFileId));
             exception.addParameter("FileName",targetFile->mName);
             exception.addParameter("Result",getResultString(result));
@@ -838,7 +838,7 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
               //result = targetInterface->addFileInfo(sessionId,fileInfo);
               if (result != 0)
               {
-                SmartMet::Spine::Exception exception(BCP,"Cannot add the file information into the target data storage!");
+                Fmi::Exception exception(BCP,"Cannot add the file information into the target data storage!");
                 exception.addParameter("FileName",fileInfo.mName);
                 exception.addParameter("Result",getResultString(result));
                 throw exception;
@@ -865,7 +865,7 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -896,7 +896,7 @@ void ContentSync::updateContent(ServiceInterface *targetInterface)
           int result = targetInterface->deleteContentInfo(mSessionId,targetContent->mFileId,targetContent->mMessageIndex);
           if (result != 0)
           {
-            SmartMet::Spine::Exception exception(BCP,"Cannot delete the generation information from the target data storage!");
+            Fmi::Exception exception(BCP,"Cannot delete the generation information from the target data storage!");
             exception.addParameter("FileId",Fmi::to_string(targetContent->mFileId));
             exception.addParameter("Result",getResultString(result));
             throw exception;
@@ -907,7 +907,7 @@ void ContentSync::updateContent(ServiceInterface *targetInterface)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 

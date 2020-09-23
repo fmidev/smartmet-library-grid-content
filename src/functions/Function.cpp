@@ -15,7 +15,7 @@ Function::Function()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -30,7 +30,7 @@ Function::Function(const Function& function)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -45,7 +45,7 @@ Function::~Function()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -56,7 +56,7 @@ Function::~Function()
 
 float Function::executeFunctionCall1(std::vector<float>& parameters)
 {
-  throw Spine::Exception(BCP, "Not implemented!");
+  throw Fmi::Exception(BCP, "Not implemented!");
 }
 
 
@@ -65,7 +65,7 @@ float Function::executeFunctionCall1(std::vector<float>& parameters)
 
 double Function::executeFunctionCall1(std::vector<double>& parameters)
 {
-  throw Spine::Exception(BCP, "Not implemented!");
+  throw Fmi::Exception(BCP, "Not implemented!");
 }
 
 
@@ -74,7 +74,7 @@ double Function::executeFunctionCall1(std::vector<double>& parameters)
 
 void Function::executeFunctionCall4(uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters)
 {
-  throw Spine::Exception(BCP, "Not implemented!");
+  throw Fmi::Exception(BCP, "Not implemented!");
 }
 
 
@@ -83,7 +83,7 @@ void Function::executeFunctionCall4(uint columns,uint rows,std::vector<float>& i
 
 void Function::executeFunctionCall4(uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters)
 {
-  throw Spine::Exception(BCP, "Not implemented!");
+  throw Fmi::Exception(BCP, "Not implemented!");
 }
 
 
@@ -91,7 +91,7 @@ void Function::executeFunctionCall4(uint columns,uint rows,std::vector<double>& 
 
 void Function::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
-  throw Spine::Exception(BCP, "Not implemented!");
+  throw Fmi::Exception(BCP, "Not implemented!");
 }
 
 
@@ -100,7 +100,7 @@ void Function::executeFunctionCall9(uint columns,uint rows,std::vector<std::vect
 
 void Function::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
-  throw Spine::Exception(BCP, "Not implemented!");
+  throw Fmi::Exception(BCP, "Not implemented!");
 }
 
 
@@ -115,7 +115,7 @@ Function* Function::duplicate()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -130,7 +130,7 @@ void Function::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

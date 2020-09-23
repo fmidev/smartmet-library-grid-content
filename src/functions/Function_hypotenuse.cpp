@@ -15,7 +15,7 @@ Function_hypotenuse::Function_hypotenuse()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -31,7 +31,7 @@ Function_hypotenuse::Function_hypotenuse(const Function_hypotenuse& function)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -45,7 +45,7 @@ Function_hypotenuse::~Function_hypotenuse()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -56,7 +56,7 @@ Function_hypotenuse::~Function_hypotenuse()
 
 float Function_hypotenuse::executeFunctionCall1(std::vector<float>& parameters)
 {
-  throw Spine::Exception(BCP, "Not implemented!");
+  throw Fmi::Exception(BCP, "Not implemented!");
 }
 
 
@@ -65,7 +65,7 @@ float Function_hypotenuse::executeFunctionCall1(std::vector<float>& parameters)
 
 double Function_hypotenuse::executeFunctionCall1(std::vector<double>& parameters)
 {
-  throw Spine::Exception(BCP, "Not implemented!");
+  throw Fmi::Exception(BCP, "Not implemented!");
 }
 
 
@@ -100,7 +100,7 @@ void Function_hypotenuse::executeFunctionCall9(uint columns,uint rows,std::vecto
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -135,7 +135,7 @@ void Function_hypotenuse::executeFunctionCall9(uint columns,uint rows,std::vecto
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -150,7 +150,7 @@ Function* Function_hypotenuse::duplicate()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -165,7 +165,7 @@ void Function_hypotenuse::print(std::ostream& stream,uint level,uint optionFlags
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

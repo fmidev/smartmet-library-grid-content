@@ -1,5 +1,5 @@
 #include "ServiceInterface.h"
-#include <grid-files/common/Exception.h>
+#include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/ShowFunction.h>
 
@@ -24,7 +24,7 @@ ServiceInterface::ServiceInterface()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -40,7 +40,7 @@ ServiceInterface::~ServiceInterface()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -58,7 +58,7 @@ void ServiceInterface::setProcessingLog(Log *processingLog)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -75,7 +75,7 @@ void ServiceInterface::setDebugLog(Log *debugLog)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -91,7 +91,7 @@ void ServiceInterface::shutdown()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -113,7 +113,7 @@ int ServiceInterface::getGridCoordinates(T::SessionId sessionId,uint fileId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -135,7 +135,7 @@ int ServiceInterface::getGridData(T::SessionId sessionId,uint fileId,uint messag
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -157,7 +157,7 @@ int ServiceInterface::getGridAttributeList(T::SessionId sessionId,uint fileId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -179,7 +179,7 @@ int ServiceInterface::getGridFileCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -201,7 +201,7 @@ int ServiceInterface::getGridMessagePreloadCount(T::SessionId sessionId,uint& co
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -223,7 +223,7 @@ int ServiceInterface::getGridMessageBytes(T::SessionId sessionId,uint fileId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -245,7 +245,7 @@ int ServiceInterface::getGridValueByPoint(T::SessionId sessionId,uint fileId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -267,7 +267,7 @@ int ServiceInterface::getGridValueByLevelAndPoint(T::SessionId sessionId,uint fi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -289,7 +289,7 @@ int ServiceInterface::getGridValueByTimeAndPoint(T::SessionId sessionId,uint fil
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -311,7 +311,7 @@ int ServiceInterface::getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -333,7 +333,7 @@ int ServiceInterface::getGridValueListByCircle(T::SessionId sessionId,uint fileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -355,7 +355,7 @@ int ServiceInterface::getGridValueListByLevelAndCircle(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -377,7 +377,7 @@ int ServiceInterface::getGridValueListByTimeAndCircle(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -399,7 +399,7 @@ int ServiceInterface::getGridValueListByTimeLevelAndCircle(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -421,7 +421,7 @@ int ServiceInterface::getGridValueListByPointList(T::SessionId sessionId,uint fi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -443,7 +443,7 @@ int ServiceInterface::getGridValueListByLevelAndPointList(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -465,7 +465,7 @@ int ServiceInterface::getGridValueListByTimeAndPointList(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -487,7 +487,7 @@ int ServiceInterface::getGridValueListByTimeLevelAndPointList(T::SessionId sessi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -509,7 +509,7 @@ int ServiceInterface::getGridValueListByPolygon(T::SessionId sessionId,uint file
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -531,7 +531,7 @@ int ServiceInterface::getGridValueListByLevelAndPolygon(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -553,7 +553,7 @@ int ServiceInterface::getGridValueListByTimeAndPolygon(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -575,7 +575,7 @@ int ServiceInterface::getGridValueListByTimeLevelAndPolygon(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -597,7 +597,7 @@ int ServiceInterface::getGridValueListByPolygonPath(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -619,7 +619,7 @@ int ServiceInterface::getGridValueListByLevelAndPolygonPath(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -641,7 +641,7 @@ int ServiceInterface::getGridValueListByTimeAndPolygonPath(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -663,7 +663,7 @@ int ServiceInterface::getGridValueListByTimeLevelAndPolygonPath(T::SessionId ses
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -685,7 +685,7 @@ int ServiceInterface::getGridValueListByRectangle(T::SessionId sessionId,uint fi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -707,7 +707,7 @@ int ServiceInterface::getGridValueVector(T::SessionId sessionId,uint fileId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -729,7 +729,7 @@ int ServiceInterface::getGridValueVectorByLevel(T::SessionId sessionId,uint file
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -751,7 +751,7 @@ int ServiceInterface::getGridValueVectorByTime(T::SessionId sessionId,uint fileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -773,7 +773,7 @@ int ServiceInterface::getGridValueVectorByCoordinateList(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -795,7 +795,7 @@ int ServiceInterface::getGridValueVectorByLevelAndCoordinateList(T::SessionId se
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -817,7 +817,7 @@ int ServiceInterface::getGridValueVectorByTimeAndCoordinateList(T::SessionId ses
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -840,7 +840,7 @@ int ServiceInterface::getGridValueVectorByGeometry(T::SessionId sessionId,uint f
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -862,7 +862,7 @@ int ServiceInterface::getGridValueVectorByRectangle(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -884,7 +884,7 @@ int ServiceInterface::getGridValueVectorByPoint(T::SessionId sessionId,uint file
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -906,7 +906,7 @@ int ServiceInterface::getGridValueVectorByLevelAndGeometry(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -928,7 +928,7 @@ int ServiceInterface::getGridValueVectorByTimeAndGeometry(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -950,7 +950,7 @@ int ServiceInterface::getGridValueVectorByTimeAndLevel(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -972,7 +972,7 @@ int ServiceInterface::getGridValueVectorByTimeLevelAndGeometry(T::SessionId sess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -994,7 +994,7 @@ int ServiceInterface::getGridValueVectorByTimeLevelAndCoordinateList(T::SessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1016,7 +1016,7 @@ int ServiceInterface::getGridIsobands(T::SessionId sessionId,uint fileId,uint me
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1038,7 +1038,7 @@ int ServiceInterface::getGridIsobandsByGeometry(T::SessionId sessionId,uint file
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1060,7 +1060,7 @@ int ServiceInterface::getGridIsobandsByGrid(T::SessionId sessionId,uint fileId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1082,7 +1082,7 @@ int ServiceInterface::getGridIsobandsByLevel(T::SessionId sessionId,uint fileId1
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1104,7 +1104,7 @@ int ServiceInterface::getGridIsobandsByTime(T::SessionId sessionId,uint fileId1,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1126,7 +1126,7 @@ int ServiceInterface::getGridIsobandsByTimeAndLevel(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1148,7 +1148,7 @@ int ServiceInterface::getGridIsobandsByTimeLevelAndGeometry(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1170,7 +1170,7 @@ int ServiceInterface::getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1192,7 +1192,7 @@ int ServiceInterface::getGridIsobandsByLevelAndGeometry(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1214,7 +1214,7 @@ int ServiceInterface::getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1236,7 +1236,7 @@ int ServiceInterface::getGridIsobandsByLevelAndGrid(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1258,7 +1258,7 @@ int ServiceInterface::getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint f
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1279,7 +1279,7 @@ int ServiceInterface::getGridIsolines(T::SessionId sessionId,uint fileId,uint me
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1301,7 +1301,7 @@ int ServiceInterface::getGridIsolinesByGeometry(T::SessionId sessionId,uint file
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1323,7 +1323,7 @@ int ServiceInterface::getGridIsolinesByGrid(T::SessionId sessionId,uint fileId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1345,7 +1345,7 @@ int ServiceInterface::getGridIsolinesByLevel(T::SessionId sessionId,uint fileId1
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1367,7 +1367,7 @@ int ServiceInterface::getGridIsolinesByTime(T::SessionId sessionId,uint fileId1,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1389,7 +1389,7 @@ int ServiceInterface::getGridIsolinesByLevelAndGeometry(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1411,7 +1411,7 @@ int ServiceInterface::getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1433,7 +1433,7 @@ int ServiceInterface::getGridIsolinesByLevelAndGrid(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1455,7 +1455,7 @@ int ServiceInterface::getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint f
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1477,7 +1477,7 @@ int ServiceInterface::getGridIsolinesByTimeAndLevel(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1499,7 +1499,7 @@ int ServiceInterface::getGridIsolinesByTimeLevelAndGeometry(T::SessionId session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1521,7 +1521,7 @@ int ServiceInterface::getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1543,7 +1543,7 @@ int ServiceInterface::getMultipleGridValues(T::SessionId sessionId,T::ValueRecor
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1560,7 +1560,7 @@ int ServiceInterface::getMultipleGridValues(T::SessionId sessionId,T::ValueRecor
 
 int ServiceInterface::_getGridCoordinates(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,T::GridCoordinates& coordinates)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1569,7 +1569,7 @@ int ServiceInterface::_getGridCoordinates(T::SessionId sessionId,uint fileId,uin
 
 int ServiceInterface::_getGridData(T::SessionId sessionId,uint fileId,uint messageIndex,T::GridData& data)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1578,7 +1578,7 @@ int ServiceInterface::_getGridData(T::SessionId sessionId,uint fileId,uint messa
 
 int ServiceInterface::_getGridAttributeList(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1587,7 +1587,7 @@ int ServiceInterface::_getGridAttributeList(T::SessionId sessionId,uint fileId,u
 
 int ServiceInterface::_getGridFileCount(T::SessionId sessionId,uint& count)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1596,7 +1596,7 @@ int ServiceInterface::_getGridFileCount(T::SessionId sessionId,uint& count)
 
 int ServiceInterface::_getGridMessagePreloadCount(T::SessionId sessionId,uint& count)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1605,7 +1605,7 @@ int ServiceInterface::_getGridMessagePreloadCount(T::SessionId sessionId,uint& c
 
 int ServiceInterface::_getGridMessageBytes(T::SessionId sessionId,uint fileId,uint messageIndex,std::vector<uchar>& messageBytes,std::vector<uint>& messageSections)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1613,7 +1613,7 @@ int ServiceInterface::_getGridMessageBytes(T::SessionId sessionId,uint fileId,ui
 
 int ServiceInterface::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,T::ParamValue& value)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1622,7 +1622,7 @@ int ServiceInterface::_getGridValueByPoint(T::SessionId sessionId,uint fileId,ui
 
 int ServiceInterface::_getGridValueByLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1631,7 +1631,7 @@ int ServiceInterface::_getGridValueByLevelAndPoint(T::SessionId sessionId,uint f
 
 int ServiceInterface::_getGridValueByTimeAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,T::ParamValue& value)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1640,7 +1640,7 @@ int ServiceInterface::_getGridValueByTimeAndPoint(T::SessionId sessionId,uint fi
 
 int ServiceInterface::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,uint fileId3,uint messageIndex3,int level3,uint fileId4,uint messageIndex4,int level4,std::string newTime,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1649,7 +1649,7 @@ int ServiceInterface::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,ui
 
 int ServiceInterface::_getGridValueListByCircle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double origoX,double origoY,double radius,T::GridValueList& valueList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1658,7 +1658,7 @@ int ServiceInterface::_getGridValueListByCircle(T::SessionId sessionId,uint file
 
 int ServiceInterface::_getGridValueListByTimeAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,T::GridValueList& valueList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1667,7 +1667,7 @@ int ServiceInterface::_getGridValueListByTimeAndCircle(T::SessionId sessionId,ui
 
 int ServiceInterface::_getGridValueListByLevelAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short levelInterpolationMethod,T::GridValueList& valueList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1676,7 +1676,7 @@ int ServiceInterface::_getGridValueListByLevelAndCircle(T::SessionId sessionId,u
 
 int ServiceInterface::_getGridValueListByTimeLevelAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,std::string newTime,int newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,short levelInterpolationMethod,T::GridValueList& valueList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1685,7 +1685,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndCircle(T::SessionId session
 
 int ServiceInterface::_getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,T::GridValueList& valueList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1694,7 +1694,7 @@ int ServiceInterface::_getGridValueListByPointList(T::SessionId sessionId,uint f
 
 int ServiceInterface::_getGridValueListByLevelAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short levelInterpolationMethod,T::GridValueList& valueList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1703,7 +1703,7 @@ int ServiceInterface::_getGridValueListByLevelAndPointList(T::SessionId sessionI
 
 int ServiceInterface::_getGridValueListByTimeAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,T::GridValueList& valueList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1712,7 +1712,7 @@ int ServiceInterface::_getGridValueListByTimeAndPointList(T::SessionId sessionId
 
 int ServiceInterface::_getGridValueListByTimeLevelAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,std::string newTime,int newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::GridValueList& valueList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1721,7 +1721,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndPointList(T::SessionId sess
 
 int ServiceInterface::_getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,T::GridValueList& valueList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1730,7 +1730,7 @@ int ServiceInterface::_getGridValueListByPolygon(T::SessionId sessionId,uint fil
 
 int ServiceInterface::_getGridValueListByLevelAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short levelInterpolationMethod,T::GridValueList& valueList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1739,7 +1739,7 @@ int ServiceInterface::_getGridValueListByLevelAndPolygon(T::SessionId sessionId,
 
 int ServiceInterface::_getGridValueListByTimeAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,T::GridValueList& valueList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1748,7 +1748,7 @@ int ServiceInterface::_getGridValueListByTimeAndPolygon(T::SessionId sessionId,u
 
 int ServiceInterface::_getGridValueListByTimeLevelAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,std::string newTime,int newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,short levelInterpolationMethod,T::GridValueList& valueList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1757,7 +1757,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndPolygon(T::SessionId sessio
 
 int ServiceInterface::_getGridValueListByPolygonPath(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,T::GridValueList& valueList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1766,7 +1766,7 @@ int ServiceInterface::_getGridValueListByPolygonPath(T::SessionId sessionId,uint
 
 int ServiceInterface::_getGridValueListByLevelAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short levelInterpolationMethod,T::GridValueList& valueList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1775,7 +1775,7 @@ int ServiceInterface::_getGridValueListByLevelAndPolygonPath(T::SessionId sessio
 
 int ServiceInterface::_getGridValueListByTimeAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,T::GridValueList& valueList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1784,7 +1784,7 @@ int ServiceInterface::_getGridValueListByTimeAndPolygonPath(T::SessionId session
 
 int ServiceInterface::_getGridValueListByTimeLevelAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,std::string newTime,int newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,short levelInterpolationMethod,T::GridValueList& valueList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1792,7 +1792,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndPolygonPath(T::SessionId se
 
 int ServiceInterface::_getGridValueListByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,T::GridValueList& valueList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1801,7 +1801,7 @@ int ServiceInterface::_getGridValueListByRectangle(T::SessionId sessionId,uint f
 
 int ServiceInterface::_getGridValueVector(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& values)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1810,7 +1810,7 @@ int ServiceInterface::_getGridValueVector(T::SessionId sessionId,uint fileId,uin
 
 int ServiceInterface::_getGridValueVectorByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,short levelInterpolationMethod,T::ParamValue_vec& values)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1819,7 +1819,7 @@ int ServiceInterface::_getGridValueVectorByLevel(T::SessionId sessionId,uint fil
 
 int ServiceInterface::_getGridValueVectorByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,short timeInterpolationMethod,T::ParamValue_vec& values)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1828,7 +1828,7 @@ int ServiceInterface::_getGridValueVectorByTime(T::SessionId sessionId,uint file
 
 int ServiceInterface::_getGridValueVectorByLevelAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,T::ParamValue_vec& values)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1837,7 +1837,7 @@ int ServiceInterface::_getGridValueVectorByLevelAndCoordinateList(T::SessionId s
 
 int ServiceInterface::_getGridValueVectorByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::AttributeList& attributeList,T::ParamValue_vec& values)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1846,7 +1846,7 @@ int ServiceInterface::_getGridValueVectorByLevelAndGeometry(T::SessionId session
 
 int ServiceInterface::_getGridValueVectorByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::AttributeList& attributeList,T::ParamValue_vec& values)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1855,7 +1855,7 @@ int ServiceInterface::_getGridValueVectorByTimeAndGeometry(T::SessionId sessionI
 
 int ServiceInterface::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,std::string newTime,int newLevel,T::AttributeList& attributeList,T::ParamValue_vec& values)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1864,7 +1864,7 @@ int ServiceInterface::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId ses
 
 int ServiceInterface::_getGridValueVectorByCoordinateList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,short areaInterpolationMethod,T::ParamValue_vec& values)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1873,7 +1873,7 @@ int ServiceInterface::_getGridValueVectorByCoordinateList(T::SessionId sessionId
 
 int ServiceInterface::_getGridValueVectorByTimeAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,T::ParamValue_vec& values)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1881,7 +1881,7 @@ int ServiceInterface::_getGridValueVectorByTimeAndCoordinateList(T::SessionId se
 
 int ServiceInterface::_getGridValueVectorByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList,T::ParamValue_vec& values)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1890,7 +1890,7 @@ int ServiceInterface::_getGridValueVectorByGeometry(T::SessionId sessionId,uint 
 
 int ServiceInterface::_getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,short areaInterpolationMethod,T::ParamValue_vec& values)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1899,7 +1899,7 @@ int ServiceInterface::_getGridValueVectorByRectangle(T::SessionId sessionId,uint
 
 int ServiceInterface::_getGridValueVectorByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,std::string newTime,int newLevel,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue_vec& values)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1908,7 +1908,7 @@ int ServiceInterface::_getGridValueVectorByTimeAndLevel(T::SessionId sessionId,u
 
 int ServiceInterface::_getGridValueVectorByTimeLevelAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,std::string newTime,int newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,T::ParamValue_vec& values)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1917,7 +1917,7 @@ int ServiceInterface::_getGridValueVectorByTimeLevelAndCoordinateList(T::Session
 
 int ServiceInterface::_getGridIsobands(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1926,7 +1926,7 @@ int ServiceInterface::_getGridIsobands(T::SessionId sessionId,uint fileId,uint m
 
 int ServiceInterface::_getGridIsobandsByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1935,7 +1935,7 @@ int ServiceInterface::_getGridIsobandsByGeometry(T::SessionId sessionId,uint fil
 
 int ServiceInterface::_getGridIsobandsByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1944,7 +1944,7 @@ int ServiceInterface::_getGridIsobandsByGrid(T::SessionId sessionId,uint fileId,
 
 int ServiceInterface::_getGridIsolinesByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1953,7 +1953,7 @@ int ServiceInterface::_getGridIsolinesByLevel(T::SessionId sessionId,uint fileId
 
 int ServiceInterface::_getGridIsobandsByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1962,7 +1962,7 @@ int ServiceInterface::_getGridIsobandsByLevelAndGeometry(T::SessionId sessionId,
 
 int ServiceInterface::_getGridIsobandsByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1971,7 +1971,7 @@ int ServiceInterface::_getGridIsobandsByTime(T::SessionId sessionId,uint fileId1
 
 int ServiceInterface::_getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1980,7 +1980,7 @@ int ServiceInterface::_getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,u
 
 int ServiceInterface::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1989,7 +1989,7 @@ int ServiceInterface::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId,uint
 
 int ServiceInterface::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -1998,7 +1998,7 @@ int ServiceInterface::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint 
 
 int ServiceInterface::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,std::string newTime,int newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2007,7 +2007,7 @@ int ServiceInterface::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,uint
 
 int ServiceInterface::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,std::string newTime,int newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2016,7 +2016,7 @@ int ServiceInterface::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessio
 
 int ServiceInterface::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,std::string newTime,int newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2025,7 +2025,7 @@ int ServiceInterface::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,
 
 int ServiceInterface::_getGridIsolines(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2034,7 +2034,7 @@ int ServiceInterface::_getGridIsolines(T::SessionId sessionId,uint fileId,uint m
 
 int ServiceInterface::_getGridIsolinesByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2043,7 +2043,7 @@ int ServiceInterface::_getGridIsolinesByGeometry(T::SessionId sessionId,uint fil
 
 int ServiceInterface::_getGridIsolinesByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2052,7 +2052,7 @@ int ServiceInterface::_getGridIsolinesByGrid(T::SessionId sessionId,uint fileId,
 
 int ServiceInterface::_getGridIsobandsByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2061,7 +2061,7 @@ int ServiceInterface::_getGridIsobandsByLevel(T::SessionId sessionId,uint fileId
 
 int ServiceInterface::_getGridIsolinesByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2070,7 +2070,7 @@ int ServiceInterface::_getGridIsolinesByTime(T::SessionId sessionId,uint fileId1
 
 int ServiceInterface::_getGridIsolinesByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2079,7 +2079,7 @@ int ServiceInterface::_getGridIsolinesByLevelAndGeometry(T::SessionId sessionId,
 
 int ServiceInterface::_getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2088,7 +2088,7 @@ int ServiceInterface::_getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,u
 
 int ServiceInterface::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2097,7 +2097,7 @@ int ServiceInterface::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId,uint
 
 int ServiceInterface::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2106,7 +2106,7 @@ int ServiceInterface::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint 
 
 int ServiceInterface::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,std::string newTime,int newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2115,7 +2115,7 @@ int ServiceInterface::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,uint
 
 int ServiceInterface::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,std::string newTime,int newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2124,7 +2124,7 @@ int ServiceInterface::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessio
 
 int ServiceInterface::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,std::string newTime,int newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::ByteData_vec& contours)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2133,7 +2133,7 @@ int ServiceInterface::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,
 
 int ServiceInterface::_getMultipleGridValues(T::SessionId sessionId,T::ValueRecordList& valueRecordList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2142,7 +2142,7 @@ int ServiceInterface::_getMultipleGridValues(T::SessionId sessionId,T::ValueReco
 
 int ServiceInterface::_getGridValueVectorByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,uint vectorType,double_vec& valueVector)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 

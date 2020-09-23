@@ -31,7 +31,7 @@ LuaFile::LuaFile()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Constructor failed!", nullptr);
+    throw Fmi::Exception(BCP, "Constructor failed!", nullptr);
   }
 }
 
@@ -54,7 +54,7 @@ LuaFile::LuaFile(const std::string& filename)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Constructor failed!", nullptr);
+    throw Fmi::Exception(BCP, "Constructor failed!", nullptr);
   }
 }
 
@@ -78,7 +78,7 @@ LuaFile::LuaFile(const LuaFile& luaFile)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Copy constructor failed!", nullptr);
+    throw Fmi::Exception(BCP, "Copy constructor failed!", nullptr);
   }
 }
 
@@ -98,7 +98,7 @@ LuaFile::~LuaFile()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -121,7 +121,7 @@ void LuaFile::init()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Initialization failed!", nullptr);
+    throw Fmi::Exception(BCP, "Initialization failed!", nullptr);
   }
 }
 
@@ -138,7 +138,7 @@ void LuaFile::init(const std::string& filename)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Initialization failed!", nullptr);
+    throw Fmi::Exception(BCP, "Initialization failed!", nullptr);
   }
 }
 
@@ -166,7 +166,7 @@ void* LuaFile::getLuaState(ulonglong key)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Initialization failed!", nullptr);
+    throw Fmi::Exception(BCP, "Initialization failed!", nullptr);
   }
 }
 
@@ -189,7 +189,7 @@ void LuaFile::releaseLuaState(ulonglong key)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Initialization failed!", nullptr);
+    throw Fmi::Exception(BCP, "Initialization failed!", nullptr);
   }
 }
 
@@ -200,9 +200,11 @@ bool LuaFile::checkUpdates()
 {
   try
   {
-    AutoWriteLock lock(&mModificationLock);
-
     time_t tt = getFileModificationTime(mFilename.c_str());
+    if (tt == mLastModified  ||  (tt+3) >= time(nullptr))
+      return false;
+
+    AutoWriteLock lock(&mModificationLock);
 
     if (tt != mLastModified  &&  (tt+3) < time(nullptr))
     {
@@ -245,7 +247,7 @@ bool LuaFile::checkUpdates()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Update check failed!", nullptr);
+    throw Fmi::Exception(BCP, "Update check failed!", nullptr);
   }
 }
 
@@ -269,7 +271,7 @@ uint LuaFile::getFunction(const std::string& functionName,std::string& function)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function searching failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function searching failed!", nullptr);
   }
 }
 
@@ -284,17 +286,18 @@ float LuaFile::executeFunctionCall1(std::string& function,std::vector<float>& pa
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
+    AutoReadLock lock(&mModificationLock);
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
-      Spine::Exception exception(BCP, "Unknown function!");
+      Fmi::Exception exception(BCP, "Unknown function!");
       exception.addParameter("Function",function);
       throw exception;
     }
 
     if (a->second.mType != 1)
     {
-      Spine::Exception exception(BCP, "Invalid function type!");
+      Fmi::Exception exception(BCP, "Invalid function type!");
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
@@ -323,7 +326,7 @@ float LuaFile::executeFunctionCall1(std::string& function,std::vector<float>& pa
     if (res != 0)
     {
       // LUA ERROR
-      Spine::Exception exception(BCP, "LUA call returns an error!");
+      Fmi::Exception exception(BCP, "LUA call returns an error!");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
@@ -342,7 +345,7 @@ float LuaFile::executeFunctionCall1(std::string& function,std::vector<float>& pa
 
       if (message != "OK")
       {
-        Spine::Exception exception(BCP, "LUA function call returns an error!");
+        Fmi::Exception exception(BCP, "LUA function call returns an error!");
         exception.addParameter("LUA File",mFilename);
         exception.addParameter("LUA Function",function);
         exception.addParameter("Error Message",message.c_str());
@@ -354,7 +357,7 @@ float LuaFile::executeFunctionCall1(std::string& function,std::vector<float>& pa
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -369,17 +372,18 @@ double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& 
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
+    AutoReadLock lock(&mModificationLock);
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
-      Spine::Exception exception(BCP, "Unknown function!");
+      Fmi::Exception exception(BCP, "Unknown function!");
       exception.addParameter("Function",function);
       throw exception;
     }
 
     if (a->second.mType != 1)
     {
-      Spine::Exception exception(BCP, "Invalid function type!");
+      Fmi::Exception exception(BCP, "Invalid function type!");
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
@@ -408,7 +412,7 @@ double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& 
     if (res != 0)
     {
       // LUA ERROR
-      Spine::Exception exception(BCP, "LUA call returns an error!");
+      Fmi::Exception exception(BCP, "LUA call returns an error!");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
@@ -427,7 +431,7 @@ double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& 
 
       if (message != "OK")
       {
-        Spine::Exception exception(BCP, "LUA function call returns an error!");
+        Fmi::Exception exception(BCP, "LUA function call returns an error!");
         exception.addParameter("LUA File",mFilename);
         exception.addParameter("LUA Function",function);
         exception.addParameter("Error Message",message.c_str());
@@ -439,7 +443,7 @@ double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& 
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -454,17 +458,18 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
+    AutoReadLock lock(&mModificationLock);
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
-      Spine::Exception exception(BCP, "Unknown function!");
+      Fmi::Exception exception(BCP, "Unknown function!");
       exception.addParameter("Function",function);
       throw exception;
     }
 
     if (a->second.mType != 4)
     {
-      Spine::Exception exception(BCP, "Invalid function type!");
+      Fmi::Exception exception(BCP, "Invalid function type!");
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
@@ -480,7 +485,7 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
 
     if (pLen1 != pLen2)
     {
-      Spine::Exception exception(BCP, "Input parameters should have the same number of values!");
+      Fmi::Exception exception(BCP, "Input parameters should have the same number of values!");
       exception.addParameter("NumOfValues(inParameters1)",Fmi::to_string(pLen1));
       exception.addParameter("NumOfValues(inParameters2)",Fmi::to_string(pLen2));
       throw exception;
@@ -488,7 +493,7 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
 
     if (pLen1 != aLen)
     {
-      Spine::Exception exception(BCP, "There should be as many angles as grid values!");
+      Fmi::Exception exception(BCP, "There should be as many angles as grid values!");
       exception.addParameter("NumOfValues",Fmi::to_string(pLen1));
       exception.addParameter("NumOfAngles",Fmi::to_string(aLen));
       throw exception;
@@ -525,7 +530,7 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
     if (res != 0)
     {
       // LUA ERROR
-      Spine::Exception exception(BCP, "LUA call returns an error!");
+      Fmi::Exception exception(BCP, "LUA call returns an error!");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
@@ -550,7 +555,7 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -565,17 +570,18 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
+    AutoReadLock lock(&mModificationLock);
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
-      Spine::Exception exception(BCP, "Unknown function!");
+      Fmi::Exception exception(BCP, "Unknown function!");
       exception.addParameter("Function",function);
       throw exception;
     }
 
     if (a->second.mType != 4)
     {
-      Spine::Exception exception(BCP, "Invalid function type!");
+      Fmi::Exception exception(BCP, "Invalid function type!");
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
@@ -591,14 +597,14 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
 
     if (pLen1 != pLen2)
     {
-      Spine::Exception exception(BCP, "Input parameters should have the same number of values!");
+      Fmi::Exception exception(BCP, "Input parameters should have the same number of values!");
       exception.addParameter("NumOfValues(inParameters1)",Fmi::to_string(pLen1));
       exception.addParameter("NumOfValues(inParameters2)",Fmi::to_string(pLen2));
       throw exception;
     }
     if (pLen1 != aLen)
     {
-      Spine::Exception exception(BCP, "There should be as many angles as grid values!");
+      Fmi::Exception exception(BCP, "There should be as many angles as grid values!");
       exception.addParameter("NumOfValues",Fmi::to_string(pLen1));
       exception.addParameter("NumOfAngles",Fmi::to_string(aLen));
       throw exception;
@@ -634,7 +640,7 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
     if (res != 0)
     {
       // LUA ERROR
-      Spine::Exception exception(BCP, "LUA call returns an error!");
+      Fmi::Exception exception(BCP, "LUA call returns an error!");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
@@ -659,7 +665,7 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -674,17 +680,18 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
+    AutoReadLock lock(&mModificationLock);
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
-      Spine::Exception exception(BCP, "Unknown function!");
+      Fmi::Exception exception(BCP, "Unknown function!");
       exception.addParameter("Function",function);
       throw exception;
     }
 
     if (a->second.mType != 5)
     {
-      Spine::Exception exception(BCP, "Invalid function type!");
+      Fmi::Exception exception(BCP, "Invalid function type!");
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
@@ -713,7 +720,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
     if (res != 0)
     {
       // LUA ERROR
-      Spine::Exception exception(BCP, "LUA call returns an error!");
+      Fmi::Exception exception(BCP, "LUA call returns an error!");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
@@ -733,7 +740,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
 
       if (message != "OK")
       {
-        Spine::Exception exception(BCP, "LUA function call returns an error!");
+        Fmi::Exception exception(BCP, "LUA function call returns an error!");
         exception.addParameter("LUA File",mFilename);
         exception.addParameter("LUA Function",function);
         exception.addParameter("Error Message",message.c_str());
@@ -746,7 +753,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -761,17 +768,18 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
+    AutoReadLock lock(&mModificationLock);
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
-      Spine::Exception exception(BCP, "Unknown function!");
+      Fmi::Exception exception(BCP, "Unknown function!");
       exception.addParameter("Function",function);
       throw exception;
     }
 
     if (a->second.mType != 5)
     {
-      Spine::Exception exception(BCP, "Invalid function type!");
+      Fmi::Exception exception(BCP, "Invalid function type!");
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
@@ -800,7 +808,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
     if (res != 0)
     {
       // LUA ERROR
-      Spine::Exception exception(BCP, "LUA call returns an error!");
+      Fmi::Exception exception(BCP, "LUA call returns an error!");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
@@ -820,7 +828,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
 
       if (message != "OK")
       {
-        Spine::Exception exception(BCP, "LUA function call returns an error!");
+        Fmi::Exception exception(BCP, "LUA function call returns an error!");
         exception.addParameter("LUA File",mFilename);
         exception.addParameter("LUA Function",function);
         exception.addParameter("Error Message",message.c_str());
@@ -833,7 +841,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -848,17 +856,18 @@ std::string LuaFile::executeFunctionCall6(std::string& function,std::vector<std:
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
+    AutoReadLock lock(&mModificationLock);
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
-      Spine::Exception exception(BCP, "Unknown function!");
+      Fmi::Exception exception(BCP, "Unknown function!");
       exception.addParameter("Function",function);
       throw exception;
     }
 
     if (a->second.mType != 6)
     {
-      Spine::Exception exception(BCP, "Invalid function type!");
+      Fmi::Exception exception(BCP, "Invalid function type!");
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
@@ -888,7 +897,7 @@ std::string LuaFile::executeFunctionCall6(std::string& function,std::vector<std:
     if (res != 0)
     {
       // LUA ERROR
-      Spine::Exception exception(BCP, "LUA call returns an error!");
+      Fmi::Exception exception(BCP, "LUA call returns an error!");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
@@ -908,7 +917,7 @@ std::string LuaFile::executeFunctionCall6(std::string& function,std::vector<std:
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -953,14 +962,14 @@ std::string LuaFile::executeFunctionCall6(
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
-      Spine::Exception exception(BCP, "Unknown function!");
+      Fmi::Exception exception(BCP, "Unknown function!");
       exception.addParameter("Function",function);
       throw exception;
     }
 
     if (a->second.mType != 7)
     {
-      Spine::Exception exception(BCP, "Invalid function type!");
+      Fmi::Exception exception(BCP, "Invalid function type!");
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
@@ -991,7 +1000,7 @@ std::string LuaFile::executeFunctionCall6(
     if (res != 0)
     {
       // LUA ERROR
-      Spine::Exception exception(BCP, "LUA call returns an error!");
+      Fmi::Exception exception(BCP, "LUA call returns an error!");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
@@ -1011,7 +1020,7 @@ std::string LuaFile::executeFunctionCall6(
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -1030,14 +1039,14 @@ void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
-      Spine::Exception exception(BCP, "Unknown function!");
+      Fmi::Exception exception(BCP, "Unknown function!");
       exception.addParameter("Function",function);
       throw exception;
     }
 
     if (a->second.mType != 7)
     {
-      Spine::Exception exception(BCP, "Invalid function type!");
+      Fmi::Exception exception(BCP, "Invalid function type!");
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
@@ -1053,7 +1062,7 @@ void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,
 
     if (pLen1 != pLen2 || pLen1 != pLen3)
     {
-      Spine::Exception exception(BCP, "Input parameters should have the same number of values!");
+      Fmi::Exception exception(BCP, "Input parameters should have the same number of values!");
       exception.addParameter("NumOfValues(inParameters1)",Fmi::to_string(pLen1));
       exception.addParameter("NumOfValues(inParameters2)",Fmi::to_string(pLen2));
       exception.addParameter("NumOfValues(inParameters3)",Fmi::to_string(pLen3));
@@ -1091,7 +1100,7 @@ void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,
     if (res != 0)
     {
       // LUA ERROR
-      Spine::Exception exception(BCP, "LUA call returns an error!");
+      Fmi::Exception exception(BCP, "LUA call returns an error!");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
@@ -1116,7 +1125,7 @@ void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -1134,14 +1143,14 @@ void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
-      Spine::Exception exception(BCP, "Unknown function!");
+      Fmi::Exception exception(BCP, "Unknown function!");
       exception.addParameter("Function",function);
       throw exception;
     }
 
     if (a->second.mType != 7)
     {
-      Spine::Exception exception(BCP, "Invalid function type!");
+      Fmi::Exception exception(BCP, "Invalid function type!");
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
@@ -1157,7 +1166,7 @@ void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,
 
     if (pLen1 != pLen2 || pLen1 != pLen3)
     {
-      Spine::Exception exception(BCP, "Input parameters should have the same number of values!");
+      Fmi::Exception exception(BCP, "Input parameters should have the same number of values!");
       exception.addParameter("NumOfValues(inParameters1)",Fmi::to_string(pLen1));
       exception.addParameter("NumOfValues(inParameters2)",Fmi::to_string(pLen2));
       exception.addParameter("NumOfValues(inParameters3)",Fmi::to_string(pLen3));
@@ -1195,7 +1204,7 @@ void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,
     if (res != 0)
     {
       // LUA ERROR
-      Spine::Exception exception(BCP, "LUA call returns an error!");
+      Fmi::Exception exception(BCP, "LUA call returns an error!");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
@@ -1220,7 +1229,7 @@ void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -1237,14 +1246,14 @@ void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
-      Spine::Exception exception(BCP, "Unknown function!");
+      Fmi::Exception exception(BCP, "Unknown function!");
       exception.addParameter("Function",function);
       throw exception;
     }
 
     if (a->second.mType != 8)
     {
-      Spine::Exception exception(BCP, "Invalid function type!");
+      Fmi::Exception exception(BCP, "Invalid function type!");
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
@@ -1261,7 +1270,7 @@ void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,
 
     if (pLen1 != pLen2 || pLen1 != pLen3 || pLen1 != pLen4)
     {
-      Spine::Exception exception(BCP, "Input parameters should have the same number of values!");
+      Fmi::Exception exception(BCP, "Input parameters should have the same number of values!");
       exception.addParameter("NumOfValues(inParameters1)",Fmi::to_string(pLen1));
       exception.addParameter("NumOfValues(inParameters2)",Fmi::to_string(pLen2));
       exception.addParameter("NumOfValues(inParameters3)",Fmi::to_string(pLen3));
@@ -1307,7 +1316,7 @@ void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,
     if (res != 0)
     {
       // LUA ERROR
-      Spine::Exception exception(BCP, "LUA call returns an error!");
+      Fmi::Exception exception(BCP, "LUA call returns an error!");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
@@ -1332,7 +1341,7 @@ void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -1350,14 +1359,14 @@ void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
-      Spine::Exception exception(BCP, "Unknown function!");
+      Fmi::Exception exception(BCP, "Unknown function!");
       exception.addParameter("Function",function);
       throw exception;
     }
 
     if (a->second.mType != 8)
     {
-      Spine::Exception exception(BCP, "Invalid function type!");
+      Fmi::Exception exception(BCP, "Invalid function type!");
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
@@ -1374,7 +1383,7 @@ void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,
 
     if (pLen1 != pLen2 || pLen1 != pLen3 || pLen1 != pLen4)
     {
-      Spine::Exception exception(BCP, "Input parameters should have the same number of values!");
+      Fmi::Exception exception(BCP, "Input parameters should have the same number of values!");
       exception.addParameter("NumOfValues(inParameters1)",Fmi::to_string(pLen1));
       exception.addParameter("NumOfValues(inParameters2)",Fmi::to_string(pLen2));
       exception.addParameter("NumOfValues(inParameters3)",Fmi::to_string(pLen3));
@@ -1420,7 +1429,7 @@ void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,
     if (res != 0)
     {
       // LUA ERROR
-      Spine::Exception exception(BCP, "LUA call returns an error!");
+      Fmi::Exception exception(BCP, "LUA call returns an error!");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
@@ -1445,7 +1454,7 @@ void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -1460,17 +1469,18 @@ void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
+    AutoReadLock lock(&mModificationLock);
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
-      Spine::Exception exception(BCP, "Unknown function!");
+      Fmi::Exception exception(BCP, "Unknown function!");
       exception.addParameter("Function",function);
       throw exception;
     }
 
     if (a->second.mType != 9)
     {
-      Spine::Exception exception(BCP, "Invalid function type!");
+      Fmi::Exception exception(BCP, "Invalid function type!");
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
@@ -1518,7 +1528,7 @@ void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,
     if (res != 0)
     {
       // LUA ERROR
-      Spine::Exception exception(BCP, "LUA call returns an error!");
+      Fmi::Exception exception(BCP, "LUA call returns an error!");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
@@ -1543,7 +1553,7 @@ void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -1558,17 +1568,18 @@ void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
+    AutoReadLock lock(&mModificationLock);
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
-      Spine::Exception exception(BCP, "Unknown function!");
+      Fmi::Exception exception(BCP, "Unknown function!");
       exception.addParameter("Function",function);
       throw exception;
     }
 
     if (a->second.mType != 9)
     {
-      Spine::Exception exception(BCP, "Invalid function type!");
+      Fmi::Exception exception(BCP, "Invalid function type!");
       exception.addDetail("You should probably use different 'executeFunction' with this LUA function.");
       exception.addDetail("That's because the current LUA function does not support the same parameters");
       exception.addDetail("or the return values that this 'executeFunction' is using.");
@@ -1616,7 +1627,7 @@ void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,
     if (res != 0)
     {
       // LUA ERROR
-      Spine::Exception exception(BCP, "LUA call returns an error!");
+      Fmi::Exception exception(BCP, "LUA call returns an error!");
       exception.addParameter("LUA File",mFilename);
       exception.addParameter("LUA Function",function);
       exception.addParameter("LUA message",lua_tostring(L, -1));
@@ -1641,7 +1652,7 @@ void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function execution failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
   }
 }
 
@@ -1652,6 +1663,8 @@ void LuaFile::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try
   {
+    AutoReadLock lock(&mModificationLock);
+
     stream << space(level) << "LuaFile\n";
     stream << space(level) << "- mFilename  = " << mFilename << "\n";
 
@@ -1660,7 +1673,7 @@ void LuaFile::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -1685,7 +1698,7 @@ void LuaFile::loadFile()
 
       if (luaL_dofile((lua_State*)mLuaState[t],mFilename.c_str()) != 0)
       {
-        Spine::Exception exception(BCP, "Cannot load a LUA file!");
+        Fmi::Exception exception(BCP, "Cannot load a LUA file!");
         exception.addParameter("Filename",mFilename);
         exception.addParameter("Lua message",lua_tostring((lua_State*)mLuaState[t], -1));
         lua_pop((lua_State*)mLuaState[t], 1);
@@ -1697,7 +1710,7 @@ void LuaFile::loadFile()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "File loading failed!", nullptr);
+    throw Fmi::Exception(BCP, "File loading failed!", nullptr);
   }
 }
 
@@ -1717,7 +1730,7 @@ void LuaFile::loadFunctionList(uint type)
     if (res != 0)
     {
       // LUA ERROR
-      Spine::Exception exception(BCP, "LUA call returns an error!");
+      Fmi::Exception exception(BCP, "LUA call returns an error!");
       exception.addParameter("Lua message",lua_tostring(L, -1));
       lua_pop(L, 1);
       throw exception;
@@ -1752,7 +1765,7 @@ void LuaFile::loadFunctionList(uint type)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "LUA function list loading failed!", nullptr);
+    throw Fmi::Exception(BCP, "LUA function list loading failed!", nullptr);
   }
 }
 

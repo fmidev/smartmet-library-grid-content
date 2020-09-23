@@ -19,7 +19,7 @@ static void* GridServer_maintenanceThread(void *arg)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+    Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     exception.printError();
     exit(-1);
   }
@@ -66,27 +66,27 @@ GridServer::GridServer(const char *address,const char *port)
     {
       char msg[1000];
       sprintf(msg,"Caught CORBA::System Exception %s",ex._name());
-      SmartMet::Spine::Exception exception(BCP,msg);
+      Fmi::Exception exception(BCP,msg);
       throw exception;
     }
     catch(CORBA::Exception& ex)
     {
       char msg[1000];
       sprintf(msg,"Caught CORBA::Exception %s",ex._name());
-      SmartMet::Spine::Exception exception(BCP,msg);
+      Fmi::Exception exception(BCP,msg);
       throw exception;
     }
     catch(omniORB::fatalException& fe)
     {
       char msg[1000];
       sprintf(msg,"Caught omniORB:fatalException %s (%s:%d)",fe.errmsg(),fe.file(),fe.line());
-      SmartMet::Spine::Exception exception(BCP,msg);
+      Fmi::Exception exception(BCP,msg);
       throw exception;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -102,7 +102,7 @@ GridServer::~GridServer()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -165,27 +165,27 @@ void GridServer::init(ContentServer::ServiceInterface *contentServiceInterface,D
     {
       char msg[1000];
       sprintf(msg,"Caught CORBA::System Exception %s",ex._name());
-      SmartMet::Spine::Exception exception(BCP,msg);
+      Fmi::Exception exception(BCP,msg);
       throw exception;
     }
     catch(CORBA::Exception& ex)
     {
       char msg[1000];
       sprintf(msg,"Caught CORBA::Exception %s",ex._name());
-      SmartMet::Spine::Exception exception(BCP,msg);
+      Fmi::Exception exception(BCP,msg);
       throw exception;
     }
     catch(omniORB::fatalException& fe)
     {
       char msg[1000];
       sprintf(msg,"Caught omniORB:fatalException %s (%s:%d)",fe.errmsg(),fe.file(),fe.line());
-      SmartMet::Spine::Exception exception(BCP,msg);
+      Fmi::Exception exception(BCP,msg);
       throw exception;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -201,7 +201,7 @@ void GridServer::shutdown()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -216,7 +216,7 @@ void GridServer::start()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -235,27 +235,27 @@ void GridServer::run()
     {
       char msg[1000];
       sprintf(msg,"Caught CORBA::System Exception %s",ex._name());
-      SmartMet::Spine::Exception exception(BCP,msg);
+      Fmi::Exception exception(BCP,msg);
       throw exception;
     }
     catch(CORBA::Exception& ex)
     {
       char msg[1000];
       sprintf(msg,"Caught CORBA::Exception %s",ex._name());
-      SmartMet::Spine::Exception exception(BCP,msg);
+      Fmi::Exception exception(BCP,msg);
       throw exception;
     }
     catch(omniORB::fatalException& fe)
     {
       char msg[1000];
       sprintf(msg,"Caught omniORB:fatalException %s (%s:%d)",fe.errmsg(),fe.file(),fe.line());
-      SmartMet::Spine::Exception exception(BCP,msg);
+      Fmi::Exception exception(BCP,msg);
       throw exception;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -271,7 +271,7 @@ std::string GridServer::getContentServiceIor()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -287,7 +287,7 @@ std::string GridServer::getDataServiceIor()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -303,7 +303,7 @@ std::string GridServer::getQueryServiceIor()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 

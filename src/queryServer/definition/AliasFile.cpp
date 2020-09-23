@@ -17,7 +17,7 @@ AliasFile::AliasFile()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -35,7 +35,7 @@ AliasFile::AliasFile(const std::string& filename)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -53,7 +53,7 @@ AliasFile::AliasFile(const std::string& filename,bool duplicatesAllowed)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -72,7 +72,7 @@ AliasFile::AliasFile(const AliasFile& aliasFile)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -86,7 +86,7 @@ AliasFile::~AliasFile()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -102,12 +102,12 @@ void AliasFile::init()
     if (mAliasList.size() > 0)
       return; // Already initialized
 
-    AutoThreadLock lock(&mThreadLock);
+    AutoWriteLock lock(&mModificationLock);
     loadFile();
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -124,7 +124,7 @@ void AliasFile::init(const std::string& filename)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -142,7 +142,7 @@ void AliasFile::init(const std::string& filename,bool duplicatesAllowed)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -154,10 +154,11 @@ bool AliasFile::checkUpdates()
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
-
     time_t tt = getFileModificationTime(mFilename.c_str());
+    if (tt == mLastModified  ||  (tt+3) >= time(nullptr))
+      return false;
 
+    AutoWriteLock lock(&mModificationLock);
     if (tt != mLastModified  &&  (tt+3) < time(nullptr))
     {
       loadFile();
@@ -167,7 +168,7 @@ bool AliasFile::checkUpdates()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -178,7 +179,7 @@ bool AliasFile::getAlias(const std::string& name,std::string& alias)
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
 
     if (!mDuplicatesAllowed)
     {
@@ -203,7 +204,7 @@ bool AliasFile::getAlias(const std::string& name,std::string& alias)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -236,7 +237,7 @@ bool AliasFile::replaceAlias(const std::string& name,std::string& alias)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -248,7 +249,7 @@ void AliasFile::getAliasList(const std::string& name,std::vector<std::string>& a
 {
   try
   {
-    AutoThreadLock lock(&mThreadLock);
+    AutoReadLock lock(&mModificationLock);
 
     if (!mDuplicatesAllowed)
     {
@@ -268,7 +269,7 @@ void AliasFile::getAliasList(const std::string& name,std::vector<std::string>& a
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -283,7 +284,7 @@ void AliasFile::loadFile()
     FILE *file = fopen(mFilename.c_str(),"re");
     if (file == nullptr)
     {
-      Spine::Exception exception(BCP,"Cannot open the alias file!");
+      Fmi::Exception exception(BCP,"Cannot open the alias file!");
       exception.addParameter("Filename",mFilename);
       throw exception;
     }
@@ -351,7 +352,7 @@ void AliasFile::loadFile()
               if (alias != mAliasList.end())
               {
                 std::cout << "#### ALIAS '" << rec.mName << "' ALREADY DEFINED (" << mFilename << ":" << lineCount << ")\n";
-                std::cout << "  " << CODE_LOCATION << "\n\n";
+                //std::cout << "  " << CODE_LOCATION << "\n\n";
                 //rec.print(std::cout,0,0);
               }
               else
@@ -374,7 +375,7 @@ void AliasFile::loadFile()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -395,7 +396,7 @@ void AliasFile::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

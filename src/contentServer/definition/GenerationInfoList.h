@@ -33,6 +33,7 @@ class GenerationInfoList
     int                 getClosestIndex(uint comparisonMethod,GenerationInfo& generationInfo);
     int                 getClosestIndexNoLock(uint comparisonMethod,GenerationInfo& generationInfo);
     GenerationInfo*     getGenerationInfoById(uint generationId);
+    bool                getGenerationInfoById(uint generationId,GenerationInfo& generationInfo);
     GenerationInfo*     getGenerationInfoByIndex(uint index);
     GenerationInfo*     getGenerationInfoByIndexNoCheck(uint index);
     GenerationInfo*     getGenerationInfoByName(std::string generationName);

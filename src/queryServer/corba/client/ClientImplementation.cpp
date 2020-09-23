@@ -3,7 +3,7 @@
 #include "../../../contentServer/corba/convert/Converter.h"
 #include "../../../contentServer/definition/ServiceInterface.h"
 
-#include <grid-files/common/Exception.h>
+#include <macgyver/Exception.h>
 
 
 namespace SmartMet
@@ -16,33 +16,33 @@ namespace Corba
 #define CATCH_EXCEPTION \
   catch (CORBA::TRANSIENT&)\
   {\
-    Spine::Exception exception(BCP, "Caught system exception TRANSIENT -- unable to connect the server!");\
+    Fmi::Exception exception(BCP, "Caught system exception TRANSIENT -- unable to connect the server!");\
     throw exception;\
   }\
   catch (CORBA::SystemException& ex)\
   {\
     char msg[500];\
     sprintf(msg, "Caught a CORBA::%s\n", ex._name());\
-    Spine::Exception exception(BCP, msg);\
+    Fmi::Exception exception(BCP, msg);\
     throw exception;\
   }\
   catch (CORBA::Exception& ex)\
   {\
     char msg[500];\
     sprintf(msg, "Exception CORBA::%s\n", ex._name());\
-    Spine::Exception exception(BCP, msg);\
+    Fmi::Exception exception(BCP, msg);\
     throw exception;\
   }\
   catch (omniORB::fatalException& fe)\
   {\
     char msg[500];\
     sprintf(msg, "Caught omniORB::fatalException:%s\n", fe.errmsg());\
-    Spine::Exception exception(BCP, msg);\
+    Fmi::Exception exception(BCP, msg);\
     throw exception;\
   }\
   catch (...)\
   {\
-    throw Spine::Exception(BCP, exception_operation_failed, nullptr);\
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);\
   }
 
 
@@ -57,7 +57,7 @@ ClientImplementation::ClientImplementation()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -73,7 +73,7 @@ ClientImplementation::~ClientImplementation()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -99,7 +99,7 @@ void ClientImplementation::init(const std::string& serviceIor)
 
     if (CORBA::is_nil(mService))
     {
-      SmartMet::Spine::Exception exception(BCP, "Can't narrow reference to type QueryServer::Corba::ServiceInterace (or it was nil)!");
+      Fmi::Exception exception(BCP, "Can't narrow reference to type QueryServer::Corba::ServiceInterace (or it was nil)!");
       throw exception;
     }
 
@@ -119,7 +119,7 @@ int ClientImplementation::_executeQuery(T::SessionId sessionId,Query& query)
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Fmi::Exception(BCP, "The client is not initialized!");
 
     QueryServer::Corba::CorbaQuery_var corbaQuery = new QueryServer::Corba::CorbaQuery();
     QueryServer::Corba::Converter::convert(query, corbaQuery);
@@ -143,7 +143,7 @@ int ClientImplementation::_getProducerList(T::SessionId sessionId,string_vec& pr
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Fmi::Exception(BCP, "The client is not initialized!");
 
     QueryServer::Corba::CorbaStringList_var corbaProducerList = new QueryServer::Corba::CorbaStringList();
 
@@ -166,7 +166,7 @@ int ClientImplementation::_getValuesByGridPoint(T::SessionId sessionId,T::Conten
   try
   {
     if (!mInitialized)
-      throw SmartMet::Spine::Exception(BCP, "The client is not initialized!");
+      throw Fmi::Exception(BCP, "The client is not initialized!");
 
     QueryServer::Corba::CorbaGridPointValueList_var corbaValueList = new QueryServer::Corba::CorbaGridPointValueList();
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();

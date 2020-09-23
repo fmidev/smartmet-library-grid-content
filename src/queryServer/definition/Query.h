@@ -42,7 +42,7 @@ class Query
     std::string         mAnalysisTime;
     T::GeometryId_set   mGeometryIdList;
     std::string         mLanguage;
-    uint                mGenerationFlags;
+    ulonglong           mGenerationFlags;
     uint                mFlags;
     uint                mMaxParameterValues;
 

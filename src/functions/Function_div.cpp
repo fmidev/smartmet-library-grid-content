@@ -15,7 +15,7 @@ Function_div::Function_div()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -31,7 +31,7 @@ Function_div::Function_div(const Function_div& function)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -45,7 +45,7 @@ Function_div::~Function_div()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -66,11 +66,11 @@ float Function_div::executeFunctionCall1(std::vector<float>& parameters)
         return ParamValueMissing;
     }
 
-    throw Spine::Exception(BCP, "The parameters vector should contain only one value!");
+    throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -90,11 +90,11 @@ double Function_div::executeFunctionCall1(std::vector<double>& parameters)
         return ParamValueMissing;
     }
 
-    throw Spine::Exception(BCP, "The parameters vector should contain only one value!");
+    throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -129,7 +129,7 @@ void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -163,7 +163,7 @@ void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 */
@@ -177,7 +177,7 @@ Function* Function_div::duplicate()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

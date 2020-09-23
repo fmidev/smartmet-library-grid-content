@@ -58,11 +58,11 @@ class LuaFileCollection
 
   protected:
 
-    string_vec      mFilenames;
-    LuaFile_vec     mLuaFileList;
-    ThreadLock      mThreadLock;
-    time_t          mLastCheck;
-    uint            mCheckInterval;
+    string_vec        mFilenames;
+    LuaFile_vec       mLuaFileList;
+    ModificationLock  mModificationLock;
+    time_t            mLastCheck;
+    uint              mCheckInterval;
 };
 
 

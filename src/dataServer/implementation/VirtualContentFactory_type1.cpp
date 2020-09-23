@@ -2,7 +2,7 @@
 #include "VirtualMessage.h"
 
 #include <grid-files/common/ShowFunction.h>
-#include <grid-files/common/Exception.h>
+#include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/identification/GridDef.h>
 
@@ -25,7 +25,7 @@ VirtualContentFactory_type1::VirtualContentFactory_type1()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -41,7 +41,7 @@ VirtualContentFactory_type1::~VirtualContentFactory_type1()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -60,7 +60,7 @@ void VirtualContentFactory_type1::init(std::string definitionFileName)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -89,7 +89,7 @@ void VirtualContentFactory_type1::addFile(T::ProducerInfo& producerInfo,T::Gener
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -364,7 +364,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+    Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     exception.printError();
     throw exception;
   }

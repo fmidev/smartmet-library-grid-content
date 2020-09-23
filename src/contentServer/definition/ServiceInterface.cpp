@@ -1,5 +1,5 @@
 #include "ServiceInterface.h"
-#include <grid-files/common/Exception.h>
+#include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/ShowFunction.h>
 
@@ -25,7 +25,7 @@ ServiceInterface::ServiceInterface()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -41,7 +41,7 @@ ServiceInterface::~ServiceInterface()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -59,7 +59,7 @@ Implementation ServiceInterface::getImplementationType()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -76,7 +76,7 @@ void ServiceInterface::setDebugLog(Log *debugLog)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -93,7 +93,7 @@ void ServiceInterface::setProcessingLog(Log *processingLog)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -109,7 +109,7 @@ void ServiceInterface::shutdown()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -127,7 +127,7 @@ int ServiceInterface::clear(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -145,7 +145,7 @@ int ServiceInterface::reload(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -167,7 +167,7 @@ int ServiceInterface::addDataServerInfo(T::SessionId sessionId,T::ServerInfo& se
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -189,7 +189,7 @@ int ServiceInterface::deleteDataServerInfoById(T::SessionId sessionId,uint serve
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -211,7 +211,7 @@ int ServiceInterface::getDataServerInfoById(T::SessionId sessionId,uint serverId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -233,7 +233,7 @@ int ServiceInterface::getDataServerInfoByName(T::SessionId sessionId,std::string
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -255,7 +255,7 @@ int ServiceInterface::getDataServerInfoByIor(T::SessionId sessionId,std::string 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -277,7 +277,7 @@ int ServiceInterface::getDataServerInfoList(T::SessionId sessionId,T::ServerInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -299,7 +299,7 @@ int ServiceInterface::getDataServerInfoCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -321,7 +321,7 @@ int ServiceInterface::addProducerInfo(T::SessionId sessionId,T::ProducerInfo& pr
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -343,7 +343,7 @@ int ServiceInterface::deleteProducerInfoById(T::SessionId sessionId,uint produce
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -365,7 +365,7 @@ int ServiceInterface::deleteProducerInfoByName(T::SessionId sessionId,std::strin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -387,7 +387,7 @@ int ServiceInterface::deleteProducerInfoListBySourceId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -409,7 +409,7 @@ int ServiceInterface::getProducerInfoById(T::SessionId sessionId,uint producerId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -431,7 +431,7 @@ int ServiceInterface::getProducerInfoByName(T::SessionId sessionId,std::string p
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -453,7 +453,7 @@ int ServiceInterface::getProducerInfoList(T::SessionId sessionId,T::ProducerInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -475,7 +475,7 @@ int ServiceInterface::getProducerInfoListByParameter(T::SessionId sessionId,T::P
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -497,7 +497,7 @@ int ServiceInterface::getProducerInfoListBySourceId(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -519,7 +519,7 @@ int ServiceInterface::getProducerInfoCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -541,7 +541,7 @@ int ServiceInterface::getProducerNameAndGeometryList(T::SessionId sessionId,std:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -563,7 +563,7 @@ int ServiceInterface::getProducerParameterList(T::SessionId sessionId,T::ParamKe
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -585,7 +585,7 @@ int ServiceInterface::getProducerParameterListByProducerId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -607,7 +607,7 @@ int ServiceInterface::addGenerationInfo(T::SessionId sessionId,T::GenerationInfo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -629,7 +629,7 @@ int ServiceInterface::deleteGenerationInfoById(T::SessionId sessionId,uint gener
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -651,7 +651,7 @@ int ServiceInterface::deleteGenerationInfoByName(T::SessionId sessionId,std::str
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -673,7 +673,7 @@ int ServiceInterface::deleteGenerationInfoListByIdList(T::SessionId sessionId,st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -695,7 +695,7 @@ int ServiceInterface::deleteGenerationInfoListByProducerId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -717,7 +717,7 @@ int ServiceInterface::deleteGenerationInfoListByProducerName(T::SessionId sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -739,7 +739,7 @@ int ServiceInterface::deleteGenerationInfoListBySourceId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -761,7 +761,7 @@ int ServiceInterface::getGenerationInfoListByGeometryId(T::SessionId sessionId,T
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -783,7 +783,7 @@ int ServiceInterface::getGenerationInfoById(T::SessionId sessionId,uint generati
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -805,7 +805,7 @@ int ServiceInterface::getGenerationInfoByName(T::SessionId sessionId,std::string
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -827,7 +827,7 @@ int ServiceInterface::getGenerationInfoList(T::SessionId sessionId,T::Generation
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -849,7 +849,7 @@ int ServiceInterface::getGenerationInfoListByProducerId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -871,7 +871,7 @@ int ServiceInterface::getGenerationInfoListByProducerName(T::SessionId sessionId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -893,7 +893,7 @@ int ServiceInterface::getGenerationInfoListBySourceId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -915,7 +915,7 @@ int ServiceInterface::getLastGenerationInfoByProducerIdAndStatus(T::SessionId se
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -937,7 +937,7 @@ int ServiceInterface::getLastGenerationInfoByProducerNameAndStatus(T::SessionId 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -959,7 +959,7 @@ int ServiceInterface::getGenerationInfoCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -981,7 +981,7 @@ int ServiceInterface::setGenerationInfoStatusById(T::SessionId sessionId,uint ge
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1003,7 +1003,7 @@ int ServiceInterface::setGenerationInfoStatusByName(T::SessionId sessionId,std::
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1025,7 +1025,7 @@ int ServiceInterface::addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1047,7 +1047,7 @@ int ServiceInterface::addFileInfoWithContentList(T::SessionId sessionId,T::FileI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1069,7 +1069,7 @@ int ServiceInterface::addFileInfoListWithContent(T::SessionId sessionId,uint req
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1091,7 +1091,7 @@ int ServiceInterface::deleteFileInfoById(T::SessionId sessionId,uint fileId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1113,7 +1113,7 @@ int ServiceInterface::deleteFileInfoByName(T::SessionId sessionId,std::string fi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1135,7 +1135,7 @@ int ServiceInterface::deleteFileInfoListByGroupFlags(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1157,7 +1157,7 @@ int ServiceInterface::deleteFileInfoListByProducerId(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1179,7 +1179,7 @@ int ServiceInterface::deleteFileInfoListByProducerName(T::SessionId sessionId,st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1201,7 +1201,7 @@ int ServiceInterface::deleteFileInfoListByGenerationId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1223,7 +1223,7 @@ int ServiceInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Session
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1245,7 +1245,7 @@ int ServiceInterface::deleteFileInfoListByForecastTimeList(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1267,7 +1267,7 @@ int ServiceInterface::deleteFileInfoListByGenerationName(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1289,7 +1289,7 @@ int ServiceInterface::deleteFileInfoListBySourceId(T::SessionId sessionId,uint s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1311,7 +1311,7 @@ int ServiceInterface::deleteFileInfoListByFileIdList(T::SessionId sessionId,std:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1333,7 +1333,7 @@ int ServiceInterface::getFileInfoById(T::SessionId sessionId,uint fileId,T::File
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1355,7 +1355,7 @@ int ServiceInterface::getFileInfoByName(T::SessionId sessionId,std::string filen
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1377,7 +1377,7 @@ int ServiceInterface::getFileInfoList(T::SessionId sessionId,uint startFileId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1399,7 +1399,7 @@ int ServiceInterface::getFileInfoListByFileIdList(T::SessionId sessionId,std::ve
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1421,7 +1421,7 @@ int ServiceInterface::getFileInfoListByProducerId(T::SessionId sessionId,uint pr
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1443,7 +1443,7 @@ int ServiceInterface::getFileInfoListByProducerName(T::SessionId sessionId,std::
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1465,7 +1465,7 @@ int ServiceInterface::getFileInfoListByGenerationId(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1487,7 +1487,7 @@ int ServiceInterface::getFileInfoListByGenerationName(T::SessionId sessionId,std
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1509,7 +1509,7 @@ int ServiceInterface::getFileInfoListByGroupFlags(T::SessionId sessionId,uint gr
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1531,7 +1531,7 @@ int ServiceInterface::getFileInfoListBySourceId(T::SessionId sessionId,uint sour
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1553,7 +1553,7 @@ int ServiceInterface::getFileInfoCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1575,7 +1575,7 @@ int ServiceInterface::getFileInfoCountByProducerId(T::SessionId sessionId,uint p
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1597,7 +1597,7 @@ int ServiceInterface::getFileInfoCountByGenerationId(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1619,7 +1619,7 @@ int ServiceInterface::getFileInfoCountBySourceId(T::SessionId sessionId,uint sou
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1641,7 +1641,7 @@ int ServiceInterface::addEventInfo(T::SessionId sessionId,T::EventInfo& eventInf
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1665,7 +1665,7 @@ int ServiceInterface::getLastEventInfo(T::SessionId sessionId,uint requestingSer
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1687,7 +1687,7 @@ int ServiceInterface::getEventInfoList(T::SessionId sessionId,uint requestingSer
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1710,7 +1710,7 @@ int ServiceInterface::getEventInfoCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1732,7 +1732,7 @@ int ServiceInterface::addContentInfo(T::SessionId sessionId,T::ContentInfo& cont
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1754,7 +1754,7 @@ int ServiceInterface::addContentList(T::SessionId sessionId,T::ContentInfoList& 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1776,7 +1776,7 @@ int ServiceInterface::deleteContentInfo(T::SessionId sessionId,uint fileId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1798,7 +1798,7 @@ int ServiceInterface::deleteContentListByFileId(T::SessionId sessionId,uint file
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1820,7 +1820,7 @@ int ServiceInterface::deleteContentListByFileName(T::SessionId sessionId,std::st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1842,7 +1842,7 @@ int ServiceInterface::deleteContentListByGroupFlags(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1864,7 +1864,7 @@ int ServiceInterface::deleteContentListByProducerId(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1886,7 +1886,7 @@ int ServiceInterface::deleteContentListByProducerName(T::SessionId sessionId,std
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1908,7 +1908,7 @@ int ServiceInterface::deleteContentListByGenerationId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1930,7 +1930,7 @@ int ServiceInterface::deleteContentListByGenerationName(T::SessionId sessionId,s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1952,7 +1952,7 @@ int ServiceInterface::deleteContentListBySourceId(T::SessionId sessionId,uint so
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1974,7 +1974,7 @@ int ServiceInterface::registerContentList(T::SessionId sessionId,uint serverId,T
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1996,7 +1996,7 @@ int ServiceInterface::registerContentListByFileId(T::SessionId sessionId,uint se
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2018,7 +2018,7 @@ int ServiceInterface::unregisterContentList(T::SessionId sessionId,uint serverId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2040,7 +2040,7 @@ int ServiceInterface::unregisterContentListByFileId(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2062,7 +2062,7 @@ int ServiceInterface::getContentInfo(T::SessionId sessionId,uint fileId,uint mes
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2084,7 +2084,7 @@ int ServiceInterface::getContentList(T::SessionId sessionId,uint startFileId,uin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2106,7 +2106,7 @@ int ServiceInterface::getContentListByFileId(T::SessionId sessionId,uint fileId,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2128,7 +2128,7 @@ int ServiceInterface::getContentListByFileIdList(T::SessionId sessionId,std::vec
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2150,7 +2150,7 @@ int ServiceInterface::getContentListByFileName(T::SessionId sessionId,std::strin
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2172,7 +2172,7 @@ int ServiceInterface::getContentListByServerId(T::SessionId sessionId,uint serve
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2194,7 +2194,7 @@ int ServiceInterface::getContentListByGroupFlags(T::SessionId sessionId,uint gro
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2216,7 +2216,7 @@ int ServiceInterface::getContentListByProducerId(T::SessionId sessionId,uint pro
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2238,7 +2238,7 @@ int ServiceInterface::getContentListByProducerName(T::SessionId sessionId,std::s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2260,7 +2260,7 @@ int ServiceInterface::getContentListBySourceId(T::SessionId sessionId,uint sourc
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2282,7 +2282,7 @@ int ServiceInterface::getContentListByGenerationId(T::SessionId sessionId,uint g
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2304,7 +2304,7 @@ int ServiceInterface::getContentListByGenerationName(T::SessionId sessionId,std:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2326,7 +2326,7 @@ int ServiceInterface::getContentListByGenerationIdAndTimeRange(T::SessionId sess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2348,7 +2348,7 @@ int ServiceInterface::getContentListByGenerationNameAndTimeRange(T::SessionId se
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2370,7 +2370,7 @@ int ServiceInterface::getContentListByParameter(T::SessionId sessionId,T::ParamK
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2392,7 +2392,7 @@ int ServiceInterface::getContentListByParameterAndGenerationId(T::SessionId sess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2414,7 +2414,7 @@ int ServiceInterface::getContentListByParameterAndGenerationName(T::SessionId se
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2436,7 +2436,7 @@ int ServiceInterface::getContentListByParameterAndProducerId(T::SessionId sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2458,7 +2458,7 @@ int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sess
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2480,7 +2480,7 @@ int ServiceInterface::getContentListByParameterGenerationIdAndForecastTime(T::Se
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2502,7 +2502,7 @@ int ServiceInterface::getContentListByRequestCounterKey(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2525,7 +2525,7 @@ int ServiceInterface::getContentListOfInvalidIntegrity(T::SessionId sessionId,T:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2547,7 +2547,7 @@ int ServiceInterface::getContentGeometryIdListByGenerationId(T::SessionId sessio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2569,7 +2569,7 @@ int ServiceInterface::getContentParamListByGenerationId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2591,7 +2591,7 @@ int ServiceInterface::getContentParamKeyListByGenerationId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2612,7 +2612,7 @@ int ServiceInterface::getContentTimeListByGenerationId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2634,7 +2634,7 @@ int ServiceInterface::getContentTimeListByGenerationAndGeometryId(T::SessionId s
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2656,7 +2656,7 @@ int ServiceInterface::getContentTimeListByProducerId(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2678,7 +2678,7 @@ int ServiceInterface::getGenerationIdGeometryIdAndForecastTimeList(T::SessionId 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2700,7 +2700,7 @@ int ServiceInterface::getContentCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2722,7 +2722,7 @@ int ServiceInterface::getHashByProducerId(T::SessionId sessionId,uint producerId
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2744,7 +2744,7 @@ int ServiceInterface::getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2767,7 +2767,7 @@ int ServiceInterface::deleteVirtualContent(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2789,7 +2789,7 @@ int ServiceInterface::updateVirtualContent(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2799,7 +2799,7 @@ int ServiceInterface::updateVirtualContent(T::SessionId sessionId)
 
 int ServiceInterface::_clear(T::SessionId sessionId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2808,7 +2808,7 @@ int ServiceInterface::_clear(T::SessionId sessionId)
 
 int ServiceInterface::_reload(T::SessionId sessionId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2817,7 +2817,7 @@ int ServiceInterface::_reload(T::SessionId sessionId)
 
 int ServiceInterface::_addDataServerInfo(T::SessionId sessionId,T::ServerInfo& serverInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2826,7 +2826,7 @@ int ServiceInterface::_addDataServerInfo(T::SessionId sessionId,T::ServerInfo& s
 
 int ServiceInterface::_deleteDataServerInfoById(T::SessionId sessionId,uint serverId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2835,7 +2835,7 @@ int ServiceInterface::_deleteDataServerInfoById(T::SessionId sessionId,uint serv
 
 int ServiceInterface::_getDataServerInfoById(T::SessionId sessionId,uint serverId,T::ServerInfo& serverInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2844,7 +2844,7 @@ int ServiceInterface::_getDataServerInfoById(T::SessionId sessionId,uint serverI
 
 int ServiceInterface::_getDataServerInfoByName(T::SessionId sessionId,std::string serverName,T::ServerInfo& serverInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2853,7 +2853,7 @@ int ServiceInterface::_getDataServerInfoByName(T::SessionId sessionId,std::strin
 
 int ServiceInterface::_getDataServerInfoByIor(T::SessionId sessionId,std::string serverIor,T::ServerInfo& serverInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2862,7 +2862,7 @@ int ServiceInterface::_getDataServerInfoByIor(T::SessionId sessionId,std::string
 
 int ServiceInterface::_getDataServerInfoList(T::SessionId sessionId,T::ServerInfoList& serverInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2871,7 +2871,7 @@ int ServiceInterface::_getDataServerInfoList(T::SessionId sessionId,T::ServerInf
 
 int ServiceInterface::_getDataServerInfoCount(T::SessionId sessionId,uint& count)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2880,7 +2880,7 @@ int ServiceInterface::_getDataServerInfoCount(T::SessionId sessionId,uint& count
 
 int ServiceInterface::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2889,7 +2889,7 @@ int ServiceInterface::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo& p
 
 int ServiceInterface::_deleteProducerInfoById(T::SessionId sessionId,uint producerId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2898,7 +2898,7 @@ int ServiceInterface::_deleteProducerInfoById(T::SessionId sessionId,uint produc
 
 int ServiceInterface::_deleteProducerInfoByName(T::SessionId sessionId,std::string producerName)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2907,7 +2907,7 @@ int ServiceInterface::_deleteProducerInfoByName(T::SessionId sessionId,std::stri
 
 int ServiceInterface::_deleteProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2916,7 +2916,7 @@ int ServiceInterface::_deleteProducerInfoListBySourceId(T::SessionId sessionId,u
 
 int ServiceInterface::_getProducerInfoById(T::SessionId sessionId,uint producerId,T::ProducerInfo& producerInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2925,7 +2925,7 @@ int ServiceInterface::_getProducerInfoById(T::SessionId sessionId,uint producerI
 
 int ServiceInterface::_getProducerInfoByName(T::SessionId sessionId,std::string producerName,T::ProducerInfo& producerInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2934,7 +2934,7 @@ int ServiceInterface::_getProducerInfoByName(T::SessionId sessionId,std::string 
 
 int ServiceInterface::_getProducerInfoList(T::SessionId sessionId,T::ProducerInfoList& producerInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2943,7 +2943,7 @@ int ServiceInterface::_getProducerInfoList(T::SessionId sessionId,T::ProducerInf
 
 int ServiceInterface::_getProducerInfoListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ProducerInfoList& producerInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2952,7 +2952,7 @@ int ServiceInterface::_getProducerInfoListByParameter(T::SessionId sessionId,T::
 
 int ServiceInterface::_getProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::ProducerInfoList& producerInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2961,7 +2961,7 @@ int ServiceInterface::_getProducerInfoListBySourceId(T::SessionId sessionId,uint
 
 int ServiceInterface::_getProducerInfoCount(T::SessionId sessionId,uint& count)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2970,7 +2970,7 @@ int ServiceInterface::_getProducerInfoCount(T::SessionId sessionId,uint& count)
 
 int ServiceInterface::_getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2979,7 +2979,7 @@ int ServiceInterface::_getProducerNameAndGeometryList(T::SessionId sessionId,std
 
 int ServiceInterface::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2988,7 +2988,7 @@ int ServiceInterface::_getProducerParameterList(T::SessionId sessionId,T::ParamK
 
 int ServiceInterface::_getProducerParameterListByProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -2997,7 +2997,7 @@ int ServiceInterface::_getProducerParameterListByProducerId(T::SessionId session
 
 int ServiceInterface::_addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3006,7 +3006,7 @@ int ServiceInterface::_addGenerationInfo(T::SessionId sessionId,T::GenerationInf
 
 int ServiceInterface::_deleteGenerationInfoById(T::SessionId sessionId,uint generationId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3015,7 +3015,7 @@ int ServiceInterface::_deleteGenerationInfoById(T::SessionId sessionId,uint gene
 
 int ServiceInterface::_deleteGenerationInfoByName(T::SessionId sessionId,std::string generationName)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3024,7 +3024,7 @@ int ServiceInterface::_deleteGenerationInfoByName(T::SessionId sessionId,std::st
 
 int ServiceInterface::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<uint>& generationIdList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3033,7 +3033,7 @@ int ServiceInterface::_deleteGenerationInfoListByIdList(T::SessionId sessionId,s
 
 int ServiceInterface::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3042,7 +3042,7 @@ int ServiceInterface::_deleteGenerationInfoListByProducerId(T::SessionId session
 
 int ServiceInterface::_deleteGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3051,7 +3051,7 @@ int ServiceInterface::_deleteGenerationInfoListByProducerName(T::SessionId sessi
 
 int ServiceInterface::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3060,7 +3060,7 @@ int ServiceInterface::_deleteGenerationInfoListBySourceId(T::SessionId sessionId
 
 int ServiceInterface::_getGenerationInfoById(T::SessionId sessionId,uint generationId,T::GenerationInfo& generationInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3069,7 +3069,7 @@ int ServiceInterface::_getGenerationInfoById(T::SessionId sessionId,uint generat
 
 int ServiceInterface::_getGenerationInfoByName(T::SessionId sessionId,std::string generationName,T::GenerationInfo& generationInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3078,7 +3078,7 @@ int ServiceInterface::_getGenerationInfoByName(T::SessionId sessionId,std::strin
 
 int ServiceInterface::_getGenerationInfoList(T::SessionId sessionId,T::GenerationInfoList& generationInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3087,7 +3087,7 @@ int ServiceInterface::_getGenerationInfoList(T::SessionId sessionId,T::Generatio
 
 int ServiceInterface::_getGenerationInfoListByGeometryId(T::SessionId sessionId,T::GeometryId geometryId,T::GenerationInfoList& generationInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3096,7 +3096,7 @@ int ServiceInterface::_getGenerationInfoListByGeometryId(T::SessionId sessionId,
 
 int ServiceInterface::_getGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GenerationInfoList& generationInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3105,7 +3105,7 @@ int ServiceInterface::_getGenerationInfoListByProducerId(T::SessionId sessionId,
 
 int ServiceInterface::_getGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName,T::GenerationInfoList& generationInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3114,7 +3114,7 @@ int ServiceInterface::_getGenerationInfoListByProducerName(T::SessionId sessionI
 
 int ServiceInterface::_getGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GenerationInfoList& generationInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3123,7 +3123,7 @@ int ServiceInterface::_getGenerationInfoListBySourceId(T::SessionId sessionId,ui
 
 int ServiceInterface::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,uint producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3132,7 +3132,7 @@ int ServiceInterface::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId s
 
 int ServiceInterface::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,std::string producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3141,7 +3141,7 @@ int ServiceInterface::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId
 
 int ServiceInterface::_getGenerationInfoCount(T::SessionId sessionId,uint& count)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3150,7 +3150,7 @@ int ServiceInterface::_getGenerationInfoCount(T::SessionId sessionId,uint& count
 
 int ServiceInterface::_setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,uchar status)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3159,7 +3159,7 @@ int ServiceInterface::_setGenerationInfoStatusById(T::SessionId sessionId,uint g
 
 int ServiceInterface::_setGenerationInfoStatusByName(T::SessionId sessionId,std::string generationName,uchar status)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3168,7 +3168,7 @@ int ServiceInterface::_setGenerationInfoStatusByName(T::SessionId sessionId,std:
 
 int ServiceInterface::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3177,7 +3177,7 @@ int ServiceInterface::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 
 int ServiceInterface::_addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3186,7 +3186,7 @@ int ServiceInterface::_addFileInfoWithContentList(T::SessionId sessionId,T::File
 
 int ServiceInterface::_addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3195,7 +3195,7 @@ int ServiceInterface::_addFileInfoListWithContent(T::SessionId sessionId,uint re
 
 int ServiceInterface::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3204,7 +3204,7 @@ int ServiceInterface::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
 
 int ServiceInterface::_deleteFileInfoByName(T::SessionId sessionId,std::string filename)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3213,7 +3213,7 @@ int ServiceInterface::_deleteFileInfoByName(T::SessionId sessionId,std::string f
 
 int ServiceInterface::_deleteFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3222,7 +3222,7 @@ int ServiceInterface::_deleteFileInfoListByGroupFlags(T::SessionId sessionId,uin
 
 int ServiceInterface::_deleteFileInfoListByProducerId(T::SessionId sessionId,uint producerId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3231,7 +3231,7 @@ int ServiceInterface::_deleteFileInfoListByProducerId(T::SessionId sessionId,uin
 
 int ServiceInterface::_deleteFileInfoListByProducerName(T::SessionId sessionId,std::string producerName)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3240,7 +3240,7 @@ int ServiceInterface::_deleteFileInfoListByProducerName(T::SessionId sessionId,s
 
 int ServiceInterface::_deleteFileInfoListByGenerationId(T::SessionId sessionId,uint generationId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3249,7 +3249,7 @@ int ServiceInterface::_deleteFileInfoListByGenerationId(T::SessionId sessionId,u
 
 int ServiceInterface::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,std::string forecastTime)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3258,7 +3258,7 @@ int ServiceInterface::_deleteFileInfoListByGenerationIdAndForecastTime(T::Sessio
 
 int ServiceInterface::_deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3267,7 +3267,7 @@ int ServiceInterface::_deleteFileInfoListByForecastTimeList(T::SessionId session
 
 int ServiceInterface::_deleteFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3276,7 +3276,7 @@ int ServiceInterface::_deleteFileInfoListByGenerationName(T::SessionId sessionId
 
 int ServiceInterface::_deleteFileInfoListBySourceId(T::SessionId sessionId,uint sourceId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3285,7 +3285,7 @@ int ServiceInterface::_deleteFileInfoListBySourceId(T::SessionId sessionId,uint 
 
 int ServiceInterface::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<uint>& fileIdList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3294,7 +3294,7 @@ int ServiceInterface::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std
 
 int ServiceInterface::_getFileInfoById(T::SessionId sessionId,uint fileId,T::FileInfo& fileInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3303,7 +3303,7 @@ int ServiceInterface::_getFileInfoById(T::SessionId sessionId,uint fileId,T::Fil
 
 int ServiceInterface::_getFileInfoByName(T::SessionId sessionId,std::string filename,T::FileInfo& fileInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3312,7 +3312,7 @@ int ServiceInterface::_getFileInfoByName(T::SessionId sessionId,std::string file
 
 int ServiceInterface::_getFileInfoList(T::SessionId sessionId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3321,7 +3321,7 @@ int ServiceInterface::_getFileInfoList(T::SessionId sessionId,uint startFileId,u
 
 int ServiceInterface::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::FileInfoList& fileInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3330,7 +3330,7 @@ int ServiceInterface::_getFileInfoListByFileIdList(T::SessionId sessionId,std::v
 
 int ServiceInterface::_getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3339,7 +3339,7 @@ int ServiceInterface::_getFileInfoListByProducerId(T::SessionId sessionId,uint p
 
 int ServiceInterface::_getFileInfoListByProducerName(T::SessionId sessionId,std::string producerName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3348,7 +3348,7 @@ int ServiceInterface::_getFileInfoListByProducerName(T::SessionId sessionId,std:
 
 int ServiceInterface::_getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3357,7 +3357,7 @@ int ServiceInterface::_getFileInfoListByGenerationId(T::SessionId sessionId,uint
 
 int ServiceInterface::_getFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3366,7 +3366,7 @@ int ServiceInterface::_getFileInfoListByGenerationName(T::SessionId sessionId,st
 
 int ServiceInterface::_getFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3375,7 +3375,7 @@ int ServiceInterface::_getFileInfoListByGroupFlags(T::SessionId sessionId,uint g
 
 int ServiceInterface::_getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3384,7 +3384,7 @@ int ServiceInterface::_getFileInfoListBySourceId(T::SessionId sessionId,uint sou
 
 int ServiceInterface::_getFileInfoCount(T::SessionId sessionId,uint& count)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3393,7 +3393,7 @@ int ServiceInterface::_getFileInfoCount(T::SessionId sessionId,uint& count)
 
 int ServiceInterface::_getFileInfoCountByProducerId(T::SessionId sessionId,uint producerId,uint& count)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3402,7 +3402,7 @@ int ServiceInterface::_getFileInfoCountByProducerId(T::SessionId sessionId,uint 
 
 int ServiceInterface::_getFileInfoCountByGenerationId(T::SessionId sessionId,uint generationId,uint& count)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3411,7 +3411,7 @@ int ServiceInterface::_getFileInfoCountByGenerationId(T::SessionId sessionId,uin
 
 int ServiceInterface::_getFileInfoCountBySourceId(T::SessionId sessionId,uint sourceId,uint& count)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3420,7 +3420,7 @@ int ServiceInterface::_getFileInfoCountBySourceId(T::SessionId sessionId,uint so
 
 int ServiceInterface::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3429,7 +3429,7 @@ int ServiceInterface::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventIn
 
 int ServiceInterface::_getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3438,7 +3438,7 @@ int ServiceInterface::_getLastEventInfo(T::SessionId sessionId,uint requestingSe
 
 int ServiceInterface::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,uint maxRecords,T::EventInfoList& eventInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3447,7 +3447,7 @@ int ServiceInterface::_getEventInfoList(T::SessionId sessionId,uint requestingSe
 
 int ServiceInterface::_getEventInfoCount(T::SessionId sessionId,uint& count)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3456,7 +3456,7 @@ int ServiceInterface::_getEventInfoCount(T::SessionId sessionId,uint& count)
 
 int ServiceInterface::_addContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3465,7 +3465,7 @@ int ServiceInterface::_addContentInfo(T::SessionId sessionId,T::ContentInfo& con
 
 int ServiceInterface::_addContentList(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3474,7 +3474,7 @@ int ServiceInterface::_addContentList(T::SessionId sessionId,T::ContentInfoList&
 
 int ServiceInterface::_registerContentList(T::SessionId sessionId,uint serverId,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3483,7 +3483,7 @@ int ServiceInterface::_registerContentList(T::SessionId sessionId,uint serverId,
 
 int ServiceInterface::_registerContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3492,7 +3492,7 @@ int ServiceInterface::_registerContentListByFileId(T::SessionId sessionId,uint s
 
 int ServiceInterface::_unregisterContentList(T::SessionId sessionId,uint serverId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3501,7 +3501,7 @@ int ServiceInterface::_unregisterContentList(T::SessionId sessionId,uint serverI
 
 int ServiceInterface::_unregisterContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3510,7 +3510,7 @@ int ServiceInterface::_unregisterContentListByFileId(T::SessionId sessionId,uint
 
 int ServiceInterface::_deleteContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3519,7 +3519,7 @@ int ServiceInterface::_deleteContentInfo(T::SessionId sessionId,uint fileId,uint
 
 int ServiceInterface::_deleteContentListByFileId(T::SessionId sessionId,uint fileId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3528,7 +3528,7 @@ int ServiceInterface::_deleteContentListByFileId(T::SessionId sessionId,uint fil
 
 int ServiceInterface::_deleteContentListByFileName(T::SessionId sessionId,std::string filename)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3537,7 +3537,7 @@ int ServiceInterface::_deleteContentListByFileName(T::SessionId sessionId,std::s
 
 int ServiceInterface::_deleteContentListByGroupFlags(T::SessionId sessionId,uint groupFlags)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3546,7 +3546,7 @@ int ServiceInterface::_deleteContentListByGroupFlags(T::SessionId sessionId,uint
 
 int ServiceInterface::_deleteContentListByProducerId(T::SessionId sessionId,uint producerId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3555,7 +3555,7 @@ int ServiceInterface::_deleteContentListByProducerId(T::SessionId sessionId,uint
 
 int ServiceInterface::_deleteContentListByProducerName(T::SessionId sessionId,std::string producerName)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3564,7 +3564,7 @@ int ServiceInterface::_deleteContentListByProducerName(T::SessionId sessionId,st
 
 int ServiceInterface::_deleteContentListByGenerationId(T::SessionId sessionId,uint generationId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3573,7 +3573,7 @@ int ServiceInterface::_deleteContentListByGenerationId(T::SessionId sessionId,ui
 
 int ServiceInterface::_deleteContentListByGenerationName(T::SessionId sessionId,std::string generationName)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3582,7 +3582,7 @@ int ServiceInterface::_deleteContentListByGenerationName(T::SessionId sessionId,
 
 int ServiceInterface::_deleteContentListBySourceId(T::SessionId sessionId,uint sourceId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3591,7 +3591,7 @@ int ServiceInterface::_deleteContentListBySourceId(T::SessionId sessionId,uint s
 
 int ServiceInterface::_getContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex,T::ContentInfo& contentInfo)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3600,7 +3600,7 @@ int ServiceInterface::_getContentInfo(T::SessionId sessionId,uint fileId,uint me
 
 int ServiceInterface::_getContentList(T::SessionId sessionId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3609,7 +3609,7 @@ int ServiceInterface::_getContentList(T::SessionId sessionId,uint startFileId,ui
 
 int ServiceInterface::_getContentListByFileId(T::SessionId sessionId,uint fileId,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3618,7 +3618,7 @@ int ServiceInterface::_getContentListByFileId(T::SessionId sessionId,uint fileId
 
 int ServiceInterface::_getContentListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3627,7 +3627,7 @@ int ServiceInterface::_getContentListByFileIdList(T::SessionId sessionId,std::ve
 
 int ServiceInterface::_getContentListByFileName(T::SessionId sessionId,std::string filename,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3636,7 +3636,7 @@ int ServiceInterface::_getContentListByFileName(T::SessionId sessionId,std::stri
 
 int ServiceInterface::_getContentListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3645,7 +3645,7 @@ int ServiceInterface::_getContentListByGroupFlags(T::SessionId sessionId,uint gr
 
 int ServiceInterface::_getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3654,7 +3654,7 @@ int ServiceInterface::_getContentListByProducerId(T::SessionId sessionId,uint pr
 
 int ServiceInterface::_getContentListByProducerName(T::SessionId sessionId,std::string producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3663,7 +3663,7 @@ int ServiceInterface::_getContentListByProducerName(T::SessionId sessionId,std::
 
 int ServiceInterface::_getContentListByServerId(T::SessionId sessionId,uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3672,7 +3672,7 @@ int ServiceInterface::_getContentListByServerId(T::SessionId sessionId,uint serv
 
 int ServiceInterface::_getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3681,7 +3681,7 @@ int ServiceInterface::_getContentListBySourceId(T::SessionId sessionId,uint sour
 
 int ServiceInterface::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3690,7 +3690,7 @@ int ServiceInterface::_getContentListByGenerationId(T::SessionId sessionId,uint 
 
 int ServiceInterface::_getContentListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3699,7 +3699,7 @@ int ServiceInterface::_getContentListByGenerationName(T::SessionId sessionId,std
 
 int ServiceInterface::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3708,7 +3708,7 @@ int ServiceInterface::_getContentListByGenerationIdAndTimeRange(T::SessionId ses
 
 int ServiceInterface::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,std::string generationName,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3717,7 +3717,7 @@ int ServiceInterface::_getContentListByGenerationNameAndTimeRange(T::SessionId s
 
 int ServiceInterface::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3726,7 +3726,7 @@ int ServiceInterface::_getContentListByParameter(T::SessionId sessionId,T::Param
 
 int ServiceInterface::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3735,7 +3735,7 @@ int ServiceInterface::_getContentListByParameterAndGenerationId(T::SessionId ses
 
 int ServiceInterface::_getContentListByParameterAndGenerationName(T::SessionId sessionId,std::string generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3744,7 +3744,7 @@ int ServiceInterface::_getContentListByParameterAndGenerationName(T::SessionId s
 
 int ServiceInterface::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3753,7 +3753,7 @@ int ServiceInterface::_getContentListByParameterAndProducerId(T::SessionId sessi
 
 int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId sessionId,std::string producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3762,7 +3762,7 @@ int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId ses
 
 int ServiceInterface::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string forecastTime,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3771,7 +3771,7 @@ int ServiceInterface::_getContentListByParameterGenerationIdAndForecastTime(T::S
 
 int ServiceInterface::_getContentListByRequestCounterKey(T::SessionId sessionId,ulonglong key,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3780,7 +3780,7 @@ int ServiceInterface::_getContentListByRequestCounterKey(T::SessionId sessionId,
 
 int ServiceInterface::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3789,7 +3789,7 @@ int ServiceInterface::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T
 
 int ServiceInterface::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<T::GeometryId>& geometryIdList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3798,7 +3798,7 @@ int ServiceInterface::_getContentGeometryIdListByGenerationId(T::SessionId sessi
 
 int ServiceInterface::_getContentParamListByGenerationId(T::SessionId sessionId,uint generationId,T::ContentInfoList& contentParamList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3807,7 +3807,7 @@ int ServiceInterface::_getContentParamListByGenerationId(T::SessionId sessionId,
 
 int ServiceInterface::_getContentParamKeyListByGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3816,7 +3816,7 @@ int ServiceInterface::_getContentParamKeyListByGenerationId(T::SessionId session
 
 int ServiceInterface::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3825,7 +3825,7 @@ int ServiceInterface::_getContentTimeListByGenerationId(T::SessionId sessionId,u
 
 int ServiceInterface::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3834,7 +3834,7 @@ int ServiceInterface::_getContentTimeListByGenerationAndGeometryId(T::SessionId 
 
 int ServiceInterface::_getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3843,7 +3843,7 @@ int ServiceInterface::_getContentTimeListByProducerId(T::SessionId sessionId,uin
 
 int ServiceInterface::_getGenerationIdGeometryIdAndForecastTimeList(T::SessionId sessionId,std::set<std::string>& list)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3852,7 +3852,7 @@ int ServiceInterface::_getGenerationIdGeometryIdAndForecastTimeList(T::SessionId
 
 int ServiceInterface::_getContentCount(T::SessionId sessionId,uint& count)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3861,7 +3861,7 @@ int ServiceInterface::_getContentCount(T::SessionId sessionId,uint& count)
 
 int ServiceInterface::_getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3870,7 +3870,7 @@ int ServiceInterface::_getHashByProducerId(T::SessionId sessionId,uint producerI
 
 int ServiceInterface::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3879,7 +3879,7 @@ int ServiceInterface::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList&
 
 int ServiceInterface::_deleteVirtualContent(T::SessionId sessionId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -3888,7 +3888,7 @@ int ServiceInterface::_deleteVirtualContent(T::SessionId sessionId)
 
 int ServiceInterface::_updateVirtualContent(T::SessionId sessionId)
 {
-  throw SmartMet::Spine::Exception(BCP,exception_implementation_required);
+  throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 

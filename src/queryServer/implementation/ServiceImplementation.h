@@ -80,10 +80,9 @@ class ServiceImplementation : public ServiceInterface
                        string_vec& luaFileNames);
 
      virtual void   shutdown();
-
      virtual void   setDem(boost::shared_ptr<Fmi::DEM> dem);
      virtual void   setLandCover(boost::shared_ptr<Fmi::LandCover> landCover);
-
+     virtual void   updateProcessing();
 
   protected:
 
@@ -106,11 +105,16 @@ class ServiceImplementation : public ServiceInterface
 
      // Private methods
 
-     void           checkConfigurationUpdates();
+     void           checkProducerMapUpdates();
+     void           checkGenerationUpdates();
+     void           checkProducerFileUpdates();
+     void           checkParameterMappingUpdates();
+
      bool           getAlias(std::string& name,std::string& alias);
      void           executeQueryFunctions(Query& query);
      int            executeTimeRangeQuery(Query& query);
      int            executeTimeStepQuery(Query& query);
+     void           startUpdateProcessing();
 
      void           getGridValues(
                        uchar queryType,
@@ -118,7 +122,7 @@ class ServiceImplementation : public ServiceInterface
                        std::set<T::GeometryId>& geometryIdList,
                        uint producerId,
                        std::string& analysisTime,
-                       uint generationFlags,
+                       ulonglong generationFlags,
                        bool reverseGenerations,
                        std::string& parameterKey,
                        T::ParamLevelId paramLevelId,
@@ -149,7 +153,7 @@ class ServiceImplementation : public ServiceInterface
                        std::set<T::GeometryId>& geometryIdList,
                        uint producerId,
                        std::string& analysisTime,
-                       uint generationFlags,
+                       ulonglong generationFlags,
                        std::string& parameterKey,
                        T::ParamLevelId paramLevelId,
                        T::ParamLevel paramLevel,
@@ -186,7 +190,7 @@ class ServiceImplementation : public ServiceInterface
                        T::ForecastNumber& forecastNumber,
                        std::string& producerName,
                        uint& producerId,
-                       uint& generationFlags,
+                       ulonglong& generationFlags,
                        short& areaInterpolationMethod,
                        short& timeInterpolationMethod,
                        short& levelInterpolationMethod);
@@ -201,7 +205,7 @@ class ServiceImplementation : public ServiceInterface
                        std::vector<T::ForecastNumber>& forecastNumberVec,
                        std::string& producerName,
                        uint& producerId,
-                       uint& generationFlags,
+                       ulonglong& generationFlags,
                        short& areaInterpolationMethod,
                        short& timeInterpolationMethod,
                        short& levelInterpolationMethod);
@@ -301,7 +305,7 @@ class ServiceImplementation : public ServiceInterface
                        T::GeometryId producerGeometryId,
                        uint generationId,
                        std::string& analysisTime,
-                       uint generationFlags,
+                       ulonglong generationFlags,
                        ParameterMapping& pInfo,
                        std::string& forecastTime,
                        T::ParamLevelId paramLevelId,
@@ -323,7 +327,7 @@ class ServiceImplementation : public ServiceInterface
                        T::GeometryId producerGeometryId,
                        uint generationId,
                        std::string& analysisTime,
-                       uint generationFlags,
+                       ulonglong generationFlags,
                        ParameterMapping& pInfo,
                        std::string& forecastTime,
                        T::ParamLevelId paramLevelId,
@@ -344,7 +348,7 @@ class ServiceImplementation : public ServiceInterface
                        T::GeometryId producerGeometryId,
                        uint generationId,
                        std::string& analysisTime,
-                       uint generationFlags,
+                       ulonglong generationFlags,
                        ParameterMapping& pInfo,
                        std::string& forecastTime,
                        T::ParamLevelId paramLevelId,
@@ -367,7 +371,7 @@ class ServiceImplementation : public ServiceInterface
                        T::GeometryId producerGeometryId,
                        uint generationId,
                        std::string& analysisTime,
-                       uint generationFlags,
+                       ulonglong generationFlags,
                        ParameterMapping& pInfo,
                        std::string& forecastTime,
                        T::ParamLevelId paramLevelId,
@@ -389,7 +393,7 @@ class ServiceImplementation : public ServiceInterface
                        T::GeometryId producerGeometryId,
                        uint generationId,
                        std::string& analysisTime,
-                       uint generationFlags,
+                       ulonglong generationFlags,
                        ParameterMapping& pInfo,
                        std::string& forecastTime,
                        T::ParamLevelId paramLevelId,
@@ -412,7 +416,7 @@ class ServiceImplementation : public ServiceInterface
                        T::GeometryId producerGeometryId,
                        uint generationId,
                        std::string& analysisTime,
-                       uint generationFlags,
+                       ulonglong generationFlags,
                        ParameterMapping& pInfo,
                        std::string& forecastTime,
                        T::ParamLevelId paramLevelId,
@@ -438,7 +442,7 @@ class ServiceImplementation : public ServiceInterface
                        T::GeometryId producerGeometryId,
                        uint generationId,
                        std::string& analysisTime,
-                       uint generationFlags,
+                       ulonglong generationFlags,
                        ParameterMapping& pInfo,
                        std::string& forecastTime,
                        T::ParamLevelId paramLevelId,
@@ -464,7 +468,7 @@ class ServiceImplementation : public ServiceInterface
                        T::GeometryId producerGeometryId,
                        uint generationId,
                        std::string& analysisTime,
-                       uint generationFlags,
+                       ulonglong generationFlags,
                        ParameterMapping& pInfo,
                        std::string& forecastTime,
                        T::ParamLevelId paramLevelId,
@@ -489,7 +493,7 @@ class ServiceImplementation : public ServiceInterface
                        T::GeometryId producerGeometryId,
                        uint generationId,
                        std::string& analysisTime,
-                       uint generationFlags,
+                       ulonglong generationFlags,
                        ParameterMapping& pInfo,
                        std::string& forecastTime,
                        T::ParamLevelId paramLevelId,
@@ -554,42 +558,58 @@ class ServiceImplementation : public ServiceInterface
      // Private attributes
 
      AliasFileCollection    mAliasFileCollection;
+     AliasFileCollection    mProducerAliasFileCollection;
      uint                   mFunctionParamId;
      std::string            mGridConfigFile;
-     time_t                 mLastConfiguratonCheck;
      Lua::LuaFileCollection mLuaFileCollection;
      string_vec             mParameterMappingFiles;
-     ParamMappingFile_vec   mParameterMappings;
-     ParameterMappingCache  mParameterMappingCache;
-     std::string            mProducerFile;
-     time_t                 mProducerFileModificationTime;
-     Producer_vec           mProducerList;
-     ModificationLock       mProducerListModificationLock;
      ProducerHash_map       mProducerHashMap;
-     T::GenerationInfoList  mGenerationInfoList;
-     time_t                 mGenerationInfoListUpdateTime;
+
+     std::string            mProducerFile;
+     time_t                 mProducerFile_modificationTime;
+     time_t                 mProducerFile_checkTime;
+     uint                   mProducerFile_checkInterval;
+
+     Producer_vec           mProducerList;
+     ModificationLock       mProducerList_modificationLock;
+
      Producer_map           mProducerMap;
+     ModificationLock       mProducerMap_modificationLock;
      time_t                 mProducerMap_updateTime;
-     AliasFileCollection    mProducerAliasFileCollection;
-     ThreadLock             mThreadLock;
+     uint                   mProducerMap_checkInterval;
+
+     T::GenerationInfoList  mGenerationInfoList;
+     ModificationLock       mGenerationInfoList_modificationLock;
+     time_t                 mGenerationInfoList_checkTime;
+     uint                   mGenerationInfoList_checkInterval;
+
      ContentServer_ptr      mContentServerPtr;
      DataServer_ptr         mDataServerPtr;
-     uint                   mCheckInterval;
      LevelHeightCache       mLevelHeightCache;
-     ThreadLock             mHeightCacheThreadLock;
-     ModificationLock       mParameterMappingCacheModificationLock;
+     ModificationLock       mHeightCache_modificationLock;
 
-     ModificationLock       mContentCacheModificationLock;
+     ParamMappingFile_vec   mParameterMappings;
+     time_t                 mParameterMapping_checkTime;
+     uint                   mParameterMapping_checkInterval;
+
+     ParameterMappingCache  mParameterMappingCache;
+     ModificationLock       mParameterMappingCache_modificationLock;
+
      ContentCache           mContentCache;
+     ModificationLock       mContentCache_modificationLock;
 
-     ModificationLock       mContentSearchCacheModificationLock;
      ContentSearchCache     mContentSearchCache;
+     ModificationLock       mContentSearchCache_modificationLock;
 
+     pthread_t              mThread;
+     bool                   mShutdownRequested;
 
      Functions::FunctionCollection     mFunctionCollection;
      boost::shared_ptr<Fmi::LandCover> mLandCover;
      boost::shared_ptr<Fmi::DEM>       mDem;
+
      ProducerGenarationListCache       mProducerGenerationListCache;
+     ModificationLock                  mProducerGenerationListCacheModificationLock;
 
 };
 

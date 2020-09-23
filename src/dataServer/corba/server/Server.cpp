@@ -19,7 +19,7 @@ static void* Server_maintenanceThread(void *arg)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+    Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     exception.printError();
     exit(-1);
   }
@@ -61,27 +61,27 @@ Server::Server(const char *address,const char *port)
     {
       char msg[1000];
       sprintf(msg,"Caught CORBA::System Exception %s",ex._name());
-      SmartMet::Spine::Exception exception(BCP,msg);
+      Fmi::Exception exception(BCP,msg);
       throw exception;
     }
     catch(CORBA::Exception& ex)
     {
       char msg[1000];
       sprintf(msg,"Caught CORBA::Exception %s",ex._name());
-      SmartMet::Spine::Exception exception(BCP,msg);
+      Fmi::Exception exception(BCP,msg);
       throw exception;
     }
     catch(omniORB::fatalException& fe)
     {
       char msg[1000];
       sprintf(msg,"Caught omniORB:fatalException %s (%s:%d)",fe.errmsg(),fe.file(),fe.line());
-      SmartMet::Spine::Exception exception(BCP,msg);
+      Fmi::Exception exception(BCP,msg);
       throw exception;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -97,7 +97,7 @@ Server::~Server()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -129,27 +129,27 @@ void Server::init(DataServer::ServiceInterface *serviceInterface)
     {
       char msg[1000];
       sprintf(msg,"Caught CORBA::System Exception %s",ex._name());
-      SmartMet::Spine::Exception exception(BCP,msg);
+      Fmi::Exception exception(BCP,msg);
       throw exception;
     }
     catch(CORBA::Exception& ex)
     {
       char msg[1000];
       sprintf(msg,"Caught CORBA::Exception %s",ex._name());
-      SmartMet::Spine::Exception exception(BCP,msg);
+      Fmi::Exception exception(BCP,msg);
       throw exception;
     }
     catch(omniORB::fatalException& fe)
     {
       char msg[1000];
       sprintf(msg,"Caught omniORB:fatalException %s (%s:%d)",fe.errmsg(),fe.file(),fe.line());
-      SmartMet::Spine::Exception exception(BCP,msg);
+      Fmi::Exception exception(BCP,msg);
       throw exception;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -165,7 +165,7 @@ void Server::shutdown()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -180,7 +180,7 @@ void Server::start()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -199,27 +199,27 @@ void Server::run()
     {
       char msg[1000];
       sprintf(msg,"Caught CORBA::System Exception %s",ex._name());
-      SmartMet::Spine::Exception exception(BCP,msg);
+      Fmi::Exception exception(BCP,msg);
       throw exception;
     }
     catch(CORBA::Exception& ex)
     {
       char msg[1000];
       sprintf(msg,"Caught CORBA::Exception %s",ex._name());
-      SmartMet::Spine::Exception exception(BCP,msg);
+      Fmi::Exception exception(BCP,msg);
       throw exception;
     }
     catch(omniORB::fatalException& fe)
     {
       char msg[1000];
       sprintf(msg,"Caught omniORB:fatalException %s (%s:%d)",fe.errmsg(),fe.file(),fe.line());
-      SmartMet::Spine::Exception exception(BCP,msg);
+      Fmi::Exception exception(BCP,msg);
       throw exception;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -235,7 +235,7 @@ std::string Server::getServiceIor()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 

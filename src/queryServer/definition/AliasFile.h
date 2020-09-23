@@ -1,7 +1,8 @@
 #pragma once
 
 #include <grid-files/grid/Typedefs.h>
-#include <grid-files/common/AutoThreadLock.h>
+#include <grid-files/common/AutoWriteLock.h>
+#include <grid-files/common/AutoReadLock.h>
 #include "Alias.h"
 
 
@@ -33,12 +34,12 @@ class AliasFile
 
     virtual void  loadFile();
 
-    std::string   mFilename;
-    time_t        mLastModified;
-    Alias_map     mAliasList;
-    Alias_vec     mAliasVector;
-    ThreadLock    mThreadLock;
-    bool          mDuplicatesAllowed;
+    std::string       mFilename;
+    time_t            mLastModified;
+    Alias_map         mAliasList;
+    Alias_vec         mAliasVector;
+    ModificationLock  mModificationLock;
+    bool              mDuplicatesAllowed;
 };
 
 

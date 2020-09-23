@@ -14,7 +14,7 @@ FunctionCollection::FunctionCollection()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -33,7 +33,7 @@ FunctionCollection::~FunctionCollection()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -51,7 +51,7 @@ void FunctionCollection::addFunction(const char *functionName,FunctionPtr functi
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -66,7 +66,7 @@ void FunctionCollection::addFunction(std::string& functionName,FunctionPtr funct
     Function *f = getFunction(functionName);
     if (f != nullptr)
     {
-      Spine::Exception exception(BCP, "The function is already in the collection!");
+      Fmi::Exception exception(BCP, "The function is already in the collection!");
       exception.addParameter("Function name",functionName);
       throw exception;
     }
@@ -75,7 +75,7 @@ void FunctionCollection::addFunction(std::string& functionName,FunctionPtr funct
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -96,7 +96,7 @@ FunctionPtr FunctionCollection::getFunction(std::string& functionName)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -111,7 +111,7 @@ float FunctionCollection::executeFunctionCall1(std::string& functionName,std::ve
     auto function = getFunction(functionName);
     if (function == nullptr)
     {
-      Spine::Exception exception(BCP, "Function not found!");
+      Fmi::Exception exception(BCP, "Function not found!");
       exception.addParameter("Function name",functionName);
       throw exception;
     }
@@ -120,7 +120,7 @@ float FunctionCollection::executeFunctionCall1(std::string& functionName,std::ve
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -135,7 +135,7 @@ double FunctionCollection::executeFunctionCall1(std::string& functionName,std::v
     auto function = getFunction(functionName);
     if (function == nullptr)
     {
-      Spine::Exception exception(BCP, "Function not found!");
+      Fmi::Exception exception(BCP, "Function not found!");
       exception.addParameter("Function name",functionName);
       throw exception;
     }
@@ -144,7 +144,7 @@ double FunctionCollection::executeFunctionCall1(std::string& functionName,std::v
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -159,7 +159,7 @@ void FunctionCollection::executeFunctionCall4(std::string& functionName,uint col
     auto function = getFunction(functionName);
     if (function == nullptr)
     {
-      Spine::Exception exception(BCP, "Function not found!");
+      Fmi::Exception exception(BCP, "Function not found!");
       exception.addParameter("Function name",functionName);
       throw exception;
     }
@@ -168,7 +168,7 @@ void FunctionCollection::executeFunctionCall4(std::string& functionName,uint col
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -183,7 +183,7 @@ void FunctionCollection::executeFunctionCall4(std::string& functionName,uint col
     auto function = getFunction(functionName);
     if (function == nullptr)
     {
-      Spine::Exception exception(BCP, "Function not found!");
+      Fmi::Exception exception(BCP, "Function not found!");
       exception.addParameter("Function name",functionName);
       throw exception;
     }
@@ -192,7 +192,7 @@ void FunctionCollection::executeFunctionCall4(std::string& functionName,uint col
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -207,7 +207,7 @@ void FunctionCollection::executeFunctionCall9(std::string& functionName,uint col
     auto function = getFunction(functionName);
     if (function == nullptr)
     {
-      Spine::Exception exception(BCP, "Function not found!");
+      Fmi::Exception exception(BCP, "Function not found!");
       exception.addParameter("Function name",functionName);
       throw exception;
     }
@@ -216,7 +216,7 @@ void FunctionCollection::executeFunctionCall9(std::string& functionName,uint col
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -231,7 +231,7 @@ void FunctionCollection::executeFunctionCall9(std::string& functionName,uint col
     auto function = getFunction(functionName);
     if (function == nullptr)
     {
-      Spine::Exception exception(BCP, "Function not found!");
+      Fmi::Exception exception(BCP, "Function not found!");
       exception.addParameter("Function name",functionName);
       throw exception;
     }
@@ -240,7 +240,7 @@ void FunctionCollection::executeFunctionCall9(std::string& functionName,uint col
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -259,7 +259,7 @@ void FunctionCollection::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <grid-files/grid/Typedefs.h>
-#include <grid-files/common/Exception.h>
+#include <macgyver/Exception.h>
 #include <grid-files/common/ModificationLock.h>
 #include <string>
 #include <map>

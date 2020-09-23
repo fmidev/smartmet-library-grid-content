@@ -1,6 +1,6 @@
 #include "VirtualMessage.h"
 #include <grid-files/common/ShowFunction.h>
-#include <grid-files/common/Exception.h>
+#include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <macgyver/StringConversion.h>
 
@@ -30,7 +30,7 @@ VirtualMessage::VirtualMessage(GRID::VirtualGridFile *gridFile,DataServer::Param
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -46,7 +46,7 @@ VirtualMessage::~VirtualMessage()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -83,7 +83,7 @@ void VirtualMessage::initMessagePtrs() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -104,7 +104,7 @@ void VirtualMessage::setFunction(Functions::FunctionCollection *functionCollecti
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -124,7 +124,7 @@ uint VirtualMessage::getFileId() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -142,7 +142,7 @@ void VirtualMessage::getAttributeList(std::string prefix,T::AttributeList& attri
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -165,7 +165,7 @@ T::TimeString VirtualMessage::getForecastTime() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -183,7 +183,7 @@ time_t VirtualMessage::getForecastTimeT() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -205,7 +205,7 @@ short VirtualMessage::getForecastType() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -228,7 +228,7 @@ short VirtualMessage::getForecastNumber() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -251,7 +251,7 @@ T::GeometryId VirtualMessage::getGridGeometryId() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -277,7 +277,7 @@ T::Coordinate_svec VirtualMessage::getGridCoordinates() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -302,7 +302,7 @@ T::Coordinate_svec VirtualMessage::getGridLatLonCoordinates() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -328,7 +328,7 @@ T::Dimensions VirtualMessage::getGridDimensions() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -351,7 +351,7 @@ T::Hash VirtualMessage::getGridHash() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -378,7 +378,7 @@ bool VirtualMessage::getGridLatLonCoordinatesByGridPoint(uint grid_i,uint grid_j
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -405,7 +405,7 @@ bool VirtualMessage::getGridLatLonCoordinatesByGridPosition(double grid_i,double
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -432,7 +432,7 @@ bool VirtualMessage::getGridLatLonCoordinatesByOriginalCoordinates(double x,doub
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -459,7 +459,7 @@ bool VirtualMessage::getGridOriginalCoordinatesByGridPoint(uint grid_i,uint grid
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -486,7 +486,7 @@ bool VirtualMessage::getGridOriginalCoordinatesByGridPosition(double grid_i,doub
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -513,7 +513,7 @@ bool VirtualMessage::getGridOriginalCoordinatesByLatLonCoordinates(double lat,do
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -536,7 +536,7 @@ T::GridLayout VirtualMessage::getGridLayout() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -560,7 +560,7 @@ std::size_t VirtualMessage::getGridOriginalColumnCount(std::size_t row) const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -584,7 +584,7 @@ std::size_t VirtualMessage::getGridOriginalColumnCount() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -607,7 +607,7 @@ std::size_t VirtualMessage::getGridOriginalRowCount() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -630,7 +630,7 @@ std::size_t VirtualMessage::getGridOriginalValueCount() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -661,7 +661,7 @@ int VirtualMessage::getGridOriginalValueIndex(uint grid_i,uint grid_j) const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -689,7 +689,7 @@ bool VirtualMessage::getGridPointByLatLonCoordinates(double lat,double lon,doubl
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -717,7 +717,7 @@ bool VirtualMessage::getGridPointByOriginalCoordinates(double x,double y,double&
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -740,7 +740,7 @@ T::GridProjection VirtualMessage::getGridProjection() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -764,7 +764,7 @@ void VirtualMessage::getGridProjectionAttributes(std::string prefix,T::Attribute
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -787,7 +787,7 @@ std::string VirtualMessage::getGridProjectionString() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -812,7 +812,7 @@ bool VirtualMessage::reverseXDirection() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -836,7 +836,7 @@ bool VirtualMessage::reverseYDirection() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -858,7 +858,7 @@ void VirtualMessage::getGridValueByPoint(T::CoordinateType coordinateType,double
       case 9:
       {
         if (mMessageList.size() < 1)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters!");
+          throw Fmi::Exception(BCP,"Invalid number of parameters!");
 
         std::vector<std::vector<double>> inParameters;
 
@@ -881,7 +881,7 @@ void VirtualMessage::getGridValueByPoint(T::CoordinateType coordinateType,double
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -901,7 +901,7 @@ void VirtualMessage::getGridValueListByCircle(T::CoordinateType coordinateType,d
       case 9:
       {
         if (mMessageList.size() < 1)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters!");
+          throw Fmi::Exception(BCP,"Invalid number of parameters!");
 
         std::vector<T::GridValueList> inValueList;
 
@@ -920,7 +920,7 @@ void VirtualMessage::getGridValueListByCircle(T::CoordinateType coordinateType,d
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -940,7 +940,7 @@ void VirtualMessage::getGridValueListByPointList(T::CoordinateType coordinateTyp
       case 9:
       {
         if (mMessageList.size() < 1)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters!");
+          throw Fmi::Exception(BCP,"Invalid number of parameters!");
 
         std::vector<T::GridValueList> inValueList;
 
@@ -959,7 +959,7 @@ void VirtualMessage::getGridValueListByPointList(T::CoordinateType coordinateTyp
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -979,7 +979,7 @@ void VirtualMessage::getGridValueListByPolygon(T::CoordinateType coordinateType,
       case 9:
       {
         if (mMessageList.size() < 1)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters!");
+          throw Fmi::Exception(BCP,"Invalid number of parameters!");
 
         std::vector<T::GridValueList> inValueList;
 
@@ -998,7 +998,7 @@ void VirtualMessage::getGridValueListByPolygon(T::CoordinateType coordinateType,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1018,7 +1018,7 @@ void VirtualMessage::getGridValueListByPolygonPath(T::CoordinateType coordinateT
       case 9:
       {
         if (mMessageList.size() < 1)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters!");
+          throw Fmi::Exception(BCP,"Invalid number of parameters!");
 
         std::vector<T::GridValueList> inValueList;
 
@@ -1037,7 +1037,7 @@ void VirtualMessage::getGridValueListByPolygonPath(T::CoordinateType coordinateT
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1057,7 +1057,7 @@ void VirtualMessage::getGridValueListByRectangle(T::CoordinateType coordinateTyp
       case 9:
       {
         if (mMessageList.size() < 1)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters!");
+          throw Fmi::Exception(BCP,"Invalid number of parameters!");
 
         std::vector<T::GridValueList> inValueList;
 
@@ -1076,7 +1076,7 @@ void VirtualMessage::getGridValueListByRectangle(T::CoordinateType coordinateTyp
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1102,7 +1102,7 @@ void VirtualMessage::getGridValueVector(T::ParamValue_vec& values) const
       case 9:
       {
         if (mMessageList.size() < 1)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters!");
+          throw Fmi::Exception(BCP,"Invalid number of parameters!");
 
         std::vector<std::vector<float>> valueList;
         uint sz = mMessageList.size();
@@ -1119,7 +1119,7 @@ void VirtualMessage::getGridValueVector(T::ParamValue_vec& values) const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1146,7 +1146,7 @@ void VirtualMessage::getGridOriginalValueVector(T::ParamValue_vec& values) const
       case 9:
       {
         if (mMessageList.size() < 1)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters!");
+          throw Fmi::Exception(BCP,"Invalid number of parameters!");
 
         std::vector<std::vector<float>> valueList;
         uint sz = mMessageList.size();
@@ -1163,7 +1163,7 @@ void VirtualMessage::getGridOriginalValueVector(T::ParamValue_vec& values) const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1181,7 +1181,7 @@ T::ParamLevel VirtualMessage::getGridParameterLevel() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1199,7 +1199,7 @@ T::ParamLevelId VirtualMessage::getGridParameterLevelId() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1217,7 +1217,7 @@ std::string VirtualMessage::getGridParameterLevelIdString() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1235,7 +1235,7 @@ void VirtualMessage::getGridMinAndMaxValues(T::ParamValue& minValue,T::ParamValu
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1263,7 +1263,7 @@ T::ParamValue VirtualMessage::getGridValueByGridPoint(uint grid_i,uint grid_j) c
       case 9:
       {
         if (mMessageList.size() < 1)
-          throw SmartMet::Spine::Exception(BCP,"Invalid number of parameters!");
+          throw Fmi::Exception(BCP,"Invalid number of parameters!");
 
         std::vector<std::vector<T::ParamValue>> inParameters;
 
@@ -1286,7 +1286,7 @@ T::ParamValue VirtualMessage::getGridValueByGridPoint(uint grid_i,uint grid_j) c
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1304,7 +1304,7 @@ T::ParamValue VirtualMessage::getGridValueByGridPoint_byInterpolation(double gri
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1322,7 +1322,7 @@ T::ParamValue VirtualMessage::getGridValueByGridPoint_nearest(double grid_i,doub
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1340,7 +1340,7 @@ T::ParamValue VirtualMessage::getGridValueByGridPoint_linearInterpolation(double
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1358,7 +1358,7 @@ T::ParamValue VirtualMessage::getGridValueByLatLonCoordinate(double lat,double l
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1376,7 +1376,7 @@ T::ParamValue VirtualMessage::getGridValueByOriginalGridPoint(uint grid_i,uint g
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1394,7 +1394,7 @@ void VirtualMessage::getGridValueVectorByRectangle(uint grid_i_start,uint grid_j
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1412,7 +1412,7 @@ void VirtualMessage::getParameterValuesByRectangle(uint grid_i_start,uint grid_j
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1436,7 +1436,7 @@ T::TimeString VirtualMessage::getReferenceTime() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1459,7 +1459,7 @@ T::SpatialRef* VirtualMessage::getSpatialReference() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1477,7 +1477,7 @@ std::string VirtualMessage::getWKT() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1495,7 +1495,7 @@ bool VirtualMessage::isGridGlobal() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1510,7 +1510,7 @@ void VirtualMessage::executeFunctionCall9(uint columns,uint rows,std::vector<std
   {
     if (mMessageList.size() < 1)
     {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids!");
+      Fmi::Exception exception(BCP,"Invalid number of source grids!");
       exception.addParameter("NumberOfGrids",Fmi::to_string(mMessageList.size()));
       throw exception;
     }
@@ -1531,7 +1531,7 @@ void VirtualMessage::executeFunctionCall9(uint columns,uint rows,std::vector<std
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1546,7 +1546,7 @@ void VirtualMessage::executeFunctionCall9(uint columns,uint rows,std::vector<std
   {
     if (mMessageList.size() < 1)
     {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids!");
+      Fmi::Exception exception(BCP,"Invalid number of source grids!");
       exception.addParameter("NumberOfGrids",Fmi::to_string(mMessageList.size()));
       throw exception;
     }
@@ -1567,7 +1567,7 @@ void VirtualMessage::executeFunctionCall9(uint columns,uint rows,std::vector<std
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1581,7 +1581,7 @@ void VirtualMessage::executeFunctionCall9(std::vector<T::GridValueList>& inValue
   {
     if (mMessageList.size() < 1)
     {
-      SmartMet::Spine::Exception exception(BCP,"Invalid number of source grids!");
+      Fmi::Exception exception(BCP,"Invalid number of source grids!");
       exception.addParameter("NumberOfGrids",Fmi::to_string(mMessageList.size()));
       throw exception;
     }
@@ -1618,7 +1618,7 @@ void VirtualMessage::executeFunctionCall9(std::vector<T::GridValueList>& inValue
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1634,7 +1634,7 @@ void VirtualMessage::setContentInfo(T::ContentInfo& contentInfo)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1651,7 +1651,7 @@ T::ContentInfo* VirtualMessage::getContentInfo()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1667,7 +1667,7 @@ void VirtualMessage::print(std::ostream& stream,uint level,uint optionFlags) con
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 

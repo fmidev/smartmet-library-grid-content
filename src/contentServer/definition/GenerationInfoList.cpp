@@ -1,5 +1,5 @@
 #include "GenerationInfoList.h"
-#include <grid-files/common/Exception.h>
+#include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/AutoWriteLock.h>
 #include <grid-files/common/AutoThreadLock.h>
@@ -89,7 +89,7 @@ GenerationInfoList::GenerationInfoList()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -135,7 +135,7 @@ GenerationInfoList::GenerationInfoList(GenerationInfoList& generationInfoList)
   catch (...)
   {
     generationInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -164,7 +164,7 @@ GenerationInfoList::~GenerationInfoList()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -220,7 +220,7 @@ GenerationInfoList& GenerationInfoList::operator=(GenerationInfoList& generation
   catch (...)
   {
     generationInfoList.unlock();
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -240,7 +240,7 @@ void GenerationInfoList::setModificationLockPtr(ModificationLock* modificationLo
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -257,7 +257,7 @@ ModificationLock*  GenerationInfoList::getModificationLockPtr()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -274,7 +274,7 @@ void GenerationInfoList::lock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -290,7 +290,7 @@ void GenerationInfoList::unlock()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -348,7 +348,7 @@ GenerationInfo* GenerationInfoList::addGenerationInfo(GenerationInfo *generation
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -394,7 +394,7 @@ void GenerationInfoList::increaseSize(uint newSize)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -427,7 +427,7 @@ void GenerationInfoList::clear()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -448,7 +448,7 @@ int GenerationInfoList::getClosestIndex(uint comparisonMethod,GenerationInfo& ge
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -524,7 +524,7 @@ int GenerationInfoList::getClosestIndexNoLock(uint comparisonMethod,GenerationIn
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -566,7 +566,7 @@ bool GenerationInfoList::deleteGenerationInfoById(uint generationId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -606,7 +606,7 @@ void GenerationInfoList::deleteGenerationInfoListByProducerId(uint producerId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -638,7 +638,42 @@ GenerationInfo* GenerationInfoList::getGenerationInfoById(uint generationId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+bool GenerationInfoList::getGenerationInfoById(uint generationId,GenerationInfo& generationInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return false;
+
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+
+    GenerationInfo search;
+    search.mGenerationId = generationId;
+    int idx = getClosestIndexNoLock(GenerationInfo::ComparisonMethod::generationId,search);
+    if (idx < 0  ||  C_UINT(idx) >= getLength())
+      return false;
+
+    GenerationInfo *info = getGenerationInfoByIndexNoCheck(idx);
+    if (info != nullptr  &&  info->mGenerationId == generationId)
+    {
+      generationInfo = *info;
+      return true;
+    }
+
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -678,7 +713,7 @@ void GenerationInfoList::deleteGenerationInfoListBySourceId(uint sourceId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -702,7 +737,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByIndex(uint index)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -719,7 +754,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByIndexNoCheck(uint index)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -746,7 +781,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByName(std::string generati
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -774,7 +809,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(std::string 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -802,7 +837,7 @@ int GenerationInfoList::getGenerationInfoIndexByAnalysisTime(std::string analysi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -829,7 +864,7 @@ int GenerationInfoList::getGenerationInfoIndexByGenerationId(uint generationId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -882,7 +917,7 @@ void GenerationInfoList::getGenerationInfoListByProducerId(uint producerId,Gener
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -914,7 +949,7 @@ std::size_t GenerationInfoList::getHash()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -964,7 +999,7 @@ std::size_t GenerationInfoList::getHashByProducerId(uint producerId)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1017,7 +1052,7 @@ void GenerationInfoList::getGenerationInfoListByProducerIdAndStatus(uint produce
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1050,7 +1085,7 @@ void GenerationInfoList::getGenerationInfoListByAnalysisTime(std::string analysi
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1077,7 +1112,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(u
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1108,7 +1143,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByAnalysisTime()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1139,7 +1174,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(uint produ
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1170,7 +1205,7 @@ GenerationInfo*  GenerationInfoList::getPrevGenerationInfoByProducerId(uint prod
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1203,7 +1238,7 @@ void GenerationInfoList::getGenerationInfoListBySourceId(uint sourceId,Generatio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1219,7 +1254,7 @@ uint GenerationInfoList::getLength()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1236,7 +1271,7 @@ uint GenerationInfoList::getSize() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1253,7 +1288,7 @@ bool GenerationInfoList::getReleaseObjects()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1270,7 +1305,7 @@ void GenerationInfoList::setReleaseObjects(bool releaseObjects)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1315,7 +1350,7 @@ void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTime
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1332,7 +1367,7 @@ void GenerationInfoList::setLockingEnabled(bool lockingEnabled)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1352,7 +1387,7 @@ void GenerationInfoList::setComparisonMethod(uint comparisonMethod)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1392,7 +1427,7 @@ void GenerationInfoList::sort(uint comparisonMethod)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1410,7 +1445,7 @@ void GenerationInfoList::writeToFile(std::string filename)
     FILE *file = fopen(filename.c_str(),"we");
     if (file == nullptr)
     {
-      SmartMet::Spine::Exception exception(BCP,"Cannot create the file!");
+      Fmi::Exception exception(BCP,"Cannot create the file!");
       exception.addParameter("Filename",filename);
       throw exception;
     }
@@ -1425,7 +1460,7 @@ void GenerationInfoList::writeToFile(std::string filename)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1450,7 +1485,7 @@ void GenerationInfoList::print(std::ostream& stream,uint level,uint optionFlags)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 

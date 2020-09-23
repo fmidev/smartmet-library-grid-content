@@ -249,8 +249,6 @@ class CacheImplementation : public ServiceInterface
     pthread_t              mThread;
     ThreadLock             mEventProcessingLock;
     ModificationLock       mModificationLock;
-    ModificationLock       mContentModificationLock;
-    ModificationLock       mFileModificationLock;
     ServiceInterface*      mContentStorage;
     time_t                 mContentStorageStartTime;
     bool                   mSaveEnabled;

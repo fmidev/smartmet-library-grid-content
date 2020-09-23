@@ -2,7 +2,7 @@
 #include "../convert/Converter.h"
 #include "../../../contentServer/corba/convert/Converter.h"
 
-#include <grid-files/common/Exception.h>
+#include <macgyver/Exception.h>
 #include <grid-files/common/ShowFunction.h>
 
 
@@ -26,7 +26,7 @@ ServerInterface::ServerInterface()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -42,7 +42,7 @@ ServerInterface::~ServerInterface()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -60,7 +60,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -74,7 +74,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
   try
   {
     if (mService == nullptr)
-      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+      throw Fmi::Exception(BCP,"Service not initialized!");
 
     QueryServer::Query sQuery;
     QueryServer::Corba::Converter::convert(query,sQuery);
@@ -87,7 +87,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
     exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -103,7 +103,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
   try
   {
     if (mService == nullptr)
-      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+      throw Fmi::Exception(BCP,"Service not initialized!");
 
     string_vec sProducerList;
 
@@ -118,7 +118,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
     //exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }
@@ -133,7 +133,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
   try
   {
     if (mService == nullptr)
-      throw SmartMet::Spine::Exception(BCP,"Service not initialized!");
+      throw Fmi::Exception(BCP,"Service not initialized!");
 
     T::GridPointValueList sValueList;
     T::ContentInfoList sContentInfoList;
@@ -151,7 +151,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Service call failed!",nullptr);
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
     //exception.printError();
     return Result::UNEXPECTED_EXCEPTION;
   }

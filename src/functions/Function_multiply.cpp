@@ -16,7 +16,7 @@ Function_multiply::Function_multiply(double multiplyer)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -33,7 +33,7 @@ Function_multiply::Function_multiply(const Function_multiply& function)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -47,7 +47,7 @@ Function_multiply::~Function_multiply()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -68,11 +68,11 @@ float Function_multiply::executeFunctionCall1(std::vector<float>& parameters)
         return ParamValueMissing;
     }
 
-    throw Spine::Exception(BCP, "The parameters vector should contain only one value!");
+    throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -92,11 +92,11 @@ double Function_multiply::executeFunctionCall1(std::vector<double>& parameters)
         return ParamValueMissing;
     }
 
-    throw Spine::Exception(BCP, "The parameters vector should contain only one value!");
+    throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -118,7 +118,7 @@ void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -142,7 +142,7 @@ void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -166,7 +166,7 @@ void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -187,7 +187,7 @@ void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -219,7 +219,7 @@ void Function_multiply::executeFunctionCall3(uint columns,uint rows,std::vector<
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -279,7 +279,7 @@ void Function_multiply::executeFunctionCall9(uint columns,uint rows,std::vector<
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -313,7 +313,7 @@ void Function_multiply::executeFunctionCall9(uint columns,uint rows,std::vector<
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 
@@ -327,7 +327,7 @@ Function* Function_multiply::duplicate()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", nullptr);
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
 

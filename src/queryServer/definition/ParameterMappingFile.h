@@ -1,7 +1,8 @@
 #pragma once
 
 #include <grid-files/grid/Typedefs.h>
-#include <grid-files/common/AutoThreadLock.h>
+#include <grid-files/common/AutoWriteLock.h>
+#include <grid-files/common/AutoReadLock.h>
 #include "ParameterMapping.h"
 
 
@@ -37,7 +38,7 @@ class ParameterMappingFile
     std::string           mFilename;
     time_t                mLastModified;
     MappingSearch         mMappingSearch;
-    ThreadLock            mThreadLock;
+    ModificationLock      mModificationLock;
 };
 
 

@@ -22,7 +22,7 @@ class ParameterValues
     std::string             mForecastTime;
     uint                    mProducerId;
     uint                    mGenerationId;
-    uint                    mGenerationFlags;
+    ulonglong               mGenerationFlags;
     uint                    mGeometryId;
     uint                    mFileId[4];
     uint                    mMessageIndex[4];

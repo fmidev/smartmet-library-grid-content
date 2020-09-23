@@ -15,7 +15,7 @@ QueryStreamer::QueryStreamer()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+    Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     throw exception;
   }
 }
@@ -41,7 +41,7 @@ void QueryStreamer::init(T::SessionId sessionId,QueryServer_sptr queryServerPtr)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+    Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     throw exception;
   }
 }
@@ -58,7 +58,7 @@ void QueryStreamer::addQuery(Query& query)
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+    Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     throw exception;
   }
 }
@@ -111,7 +111,7 @@ std::string QueryStreamer::getChunk()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+    Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     throw exception;
   }
 }

@@ -1,6 +1,6 @@
 #include "CacheImplementation.h"
 
-#include <grid-files/common/Exception.h>
+#include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/AutoWriteLock.h>
 #include <grid-files/common/AutoReadLock.h>
@@ -29,7 +29,7 @@ static void* CacheImplementation_eventProcessingThread(void *arg)
   }
   catch (...)
   {
-    Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+    Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     exception.printError();
     exit(-1);
   }
@@ -84,18 +84,16 @@ CacheImplementation::CacheImplementation()
       }
     }
 
-    mFileInfoList.setModificationLockPtr(&mFileModificationLock);
     mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
 
     mContentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
-    mContentInfoList.setModificationLockPtr(&mContentModificationLock);
     mContentInfoList.setLockingEnabled(true);
 
     mDataSwapTime = 0;
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -111,7 +109,7 @@ CacheImplementation::~CacheImplementation()
   }
   catch (...)
   {
-    SmartMet::Spine::Exception exception(BCP,"Destructor failed",nullptr);
+    Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
 }
@@ -176,7 +174,7 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
   catch (...)
   {
     mUpdateInProgress = false;
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -193,7 +191,7 @@ void CacheImplementation::setRequestForwardEnabled(bool enabled)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -210,7 +208,7 @@ void CacheImplementation::setEventListMaxLength(uint maxLength)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -235,7 +233,7 @@ void CacheImplementation::synchronize()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -251,7 +249,7 @@ void CacheImplementation::startEventProcessing()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -268,7 +266,7 @@ void CacheImplementation::shutdown()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -285,7 +283,7 @@ bool CacheImplementation::isSessionValid(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -307,7 +305,7 @@ int CacheImplementation::_clear(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -330,7 +328,7 @@ int CacheImplementation::_reload(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -394,7 +392,7 @@ void CacheImplementation::reloadData()
   catch (...)
   {
     mUpdateInProgress = false;
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -416,7 +414,7 @@ int CacheImplementation::_addDataServerInfo(T::SessionId sessionId,T::ServerInfo
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -438,7 +436,7 @@ int CacheImplementation::_deleteDataServerInfoById(T::SessionId sessionId,uint s
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -469,7 +467,7 @@ int CacheImplementation::_getDataServerInfoById(T::SessionId sessionId,uint serv
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -500,7 +498,7 @@ int CacheImplementation::_getDataServerInfoByName(T::SessionId sessionId,std::st
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -531,7 +529,7 @@ int CacheImplementation::_getDataServerInfoByIor(T::SessionId sessionId,std::str
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -560,7 +558,7 @@ int CacheImplementation::_getDataServerInfoList(T::SessionId sessionId,T::Server
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -587,7 +585,7 @@ int CacheImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& co
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -609,7 +607,7 @@ int CacheImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -631,7 +629,7 @@ int CacheImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint pro
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -653,7 +651,7 @@ int CacheImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::s
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -684,7 +682,7 @@ int CacheImplementation::_getProducerInfoById(T::SessionId sessionId,uint produc
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -706,7 +704,7 @@ int CacheImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -737,7 +735,7 @@ int CacheImplementation::_getProducerInfoByName(T::SessionId sessionId,std::stri
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -766,7 +764,7 @@ int CacheImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -898,7 +896,7 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -927,7 +925,7 @@ int CacheImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -954,7 +952,7 @@ int CacheImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& coun
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1004,7 +1002,7 @@ int CacheImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1169,7 +1167,7 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1339,7 +1337,7 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 #endif
@@ -1498,7 +1496,7 @@ int CacheImplementation::_getProducerParameterListByProducerId(T::SessionId sess
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1520,7 +1518,7 @@ int CacheImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1542,7 +1540,7 @@ int CacheImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint g
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1564,7 +1562,7 @@ int CacheImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std:
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1586,7 +1584,7 @@ int CacheImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1608,7 +1606,7 @@ int CacheImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sess
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1630,7 +1628,7 @@ int CacheImplementation::_deleteGenerationInfoListByProducerName(T::SessionId se
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1652,7 +1650,7 @@ int CacheImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessio
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1693,7 +1691,7 @@ int CacheImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1732,7 +1730,7 @@ int CacheImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1763,7 +1761,7 @@ int CacheImplementation::_getGenerationInfoById(T::SessionId sessionId,uint gene
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1794,7 +1792,7 @@ int CacheImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::st
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1823,7 +1821,7 @@ int CacheImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Genera
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1856,7 +1854,7 @@ int CacheImplementation::_getGenerationInfoListByProducerId(T::SessionId session
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1889,7 +1887,7 @@ int CacheImplementation::_getGenerationInfoListByProducerName(T::SessionId sessi
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1918,7 +1916,7 @@ int CacheImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1954,7 +1952,7 @@ int CacheImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -1989,7 +1987,7 @@ int CacheImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessio
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2016,7 +2014,7 @@ int CacheImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2038,7 +2036,7 @@ int CacheImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2060,7 +2058,7 @@ int CacheImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,s
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2082,7 +2080,7 @@ int CacheImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2104,7 +2102,7 @@ int CacheImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2126,7 +2124,7 @@ int CacheImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2148,7 +2146,7 @@ int CacheImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2170,7 +2168,7 @@ int CacheImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::strin
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2192,7 +2190,7 @@ int CacheImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2214,7 +2212,7 @@ int CacheImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2236,7 +2234,7 @@ int CacheImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2258,7 +2256,7 @@ int CacheImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2280,7 +2278,7 @@ int CacheImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2302,7 +2300,7 @@ int CacheImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sess
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2324,7 +2322,7 @@ int CacheImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessio
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2346,7 +2344,7 @@ int CacheImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2368,7 +2366,7 @@ int CacheImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2399,7 +2397,7 @@ int CacheImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2430,7 +2428,7 @@ int CacheImplementation::_getFileInfoByName(T::SessionId sessionId,std::string f
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2459,7 +2457,7 @@ int CacheImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2488,7 +2486,7 @@ int CacheImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2520,7 +2518,7 @@ int CacheImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2553,7 +2551,7 @@ int CacheImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,s
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2586,7 +2584,7 @@ int CacheImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2619,7 +2617,7 @@ int CacheImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2648,7 +2646,7 @@ int CacheImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2677,7 +2675,7 @@ int CacheImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2704,7 +2702,7 @@ int CacheImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2731,7 +2729,7 @@ int CacheImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2757,7 +2755,7 @@ int CacheImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2784,7 +2782,7 @@ int CacheImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2806,7 +2804,7 @@ int CacheImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& even
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2848,7 +2846,7 @@ int CacheImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2886,7 +2884,7 @@ int CacheImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2913,7 +2911,7 @@ int CacheImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2935,7 +2933,7 @@ int CacheImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2957,7 +2955,7 @@ int CacheImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -2979,7 +2977,7 @@ int CacheImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,u
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3001,7 +2999,7 @@ int CacheImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint 
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3023,7 +3021,7 @@ int CacheImplementation::_deleteContentListByFileName(T::SessionId sessionId,std
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3045,7 +3043,7 @@ int CacheImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3067,7 +3065,7 @@ int CacheImplementation::_deleteContentListByProducerId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3089,7 +3087,7 @@ int CacheImplementation::_deleteContentListByProducerName(T::SessionId sessionId
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3111,7 +3109,7 @@ int CacheImplementation::_deleteContentListByGenerationId(T::SessionId sessionId
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3133,7 +3131,7 @@ int CacheImplementation::_deleteContentListByGenerationName(T::SessionId session
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3155,7 +3153,7 @@ int CacheImplementation::_deleteContentListBySourceId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3177,7 +3175,7 @@ int CacheImplementation::_registerContentList(T::SessionId sessionId,uint server
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3199,7 +3197,7 @@ int CacheImplementation::_registerContentListByFileId(T::SessionId sessionId,uin
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3221,7 +3219,7 @@ int CacheImplementation::_unregisterContentList(T::SessionId sessionId,uint serv
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3243,7 +3241,7 @@ int CacheImplementation::_unregisterContentListByFileId(T::SessionId sessionId,u
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3276,7 +3274,7 @@ int CacheImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3305,7 +3303,7 @@ int CacheImplementation::_getContentList(T::SessionId sessionId,uint startFileId
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3334,7 +3332,7 @@ int CacheImplementation::_getContentListByFileId(T::SessionId sessionId,uint fil
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3369,7 +3367,7 @@ int CacheImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3402,7 +3400,7 @@ int CacheImplementation::_getContentListByFileName(T::SessionId sessionId,std::s
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3435,7 +3433,7 @@ int CacheImplementation::_getContentListByServerId(T::SessionId sessionId,uint s
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3464,7 +3462,7 @@ int CacheImplementation::_getContentListByGroupFlags(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3497,7 +3495,7 @@ int CacheImplementation::_getContentListByProducerId(T::SessionId sessionId,uint
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3530,7 +3528,7 @@ int CacheImplementation::_getContentListByProducerName(T::SessionId sessionId,st
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3566,7 +3564,7 @@ int CacheImplementation::_getContentListByGenerationId(T::SessionId sessionId,ui
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3599,7 +3597,7 @@ int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3632,7 +3630,7 @@ int CacheImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3665,7 +3663,7 @@ int CacheImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3694,7 +3692,7 @@ int CacheImplementation::_getContentListBySourceId(T::SessionId sessionId,uint s
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3809,7 +3807,7 @@ int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -3925,7 +3923,7 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4039,7 +4037,7 @@ int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4152,7 +4150,7 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4265,7 +4263,7 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4429,7 +4427,7 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4459,7 +4457,7 @@ int CacheImplementation::_getContentListByRequestCounterKey(T::SessionId session
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4519,7 +4517,7 @@ int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4552,7 +4550,7 @@ int CacheImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4612,7 +4610,7 @@ int CacheImplementation::_getContentParamListByGenerationId(T::SessionId session
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4645,7 +4643,7 @@ int CacheImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4688,7 +4686,7 @@ int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4722,7 +4720,7 @@ int CacheImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4752,7 +4750,7 @@ int CacheImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4779,7 +4777,7 @@ int CacheImplementation::_getContentCount(T::SessionId sessionId,uint& count)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4816,7 +4814,7 @@ int CacheImplementation::_getHashByProducerId(T::SessionId sessionId,uint produc
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4845,7 +4843,7 @@ int CacheImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoLi
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4867,7 +4865,7 @@ int CacheImplementation::_deleteVirtualContent(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4889,7 +4887,7 @@ int CacheImplementation::_updateVirtualContent(T::SessionId sessionId)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4912,14 +4910,14 @@ void CacheImplementation::readProducerList()
     int result = mContentStorage->getProducerInfoList(mSessionId,mProducerInfoList);
     if (result != 0)
     {
-      Spine::Exception exception(BCP,"Cannot read the producer list from the content storage!");
+      Fmi::Exception exception(BCP,"Cannot read the producer list from the content storage!");
       exception.addParameter("ServiceResult",getResultString(result));
       throw exception;
     }
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4941,14 +4939,14 @@ void CacheImplementation::readGenerationList()
     int result = mContentStorage->getGenerationInfoList(mSessionId,mGenerationInfoList);
     if (result != 0)
     {
-      Spine::Exception exception(BCP,"Cannot read the generation list from the content storage!");
+      Fmi::Exception exception(BCP,"Cannot read the generation list from the content storage!");
       exception.addParameter("ServiceResult",getResultString(result));
       throw exception;
     }
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -4978,7 +4976,7 @@ void CacheImplementation::readFileList()
       int result = mContentStorage->getFileInfoList(mSessionId,startFileId,50000,fileInfoList);
       if (result != 0)
       {
-        Spine::Exception exception(BCP,"Cannot read the file list from the content storage!");
+        Fmi::Exception exception(BCP,"Cannot read the file list from the content storage!");
         exception.addParameter("ServiceResult",getResultString(result));
         throw exception;
       }
@@ -4996,7 +4994,7 @@ void CacheImplementation::readFileList()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5024,7 +5022,7 @@ void CacheImplementation::readContentList()
       int result = mContentStorage->getContentList(mSessionId,startFileId,startMessageIndex,50000,contentInfoList);
       if (result != 0)
       {
-        Spine::Exception exception(BCP,"Cannot read the content list from the content storage!");
+        Fmi::Exception exception(BCP,"Cannot read the content list from the content storage!");
         exception.addParameter("ServiceResult",getResultString(result));
         throw exception;
       }
@@ -5044,7 +5042,7 @@ void CacheImplementation::readContentList()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5064,14 +5062,14 @@ void CacheImplementation::readDataServerList()
     int result = mContentStorage->getDataServerInfoList(mSessionId,mDataServerInfoList);
     if (result != 0)
     {
-      Spine::Exception exception(BCP,"Cannot read the data server list from the content storage!");
+      Fmi::Exception exception(BCP,"Cannot read the data server list from the content storage!");
       exception.addParameter("ServiceResult",getResultString(result));
       throw exception;
     }
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5100,7 +5098,7 @@ void CacheImplementation::event_clear(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5118,7 +5116,7 @@ void CacheImplementation::event_contentServerReload(T::EventInfo& eventInfo)
   catch (...)
   {
     mUpdateInProgress = false;
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5144,7 +5142,7 @@ void CacheImplementation::event_producerAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5167,7 +5165,7 @@ void CacheImplementation::event_producerDeleted(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5191,7 +5189,7 @@ void CacheImplementation::event_producerListDeletedBySourceId(T::EventInfo& even
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5216,7 +5214,7 @@ void CacheImplementation::event_generationAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5243,7 +5241,7 @@ void CacheImplementation::event_generationDeleted(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5264,7 +5262,7 @@ void CacheImplementation::event_generationStatusChanged(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5287,7 +5285,7 @@ void CacheImplementation::event_generationListDeletedByProducerId(T::EventInfo& 
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5310,7 +5308,7 @@ void CacheImplementation::event_generationListDeletedBySourceId(T::EventInfo& ev
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5449,7 +5447,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5485,7 +5483,7 @@ void CacheImplementation::event_fileDeleted(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5558,7 +5556,7 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5580,7 +5578,7 @@ void CacheImplementation::event_fileListDeletedByGroupFlags(T::EventInfo& eventI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5602,7 +5600,7 @@ void CacheImplementation::event_fileListDeletedByProducerId(T::EventInfo& eventI
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5624,7 +5622,7 @@ void CacheImplementation::event_fileListDeletedByGenerationId(T::EventInfo& even
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5647,7 +5645,7 @@ void CacheImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventInf
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5667,7 +5665,7 @@ void CacheImplementation::event_contentListDeletedByFileId(T::EventInfo& eventIn
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5687,7 +5685,7 @@ void CacheImplementation::event_contentListDeletedByGroupFlags(T::EventInfo& eve
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5707,7 +5705,7 @@ void CacheImplementation::event_contentListDeletedByProducerId(T::EventInfo& eve
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5727,7 +5725,7 @@ void CacheImplementation::event_contentListDeletedBySourceId(T::EventInfo& event
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5747,7 +5745,7 @@ void CacheImplementation::event_contentListDeletedByGenerationId(T::EventInfo& e
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5773,7 +5771,7 @@ void CacheImplementation::event_dataServerAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5797,7 +5795,7 @@ void CacheImplementation::event_dataServerDeleted(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5857,7 +5855,7 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5882,7 +5880,7 @@ void CacheImplementation::event_contentDeleted(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5916,7 +5914,7 @@ void CacheImplementation::event_contentRegistered(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5937,7 +5935,7 @@ void CacheImplementation::event_deleteVirtualContent(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -5958,7 +5956,7 @@ void CacheImplementation::event_updateVirtualContent(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6094,7 +6092,7 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6167,7 +6165,7 @@ void CacheImplementation::processEvents(bool eventThread)
           }
           catch (...)
           {
-            Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+            Fmi::Exception exception(BCP,"Operation failed!",nullptr);
             exception.printError();
           }
 
@@ -6213,7 +6211,7 @@ void CacheImplementation::processEvents(bool eventThread)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6234,7 +6232,7 @@ void CacheImplementation::eventProcessingThread()
       }
       catch (...)
       {
-        Spine::Exception exception(BCP,exception_operation_failed,nullptr);
+        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
         exception.printError();
       }
 
@@ -6247,7 +6245,7 @@ void CacheImplementation::eventProcessingThread()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6290,7 +6288,7 @@ void CacheImplementation::saveData()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -6305,13 +6303,13 @@ void CacheImplementation::swapData()
   {
     int diff = time(nullptr) - mDataSwapTime;
 
-    if (diff < 60)
+    if (diff < 300)
     {
       SearchStructure *ss = &mSearchStructure[1];
       if (mSSI == 1)
         ss = &mSearchStructure[0];
 
-      if (diff > 30  &&  ss->mProducerInfoList.getLength() > 0)
+      if (diff > 60  &&  ss->mProducerInfoList.getLength() > 0)
       {
         // Releasing memory
 
@@ -6329,8 +6327,6 @@ void CacheImplementation::swapData()
     }
 
 
-    printf("###### SWAP DATA ######\n");
-
     SearchStructure *ss = &mSearchStructure[1];
     SearchStructure *st = &mSearchStructure[0];
     if (mSSI == 1)
@@ -6347,7 +6343,6 @@ void CacheImplementation::swapData()
     {
       // Nothing has changed. No swapping needed.
 
-      printf("---- swap not needed\n");
       mDataSwapTime = time(nullptr);
       return;
     }
@@ -6412,7 +6407,7 @@ void CacheImplementation::swapData()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP,exception_operation_failed,nullptr);
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
