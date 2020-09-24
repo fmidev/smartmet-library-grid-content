@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 20.9.23
+Version: 20.9.24
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -76,6 +76,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Sep 24 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.9.24-1.fmi
+- Rebuilt due to debuginfo issues
 * Wed Sep 23 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.9.23-1.fmi
 - Avoid locking by using copied data structures for R/O operations
 - Use Fmi::Exception instead of Spine::Exception
