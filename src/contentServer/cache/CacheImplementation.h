@@ -22,13 +22,15 @@ typedef std::map<uint,std::set<std::string>> ContentTimeCache;
 class SearchStructure
 {
   public:
-    T::ServerInfoList      mDataServerInfoList;
     T::ProducerInfoList    mProducerInfoList;
     T::GenerationInfoList  mGenerationInfoList;
     T::FileInfoList        mFileInfoList;
     T::FileInfoList        mFileInfoListByName;
     T::ContentInfoList     mContentInfoList[CONTENT_LIST_COUNT];
 };
+
+typedef std::shared_ptr<SearchStructure> SearchStructure_sptr;
+
 
 
 class CacheImplementation : public ServiceInterface
@@ -262,9 +264,7 @@ class CacheImplementation : public ServiceInterface
     uint                   mContentDeleteCount;
     uint                   mFileDeleteCount;
     ContentTimeCache       mContentTimeCache;
-
-    SearchStructure        mSearchStructure[2];
-    uint                   mSSI;
+    SearchStructure_sptr   mSearchStructureSptr;
     time_t                 mDataSwapTime;
 };
 

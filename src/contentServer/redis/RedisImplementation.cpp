@@ -85,7 +85,7 @@ RedisImplementation::RedisImplementation()
       if (!mMutex->timed_lock(boost::get_system_time() + boost::posix_time::seconds(10)))
       {
         tryCount++;
-        if (tryCount == 12)
+        if (tryCount == 30)
         {
           // Cannot lock the mutex. Maybe it was locked by a faulty process. Let's remove
           // it and create it again.
@@ -100,7 +100,7 @@ RedisImplementation::RedisImplementation()
         mMutex->unlock();
       }
 
-      if (mMutex == nullptr && tryCount > 12)
+      if (mMutex == nullptr && tryCount > 18)
       {
         throw Fmi::Exception(BCP,"Cannot init mutex!");
       }
@@ -145,7 +145,7 @@ void RedisImplementation::lock(const char *function,uint line)
   {
     if (mMutex != nullptr)
     {
-      if (!mMutex->timed_lock(boost::get_system_time() + boost::posix_time::seconds(120)))
+      if (!mMutex->timed_lock(boost::get_system_time() + boost::posix_time::seconds(300)))
       {
         throw Fmi::Exception(BCP,"Cannot lock mutex!");
       }
@@ -488,7 +488,6 @@ int RedisImplementation::_addDataServerInfo(T::SessionId sessionId,T::ServerInfo
       return Result::INVALID_SERVER_ID;
 
     T::ServerInfoList serverInfoList;
-
     getDataServerList(serverInfoList);
 
     T::ServerInfo *info = serverInfoList.getServerInfoById(serverInfo.mServerId);
