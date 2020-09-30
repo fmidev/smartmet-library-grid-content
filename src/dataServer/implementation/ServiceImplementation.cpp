@@ -408,28 +408,35 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
     GRID::GridFile_sptr gridFile = mGridFileManager.getFileById(fileId);
     if (gridFile)
     {
-      if (mMemoryMapCheckEnabled  &&  !gridFile->isVirtual() && gridFile->isMemoryMapped())
+      if (gridFile->hasMessagePositionError())
       {
-        std::string fname = gridFile->getFileName();
-        if (getFileSize(fname.c_str()) <= 100)
-        {
-          mGridFileManager.deleteFileById(fileId);
-          return nullptr;
-        }
-      }
-
-      time_t deletionTime = gridFile->getDeletionTime();
-      if (deletionTime == 0)
-        return gridFile;
-
-      if ((time(nullptr) + 120) > deletionTime)
-      {
-        // The grid file will be deleted soon. We should not access it anymore.
-        return nullptr;
+        mGridFileManager.deleteFileById(fileId);
       }
       else
       {
-        return gridFile;
+        if (mMemoryMapCheckEnabled  &&  !gridFile->isVirtual() && gridFile->isMemoryMapped())
+        {
+          std::string fname = gridFile->getFileName();
+          if (getFileSize(fname.c_str()) <= 100)
+          {
+            mGridFileManager.deleteFileById(fileId);
+            return nullptr;
+          }
+        }
+
+        time_t deletionTime = gridFile->getDeletionTime();
+        if (deletionTime == 0)
+          return gridFile;
+
+        if ((time(nullptr) + 120) > deletionTime)
+        {
+          // The grid file will be deleted soon. We should not access it anymore.
+          return nullptr;
+        }
+        else
+        {
+          return gridFile;
+        }
       }
     }
 
