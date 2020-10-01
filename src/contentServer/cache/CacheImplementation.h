@@ -29,7 +29,7 @@ class SearchStructure
     T::ContentInfoList     mContentInfoList[CONTENT_LIST_COUNT];
 };
 
-typedef std::shared_ptr<SearchStructure> SearchStructure_sptr;
+typedef boost::shared_ptr<SearchStructure> SearchStructure_sptr;
 
 
 
