@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 20.10.1
+Version: 20.10.6
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -21,20 +21,20 @@ BuildRequires: make
 BuildRequires: omniORB-devel
 BuildRequires: postgresql95-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 20.9.29
+BuildRequires: smartmet-library-gis-devel >= 20.10.5
 BuildRequires: smartmet-library-grid-files-devel >= 20.10.1
-BuildRequires: smartmet-library-macgyver-devel >= 20.9.29
-BuildRequires: smartmet-library-spine-devel >= 20.9.23
+BuildRequires: smartmet-library-macgyver-devel >= 20.10.5
+BuildRequires: smartmet-library-spine-devel >= 20.10.6
 Requires: boost169-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
 Requires: postgresql95
-Requires: smartmet-library-gis >= 20.9.29
+Requires: smartmet-library-gis >= 20.10.5
 Requires: smartmet-library-grid-files >= 20.10.1
-Requires: smartmet-library-macgyver >= 20.9.29
-Requires: smartmet-library-spine >= 20.9.23
+Requires: smartmet-library-macgyver >= 20.10.5
+Requires: smartmet-library-spine >= 20.10.6
 Provides: %{SPECNAME}
 
 %description
@@ -76,6 +76,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Oct  6 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.10.6-1.fmi
+- Deadlock fix
 * Thu Oct  1 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.10.1-1.fmi
 - Removing grid files which predefined message positions exceeds the file size
 - Use atomic shared pointers to speed up search structures
