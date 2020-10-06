@@ -150,7 +150,7 @@ void* LuaFile::getLuaState(ulonglong key)
 {
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock lock(&mStateModificationLock);
     while (true)
     {
       for (uint t=0; t<NUM_OF_LUA_HANDLES; t++)
@@ -283,10 +283,11 @@ float LuaFile::executeFunctionCall1(std::string& function,std::vector<float>& pa
 {
   try
   {
+    AutoReadLock lock(&mModificationLock);
+
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
-    AutoReadLock lock(&mModificationLock);
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
@@ -369,10 +370,11 @@ double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& 
 {
   try
   {
+    AutoReadLock lock(&mModificationLock);
+
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
-    AutoReadLock lock(&mModificationLock);
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
@@ -455,10 +457,11 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
 {
   try
   {
+    AutoReadLock lock(&mModificationLock);
+
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
-    AutoReadLock lock(&mModificationLock);
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
@@ -567,10 +570,11 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
 {
   try
   {
+    AutoReadLock lock(&mModificationLock);
+
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
-    AutoReadLock lock(&mModificationLock);
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
@@ -677,10 +681,11 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
 {
   try
   {
+    AutoReadLock lock(&mModificationLock);
+
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
-    AutoReadLock lock(&mModificationLock);
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
@@ -765,10 +770,11 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
 {
   try
   {
+    AutoReadLock lock(&mModificationLock);
+
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
-    AutoReadLock lock(&mModificationLock);
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
@@ -853,10 +859,11 @@ std::string LuaFile::executeFunctionCall6(std::string& function,std::vector<std:
 {
   try
   {
+    AutoReadLock lock(&mModificationLock);
+
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
-    AutoReadLock lock(&mModificationLock);
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
@@ -1466,10 +1473,11 @@ void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,
 {
   try
   {
+    AutoReadLock lock(&mModificationLock);
+
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
-    AutoReadLock lock(&mModificationLock);
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
@@ -1565,10 +1573,11 @@ void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,
 {
   try
   {
+    AutoReadLock lock(&mModificationLock);
+
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
-    AutoReadLock lock(&mModificationLock);
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {

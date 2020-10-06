@@ -7,7 +7,7 @@
 #include <grid-files/common/AutoReadLock.h>
 #include <grid-files/grid/Typedefs.h>
 
-#define NUM_OF_LUA_HANDLES 10
+#define NUM_OF_LUA_HANDLES 20
 
 
 namespace SmartMet
@@ -76,6 +76,7 @@ class LuaFile
     ulonglong         mStateKey[NUM_OF_LUA_HANDLES];
     time_t            mLastModified;
     ModificationLock  mModificationLock;
+    ModificationLock  mStateModificationLock;
 };
 
 
