@@ -477,6 +477,41 @@ FileInfo* FileInfoList::getFileInfoById(uint fileId)
 
 
 
+bool FileInfoList::getFileInfoById(uint fileId,FileInfo& fileInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return false;
+
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+
+    FileInfo search;
+    search.mFileId = fileId;
+    int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
+    if (idx < 0  ||  C_UINT(idx) >= getLength())
+      return false;
+
+    FileInfo *info = getFileInfoByIndexNoCheck(idx);
+    if (info != nullptr  &&  info->mFileId == fileId  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
+    {
+      fileInfo = *info;
+      return true;
+    }
+
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 FileInfo* FileInfoList::getFileInfoByIdNoLock(uint fileId)
 {
   FUNCTION_TRACE
@@ -657,15 +692,6 @@ FileInfo* FileInfoList::getFileInfoByName(std::string filename)
       return info;
 
     return nullptr;
-    /*
-    for (uint t=0; t<mLength; t++)
-    {
-      FileInfo *info = getFileInfoByIndexNoCheck(t);
-      if (info != nullptr  &&  info->mName == filename)
-        return info;
-    }
-    return nullptr;
-    */
   }
   catch (...)
   {
@@ -673,6 +699,40 @@ FileInfo* FileInfoList::getFileInfoByName(std::string filename)
   }
 }
 
+
+
+
+
+bool FileInfoList::getFileInfoByName(std::string filename,FileInfo& fileInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return false;
+
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+
+    FileInfo search;
+    search.mName = filename;
+    int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileName,search);
+    if (idx < 0  ||  C_UINT(idx) >= getLength())
+      return false;
+
+    FileInfo *info = getFileInfoByIndexNoCheck(idx);
+    if (info != nullptr  &&  info->mName == filename  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
+    {
+      fileInfo = *info;
+      return true;
+    }
+
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
 
 
 

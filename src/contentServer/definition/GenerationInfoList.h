@@ -37,6 +37,7 @@ class GenerationInfoList
     GenerationInfo*     getGenerationInfoByIndex(uint index);
     GenerationInfo*     getGenerationInfoByIndexNoCheck(uint index);
     GenerationInfo*     getGenerationInfoByName(std::string generationName);
+    bool                getGenerationInfoByName(std::string generationName,GenerationInfo& generationInfo);
     GenerationInfo*     getGenerationInfoByAnalysisTime(std::string analysisTime);
     int                 getGenerationInfoIndexByAnalysisTime(std::string analysisTime);
     int                 getGenerationInfoIndexByGenerationId(uint generationId);

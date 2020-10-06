@@ -249,7 +249,6 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,std:
     mFunctionCollection.addFunction("WIND_V",new Functions::Function_vectorV());
     mFunctionCollection.addFunction("WIND_U",new Functions::Function_vectorU());
 
-    checkServerRegistration();
     // fullUpdate();
   }
   catch (...)
@@ -444,10 +443,10 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
     // to the contentServer then we should try to add it to the grid storage.
 
     T::FileInfo fileInfo;
-    T::ContentInfoList currentContentList;
+    T::ContentInfoList contentList;
 
     if (mContentServer->getFileInfoById(mServerSessionId,fileId,fileInfo) == 0 &&
-        mContentServer->getContentListByFileId(mServerSessionId,fileId,currentContentList) == 0)
+        mContentServer->getContentListByFileId(mServerSessionId,fileId,contentList) == 0)
     {
       if (!fileInfo.mDeletionTime.empty())
       {
@@ -461,11 +460,9 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
 
       if (getFileSize(fileInfo.mName.c_str()) > 0)
       {
-        mContentServer->getContentListByFileId(mServerSessionId,fileId,currentContentList);
+        mContentServer->getContentListByFileId(mServerSessionId,fileId,contentList);
 
-        T::ContentInfoList contentInfoList;
-
-        addFile(fileInfo,currentContentList,contentInfoList);
+        addFile(fileInfo,contentList);
         gridFile = mGridFileManager.getFileById(fileId);
       }
     }
@@ -4463,7 +4460,7 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
 
 
 
-void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& currentContentList,T::ContentInfoList& contentInfoList)
+void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& contentList)
 {
   FUNCTION_TRACE
   try
@@ -4474,8 +4471,6 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
       return;
 
     time_t checkTime = time(nullptr);
-    T::ContentInfoList contentList;
-
     GRID::GridFile_sptr storageFile = mGridFileManager.getFileByIdNoMapping(fileInfo.mFileId);
 
     GRID::GridFile *gridFile = nullptr;
@@ -4496,7 +4491,6 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
       gridFile->setGenerationId(fileInfo.mGenerationId);
       gridFile->setSourceId(fileInfo.mSourceId);
       gridFile->setDeletionTime(fileInfo.mDeletionTime);
-      // gridFile->mapToMemory();
     }
 
     T::ProducerInfo producerInfo;
@@ -4511,19 +4505,6 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
 
     if (gridFile->getModificationTime() != 0)
     {
-      if ((fileInfo.mFlags & T::FileInfo::Flags::PredefinedContent) == 0)
-      {
-        // The content of the file is not predefined. However, some other data server might
-        // have already registered the content.
-
-        if (currentContentList.getLength() == 0)
-        {
-          // The content of the file is not registered. So, we need to read it.
-
-          gridFile->read(mDataDir + "/" + fileInfo.mName);
-        }
-      }
-
       if (!storageFile)
       {
         mGridFileManager.addFile(gridFile);
@@ -4541,137 +4522,39 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& cu
 
     gridFile->setCheckTime(checkTime);
 
-    if ((fileInfo.mFlags & T::FileInfo::Flags::PredefinedContent) != 0  ||  contentList.getLength() > 0)
+    uint cLen = contentList.getLength();
+    GRID::GridFile_sptr gFile;
+    for (uint t=0; t<cLen; t++)
     {
-      uint cLen = currentContentList.getLength();
-      GRID::GridFile_sptr gFile;
-      for (uint t=0; t<cLen; t++)
+      T::ContentInfo *info = contentList.getContentInfoByIndex(t);
+
+      GRID::MessageInfo mInfo;
+
+      mInfo.mFilePosition = info->mFilePosition;
+      mInfo.mMessageSize = info->mMessageSize;
+      mInfo.mProducerId = info->mProducerId;
+      mInfo.mGenerationId = info->mGenerationId;
+      mInfo.mFmiParameterId = info->mFmiParameterId;
+      mInfo.mFmiParameterName = info->getFmiParameterName();
+      mInfo.mFmiParameterLevelId = info->mFmiParameterLevelId;
+      mInfo.mParameterLevel = info->mParameterLevel;
+      mInfo.mForecastType = info->mForecastType;
+      mInfo.mForecastNumber = info->mForecastNumber;
+      mInfo.mGeometryId = info->mGeometryId;
+
+      gridFile->newMessage(info->mMessageIndex,mInfo);
+
+      if (mContentPreloadEnabled)
       {
-        T::ContentInfo *info = currentContentList.getContentInfoByIndex(t);
-
-        GRID::MessageInfo mInfo;
-
-        mInfo.mFilePosition = info->mFilePosition;
-        mInfo.mMessageSize = info->mMessageSize;
-        mInfo.mProducerId = info->mProducerId;
-        mInfo.mGenerationId = info->mGenerationId;
-        mInfo.mFmiParameterId = info->mFmiParameterId;
-        mInfo.mFmiParameterName = info->getFmiParameterName();
-        mInfo.mFmiParameterLevelId = info->mFmiParameterLevelId;
-        mInfo.mParameterLevel = info->mParameterLevel;
-        mInfo.mForecastType = info->mForecastType;
-        mInfo.mForecastNumber = info->mForecastNumber;
-        mInfo.mGeometryId = info->mGeometryId;
-
-        gridFile->newMessage(info->mMessageIndex,mInfo);
-
-        //if (mContentPreloadEnabled && (info->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
-
-        if (mContentPreloadEnabled)
-        {
-          char tmp[200];
-          sprintf(tmp,"%u;%s;%u;1;%u;%05u;%d;%d;1",info->mProducerId,info->getFmiParameterName().c_str(),info->mGeometryId,info->mFmiParameterLevelId,info->mParameterLevel,info->mForecastType,info->mForecastNumber);
-          //printf("FIND %s\n",tmp);
-          if (mPreloadDefList.find(toLowerString(std::string(tmp))) != mPreloadDefList.end())
-            mPreloadList.push_back(std::pair<uint,uint>(info->mFileId,info->mMessageIndex));
-        }
-/*
-        {
-          printf("PRELOAD %s\n",info->getFmiParameterName().c_str());
-
-          if (!gFile)
-            gFile = getGridFile(fileInfo.mFileId);
-
-          if (gFile)
-          {
-            printf("** PRELOAD %s\n",info->getFmiParameterName().c_str());
-            GRID::Message *message = gFile->getMessageByIndex(info->mMessageIndex);
-            if (message != nullptr)
-              message->lockData();
-              //message->getGridValueByGridPoint(0,0);
-          }
-        }
-        */
-
-      }
-
-      // The content of the file is predefined or registered by another server. So,
-      // we can just register our server for the current content (if we have not already
-      // registered. This is possible if the content server has been down).
-
-      if (mServerId > 0  &&  mContentRegistrationEnabled)
-      {
-        unsigned long long sf = (1 << (mServerId-1));
-
-        T::ContentInfo *info = contentList.getContentInfoByIndex(0);
-        if (info == nullptr  ||  (info->mServerFlags & sf) == 0)
-          mContentServer->registerContentListByFileId(mServerSessionId,mServerId,fileInfo.mFileId);
-      }
-
-
-      if (contentInfoList.getLength() == 0)
-      {
-        //T::ContentInfoList tmpContentList;
-        //mContentServer->getContentListByFileId(mServerSessionId,fileInfo.mFileId,tmpContentList);
-        //fullContentList->getContentListByFileId(fileInfo.mFileId,tmpContentList);
-        if (mVirtualContentEnabled)
-          mVirtualContentManager.addFile(producerInfo,generationInfo,fileInfo,currentContentList,mGridFileMap);
-      }
-      else
-      {
-        if (mVirtualContentEnabled)
-          mVirtualContentManager.addFile(producerInfo,generationInfo,fileInfo,contentList,mGridFileMap);
+        char tmp[200];
+        sprintf(tmp,"%u;%s;%u;1;%u;%05u;%d;%d;1",info->mProducerId,info->getFmiParameterName().c_str(),info->mGeometryId,info->mFmiParameterLevelId,info->mParameterLevel,info->mForecastType,info->mForecastNumber);
+        if (mPreloadDefList.find(toLowerString(std::string(tmp))) != mPreloadDefList.end())
+          mPreloadList.push_back(std::pair<uint,uint>(info->mFileId,info->mMessageIndex));
       }
     }
-    else
-    {
-      // The content of the file is not predefined or registered earlier. So, we have
-      // to register the content.
 
-      gridFile->read(mDataDir + "/" + fileInfo.mName);
-
-      std::size_t messageCount = gridFile->getNumberOfMessages();
-      for (std::size_t m=0; m<messageCount; m++)
-      {
-        GRID::Message *message = gridFile->getMessageByIndex(m);
-        T::ContentInfo *contentInfo = new T::ContentInfo();
-        if (mServerId != 0)
-          contentInfo->mServerFlags = 1 << (mServerId-1);
-        else
-          contentInfo->mServerFlags = 0;
-
-        contentInfo->mGroupFlags = fileInfo.mGroupFlags;
-        contentInfo->mProducerId = fileInfo.mProducerId;
-        contentInfo->mGenerationId = fileInfo.mGenerationId;
-        contentInfo->mFileType = gridFile->getFileType();
-        contentInfo->mFileId = fileInfo.mFileId;
-        contentInfo->mMessageIndex = m;
-        contentInfo->mForecastTime = message->getForecastTime();
-        contentInfo->mFmiParameterId = message->getFmiParameterId();
-        contentInfo->setFmiParameterName(message->getFmiParameterName());
-        contentInfo->mGribParameterId = message->getGribParameterId();
-        contentInfo->mFmiParameterLevelId = message->getFmiParameterLevelId();
-        contentInfo->mGrib1ParameterLevelId = message->getGrib1ParameterLevelId();
-        contentInfo->mGrib2ParameterLevelId = message->getGrib2ParameterLevelId();
-        contentInfo->mParameterLevel = message->getGridParameterLevel();
-        contentInfo->mFmiParameterUnits = message->getFmiParameterUnits();
-        contentInfo->mGribParameterUnits = message->getGribParameterUnits();
-        contentInfo->mCdmParameterId = message->getCdmParameterId();
-        contentInfo->mCdmParameterName = message->getCdmParameterName();
-        contentInfo->mNewbaseParameterId = message->getNewbaseParameterId();
-        contentInfo->mNewbaseParameterName = message->getNewbaseParameterName();
-        contentInfo->mForecastType = message->getForecastType();
-        contentInfo->mForecastNumber = message->getForecastNumber();
-        contentInfo->mFlags = 0;
-        contentInfo->mSourceId = fileInfo.mSourceId;
-        contentInfo->mGeometryId = message->getGridGeometryId();
-
-        //contentInfo->print(std::cout,0,0);
-        contentInfoList.addContentInfo(contentInfo);
-      }
-      if (mVirtualContentEnabled)
-        mVirtualContentManager.addFile(producerInfo,generationInfo,fileInfo,contentList,mGridFileMap);
-    }
+    if (mVirtualContentEnabled)
+      mVirtualContentManager.addFile(producerInfo,generationInfo,fileInfo,contentList,mGridFileMap);
   }
   catch (...)
   {
@@ -4730,7 +4613,6 @@ void ServiceImplementation::fullUpdate()
         return;
       }
 
-      T::ContentInfoList contentInfoList;
       len = fileInfoList.getLength();
       for (uint t=0; t<len; t++)
       {
@@ -4743,18 +4625,13 @@ void ServiceImplementation::fullUpdate()
           if (fileInfo->mFileId >= startFileId)
             startFileId = fileInfo->mFileId + 1;
 
-          T::ContentInfoList currentContentList;
+          T::ContentInfoList contentList;
           if (mContentServer->getImplementationType() != ContentServer::Implementation::Cache || fullContentList.getLength() > 0)
-            fullContentList.getContentInfoListByFileId(fileInfo->mFileId,currentContentList);
+            fullContentList.getContentInfoListByFileId(fileInfo->mFileId,contentList);
           else
-            mContentServer->getContentListByFileId(mServerSessionId,fileInfo->mFileId,currentContentList);
+            mContentServer->getContentListByFileId(mServerSessionId,fileInfo->mFileId,contentList);
 
-          addFile(*fileInfo,currentContentList,contentInfoList);
-          if (contentInfoList.getLength() > 1000)
-          {
-            mContentServer->registerContentList(mServerSessionId,mServerId,contentInfoList);
-            contentInfoList.clear();
-          }
+          addFile(*fileInfo,contentList);
 
           counter++;
           if ((counter % 10000) == 0)
@@ -4766,12 +4643,6 @@ void ServiceImplementation::fullUpdate()
           std::string st = exception.getStackTrace();
           PRINT_DATA(mDebugLog,"%s",st.c_str());
         }
-      }
-
-      if (contentInfoList.getLength() > 0)
-      {
-        mContentServer->registerContentList(mServerSessionId,mServerId,contentInfoList);
-        contentInfoList.clear();
       }
     }
 
@@ -4988,7 +4859,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
   {
     uint len = eventInfo.mNote.length();
     T::FileInfo fileInfo;
-    T::ContentInfoList currentContentList;
+    T::ContentInfoList contentList;
 
     if (len > 0)
     {
@@ -5010,7 +4881,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
           {
             T::ContentInfo *contentInfo = new T::ContentInfo();
             contentInfo->setCsv(s);
-            currentContentList.addContentInfo(contentInfo);
+            contentList.addContentInfo(contentInfo);
           }
           s = p + 1;
         }
@@ -5031,7 +4902,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
         return;
       }
 
-      result = mContentServer->getContentListByFileId(mServerSessionId,fileInfo.mFileId,currentContentList);
+      result = mContentServer->getContentListByFileId(mServerSessionId,fileInfo.mFileId,contentList);
       if (result != 0)
       {
         PRINT_DATA(mDebugLog,"%s:%d: Cannot get the content list (fileId=%d) from the content server!\n",__FILE__,__LINE__,fileInfo.mFileId);
@@ -5040,12 +4911,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
       }
     }
 
-    T::ContentInfoList contentInfoList;
-    addFile(fileInfo,currentContentList,contentInfoList);
-    if (contentInfoList.getLength() > 0)
-    {
-      mContentServer->addContentList(mServerSessionId,contentInfoList);
-    }
+    addFile(fileInfo,contentList);
 
     uint cnt = mGridFileManager.getFileCount();
     if ((cnt % 1000) == 0)
@@ -5058,102 +4924,6 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
 }
 
 
-
-#if 0
-void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo *nextEventInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    //printf("EVENT[%llu]: fileAdded(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
-    if (eventInfo.mId2 == T::FileTypeValue::Virtual)
-      return; // The added file was virtual. No need to react.
-
-    mFileAdditionList.push_back(eventInfo.mId1);
-
-    if (nextEventInfo == nullptr  ||  nextEventInfo->mType != ContentServer::EventType::FILE_ADDED  ||  mFileAdditionList.size() > 1000)
-    {
-      T::FileInfoList fileInfoList;
-      int result = mContentServer->getFileInfoListByFileIdList(mServerSessionId,mFileAdditionList,fileInfoList);
-      if (result != 0)
-      {
-        PRINT_DATA(mDebugLog,"%s:%d: Cannot get the file info list from the content server\n",__FILE__,__LINE__);
-        PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
-        return;
-      }
-
-      T::ContentInfoList contentInfoList;
-      result = mContentServer->getContentListByFileIdList(mServerSessionId,mFileAdditionList,contentInfoList);
-      if (result != 0)
-      {
-        PRINT_DATA(mDebugLog,"%s:%d: Cannot get the content list from the content server!\n",__FILE__,__LINE__);
-        PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
-        return;
-      }
-
-      uint len = fileInfoList.getLength();
-      for (uint t=0; t<len; t++)
-      {
-        T::FileInfo *fileInfo = fileInfoList.getFileInfoByIndex(t);
-        if (fileInfo != nullptr)
-        {
-          T::ContentInfoList contentList;
-          contentInfoList.getContentInfoListByFileId(fileInfo->mFileId,contentList);
-
-          T::ContentInfoList cList;
-          addFile(*fileInfo,contentList,cList);
-          if (cList.getLength() > 0)
-          {
-            mContentServer->addContentList(mServerSessionId,cList);
-          }
-
-          if ((fileInfo->mFileId % 1000) == 0)
-            PRINT_DATA(mDebugLog,"** fileAdded %lu\n",mGridFileManager.getFileCount());
-        }
-      }
-
-      mFileAdditionList.clear();
-    }
-
-/*
-    T::FileInfo fileInfo;
-    int result = mContentServer->getFileInfoById(mServerSessionId,eventInfo.mId1,fileInfo);
-    if (result != 0)
-    {
-      std::string cPos = CODE_LOCATION;
-      PRINT_DATA(mDebugLog,"%s: Cannot get the file info (fileId=%u) from the content server\n",cPos.c_str(),eventInfo.mId1);
-      PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
-      return;
-    }
-
-    T::ContentInfoList currentContentList;
-    result = mContentServer->getContentListByFileId(mServerSessionId,fileInfo.mFileId,currentContentList);
-    if (result != 0)
-    {
-      std::string cPos = CODE_LOCATION;
-      PRINT_DATA(mDebugLog,"%s: Cannot get the content list (fileId=%d) from the content server!\n",cPos.c_str(),fileInfo.mFileId);
-      PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
-      return;
-    }
-
-    T::ContentInfoList contentInfoList;
-    addFile(fileInfo,currentContentList,contentInfoList);
-    if (contentInfoList.getLength() > 0)
-    {
-      mContentServer->addContentList(mServerSessionId,contentInfoList);
-    }
-
-    if ((fileInfo.mFileId % 1000) == 0)
-      PRINT_DATA(mDebugLog,"** fileAdded %lu\n",mGridFileManager.getFileCount());
-*/
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-#endif
 
 
 
@@ -5222,27 +4992,15 @@ void ServiceImplementation::event_fileUpdated(T::EventInfo& eventInfo)
     T::ContentInfoList currentContentList;
 
     // If the content list is not predefined the we should remove it and replace it with a new list.
-    if ((fileInfo.mFlags & T::FileInfo::Flags::PredefinedContent) == 0)
+    result = mContentServer->getContentListByFileId(mServerSessionId,fileInfo.mFileId,currentContentList);
+    if (result != 0)
     {
-      mContentServer->deleteContentListByFileId(mServerSessionId,eventInfo.mId1);
-    }
-    else
-    {
-      result = mContentServer->getContentListByFileId(mServerSessionId,fileInfo.mFileId,currentContentList);
-      if (result != 0)
-      {
-        PRINT_DATA(mDebugLog,"%s:%d: Cannot get the content list (fileId=%d) from the content server!\n",__FILE__,__LINE__,fileInfo.mFileId);
-        PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
-        return;
-      }
+      PRINT_DATA(mDebugLog,"%s:%d: Cannot get the content list (fileId=%d) from the content server!\n",__FILE__,__LINE__,fileInfo.mFileId);
+      PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
+      return;
     }
 
-    T::ContentInfoList contentInfoList;
-    addFile(fileInfo,currentContentList,contentInfoList);
-    if (contentInfoList.getLength() > 0)
-    {
-      mContentServer->addContentList(mServerSessionId,contentInfoList);
-    }
+    addFile(fileInfo,currentContentList);
 #endif
   }
   catch (...)
@@ -5416,48 +5174,6 @@ void ServiceImplementation::event_contentListDeletedBySourceId(T::EventInfo& eve
 
 
 
-void ServiceImplementation::event_dataServerAdded(T::EventInfo& eventInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    //printf("EVENT[%llu]: dataServerAdded(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ServiceImplementation::event_dataServerDeleted(T::EventInfo& eventInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-//    printf("EVENT[%llu]: dataServerDeleted(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
-    if (eventInfo.mId1 == mServerId)
-    {
-      // It seems that somebody has deleted the current server registration from
-      // the content server.
-
-      //printf("**** SHUTDOWN REQUIRED ****\n");
-      mShutdownRequested = true;
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
 void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5546,23 +5262,6 @@ void ServiceImplementation::event_contentDeleted(T::EventInfo& eventInfo)
   try
   {
     //printf("EVENT[%llu]: contentDeleted(%u,%u)\n",eventInfo.mEventId,eventInfo.mId1,eventInfo.mId2);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ServiceImplementation::event_contentRegistered(T::EventInfo& eventInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    //printf("EVENT[%llu]: contentRegistered(%u,%u,%u)\n",eventInfo.mEventId,eventInfo.mId1,eventInfo.mId2,eventInfo.mId3);
   }
   catch (...)
   {
@@ -5728,24 +5427,12 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *n
         event_contentListDeletedBySourceId(eventInfo);
         break;
 
-      case ContentServer::EventType::DATA_SERVER_ADDED:
-        event_dataServerAdded(eventInfo);
-        break;
-
-      case ContentServer::EventType::DATA_SERVER_DELETED:
-        event_dataServerDeleted(eventInfo);
-        break;
-
       case ContentServer::EventType::CONTENT_ADDED:
         event_contentAdded(eventInfo);
         break;
 
       case ContentServer::EventType::CONTENT_DELETED:
         event_contentDeleted(eventInfo);
-        break;
-
-      case ContentServer::EventType::CONTENT_REGISTERED:
-        event_contentRegistered(eventInfo);
         break;
 
       case ContentServer::EventType::DELETE_VIRTUAL_CONTENT:
@@ -5835,72 +5522,6 @@ void ServiceImplementation::loadPreloadList()
 
 
 
-void ServiceImplementation::checkServerRegistration()
-{
-  //FUNCTION_TRACE
-  try
-  {
-    if (mServerId == 0)
-      return;
-
-    T::ServerInfo info;
-    int result = mContentServer->getDataServerInfoById(mServerSessionId,mServerId,info);
-    if (result == 0)
-    {
-      if (info.mServerIor != mServerIor)
-      {
-        // It seems that the same server id is registered with different IOR. We should
-        // shutdown immediately.
-
-        PRINT_DATA(mDebugLog,"***** The same server is registered with different IOR. ********\n");
-        PRINT_DATA(mDebugLog,"***** Shutting down the server! ****\n");
-        mShutdownRequested = true;
-        return;
-      }
-    }
-    else
-    {
-      if (result != ContentServer::DATA_NOT_FOUND)
-      {
-        //printf("ERROR: getDataServerInfoById : %d\n",result);
-        return;
-      }
-
-      if (result == ContentServer::DATA_NOT_FOUND)
-      {
-        // The server registration cannot be found. Notice that the server and the content
-        // registrations will disappear when the content server is reseted. In this case
-        // we should re-register them.
-
-        T::ServerInfo serverInfo;
-        serverInfo.mServerId = mServerId;
-        serverInfo.mName = mServerName;
-        serverInfo.mServerIor = mServerIor;
-
-        int result2 = mContentServer->addDataServerInfo(mServerSessionId,serverInfo);
-        if (result2 != ContentServer::OK)
-        {
-          char msg[200];
-          sprintf(msg,"ERROR addDataServerInfo (%d) : %s\n",result2,ContentServer::getResultString(result2).c_str());
-          throw Fmi::Exception(BCP,msg);
-        }
-
-        //printf("SERVER REGISTERED\n");
-        //serverInfo.print(std::cout,0,0);
-
-        mFullUpdateRequired = true;
-      }
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
 void ServiceImplementation::processEvents()
 {
   //FUNCTION_TRACE
@@ -5909,7 +5530,6 @@ void ServiceImplementation::processEvents()
     if (mShutdownRequested)
       return;
 
-    checkServerRegistration();
     mLuaFileCollection.checkUpdates(false);
 
     if (mFullUpdateRequired)
@@ -6051,8 +5671,6 @@ void ServiceImplementation::eventProcessingThread()
     }
 
     mEventProcessingActive = false;
-    if (mServerId != 0)
-      mContentServer->deleteDataServerInfoById(mServerSessionId,mServerId);
   }
   catch (...)
   {

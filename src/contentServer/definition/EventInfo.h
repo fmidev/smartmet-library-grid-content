@@ -33,14 +33,11 @@ class EventType
     static const uint FILE_LIST_DELETED_BY_SOURCE_ID          = 36;
     static const uint CONTENT_ADDED                           = 40;
     static const uint CONTENT_DELETED                         = 41;
-    static const uint CONTENT_REGISTERED                      = 42;
     static const uint CONTENT_LIST_DELETED_BY_GROUP_FLAGS     = 43;
     static const uint CONTENT_LIST_DELETED_BY_PRODUCER_ID     = 44;
     static const uint CONTENT_LIST_DELETED_BY_GENERATION_ID   = 45;
     static const uint CONTENT_LIST_DELETED_BY_FILE_ID         = 46;
     static const uint CONTENT_LIST_DELETED_BY_SOURCE_ID       = 47;
-    static const uint DATA_SERVER_ADDED                       = 50;
-    static const uint DATA_SERVER_DELETED                     = 51;
     static const uint DELETE_VIRTUAL_CONTENT                  = 60;
     static const uint UPDATE_VIRTUAL_CONTENT                  = 61;
 };

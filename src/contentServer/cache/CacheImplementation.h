@@ -53,14 +53,6 @@ class CacheImplementation : public ServiceInterface
     virtual int     _clear(T::SessionId sessionId);
     virtual int     _reload(T::SessionId sessionId);
 
-    virtual int     _addDataServerInfo(T::SessionId sessionId,T::ServerInfo& serverInfo);
-    virtual int     _deleteDataServerInfoById(T::SessionId sessionId,uint serverId);
-    virtual int     _getDataServerInfoById(T::SessionId sessionId,uint serverId,T::ServerInfo& serverInfo);
-    virtual int     _getDataServerInfoByName(T::SessionId sessionId,std::string serverName,T::ServerInfo& serverInfo);
-    virtual int     _getDataServerInfoByIor(T::SessionId sessionId,std::string serverIor,T::ServerInfo& serverInfo);
-    virtual int     _getDataServerInfoList(T::SessionId sessionId,T::ServerInfoList& serverInfoList);
-    virtual int     _getDataServerInfoCount(T::SessionId sessionId,uint& count);
-
     virtual int     _addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo);
     virtual int     _deleteProducerInfoById(T::SessionId sessionId,uint producerId);
     virtual int     _deleteProducerInfoByName(T::SessionId sessionId,std::string producerName);
@@ -141,10 +133,6 @@ class CacheImplementation : public ServiceInterface
     virtual int     _deleteContentListByGenerationId(T::SessionId sessionId,uint generationId);
     virtual int     _deleteContentListByGenerationName(T::SessionId sessionId,std::string generationName);
     virtual int     _deleteContentListBySourceId(T::SessionId sessionId,uint sourceId);
-    virtual int     _registerContentList(T::SessionId sessionId,uint serverId,T::ContentInfoList& contentInfoList);
-    virtual int     _registerContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId);
-    virtual int     _unregisterContentList(T::SessionId sessionId,uint serverId);
-    virtual int     _unregisterContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId);
 
     virtual int     _getContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex,T::ContentInfo& contentInfo);
     virtual int     _getContentList(T::SessionId sessionId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
@@ -154,7 +142,6 @@ class CacheImplementation : public ServiceInterface
     virtual int     _getContentListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
     virtual int     _getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
     virtual int     _getContentListByProducerName(T::SessionId sessionId,std::string producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
-    virtual int     _getContentListByServerId(T::SessionId sessionId,uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
     virtual int     _getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList);
     virtual int     _getContentListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
     virtual int     _getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList);
@@ -194,7 +181,6 @@ class CacheImplementation : public ServiceInterface
     virtual void    readFileList();
     virtual void    readProducerList();
     virtual void    readGenerationList();
-    virtual void    readDataServerList();
 
     virtual void    event_clear(T::EventInfo& eventInfo);
     virtual void    event_contentServerReload(T::EventInfo& eventInfo);
@@ -218,11 +204,8 @@ class CacheImplementation : public ServiceInterface
     virtual void    event_contentListDeletedByProducerId(T::EventInfo& eventInfo);
     virtual void    event_contentListDeletedByGenerationId(T::EventInfo& eventInfo);
     virtual void    event_contentListDeletedBySourceId(T::EventInfo& eventInfo);
-    virtual void    event_dataServerAdded(T::EventInfo& eventInfo);
-    virtual void    event_dataServerDeleted(T::EventInfo& eventInfo);
     virtual void    event_contentAdded(T::EventInfo& eventInfo);
     virtual void    event_contentDeleted(T::EventInfo& eventInfo);
-    virtual void    event_contentRegistered(T::EventInfo& eventInfo);
     virtual void    event_deleteVirtualContent(T::EventInfo& eventInfo);
     virtual void    event_updateVirtualContent(T::EventInfo& eventInfo);
 
@@ -243,7 +226,6 @@ class CacheImplementation : public ServiceInterface
     T::FileInfoList        mFileInfoList;
     T::ProducerInfoList    mProducerInfoList;
     T::GenerationInfoList  mGenerationInfoList;
-    T::ServerInfoList      mDataServerInfoList;
     T::ContentInfoList     mContentInfoList;
     T::EventInfoList       mEventInfoList;
     bool                   mContentInfoListEnabled[CONTENT_LIST_COUNT];
@@ -256,7 +238,6 @@ class CacheImplementation : public ServiceInterface
     bool                   mSaveEnabled;
     std::string            mSaveDir;
     uint                   mContentSortingFlags;
-    uint                   mDataServerCount;
     uint                   mProducerCount;
     uint                   mGenerationCount;
     uint                   mFileCount;

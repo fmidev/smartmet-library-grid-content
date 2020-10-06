@@ -54,20 +54,6 @@ typedef sequence<CorbaContentInfo> CorbaContentInfoList;
 
 
 
-struct CorbaServerInfo
-{
-  unsigned long      serverId;
-  string             name;
-  string             serverIor;
-  unsigned long      type;
-  unsigned long      flags;
-};
-
-typedef sequence<CorbaServerInfo> CorbaServerInfoList;
-
-
-
-
 struct CorbaProducerInfo
 {
   unsigned long      producerId;

@@ -789,6 +789,35 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByName(std::string generati
 
 
 
+bool GenerationInfoList::getGenerationInfoByName(std::string generationName,GenerationInfo& generationInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return false;
+
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    for (uint t=0; t<mLength; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr  &&  strcasecmp(info->mName.c_str(),generationName.c_str()) == 0)
+      {
+        generationInfo = *info;
+        return true;
+      }
+    }
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 
 GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(std::string analysisTime)
 {

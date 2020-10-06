@@ -58,7 +58,6 @@ MemoryImplementation::MemoryImplementation()
     mMaxFileId = 0;
     mMaxEventId = 0;
 
-    mDataServerCount = 1000000000;
     mProducerCount = 1000000000;
     mGenerationCount = 1000000000;
     mFileCount = 1000000000;
@@ -142,7 +141,6 @@ void MemoryImplementation::init(bool contentLoadEnabled,bool contentSaveEnabled,
     mContentSaveInterval = contentSaveInterval;
     mContentSortingFlags = contentSortingFlags;
 
-    readDataServerList();
     readProducerList();
     readGenerationList();
     readFileList();
@@ -353,7 +351,6 @@ int MemoryImplementation::_clear(T::SessionId sessionId)
     mFileInfoList.clear();
     mProducerInfoList.clear();
     mGenerationInfoList.clear();
-    mDataServerInfoList.clear();
     mEventInfoList.clear();
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -385,13 +382,11 @@ int MemoryImplementation::_reload(T::SessionId sessionId)
     mFileInfoList.clear();
     mProducerInfoList.clear();
     mGenerationInfoList.clear();
-    mDataServerInfoList.clear();
     mEventInfoList.clear();
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].clear();
 
-    readDataServerList();
     readProducerList();
     readGenerationList();
     readFileList();
@@ -442,207 +437,6 @@ int MemoryImplementation::_reload(T::SessionId sessionId)
     mUpdateInProgress = false;
 
    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int MemoryImplementation::_addDataServerInfo(T::SessionId sessionId,T::ServerInfo& serverInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    if (serverInfo.mServerId < 1  ||  serverInfo.mServerId > 64)
-      return Result::INVALID_SERVER_ID;
-
-    T::ServerInfo *info = mDataServerInfoList.getServerInfoById(serverInfo.mServerId);
-    if (info != nullptr)
-      return Result::SERVER_ID_ALREADY_REGISTERED;
-
-    info = mDataServerInfoList.getServerInfoByName(serverInfo.mName);
-    if (info != nullptr)
-      return Result::SERVER_NAME_ALREADY_REGISTERED;
-
-    if (serverInfo.mServerIor.length() > 0)
-    {
-      info = mDataServerInfoList.getServerInfoByIor(serverInfo.mServerIor);
-      if (info != nullptr)
-        return Result::SERVER_IOR_ALREADY_REGISTERED;
-    }
-
-    mDataServerInfoList.addServerInfo(serverInfo.duplicate());
-
-    addEvent(EventType::DATA_SERVER_ADDED,serverInfo.mServerId,0,0,0);
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int MemoryImplementation::_deleteDataServerInfoById(T::SessionId sessionId,uint serverId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    T::ServerInfo* serverInfo = mDataServerInfoList.getServerInfoById(serverId);
-    if (serverInfo == nullptr)
-      return Result::UNKNOWN_SERVER_ID;
-
-    mDataServerInfoList.deleteServerInfoById(serverId);
-
-    addEvent(EventType::DATA_SERVER_DELETED,serverId,0,0,0);
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int MemoryImplementation::_getDataServerInfoById(T::SessionId sessionId,uint serverId,T::ServerInfo& serverInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    T::ServerInfo *info = mDataServerInfoList.getServerInfoById(serverId);
-    if (info == nullptr)
-      return Result::DATA_NOT_FOUND;
-
-    serverInfo = *info;
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int MemoryImplementation::_getDataServerInfoByName(T::SessionId sessionId,std::string serverName,T::ServerInfo& serverInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    T::ServerInfo *info = mDataServerInfoList.getServerInfoByName(serverName);
-    if (info == nullptr)
-      return Result::DATA_NOT_FOUND;
-
-    serverInfo = *info;
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int MemoryImplementation::_getDataServerInfoByIor(T::SessionId sessionId,std::string serverIor,T::ServerInfo& serverInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    T::ServerInfo *info = mDataServerInfoList.getServerInfoByIor(serverIor);
-    if (info == nullptr)
-      return Result::DATA_NOT_FOUND;
-
-    serverInfo = *info;
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int MemoryImplementation::_getDataServerInfoList(T::SessionId sessionId,T::ServerInfoList& serverInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    serverInfoList.clear();
-
-    serverInfoList = mDataServerInfoList;
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int MemoryImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& count)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    count = mDataServerInfoList.getLength();
-    return Result::OK;
   }
   catch (...)
   {
@@ -2148,7 +1942,7 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
         cInfo->mProducerId = fileInfo.mProducerId;
         cInfo->mGenerationId = fileInfo.mGenerationId;
         cInfo->mGroupFlags = fileInfo.mGroupFlags;
-        cInfo->mFlags = cInfo->mFlags | T::FileInfo::Flags::PredefinedContent;
+        cInfo->mFlags = cInfo->mFlags;
 
         for (int t=0; t<CONTENT_LIST_COUNT; t++)
         {
@@ -2268,7 +2062,7 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
           info->mProducerId = ff->mFileInfo.mProducerId;
           info->mGenerationId = ff->mFileInfo.mGenerationId;
           info->mGroupFlags = ff->mFileInfo.mGroupFlags;
-          info->mFlags = info->mFlags | T::ContentInfo::Flags::PredefinedContent;
+          info->mFlags = info->mFlags;
 
 
           //mContentInfoList[0].addContentInfo(cInfo);
@@ -3132,13 +2926,6 @@ int MemoryImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
 
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
-    if (requestingServerId != 0)
-    {
-      T::ServerInfo *info = mDataServerInfoList.getServerInfoById(requestingServerId);
-      if (info != nullptr)
-        info->mLastCall = time(nullptr);
-    }
-
     T::EventInfo *lastEvent = mEventInfoList.getLastEvent();
     if (lastEvent == nullptr)
       return Result::DATA_NOT_FOUND;
@@ -3172,13 +2959,6 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
     AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
     eventInfoList.clear();
-
-    if (requestingServerId != 0)
-    {
-      T::ServerInfo *info = mDataServerInfoList.getServerInfoById(requestingServerId);
-      if (info != nullptr)
-        info->mLastCall = time(nullptr);
-    }
 
     T::EventInfoList eventList;
     mEventInfoList.getEventInfoList(startEventId,maxRecords,eventList);
@@ -3665,199 +3445,6 @@ int MemoryImplementation::_deleteContentListBySourceId(T::SessionId sessionId,ui
 
 
 
-int MemoryImplementation::_registerContentList(T::SessionId sessionId,uint serverId,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-#if 0
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    unsigned long long sf = 0;
-    if (serverId > 0)
-      sf = (1 << (serverId-1));
-
-    uint len = contentInfoList.getLength();
-    for (uint t=0; t<len; t++)
-    {
-      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
-
-      T::ContentInfo contentInfo;
-      if (getContent(info->mFileId,info->mMessageIndex,contentInfo) == Result::OK)
-      {
-        printf("Register content %u\n",info->mFileId);
-
-        if (serverId > 0  &&  (info->mServerFlags & sf) == 0)
-        {
-          info->mServerFlags = contentInfo.mServerFlags | sf;
-          setContent(*info);
-          addEvent(EventType::CONTENT_REGISTERED,info->mFileId,info->mMessageIndex,serverId,info->mServerFlags);
-        }
-      }
-      else
-      {
-        T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(info->mProducerId);
-        if (producerInfo == nullptr)
-          return Result::UNKNOWN_PRODUCER_ID;
-
-        T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(info->mGenerationId);
-        if (generationInfo == nullptr)
-          return Result::UNKNOWN_GENERATION_ID;
-
-        T::FileInfo fileInfo;
-        if (getFileInfoById(info->mFileId,fileInfo) != Result::OK)
-          return Result::UNKNOWN_FILE_ID;
-
-        if (producerInfo.mProducerId != generationInfo.mProducerId)
-          return Result::PRODUCER_AND_GENERATION_DO_NOT_MATCH;
-
-        if (producerInfo.mProducerId != fileInfo.mProducerId)
-          return Result::PRODUCER_AND_FILE_DO_NOT_MATCH;
-
-        if (generationInfo.mGenerationId != fileInfo.mGenerationId)
-          return Result::GENERATION_AND_FILE_DO_NOT_MATCH;
-
-        printf("Add content %u\n",info->mFileId);
-        unsigned long long id = ((unsigned long long)info->mFileId << 32) + info->mMessageIndex;
-        info->mServerFlags = sf;
-
-        redisReply *reply = (redisReply*)redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,info->getCsv().c_str());
-        if (reply == nullptr)
-        {
-          closeConnection();
-          return Result::PERMANENT_STORAGE_ERROR;
-        }
-
-        freeReplyObject(reply);
-
-        addEvent(EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,serverId,info->mServerFlags);
-      }
-    }
-#endif
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int MemoryImplementation::_registerContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId)
-{
-  FUNCTION_TRACE
-  try
-  {
-#if 0
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    unsigned long long sf = (1 << (serverId-1));
-
-    T::ContentInfoList contentInfoList;
-    getContentByFileId(fileId,contentInfoList);
-    uint len = contentInfoList.getLength();
-    for (uint t=0; t<len; t++)
-    {
-      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
-      if ((info->mServerFlags & sf) == 0)
-      {
-        info->mServerFlags = info->mServerFlags | sf;
-        setContent(*info);
-        addEvent(EventType::CONTENT_REGISTERED,info->mFileId,info->mMessageIndex,serverId,info->mServerFlags);
-      }
-    }
-#endif
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int MemoryImplementation::_unregisterContentList(T::SessionId sessionId,uint serverId)
-{
-  FUNCTION_TRACE
-  try
-  {
-#if 0
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    return unregisterContent(serverId);
-#endif
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int MemoryImplementation::_unregisterContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId)
-{
-  FUNCTION_TRACE
-  try
-  {
-#if 0
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    unsigned long long sf = (1 << (serverId-1));
-    unsigned long long nsf = ~sf;
-
-    T::ContentInfoList contentInfoList;
-    getContentByFileId(fileId,contentInfoList);
-    uint len = contentInfoList.getLength();
-    for (uint t=0; t<len; t++)
-    {
-      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
-      if ((info->mServerFlags & sf) != 0)
-      {
-        info->mServerFlags = info->mServerFlags & nsf;
-        setContent(*info);
-      }
-    }
-#endif
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int MemoryImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex,T::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
@@ -4068,35 +3655,6 @@ int MemoryImplementation::_getContentListByProducerName(T::SessionId sessionId,s
     contentInfoList.clear();
 
     mContentInfoList[0].getContentInfoListByProducerId(producerInfo->mProducerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int MemoryImplementation::_getContentListByServerId(T::SessionId sessionId,uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    T::ServerInfo *info = mDataServerInfoList.getServerInfoById(serverId);
-    if (info == nullptr)
-      return Result::UNKNOWN_SERVER_ID;
-
-    contentInfoList.clear();
-
-    mContentInfoList[0].getContentInfoListByServerId(serverId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     return Result::OK;
   }
   catch (...)
@@ -5636,51 +5194,6 @@ void MemoryImplementation::readContentList()
 
 
 
-void MemoryImplementation::readDataServerList()
-{
-  FUNCTION_TRACE
-  try
-  {
-    mDataServerInfoList.clear();
-
-    if (!mContentLoadEnabled)
-      return;
-
-    char filename[200];
-
-    sprintf(filename,"%s/dataServers.csv",mContentDir.c_str());
-    FILE *file = fopen(filename,"re");
-    if (file == nullptr)
-      return;
-
-    char st[1000];
-
-    while (!feof(file))
-    {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
-      {
-        char *p = strstr(st,"\n");
-        if (p != nullptr)
-          *p = '\0';
-
-        T::ServerInfo *rec = new T::ServerInfo();
-        rec->setCsv(st);
-        mDataServerInfoList.addServerInfo(rec);
-      }
-    }
-    fclose(file);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-
 void MemoryImplementation::saveData()
 {
   FUNCTION_TRACE
@@ -5691,9 +5204,6 @@ void MemoryImplementation::saveData()
       if ((time(nullptr)-mLastSaveTime) >= mContentSaveInterval)
       {
         mLastSaveTime = time(nullptr);
-
-        if (mDataServerCount != mDataServerInfoList.getLength())
-          mDataServerInfoList.writeToFile(mContentDir + "/dataServers.csv");
 
         if (mProducerCount != mProducerInfoList.getLength())
           mProducerInfoList.writeToFile(mContentDir + "/producers.csv");
@@ -5710,7 +5220,6 @@ void MemoryImplementation::saveData()
         if (mContentCount != mContentInfoList[0].getLength())
           mContentInfoList[0].writeToFile(mContentDir + "/content.csv");
 
-        mDataServerCount = mDataServerInfoList.getLength();
         mProducerCount = mProducerInfoList.getLength();
         mGenerationCount = mGenerationInfoList.getLength();
         mFileCount= mFileInfoList.getLength();

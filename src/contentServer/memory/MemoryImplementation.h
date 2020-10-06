@@ -32,14 +32,6 @@ class MemoryImplementation : public ServiceInterface
      virtual int    _clear(T::SessionId sessionId);
      virtual int    _reload(T::SessionId sessionId);
 
-     virtual int    _addDataServerInfo(T::SessionId sessionId,T::ServerInfo& serverInfo);
-     virtual int    _deleteDataServerInfoById(T::SessionId sessionId,uint serverId);
-     virtual int    _getDataServerInfoById(T::SessionId sessionId,uint serverId,T::ServerInfo& serverInfo);
-     virtual int    _getDataServerInfoByName(T::SessionId sessionId,std::string serverName,T::ServerInfo& serverInfo);
-     virtual int    _getDataServerInfoByIor(T::SessionId sessionId,std::string serverIor,T::ServerInfo& serverInfo);
-     virtual int    _getDataServerInfoList(T::SessionId sessionId,T::ServerInfoList& serverInfoList);
-     virtual int    _getDataServerInfoCount(T::SessionId sessionId,uint& count);
-
      virtual int    _addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo);
      virtual int    _deleteProducerInfoById(T::SessionId sessionId,uint producerId);
      virtual int    _deleteProducerInfoByName(T::SessionId sessionId,std::string producerName);
@@ -120,10 +112,6 @@ class MemoryImplementation : public ServiceInterface
      virtual int    _deleteContentListByGenerationId(T::SessionId sessionId,uint generationId);
      virtual int    _deleteContentListByGenerationName(T::SessionId sessionId,std::string generationName);
      virtual int    _deleteContentListBySourceId(T::SessionId sessionId,uint sourceId);
-     virtual int    _registerContentList(T::SessionId sessionId,uint serverId,T::ContentInfoList& contentInfoList);
-     virtual int    _registerContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId);
-     virtual int    _unregisterContentList(T::SessionId sessionId,uint serverId);
-     virtual int    _unregisterContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId);
 
      virtual int    _getContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex,T::ContentInfo& contentInfo);
      virtual int    _getContentList(T::SessionId sessionId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
@@ -133,7 +121,6 @@ class MemoryImplementation : public ServiceInterface
      virtual int    _getContentListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByProducerName(T::SessionId sessionId,std::string producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
-     virtual int    _getContentListByServerId(T::SessionId sessionId,uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList);
@@ -175,7 +162,6 @@ class MemoryImplementation : public ServiceInterface
      virtual void   readFileList();
      virtual void   readProducerList();
      virtual void   readGenerationList();
-     virtual void   readDataServerList();
 
      virtual bool   syncProducerList();
      virtual bool   syncGenerationList();
@@ -191,7 +177,6 @@ class MemoryImplementation : public ServiceInterface
      T::FileInfoList        mFileInfoListByName;
      T::ProducerInfoList    mProducerInfoList;
      T::GenerationInfoList  mGenerationInfoList;
-     T::ServerInfoList      mDataServerInfoList;
      T::EventInfoList       mEventInfoList;
      T::ContentInfoList     mContentInfoList[CONTENT_LIST_COUNT];
      bool                   mContentInfoListEnabled[CONTENT_LIST_COUNT];
@@ -210,7 +195,6 @@ class MemoryImplementation : public ServiceInterface
      uint                   mContentSaveInterval;
      uint                   mContentSortingFlags;
 
-     uint                   mDataServerCount;
      uint                   mProducerCount;
      uint                   mGenerationCount;
      uint                   mFileCount;

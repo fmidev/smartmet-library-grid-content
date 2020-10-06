@@ -2599,19 +2599,22 @@ ulonglong ServiceImplementation::getProducerHash(uint producerId)
     time_t currentTime = time(nullptr);
     ulonglong hash = 0;
 
-    auto rec = mProducerHashMap.find(producerId);
-    if (rec != mProducerHashMap.end())
     {
-      if ((currentTime - rec->second.checkTime) > 120)
+      AutoReadLock lock(&mProducerHashMap_modificationLock);
+      auto rec = mProducerHashMap.find(producerId);
+      if (rec != mProducerHashMap.end())
       {
-        rec->second.checkTime = currentTime;
-        int result = mContentServerPtr->getHashByProducerId(0,producerId,hash);
-        if (result == 0)
-          rec->second.hash = hash;
-        else
-          rec->second.hash = 0;
+        if ((currentTime - rec->second.checkTime) > 120)
+        {
+          rec->second.checkTime = currentTime;
+          int result = mContentServerPtr->getHashByProducerId(0,producerId,hash);
+          if (result == 0)
+            rec->second.hash = hash;
+          else
+            rec->second.hash = 0;
+        }
+        return rec->second.hash;
       }
-      return rec->second.hash;
     }
 
     int result = mContentServerPtr->getHashByProducerId(0,producerId,hash);
@@ -2621,6 +2624,7 @@ ulonglong ServiceImplementation::getProducerHash(uint producerId)
       hrec.checkTime = currentTime;
       hrec.hash = hash;
 
+      AutoWriteLock lock(&mProducerHashMap_modificationLock);
       mProducerHashMap.insert(std::pair<uint,HashRec>(producerId,hrec));
       return hash;
     }

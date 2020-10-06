@@ -40,8 +40,10 @@ class FileInfoList
     int            getClosestIndex(uint comparisonMethod,FileInfo& fileInfo);
     int            getClosestIndexNoLock(uint comparisonMethod,FileInfo& fileInfo);
     FileInfo*      getFileInfoById(uint fileId);
+    bool           getFileInfoById(uint fileId,FileInfo& fileInfo);
     FileInfo*      getFileInfoByIdNoLock(uint fileId);
     FileInfo*      getFileInfoByName(std::string filename);
+    bool           getFileInfoByName(std::string filename,FileInfo& fileInfo);
     FileInfo*      getFileInfoByIndex(uint index);
     FileInfo*      getFileInfoByIndexNoCheck(uint index);
     uint           getFileInfoCountByProducerId(uint producerId);
@@ -79,13 +81,13 @@ class FileInfoList
 
   protected:
 
-    FileInfoPtr                *mArray;
-    uint                       mSize;
-    uint                       mLength;
-    bool                       mReleaseObjects;
-    ModificationLock           mModificationLock;
-    ModificationLock*          mModificationLockPtr;
-    uint                       mComparisonMethod;
+    FileInfoPtr        *mArray;
+    uint               mSize;
+    uint               mLength;
+    bool               mReleaseObjects;
+    ModificationLock   mModificationLock;
+    ModificationLock*  mModificationLockPtr;
+    uint               mComparisonMethod;
 };
 
 

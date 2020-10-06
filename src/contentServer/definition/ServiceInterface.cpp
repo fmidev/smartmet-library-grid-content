@@ -153,160 +153,6 @@ int ServiceInterface::reload(T::SessionId sessionId)
 
 
 
-int ServiceInterface::addDataServerInfo(T::SessionId sessionId,T::ServerInfo& serverInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    unsigned long long timeStart = getTime();
-    int result = _addDataServerInfo(sessionId,serverInfo);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,serverInfo.getCsv().c_str(),result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int ServiceInterface::deleteDataServerInfoById(T::SessionId sessionId,uint serverId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    unsigned long long timeStart = getTime();
-    int result = _deleteDataServerInfoById(sessionId,serverId);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,serverId,result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int ServiceInterface::getDataServerInfoById(T::SessionId sessionId,uint serverId,T::ServerInfo& serverInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    unsigned long long timeStart = getTime();
-    int result = _getDataServerInfoById(sessionId,serverId,serverInfo);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,serverId,result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int ServiceInterface::getDataServerInfoByName(T::SessionId sessionId,std::string serverName,T::ServerInfo& serverInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    unsigned long long timeStart = getTime();
-    int result = _getDataServerInfoByName(sessionId,serverName,serverInfo);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,serverName.c_str(),result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int ServiceInterface::getDataServerInfoByIor(T::SessionId sessionId,std::string serverIor,T::ServerInfo& serverInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    unsigned long long timeStart = getTime();
-    int result = _getDataServerInfoByIor(sessionId,serverIor,serverInfo);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,serverIor.c_str(),result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int ServiceInterface::getDataServerInfoList(T::SessionId sessionId,T::ServerInfoList& serverInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    unsigned long long timeStart = getTime();
-    int result = _getDataServerInfoList(sessionId,serverInfoList);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,ServerInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,serverInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int ServiceInterface::getDataServerInfoCount(T::SessionId sessionId,uint& count)
-{
-  FUNCTION_TRACE
-  try
-  {
-    unsigned long long timeStart = getTime();
-    int result = _getDataServerInfoCount(sessionId,count);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,count,result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int ServiceInterface::addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
@@ -1960,94 +1806,6 @@ int ServiceInterface::deleteContentListBySourceId(T::SessionId sessionId,uint so
 
 
 
-int ServiceInterface::registerContentList(T::SessionId sessionId,uint serverId,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    unsigned long long timeStart = getTime();
-    int result = _registerContentList(sessionId,serverId,contentInfoList);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,serverId,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int ServiceInterface::registerContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    unsigned long long timeStart = getTime();
-    int result = _registerContentListByFileId(sessionId,serverId,fileId);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,serverId,fileId,result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int ServiceInterface::unregisterContentList(T::SessionId sessionId,uint serverId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    unsigned long long timeStart = getTime();
-    int result = _unregisterContentList(sessionId,serverId);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,serverId,result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int ServiceInterface::unregisterContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    unsigned long long timeStart = getTime();
-    int result = _unregisterContentListByFileId(sessionId,serverId,fileId);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,serverId,fileId,result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int ServiceInterface::getContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex,T::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
@@ -2146,28 +1904,6 @@ int ServiceInterface::getContentListByFileName(T::SessionId sessionId,std::strin
     unsigned long requestTime = getTime() - timeStart;
 
     PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,filename.c_str(),contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int ServiceInterface::getContentListByServerId(T::SessionId sessionId,uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    unsigned long long timeStart = getTime();
-    int result = _getContentListByServerId(sessionId,serverId,startFileId,startMessageIndex,maxRecords,contentInfoList);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,serverId,startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2815,69 +2551,6 @@ int ServiceInterface::_reload(T::SessionId sessionId)
 
 
 
-int ServiceInterface::_addDataServerInfo(T::SessionId sessionId,T::ServerInfo& serverInfo)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
-int ServiceInterface::_deleteDataServerInfoById(T::SessionId sessionId,uint serverId)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
-int ServiceInterface::_getDataServerInfoById(T::SessionId sessionId,uint serverId,T::ServerInfo& serverInfo)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
-int ServiceInterface::_getDataServerInfoByName(T::SessionId sessionId,std::string serverName,T::ServerInfo& serverInfo)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
-int ServiceInterface::_getDataServerInfoByIor(T::SessionId sessionId,std::string serverIor,T::ServerInfo& serverInfo)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
-int ServiceInterface::_getDataServerInfoList(T::SessionId sessionId,T::ServerInfoList& serverInfoList)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
-int ServiceInterface::_getDataServerInfoCount(T::SessionId sessionId,uint& count)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
 int ServiceInterface::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -3472,42 +3145,6 @@ int ServiceInterface::_addContentList(T::SessionId sessionId,T::ContentInfoList&
 
 
 
-int ServiceInterface::_registerContentList(T::SessionId sessionId,uint serverId,T::ContentInfoList& contentInfoList)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
-int ServiceInterface::_registerContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
-int ServiceInterface::_unregisterContentList(T::SessionId sessionId,uint serverId)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
-int ServiceInterface::_unregisterContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
 int ServiceInterface::_deleteContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -3653,15 +3290,6 @@ int ServiceInterface::_getContentListByProducerId(T::SessionId sessionId,uint pr
 
 
 int ServiceInterface::_getContentListByProducerName(T::SessionId sessionId,std::string producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
-int ServiceInterface::_getContentListByServerId(T::SessionId sessionId,uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }

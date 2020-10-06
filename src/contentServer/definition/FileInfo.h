@@ -102,7 +102,7 @@ class FileInfo
     class Flags
     {
       public:
-        static const uint PredefinedContent = 1;
+        static const uint UnusedFlag        = 1;
         static const uint VirtualContent    = 2;
         static const uint DeletedFile       = 4;
     };

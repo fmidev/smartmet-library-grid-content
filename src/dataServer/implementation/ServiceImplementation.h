@@ -152,16 +152,12 @@ class ServiceImplementation : public ServiceInterface
      virtual void   event_contentListDeletedByProducerId(T::EventInfo& eventInfo);
      virtual void   event_contentListDeletedByGenerationId(T::EventInfo& eventInfo);
      virtual void   event_contentListDeletedBySourceId(T::EventInfo& eventInfo);
-     virtual void   event_dataServerAdded(T::EventInfo& eventInfo);
-     virtual void   event_dataServerDeleted(T::EventInfo& eventInfo);
      virtual void   event_contentAdded(T::EventInfo& eventInfo);
      virtual void   event_contentDeleted(T::EventInfo& eventInfo);
-     virtual void   event_contentRegistered(T::EventInfo& eventInfo);
      virtual void   event_deleteVirtualContent(T::EventInfo& eventInfo);
      virtual void   event_updateVirtualContent(T::EventInfo& eventInfo);
 
-     virtual void   addFile(T::FileInfo& fileInfo,T::ContentInfoList& currentContentList,T::ContentInfoList& contentInfoList);
-     virtual void   checkServerRegistration();
+     virtual void   addFile(T::FileInfo& fileInfo,T::ContentInfoList& currentContentList);
      virtual void   fullUpdate();
      virtual void   loadPreloadList();
      virtual void   updateVirtualFiles(T::ContentInfoList fullContentList);

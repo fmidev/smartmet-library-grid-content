@@ -58,10 +58,6 @@ class ContentInfoList
     void                keepContentInfoByGenerationId(uint generationId);
     void                keepContentInfoBySourceId(uint sourceId);
 
-    uint                registerContentInfoByServerAndFileId(uint serverId,uint fileId);
-    uint                unregisterContentInfoByServerId(uint serverId);
-    uint                unregisterContentInfoByServerAndFileId(uint serverId,uint fileId);
-
     ContentInfo*        getContentInfoByIndex(uint index) const;
     ContentInfo*        getContentInfoByIndexNoCheck(uint index);
     ContentInfo*        getContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex);
@@ -113,8 +109,6 @@ class ContentInfoList
     void                getContentInfoListByGenerationAndGeometryId(uint producerId,uint generationId,T::GeometryId geometryId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
     void                getContentInfoListByProducerId(uint producerId,ContentInfoList& contentInfoList);
     void                getContentInfoListByProducerId(uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
-    void                getContentInfoListByServerId(uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
-    void                getContentInfoListByServerAndFileId(uint serverId,uint fileId,ContentInfoList& contentInfoList);
     int                 getClosestIndex(uint comparisonMethod,ContentInfo& contentInfo);
     int                 getClosestIndexNoLock(uint comparisonMethod,ContentInfo& contentInfo);
     void                getContentInfoListBySourceId(uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);

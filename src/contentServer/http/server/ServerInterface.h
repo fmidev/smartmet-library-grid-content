@@ -26,13 +26,6 @@ class ServerInterface
 
     virtual void clear(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void reload(T::RequestMessage& request,T::ResponseMessage& response);
-    virtual void addDataServerInfo(T::RequestMessage& request,T::ResponseMessage& response);
-    virtual void deleteDataServerInfoById(T::RequestMessage& request,T::ResponseMessage& response);
-    virtual void getDataServerInfoById(T::RequestMessage& request,T::ResponseMessage& response);
-    virtual void getDataServerInfoByName(T::RequestMessage& request,T::ResponseMessage& response);
-    virtual void getDataServerInfoByIor(T::RequestMessage& request,T::ResponseMessage& response);
-    virtual void getDataServerInfoList(T::RequestMessage& request,T::ResponseMessage& response);
-    virtual void getDataServerInfoCount(T::RequestMessage& request,T::ResponseMessage& response);
 
     virtual void addProducerInfo(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteProducerInfoById(T::RequestMessage& request,T::ResponseMessage& response);
@@ -114,10 +107,6 @@ class ServerInterface
     virtual void deleteContentListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteContentListByGenerationName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteContentListBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
-    virtual void registerContentList(T::RequestMessage& request,T::ResponseMessage& response);
-    virtual void registerContentListByFileId(T::RequestMessage& request,T::ResponseMessage& response);
-    virtual void unregisterContentList(T::RequestMessage& request,T::ResponseMessage& response);
-    virtual void unregisterContentListByFileId(T::RequestMessage& request,T::ResponseMessage& response);
 
     virtual void getContentInfo(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentList(T::RequestMessage& request,T::ResponseMessage& response);
@@ -127,7 +116,6 @@ class ServerInterface
     virtual void getContentListByGroupFlags(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByProducerName(T::RequestMessage& request,T::ResponseMessage& response);
-    virtual void getContentListByServerId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByGenerationName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByGenerationIdAndTimeRange(T::RequestMessage& request,T::ResponseMessage& response);

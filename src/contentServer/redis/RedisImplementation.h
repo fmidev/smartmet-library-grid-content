@@ -33,14 +33,6 @@ class RedisImplementation : public ServiceInterface
      virtual int    _clear(T::SessionId sessionId);
      virtual int    _reload(T::SessionId sessionId);
 
-     virtual int    _addDataServerInfo(T::SessionId sessionId,T::ServerInfo& serverInfo);
-     virtual int    _deleteDataServerInfoById(T::SessionId sessionId,uint serverId);
-     virtual int    _getDataServerInfoById(T::SessionId sessionId,uint serverId,T::ServerInfo& serverInfo);
-     virtual int    _getDataServerInfoByName(T::SessionId sessionId,std::string serverName,T::ServerInfo& serverInfo);
-     virtual int    _getDataServerInfoByIor(T::SessionId sessionId,std::string serverIor,T::ServerInfo& serverInfo);
-     virtual int    _getDataServerInfoList(T::SessionId sessionId,T::ServerInfoList& serverInfoList);
-     virtual int    _getDataServerInfoCount(T::SessionId sessionId,uint& count);
-
      virtual int    _addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo);
      virtual int    _deleteProducerInfoById(T::SessionId sessionId,uint producerId);
      virtual int    _deleteProducerInfoByName(T::SessionId sessionId,std::string producerName);
@@ -121,10 +113,6 @@ class RedisImplementation : public ServiceInterface
      virtual int    _deleteContentListByGenerationId(T::SessionId sessionId,uint generationId);
      virtual int    _deleteContentListByGenerationName(T::SessionId sessionId,std::string generationName);
      virtual int    _deleteContentListBySourceId(T::SessionId sessionId,uint sourceId);
-     virtual int    _registerContentList(T::SessionId sessionId,uint serverId,T::ContentInfoList& contentInfoList);
-     virtual int    _registerContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId);
-     virtual int    _unregisterContentList(T::SessionId sessionId,uint serverId);
-     virtual int    _unregisterContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId);
 
      virtual int    _getContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex,T::ContentInfo& contentInfo);
      virtual int    _getContentList(T::SessionId sessionId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
@@ -134,7 +122,6 @@ class RedisImplementation : public ServiceInterface
      virtual int    _getContentListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByProducerName(T::SessionId sessionId,std::string producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
-     virtual int    _getContentListByServerId(T::SessionId sessionId,uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList);
@@ -174,14 +161,6 @@ class RedisImplementation : public ServiceInterface
      bool           isSessionValid(T::SessionId sessionId);
 
      T::EventId     addEvent(uint eventType,uint id1,uint id2,uint id3,unsigned long long flags);
-
-     int            deleteDataServerById(uint serverId);
-     int            getDataServerById(uint serverId,T::ServerInfo& serverInfo);
-     int            getDataServerList(T::ServerInfoList& serverInfoList);
-
-     int            deleteContentServerById(uint serverId);
-     int            getContentServerById(uint serverId,T::ServerInfo& serverInfo);
-     int            getContentServerList(T::ServerInfoList& serverInfoList);
 
      int            deleteProducerById(uint producerId,bool deleteGenerations,bool deleteFiles,bool deleteContent);
      int            deleteProducerListBySourceId(uint sourceId,bool deleteGenerations,bool deleteFiles,bool deleteContent);
@@ -235,7 +214,6 @@ class RedisImplementation : public ServiceInterface
      int            getContentByGroupFlags(uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      int            getContentByProducerId(uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      int            getContentByRequestCounterKey(ulonglong key,T::ContentInfoList& contentInfoList);
-     int            getContentByServerId(uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      int            getContentBySourceId(uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      int            getContentByParameterId(T::ParamKeyType parameterKeyType,std::string parameterKey,T::ContentInfoList& contentInfoList);
      int            getContentByParameterIdAndTimeRange(T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList);
@@ -247,8 +225,6 @@ class RedisImplementation : public ServiceInterface
      int            getVirtualContent(uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
 
      void           truncateEvents();
-     int            unregisterContent(uint serverId);
-     void           resetContentRegistrations();
 
      int            addFilename(std::string filename,uint fileId);
      int            deleteFilename(std::string filename);

@@ -29,7 +29,9 @@ class ProducerInfoList
     bool              deleteProducerInfoById(uint producerId);
     void              deleteProducerInfoListBySourceId(uint sourceId);
     ProducerInfo*     getProducerInfoById(uint producerId);
+    bool              getProducerInfoById(uint producerId,ProducerInfo& producerInfo);
     ProducerInfo*     getProducerInfoByName(std::string producerName);
+    bool              getProducerInfoByName(std::string producerName,ProducerInfo& producerInfo);
     ProducerInfo*     getProducerInfoByIndex(uint index);
     ProducerInfo*     getProducerInfoByIndexNoCheck(uint index);
     void              getProducerInfoListBySourceId(uint sourceId,ProducerInfoList& producerInfoList);

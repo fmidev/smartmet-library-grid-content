@@ -7,8 +7,6 @@
 #include "../../definition/FileInfoList.h"
 #include "../../definition/EventInfo.h"
 #include "../../definition/EventInfoList.h"
-#include "../../definition/ServerInfo.h"
-#include "../../definition/ServerInfoList.h"
 #include "../../definition/ProducerInfo.h"
 #include "../../definition/ProducerInfoList.h"
 #include "../../definition/GenerationInfo.h"
@@ -46,12 +44,6 @@ class Converter
 
     static void   convert(T::FileInfoList& source,ContentServer::Corba::CorbaFileInfoList& target);
     static void   convert(const ContentServer::Corba::CorbaFileInfoList& source,T::FileInfoList& target);
-
-    static void   convert(T::ServerInfo& source,ContentServer::Corba::CorbaServerInfo& target);
-    static void   convert(const ContentServer::Corba::CorbaServerInfo& source,T::ServerInfo& target);
-
-    static void   convert(T::ServerInfoList& source,ContentServer::Corba::CorbaServerInfoList& target);
-    static void   convert(const ContentServer::Corba::CorbaServerInfoList& source,T::ServerInfoList& target);
 
     static void   convert(T::ProducerInfo& source,ContentServer::Corba::CorbaProducerInfo& target);
     static void   convert(const ContentServer::Corba::CorbaProducerInfo& source,T::ProducerInfo& target);

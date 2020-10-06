@@ -232,6 +232,34 @@ ProducerInfo* ProducerInfoList::getProducerInfoById(uint producerId)
 
 
 
+bool ProducerInfoList::getProducerInfoById(uint producerId,ProducerInfo& producerInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+    uint sz = getLength();
+    for (uint t=0; t<sz; t++)
+    {
+      ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
+      if (info != nullptr  &&  info->mProducerId == producerId)
+      {
+        producerInfo = *info;
+        return true;
+      }
+    }
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 ProducerInfo* ProducerInfoList::getProducerInfoByName(std::string producerName)
 {
   FUNCTION_TRACE
@@ -246,6 +274,34 @@ ProducerInfo* ProducerInfoList::getProducerInfoByName(std::string producerName)
         return info;
     }
     return nullptr;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+bool ProducerInfoList::getProducerInfoByName(std::string producerName,ProducerInfo& producerInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+    uint sz = getLength();
+    for (uint t=0; t<sz; t++)
+    {
+      ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
+      if (info != nullptr  &&  strcasecmp(info->mName.c_str(),producerName.c_str()) == 0)
+      {
+        producerInfo = *info;
+        return true;
+      }
+    }
+    return false;
   }
   catch (...)
   {

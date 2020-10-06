@@ -564,6 +564,7 @@ class ServiceImplementation : public ServiceInterface
      Lua::LuaFileCollection mLuaFileCollection;
      string_vec             mParameterMappingFiles;
      ProducerHash_map       mProducerHashMap;
+     ModificationLock       mProducerHashMap_modificationLock;
 
      std::string            mProducerFile;
      time_t                 mProducerFile_modificationTime;

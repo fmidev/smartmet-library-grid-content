@@ -55,7 +55,6 @@ CacheImplementation::CacheImplementation()
     mUpdateInProgress = false;
     mRequestForwardEnabled = false;
     mLastProcessedEventId = 0;
-    mDataServerCount = 0xFFFFFFFF;
     mProducerCount = 0xFFFFFFFF;
     mGenerationCount = 0xFFFFFFFF;
     mFileCount = 0xFFFFFFFF;
@@ -126,13 +125,11 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
       mLastProcessedEventId = eventInfo.mEventId;
       mContentStorageStartTime = eventInfo.mServerTime;
 
-      mDataServerCount = 0xFFFFFFFF;
       mProducerCount = 0xFFFFFFFF;
       mGenerationCount = 0xFFFFFFFF;
       mFileCount = 0xFFFFFFFF;
       mContentCount = 0xFFFFFFFF;
 
-      readDataServerList();
       readProducerList();
       readGenerationList();
       readFileList();
@@ -334,7 +331,6 @@ void CacheImplementation::reloadData()
       mUpdateInProgress = true;
       mLastProcessedEventId = 0;
 
-      mDataServerCount = 0xFFFFFFFF;
       mProducerCount = 0xFFFFFFFF;
       mGenerationCount = 0xFFFFFFFF;
       mFileCount = 0xFFFFFFFF;
@@ -343,7 +339,6 @@ void CacheImplementation::reloadData()
       mFileInfoList.clear();
       mProducerInfoList.clear();
       mGenerationInfoList.clear();
-      mDataServerInfoList.clear();
       mEventInfoList.clear();
       mContentInfoList.clear();
 
@@ -353,7 +348,6 @@ void CacheImplementation::reloadData()
       mLastProcessedEventId = eventInfo.mEventId;
       mContentStorageStartTime = eventInfo.mServerTime;
 
-      readDataServerList();
       readProducerList();
       readGenerationList();
       readFileList();
@@ -378,199 +372,6 @@ void CacheImplementation::reloadData()
   catch (...)
   {
     mUpdateInProgress = false;
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int CacheImplementation::_addDataServerInfo(T::SessionId sessionId,T::ServerInfo& serverInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mContentStorage == nullptr)
-      return Result::NO_PERMANENT_STORAGE_DEFINED;
-
-    int result = mContentStorage->addDataServerInfo(sessionId,serverInfo);
-    processEvents(false);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int CacheImplementation::_deleteDataServerInfoById(T::SessionId sessionId,uint serverId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mContentStorage == nullptr)
-      return Result::NO_PERMANENT_STORAGE_DEFINED;
-
-    int result = mContentStorage->deleteDataServerInfoById(sessionId,serverId);
-    processEvents(false);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int CacheImplementation::_getDataServerInfoById(T::SessionId sessionId,uint serverId,T::ServerInfo& serverInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mUpdateInProgress &&  !mRequestForwardEnabled)
-      return Result::OK;
-
-    if (mUpdateInProgress)
-      return mContentStorage->getDataServerInfoById(sessionId,serverId,serverInfo);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    T::ServerInfo *info = mDataServerInfoList.getServerInfoById(serverId);
-    if (info == nullptr)
-      return Result::DATA_NOT_FOUND;
-
-    serverInfo = *info;
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int CacheImplementation::_getDataServerInfoByName(T::SessionId sessionId,std::string serverName,T::ServerInfo& serverInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mUpdateInProgress &&  !mRequestForwardEnabled)
-      return Result::OK;
-
-    if (mUpdateInProgress)
-      return mContentStorage->getDataServerInfoByName(sessionId,serverName,serverInfo);;
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    T::ServerInfo *info = mDataServerInfoList.getServerInfoByName(serverName);
-    if (info == nullptr)
-      return Result::DATA_NOT_FOUND;
-
-    serverInfo = *info;
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int CacheImplementation::_getDataServerInfoByIor(T::SessionId sessionId,std::string serverIor,T::ServerInfo& serverInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mUpdateInProgress &&  !mRequestForwardEnabled)
-      return Result::OK;
-
-    if (mUpdateInProgress)
-      return mContentStorage->getDataServerInfoByIor(sessionId,serverIor,serverInfo);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    T::ServerInfo *info = mDataServerInfoList.getServerInfoByIor(serverIor);
-    if (info == nullptr)
-      return Result::DATA_NOT_FOUND;
-
-    serverInfo = *info;
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int CacheImplementation::_getDataServerInfoList(T::SessionId sessionId,T::ServerInfoList& serverInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mUpdateInProgress &&  !mRequestForwardEnabled)
-      return Result::OK;
-
-    if (mUpdateInProgress)
-      return mContentStorage->getDataServerInfoList(sessionId,serverInfoList);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    serverInfoList.clear();
-
-    serverInfoList = mDataServerInfoList;
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int CacheImplementation::_getDataServerInfoCount(T::SessionId sessionId,uint& count)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mUpdateInProgress &&  !mRequestForwardEnabled)
-      return Result::OK;
-
-    if (mUpdateInProgress)
-      return mContentStorage->getDataServerInfoCount(sessionId,count);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    count = mDataServerInfoList.getLength();
-    return Result::OK;
-  }
-  catch (...)
-  {
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
@@ -2953,13 +2754,6 @@ int CacheImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    if (requestingServerId != 0)
-    {
-      T::ServerInfo *info = mDataServerInfoList.getServerInfoById(requestingServerId);
-      if (info != nullptr)
-        info->mLastCall = time(nullptr);
-    }
-
     T::EventInfo *lastEvent = mEventInfoList.getLastEvent();
     if (lastEvent == nullptr)
       return Result::DATA_NOT_FOUND;
@@ -2996,13 +2790,6 @@ int CacheImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
       return Result::INVALID_SESSION;
 
     eventInfoList.clear();
-
-    if (requestingServerId != 0)
-    {
-      T::ServerInfo *info = mDataServerInfoList.getServerInfoById(requestingServerId);
-      if (info != nullptr)
-        info->mLastCall = time(nullptr);
-    }
 
     mEventInfoList.getEventInfoList(startEventId,maxRecords,eventInfoList);
     return Result::OK;
@@ -3286,94 +3073,6 @@ int CacheImplementation::_deleteContentListBySourceId(T::SessionId sessionId,uin
 
 
 
-int CacheImplementation::_registerContentList(T::SessionId sessionId,uint serverId,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mContentStorage == nullptr)
-      return Result::NO_PERMANENT_STORAGE_DEFINED;
-
-    int result = mContentStorage->registerContentList(sessionId,serverId,contentInfoList);
-    processEvents(false);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int CacheImplementation::_registerContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mContentStorage == nullptr)
-      return Result::NO_PERMANENT_STORAGE_DEFINED;
-
-    int result = mContentStorage->registerContentListByFileId(sessionId,serverId,fileId);
-    processEvents(false);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int CacheImplementation::_unregisterContentList(T::SessionId sessionId,uint serverId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mContentStorage == nullptr)
-      return Result::NO_PERMANENT_STORAGE_DEFINED;
-
-    int result = mContentStorage->unregisterContentList(sessionId,serverId);
-    processEvents(false);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int CacheImplementation::_unregisterContentListByFileId(T::SessionId sessionId,uint serverId,uint fileId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mContentStorage == nullptr)
-      return Result::NO_PERMANENT_STORAGE_DEFINED;
-
-    int result = mContentStorage->unregisterContentListByFileId(sessionId,serverId,fileId);
-    processEvents(false);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int CacheImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex,T::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
@@ -3541,43 +3240,6 @@ int CacheImplementation::_getContentListByFileName(T::SessionId sessionId,std::s
     contentInfoList.clear();
 
     ssp->mContentInfoList[0].getContentInfoListByFileId(fileInfo->mFileId,contentInfoList);
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int CacheImplementation::_getContentListByServerId(T::SessionId sessionId,uint serverId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mUpdateInProgress &&  !mRequestForwardEnabled)
-      return Result::OK;
-
-    if (mUpdateInProgress)
-      return mContentStorage->getContentListByServerId(sessionId,serverId,startFileId,startMessageIndex,maxRecords,contentInfoList);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    auto ssp = boost::atomic_load(&mSearchStructureSptr);
-    if (!ssp)
-      return Result::DATA_NOT_FOUND;
-
-    T::ServerInfo *info = mDataServerInfoList.getServerInfoById(serverId);
-    if (info == nullptr)
-      return Result::UNKNOWN_SERVER_ID;
-
-    contentInfoList.clear();
-
-    ssp->mContentInfoList[0].getContentInfoListByServerId(serverId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     return Result::OK;
   }
   catch (...)
@@ -5297,35 +4959,6 @@ void CacheImplementation::readContentList()
 
 
 
-void CacheImplementation::readDataServerList()
-{
-  FUNCTION_TRACE
-  try
-  {
-   PRINT_DATA(mDebugLog,"* Reading the data server list\n");
-   if (mContentStorage == nullptr)
-      return;
-
-    mDataServerInfoList.clear();
-
-    int result = mContentStorage->getDataServerInfoList(mSessionId,mDataServerInfoList);
-    if (result != 0)
-    {
-      Fmi::Exception exception(BCP,"Cannot read the data server list from the content storage!");
-      exception.addParameter("ServiceResult",getResultString(result));
-      throw exception;
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 void CacheImplementation::event_clear(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5341,7 +4974,6 @@ void CacheImplementation::event_clear(T::EventInfo& eventInfo)
     mFileInfoList.clear();
     mProducerInfoList.clear();
     mGenerationInfoList.clear();
-    mDataServerInfoList.clear();
     mEventInfoList.clear();
     mContentInfoList.clear();
   }
@@ -5650,41 +5282,37 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
 
         if (eventInfo.mId3 > 0)
         {
-          if ((fileInfo.mFlags & T::FileInfo::Flags::PredefinedContent) != 0)
+          T::ContentInfoList contentInfoList;
+          if (mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) == Result::OK)
           {
-            T::ContentInfoList contentInfoList;
-            if (mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) == Result::OK)
+            uint len = contentInfoList.getLength();
+            for (uint c=0; c<len; c++)
             {
-              uint len = contentInfoList.getLength();
-              for (uint c=0; c<len; c++)
+              T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
+              T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
+              if (oInfo == nullptr  ||  (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
               {
-                T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
-                T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
-                if (oInfo == nullptr  ||  (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
+                if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
                 {
-                  if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
+                  // We should remove the old content before the addition
+                }
+                else
+                {
+                  T::ContentInfo *cInfo = info->duplicate();
+                  auto it = mContentTimeCache.find(cInfo->mGenerationId);
+                  if (it != mContentTimeCache.end())
                   {
-                    // We should remove the old content before the addition
+                    if (it->second.find(cInfo->mForecastTime) == it->second.end())
+                      it->second.insert(cInfo->mForecastTime);
+                  }
+
+                  if (mContentInfoList.addContentInfo(cInfo) == cInfo)
+                  {
                   }
                   else
                   {
-                    T::ContentInfo *cInfo = info->duplicate();
-
-                    auto it = mContentTimeCache.find(cInfo->mGenerationId);
-                    if (it != mContentTimeCache.end())
-                    {
-                      if (it->second.find(cInfo->mForecastTime) == it->second.end())
-                        it->second.insert(cInfo->mForecastTime);
-                    }
-
-                    if (mContentInfoList.addContentInfo(cInfo) == cInfo)
-                    {
-                    }
-                    else
-                    {
-                      // Addition failed
-                      delete cInfo;
-                    }
+                    // Addition failed
+                    delete cInfo;
                   }
                 }
               }
@@ -5768,34 +5396,31 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
         mFileInfoList.addFileInfo(fInfo);
       }
 
-      if ((fileInfo.mFlags & T::FileInfo::Flags::PredefinedContent) != 0)
+      T::ContentInfoList contentInfoList;
+      if (mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) == Result::OK)
       {
-        T::ContentInfoList contentInfoList;
-        if (mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) == Result::OK)
+        uint len = contentInfoList.getLength();
+        for (uint c=0; c<len; c++)
         {
-          uint len = contentInfoList.getLength();
-          for (uint c=0; c<len; c++)
+          T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
+          T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
+          if (oInfo == nullptr  ||  (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
           {
-            T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
-            T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
-            if (oInfo == nullptr  ||  (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
+            if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
             {
-              if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
+              // We should remove the old content before the addition
+            }
+            else
+            {
+              T::ContentInfo *cInfo = info->duplicate();
+
+              if (mContentInfoList.addContentInfo(cInfo) == cInfo)
               {
-                // We should remove the old content before the addition
               }
               else
               {
-                T::ContentInfo *cInfo = info->duplicate();
-
-                if (mContentInfoList.addContentInfo(cInfo) == cInfo)
-                {
-                }
-                else
-                {
-                  // Addtion failed
-                  delete cInfo;
-                }
+                // Addtion failed
+                delete cInfo;
               }
             }
           }
@@ -6002,56 +5627,6 @@ void CacheImplementation::event_contentListDeletedByGenerationId(T::EventInfo& e
 
 
 
-void CacheImplementation::event_dataServerAdded(T::EventInfo& eventInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    // printf("EVENT[%llu]: dataServerAdded(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    T::ServerInfo serverInfo;
-    if (mContentStorage->getDataServerInfoById(mSessionId,eventInfo.mId1,serverInfo) == Result::OK)
-    {
-      T::ServerInfo *info = serverInfo.duplicate();
-      mDataServerInfoList.addServerInfo(info);
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void CacheImplementation::event_dataServerDeleted(T::EventInfo& eventInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    // printf("EVENT[%llu]: dataServerDeleted(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    mContentInfoList.unregisterContentInfoByServerId(eventInfo.mId1);
-    mContentCount = 0xFFFFFFFF;
-
-    mDataServerInfoList.deleteServerInfoById(eventInfo.mId1);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6125,40 +5700,6 @@ void CacheImplementation::event_contentDeleted(T::EventInfo& eventInfo)
     if (contentInfo != nullptr)
     {
        mContentInfoList.deleteContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void CacheImplementation::event_contentRegistered(T::EventInfo& eventInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    // printf("EVENT[%llu]: contentRegistered(%u,%u,%u)\n",eventInfo.mEventId,eventInfo.mId1,eventInfo.mId2,eventInfo.mId3);
-
-    if (eventInfo.mId3 < 1 ||  eventInfo.mId3 > 64)
-    {
-      PRINT_DATA(mDebugLog,"%s:%d:%s: Invalid server id (%u)!\n",__FILE__,__LINE__,__FUNCTION__,eventInfo.mId3);
-      return;
-    }
-
-    unsigned long long sf = 1 << (eventInfo.mId3-1);
-
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    T::ContentInfo *info = mContentInfoList.getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
-    if (info != nullptr)
-    {
-      info->mServerFlags = info->mServerFlags | sf;
-      mContentCount = 0xFFFFFFFF;
     }
   }
   catch (...)
@@ -6310,24 +5851,12 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
         event_contentListDeletedBySourceId(eventInfo);
         break;
 
-      case EventType::DATA_SERVER_ADDED:
-        event_dataServerAdded(eventInfo);
-        break;
-
-      case EventType::DATA_SERVER_DELETED:
-        event_dataServerDeleted(eventInfo);
-        break;
-
       case EventType::CONTENT_ADDED:
         event_contentAdded(eventInfo);
         break;
 
       case EventType::CONTENT_DELETED:
         event_contentDeleted(eventInfo);
-        break;
-
-      case EventType::CONTENT_REGISTERED:
-        event_contentRegistered(eventInfo);
         break;
 
       case EventType::DELETE_VIRTUAL_CONTENT:
@@ -6510,9 +6039,6 @@ void CacheImplementation::saveData()
     {
       AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
 
-      if (mDataServerCount != mDataServerInfoList.getLength())
-        mDataServerInfoList.writeToFile(mSaveDir + "/dataServers.csv");
-
       if (mProducerCount != mProducerInfoList.getLength())
         mProducerInfoList.writeToFile(mSaveDir + "/producer.csv");
 
@@ -6528,7 +6054,6 @@ void CacheImplementation::saveData()
       if (mContentCount != mContentInfoList.getLength())
         mContentInfoList.writeToFile(mSaveDir + "/content.csv");
 
-      mDataServerCount = mDataServerInfoList.getLength();
       mProducerCount = mProducerInfoList.getLength();
       mGenerationCount = mGenerationInfoList.getLength();
       mFileCount = mFileInfoList.getLength();
