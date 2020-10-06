@@ -28,6 +28,7 @@ LuaFile::LuaFile()
     }
 
     mLastModified = 0;
+    mStateKeyCounter = 0;
   }
   catch (...)
   {
@@ -51,6 +52,7 @@ LuaFile::LuaFile(const std::string& filename)
     }
 
     mLastModified = 0;
+    mStateKeyCounter = 0;
   }
   catch (...)
   {
@@ -75,6 +77,7 @@ LuaFile::LuaFile(const LuaFile& luaFile)
     }
 
     mLastModified = luaFile.mLastModified;
+    mStateKeyCounter = 0;
   }
   catch (...)
   {
@@ -146,7 +149,7 @@ void LuaFile::init(const std::string& filename)
 
 
 
-void* LuaFile::getLuaState(ulonglong key)
+void* LuaFile::getLuaState(ulonglong& key)
 {
   try
   {
@@ -157,7 +160,10 @@ void* LuaFile::getLuaState(ulonglong key)
       {
         if (mStateKey[t] == 0)
         {
+          mStateKeyCounter++;
+          key = mStateKeyCounter;
           mStateKey[t] = key;
+//          printf("GET %u %llu %llu\n",t,key,(ulonglong)mLuaState[t]);
           return mLuaState[t];
         }
       }
@@ -208,6 +214,8 @@ bool LuaFile::checkUpdates()
 
     if (tt != mLastModified  &&  (tt+3) < time(nullptr))
     {
+      AutoWriteLock lock(&mStateModificationLock);
+
       // Waiting until all states are free.
       bool ind = false;
       while (!ind)
@@ -374,6 +382,8 @@ double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& 
 
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
+
+    // printf("STATE %llu\n",(ulonglong)L);
 
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
