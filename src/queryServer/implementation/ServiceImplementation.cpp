@@ -15,6 +15,7 @@
 #include "../../functions/Function_add.h"
 #include "../../functions/Function_avg.h"
 #include "../../functions/Function_div.h"
+#include "../../functions/Function_feelsLike.h"
 #include "../../functions/Function_min.h"
 #include "../../functions/Function_max.h"
 #include "../../functions/Function_mul.h"
@@ -143,6 +144,8 @@ void ServiceImplementation::init(
 
     // Degrees to radians
     mFunctionCollection.addFunction("DEG2RAD",new Functions::Function_multiply((2*3.1415926535/360.0)));
+
+    mFunctionCollection.addFunction("FEELS_LIKE",new Functions::Function_feelsLike());
 
     mParameterMappingFiles = parameterMappingFiles;
 
@@ -2941,7 +2944,7 @@ bool ServiceImplementation::getSpecialValues(
             p += sprintf(p, "%f;", rec.mValue);
           }
 
-          T::GridValue rec(x, y, std::string(tmp));
+          T::GridValue rec(x, y, tmp);
           valueList.mValueList.addGridValue(rec);
         }
 
@@ -3053,7 +3056,7 @@ bool ServiceImplementation::getSpecialValues(
           p += sprintf(p, "%f;", rec.mValue);
         }
 
-        T::GridValue rec(x, y, std::string(tmp));
+        T::GridValue rec(x, y, tmp);
         valueList.mValueList.addGridValue(rec);
 
         if (precision < 0)

@@ -102,7 +102,6 @@ double Function_mul::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
-/*
 void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try
@@ -115,10 +114,11 @@ void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::
     for (uint t=0; t<len; t++)
     {
       double a = inParameters[0][t];
+      double b = inParameters[1][t];
 
-      if (a != ParamValueMissing)
+      if (a != ParamValueMissing  &&  b != ParamValueMissing)
       {
-        float c = (float)(a * mmuler);
+        float c = a*b;
         outParameters.push_back(c);
       }
       else
@@ -141,7 +141,7 @@ void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 {
   try
   {
-    if (inParameters.size() != 1)
+    if (inParameters.size() != 2)
       return;
 
     uint len = inParameters[0].size();
@@ -149,10 +149,11 @@ void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::
     for (uint t=0; t<len; t++)
     {
       double a = inParameters[0][t];
+      double b = inParameters[1][t];
 
-      if (a != ParamValueMissing)
+      if (a != ParamValueMissing  &&  b != ParamValueMissing)
       {
-        double c = (double)(a * mmuler);
+        float c = a*b;
         outParameters.push_back(c);
       }
       else
@@ -166,7 +167,7 @@ void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::
     throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
-*/
+
 
 
 Function* Function_mul::duplicate()

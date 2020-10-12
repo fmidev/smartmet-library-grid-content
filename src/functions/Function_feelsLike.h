@@ -9,12 +9,12 @@ namespace Functions
 {
 
 
-class Function_mul : public Function
+class Function_feelsLike : public Function
 {
   public:
-                      Function_mul();
-                      Function_mul(const Function_mul& function);
-    virtual           ~Function_mul();
+                      Function_feelsLike();
+                      Function_feelsLike(const Function_feelsLike& function);
+    virtual           ~Function_feelsLike();
 
     // Type 1: Takes one or several parameters, returns one value
     virtual float     executeFunctionCall1(std::vector<float>& parameters);
@@ -25,7 +25,15 @@ class Function_mul : public Function
     virtual void      executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters);
 
     virtual Function* duplicate();
+    virtual void      print(std::ostream& stream,uint level,uint optionFlags);
+
+  protected:
+
+    double            feelsLike(double wind,double rh,double temp,double rad);
+    double            SSI(double rh,double t);
+
 };
+
 
 
 }  // namespace Functions

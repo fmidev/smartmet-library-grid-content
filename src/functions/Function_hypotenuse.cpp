@@ -56,7 +56,23 @@ Function_hypotenuse::~Function_hypotenuse()
 
 float Function_hypotenuse::executeFunctionCall1(std::vector<float>& parameters)
 {
-  throw Fmi::Exception(BCP, "Not implemented!");
+  try
+  {
+    if (parameters.size() != 2)
+      return ParamValueMissing;
+
+    double a = parameters[0];
+    double b = parameters[1];
+
+    if (a != ParamValueMissing and b != ParamValueMissing)
+      return (float)sqrt(a*a+b*b);
+    else
+      return ParamValueMissing;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
 }
 
 
@@ -65,7 +81,23 @@ float Function_hypotenuse::executeFunctionCall1(std::vector<float>& parameters)
 
 double Function_hypotenuse::executeFunctionCall1(std::vector<double>& parameters)
 {
-  throw Fmi::Exception(BCP, "Not implemented!");
+  try
+  {
+    if (parameters.size() != 2)
+      return ParamValueMissing;
+
+    double a = parameters[0];
+    double b = parameters[1];
+
+    if (a != ParamValueMissing and b != ParamValueMissing)
+      return (float)sqrt(a*a+b*b);
+    else
+      return ParamValueMissing;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
 }
 
 
