@@ -34,19 +34,29 @@ class RedisProcessLock
     {
       FUNCTION_TRACE
       mRedisImplementation = redisImplementation;
-      mRedisImplementation->lock(function,line);
+      mRedisImplementation->lock(function,line,mKey,180,true);
+    }
+
+
+    RedisProcessLock(const char *function,uint line,RedisImplementation *redisImplementation,uint waitTimeInSec,bool resetLock)
+    {
+      FUNCTION_TRACE
+      mRedisImplementation = redisImplementation;
+      mRedisImplementation->lock(function,line,mKey,waitTimeInSec,resetLock);
     }
 
 
     virtual ~RedisProcessLock()
     {
       FUNCTION_TRACE
-      mRedisImplementation->unlock();
+      if (mKey != 0)
+        mRedisImplementation->unlock(mKey);
     }
 
   protected:
 
     RedisImplementation *mRedisImplementation;
+    ulonglong mKey;
 };
 
 
@@ -72,40 +82,8 @@ RedisImplementation::RedisImplementation()
     mContext = nullptr;
     mStartTime = time(nullptr);
     mRedisPort = 0;
-    uint tryCount = 0;
-
-    permissions allow_all;
-    allow_all.set_unrestricted();
-    umask(0);
-
-    mMutex = nullptr;
-    while (mMutex == nullptr)
-    {
-      mMutex = new named_mutex(open_or_create, "redis_mutex",allow_all);
-      if (!mMutex->timed_lock(boost::get_system_time() + boost::posix_time::seconds(10)))
-      {
-        tryCount++;
-        if (tryCount == 30)
-        {
-          // Cannot lock the mutex. Maybe it was locked by a faulty process. Let's remove
-          // it and create it again.
-          named_mutex::remove("redis_mutex");
-        }
-
-        delete mMutex;
-        mMutex = nullptr;
-      }
-      else
-      {
-        mMutex->unlock();
-      }
-
-      if (mMutex == nullptr && tryCount > 18)
-      {
-        throw Fmi::Exception(BCP,"Cannot init mutex!");
-      }
-    }
     mLine = 0;
+    mShutdownRequested = false;
   }
   catch (...)
   {
@@ -124,9 +102,6 @@ RedisImplementation::~RedisImplementation()
   {
     if (mContext != nullptr)
       redisFree(mContext);
-
-    if (mMutex != nullptr)
-      delete mMutex;
   }
   catch (...)
   {
@@ -138,19 +113,78 @@ RedisImplementation::~RedisImplementation()
 
 
 
-void RedisImplementation::lock(const char *function,uint line)
+void RedisImplementation::lock(const char *function,uint line,ulonglong& key,uint waitTimeInSec,bool resetLock)
 {
   FUNCTION_TRACE
   try
   {
-    if (mMutex != nullptr)
+    AutoThreadLock lock(&mThreadLock);
+
+    mFunction = function;
+    mLine = line;
+    key = 0;
+
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"INCR %slockRequestCounter",mTablePrefix.c_str()));
+    if (reply == nullptr)
     {
-      if (!mMutex->timed_lock(boost::get_system_time() + boost::posix_time::seconds(300)))
+      closeConnection();
+      throw Fmi::Exception(BCP,"Cannot set the lock request counter!");
+    }
+
+    ulonglong lockRequestCounter = reply->integer;
+    ulonglong lockReleaseCounter = 0;
+    freeReplyObject(reply);
+
+    time_t startTime = time(nullptr);
+
+    //printf("TRY LOCK %llu\n",lockRequestCounter);
+
+    while ((lockReleaseCounter+1) <= lockRequestCounter)
+    {
+      if (mShutdownRequested)
+        return;
+
+      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"GET %slockReleaseCounter",mTablePrefix.c_str()));
+      if (reply == nullptr)
       {
-        throw Fmi::Exception(BCP,"Cannot lock mutex!");
+        closeConnection();
+        throw Fmi::Exception(BCP,"Cannot get the lock release counter!");
       }
-      mFunction = function;
-      mLine = line;
+      lockReleaseCounter = reply->integer;
+      if (reply->str != nullptr)
+        lockReleaseCounter = toInt64(reply->str);
+      freeReplyObject(reply);
+
+      // printf("-- TRY LOCK %llu+1 == %llu\n",lockReleaseCounter,lockRequestCounter);
+
+      if ((lockReleaseCounter+1) == lockRequestCounter)
+      {
+        key = lockRequestCounter;
+        //printf("LOCK %llu\n",key);
+        return;
+      }
+      time_usleep(0,100);
+
+      time_t currentTime = time(nullptr);
+      if ((currentTime-startTime) >= waitTimeInSec)
+      {
+        if (resetLock)
+        {
+          redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"SET %slockReleaseCounter %llu",mTablePrefix.c_str(),lockRequestCounter-1));
+          if (reply == nullptr)
+          {
+            closeConnection();
+            throw Fmi::Exception(BCP,"Cannot set the lock release counter!");
+          }
+
+          freeReplyObject(reply);
+          //printf("RESET %llu\n",lockRequestCounter-1);
+        }
+        else
+        {
+          return;
+        }
+      }
     }
   }
   catch (...)
@@ -162,19 +196,43 @@ void RedisImplementation::lock(const char *function,uint line)
 
 
 
-void RedisImplementation::unlock()
+void RedisImplementation::unlock(ulonglong key)
 {
   FUNCTION_TRACE
   try
   {
-    if (mMutex != nullptr)
-      mMutex->unlock();
+    AutoThreadLock lock(&mThreadLock);
+
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"GET %slockReleaseCounter",mTablePrefix.c_str()));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      throw Fmi::Exception(BCP,"Cannot get the lock release counter!");
+    }
+
+    ulonglong lockReleaseCounter = reply->integer;
+    if (reply->str != nullptr)
+      lockReleaseCounter = toInt64(reply->str);
+
+    //printf("UNLOCK %llu < %llu\n",lockReleaseCounter,key);
+
+    if (lockReleaseCounter < key)
+    {
+      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"SET %slockReleaseCounter %llu",mTablePrefix.c_str(),key));
+      if (reply == nullptr)
+      {
+        closeConnection();
+        throw Fmi::Exception(BCP,"Cannot set the lock release counter!");
+      }
+      freeReplyObject(reply);
+    }
   }
   catch (...)
   {
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
+
 
 
 
@@ -192,6 +250,16 @@ void RedisImplementation::init(const char *redisAddress,int redisPort,const char
 
     if (mContext == nullptr)
       throw Fmi::Exception(BCP,"Cannot connect to Redis!");
+/*
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"SET %slockRequestCounter 0",mTablePrefix.c_str()));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      throw Fmi::Exception(BCP,"Cannot set the lock release counter!");
+    }
+
+    freeReplyObject(reply);
+*/
   }
   catch (...)
   {
@@ -272,7 +340,7 @@ void RedisImplementation::shutdown()
   FUNCTION_TRACE
   try
   {
-    //exit(0);
+    mShutdownRequested = true;
   }
   catch (...)
   {
@@ -3264,7 +3332,7 @@ int RedisImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
   FUNCTION_TRACE
   try
   {
-    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+    //RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3425,7 +3493,7 @@ int RedisImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
   {
     count = 0;
 
-    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+    //RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
