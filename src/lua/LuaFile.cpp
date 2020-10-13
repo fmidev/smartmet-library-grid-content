@@ -930,7 +930,7 @@ std::string LuaFile::executeFunctionCall6(std::string& function,std::vector<std:
 
       return value;
     }
-    return 0;
+    return std::string("");
   }
   catch (...)
   {
