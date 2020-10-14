@@ -222,14 +222,14 @@ void EventInfo::setCsv(const char *csv)
 
     if (c >= 8)
     {
-      mEventId = toInt64(field[0]);
-      mEventTime = toInt64(field[1]);
-      mServerTime = toInt64(field[2]);
-      mType = toInt64(field[3]);
-      mId1 = toInt64(field[4]);
-      mId2 = toInt64(field[5]);
-      mId3 = toInt64(field[6]);
-      mFlags = (unsigned long long)toInt64(field[7]);
+      mEventId = toUInt64(field[0]);
+      mEventTime = (time_t)toInt64(field[1]);
+      mServerTime = (time_t)toInt64(field[2]);
+      mType = toUInt32(field[3]);
+      mId1 = toUInt32(field[4]);
+      mId2 = toUInt32(field[5]);
+      mId3 = toUInt32(field[6]);
+      mFlags = toUInt64(field[7]);
       mNote = field[8];
     }
   }

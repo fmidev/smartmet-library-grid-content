@@ -201,7 +201,7 @@ short VirtualMessage::getForecastType() const
   try
   {
     initMessagePtrs();
-    return toInt64(mParamDef.mForecastType);
+    return toInt16(mParamDef.mForecastType);
   }
   catch (...)
   {
@@ -224,7 +224,7 @@ short VirtualMessage::getForecastNumber() const
   try
   {
     initMessagePtrs();
-    return toInt64(mParamDef.mForecastNumber);
+    return toInt16(mParamDef.mForecastNumber);
   }
   catch (...)
   {
@@ -247,7 +247,7 @@ T::GeometryId VirtualMessage::getGridGeometryId() const
   try
   {
     initMessagePtrs();
-    return toInt64(mParamDef.mGeometryId);
+    return toInt32(mParamDef.mGeometryId);
   }
   catch (...)
   {
@@ -1177,7 +1177,7 @@ T::ParamLevel VirtualMessage::getGridParameterLevel() const
   try
   {
     initMessagePtrs();
-    return toInt64(mParamDef.mLevel);
+    return toInt32(mParamDef.mLevel);
   }
   catch (...)
   {
@@ -1195,7 +1195,7 @@ T::ParamLevelId VirtualMessage::getGridParameterLevelId() const
   try
   {
     initMessagePtrs();
-    return toInt64(mParamDef.mLevelId);
+    return toUInt8(mParamDef.mLevelId);
   }
   catch (...)
   {

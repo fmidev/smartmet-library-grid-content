@@ -186,8 +186,8 @@ void ProducerInfoList::deleteProducerInfoListBySourceId(uint sourceId)
   try
   {
     AutoWriteLock lock(&mModificationLock);
-    int sz = getLength()-1;
-    for (int t=sz; t>=0; t--)
+    long sz = getLength()-1;
+    for (long t=sz; t>=0; t--)
     {
       ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
       if (info != nullptr  &&  info->mSourceId == sourceId)

@@ -59,7 +59,7 @@ float Function_avg::executeFunctionCall1(std::vector<float>& parameters)
 {
   try
   {
-    double total = 0;
+    float total = 0;
     uint len = parameters.size();
     uint cnt = 0;
     for (uint t=0; t<len; t++)
@@ -129,7 +129,7 @@ void Function_avg::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
     for (uint s=0; s<sz; s++)
     {
-      double total = 0;
+      float total = 0;
       uint cnt = 0;
       for (uint t=0; t<len; t++)
       {

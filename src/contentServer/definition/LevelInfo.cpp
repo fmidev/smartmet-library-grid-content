@@ -180,12 +180,12 @@ void LevelInfo::setCsv(const char *csv)
 
     if (c >= 6)
     {
-      mProducerId = toInt64(field[0]);
+      mProducerId = toUInt32(field[0]);
       mFmiParameterName = field[1];
-      mFmiParameterLevelId = toInt64(field[2]);
-      mGrib1ParameterLevelId = toInt64(field[3]);
-      mGrib2ParameterLevelId = toInt64(field[4]);
-      mParameterLevel = toInt64(field[5]);
+      mFmiParameterLevelId = toUInt8(field[2]);
+      mGrib1ParameterLevelId = toUInt8(field[3]);
+      mGrib2ParameterLevelId = toUInt8(field[4]);
+      mParameterLevel = toInt32(field[5]);
     }
   }
   catch (...)

@@ -84,7 +84,7 @@ float Function_sequence::executeFunctionCall1(std::vector<float>& parameters)
     if (parameters.size() != 1)
       throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");
 
-    double val = parameters[0];
+    float val = parameters[0];
 
     for (auto it = mFunctionList.begin(); it != mFunctionList.end(); ++it)
     {

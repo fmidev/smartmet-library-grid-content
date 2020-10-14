@@ -144,7 +144,7 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
     time_t startTime = currentTime;
     int startStep = 0;
     int timestep = 3600;
-    int timesteps = 24;
+    long timesteps = 24;
     time_t endTime = startTime + (timesteps-1) * timestep;
     std::set<std::string> timeList;
 
@@ -272,8 +272,8 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
       sprintf(tmp,"%04d%02d%02dT000000",tt.tm_year + 1900,tt.tm_mon + 1,tt.tm_mday);
       time_t dayStartTime = localTimeToTimeT(tmp,"UTC");
 
-      int diff = startTime - dayStartTime;
-      int steps = (diff / timestep);
+      long diff = startTime - dayStartTime;
+      long steps = (diff / timestep);
       if ((diff % timestep) != 0)
         startTime = dayStartTime + (steps+1)*timestep;
 

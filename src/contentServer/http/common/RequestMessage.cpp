@@ -377,7 +377,7 @@ bool RequestMessage::getLineByKey(const char *key,short& value)
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        value = (short)toInt64(s+len+1);
+        value = toInt16(s+len+1);
         return true;
       }
     }
@@ -404,7 +404,7 @@ bool RequestMessage::getLineByKey(const char *key,int& value)
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        value = toInt64(s+len+1);
+        value = toInt32(s+len+1);
         return true;
       }
     }
@@ -431,7 +431,7 @@ bool RequestMessage::getLineByKey(const char *key,uint& value)
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        value = toInt64(s+len+1);
+        value = toUInt32(s+len+1);
         return true;
       }
     }
@@ -458,7 +458,7 @@ bool RequestMessage::getLineByKey(const char *key,unsigned char& value)
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        value = (unsigned char)toInt64(s+len+1);
+        value = toUInt8(s+len+1);
         return true;
       }
     }
@@ -485,7 +485,7 @@ bool RequestMessage::getLineByKey(const char *key,unsigned long long& value)
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        value = (unsigned long long)toInt64(s+len+1);
+        value = toUInt64(s+len+1);
         return true;
       }
     }
@@ -512,7 +512,7 @@ bool RequestMessage::getLineByKey(const char *key,long long& value)
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        value = (long long)toInt64(s+len+1);
+        value = toInt64(s+len+1);
         return true;
       }
     }

@@ -461,7 +461,7 @@ void ServiceImplementation::loadProducerFile()
 
         if (c >= 2 && field[0][0] != '\0' && field[1][0] != '\0')
         {
-          mProducerList.push_back(std::pair<std::string, T::GeometryId>(std::string(field[0]), toInt64(field[1])));
+          mProducerList.push_back(std::pair<std::string, T::GeometryId>(std::string(field[0]), toInt32(field[1])));
         }
       }
     }
@@ -1033,25 +1033,25 @@ void ServiceImplementation::getParameterStringInfo(
     if (c > 2)
     {
       if (field[2][0] != '\0')
-        geometryId = toInt64(field[2]);
+        geometryId = toInt32(field[2]);
     }
 
     if (c > 3)
     {
       if (field[3][0] != '\0')
-        paramLevelId = toInt64(field[3]);
+        paramLevelId = toUInt8(field[3]);
     }
 
     if (c > 4)
     {
       if (field[4][0] != '\0')
-        paramLevel = toInt64(field[4]);
+        paramLevel = toInt32(field[4]);
     }
 
     if (c > 5)
     {
       if (field[5][0] != '\0')
-        forecastType = (T::ForecastType) toInt64(field[5]);
+        forecastType = toInt16(field[5]);
     }
 
     if (c > 6)
@@ -1063,12 +1063,12 @@ void ServiceImplementation::getParameterStringInfo(
         size_t sz = partList.size();
         if (sz == 1)
         {
-          forecastNumberVec.push_back((T::ForecastNumber) toInt64(partList[0].c_str()));
+          forecastNumberVec.push_back(toInt16(partList[0].c_str()));
         }
         else if (sz == 2)
         {
-          auto start = toInt64(partList[0].c_str());
-          auto end = toInt64(partList[1].c_str());
+          auto start = toInt16(partList[0].c_str());
+          auto end = toInt16(partList[1].c_str());
           if (start < end && (end - start) <= 200)
           {
             for (auto t = start; t <= end; t++)
@@ -1081,25 +1081,25 @@ void ServiceImplementation::getParameterStringInfo(
     if (c > 7)
     {
       if (field[7][0] != '\0')
-        generationFlags = toInt64(field[7]);
+        generationFlags = toUInt64(field[7]);
     }
 
     if (c > 8)
     {
       if (field[8][0] != '\0')
-        areaInterpolationMethod = (short) toInt64(field[8]);
+        areaInterpolationMethod = toInt16(field[8]);
     }
 
     if (c > 9)
     {
       if (field[9][0] != '\0')
-        timeInterpolationMethod = (short) toInt64(field[9]);
+        timeInterpolationMethod = toInt16(field[9]);
     }
 
     if (c > 10)
     {
       if (field[10][0] != '\0')
-        levelInterpolationMethod = (short) toInt64(field[10]);
+        levelInterpolationMethod = toInt16(field[10]);
     }
   }
   catch (...)
@@ -2491,9 +2491,9 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
           parameters.push_back(toDouble(fp->c_str()));
       }
 
-      T::ParamValue newValue;
+      T::ParamValue newValue = 0;
       if (functionPtr)
-        functionPtr->executeFunctionCall1(parameters);
+        newValue = functionPtr->executeFunctionCall1(parameters);
       else
         newValue = mLuaFileCollection.executeFunctionCall1(function, parameters);
 
@@ -2528,7 +2528,7 @@ void ServiceImplementation::executeConversion(std::string& function, std::vector
         else
           parameters.push_back(toDouble(fp->c_str()));
       }
-      T::ParamValue newValue;
+      T::ParamValue newValue = 0;
       if (functionPtr)
         newValue = functionPtr->executeFunctionCall1(parameters);
       else
@@ -6479,19 +6479,19 @@ void ServiceImplementation::getGridValues(
                                     a_parameterKey = pv[0];
 
                                   if (!pv[1].empty())
-                                    a_paramLevelId = toInt64(pv[1].c_str());
+                                    a_paramLevelId = toUInt8(pv[1].c_str());
 
                                   if (!pv[2].empty())
-                                    a_paramLevel = toInt64(pv[2].c_str());
+                                    a_paramLevel = toInt32(pv[2].c_str());
 
                                   if (!pv[3].empty())
-                                    a_forecastType = toInt64(pv[3].c_str());
+                                    a_forecastType = toInt16(pv[3].c_str());
 
                                   if (!pv[4].empty())
-                                    a_forecastNumber = toInt64(pv[4].c_str());
+                                    a_forecastNumber = toInt16(pv[4].c_str());
 
                                   if (!pv[5].empty())
-                                    a_areaInterpolationMethod = toInt64(pv[5].c_str());
+                                    a_areaInterpolationMethod = toInt16(pv[5].c_str());
 
                                   if (!pv[6].empty() && toInt64(pv[6].c_str()) == 1)
                                   {
@@ -7443,7 +7443,7 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
         if (cList->getLength() == 1)
         {
           T::ContentInfo* cInfo = cList->getContentInfoByIndex(0);
-          T::ParamValue value;
+          T::ParamValue value = 0;
           int result = mDataServerPtr->getGridValueByPoint(0, cInfo->mFileId, cInfo->mMessageIndex, coordinateType,x,y,T::AreaInterpolationMethod::Linear,value);
           if (result != 0)
           {

@@ -188,9 +188,9 @@ void GenerationInfo::setCsv(const char *csv)
 
     if (c >= 8)
     {
-      mGenerationId = toInt64(field[0]);
-      mGenerationType = toInt64(field[1]);
-      mProducerId = toInt64(field[2]);
+      mGenerationId = toUInt32(field[0]);
+      mGenerationType = toUInt32(field[1]);
+      mProducerId = toUInt32(field[2]);
       mName = field[3];
       mDescription = field[4];
       mAnalysisTime = field[5];

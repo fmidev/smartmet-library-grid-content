@@ -34,7 +34,8 @@ class ResponseMessage
      std::string    getLineByIndex(uint index);
      long long      getLineValueByIndex(uint index);
      std::string    getLineByKey(const char *key);
-     long long      getLineValueByKey(const char *key);
+     int            getLineValueByKey(const char *key);
+     long long      getLineInt64ValueByKey(const char *key);
 
      bool           getLineByKey(const char *key,std::string& value);
      bool           getLineByKey(const char *key,int& value);

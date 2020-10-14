@@ -347,7 +347,7 @@ int ServiceInterface::getGridValueListByLevelAndCircle(T::SessionId sessionId,ui
   try
   {
     unsigned long long timeStart = getTime();
-    int result = getGridValueListByLevelAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,origoX,origoY,radius,levelInterpolationMethod,valueList);
+    int result = _getGridValueListByLevelAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,origoX,origoY,radius,levelInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
 
     PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%d,%u,%f,%f,%f,%d,GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,origoX,origoY,radius,levelInterpolationMethod,valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);

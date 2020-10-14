@@ -63,7 +63,7 @@ float Function_multiply::executeFunctionCall1(std::vector<float>& parameters)
     if (parameters.size() == 1)
     {
       if (parameters[0] != ParamValueMissing)
-        return parameters[0] * mMultiplyer;
+        return C_FLOAT(parameters[0] * mMultiplyer);
       else
         return ParamValueMissing;
     }
@@ -87,7 +87,7 @@ double Function_multiply::executeFunctionCall1(std::vector<double>& parameters)
     if (parameters.size() == 1)
     {
       if (parameters[0] != ParamValueMissing)
-        return parameters[0] * mMultiplyer;
+        return C_DOUBLE(parameters[0] * mMultiplyer);
       else
         return ParamValueMissing;
     }
@@ -268,7 +268,7 @@ void Function_multiply::executeFunctionCall9(uint columns,uint rows,std::vector<
 
       if (a != ParamValueMissing)
       {
-        float c = (float)(a * mMultiplyer);
+        float c = C_FLOAT(a * mMultiplyer);
         outParameters.push_back(c);
       }
       else
@@ -302,7 +302,7 @@ void Function_multiply::executeFunctionCall9(uint columns,uint rows,std::vector<
 
       if (a != ParamValueMissing)
       {
-        double c = (double)(a * mMultiplyer);
+        double c = C_DOUBLE(a * mMultiplyer);
         outParameters.push_back(c);
       }
       else

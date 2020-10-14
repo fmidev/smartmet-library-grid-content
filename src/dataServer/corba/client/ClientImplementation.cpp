@@ -261,7 +261,7 @@ int ClientImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileI
     if (!mInitialized)
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
-    SmartMet::DataServer::Corba::CorbaParamValue corbaValue;
+    SmartMet::DataServer::Corba::CorbaParamValue corbaValue = 0;
 
     int result = mService->getGridValueByPoint(sessionId,fileId,messageIndex,(CORBA::Octet)coordinateType,x,y,(CORBA::Short)areaInterpolationMethod,corbaValue);
 
@@ -284,7 +284,7 @@ int ClientImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,ui
     if (!mInitialized)
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
-    SmartMet::DataServer::Corba::CorbaParamValue corbaValue;
+    SmartMet::DataServer::Corba::CorbaParamValue corbaValue = 0;
 
     int result = mService->getGridValueByLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,newLevel,(CORBA::Octet)coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,corbaValue);
 
@@ -307,7 +307,7 @@ int ClientImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,uin
     if (!mInitialized)
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
-    SmartMet::DataServer::Corba::CorbaParamValue corbaValue;
+    SmartMet::DataServer::Corba::CorbaParamValue corbaValue = 0;
 
     int result = mService->getGridValueByTimeAndPoint(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),(CORBA::Octet)coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,corbaValue);
 
@@ -330,7 +330,7 @@ int ClientImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId sessionI
     if (!mInitialized)
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
-    SmartMet::DataServer::Corba::CorbaParamValue corbaValue;
+    SmartMet::DataServer::Corba::CorbaParamValue corbaValue = 0;
 
     int result = mService->getGridValueByTimeLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,newTime.c_str(),newLevel,(CORBA::Octet)coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,corbaValue);
 

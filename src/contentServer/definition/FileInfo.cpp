@@ -214,14 +214,14 @@ void FileInfo::setCsv(const char *csv)
 
     if (c >= 7)
     {
-      mFileId = toInt64(field[0]);
-      mFileType = toInt64(field[1]);
+      mFileId = toUInt32(field[0]);
+      mFileType = toUInt8(field[1]);
       mName = field[2];
-      mProducerId = toInt64(field[3]);
-      mGenerationId = toInt64(field[4]);
-      mGroupFlags = toInt64(field[5]);
-      mFlags = toInt64(field[6]);
-      mSourceId = toInt64(field[7]);
+      mProducerId = toUInt32(field[3]);
+      mGenerationId = toUInt32(field[4]);
+      mGroupFlags = toUInt32(field[5]);
+      mFlags = toUInt32(field[6]);
+      mSourceId = toUInt32(field[7]);
       if (c >= 8)
         mModificationTime = field[8];
       if (c >= 9)

@@ -343,7 +343,32 @@ std::string ResponseMessage::getLineByKey(const char *key)
 
 
 
-long long ResponseMessage::getLineValueByKey(const char *key)
+int ResponseMessage::getLineValueByKey(const char *key)
+{
+  try
+  {
+    uint len = strlen(key);
+    uint sz = getLineCount();
+    for (uint t=0; t<sz; t++)
+    {
+      const char *s = mLines[t].c_str();
+      if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
+        return toInt32(s+len+1);
+    }
+
+    return 0;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+long long ResponseMessage::getLineInt64ValueByKey(const char *key)
 {
   try
   {
@@ -407,7 +432,7 @@ bool ResponseMessage::getLineByKey(const char *key,int& value)
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        value = toInt64(s+len+1);
+        value = toInt32(s+len+1);
         return true;
       }
     }
@@ -434,7 +459,7 @@ bool ResponseMessage::getLineByKey(const char *key,uint& value)
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        value = toInt64(s+len+1);
+        value = toUInt32(s+len+1);
         return true;
       }
     }
@@ -461,7 +486,7 @@ bool ResponseMessage::getLineByKey(const char *key,unsigned char& value)
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        value = (unsigned char)toInt64(s+len+1);
+        value = toUInt8(s+len+1);
         return true;
       }
     }
@@ -488,7 +513,7 @@ bool ResponseMessage::getLineByKey(const char *key,unsigned long long& value)
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        value = (unsigned long long)toInt64(s+len+1);
+        value = toUInt64(s+len+1);
         return true;
       }
     }
@@ -515,7 +540,7 @@ bool ResponseMessage::getLineByKey(const char *key,long long& value)
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        value = (long long)toInt64(s+len+1);
+        value = toInt64(s+len+1);
         return true;
       }
     }

@@ -241,8 +241,8 @@ void VirtualContentDefinitionFile::loadFile()
             splitString(pdef.mForecastNumber,'-',numbers);
             if (numbers.size() == 2  &&  numbers[0] > " ")
             {
-              int startp = toInt64(numbers[0]);
-              int endp = toInt64(numbers[1]);
+              short startp = toInt16(numbers[0]);
+              short endp = toInt16(numbers[1]);
               while (startp <= endp)
               {
                 ParameterDef newdef(pdef);
@@ -260,7 +260,7 @@ void VirtualContentDefinitionFile::loadFile()
           }
 
           rec.mFunctionName = partList[2];
-          rec.mFunctionCallMethod = toInt64(partList[3].c_str());
+          rec.mFunctionCallMethod = toUInt32(partList[3].c_str());
           splitString(partList[4],',',rec.mFunctionParameters);
           mContentDefList.push_back(rec);
           //rec.print(std::cout,0,0);

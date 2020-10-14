@@ -338,14 +338,14 @@ void ContentInfo::setCsv(const char *csv)
 
     if (c >= 27)
     {
-      mFileId = toInt64(field[0]);
-      mMessageIndex = toInt64(field[1]);
-      mFileType = toInt64(field[2]);
-      mFilePosition = toInt64(field[3]);
-      mMessageSize = toInt64(field[4]);
-      mProducerId = toInt64(field[5]);
-      mGenerationId = toInt64(field[6]);
-      mGroupFlags = toInt64(field[7]);
+      mFileId = toUInt32(field[0]);
+      mMessageIndex = toUInt32(field[1]);
+      mFileType = toUInt8(field[2]);
+      mFilePosition = toUInt64(field[3]);
+      mMessageSize = toUInt32(field[4]);
+      mProducerId = toUInt32(field[5]);
+      mGenerationId = toUInt32(field[6]);
+      mGroupFlags = toUInt32(field[7]);
       mForecastTime = field[8];
       mFmiParameterId = field[9];
       mFmiParameterName = toUpperString(field[10]);
@@ -354,18 +354,18 @@ void ContentInfo::setCsv(const char *csv)
       mCdmParameterName = field[13];
       mNewbaseParameterId = field[14];
       mNewbaseParameterName = field[15];
-      mFmiParameterLevelId = toInt64(field[16]);
-      mGrib1ParameterLevelId = toInt64(field[17]);
-      mGrib2ParameterLevelId = toInt64(field[18]);
-      mParameterLevel = (T::ParamLevel)toInt64(field[19]);
+      mFmiParameterLevelId = toUInt8(field[16]);
+      mGrib1ParameterLevelId = toUInt8(field[17]);
+      mGrib2ParameterLevelId = toUInt8(field[18]);
+      mParameterLevel = toInt32(field[19]);
       mFmiParameterUnits = field[20];
       mGribParameterUnits = field[21];
-      mForecastType = (short)toInt64(field[22]);
-      mForecastNumber = (short)toInt64(field[23]);
-      mServerFlags = (unsigned long long)toInt64(field[24]);
-      mFlags = toInt64(field[25]);
-      mSourceId = toInt64(field[26]);
-      mGeometryId = toInt64(field[27]);
+      mForecastType = toInt16(field[22]);
+      mForecastNumber = toInt16(field[23]);
+      mServerFlags = toUInt64(field[24]);
+      mFlags = toUInt32(field[25]);
+      mSourceId = toUInt32(field[26]);
+      mGeometryId = toInt32(field[27]);
       if (c >= 28)
         mModificationTime = field[28];
     }

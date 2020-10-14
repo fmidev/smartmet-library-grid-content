@@ -6075,7 +6075,7 @@ void CacheImplementation::swapData()
   //FUNCTION_TRACE
   try
   {
-    int diff = time(nullptr) - mDataSwapTime;
+    long diff = time(nullptr) - mDataSwapTime;
 
     if (diff < 180)
       return;

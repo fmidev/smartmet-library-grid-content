@@ -177,12 +177,12 @@ void ProducerInfo::setCsv(const char *csv)
 
     if (c >= 5)
     {
-       mProducerId = toInt64(field[0]);
+       mProducerId = toUInt32(field[0]);
        mName = field[1];
        mTitle = field[2];
        mDescription = field[3];
-       mFlags = toInt64(field[4]);
-       mSourceId = toInt64(field[5]);
+       mFlags = toUInt32(field[4]);
+       mSourceId = toUInt32(field[5]);
     }
   }
   catch (...)

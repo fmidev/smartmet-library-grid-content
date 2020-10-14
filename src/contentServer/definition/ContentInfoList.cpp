@@ -3007,7 +3007,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
                       else
                       if (info->mParameterLevel > level)
                       {
-                        if (nextTimeNextLevel == nullptr || nextTimePrevLevel->mForecastTime > info->mForecastTime || (nextTimeNextLevel->mForecastTime == info->mForecastTime &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
+                        if (nextTimeNextLevel == nullptr || (nextTimePrevLevel != nullptr && nextTimePrevLevel->mForecastTime > info->mForecastTime) || (nextTimeNextLevel->mForecastTime == info->mForecastTime &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
                         {
                           nextTimeNextLevel = info;
                           t = mLength;
@@ -4196,7 +4196,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
                       else
                       if (info->mParameterLevel > level)
                       {
-                        if (nextTimeNextLevel == nullptr || nextTimePrevLevel->mForecastTime > info->mForecastTime || (nextTimeNextLevel->mForecastTime == info->mForecastTime &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
+                        if (nextTimeNextLevel == nullptr || (nextTimePrevLevel != nullptr && nextTimePrevLevel->mForecastTime > info->mForecastTime) || (nextTimeNextLevel->mForecastTime == info->mForecastTime &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
                         {
                           nextTimeNextLevel = info;
                           t = mLength;
@@ -4510,7 +4510,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
                       else
                       if (info->mParameterLevel > level)
                       {
-                        if (nextTimeNextLevel == nullptr || nextTimePrevLevel->mForecastTime > info->mForecastTime || (nextTimeNextLevel->mForecastTime == info->mForecastTime &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
+                        if (nextTimeNextLevel == nullptr || (nextTimePrevLevel != nullptr && nextTimePrevLevel->mForecastTime > info->mForecastTime) || (nextTimeNextLevel->mForecastTime == info->mForecastTime &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
                         {
                           nextTimeNextLevel = info;
                           t = mLength;

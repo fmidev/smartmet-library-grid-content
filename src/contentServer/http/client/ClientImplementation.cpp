@@ -3741,7 +3741,7 @@ int ClientImplementation::_getHashByProducerId(T::SessionId sessionId,uint produ
 
     int result = response.getLineValueByKey("result");
     if (result == Result::OK)
-      hash = response.getLineValueByKey("hash");
+      hash = response.getLineInt64ValueByKey("hash");
     else
       hash = 0;
 

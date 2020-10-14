@@ -930,17 +930,20 @@ void GenerationInfoList::getGenerationInfoListByProducerId(uint producerId,Gener
     for (int t=idx; t<len; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr  &&  info->mProducerId == producerId)
+      if (info != nullptr)
       {
-        if (generationInfoList.getReleaseObjects())
-          generationInfoList.addGenerationInfo(info->duplicate());
+        if (info->mProducerId == producerId)
+        {
+          if (generationInfoList.getReleaseObjects())
+            generationInfoList.addGenerationInfo(info->duplicate());
+          else
+            generationInfoList.addGenerationInfo(info);
+        }
         else
-          generationInfoList.addGenerationInfo(info);
-      }
-      else
-      {
-        if (mComparisonMethod == GenerationInfo::ComparisonMethod::producerId  &&  info->mProducerId > producerId)
-          return;
+        {
+          if (mComparisonMethod == GenerationInfo::ComparisonMethod::producerId  &&  info->mProducerId > producerId)
+            return;
+        }
       }
     }
   }
@@ -1014,14 +1017,17 @@ std::size_t GenerationInfoList::getHashByProducerId(uint producerId)
     for (int t=idx; t<len; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr  &&  info->mProducerId == producerId)
+      if (info != nullptr)
       {
-        boost::hash_combine(hash,info->mGenerationId);
-      }
-      else
-      {
-        if (mComparisonMethod == GenerationInfo::ComparisonMethod::producerId  &&  info->mProducerId > producerId)
-          return hash;
+        if (info->mProducerId == producerId)
+        {
+          boost::hash_combine(hash,info->mGenerationId);
+        }
+        else
+        {
+          if (mComparisonMethod == GenerationInfo::ComparisonMethod::producerId  &&  info->mProducerId > producerId)
+            return hash;
+        }
       }
     }
     return hash;
@@ -1065,17 +1071,20 @@ void GenerationInfoList::getGenerationInfoListByProducerIdAndStatus(uint produce
     for (int t=idx; t<len; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr  &&  info->mProducerId == producerId  &&  info->mStatus == generationStatus)
+      if (info != nullptr)
       {
-        if (generationInfoList.getReleaseObjects())
-          generationInfoList.addGenerationInfo(info->duplicate());
+        if (info->mProducerId == producerId  &&  info->mStatus == generationStatus)
+        {
+          if (generationInfoList.getReleaseObjects())
+            generationInfoList.addGenerationInfo(info->duplicate());
+          else
+            generationInfoList.addGenerationInfo(info);
+        }
         else
-          generationInfoList.addGenerationInfo(info);
-      }
-      else
-      {
-        if (mComparisonMethod == GenerationInfo::ComparisonMethod::producerId  &&  info->mProducerId > producerId)
-          return;
+        {
+          if (mComparisonMethod == GenerationInfo::ComparisonMethod::producerId  &&  info->mProducerId > producerId)
+            return;
+        }
       }
     }
   }
