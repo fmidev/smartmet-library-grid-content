@@ -1581,28 +1581,39 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
 
             if (f != "@")
             {
-              std::string function;
-              uint type = mLuaFileCollection.getFunction(qParam->mFunction, function);
-              // printf("CALL %s\n",function.c_str());
-              switch (type)
+              auto functionPtr = mFunctionCollection.getFunction(qParam->mFunction);
+              if (functionPtr)
               {
-                case 1:
+                double val = functionPtr->executeFunctionCall1(parameters);
+                // printf("-- result %f\n",val);
+                T::GridValue rec(lastRec.mX, lastRec.mY, val);
+                pValues.mValueList.addGridValue(rec);
+              }
+              else
+              {
+                std::string function;
+                uint type = mLuaFileCollection.getFunction(qParam->mFunction, function);
+                // printf("CALL %s\n",function.c_str());
+                switch (type)
                 {
-                  double val = mLuaFileCollection.executeFunctionCall1(function, parameters);
-                  // printf("-- result %f\n",val);
-                  T::GridValue rec(lastRec.mX, lastRec.mY, val);
-                  pValues.mValueList.addGridValue(rec);
-                }
-                break;
+                  case 1:
+                  {
+                    double val = mLuaFileCollection.executeFunctionCall1(function, parameters);
+                    // printf("-- result %f\n",val);
+                    T::GridValue rec(lastRec.mX, lastRec.mY, val);
+                    pValues.mValueList.addGridValue(rec);
+                  }
+                  break;
 
-                case 5:
-                {
-                  std::string val = mLuaFileCollection.executeFunctionCall5(function, query.mLanguage, parameters);
-                  // std::cout << "** result " << val << "\n";
-                  T::GridValue rec(lastRec.mX, lastRec.mY, val);
-                  pValues.mValueList.addGridValue(rec);
+                  case 5:
+                  {
+                    std::string val = mLuaFileCollection.executeFunctionCall5(function, query.mLanguage, parameters);
+                    // std::cout << "** result " << val << "\n";
+                    T::GridValue rec(lastRec.mX, lastRec.mY, val);
+                    pValues.mValueList.addGridValue(rec);
+                  }
+                  break;
                 }
-                break;
               }
 
               pValues.mProducerId = producerId;
@@ -1622,12 +1633,23 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
 
           if (qParam->mFunction.substr(0, 1) == "@")
           {
-            // T::ParamValue val = executeAreaFunction(qParam->mFunction,areaParameters);
             std::string func = qParam->mFunction.substr(1);
-            double val = mLuaFileCollection.executeFunctionCall1(func, areaParameters);
-            // double val = executeFunctionCall1(func,areaParameters);
-            T::GridValue rec(-1000, -1000, val);
-            pValues.mValueList.addGridValue(rec);
+
+            auto functionPtr = mFunctionCollection.getFunction(func);
+            if (functionPtr)
+            {
+              double val = functionPtr->executeFunctionCall1(areaParameters);
+              // double val = executeFunctionCall1(func,areaParameters);
+              T::GridValue rec(-1000, -1000, val);
+              pValues.mValueList.addGridValue(rec);
+            }
+            else
+            {
+              double val = mLuaFileCollection.executeFunctionCall1(func, areaParameters);
+              // double val = executeFunctionCall1(func,areaParameters);
+              T::GridValue rec(-1000, -1000, val);
+              pValues.mValueList.addGridValue(rec);
+            }
           }
 
           if (areaCnt)
