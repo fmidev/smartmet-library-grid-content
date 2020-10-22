@@ -5,7 +5,7 @@
 #include <grid-files/grid/GridFile.h>
 #include <grid-files/common/ModificationLock.h>
 #include <vector>
-#include <map>
+#include <unordered_map>
 
 namespace SmartMet
 {
@@ -48,9 +48,9 @@ class GridFileManager
 
   private:
 
-    ModificationLock                   mModificationLock;
-    std::map<uint,GRID::GridFile_sptr> mFileList;
-    ContentServer::ServiceInterface*   mContentServer;
+    ModificationLock                             mModificationLock;
+    std::unordered_map<uint,GRID::GridFile_sptr> mFileList;
+    ContentServer::ServiceInterface*             mContentServer;
 };
 
 

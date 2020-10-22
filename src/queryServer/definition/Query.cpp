@@ -172,7 +172,7 @@ uint Query::getValuesPerTimeStep()
     {
       for (auto vList = param->mValueList.begin(); vList != param->mValueList.end(); ++vList)
       {
-        uint vCount = vList->mValueList.getLength();
+        uint vCount = (*vList)->mValueList.getLength();
         if (vCount > valueCount)
           valueCount = vCount;
       }
@@ -239,8 +239,8 @@ void Query::getResultProducerIdList(std::set<uint>& producerIdList)
     {
       for (auto val = param->mValueList.begin(); val != param->mValueList.end(); val++)
       {
-        if (producerIdList.find(val->mProducerId) == producerIdList.end())
-          producerIdList.insert(val->mProducerId);
+        if (producerIdList.find((*val)->mProducerId) == producerIdList.end())
+          producerIdList.insert((*val)->mProducerId);
       }
     }
   }

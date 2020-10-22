@@ -260,7 +260,7 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
 
     for (auto it = mValueList.begin();  it != mValueList.end(); ++it)
     {
-      it->print(stream,level+2,optionFlags);
+      (*it)->print(stream,level+2,optionFlags);
     }
   }
   catch (...)

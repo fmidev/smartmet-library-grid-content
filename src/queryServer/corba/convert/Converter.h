@@ -61,8 +61,8 @@ class Converter
     static void   convert(QueryServer::Corba::CorbaParameterValues& source,QueryServer::ParameterValues& target);
     static void   convert(QueryServer::ParameterValues& source,QueryServer::Corba::CorbaParameterValues& target);
 
-    static void   convert(QueryServer::Corba::CorbaParameterValuesList& source,QueryServer::ParameterValues_vec& target);
-    static void   convert(QueryServer::ParameterValues_vec& source,QueryServer::Corba::CorbaParameterValuesList& target);
+    static void   convert(QueryServer::Corba::CorbaParameterValuesList& source,QueryServer::ParameterValues_sptr_vec& target);
+    static void   convert(QueryServer::ParameterValues_sptr_vec& source,QueryServer::Corba::CorbaParameterValuesList& target);
 
     static void   convert(QueryServer::Corba::CorbaQueryParameter& source,QueryServer::QueryParameter& target);
     static void   convert(QueryServer::QueryParameter& source,QueryServer::Corba::CorbaQueryParameter& target);

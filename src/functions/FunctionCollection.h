@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Function.h"
-#include <map>
+#include <unordered_map>
 
 
 namespace SmartMet
@@ -9,7 +9,7 @@ namespace SmartMet
 namespace Functions
 {
 
-typedef std::map<std::string,FunctionPtr> FunctionList;
+typedef std::unordered_map<std::string,FunctionPtr> FunctionList;
 
 
 class FunctionCollection

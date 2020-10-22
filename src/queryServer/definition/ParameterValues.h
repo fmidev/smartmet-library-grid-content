@@ -55,7 +55,9 @@ class ParameterValues
 };
 
 
+typedef std::shared_ptr<ParameterValues> ParameterValues_sptr;
 typedef std::vector<ParameterValues> ParameterValues_vec;
+typedef std::vector<ParameterValues_sptr> ParameterValues_sptr_vec;
 
 
 }  // namespace QueryServer

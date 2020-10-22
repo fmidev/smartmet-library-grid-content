@@ -1,7 +1,7 @@
 #pragma once
 
 #include <grid-files/grid/Typedefs.h>
-
+#include <unordered_map>
 
 namespace SmartMet
 {
@@ -23,7 +23,7 @@ class Alias
 };
 
 
-typedef std::map<std::string,Alias> Alias_map;
+typedef std::unordered_map<std::string,Alias> Alias_map;
 typedef std::vector<Alias> Alias_vec;
 
 

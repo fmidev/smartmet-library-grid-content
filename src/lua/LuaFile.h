@@ -7,6 +7,8 @@
 #include <grid-files/common/AutoReadLock.h>
 #include <grid-files/grid/Typedefs.h>
 
+#include <unordered_map>
+
 #define NUM_OF_LUA_HANDLES 20
 
 

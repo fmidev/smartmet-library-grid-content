@@ -4,7 +4,7 @@
 #include <macgyver/Exception.h>
 #include <grid-files/common/ModificationLock.h>
 #include <string>
-#include <map>
+#include <unordered_map>
 
 namespace SmartMet
 {
@@ -28,7 +28,7 @@ struct CacheValueRec
 };
 
 typedef CacheValueRec* CacheValueRec_ptr;
-typedef std::map<std::size_t,CacheValueRec_ptr> CacheValueList;
+typedef std::unordered_map<std::size_t,CacheValueRec_ptr> CacheValueList;
 
 
 

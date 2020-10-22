@@ -2009,30 +2009,6 @@ int ClientImplementation::_getContentList(T::SessionId sessionId, uint startFile
 
 
 
-int ClientImplementation::_getContentListByRequestCounterKey(T::SessionId sessionId,ulonglong key,T::ContentInfoList& contentInfoList)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP, "The client is not initialized!");
-
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
-
-    int result = mService->getContentListByRequestCounterKey(sessionId, key, corbaContentInfoList);
-
-    if (result == 0)
-      ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
-
-    mLastAccessTime = time(nullptr);
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
-
-
-
 int ClientImplementation::_getContentListByFileId(T::SessionId sessionId, uint fileId, T::ContentInfoList& contentInfoList)
 {
   try

@@ -57,7 +57,7 @@ class QueryParameter
     uint                        mTimestepsAfter;
     uint                        mTimestepSizeInMinutes;
     uint                        mFlags;
-    ParameterValues_vec         mValueList;
+    ParameterValues_sptr_vec    mValueList;
     T::Coordinate_vec           mCoordinates;
     T::AttributeList            mAttributeList;
 

@@ -4202,33 +4202,6 @@ int RedisImplementation::_getContentListByProducerName(T::SessionId sessionId,st
 
 
 
-int RedisImplementation::_getContentListByRequestCounterKey(T::SessionId sessionId,ulonglong key,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    contentInfoList.clear();
-
-    return getContentByRequestCounterKey(key,contentInfoList);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int RedisImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE

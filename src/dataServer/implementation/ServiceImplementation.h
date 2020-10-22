@@ -36,17 +36,15 @@ class ServiceImplementation : public ServiceInterface
                        string_vec& luaFileNames);
 
      virtual void   startEventProcessing();
-     virtual void   startRequestCounting();
      virtual void   shutdown();
 
      virtual void   addVirtualContentFactory(VirtualContentFactory *factory);
      virtual void   setVirtualContentEnabled(bool enabled);
      virtual void   setMemoryMapCheckEnabled(bool enabled);
      virtual void   setPointCacheEnabled(bool enabled,uint hitsRequired,uint timePeriod);
-     virtual void   setPreload(bool preloadEnabled,bool preloadMemoryLock,std::string preloadFile,std::string counterFile,bool preloadFileGenerationEnabled,std::string generatedPreloadFile,std::string generatedCounterFile);
+     virtual void   setPreload(bool preloadEnabled,bool preloadMemoryLock,std::string preloadFile);
 
      virtual void   eventProcessingThread();
-     virtual void   requestCounterThread();
 
   protected:
 
@@ -164,7 +162,6 @@ class ServiceImplementation : public ServiceInterface
      virtual void   registerVirtualFiles(VirtualGridFilePtr_map& gridFileMap);
      virtual void   processEvent(T::EventInfo& eventInfo,T::EventInfo *nextEventInfo);
      virtual void   processEvents();
-     virtual void   processRequestCounters();
      virtual void   readContentList(T::ContentInfoList& contentList,bool includePhysicalContent,bool includeVirtualContent);
 
      GRID::GridFile_sptr  getGridFile(uint fileId);
@@ -173,8 +170,6 @@ class ServiceImplementation : public ServiceInterface
      bool                 mShutdownRequested;
      bool                 mFullUpdateRequired;
      bool                 mEventProcessingActive;
-     bool                 mRequestCountingActive;
-     bool                 mContentRegistrationEnabled;
      bool                 mVirtualContentEnabled;
      bool                 mContentPreloadEnabled;
      bool                 mMemoryMapCheckEnabled;
@@ -185,19 +180,13 @@ class ServiceImplementation : public ServiceInterface
      std::string          mServerIor;
      std::string          mDataDir;
      bool                 mPreloadMemoryLock;
-     bool                 mPreloadFileGenerationEnabled;
      bool                 mPointCacheEnabled;
      uint                 mPointCacheHitsRequired;
      uint                 mPointCacheTimePeriod;
      pthread_t            mEventProcessingThread;
-     pthread_t            mRequestCounterThread;
      time_t               mContentServerStartTime;
      GridFileManager      mGridFileManager;
-     std::string          mGeneratedPreloadFile;
      std::string          mPreloadFile;
-     std::string          mCounterFile;
-     time_t               mCounterFile_modificationTime;
-     std::string          mGeneratedCounterFile;
      time_t               mPreloadFile_modificationTime;
      PreloadList          mPreloadList;
      PreloadDefList       mPreloadDefList;

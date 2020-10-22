@@ -87,13 +87,13 @@ std::string QueryStreamer::getChunk()
       {
         for (auto v = it->mValueList.begin(); v != it->mValueList.end(); ++v)
         {
-          uint alen = v->mValueData.size();
+          uint alen = (*v)->mValueData.size();
           for (uint a=0; a<alen; a++)
           {
-            uint len = v->mValueData[a].size();
+            uint len = (*v)->mValueData[a].size();
             if (len > 0)
             {
-              std::string str(v->mValueData[a].begin(), v->mValueData[a].end());
+              std::string str((*v)->mValueData[a].begin(), (*v)->mValueData[a].end());
               setStatus(Spine::HTTP::ContentStreamer::StreamerStatus::OK);
               return str;
             }

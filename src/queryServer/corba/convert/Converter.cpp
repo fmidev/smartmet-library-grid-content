@@ -686,7 +686,7 @@ void Converter::convert(SmartMet::QueryServer::FunctionParam_vec& source,SmartMe
 
 
 
-void Converter::convert(QueryServer::Corba::CorbaParameterValuesList& source,QueryServer::ParameterValues_vec& target)
+void Converter::convert(QueryServer::Corba::CorbaParameterValuesList& source,QueryServer::ParameterValues_sptr_vec& target)
 {
   try
   {
@@ -696,9 +696,9 @@ void Converter::convert(QueryServer::Corba::CorbaParameterValuesList& source,Que
     for (uint t=0; t<len; t++)
     {
       QueryServer::Corba::CorbaParameterValues corbaObject = source[t];
-      QueryServer::ParameterValues obj;
-      convert(corbaObject,obj);
-      target.push_back(obj);
+      QueryServer::ParameterValues *obj = new QueryServer::ParameterValues();
+      convert(corbaObject,*obj);
+      target.push_back(std::shared_ptr<QueryServer::ParameterValues>(obj));
     }
   }
   catch (...)
@@ -711,7 +711,7 @@ void Converter::convert(QueryServer::Corba::CorbaParameterValuesList& source,Que
 
 
 
-void Converter::convert(QueryServer::ParameterValues_vec& source,QueryServer::Corba::CorbaParameterValuesList& target)
+void Converter::convert(QueryServer::ParameterValues_sptr_vec& source,QueryServer::Corba::CorbaParameterValuesList& target)
 {
   try
   {
@@ -720,7 +720,7 @@ void Converter::convert(QueryServer::ParameterValues_vec& source,QueryServer::Co
     for (uint t=0; t<len; t++)
     {
       QueryServer::Corba::CorbaParameterValues corbaObject;
-      convert(source[t],corbaObject);
+      convert(*source[t],corbaObject);
       target[t] = corbaObject;
     }
   }

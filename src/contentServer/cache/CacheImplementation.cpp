@@ -4302,40 +4302,6 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
 
 
 
-int CacheImplementation::_getContentListByRequestCounterKey(T::SessionId sessionId,ulonglong key,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mUpdateInProgress &&  !mRequestForwardEnabled)
-      return Result::OK;
-
-    if (mUpdateInProgress)
-      return mContentStorage->getContentListByRequestCounterKey(sessionId,key,contentInfoList);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    auto ssp = boost::atomic_load(&mSearchStructureSptr);
-    if (!ssp)
-      return Result::DATA_NOT_FOUND;
-
-    contentInfoList.clear();
-
-    ssp->mContentInfoList[0].getContentInfoListByRequestCounterKey(key,contentInfoList);;
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE

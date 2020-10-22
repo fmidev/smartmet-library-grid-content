@@ -4515,32 +4515,6 @@ int MemoryImplementation::_getContentListByParameterAndProducerName(T::SessionId
 
 
 
-int MemoryImplementation::_getContentListByRequestCounterKey(T::SessionId sessionId,ulonglong key,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
-
-    contentInfoList.clear();
-
-    mContentInfoList[0].getContentInfoListByRequestCounterKey(key,contentInfoList);;
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int MemoryImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE

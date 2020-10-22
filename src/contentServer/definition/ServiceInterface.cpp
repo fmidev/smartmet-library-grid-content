@@ -2224,29 +2224,6 @@ int ServiceInterface::getContentListByParameterGenerationIdAndForecastTime(T::Se
 
 
 
-int ServiceInterface::getContentListByRequestCounterKey(T::SessionId sessionId,ulonglong key,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    unsigned long long timeStart = getTime();
-    int result = _getContentListByRequestCounterKey(sessionId,key,contentInfoList);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%llu,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,key,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-
 int ServiceInterface::getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3389,15 +3366,6 @@ int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId ses
 
 
 int ServiceInterface::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string forecastTime,T::ContentInfoList& contentInfoList)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
-int ServiceInterface::_getContentListByRequestCounterKey(T::SessionId sessionId,ulonglong key,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }

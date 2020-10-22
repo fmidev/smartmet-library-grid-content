@@ -4907,58 +4907,6 @@ void ServerInterface::getContentListByProducerName(T::RequestMessage& request,T:
 
 
 
-void ServerInterface::getContentListByRequestCounterKey(T::RequestMessage& request,T::ResponseMessage& response)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::SessionId sessionId = 0;
-    if (!request.getLineByKey("sessionId",sessionId))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: sessionId");
-      return;
-    }
-
-    ulonglong key = 0;
-    if (!request.getLineByKey("key",key))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: key");
-      return;
-    }
-
-    T::ContentInfoList contentInfoList;
-
-    int result = mService->getContentListByRequestCounterKey(sessionId,key,contentInfoList);
-
-    response.addLine("result",result);
-    if (result == Result::OK)
-    {
-      uint len = contentInfoList.getLength();
-      for (uint t=0; t<len; t++)
-      {
-        T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
-        if (t == 0)
-          response.addLine("contentInfoHeader",info->getCsvHeader());
-        response.addLine("contentInfo",info->getCsv());
-      }
-    }
-    else
-    {
-      response.addLine("resultString",getResultString(result));
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 void ServerInterface::getContentListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE

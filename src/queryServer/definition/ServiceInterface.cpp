@@ -345,9 +345,9 @@ int ServiceInterface::_getParameterValueByPointAndTime(T::SessionId sessionId,st
       return result;
 
 
-    if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  query.mQueryParameterList[0].mValueList.begin()->mValueList.getLength() == 1)
+    if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  (*query.mQueryParameterList[0].mValueList.begin())->mValueList.getLength() == 1)
     {
-      auto valuePtr = query.mQueryParameterList[0].mValueList.begin()->mValueList.getGridValuePtrByIndex(0);
+      auto valuePtr = (*query.mQueryParameterList[0].mValueList.begin())->mValueList.getGridValuePtrByIndex(0);
       if (valuePtr != nullptr)
       {
         value = valuePtr->mValue;
@@ -397,12 +397,12 @@ int ServiceInterface::_getParameterValuesByPointListAndTime(T::SessionId session
     if (result != 0)
       return result;
 
-    if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  query.mQueryParameterList[0].mValueList.begin()->mValueList.getLength() == coordinates.size())
+    if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  (*query.mQueryParameterList[0].mValueList.begin())->mValueList.getLength() == coordinates.size())
     {
-      uint len = query.mQueryParameterList[0].mValueList.begin()->mValueList.getLength();
+      uint len = (*query.mQueryParameterList[0].mValueList.begin())->mValueList.getLength();
       for (uint t=0; t<len; t++)
       {
-        auto valuePtr = query.mQueryParameterList[0].mValueList.begin()->mValueList.getGridValuePtrByIndex(t);
+        auto valuePtr = (*query.mQueryParameterList[0].mValueList.begin())->mValueList.getGridValuePtrByIndex(t);
         if (valuePtr != nullptr)
           valueList.push_back(valuePtr->mValue);
         else
@@ -466,7 +466,7 @@ int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId session
     {
       for (auto it = query.mQueryParameterList[0].mValueList.begin(); it != query.mQueryParameterList[0].mValueList.end(); ++it)
       {
-        auto valuePtr = it->mValueList.getGridValuePtrByIndex(0);
+        auto valuePtr = (*it)->mValueList.getGridValuePtrByIndex(0);
         if (valuePtr != nullptr)
           values.push_back(valuePtr->mValue);
         else
@@ -526,9 +526,9 @@ int ServiceInterface::_getParameterValueVectorByGeometryAndTime(T::SessionId ses
       return result;
 
 
-    if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  query.mQueryParameterList[0].mValueList.begin()->mValueList.getLength() == 1)
+    if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  (*query.mQueryParameterList[0].mValueList.begin())->mValueList.getLength() == 1)
     {
-      values = query.mQueryParameterList[0].mValueList.begin()->mValueVector;
+      values = (*query.mQueryParameterList[0].mValueList.begin())->mValueVector;
     }
 
     return 0;

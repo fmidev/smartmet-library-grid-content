@@ -24,7 +24,6 @@
 #include <grid-files/common/GraphFunctions.h>
 #include <grid-files/common/CoordinateConversions.h>
 #include <grid-files/common/MemoryWriter.h>
-#include <grid-files/common/RequestCounter.h>
 #include <grid-files/grid/PhysicalGridFile.h>
 #include <grid-files/grid/MessageProcessing.h>
 #include <grid-files/identification/GridDef.h>
@@ -119,26 +118,6 @@ static void* ServiceImplementation_eventProcessingThread(void *arg)
 
 
 
-static void* ServiceImplementation_requestCounterThread(void *arg)
-{
-  try
-  {
-    ServiceImplementation *service = (ServiceImplementation*)arg;
-    service->requestCounterThread();
-    return nullptr;
-  }
-  catch (...)
-  {
-    Fmi::Exception exception(BCP,"Operation failed!",nullptr);
-    exception.printError();
-    exit(-1);
-  }
-}
-
-
-
-
-
 ServiceImplementation::ServiceImplementation()
 {
   FUNCTION_TRACE
@@ -152,8 +131,6 @@ ServiceImplementation::ServiceImplementation()
     mShutdownRequested = false;
     mFullUpdateRequired = false;
     mEventProcessingActive = false;
-    mRequestCountingActive = false;
-    mContentRegistrationEnabled = false;
     mVirtualContentEnabled = false;
     mContentServerStartTime = 0;
     mLastVirtualFileRegistration = 0;
@@ -162,9 +139,6 @@ ServiceImplementation::ServiceImplementation()
     mPointCacheEnabled = false;
     mPointCacheHitsRequired = 20;
     mPointCacheTimePeriod = 1200;
-
-    mCounterFile_modificationTime = 0;
-    mPreloadFileGenerationEnabled = false;
     mPreloadFile_modificationTime = 0;
     mPreloadMemoryLock = false;
     mMemoryMapCheckEnabled = false;
@@ -264,25 +238,17 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,std:
 
 
 
-void ServiceImplementation::setPreload(bool preloadEnabled,bool preloadMemoryLock,std::string preloadFile,std::string counterFile,bool preloadFileGenerationEnabled,std::string generatedPreloadFile,std::string generatedCounterFile)
+void ServiceImplementation::setPreload(bool preloadEnabled,bool preloadMemoryLock,std::string preloadFile)
 {
   FUNCTION_TRACE
   try
   {
     mContentPreloadEnabled = preloadEnabled;
     mPreloadMemoryLock = preloadMemoryLock;
-    mPreloadFileGenerationEnabled = preloadFileGenerationEnabled;
     mPreloadFile = preloadFile;
-    mCounterFile = counterFile;
-    mGeneratedPreloadFile = generatedPreloadFile;
-    mGeneratedCounterFile = generatedCounterFile;
-
-    requestCounter.setCountingEnabled(mPreloadFileGenerationEnabled);
 
     if (mContentPreloadEnabled)
     {
-      mCounterFile_modificationTime = getFileModificationTime(mCounterFile.c_str());
-      requestCounter.loadGeometryHitCounters(mCounterFile.c_str());
       loadPreloadList();
     }
   }
@@ -374,23 +340,6 @@ void ServiceImplementation::startEventProcessing()
   try
   {
     pthread_create(&mEventProcessingThread,nullptr,ServiceImplementation_eventProcessingThread,this);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ServiceImplementation::startRequestCounting()
-{
-  FUNCTION_TRACE
-  try
-  {
-    pthread_create(&mRequestCounterThread,nullptr,ServiceImplementation_requestCounterThread,this);
   }
   catch (...)
   {
@@ -5560,20 +5509,12 @@ void ServiceImplementation::processEvents()
 
           if (mPreloadMemoryLock)
             message->lockData();
-
+/*
           T::Dimensions d = message->getGridDimensions();
           int geometryId = message->getGridGeometryId();
 
-          HitCounter hitCounter = requestCounter.getGeometryHitCounters(geometryId);
-
-          // printf("---- hit counter %lu\n",hitCounter.size());
-
-          for (auto hh = hitCounter.begin(); hh != hitCounter.end(); ++hh)
-          {
-            uint x = hh->first  % d.nx();
-            uint y = hh->first / d.nx();
-            message->getGridValueByGridPoint(x,y);
-          }
+          message->getGridValueByGridPoint(x,y);
+*/
         }
       }
 
@@ -5685,188 +5626,6 @@ void ServiceImplementation::eventProcessingThread()
 
 
 
-void ServiceImplementation::processRequestCounters()
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (requestCounter.getTotalRequests() > 1000000)
-    {
-      requestCounter.saveGeometryHitCounters(mGeneratedCounterFile.c_str());
-      requestCounter.setCountingEnabled(false);
-      requestCounter.resetTotalRequests();
-      requestCounter.updateTopCounters();
-      //requestCounter.saveTopCounters(mPreloadFile.c_str());
-      requestCounter.multiplyCounters(0.9);
-      requestCounter.setCountingEnabled(true);
-    }
-
-    T::ProducerInfoList producerInfoList;
-    mContentServer->getProducerInfoList(mServerSessionId,producerInfoList);
-
-    TopList toprc = requestCounter.getTopRequestCounters();
-    std::set<std::string> preloadList;
-    std::set<std::string> preloadList2;
-
-    for (auto it = toprc.begin(); it != toprc.end(); ++it)
-    {
-      if (mShutdownRequested)
-        return;
-
-      if (it->first > 10)  // *** This limit should be defined in the configuration file
-      {
-        T::ContentInfoList contentInfoList;
-
-        int result = mContentServer->getContentListByRequestCounterKey(mServerSessionId,it->second,contentInfoList);
-        if (result != 0)
-        {
-          PRINT_DATA(mDebugLog,"%s:%d: Cannot get the content list (key=%llu) from the content server!\n",__FILE__,__LINE__,it->second);
-          PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
-          return;
-        }
-
-        uint len = contentInfoList.getLength();
-
-        for (uint t=0; t<len; t++)
-        {
-          if (mShutdownRequested)
-            return;
-
-          T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
-          if (info != nullptr)
-          {
-            char tmp[100];
-            sprintf(tmp,"%u;%s;%u;%u;%u;%d;%d;1",info->mProducerId,info->getFmiParameterName().c_str(),info->mGeometryId,info->mFmiParameterLevelId,info->mParameterLevel,info->mForecastType,info->mForecastNumber);
-
-            if (preloadList.find(tmp) == preloadList.end())
-            {
-              preloadList.insert(tmp);
-              auto producer = producerInfoList.getProducerInfoById(info->mProducerId);
-              if (producer != nullptr)
-              {
-                sprintf(tmp,"%s;%s;%u;1;%u;%05u;%d;%d;1",producer->mName.c_str(),info->getFmiParameterName().c_str(),info->mGeometryId,info->mFmiParameterLevelId,info->mParameterLevel,info->mForecastType,info->mForecastNumber);
-                preloadList2.insert(tmp);
-              }
-            }
-          }
-        }
-      }
-    }
-
-    if (preloadList2.size() > 0)
-    {
-      FILE *file = fopen(mGeneratedPreloadFile.c_str(),"w");
-      if (file != nullptr)
-      {
-        fprintf(file,"# This file is used for indicating which content should be preloaded.\n");
-        fprintf(file,"#\n");
-        fprintf(file,"# FIELDS\n");
-        fprintf(file,"#  1) Producer name\n");
-        fprintf(file,"#  2) Parameter name (Radon name)\n");
-        fprintf(file,"#  3) GeometryId\n");
-        fprintf(file,"#  4) Parameter level id type:\n");
-        fprintf(file,"#         1 = FMI\n");
-        fprintf(file,"#         2 = GRIB1\n");
-        fprintf(file,"#         3 = GRIB2\n");
-        fprintf(file,"#  5) Level id\n");
-        fprintf(file,"#         FMI level identifiers:\n");
-        fprintf(file,"#            1 Gound or water surface\n");
-        fprintf(file,"#            2 Pressure level\n");
-        fprintf(file,"#            3 Hybrid level\n");
-        fprintf(file,"#            4 Altitude\n");
-        fprintf(file,"#            5 Top of atmosphere\n");
-        fprintf(file,"#            6 Height above ground in meters\n");
-        fprintf(file,"#            7 Mean sea level\n");
-        fprintf(file,"#            8 Entire atmosphere\n");
-        fprintf(file,"#            9 Depth below land surface\n");
-        fprintf(file,"#            10 Depth below some surface\n");
-        fprintf(file,"#            11 Level at specified pressure difference from ground to level\n");
-        fprintf(file,"#            12 Max equivalent potential temperature level\n");
-        fprintf(file,"#            13 Layer between two metric heights above ground\n");
-        fprintf(file,"#            14 Layer between two depths below land surface\n");
-        fprintf(file,"#            15 Isothermal level, temperature in 1/100 K\n");
-        fprintf(file,"#  6) Level\n");
-        fprintf(file,"#  7) ForecastType\n");
-        fprintf(file,"#  8) ForecastNumber\n");
-        fprintf(file,"#  9) Preload requested (0 = No, 1 = Yes)\n");
-        fprintf(file,"#\n");
-
-        for (auto it = preloadList2.begin();it != preloadList2.end(); ++it)
-        {
-          fprintf(file,"%s\n",it->c_str());
-        }
-        fclose(file);
-      }
-    }
-
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ServiceImplementation::requestCounterThread()
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!mPreloadFileGenerationEnabled)
-      return;
-
-    sleep(5);
-
-    while (!mShutdownRequested)
-    {
-      try
-      {
-        while (mFullUpdateRequired  &&  !mShutdownRequested)
-          sleep(1);
-
-        mRequestCountingActive = true;
-        processRequestCounters();
-      }
-      catch (...)
-      {
-        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
-        std::string st = exception.getStackTrace();
-        PRINT_DATA(mDebugLog,"%s",st.c_str());
-      }
-
-      for (int t=0; t<60; t++)
-      {
-        if (!mShutdownRequested)
-          sleep(1);
-      }
-
-      if (mPreloadFile_modificationTime != getFileModificationTime(mPreloadFile.c_str()))
-        loadPreloadList();
-
-      time_t tt = getFileModificationTime(mCounterFile.c_str());
-
-      if (tt != mCounterFile_modificationTime)
-      {
-        mCounterFile_modificationTime = tt;
-        requestCounter.loadGeometryHitCounters(mCounterFile.c_str());
-      }
-    }
-
-    mRequestCountingActive = false;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 void ServiceImplementation::shutdown()
 {
   FUNCTION_TRACE
@@ -5874,7 +5633,7 @@ void ServiceImplementation::shutdown()
   {
     PRINT_DATA(mDebugLog,"*** SHUTDOWN ***\n");
     mShutdownRequested = true;
-    while (mEventProcessingActive || mRequestCountingActive)
+    while (mEventProcessingActive)
       sleep(1);
   }
   catch (...)

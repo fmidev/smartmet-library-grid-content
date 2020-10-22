@@ -13,7 +13,7 @@ namespace SmartMet
 namespace DataServer
 {
 
-typedef std::map<std::string,GRID::VirtualGridFilePtr> VirtualGridFilePtr_map;
+typedef std::unordered_map<std::string,GRID::VirtualGridFilePtr> VirtualGridFilePtr_map;
 
 
 

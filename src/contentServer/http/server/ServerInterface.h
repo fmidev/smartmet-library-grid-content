@@ -127,7 +127,6 @@ class ServerInterface
     virtual void getContentListByParameterAndProducerId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByParameterAndProducerName(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentListByParameterGenerationIdAndForecastTime(T::RequestMessage& request,T::ResponseMessage& response);
-    virtual void getContentListByRequestCounterKey(T::RequestMessage& request,T::ResponseMessage& response);
 
     virtual void getContentGeometryIdListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentParamListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);

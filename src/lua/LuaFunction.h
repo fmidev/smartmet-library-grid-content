@@ -2,7 +2,7 @@
 
 #include <grid-files/common/Typedefs.h>
 #include <grid-files/common/AutoThreadLock.h>
-#include <map>
+#include <unordered_map>
 
 
 namespace SmartMet
@@ -26,7 +26,7 @@ class LuaFunction
 };
 
 
-typedef std::map<std::string,LuaFunction> LuaFunction_map;
+typedef std::unordered_map<std::string,LuaFunction> LuaFunction_map;
 
 
 }  // namespace Lua

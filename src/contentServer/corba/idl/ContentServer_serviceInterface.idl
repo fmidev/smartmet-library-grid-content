@@ -120,7 +120,6 @@ interface ServiceInterface
   long  getContentListByParameterAndProducerId(in long long sessionId,in unsigned long producerId,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in long minLevel,in long maxLevel,in short forecastType,in short forecastNumber,in long geometryId,in string startTime,in string endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
   long  getContentListByParameterAndProducerName(in long long sessionId,in string producerName,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in long minLevel,in long maxLevel,in short forecastType,in short forecastNumber,in long geometryId,in string startTime,in string endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
   long  getContentListByParameterGenerationIdAndForecastTime(in long long sessionId,in unsigned long generationId,in octet parameterKeyType,in string parameterKey,in octet parameterLevelIdType,in unsigned long parameterLevelId,in long level,in short forecastType,in short forecastNumber,in long geometryId,in string forecastTime,out CorbaContentInfoList contentInfoList);
-  long  getContentListByRequestCounterKey(in long long sessionId,in unsigned long long key,out CorbaContentInfoList contentInfoList);
   
   long  getContentListOfInvalidIntegrity(in long long sessionId,out CorbaContentInfoList contentInfoList);
   

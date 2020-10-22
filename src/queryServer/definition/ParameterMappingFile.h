@@ -4,6 +4,7 @@
 #include <grid-files/common/AutoWriteLock.h>
 #include <grid-files/common/AutoReadLock.h>
 #include "ParameterMapping.h"
+#include <map>
 
 
 namespace SmartMet

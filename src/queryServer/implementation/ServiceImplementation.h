@@ -8,6 +8,7 @@
 #include "../../lua/LuaFileCollection.h"
 #include "../../functions/FunctionCollection.h"
 
+#include <unordered_map>
 
 
 namespace SmartMet
@@ -16,11 +17,11 @@ namespace QueryServer
 {
 
 typedef std::vector<std::pair<std::string,T::GeometryId>>   Producer_vec;
-typedef std::map<std::string,T::ProducerInfo>               Producer_map;
+typedef std::unordered_map<std::string,T::ProducerInfo>               Producer_map;
 typedef ContentServer::ServiceInterface*                    ContentServer_ptr;
 typedef DataServer::ServiceInterface*                       DataServer_ptr;
 typedef std::vector<std::pair<std::string,int>>             LevelHeightCache;
-typedef std::map<size_t,ParameterMapping_vec>               ParameterMappingCache;
+typedef std::unordered_map<size_t,ParameterMapping_vec>               ParameterMappingCache;
 typedef std::shared_ptr<std::vector<std::string>>           StringVector_sptr;
 
 class CacheEntry
@@ -31,7 +32,7 @@ class CacheEntry
 };
 
 typedef std::shared_ptr<CacheEntry> CacheEntry_sptr;
-typedef std::map<uint,CacheEntry_sptr> ProducerGenarationListCache;
+typedef std::unordered_map<uint,CacheEntry_sptr> ProducerGenarationListCache;
 
 class ContentCacheEntry
 {
@@ -40,7 +41,7 @@ class ContentCacheEntry
     ulonglong producerHash;
     uint generationId;
 };
-typedef std::map<std::size_t,ContentCacheEntry> ContentCache;
+typedef std::unordered_map<std::size_t,ContentCacheEntry> ContentCache;
 
 
 class ContentSearchCacheEntry
@@ -50,7 +51,7 @@ class ContentSearchCacheEntry
     ulonglong producerHash;
     uint generationId;
 };
-typedef std::map<std::size_t,ContentSearchCacheEntry> ContentSearchCache;
+typedef std::unordered_map<std::size_t,ContentSearchCacheEntry> ContentSearchCache;
 
 
 struct HashRec
@@ -59,7 +60,7 @@ struct HashRec
   ulonglong hash;
 };
 
-typedef std::map<uint,HashRec> ProducerHash_map;
+typedef std::unordered_map<uint,HashRec> ProducerHash_map;
 
 
 
@@ -177,7 +178,7 @@ class ServiceImplementation : public ServiceInterface
                        double radius,
                        uint maxValues,
                        short& precision,
-                       ParameterValues_vec& valueList,
+                       ParameterValues_sptr_vec& valueList,
                        T::Coordinate_vec& coordinates);
 
      void           getParameterStringInfo(
