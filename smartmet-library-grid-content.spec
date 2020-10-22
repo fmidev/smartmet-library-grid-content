@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 20.10.15
+Version: 20.10.22
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -22,9 +22,9 @@ BuildRequires: omniORB-devel
 BuildRequires: postgresql95-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 20.10.5
-BuildRequires: smartmet-library-grid-files-devel >= 20.10.15
+BuildRequires: smartmet-library-grid-files-devel >= 20.10.22
 BuildRequires: smartmet-library-macgyver-devel >= 20.10.9
-BuildRequires: smartmet-library-spine-devel >= 20.10.14
+BuildRequires: smartmet-library-spine-devel >= 20.10.20
 Requires: boost169-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
@@ -32,9 +32,9 @@ Requires: lua-devel
 Requires: omniORB
 Requires: postgresql95
 Requires: smartmet-library-gis >= 20.10.5
-Requires: smartmet-library-grid-files >= 20.10.15
+Requires: smartmet-library-grid-files >= 20.10.22
 Requires: smartmet-library-macgyver >= 20.10.9
-Requires: smartmet-library-spine >= 20.10.14
+Requires: smartmet-library-spine >= 20.10.20
 Provides: %{SPECNAME}
 
 %description
@@ -76,6 +76,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Oct 22 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.10.22-1.fmi
+- Performance improvements
 * Thu Oct 15 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.10.15-1.fmi
 - Added new C++ query functions
 - Improved Redis locking mechanism 
