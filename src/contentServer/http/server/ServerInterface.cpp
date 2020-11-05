@@ -87,19 +87,6 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
 
     const char *method = methodStr.c_str();
 
-    // printf("[%s]\n",method);
-    //request.print(std::cout,0,0);
-
-    /* This is for debugging purposes. I.e. you can crash the system and get a core dump for
-     * example when there is a deadlock or a busy loop that cannot be otherways found.
-
-    if (strcasecmp(method,"crash") == 0)
-    {
-      sprintf(nullptr,"Crash");
-      return;
-    }
-    */
-
     if (strcasecmp(method,"clear") == 0)
     {
       clear(request,response);
@@ -318,9 +305,7 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
 
     if (strcasecmp(method,"addFileInfoListWithContent") == 0)
     {
-      //request.print(std::cout,0,0);
       addFileInfoListWithContent(request,response);
-      //response.print(std::cout,0,0);
       return;
     }
 
@@ -2379,14 +2364,7 @@ void ServerInterface::addFileInfoWithContentList(T::RequestMessage& request,T::R
 
     string_vec csvLines;
     request.getLinesByKey("contentInfo",csvLines);
-/*
-    if (request.getLinesByKey("contentInfo",csvLines) == 0)
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: contentInfo");
-      return;
-    }
-*/
+
     T::ContentInfoList contentInfoList;
     uint len = csvLines.size();
     for (uint t=0; t<len; t++)

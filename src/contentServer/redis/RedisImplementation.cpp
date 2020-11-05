@@ -137,8 +137,6 @@ void RedisImplementation::lock(const char *function,uint line,ulonglong& key,uin
 
     time_t startTime = time(nullptr);
 
-    //printf("TRY LOCK %llu\n",lockRequestCounter);
-
     while ((lockReleaseCounter+1) <= lockRequestCounter)
     {
       if (mShutdownRequested)
@@ -155,12 +153,9 @@ void RedisImplementation::lock(const char *function,uint line,ulonglong& key,uin
         lockReleaseCounter = toInt64(reply->str);
       freeReplyObject(reply);
 
-      // printf("-- TRY LOCK %llu+1 == %llu\n",lockReleaseCounter,lockRequestCounter);
-
       if ((lockReleaseCounter+1) == lockRequestCounter)
       {
         key = lockRequestCounter;
-        //printf("LOCK %llu\n",key);
         return;
       }
       time_usleep(0,100);
@@ -178,7 +173,6 @@ void RedisImplementation::lock(const char *function,uint line,ulonglong& key,uin
           }
 
           freeReplyObject(reply);
-          //printf("RESET %llu\n",lockRequestCounter-1);
         }
         else
         {
@@ -214,8 +208,6 @@ void RedisImplementation::unlock(ulonglong key)
     if (reply->str != nullptr)
       lockReleaseCounter = toInt64(reply->str);
 
-    //printf("UNLOCK %llu < %llu\n",lockReleaseCounter,key);
-
     if (lockReleaseCounter < key)
     {
       redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"SET %slockReleaseCounter %llu",mTablePrefix.c_str(),key));
@@ -250,16 +242,6 @@ void RedisImplementation::init(const char *redisAddress,int redisPort,const char
 
     if (mContext == nullptr)
       throw Fmi::Exception(BCP,"Cannot connect to Redis!");
-/*
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"SET %slockRequestCounter 0",mTablePrefix.c_str()));
-    if (reply == nullptr)
-    {
-      closeConnection();
-      throw Fmi::Exception(BCP,"Cannot set the lock release counter!");
-    }
-
-    freeReplyObject(reply);
-*/
   }
   catch (...)
   {
@@ -588,7 +570,7 @@ int RedisImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
       uint id = 0;
       if (reply != nullptr  &&  reply->str != nullptr)
         id = toInt64(reply->str);
-      // printf("**** ID %u\n",id);
+
       freeReplyObject(reply);
 
       if (id < producerInfo.mProducerId)
@@ -601,7 +583,6 @@ int RedisImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
         }
 
         freeReplyObject(reply);
-        // printf("**** SET ID %u\n",producerInfo.mProducerId);
       }
     }
 
@@ -2050,7 +2031,6 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
         // The filename exists, but the actual FileInfo record does not.
         deleteFilename(fileInfo.mName);
         fileId = 0;
-        //printf("** Delete filename %s\n",fileInfo.mName.c_str());
       }
     }
 
@@ -2063,7 +2043,6 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
 
       // ### Adding an event to the event list.
 
-      //printf("-- File updated %s\n",fileInfo.mName.c_str());
       addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,fileInfo.mFileType,0,0);
     }
     else
@@ -2099,7 +2078,6 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
 
       // ### Adding an event to the event list.
 
-      //printf("-- File added %s\n",fileInfo.mName.c_str());
       addEvent(EventType::FILE_ADDED,fileInfo.mFileId,fileInfo.mFileType,0,0);
     }
 
@@ -2150,13 +2128,11 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
         // The filename exists, but the actual FileInfo record does not.
         deleteFilename(fileInfo.mName);
         fileId = 0;
-        //printf("** Delete filename %s\n",fileInfo.mName.c_str());
       }
     }
 
     if (fileId > 0)
     {
-      //printf("** File exists %s\n",fileInfo.mName.c_str());
       // ### File with the same name already exists. Let's return
       // ### the current file-id.
 
@@ -2170,7 +2146,6 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
     else
     {
       // ### Generating a new file-id.
-      //printf("** File added %s\n",fileInfo.mName.c_str());
 
         redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"INCR %sfileCounter",mTablePrefix.c_str()));
       if (reply == nullptr)
@@ -2204,7 +2179,6 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
     // ### Adding the content information into the database.
 
     uint len = contentInfoList.getLength();
-    //printf("-- contentList %u\n",len);
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
@@ -2240,12 +2214,10 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
 
     if (fileId > 0)
     {
-      //printf("-- file update event\n");
       addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,fileInfo.mFileType,contentInfoList.getLength(),0);
     }
     else
     {
-      //printf("-- file add event\n");
       addEvent(EventType::FILE_ADDED,fileInfo.mFileId,fileInfo.mFileType,contentInfoList.getLength(),0);
     }
 
@@ -2291,8 +2263,6 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
 
       // ### Checking if the filename already exists in the database.
 
-      //printf("CREATE FILE %s\n",ff->mFileInfo.mName.c_str());
-
       uint fileId = getFileId(ff->mFileInfo.mName);
       if (fileId > 0)
       {
@@ -2302,14 +2272,11 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
           // The filename exists, but the actual FileInfo record does not.
           deleteFilename(ff->mFileInfo.mName);
           fileId = 0;
-          //printf("** Delete filename %s\n",ff->mFileInfo.mName.c_str());
         }
       }
 
       if (fileId > 0)
       {
-        //printf("** File exists %s\n",ff->mFileInfo.mName.c_str());
-
         // ### File with the same name already exists. Let's return
         // ### the current file-id.
 
@@ -2323,7 +2290,6 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
       else
       {
         // ### Generating a new file-id.
-        //printf("** File added %s\n",fileInfo.mName.c_str());
 
         redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"INCR %sfileCounter",mTablePrefix.c_str()));
         if (reply == nullptr)
@@ -2357,7 +2323,6 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
       // ### Adding the content information into the database.
 
       uint len = ff->mContentInfoList.getLength();
-      //printf("-- contentList %u\n",len);
       for (uint t=0; t<len; t++)
       {
         T::ContentInfo *info = ff->mContentInfoList.getContentInfoByIndex(t);
@@ -2399,7 +2364,6 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
 
       if (fileId > 0)
       {
-        //printf("-- file update event\n");
         if (requestFlags & 0x00000001)
           addEvent(EventType::FILE_UPDATED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,0,0);
       }
@@ -3426,8 +3390,6 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
         T::EventInfo *eventInfo = new T::EventInfo();
         eventInfo->setCsv(reply->element[t]->str);
 
-        //printf("# EVENT %llu,%u\n",eventInfo->mEventId,eventInfo->mType);
-
         if (eventInfo->mType == EventType::FILE_ADDED)
         {
           T::FileInfo fileInfo;
@@ -3453,7 +3415,7 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
           }
           else
           {
-            //printf("File not found %u\n",eventInfo->mId1);
+            // File not found
           }
         }
         else
@@ -3466,7 +3428,7 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
           }
           else
           {
-           //  printf("**************** CONTENT NOT FOUND   %u %u ***********\n", eventInfo->mId1,eventInfo->mId2);
+           // Content not found
           }
         }
 
@@ -3592,8 +3554,6 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
   FUNCTION_TRACE
   try
   {
-    //printf("ADD CONTENT %u\n",contentInfoList.getLength());
-    //contentInfoList.print(std::cout,0,0);
     RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     if (!isSessionValid(sessionId))
@@ -3614,7 +3574,7 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
       T::ContentInfo contentInfo;
       if (getContent(info->mFileId,info->mMessageIndex,contentInfo) == Result::OK)
       {
-        printf("-- content already added %u:%u\n",info->mFileId,info->mMessageIndex);
+        // Content already added
       }
       else
       {
@@ -3636,7 +3596,6 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
         if (generationInfo.mGenerationId != fileInfo.mGenerationId)
           return Result::GENERATION_AND_FILE_DO_NOT_MATCH;
 
-        //printf("-- add content %u %u\n",info->mFileId,info->mMessageIndex);
         unsigned long long id = getContentKey(info->mFileId,info->mMessageIndex);
 
         redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,info->getCsv().c_str()));
@@ -4619,8 +4578,6 @@ int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     T::ContentInfoList contentList;
     int res = getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,contentList);
 
-//    contentInfoList = contentList;
-//#if 0
     contentList.getContentListByForecastTime(forecastTime,contentInfoList);
 
     // If we cannot find any forecast time, lets add at least one
@@ -4634,7 +4591,6 @@ int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
         contentInfoList.addContentInfo(info->duplicate());
       }
     }
-//#endif
     return res;
   }
   catch (...)
@@ -5393,7 +5349,6 @@ int RedisImplementation::getProducerList(T::ProducerInfoList& producerInfoList)
         T::ProducerInfo *producerInfo = new T::ProducerInfo();
         producerInfo->setCsv(reply->element[t]->str);
         producerInfoList.addProducerInfo(producerInfo);
-        //printf("%u) %s\n", t, reply->element[t]->str);
       }
     }
     freeReplyObject(reply);
@@ -5559,7 +5514,6 @@ int RedisImplementation::getGenerationList(T::GenerationInfoList& generationInfo
         T::GenerationInfo *generationInfo = new T::GenerationInfo();
         generationInfo->setCsv(reply->element[t]->str);
         generationInfoList.addGenerationInfo(generationInfo);
-        //printf("%u) %s\n", t, reply->element[t]->str);
       }
     }
     freeReplyObject(reply);
@@ -6821,7 +6775,6 @@ int RedisImplementation::setContent(T::ContentInfo& contentInfo)
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    //contentInfo.print(std::cout,0,0);
     unsigned long long id = getContentKey(contentInfo.mFileId,contentInfo.mMessageIndex);
 
     redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),id,id));
@@ -6883,20 +6836,6 @@ int RedisImplementation::getContent(uint fileId,uint messageIndex,T::ContentInfo
         }
       }
     }
-/*
-    if (reply->elements > 1)
-    {
-      for (uint t=0; t< reply->elements; t++)
-      {
-        contentInfo.setCsv(reply->element[t]->str);
-        contentInfo.print(std::cout,0,0);
-      }
-      Fmi::Exception exception(BCP,"Got multiple records - expected one");
-      exception.addParameter("FileId",std::to_string(fileId));
-      exception.addParameter("MessageIndex",std::to_string(messageIndex));
-      exception.printError();
-    }
-*/
     freeReplyObject(reply);
     return Result::DATA_NOT_FOUND;
   }
@@ -7737,10 +7676,7 @@ int RedisImplementation::getContentByForecastTimeList(std::vector<T::ForecastTim
 
         sprintf(tmp,"%d;%d;%d;%d;%s",contentInfo->mGenerationId,contentInfo->mGeometryId,contentInfo->mForecastType,contentInfo->mForecastNumber,contentInfo->mForecastTime.c_str());
         if (searchList.find(tmp) != searchList.end())
-        {
           contentInfoList.addContentInfo(contentInfo);
-          // printf("-- delete %s %u\n",tmp,contentInfoList.getLength());
-        }
         else
           delete contentInfo;
       }
@@ -7782,8 +7718,6 @@ int RedisImplementation::getContentByProducerId(uint producerId,uint startFileId
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
       }
-
-      //printf("getContentByProducerId %u %u => %u\n",startFileId,startMessageIndex,reply->elements);
 
       if (reply->elements == 0)
       {
@@ -7863,8 +7797,6 @@ int RedisImplementation::getContentBySourceId(uint sourceId,uint startFileId,uin
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
       }
-
-      //printf("getContentByProducerId %u %u => %u\n",startFileId,startMessageIndex,reply->elements);
 
       if (reply->elements == 0)
       {
@@ -8002,7 +7934,6 @@ T::EventId RedisImplementation::addEvent(uint eventType,uint id1,uint id2,uint i
 
     freeReplyObject(reply);
 
-    //printf("EventId = %llu\n",eventId);
     if ((eventId % 10000) == 0)
       truncateEvents();
 
@@ -8040,10 +7971,7 @@ void RedisImplementation::truncateEvents()
     else
       count = reply->integer;
 
-    //printf("EVENTS %u (%s)\n",count,reply->str);
-
     freeReplyObject(reply);
-
 
     if (count > maxEvents)
     {

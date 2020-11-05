@@ -482,8 +482,6 @@ void GridFileManager::deleteFileNoLock(uint fileId,bool sentMessageToContentServ
   FUNCTION_TRACE
   try
   {
-    //printf("--- deleteFileNoLock %u\n",fileId);
-
     auto gridRec = mFileList.find(fileId);
 
     if (gridRec != mFileList.end())

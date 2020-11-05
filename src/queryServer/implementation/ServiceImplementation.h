@@ -249,11 +249,7 @@ class ServiceImplementation : public ServiceInterface
                      Producer_vec& producers,
                      T::AreaCoordinates& coordinates,
                      std::set<T::GeometryId>& geometryIdList);
-/*
-     void           getGeometryIdListByCoordinates(
-                       T::AreaCoordinates& coordinates,
-                       std::set<T::GeometryId>& geometryIdList);
-*/
+
      void           getGeometryIdListByCoordinates(
                        uint gridWidth,
                        uint gridHeight,

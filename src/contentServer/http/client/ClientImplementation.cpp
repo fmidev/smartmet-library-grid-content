@@ -3809,40 +3809,13 @@ size_t ClientImplementation_responseProcessing(char *ptr, size_t size, size_t nm
 {
   try
   {
-    //printf("\n**** DATA %u (%u) ****\n",nmemb,size);
     T::ResponseMessage *response = (T::ResponseMessage*)userdata;
 
-    //char line[10000];
-    //uint c = 0;
     for (size_t t=0; t<nmemb; t++)
     {
       char ch = ptr[t];
       response->addChar(ch);
-#if 0
-      //printf("%c",ch);
-      if (ch == '\r'  || ch == '\n' ||  linePos == 9999)
-      {
-        line[linePos] = '\0';
-        if (linePos > 0)
-          response->addLine(line);
-
-        linePos = 0;
-      }
-      else
-      {
-        line[linePos] = ch;
-        linePos++;
-      }
-#endif
     }
-/*
-    if (c > 0)
-    {
-      line[c] = '\0';
-      response->addLine(line);
-    }
-*/
-    //printf("###### \n");
     return nmemb;
   }
   catch (...)
@@ -3879,7 +3852,6 @@ void ClientImplementation::sendRequest(T::RequestMessage& request,T::ResponseMes
         std::string s = request.getLineByIndex(t);
         p += sprintf(p,"%s\n",s.c_str());
       }
-      //printf("%s\n",data);
 
       curl_easy_setopt(curl, CURLOPT_POSTFIELDS,data);
 
@@ -3889,10 +3861,6 @@ void ClientImplementation::sendRequest(T::RequestMessage& request,T::ResponseMes
     }
 
     response.addChar('\0');
-
-    //request.print(std::cout,0,0);
-
-    //response.print(std::cout,0,0);
   }
   catch (...)
   {

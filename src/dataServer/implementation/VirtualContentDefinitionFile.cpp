@@ -154,43 +154,11 @@ void VirtualContentDefinitionFile::getContentDefinitions(T::ContentInfo& content
         s2 = toLowerString(tmp);
       }
 
-
-      //if (strcasecmp("ECBSF",producerName.c_str()) == 0)
-      //  printf("FIND [%s]\n",s.c_str());
-
       if ((contentInfo.mForecastNumber <= 0  &&  it->mSourceParameterNames.find(s1) != it->mSourceParameterNames.end()) ||
           it->mSourceParameterNames.find(s2) != it->mSourceParameterNames.end())
       {
         definitions.push_back(*it);
-        //printf("--- FOUND %lu\n",definitions.size());
       }
-/*
-      for (auto sp = it->mSourceParameters.begin(); sp != it->mSourceParameters.end(); ++sp)
-      {
-        if (strcasecmp(sp->mParameterName.c_str(),contentInfo.getFmiParameterName().c_str()) == 0)
-        {
-          if (sp->mProducerName == "" || strcasecmp(sp->mProducerName.c_str(),producerName.c_str()) == 0)
-          {
-            if (sp->mGeometryId == "" || atoi(sp->mGeometryId.c_str()) == contentInfo.mGeometryId)
-            {
-              if (sp->mLevelId == "" || atoi(sp->mLevelId.c_str()) == contentInfo.mFmiParameterLevelId)
-              {
-                if (sp->mLevel == "" || atoi(sp->mLevel.c_str()) == contentInfo.mParameterLevel)
-                {
-                  if (sp->mForecastType == "" || atoi(sp->mForecastType.c_str()) == contentInfo.mForecastType)
-                  {
-                    if (sp->mForecastNumber == "" || atoi(sp->mForecastNumber.c_str()) == contentInfo.mForecastNumber)
-                    {
-                      definitions.push_back(*it);
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-      */
     }
   }
   catch (...)
@@ -263,7 +231,6 @@ void VirtualContentDefinitionFile::loadFile()
           rec.mFunctionCallMethod = toUInt32(partList[3].c_str());
           splitString(partList[4],',',rec.mFunctionParameters);
           mContentDefList.push_back(rec);
-          //rec.print(std::cout,0,0);
         }
       }
     }

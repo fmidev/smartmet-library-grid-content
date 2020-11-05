@@ -135,7 +135,6 @@ int CacheImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint me
       {
         mDataCacheAccessTime[t] = time(nullptr);
         data = *dt;
-        //printf("** DATA FROM CACHE %u\n",fileId);
         return Result::OK;
       }
     }
@@ -159,7 +158,6 @@ int CacheImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint me
       else
         *mDataCache[idx] = data;
 
-      //printf("** DATA TO CACHE %u\n",fileId);
       mDataCacheAccessTime[idx] = time(nullptr);
     }
 
@@ -240,15 +238,12 @@ int CacheImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId
 
     if (mPointValueCache.getValue(fileId,messageIndex,coordinateType,x,y,areaInterpolationMethod,value))
     {
-      //printf("Value from cache %f,%f %f\n",x,y,value);
       return Result::OK;
     }
 
     int result = mDataServer->getGridValueByPoint(sessionId,fileId,messageIndex,coordinateType,x,y,areaInterpolationMethod,value);
     if (result == Result::OK)
       mPointValueCache.addValue(fileId,messageIndex,coordinateType,x,y,areaInterpolationMethod,value);
-
-    //printf("Value to cache %f,%f %f\n",x,y,value);
 
     return result;
   }

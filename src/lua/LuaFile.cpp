@@ -163,7 +163,6 @@ void* LuaFile::getLuaState(ulonglong& key)
           mStateKeyCounter++;
           key = mStateKeyCounter;
           mStateKey[t] = key;
-//          printf("GET %u %llu %llu\n",t,key,(ulonglong)mLuaState[t]);
           return mLuaState[t];
         }
       }
@@ -383,8 +382,6 @@ double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& 
     LuaHandle luaHandle(this);
     lua_State *L = (lua_State*)luaHandle.getState();
 
-    // printf("STATE %llu\n",(ulonglong)L);
-
     auto a = mFunctions.find(toLowerString(function));
     if (a == mFunctions.end())
     {
@@ -409,8 +406,6 @@ double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& 
     int pLen = parameters.size();
 
     lua_getglobal(L,a->second.mFunctionName.c_str());
-
-    //lua_pushstring(mLuaState,a->mFunctionName.c_str());
     lua_pushinteger(L,pLen);
 
     lua_newtable(L);
@@ -560,7 +555,6 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
         lua_gettable(L, -2);
         float a = lua_tonumber(L, -1);
         outParameters.push_back(a);
-        //printf("%d => %f\n",t,a);
         lua_pop(L, 1);
       }
       lua_pop(L, 1);  // pop table from the stack
@@ -671,7 +665,6 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
         lua_gettable(L, -2);
         double a = lua_tonumber(L, -1);
         outParameters.push_back(a);
-        //printf("%d => %f\n",t,a);
         lua_pop(L, 1);
       }
       lua_pop(L, 1);  // pop table from the stack
@@ -1563,7 +1556,6 @@ void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,
         lua_gettable(L, -2);
         float a = lua_tonumber(L, -1);
         outParameters.push_back(a);
-        //printf("%d => %f\n",t,a);
         lua_pop(L, 1);
       }
       lua_pop(L, 1);  // pop table from the stack
@@ -1663,7 +1655,6 @@ void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,
         lua_gettable(L, -2);
         double a = lua_tonumber(L, -1);
         outParameters.push_back(a);
-        //printf("%d => %f\n",t,a);
         lua_pop(L, 1);
       }
       lua_pop(L, 1);  // pop table from the stack
@@ -1773,7 +1764,6 @@ void LuaFile::loadFunctionList(uint type)
           buf[c] = '\0';
           if (c > 0)
           {
-            //printf("Function : [%s]\n",buf);
             mFunctions.insert(std::pair<std::string,LuaFunction>(toLowerString(std::string(buf)),LuaFunction(buf,type)));
           }
           c = 0;

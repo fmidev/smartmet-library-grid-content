@@ -396,17 +396,10 @@ int MemoryImplementation::_reload(T::SessionId sessionId)
     mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
     mFileInfoListByName.sort(T::FileInfo::ComparisonMethod::fileName);
 
-    //mContentInfoListEnabled[0] = true;
-
     readContentList();
 
     for (int t=1; t<CONTENT_LIST_COUNT; t++)
     {
-      //if ((mContentSortingFlags & (1 << t)) != 0)
-      //  mContentInfoListEnabled[t] = true;
-      //else
-      //  mContentInfoListEnabled[t] = false;
-
       if (mContentInfoListEnabled[t])
         mContentInfoList[t] = mContentInfoList[0];
     }
@@ -1839,7 +1832,6 @@ int MemoryImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileI
 
       // ### Adding an event to the event list.
 
-      //printf("-- File updated %s\n",fileInfo.mName.c_str());
       addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,fileInfo.mFileType,0,0);
     }
     else
@@ -1856,7 +1848,6 @@ int MemoryImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileI
 
       // ### Adding an event to the event list.
 
-      //printf("-- File added %s\n",fileInfo.mName.c_str());
       addEvent(EventType::FILE_ADDED,fileInfo.mFileId,fileInfo.mFileType,0,0);
     }
 
@@ -1899,7 +1890,6 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
     T::FileInfo *info = mFileInfoListByName.getFileInfoByName(fileInfo.mName);
     if (info != nullptr)
     {
-      //printf("** File exists %s\n",fileInfo.mName.c_str());
       // ### File with the same name already exists. Let's return
       // ### the current file-id.
 
@@ -1913,7 +1903,6 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
     else
     {
       // ### Generating a new file-id.
-      //printf("** File added %s\n",fileInfo.mName.c_str());
 
       mMaxFileId++;
 
@@ -1928,7 +1917,6 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
     // ### Adding the content information into the database.
 
     uint len = contentInfoList.getLength();
-    //printf("-- contentList %u\n",len);
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
@@ -1961,7 +1949,6 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
     }
     else
     {
-      //printf("-- file add event\n");
       addEvent(EventType::FILE_ADDED,fileInfo.mFileId,fileInfo.mFileType,0,0);
     }
 
@@ -2007,7 +1994,6 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
 
       if (producerInfo->mProducerId != generationInfo->mProducerId)
       {
-        //ff->print(std::cout,0,0);
         return Result::PRODUCER_AND_GENERATION_DO_NOT_MATCH;
       }
 
@@ -3003,7 +2989,7 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
         }
         else
         {
-         //  printf("**************** CONTENT NOT FOUND   %u %u ***********\n", eventInfo->mId1,eventInfo->mId2);
+         // Content not found
         }
       }
 
@@ -3011,7 +2997,6 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
       event = event->nextItem;
     }
 
-    // eventInfoList.print(std::cout,0,0);
     return Result::OK;
   }
   catch (...)
@@ -3121,7 +3106,7 @@ int MemoryImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoL
       T::ContentInfo contentInfo;
       if (mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex) != nullptr)
       {
-        // printf("-- content already added %u:%u\n",info->mFileId,info->mMessageIndex);
+        // Content already added
       }
       else
       {
@@ -4286,14 +4271,6 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
 
     contentInfoList.clear();
 
-/*
-    boost::posix_time::ptime s = toTimeStamp(forecastTime) - boost::posix_time::minutes(600);;
-    boost::posix_time::ptime e = s + boost::posix_time::minutes(600);
-
-    std::string startTime = toString(s);
-    std::string endTime = toString(e);
-*/
-
     std::string startTime = "13000101T000000";
     std::string endTime = "23000101T000000";
 
@@ -4372,27 +4349,7 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
-    //contentList.print(std::cout,0,0);
-
     contentInfoList = contentList;
-#if 0
-    contentList.getContentListByForecastTime(forecastTime,contentInfoList);
-
-    // If we cannot find any forecast time, lets add at least one
-    // time in order to show that there are other times available.
-
-    if (contentInfoList.getLength() == 0  &&  contentList.getLength() > 0)
-    {
-      T::ContentInfo *info = contentList.getContentInfoByIndex(0);
-      if (info != nullptr)
-      {
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(info->duplicate());
-        else
-          contentInfoList.addContentInfo(info);
-      }
-    }
-#endif
     return Result::OK;
   }
   catch (...)
@@ -5261,8 +5218,6 @@ bool MemoryImplementation::syncProducerList()
           rec->mFlags = rec->mFlags | 0x80000000;
           mProducerInfoList.addProducerInfo(rec);
           addEvent(EventType::PRODUCER_ADDED,rec->mProducerId,0,0,0);
-          printf("ADD PRODUCER\n");
-          rec->print(std::cout,0,0);
         }
       }
     }
