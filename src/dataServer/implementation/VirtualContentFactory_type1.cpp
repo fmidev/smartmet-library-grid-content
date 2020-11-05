@@ -56,7 +56,6 @@ void VirtualContentFactory_type1::init(std::string definitionFileName)
   try
   {
     mContentDefinitionFile.init(definitionFileName);
-    //mContentDefinitionFile.print(std::cout,0,0);
   }
   catch (...)
   {
@@ -102,10 +101,6 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
   FUNCTION_TRACE
   try
   {
-    //std::cout << "VirtualContentFactory_type1::addContent\n";
-    //contentInfo.print(std::cout,0,0);
-
-
     VirtualContentDefinition_vec contentDefinitionList;
     mContentDefinitionFile.getContentDefinitions(contentInfo,toLowerString(producerInfo.mName),contentDefinitionList);
 
@@ -152,9 +147,6 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
         if (gridFileMap.find(std::string(filename)) == gridFileMap.end())
         {
 
-          //printf("***** AddContent %u\n",contentInfo.mFileId);
-          //contentInfo.print(std::cout,0,0);
-
           Identification::FmiParameterDef def;
           if (Identification::gridDef.getFmiParameterDefByName(contentDef->mVirtualParameter.mParameterName.c_str(),def))
           {
@@ -163,7 +155,6 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
             uint virtualFileId = 0;
 
             std::vector<GRID::SourceMessage> sourceMessages;
-            //sourceMessages.push_back(GRID::SourceMessage(sourceGridFile,contentInfo.mMessageIndex));
 
             for (auto sourceParam = contentDef->mSourceParameters.begin(); sourceParam != contentDef->mSourceParameters.end() && componentsFound; ++sourceParam)
             {
@@ -221,17 +212,11 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
                     }
                   }
                 }
-
-                //cInfo = contentList.getContentInfoByIndex(0);
               }
 
               if (cInfo == nullptr || (contentList.getLength() == 1  &&  cInfo->mForecastTime != contentInfo.mForecastTime))
               {
-                 printf("**** Not found : %s (%s) (%s)\n",contentDef->mVirtualParameter.mParameterName.c_str(),producerInfo.mName.c_str(),contentInfo.getFmiParameterName().c_str());
-                // contentDef->print(std::cout,2,0);
-                //contentInfo.print(std::cout,2,0);
-                //if (cInfo != nullptr)
-                //  cInfo->print(std::cout,2,0);
+                 // Not found
                 componentsFound = false;
               }
               else
@@ -239,11 +224,9 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
                 if (sourceParam == contentDef->mSourceParameters.begin())
                 {
                   // Checking if the virtual file is already registered to the contentServer.
-                  //sprintf(filename,"VIRT-%s-%u-%u",contentDef->mVirtualParameter.mParameterName.c_str(),cInfo->mFileId,cInfo->mMessageIndex);
 
                   if (gridFileMap.find(std::string(filename)) != gridFileMap.end())
                   {
-                    // printf("***** FILE EXISTS %s\n",filename);
                     fileExists = true;
                   }
                   else
@@ -255,7 +238,6 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
                       GRID::GridFile_sptr vGridFile = mGridFileManager->getFileByIdNoMapping(tmpFileInfo.mFileId);
                       if (vGridFile)
                       {
-                        //printf("**** File is already in the file storage %u\n",tmpFileInfo.mFileId);
                         fileExists = true;  // File is already in the file storage
                       }
                       else
@@ -274,13 +256,8 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
               }
             }
 
-            //printf("**** VIRTUAL CONTENT : %s (%s) (%s) (%d)\n",contentDef->mVirtualParameter.mParameterName.c_str(),producerInfo.mName.c_str(),contentInfo.getFmiParameterName().c_str(),(int)componentsFound);
-
             if (!fileExists &&  componentsFound  &&  filename[0] != '\0')
             {
-              //contentDef->print(std::cout,2,0);
-              //contentInfo.print(std::cout,2,0);
-
               GRID::VirtualGridFile *virtualGridFile = new GRID::VirtualGridFile();
               virtualGridFile->setFileName(filename);
               virtualGridFile->setFileId(virtualFileId);
@@ -349,14 +326,12 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
               newContentInfo->mGeometryId = contentInfo.mGeometryId;
               newContentInfo->mModificationTime = contentInfo.mModificationTime;
 
-              //newContentInfo->print(std::cout,0,0);
-
               gridFileMap.insert(std::pair<std::string,GRID::VirtualGridFilePtr>(std::string(filename),virtualGridFile));
             }
           }
           else
           {
-            // printf("UNKNOWN PARAMETER : %s\n",contentDef->mVirtualParameter.mParameterName.c_str());
+            // UNKNOWN PARAMETER
           }
         }
       }

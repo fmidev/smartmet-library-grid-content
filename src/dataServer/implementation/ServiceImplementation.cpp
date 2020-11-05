@@ -38,65 +38,6 @@ namespace SmartMet
 namespace DataServer
 {
 
-#if 0
-
-bool sigbusActive = false;
-ThreadLock sigbusThreadLock;
-
-
-
-void sigbus_action(int signo, siginfo_t *info, void *extra)
-{
-  sigaction(SIGBUS, nullptr,nullptr);
-
-  ucontext_t *p=(ucontext_t *)extra;
-  //int x;
-  //printf("Signal %d received from parent\n", signo);
-  //printf("siginfo address=%x\n",info->si_addr);
-
-  //x = p->uc_mcontext.gregs[REG_RIP];
-
-  //printf("address = %x\n",x);
-
-  p->uc_mcontext.gregs[REG_RIP] += 6;
-}
-
-
-
-bool isMemoryMappingValid(char *address,long long size)
-{
-  if (address == nullptr || size <= 0)
-    return false;
-
-  AutoThreadLock lock(&sigbusThreadLock);
-
-  sigbusActive = false;
-
-  struct sigaction act;
-  act.sa_handler = NULL;
-  act.sa_sigaction = sigbus_action;
-  sigemptyset (&act.sa_mask);
-  act.sa_flags = 0;
-  act.sa_restorer = nullptr;
-
-  sigaction(SIGBUS, &act,nullptr);
-
-  char *ch1 = address;
-  if (sigbusActive)
-    return false;
-
-  sigaction(SIGBUS, &act,nullptr);
-  char *ch2 = address+size-1;
-  if (sigbusActive)
-    return false;
-
-  sigaction(SIGBUS, nullptr,nullptr);
-  return true;
-}
-#endif
-
-
-
 
 static void* ServiceImplementation_eventProcessingThread(void *arg)
 {
@@ -179,9 +120,6 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,std:
   {
     if (contentServer == nullptr)
       throw Fmi::Exception(BCP,"The 'contentServer' parameter points to nullptr!");
-
-    //if (serverId == 0 ||  serverId > 64)
-    //  throw Fmi::Exception(BCP,"The 'serverId' parameter value must be in the range [1..64]!");
 
     mServerId = serverId;
     mServerSessionId = serverSessionId;
@@ -2488,11 +2426,7 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,u
       if (message == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
-
       bool gridRectangle = false;
-      //if ((flags & GRID_RECTANGLE_FLAG) != 0)
-      //  gridRectangle = true;
-
       message->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,gridRectangle,valueList);
       return Result::OK;
     }
@@ -2768,122 +2702,6 @@ int ServiceImplementation::_getGridIsobandsByTime(T::SessionId sessionId,uint fi
   }
 }
 
-
-
-#if 0
-
-int ServiceImplementation::getGridIsobandsByTimeAndGridImpl(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,std::vector<T::Coordinate>& gridCoordinates,T::AttributeList& attributeList,T::ByteData_vec& contours)
-{
-  FUNCTION_TRACE
-  try
-  {
-    try
-    {
-      GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
-      if (gridFile1 == nullptr)
-        return Result::FILE_NOT_FOUND;
-
-      GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
-      if (message1 == nullptr)
-        return Result::MESSAGE_NOT_FOUND;
-
-      GRID::GridFile_sptr gridFile2 = getGridFile(fileId2);
-      if (gridFile2 == nullptr)
-        return Result::FILE_NOT_FOUND;
-
-      GRID::Message *message2 = gridFile2->getMessageByIndex(messageIndex2);
-      if (message2 == nullptr)
-        return Result::MESSAGE_NOT_FOUND;
-
-      if (gridLatLonCoordinates.size() == 0 ||  gridWidth == 0 || gridHeight == 0)
-        return Result::INVALID_NUMBER_OF_COORDINATES;
-
-      if (gridWidth == 0 || gridHeight == 0)
-        return Result::INVALID_DIMENSIONS;
-
-      short timeInterpolationMethod = T::TimeInterpolationMethod::Linear;
-      const char *ti = attributeList.getAttributeValue("grid.timeInterpolationMethod");
-      if (ti != nullptr)
-        timeInterpolationMethod = toInt16(ti);
-
-      short areaInterpolationMethod = T::AreaInterpolationMethod::Linear;
-      const char *s = attributeList.getAttributeValue("grid.areaInterpolationMethod");
-      if (s != nullptr)
-        areaInterpolationMethod = toInt16(s);
-
-      T::CoordinateType coordinateType = T::CoordinateTypeValue::GRID_COORDINATES;
-      const char *c = attributeList.getAttributeValue("contour.coordinateType");
-      if (c != nullptr)
-        coordinateType = toUInt8(c);
-
-      size_t smooth_size = 0;
-      const char *ss = attributeList.getAttributeValue("contour.smooth.size");
-      if (ss != nullptr)
-        smooth_size = toSize_t(ss);
-
-      size_t smooth_degree = 0;
-      const char *sd = attributeList.getAttributeValue("contour.smooth.degree");
-      if (sd != nullptr)
-        smooth_degree = toSize_t(sd);
-
-      T::ParamValue_vec gridValues;
-      T::ParamValue_vec values1;
-      T::ParamValue_vec values2;
-
-      message1->getGridValueVectorByCoordinateList(T::CoordinateTypeValue::LATLON_COORDINATES,gridLatLonCoordinates,areaInterpolationMethod,values1);
-      message2->getGridValueVectorByCoordinateList(T::CoordinateTypeValue::LATLON_COORDINATES,gridLatLonCoordinates,areaInterpolationMethod,values2);
-
-      time_t tt = utcTimeToTimeT(newTime);
-      timeInterpolation(values1,values2,message1->getForecastTimeT(),message2->getForecastTimeT(),tt,timeInterpolationMethod,gridValues);
-
-      T::Coordinate_vec *coordinatePtr = &gridCoordinates;
-
-      switch (coordinateType)
-      {
-        case T::CoordinateTypeValue::UNKNOWN:
-        case T::CoordinateTypeValue::LATLON_COORDINATES:
-          coordinatePtr = &gridLatLonCoordinates;
-          break;
-
-        case T::CoordinateTypeValue::GRID_COORDINATES:
-          coordinatePtr = nullptr;
-          break;
-
-        case T::CoordinateTypeValue::ORIGINAL_COORDINATES:
-          break;
-      }
-
-      attributeList.setAttribute("grid.timeInterpolationMethod",Fmi::to_string(timeInterpolationMethod));
-      attributeList.setAttribute("grid.areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
-      attributeList.setAttribute("grid.width",Fmi::to_string(gridWidth));
-      attributeList.setAttribute("grid.height",Fmi::to_string(gridHeight));
-      attributeList.setAttribute("grid.original.reverseYDirection",Fmi::to_string((int)message1->reverseYDirection()));
-      attributeList.setAttribute("grid.original.reverseXDirection",Fmi::to_string((int)message1->reverseXDirection()));
-      attributeList.setAttribute("contour.coordinateType",Fmi::to_string(coordinateType));
-
-      getIsobands(gridValues,coordinatePtr,gridWidth,gridHeight,contourLowValues,contourHighValues,areaInterpolationMethod,smooth_size,smooth_degree,contours);
-
-      return Result::OK;
-    }
-    catch (...)
-    {
-       Fmi::Exception exception(BCP,"Operation failed!",nullptr);
-       exception.addParameter("FileId1",Fmi::to_string(fileId1));
-       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
-       exception.addParameter("FileId2",Fmi::to_string(fileId1));
-       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
-       std::string st = exception.getStackTrace();
-       PRINT_DATA(mDebugLog,"%s",st.c_str());
-       return Result::UNEXPECTED_EXCEPTION;
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-#endif
 
 
 
@@ -3974,125 +3792,6 @@ int ServiceImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessi
 
 
 
-#if 0
-
-
-
-int ServiceImplementation::getGridIsolinesByTimeAndGridImpl(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,std::string newTime,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,std::vector<T::Coordinate>& gridCoordinates,T::AttributeList& attributeList,T::ByteData_vec& contours)
-{
-  FUNCTION_TRACE
-  try
-  {
-    try
-    {
-      GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
-      if (gridFile1 == nullptr)
-        return Result::FILE_NOT_FOUND;
-
-      GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
-      if (message1 == nullptr)
-        return Result::MESSAGE_NOT_FOUND;
-
-      GRID::GridFile_sptr gridFile2 = getGridFile(fileId2);
-      if (gridFile2 == nullptr)
-        return Result::FILE_NOT_FOUND;
-
-      GRID::Message *message2 = gridFile2->getMessageByIndex(messageIndex2);
-      if (message2 == nullptr)
-        return Result::MESSAGE_NOT_FOUND;
-
-      if (gridLatLonCoordinates.size() == 0 ||  gridWidth == 0 || gridHeight == 0)
-        return Result::INVALID_NUMBER_OF_COORDINATES;
-
-      if (gridWidth == 0 || gridHeight == 0)
-        return Result::INVALID_DIMENSIONS;
-
-      short timeInterpolationMethod = T::TimeInterpolationMethod::Linear;
-      const char *ti = attributeList.getAttributeValue("grid.timeInterpolationMethod");
-      if (ti != nullptr)
-        timeInterpolationMethod = toInt16(ti);
-
-      short areaInterpolationMethod = T::AreaInterpolationMethod::Linear;
-      const char *s = attributeList.getAttributeValue("grid.areaInterpolationMethod");
-      if (s != nullptr)
-        areaInterpolationMethod = toInt16(s);
-
-      T::CoordinateType coordinateType = T::CoordinateTypeValue::GRID_COORDINATES;
-      const char *c = attributeList.getAttributeValue("contour.coordinateType");
-      if (c != nullptr)
-        coordinateType = toUInt8(c);
-
-      size_t smooth_size = 0;
-      const char *ss = attributeList.getAttributeValue("contour.smooth.size");
-      if (ss != nullptr)
-        smooth_size = toSize_t(ss);
-
-      size_t smooth_degree = 0;
-      const char *sd = attributeList.getAttributeValue("contour.smooth.degree");
-      if (sd != nullptr)
-        smooth_degree = toSize_t(sd);
-
-      T::ParamValue_vec gridValues;
-      T::ParamValue_vec values1;
-      T::ParamValue_vec values2;
-
-      message1->getGridValueVectorByCoordinateList(T::CoordinateTypeValue::LATLON_COORDINATES,gridLatLonCoordinates,areaInterpolationMethod,values1);
-      message2->getGridValueVectorByCoordinateList(T::CoordinateTypeValue::LATLON_COORDINATES,gridLatLonCoordinates,areaInterpolationMethod,values2);
-
-      time_t tt = utcTimeToTimeT(newTime);
-      timeInterpolation(values1,values2,message1->getForecastTimeT(),message2->getForecastTimeT(),tt,timeInterpolationMethod,gridValues);
-
-      T::Coordinate_vec *coordinatePtr = &gridCoordinates;
-
-      switch (coordinateType)
-      {
-        case T::CoordinateTypeValue::UNKNOWN:
-        case T::CoordinateTypeValue::LATLON_COORDINATES:
-          coordinatePtr = &gridLatLonCoordinates;
-          break;
-
-        case T::CoordinateTypeValue::GRID_COORDINATES:
-          coordinatePtr = nullptr;
-          break;
-
-        case T::CoordinateTypeValue::ORIGINAL_COORDINATES:
-          break;
-      }
-
-      attributeList.setAttribute("grid.timeInterpolationMethod",Fmi::to_string(timeInterpolationMethod));
-      attributeList.setAttribute("grid.areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
-      attributeList.setAttribute("grid.width",Fmi::to_string(gridWidth));
-      attributeList.setAttribute("grid.height",Fmi::to_string(gridHeight));
-      attributeList.setAttribute("grid.original.reverseYDirection",Fmi::to_string((int)message1->reverseYDirection()));
-      attributeList.setAttribute("grid.original.reverseXDirection",Fmi::to_string((int)message1->reverseXDirection()));
-      attributeList.setAttribute("contour.coordinateType",Fmi::to_string(coordinateType));
-
-      getIsolines(gridValues,coordinatePtr,gridWidth,gridHeight,contourValues,areaInterpolationMethod,smooth_size,smooth_degree,contours);
-
-      return Result::OK;
-    }
-    catch (...)
-    {
-       Fmi::Exception exception(BCP,"Operation failed!",nullptr);
-       exception.addParameter("FileId1",Fmi::to_string(fileId1));
-       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
-       exception.addParameter("FileId2",Fmi::to_string(fileId1));
-       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
-       std::string st = exception.getStackTrace();
-       PRINT_DATA(mDebugLog,"%s",st.c_str());
-       return Result::UNEXPECTED_EXCEPTION;
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-#endif
-
-
-
-
 void ServiceImplementation::readContentList(T::ContentInfoList& contentList,bool includePhysicalContent,bool includeVirtualContent)
 {
   FUNCTION_TRACE
@@ -4216,7 +3915,6 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
       }
       else
       {
-        //GRID::Message *vmsg = virtualFilePtr->getMessageByIndex(0);
         std::size_t fLen = virtualFilePtr->getNumberOfPhysicalGridFiles();
         for (uint f=0; f<fLen; f++)
         {
@@ -4428,7 +4126,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
     GRID::GridFile *gridFile = nullptr;
     if (storageFile)
     {
-      //printf("** file already in the content storage %u\n",fileInfo.mFileId);
+      // File already in the content storage
       gridFile = storageFile.get();
     }
     else
@@ -4625,8 +4323,6 @@ void ServiceImplementation::event_clear(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: clear\n",eventInfo.mEventId);
-
     PRINT_DATA(mDebugLog,"*** Clear event : All content files deleted ****\n");
     mGridFileManager.clear();
   }
@@ -4645,7 +4341,6 @@ void ServiceImplementation::event_contentServerReload(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: contentServerReload\n",eventInfo.mEventId);
     mFullUpdateRequired = true;
   }
   catch (...)
@@ -4663,7 +4358,6 @@ void ServiceImplementation::event_producerAdded(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: producerAdded(%u)\n",eventInfo.mEventId,eventInfo.mId1);
   }
   catch (...)
   {
@@ -4680,8 +4374,6 @@ void ServiceImplementation::event_producerDeleted(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: producerDeleted(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     mGridFileManager.deleteFilesByProducerId(eventInfo.mId1);
   }
   catch (...)
@@ -4699,8 +4391,6 @@ void ServiceImplementation::event_producerListDeletedBySourceId(T::EventInfo& ev
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: producerListDeletedBySourceId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     mGridFileManager.deleteFilesBySourceId(eventInfo.mId1);
   }
   catch (...)
@@ -4718,7 +4408,6 @@ void ServiceImplementation::event_generationAdded(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: generationAdded(%u)\n",eventInfo.mEventId,eventInfo.mId1);
   }
   catch (...)
   {
@@ -4735,8 +4424,6 @@ void ServiceImplementation::event_generationDeleted(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: generationDeleted(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     mGridFileManager.deleteFilesByGenerationId(eventInfo.mId1);
   }
   catch (...)
@@ -4754,7 +4441,6 @@ void ServiceImplementation::event_generationStatusChanged(T::EventInfo& eventInf
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: generationStatusChanged(%u)\n",eventInfo.mEventId,eventInfo.mId1);
   }
   catch (...)
   {
@@ -4771,8 +4457,6 @@ void ServiceImplementation::event_generationListDeletedByProducerId(T::EventInfo
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: generationListDeletedByProducerId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     mGridFileManager.deleteFilesByProducerId(eventInfo.mId1);
   }
   catch (...)
@@ -4790,8 +4474,6 @@ void ServiceImplementation::event_generationListDeletedBySourceId(T::EventInfo& 
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: generationListDeletedBySourceId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     mGridFileManager.deleteFilesBySourceId(eventInfo.mId1);
   }
   catch (...)
@@ -4885,8 +4567,6 @@ void ServiceImplementation::event_fileDeleted(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: filedDeleted(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     if (eventInfo.mId2 == T::FileTypeValue::Virtual)
       return; // The deleted file was virtual. No need to react.
 
@@ -4970,8 +4650,6 @@ void ServiceImplementation::event_fileListDeletedByGroupFlags(T::EventInfo& even
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: fileListDeletedByGroupFlags(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     mGridFileManager.deleteFilesByGroupFlags(eventInfo.mId1);
   }
   catch (...)
@@ -4989,8 +4667,6 @@ void ServiceImplementation::event_fileListDeletedByProducerId(T::EventInfo& even
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: fileListDeletedByProducerId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     mGridFileManager.deleteFilesByProducerId(eventInfo.mId1);
   }
   catch (...)
@@ -5008,8 +4684,6 @@ void ServiceImplementation::event_fileListDeletedByGenerationId(T::EventInfo& ev
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: fileListDeletedByGenerationId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     mGridFileManager.deleteFilesByGenerationId(eventInfo.mId1);
   }
   catch (...)
@@ -5028,8 +4702,6 @@ void ServiceImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventI
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: fileListDeletedBySourceId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     mGridFileManager.deleteFilesBySourceId(eventInfo.mId1);
   }
   catch (...)
@@ -5047,7 +4719,6 @@ void ServiceImplementation::event_contentListDeletedByFileId(T::EventInfo& event
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: contentListDeletedByFileId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
   }
   catch (...)
   {
@@ -5064,7 +4735,6 @@ void ServiceImplementation::event_contentListDeletedByGroupFlags(T::EventInfo& e
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: contentListDeletedByGroupFlags(%u)\n",eventInfo.mEventId,eventInfo.mId1);
   }
   catch (...)
   {
@@ -5081,7 +4751,6 @@ void ServiceImplementation::event_contentListDeletedByProducerId(T::EventInfo& e
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: contentListDeletedByProducerId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
   }
   catch (...)
   {
@@ -5098,7 +4767,6 @@ void ServiceImplementation::event_contentListDeletedByGenerationId(T::EventInfo&
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: contentListDeletedByGenerationId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
   }
   catch (...)
   {
@@ -5114,7 +4782,6 @@ void ServiceImplementation::event_contentListDeletedBySourceId(T::EventInfo& eve
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: contentListDeletedBySourceId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
   }
   catch (...)
   {
@@ -5131,8 +4798,6 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: contentAdded(%u,%u)\n",eventInfo.mEventId,eventInfo.mId1,eventInfo.mId2);
-
     T::ContentInfo contentInfo;
     if (eventInfo.mNote > " ")
       contentInfo.setCsv(eventInfo.mNote);
@@ -5165,8 +4830,6 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
         mInfo.mGeometryId = contentInfo.mGeometryId;
 
         gridFile->newMessage(contentInfo.mMessageIndex,mInfo);
-
-        //if (mContentPreloadEnabled && (contentInfo.mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
 
         if (mContentPreloadEnabled)
         {
@@ -5213,7 +4876,6 @@ void ServiceImplementation::event_contentDeleted(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    //printf("EVENT[%llu]: contentDeleted(%u,%u)\n",eventInfo.mEventId,eventInfo.mId1,eventInfo.mId2);
   }
   catch (...)
   {
@@ -5279,7 +4941,6 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *n
   FUNCTION_TRACE
   try
   {
-    //printf("*** EVENT %llu %u\n",eventInfo.mEventId,eventInfo.mType);
     if (mGridFileMap.size() > 10000  ||  (mGridFileMap.size() > 0  &&  (mLastVirtualFileRegistration + 60) < time(nullptr)))
     {
       registerVirtualFiles(mGridFileMap);
@@ -5455,7 +5116,6 @@ void ServiceImplementation::loadPreloadList()
               {
                 char tmp[200];
                 sprintf(tmp,"%u;%s;%s;%s;%s;%s;%s;%s;%s",producer->mProducerId,a[1].c_str(),a[2].c_str(),a[3].c_str(),a[4].c_str(),a[5].c_str(),a[6].c_str(),a[7].c_str(),a[8].c_str());
-                //printf("%s\n",tmp);
                 mPreloadDefList.insert(toLowerString(std::string(tmp)));
               }
             }
@@ -5494,7 +5154,6 @@ void ServiceImplementation::processEvents()
     while (mContentPreloadEnabled  &&  !mPreloadList.empty()  &&  (time(0)-sTime) < 10)
     {
       auto it = mPreloadList.front();
-      //printf("###### PRELOAD %u:%u\n",it.first,it.second);
 
       auto gFile = mGridFileManager.getFileByIdNoMapping(it.first);
       if (gFile)
@@ -5545,7 +5204,7 @@ void ServiceImplementation::processEvents()
     }
     else
     {
-      // printf("ERROR: getLastEventInfo : %d\n",result);
+      // ERROR: getLastEventInfo
       return;
     }
 

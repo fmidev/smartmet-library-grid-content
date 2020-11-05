@@ -456,8 +456,6 @@ void ParameterMappingFile::loadFile()
           if (c > 15  &&  field[15][0] > ' ')
             rec.mDefaultPrecision = toInt16(field[15]);
 
-          //rec.print(std::cout,0,0);
-
           std::string key = toLowerString(rec.mProducerName + ":" + rec.mParameterName + ":" + Fmi::to_string(rec.mGeometryId));
 
           auto s = mMappingSearch.find(key);

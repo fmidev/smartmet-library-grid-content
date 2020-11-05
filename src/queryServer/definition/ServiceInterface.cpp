@@ -339,11 +339,8 @@ int ServiceInterface::_getParameterValueByPointAndTime(T::SessionId sessionId,st
     query.mAreaCoordinates.push_back(cc);
 
     int result = _executeQuery(sessionId,query);
-    //query.print(std::cout,0,0);
-
     if (result != 0)
       return result;
-
 
     if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  (*query.mQueryParameterList[0].mValueList.begin())->mValueList.getLength() == 1)
     {
@@ -392,8 +389,6 @@ int ServiceInterface::_getParameterValuesByPointListAndTime(T::SessionId session
     query.mAreaCoordinates.push_back(coordinates);
 
     int result = _executeQuery(sessionId,query);
-    //query.print(std::cout,0,0);
-
     if (result != 0)
       return result;
 
@@ -456,8 +451,6 @@ int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId session
     query.mAreaCoordinates.push_back(cc);
 
     int result = _executeQuery(sessionId,query);
-    //query.print(std::cout,0,0);
-
     if (result != 0)
       return result;
 
@@ -520,8 +513,6 @@ int ServiceInterface::_getParameterValueVectorByGeometryAndTime(T::SessionId ses
 
 
     int result = _executeQuery(sessionId,query);
-    //query.print(std::cout,0,0);
-
     if (result != 0)
       return result;
 

@@ -1979,8 +1979,6 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     T::ContentInfoList sContentInfoList;
     ContentServer::Corba::Converter::convert(contentInfoList,sContentInfoList);
 
-    //sContentInfoList.print(std::cout,0,0);
-
     int result = mService->addContentList(sessionId,sContentInfoList);
     if (result == 0)
       ContentServer::Corba::Converter::convert(sContentInfoList,contentInfoList);

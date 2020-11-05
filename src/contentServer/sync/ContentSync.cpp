@@ -790,9 +790,6 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
         T::FileInfo *targetFile = mTargetFileList.getFileInfoByName(sourceFile->mName);
         if (targetFile == nullptr)
         {
-          //printf("Target file not found\n");
-          //sourceFile->print(std::cout,0,0);
-
           // The file information is not available in the target data storage. So, we should add it.
 
           // Finding generation name:
@@ -822,9 +819,6 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
                 contentInfo->mFileId = 0;
               }
 
-              //printf("- Add file %s\n",fileInfo.mName.c_str());
-
-
               fileAndContentList.push_back(fc);
 
               if (fileAndContentList.size() > 50000)
@@ -832,18 +826,6 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
                 targetInterface->addFileInfoListWithContent(mSessionId,0,fileAndContentList);
                 fileAndContentList.clear();
               }
-
-              /*
-              int result = targetInterface->addFileInfoWithContentList(mSessionId,fileInfo,contentInfoList);
-              //result = targetInterface->addFileInfo(sessionId,fileInfo);
-              if (result != 0)
-              {
-                Fmi::Exception exception(BCP,"Cannot add the file information into the target data storage!");
-                exception.addParameter("FileName",fileInfo.mName);
-                exception.addParameter("Result",getResultString(result));
-                throw exception;
-              }
-              */
             }
           }
         }

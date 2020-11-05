@@ -361,7 +361,6 @@ void GenerationInfoList::increaseSize(uint newSize)
   FUNCTION_TRACE
   try
   {
-//    printf("SET SIZE %u => %u\n",mSize,newSize);
     if (mArray == nullptr)
     {
       mSize = newSize;

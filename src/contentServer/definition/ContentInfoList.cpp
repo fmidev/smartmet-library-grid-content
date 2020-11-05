@@ -629,8 +629,6 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
     uint len1 = mLength;
     uint len2 = contentInfoList.getLength();
 
-    // printf("Add content info list %llu  %u %u\n",(unsigned long long)this,len1,len2);
-
     if (mComparisonMethod == ContentInfo::ComparisonMethod::none)
     {
       if (mArray == nullptr  ||  mLength == mSize  ||  (mLength + len2) > mSize)
@@ -697,7 +695,6 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
       else
       if (cInfo1 != nullptr  &&  cInfo2 != nullptr)
       {
-        //if (cInfo1->compare(mComparisonMethod,cInfo2) <= 0)
         if (cInfo2->compare(mComparisonMethod,cInfo1) > 0)
         {
           newArray[t] = cInfo1;
@@ -737,7 +734,6 @@ void ContentInfoList::increaseSize(uint newSize)
   FUNCTION_TRACE
   try
   {
-//    printf("SET SIZE %u => %u\n",mSize,newSize);
     if (mArray == nullptr)
     {
       mSize = newSize;
@@ -2794,7 +2790,6 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
 
       ContentInfo searchInfo;
       searchInfo.mGribParameterId = gribParameterId;
-      //searchInfo.mParameterLevel = minLevel;
 
       if (strncasecmp(gribParameterId.c_str(),"GRIB-",5) == 0)
         searchInfo.mGribParameterId = gribParameterId.c_str()+5;
@@ -3338,7 +3333,6 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
       ContentInfo searchInfo;
       searchInfo.mGribParameterId = gribParameterId;
       searchInfo.mProducerId = producerId;
-      //searchInfo.mParameterLevel = minLevel;
 
       if (strncasecmp(gribParameterId.c_str(),"GRIB-",5) == 0)
         searchInfo.mGribParameterId = gribParameterId.c_str()+5;
@@ -3498,7 +3492,6 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
 
       ContentInfo searchInfo;
       searchInfo.mFmiParameterId = fmiParameterId;
-      //searchInfo.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
       if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
@@ -3748,7 +3741,6 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
       ContentInfo searchInfo;
       searchInfo.mFmiParameterId = fmiParameterId;
       searchInfo.mProducerId = producerId;
-      //searchInfo.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
       if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->mFmiParameterId.c_str(),fmiParameterId.c_str()) != 0)
@@ -3873,15 +3865,12 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
 
       ContentInfo searchInfo;
       searchInfo.setFmiParameterName(fmiParameterName);
-      //searchInfo.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
       if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) != 0)
         idx++;
 
       uint t = C_UINT(idx);
-
-      //printf("INDEX %u %s %u\n",idx,mArray[t]->getFmiParameterName().c_str(),mArray[t]->mParameterLevel);
 
       ContentInfo *prev = nullptr;
       ContentInfo *next = nullptr;
@@ -3891,7 +3880,6 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          //printf("-- INDEX %u %s %u\n",idx,mArray[t]->getFmiParameterName().c_str(),mArray[t]->mParameterLevel);
           if (strcmp(info->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) == 0)
           {
             if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
@@ -4005,7 +3993,6 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(ui
       if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr)
       {
         ContentInfo *cInfo = mArray[idx];
-        //cInfo->print(std::cout,0,0);
 
         if (searchInfo.mGenerationId == cInfo->mGenerationId &&
             searchInfo.mForecastTime == cInfo->mForecastTime &&
@@ -4065,7 +4052,6 @@ ContentInfo* ContentInfoList::getContentInfoByGribParameterIdAndGenerationId(uin
       if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr)
       {
         ContentInfo *cInfo = mArray[idx];
-        //cInfo->print(std::cout,0,0);
 
         if (searchInfo.mGenerationId == cInfo->mGenerationId &&
             searchInfo.mForecastTime == cInfo->mForecastTime &&
@@ -4808,7 +4794,6 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
       ContentInfo searchInfo;
       searchInfo.setFmiParameterName(fmiParameterName);
       searchInfo.mProducerId = producerId;
-      //searchInfo.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
       if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) != 0)
@@ -4936,7 +4921,6 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
 
       ContentInfo searchInfo;
       searchInfo.mNewbaseParameterId = newbaseParameterId;
-      //searchInfo.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
       if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
@@ -5186,7 +5170,6 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
       ContentInfo searchInfo;
       searchInfo.mNewbaseParameterId = newbaseParameterId;
       searchInfo.mProducerId = producerId;
-      //searchInfo.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
       if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) != 0)
@@ -5313,7 +5296,6 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
 
       ContentInfo searchInfo;
       searchInfo.mNewbaseParameterName = newbaseParameterName;
-      //searchInfo.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
       if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
@@ -5563,7 +5545,6 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
       ContentInfo searchInfo;
       searchInfo.mNewbaseParameterName = newbaseParameterName;
       searchInfo.mProducerId = producerId;
-      //searchInfo.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
       if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) != 0)
@@ -5691,7 +5672,6 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
 
       ContentInfo searchInfo;
       searchInfo.mCdmParameterId = cdmParameterId;
-      //searchInfo.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
       if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
@@ -5941,7 +5921,6 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
       ContentInfo searchInfo;
       searchInfo.mCdmParameterId = cdmParameterId;
       searchInfo.mProducerId = producerId;
-      //searchInfo.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
       if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterId.c_str(),cdmParameterId.c_str()) != 0)
@@ -6071,7 +6050,6 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
 
       ContentInfo searchInfo;
       searchInfo.mCdmParameterName = cdmParameterName;
-      //searchInfo.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
       if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)
@@ -6321,7 +6299,6 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
       ContentInfo searchInfo;
       searchInfo.mCdmParameterName = cdmParameterName;
       searchInfo.mProducerId = producerId;
-      //searchInfo.mParameterLevel = minLevel;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
       if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcasecmp(mArray[idx]->mCdmParameterName.c_str(),cdmParameterName.c_str()) != 0)

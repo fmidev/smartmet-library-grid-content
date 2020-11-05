@@ -69,8 +69,6 @@ void VirtualContentManager::addFile(T::ProducerInfo& producerInfo,T::GenerationI
   FUNCTION_TRACE
   try
   {
-    //printf("**** ADD FILE ***\n");
-    //fileInfo.print(std::cout,0,0);
     for (auto it = mFactoryList.begin(); it != mFactoryList.end(); ++it)
     {
       (*it)->addFile(producerInfo,generationInfo,fileInfo,contentInfoList,gridFileMap);

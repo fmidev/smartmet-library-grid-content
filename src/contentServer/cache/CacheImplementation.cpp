@@ -993,181 +993,6 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
 
 
 
-#if 0
-int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mUpdateInProgress &&  !mRequestForwardEnabled)
-      return Result::OK;
-
-    if (mUpdateInProgress)
-      return mContentStorage->getProducerParameterList(sessionId,sourceParameterKeyType,targetParameterKeyType,list);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    auto ssp = boost::atomic_load(&mSearchStructureSptr);
-    if (!ssp)
-      return Result::DATA_NOT_FOUND;
-
-    list.clear();
-
-    T::ContentInfoList cList;
-    cList.setReleaseObjects(false);
-    cList = ssp->mContentInfoList[0];
-    cList.sort(T::ContentInfo::ComparisonMethod::producer_file_message);
-
-    std::set<std::size_t> tmpList;
-
-    uint producerId = 0;
-    T::ProducerInfo *producerInfo = nullptr;
-
-    uint len = cList.getLength();
-    for (uint t=0; t<len; t++)
-    {
-      T::ContentInfo *contentInfo = cList.getContentInfoByIndex(t);
-      std::string sourceParamKey;
-      std::string targetParamKey;
-      T::ParamLevelIdType paramLevelIdType = T::ParamLevelIdTypeValue::FMI;
-      T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
-
-      if (contentInfo->mProducerId != producerId)
-      {
-        producerInfo = ssp->mProducerInfoList.getProducerInfoById(contentInfo->mProducerId);
-        if (producerInfo != nullptr)
-          producerId = producerInfo->mProducerId;
-      }
-
-      if (producerInfo != nullptr  &&  producerInfo->mProducerId == contentInfo->mProducerId)
-      {
-        switch (sourceParameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            sourceParamKey = contentInfo->mFmiParameterId;
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            sourceParamKey = contentInfo->getFmiParameterName();
-            break;
-
-          case T::ParamKeyTypeValue::GRIB_ID:
-            sourceParamKey = contentInfo->mGribParameterId;
-            break;
-
-          case T::ParamKeyTypeValue::NEWBASE_ID:
-            sourceParamKey = contentInfo->mNewbaseParameterId;
-            break;
-
-          case T::ParamKeyTypeValue::NEWBASE_NAME:
-            sourceParamKey = contentInfo->mNewbaseParameterName;
-            break;
-
-          case T::ParamKeyTypeValue::CDM_ID:
-            sourceParamKey = contentInfo->mCdmParameterId;
-            break;
-
-          case T::ParamKeyTypeValue::CDM_NAME:
-            sourceParamKey = contentInfo->mCdmParameterName;
-            break;
-
-          default:
-            break;
-        }
-
-
-        switch (targetParameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            targetParamKey = contentInfo->mFmiParameterId;
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            targetParamKey = contentInfo->getFmiParameterName();
-            break;
-
-          case T::ParamKeyTypeValue::GRIB_ID:
-            targetParamKey = contentInfo->mGribParameterId;
-            break;
-
-          case T::ParamKeyTypeValue::NEWBASE_ID:
-            targetParamKey = contentInfo->mNewbaseParameterId;
-            break;
-
-          case T::ParamKeyTypeValue::NEWBASE_NAME:
-            targetParamKey = contentInfo->mNewbaseParameterName;
-            break;
-
-          case T::ParamKeyTypeValue::CDM_ID:
-            targetParamKey = contentInfo->mCdmParameterId;
-            break;
-
-          case T::ParamKeyTypeValue::CDM_NAME:
-            targetParamKey = contentInfo->mCdmParameterName;
-            break;
-
-          default:
-            break;
-        }
-
-        if (sourceParamKey.length() > 0  &&  targetParamKey.length() > 0)
-        {
-          std::size_t seed = 0;
-          boost::hash_combine(seed,producerInfo->mName);
-          boost::hash_combine(seed,sourceParamKey);
-          boost::hash_combine(seed,targetParameterKeyType);
-          boost::hash_combine(seed,targetParamKey);
-          boost::hash_combine(seed,contentInfo->mGeometryId);
-          boost::hash_combine(seed,paramLevelIdType);
-          boost::hash_combine(seed,paramLevelId);
-          boost::hash_combine(seed,contentInfo->mParameterLevel);
-          boost::hash_combine(seed,contentInfo->mForecastType);
-          boost::hash_combine(seed,contentInfo->mForecastNumber);
-
-
-          if (tmpList.find(seed) == tmpList.end())
-          {
-            tmpList.insert(seed);
-
-            char tmp[200];
-            char *p = tmp;
-            p += sprintf(p,"%s;%s;%d;%s;%d;%d;%d;%05d;%d;%d",
-                  producerInfo->mName.c_str(),
-                  sourceParamKey.c_str(),
-                  targetParameterKeyType,
-                  targetParamKey.c_str(),
-                  contentInfo->mGeometryId,
-                  paramLevelIdType,
-                  paramLevelId,
-                  contentInfo->mParameterLevel,
-                  contentInfo->mForecastType,
-                  contentInfo->mForecastNumber);
-
-            if ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
-              p += sprintf(p,";1");
-            else
-              p += sprintf(p,";0");
-
-            list.insert(std::string(tmp));
-          }
-        }
-      }
-    }
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-#endif
-
-
-
-
-
 int CacheImplementation::_getProducerParameterListByProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
   FUNCTION_TRACE
@@ -1966,9 +1791,7 @@ int CacheImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
     if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
-    int result = mContentStorage->addFileInfoWithContentList(sessionId,fileInfo,contentInfoList);
-    //processEvents(false);
-    return result;
+    return mContentStorage->addFileInfoWithContentList(sessionId,fileInfo,contentInfoList);
   }
   catch (...)
   {
@@ -1988,9 +1811,7 @@ int CacheImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
     if (mContentStorage == nullptr)
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
-    int result = mContentStorage->addFileInfoListWithContent(sessionId,requestFlags,fileAndContentList);
-    //processEvents(false);
-    return result;
+    return mContentStorage->addFileInfoListWithContent(sessionId,requestFlags,fileAndContentList);
   }
   catch (...)
   {
@@ -3549,9 +3370,6 @@ int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
   try
   {
 
-    //printf("getContentListByParameter(%llu,%u,%s,%u,%u,%u,%u,%s,%s,%u)\n",sessionId,(uint)parameterKeyType,parameterKey.c_str(),(uint)parameterLevelIdType,(uint)parameterLevelId,minLevel,maxLevel,startTime.c_str(),endTime.c_str(),requestFlags);
-
-
     if (mUpdateInProgress &&  !mRequestForwardEnabled)
       return Result::OK;
 
@@ -4182,14 +4000,6 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
 
     contentInfoList.clear();
 
-/*
-    boost::posix_time::ptime s = toTimeStamp(forecastTime) - boost::posix_time::minutes(600);;
-    boost::posix_time::ptime e = s + boost::posix_time::minutes(600);
-
-    std::string startTime = toString(s);
-    std::string endTime = toString(e);
-*/
-
     std::string startTime = "13000101T000000";
     std::string endTime = "23000101T000000";
 
@@ -4216,13 +4026,10 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
             contentInfoList.addContentInfo(cInfo->duplicate());
             return Result::OK;
           }
-          //ssp->mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
           ssp->mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentList);
-          //contentList.print(std::cout,0,0);
         }
         else
         {
-          //printf("Not sorted\n");
           ssp->mContentInfoList[0].getContentInfoListByFmiParameterNameAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
         }
         break;
@@ -4269,27 +4076,7 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
-    //contentList.print(std::cout,0,0);
-
     contentInfoList = contentList;
-#if 0
-    contentList.getContentListByForecastTime(forecastTime,contentInfoList);
-
-    // If we cannot find any forecast time, lets add at least one
-    // time in order to show that there are other times available.
-
-    if (contentInfoList.getLength() == 0  &&  contentList.getLength() > 0)
-    {
-      T::ContentInfo *info = contentList.getContentInfoByIndex(0);
-      if (info != nullptr)
-      {
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(info->duplicate());
-        else
-          contentInfoList.addContentInfo(info);
-      }
-    }
-#endif
     return Result::OK;
   }
   catch (...)
@@ -4930,7 +4717,6 @@ void CacheImplementation::event_clear(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: clear\n",eventInfo.mEventId);
     PRINT_DATA(mDebugLog,"*** Clear event : Deleting all cached information!\n");
 
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
@@ -4958,7 +4744,6 @@ void CacheImplementation::event_contentServerReload(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: reload\n",eventInfo.mEventId);
   }
   catch (...)
   {
@@ -4976,14 +4761,11 @@ void CacheImplementation::event_producerAdded(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: producerAdded(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ProducerInfo producerInfo;
     if (mContentStorage->getProducerInfoById(mSessionId,eventInfo.mId1,producerInfo) == Result::OK)
     {
-      //producerInfo.print(std::cout,0,0);
       mProducerInfoList.addProducerInfo(producerInfo.duplicate());
     }
   }
@@ -5002,8 +4784,6 @@ void CacheImplementation::event_producerDeleted(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: producerDeleted(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     mContentInfoList.deleteContentInfoByProducerId(eventInfo.mId1);
@@ -5025,8 +4805,6 @@ void CacheImplementation::event_producerListDeletedBySourceId(T::EventInfo& even
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: producerListDeletedBySourceId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     mContentInfoList.deleteContentInfoBySourceId(eventInfo.mId1);
@@ -5049,8 +4827,6 @@ void CacheImplementation::event_generationAdded(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: generationAdded(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::GenerationInfo generationInfo;
@@ -5074,8 +4850,6 @@ void CacheImplementation::event_generationDeleted(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: generationDeleted(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     auto it = mContentTimeCache.find(eventInfo.mId1);
@@ -5101,8 +4875,6 @@ void CacheImplementation::event_generationStatusChanged(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: generationStatusChanged(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(eventInfo.mId1);
     if (info != nullptr)
       info->mStatus = eventInfo.mId2;
@@ -5122,8 +4894,6 @@ void CacheImplementation::event_generationListDeletedByProducerId(T::EventInfo& 
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: generationListDeletedByProducerId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     mContentInfoList.deleteContentInfoByProducerId(eventInfo.mId1);
@@ -5145,8 +4915,6 @@ void CacheImplementation::event_generationListDeletedBySourceId(T::EventInfo& ev
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: generationListDeletedBySourceId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     mContentInfoList.deleteContentInfoBySourceId(eventInfo.mId1);
@@ -5168,8 +4936,6 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: fileAdded(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     uint len = eventInfo.mNote.length();
@@ -5205,7 +4971,6 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
           {
             T::ContentInfo *contentInfo = new T::ContentInfo();
             contentInfo->setCsv(s);
-            //printf("%s\n",s);
             if (mContentInfoList.getContentInfoByFileIdAndMessageIndex(contentInfo->mFileId,contentInfo->mMessageIndex) == nullptr)
             {
               auto it = mContentTimeCache.find(contentInfo->mGenerationId);
@@ -5303,15 +5068,11 @@ void CacheImplementation::event_fileDeleted(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: fileDeleted(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     int cnt = mContentInfoList.markDeletedByFileId(eventInfo.mId1);
     if (cnt > 0)
       mContentDeleteCount += cnt;
-
-    // printf("--- content delete found  %u\n",cnt);
 
     T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(eventInfo.mId1);
     if (fileInfo != nullptr)
@@ -5321,7 +5082,7 @@ void CacheImplementation::event_fileDeleted(T::EventInfo& eventInfo)
     }
     else
     {
-      // printf("--- file not found\n");
+      // File not found
     }
   }
   catch (...)
@@ -5339,8 +5100,6 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: fileUpdated(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::FileInfo fileInfo;
@@ -5350,10 +5109,6 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
       if (info != nullptr)
       {
         mContentDeleteCount += mContentInfoList.markDeletedByFileId(info->mFileId);
-
-/*
-        mContentInfoList.deleteContentInfoByFileId(eventInfo.mId1);
-*/
         *info = fileInfo;
       }
       else
@@ -5409,8 +5164,6 @@ void CacheImplementation::event_fileListDeletedByGroupFlags(T::EventInfo& eventI
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: fileListDeletedByGroupFlags(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     mContentInfoList.deleteContentInfoByGroupFlags(eventInfo.mId1);
@@ -5431,8 +5184,6 @@ void CacheImplementation::event_fileListDeletedByProducerId(T::EventInfo& eventI
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: fileListDeletedByProducerId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     mContentInfoList.deleteContentInfoByProducerId(eventInfo.mId1);
@@ -5453,8 +5204,6 @@ void CacheImplementation::event_fileListDeletedByGenerationId(T::EventInfo& even
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: fileListDeletedByGenerationId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     mContentInfoList.deleteContentInfoByGenerationId(eventInfo.mId1);
@@ -5476,8 +5225,6 @@ void CacheImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventInf
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: fileListDeletedBySourceId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     mContentInfoList.deleteContentInfoBySourceId(eventInfo.mId1);
@@ -5498,8 +5245,6 @@ void CacheImplementation::event_contentListDeletedByFileId(T::EventInfo& eventIn
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: contentListDeletedByFileId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     mContentInfoList.deleteContentInfoByFileId(eventInfo.mId1);
   }
@@ -5518,8 +5263,6 @@ void CacheImplementation::event_contentListDeletedByGroupFlags(T::EventInfo& eve
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: contentListDeletedByGroupFlags(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     mContentInfoList.deleteContentInfoByGroupFlags(eventInfo.mId1);
   }
@@ -5538,8 +5281,6 @@ void CacheImplementation::event_contentListDeletedByProducerId(T::EventInfo& eve
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: contentListDeletedByProducerId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     mContentInfoList.deleteContentInfoByProducerId(eventInfo.mId1);
   }
@@ -5558,8 +5299,6 @@ void CacheImplementation::event_contentListDeletedBySourceId(T::EventInfo& event
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: contentListDeletedBySourceId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     mContentInfoList.deleteContentInfoBySourceId(eventInfo.mId1);
   }
@@ -5578,8 +5317,6 @@ void CacheImplementation::event_contentListDeletedByGenerationId(T::EventInfo& e
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: contentListDeletedByGenerationId(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
     mContentInfoList.deleteContentInfoByGenerationId(eventInfo.mId1);
   }
@@ -5598,18 +5335,13 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: contentAdded(%u,%u)\n",eventInfo.mEventId,eventInfo.mId1,eventInfo.mId2);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
     if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
     {
-      // printf("ALREADY IN CACHE %u:%u\n",eventInfo.mId1,eventInfo.mId2);
       return;  // The content info is already in the cache.
     }
-
-    // eventInfo.print(std::cout,0,0);
 
     T::ContentInfo contentInfo;
     if (eventInfo.mNote > " ")
@@ -5619,8 +5351,6 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
       if (mContentStorage->getContentInfo(mSessionId,eventInfo.mId1,eventInfo.mId2,contentInfo) != Result::OK)
         return;
     }
-
-    //contentInfo.print(std::cout,0,0);
 
     if (mContentInfoList.getContentInfoByFileIdAndMessageIndex(contentInfo.mFileId,contentInfo.mMessageIndex) == nullptr)
     {
@@ -5658,8 +5388,6 @@ void CacheImplementation::event_contentDeleted(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    // printf("EVENT[%llu]: contentDeleted(%u,%u)\n",eventInfo.mEventId,eventInfo.mId1,eventInfo.mId2);
-
     AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
     T::ContentInfo *contentInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
@@ -5894,7 +5622,6 @@ void CacheImplementation::processEvents(bool eventThread)
         result = mContentStorage->getEventInfoList(mSessionId,0,mLastProcessedEventId+1,10000,eventInfoList);
         if (result != 0)
         {
-          //printf("ERROR: getEventInfoList : %d\n",result);
           return;
         }
 

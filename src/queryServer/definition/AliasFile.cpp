@@ -352,12 +352,9 @@ void AliasFile::loadFile()
               if (alias != mAliasList.end())
               {
                 std::cout << "#### ALIAS '" << rec.mName << "' ALREADY DEFINED (" << mFilename << ":" << lineCount << ")\n";
-                //std::cout << "  " << CODE_LOCATION << "\n\n";
-                //rec.print(std::cout,0,0);
               }
               else
               {
-                //rec.print(std::cout,0,0);
                 mAliasList.insert(std::pair<std::string,Alias>(toLowerString(rec.mName),rec));
               }
             }
