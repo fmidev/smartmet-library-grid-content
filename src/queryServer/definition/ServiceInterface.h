@@ -25,8 +25,11 @@ class ServiceInterface
                     ServiceInterface();
      virtual        ~ServiceInterface();
 
+     virtual Log*   getDebugLog();
+     virtual Log*   getProcessingLog();
      virtual void   setDebugLog(Log *debugLog);
      virtual void   setProcessingLog(Log *processingLog);
+
      virtual void   shutdown();
      virtual void   setDem(boost::shared_ptr<Fmi::DEM> dem);
      virtual void   setLandCover(boost::shared_ptr<Fmi::LandCover> landCover);

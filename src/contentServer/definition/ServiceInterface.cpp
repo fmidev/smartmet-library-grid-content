@@ -67,6 +67,39 @@ Implementation ServiceInterface::getImplementationType()
 
 
 
+Log* ServiceInterface::getDebugLog()
+{
+  FUNCTION_TRACE
+  try
+  {
+    return mDebugLog;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+Log* ServiceInterface::getProcessingLog()
+{
+  FUNCTION_TRACE
+  try
+  {
+    return mProcessingLog;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ServiceInterface::setDebugLog(Log *debugLog)
 {
   FUNCTION_TRACE

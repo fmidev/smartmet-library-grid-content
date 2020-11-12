@@ -24,8 +24,11 @@ class ServiceInterface
                     ServiceInterface();
      virtual        ~ServiceInterface();
 
+     virtual Log*   getDebugLog();
+     virtual Log*   getProcessingLog();
      virtual void   setDebugLog(Log *debugLog);
      virtual void   setProcessingLog(Log *processingLog);
+
      virtual void   shutdown();
 
      virtual int    getGridAttributeList(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList);
