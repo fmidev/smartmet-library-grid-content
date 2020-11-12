@@ -208,6 +208,8 @@ void ServiceImplementation::setPointCacheEnabled(bool enabled,uint hitsRequired,
     mPointCacheEnabled = enabled;
     mPointCacheHitsRequired = hitsRequired;
     mPointCacheTimePeriod = timePeriod;
+
+    mGridFileManager.setPointCacheEnabled(mPointCacheEnabled);
   }
   catch (...)
   {

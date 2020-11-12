@@ -299,7 +299,7 @@ int ServiceImplementation::_executeQuery(T::SessionId sessionId, Query& query)
   {
     // query.print(std::cout,0,0);
 
-    if (mDebugLog != nullptr)
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
     {
       std::stringstream stream;
       query.print(stream, 0, 0);
@@ -323,7 +323,7 @@ int ServiceImplementation::_executeQuery(T::SessionId sessionId, Query& query)
         break;
     }
 
-    if (mDebugLog != nullptr)
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
     {
       PRINT_DATA(mDebugLog, "\n############################### QUERY EXECUTION END ###################\n\n");
     }
@@ -1545,7 +1545,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
       }
     }
 
-    if (mDebugLog != nullptr)
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
     {
       std::stringstream stream;
       query.print(stream, 0, 0);
@@ -1629,7 +1629,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
     updateQueryParameters(query);
 
-    if (mDebugLog != nullptr)
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
     {
       std::stringstream stream;
       query.print(stream, 0, 0);
@@ -1942,7 +1942,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
     updateQueryParameters(query);
 
-    if (mDebugLog != nullptr)
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
     {
       std::stringstream stream;
       query.print(stream, 0, 0);
@@ -2033,7 +2033,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
           }
         }
 
-        if (mDebugLog != nullptr)
+        if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
         {
           std::stringstream stream;
           qParam->print(stream, 5, 0);
@@ -2728,7 +2728,7 @@ bool ServiceImplementation::getSpecialValues(
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
-    if (mDebugLog != nullptr)
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
     {
       std::stringstream stream;
       contentList->print(stream, 0, 4);
@@ -2999,7 +2999,7 @@ bool ServiceImplementation::getValueVectors(
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
-    if (mDebugLog != nullptr)
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
     {
       std::stringstream stream;
       contentList->print(stream, 0, 4);
@@ -3427,7 +3427,7 @@ bool ServiceImplementation::getGridFiles(
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
-    if (mDebugLog != nullptr)
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
     {
       std::stringstream stream;
       contentList->print(stream, 0, 4);
@@ -4162,7 +4162,7 @@ bool ServiceImplementation::getPointValuesByHeight(
         }
 
         PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList.getLength());
-        if (mDebugLog != nullptr)
+        if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
         {
           std::stringstream stream;
           contentList.print(stream, 0, 4);
@@ -4449,7 +4449,7 @@ bool ServiceImplementation::getPointValues(
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
-    if (mDebugLog != nullptr)
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
     {
       std::stringstream stream;
       contentList->print(stream, 0, 4);
@@ -4717,7 +4717,7 @@ bool ServiceImplementation::getCircleValues(
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
-    if (mDebugLog != nullptr)
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
     {
       std::stringstream stream;
       contentList->print(stream, 0, 4);
@@ -4976,7 +4976,7 @@ bool ServiceImplementation::getPolygonValues(
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
-    if (mDebugLog != nullptr)
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
     {
       std::stringstream stream;
       contentList->print(stream, 0, 4);
@@ -5254,7 +5254,7 @@ bool ServiceImplementation::getIsolineValues(
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
-    if (mDebugLog != nullptr)
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
     {
       std::stringstream stream;
       contentList->print(stream, 0, 4);
@@ -5586,7 +5586,7 @@ bool ServiceImplementation::getIsobandValues(
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
-    if (mDebugLog != nullptr)
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
     {
       std::stringstream stream;
       contentList->print(stream, 0, 4);
@@ -5884,7 +5884,7 @@ void ServiceImplementation::getGridValues(
   FUNCTION_TRACE
   try
   {
-    if (mDebugLog != nullptr)
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
     {
       PRINT_DATA(mDebugLog, "\nMETHOD getGridValues()\n");
       PRINT_DATA(mDebugLog, "  - queryType                : %u\n", queryType);
@@ -6083,7 +6083,7 @@ void ServiceImplementation::getGridValues(
                   PRINT_DATA(mDebugLog, "      - Going through the parameter mappings\n");
                   for (auto pInfo = mappings.begin(); pInfo != mappings.end(); ++pInfo)
                   {
-                    if (mDebugLog != nullptr)
+                    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
                     {
                       std::stringstream stream;
                       pInfo->print(stream, 5, 0);
@@ -6538,7 +6538,7 @@ void ServiceImplementation::getGridValues(
   FUNCTION_TRACE
   try
   {
-    if (mDebugLog != nullptr)
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
     {
       PRINT_DATA(mDebugLog, "\nMETHOD getGridValues()\n");
       PRINT_DATA(mDebugLog, "  - queryType                : %u\n", queryType);
@@ -6661,7 +6661,7 @@ void ServiceImplementation::getGridValues(
             {
               for (auto pInfo = mappings.begin(); pInfo != mappings.end(); ++pInfo)
               {
-                if (mDebugLog != nullptr)
+                if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
                 {
                   std::stringstream stream;
                   pInfo->print(stream, 5, 0);

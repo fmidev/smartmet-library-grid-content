@@ -477,6 +477,26 @@ void GridFileManager::print(std::ostream& stream,uint level,uint optionFlags)
 
 
 
+void GridFileManager::setPointCacheEnabled(bool enabled)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
+    {
+      it->second->setPointCacheEnabled(enabled);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 void GridFileManager::deleteFileNoLock(uint fileId,bool sentMessageToContentServer)
 {
   FUNCTION_TRACE

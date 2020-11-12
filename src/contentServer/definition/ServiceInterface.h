@@ -47,6 +47,8 @@ class ServiceInterface
 
      Implementation getImplementationType();
 
+     virtual Log*   getDebugLog();
+     virtual Log*   getProcessingLog();
      virtual void   setDebugLog(Log *debugLog);
      virtual void   setProcessingLog(Log *processingLog);
      virtual void   shutdown();
