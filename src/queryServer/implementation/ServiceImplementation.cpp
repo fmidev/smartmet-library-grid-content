@@ -2562,7 +2562,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       {
         // No cache entry available
 
-        std::string startTime = "13000101T000000";
+        std::string startTime = "19000101T000000";
         std::string endTime = "23000101T000000";
 
         mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,rec.contentInfoList);
@@ -2589,7 +2589,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       AutoWriteLock lock(&mContentCache_modificationLock);
       if (entry->producerHash != producerHash)
       {
-        std::string startTime = "13000101T000000";
+        std::string startTime = "19000101T000000";
         std::string endTime = "23000101T000000";
 
         mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,entry->contentInfoList);

@@ -33,6 +33,7 @@ ContentInfo::ContentInfo()
     mFlags = 0;
     mSourceId = 0;
     mGeometryId = 0;
+    mForecastTimeUTC = 0;
   }
   catch (...)
   {
@@ -58,6 +59,7 @@ ContentInfo::ContentInfo(const ContentInfo& contentInfo)
     mFilePosition = contentInfo.mFilePosition;
     mMessageSize = contentInfo.mMessageSize;
     mForecastTime = contentInfo.mForecastTime;
+    mForecastTimeUTC = contentInfo.mForecastTimeUTC;
     mFmiParameterId = contentInfo.mFmiParameterId;
     mFmiParameterName = contentInfo.mFmiParameterName;
     mGribParameterId = contentInfo.mGribParameterId;
@@ -136,6 +138,7 @@ ContentInfo& ContentInfo::operator=(const ContentInfo& contentInfo)
     mFilePosition = contentInfo.mFilePosition;
     mMessageSize = contentInfo.mMessageSize;
     mForecastTime = contentInfo.mForecastTime;
+    mForecastTimeUTC = contentInfo.mForecastTimeUTC;
     mFmiParameterId = contentInfo.mFmiParameterId;
     mFmiParameterName = contentInfo.mFmiParameterName;
     mGribParameterId = contentInfo.mGribParameterId;
@@ -347,6 +350,7 @@ void ContentInfo::setCsv(const char *csv)
       mGenerationId = toUInt32(field[6]);
       mGroupFlags = toUInt32(field[7]);
       mForecastTime = field[8];
+      mForecastTimeUTC = utcTimeToTimeT(mForecastTime);
       mFmiParameterId = field[9];
       mFmiParameterName = toUpperString(field[10]);
       mGribParameterId = field[11];
@@ -489,7 +493,8 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
-        res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
         res = num_compare(mGeometryId,contentInfo->mGeometryId);
@@ -525,7 +530,8 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
-        res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
         res = num_compare(mGeometryId,contentInfo->mGeometryId);
@@ -558,7 +564,8 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
-        res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
         res = num_compare(mGeometryId,contentInfo->mGeometryId);
@@ -594,7 +601,8 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
-        res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
         res = num_compare(mGeometryId,contentInfo->mGeometryId);
@@ -630,7 +638,8 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
-        res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
         res = num_compare(mGeometryId,contentInfo->mGeometryId);
@@ -666,7 +675,8 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
-        res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
         res = num_compare(mGeometryId,contentInfo->mGeometryId);
@@ -702,7 +712,8 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
-        res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
         res = num_compare(mGeometryId,contentInfo->mGeometryId);
@@ -726,7 +737,8 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::starttime_file_message:
-        res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
         res = num_compare(mFileId,contentInfo->mFileId);
@@ -738,7 +750,8 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = strcmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
         if (res != 0)
           return res;
-        res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
@@ -768,7 +781,8 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
         if (res != 0)
           return res;
-        res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
         res = num_compare(mGeometryId,contentInfo->mGeometryId);
@@ -783,7 +797,8 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::starttime_fmiId_fmiLevelId_level_file_message:
-        res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
         res = strcmp(mFmiParameterId.c_str(),contentInfo->mFmiParameterId.c_str());
@@ -813,7 +828,8 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::starttime_fmiName_fmiLevelId_level_file_message:
-        res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
         res = strcmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
@@ -846,7 +862,8 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = num_compare(mGenerationId,contentInfo->mGenerationId);
         if (res != 0)
           return res;
-        res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
         res = num_compare(mFileId,contentInfo->mFileId);
@@ -876,7 +893,8 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = num_compare(mGeometryId,contentInfo->mGeometryId);
         if (res != 0)
           return res;
-        res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
         res = num_compare(mFileId,contentInfo->mFileId);
@@ -888,7 +906,8 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::starttime_generationId_file_message:
-        res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
+        res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
         res = num_compare(mGenerationId,contentInfo->mGenerationId);
@@ -969,6 +988,7 @@ void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mGenerationId           = " << mGenerationId << "\n";
     stream << space(level) << "- mGroupFlags             = " << mGroupFlags << "\n";
     stream << space(level) << "- mForecastTime           = " << mForecastTime << "\n";
+    stream << space(level) << "- mForecastTimeUTC        = " << mForecastTimeUTC << "\n";
     stream << space(level) << "- mFmiParameterId         = " << mFmiParameterId << "\n";
     stream << space(level) << "- mFmiParameterName       = " << mFmiParameterName << "\n";
     stream << space(level) << "- mGribParameterId        = " << mGribParameterId << "\n";

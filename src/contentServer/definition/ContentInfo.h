@@ -42,6 +42,7 @@ class ContentInfo
     uint               mGenerationId;
     uint               mGroupFlags;
     std::string        mForecastTime;
+    time_t             mForecastTimeUTC;
     T::ParamId         mFmiParameterId;
     T::ParamId         mGribParameterId;
     T::ParamId         mCdmParameterId;
