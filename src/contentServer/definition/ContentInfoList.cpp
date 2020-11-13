@@ -550,6 +550,9 @@ ContentInfo* ContentInfoList::addContentInfo(ContentInfo *contentInfo)
     if (contentInfo == nullptr)
       throw Fmi::Exception(BCP,"The 'contentInfo' parameter points to NULL!");
 
+    if (contentInfo->mForecastTimeUTC == 0)
+      contentInfo->mForecastTimeUTC = utcTimeToTimeT(contentInfo->mForecastTime);
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mArray == nullptr  ||  mLength == mSize)
@@ -628,6 +631,13 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
   {
     uint len1 = mLength;
     uint len2 = contentInfoList.getLength();
+
+    for (uint t=0; t<len2; t++)
+    {
+      ContentInfo *cInfo = contentInfoList.getContentInfoByIndex(t);
+      if (cInfo->mForecastTimeUTC == 0)
+        cInfo->mForecastTimeUTC = utcTimeToTimeT(cInfo->mForecastTime);
+    }
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::none)
     {
@@ -814,7 +824,7 @@ bool ContentInfoList::containsSameForecastTimes()
     if (mArray == nullptr ||  mLength == 0)
       return false;
 
-    std::set<std::string> timeList;
+    std::set<time_t> timeList;
 
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
@@ -823,10 +833,10 @@ bool ContentInfoList::containsSameForecastTimes()
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
-        if (timeList.find(info->mForecastTime) != timeList.end())
+        if (timeList.find(info->mForecastTimeUTC) != timeList.end())
           return true;
 
-        timeList.insert(info->mForecastTime);
+        timeList.insert(info->mForecastTimeUTC);
       }
     }
 
@@ -1411,6 +1421,8 @@ uint ContentInfoList::deleteContentInfoByGenerationGeometryAndForecastTime(uint 
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
+    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
+
     AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
     uint p = 0;
     uint count = 0;
@@ -1418,7 +1430,7 @@ uint ContentInfoList::deleteContentInfoByGenerationGeometryAndForecastTime(uint 
     {
       ContentInfo *info = mArray[t];
       mArray[t] = nullptr;
-      if (info != nullptr  &&  ((info->mGenerationId == generationId  &&  info->mGeometryId == geometryId  &&  info->mForecastTime == forecastTime)  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
+      if (info != nullptr  &&  ((info->mGenerationId == generationId  &&  info->mGeometryId == geometryId  &&  info->mForecastTimeUTC == forecastTimeUTC)  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
       {
         if (mReleaseObjects)
           delete info;
@@ -1798,6 +1810,8 @@ void ContentInfoList::getContentListByForecastTime(std::string forecastTime,T::C
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     ContentInfo *prevInfo = nullptr;
@@ -1809,27 +1823,27 @@ void ContentInfoList::getContentListByForecastTime(std::string forecastTime,T::C
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
-        if (info->mForecastTime <= forecastTime)
+        if (info->mForecastTimeUTC <= forecastTimeUTC)
         {
-          if (prevInfo == nullptr  ||  info->mForecastTime > prevInfo->mForecastTime)
+          if (prevInfo == nullptr  ||  info->mForecastTimeUTC > prevInfo->mForecastTimeUTC)
             prevInfo = info;
         }
         else
         {
-          if (nextInfo == nullptr  ||  info->mForecastTime < nextInfo->mForecastTime)
+          if (nextInfo == nullptr  ||  info->mForecastTimeUTC < nextInfo->mForecastTimeUTC)
             nextInfo = info;
         }
       }
     }
 
-    if (prevInfo != nullptr  &&  (nextInfo != nullptr  ||  prevInfo->mForecastTime == forecastTime))
+    if (prevInfo != nullptr  &&  (nextInfo != nullptr  ||  prevInfo->mForecastTimeUTC == forecastTimeUTC))
     {
       if (contentInfoList.getReleaseObjects())
         contentInfoList.addContentInfo(prevInfo->duplicate());
       else
         contentInfoList.addContentInfo(prevInfo);
 
-      if (nextInfo != nullptr  &&  prevInfo->mForecastTime != forecastTime)
+      if (nextInfo != nullptr  &&  prevInfo->mForecastTimeUTC != forecastTimeUTC)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(nextInfo->duplicate());
@@ -2681,12 +2695,14 @@ void ContentInfoList::getContentInfoListByForecastTime(std::string forecastTime,
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::starttime_fmiId_fmiLevelId_level_file_message)
     {
       ContentInfo searchInfo;
-      searchInfo.mForecastTime = forecastTime;
+      searchInfo.mForecastTimeUTC = forecastTimeUTC;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
       uint t = 0;
       if (idx >= 0)
@@ -2697,10 +2713,10 @@ void ContentInfoList::getContentInfoListByForecastTime(std::string forecastTime,
         ContentInfo *info = mArray[t];
         if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (info->mForecastTime > forecastTime)
+          if (info->mForecastTimeUTC > forecastTimeUTC)
             return;
 
-          if (info->mForecastTime == forecastTime)
+          if (info->mForecastTimeUTC == forecastTimeUTC)
           {
             if (contentInfoList.getReleaseObjects())
               contentInfoList.addContentInfo(info->duplicate());
@@ -2717,7 +2733,7 @@ void ContentInfoList::getContentInfoListByForecastTime(std::string forecastTime,
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mForecastTime == forecastTime)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mForecastTimeUTC == forecastTimeUTC)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -2782,6 +2798,9 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::gribId_producer_generation_level_time)
@@ -2822,13 +2841,13 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
                 {
                   if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                       next = info;
 
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                     {
                       if (contentInfoList.getReleaseObjects())
                         contentInfoList.addContentInfo(info->duplicate());
@@ -2905,6 +2924,8 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::gribId_producer_generation_level_time)
@@ -2954,11 +2975,11 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                   {
-                    if (info->mForecastTime < forecastTime)
+                    if (info->mForecastTimeUTC < forecastTimeUTC)
                     {
                       if (info->mParameterLevel == level || parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE)
                       {
-                        if (prevTimeSameLevel == nullptr || prevTimeSameLevel->mForecastTime < info->mForecastTime)
+                        if (prevTimeSameLevel == nullptr || prevTimeSameLevel->mForecastTimeUTC < info->mForecastTimeUTC)
                         {
                           prevTimeSameLevel = info;
                         }
@@ -2966,7 +2987,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
                       else
                       if (info->mParameterLevel < level)
                       {
-                        if (prevTimePrevLevel == nullptr || prevTimePrevLevel->mForecastTime < info->mForecastTime  || (prevTimePrevLevel->mForecastTime == info->mForecastTime  &&  prevTimePrevLevel->mParameterLevel < info->mParameterLevel))
+                        if (prevTimePrevLevel == nullptr || prevTimePrevLevel->mForecastTimeUTC < info->mForecastTimeUTC  || (prevTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC  &&  prevTimePrevLevel->mParameterLevel < info->mParameterLevel))
                         {
                           prevTimePrevLevel = info;
                         }
@@ -2974,14 +2995,14 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
                       else
                       if (info->mParameterLevel > level)
                       {
-                        if (prevTimeNextLevel == nullptr || prevTimeNextLevel->mForecastTime < info->mForecastTime  ||  (prevTimeNextLevel->mForecastTime == info->mForecastTime &&  prevTimeNextLevel->mParameterLevel > info->mParameterLevel))
+                        if (prevTimeNextLevel == nullptr || prevTimeNextLevel->mForecastTimeUTC < info->mForecastTimeUTC  ||  (prevTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  prevTimeNextLevel->mParameterLevel > info->mParameterLevel))
                         {
                           prevTimeNextLevel = info;
                         }
                       }
                     }
                     else
-                    if (info->mForecastTime > forecastTime)
+                    if (info->mForecastTimeUTC > forecastTimeUTC)
                     {
                       if (info->mParameterLevel == level || parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE)
                       {
@@ -2994,7 +3015,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
                       else
                       if (info->mParameterLevel < level)
                       {
-                        if (nextTimePrevLevel == nullptr || nextTimePrevLevel->mForecastTime > info->mForecastTime || (nextTimePrevLevel->mForecastTime == info->mForecastTime  &&  nextTimePrevLevel->mParameterLevel < info->mParameterLevel))
+                        if (nextTimePrevLevel == nullptr || nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC || (nextTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC  &&  nextTimePrevLevel->mParameterLevel < info->mParameterLevel))
                         {
                           nextTimePrevLevel = info;
                         }
@@ -3002,7 +3023,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
                       else
                       if (info->mParameterLevel > level)
                       {
-                        if (nextTimeNextLevel == nullptr || (nextTimePrevLevel != nullptr && nextTimePrevLevel->mForecastTime > info->mForecastTime) || (nextTimeNextLevel->mForecastTime == info->mForecastTime &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
+                        if (nextTimeNextLevel == nullptr || (nextTimePrevLevel != nullptr && nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC) || (nextTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
                         {
                           nextTimeNextLevel = info;
                           t = mLength;
@@ -3010,7 +3031,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
                       }
                     }
                     else
-                    if (info->mForecastTime == forecastTime)
+                    if (info->mForecastTimeUTC == forecastTimeUTC)
                     {
                       if (info->mParameterLevel == level || parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE)
                       {
@@ -3191,6 +3212,9 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::gribId_producer_generation_level_time)
@@ -3235,13 +3259,13 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
                   {
                     if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                         next = info;
 
-                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                       {
                         if (contentInfoList.getReleaseObjects())
                           contentInfoList.addContentInfo(info->duplicate());
@@ -3324,6 +3348,9 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::gribId_producer_generation_level_time)
@@ -3367,13 +3394,13 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
                   {
                     if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                         next = info;
 
-                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                       {
                         if (contentInfoList.getReleaseObjects())
                           contentInfoList.addContentInfo(info->duplicate());
@@ -3484,6 +3511,9 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time)
@@ -3520,13 +3550,13 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
                 {
                   if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                       next = info;
 
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                     {
                       if (contentInfoList.getReleaseObjects())
                         contentInfoList.addContentInfo(info->duplicate());
@@ -3603,6 +3633,9 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint pro
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time)
@@ -3643,13 +3676,13 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint pro
                   {
                     if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                         next = info;
 
-                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                       {
                         if (contentInfoList.getReleaseObjects())
                           contentInfoList.addContentInfo(info->duplicate());
@@ -3732,6 +3765,9 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time)
@@ -3771,13 +3807,13 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
                   {
                     if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                         next = info;
 
-                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                       {
                         if (contentInfoList.getReleaseObjects())
                           contentInfoList.addContentInfo(info->duplicate());
@@ -3857,6 +3893,9 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
@@ -3893,13 +3932,13 @@ void ContentInfoList::getContentInfoListByFmiParameterName(std::string fmiParame
                 {
                   if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                       next = info;
 
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                     {
                       if (contentInfoList.getReleaseObjects())
                         contentInfoList.addContentInfo(info->duplicate());
@@ -3973,13 +4012,15 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(ui
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
+    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+
 
     ContentInfo searchInfo;
     searchInfo.mProducerId = producerId;
     searchInfo.mGenerationId = generationId;
     searchInfo.mProducerId = producerId;
-    searchInfo.mForecastTime = forecastTime;
+    searchInfo.mForecastTimeUTC = forecastTimeUTC;
     searchInfo.setFmiParameterName(fmiParameterName);
     searchInfo.mFmiParameterLevelId = parameterLevelId;
     searchInfo.mParameterLevel = level;
@@ -3995,7 +4036,7 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(ui
         ContentInfo *cInfo = mArray[idx];
 
         if (searchInfo.mGenerationId == cInfo->mGenerationId &&
-            searchInfo.mForecastTime == cInfo->mForecastTime &&
+            searchInfo.mForecastTimeUTC == cInfo->mForecastTimeUTC &&
             searchInfo.getFmiParameterName() == cInfo->getFmiParameterName() &&
             searchInfo.mFmiParameterLevelId == cInfo->mFmiParameterLevelId &&
             searchInfo.mParameterLevel == cInfo->mParameterLevel &&
@@ -4028,13 +4069,15 @@ ContentInfo* ContentInfoList::getContentInfoByGribParameterIdAndGenerationId(uin
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
+    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     ContentInfo searchInfo;
     searchInfo.mProducerId = producerId;
     searchInfo.mGenerationId = generationId;
     searchInfo.mProducerId = producerId;
-    searchInfo.mForecastTime = forecastTime;
+    searchInfo.mForecastTimeUTC = forecastTimeUTC;
     searchInfo.mGribParameterId = gribParameterId;
     searchInfo.mFmiParameterLevelId = parameterLevelId;
     searchInfo.mParameterLevel = level;
@@ -4054,7 +4097,7 @@ ContentInfo* ContentInfoList::getContentInfoByGribParameterIdAndGenerationId(uin
         ContentInfo *cInfo = mArray[idx];
 
         if (searchInfo.mGenerationId == cInfo->mGenerationId &&
-            searchInfo.mForecastTime == cInfo->mForecastTime &&
+            searchInfo.mForecastTimeUTC == cInfo->mForecastTimeUTC &&
             searchInfo.mGribParameterId == cInfo->mGribParameterId &&
             searchInfo.mFmiParameterLevelId == cInfo->mFmiParameterLevelId &&
             searchInfo.mParameterLevel == cInfo->mParameterLevel &&
@@ -4088,6 +4131,8 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
 
     if (mArray == nullptr ||  mLength == 0)
       return;
+
+    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
 
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
@@ -4134,11 +4179,11 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                   {
-                    if (info->mForecastTime < forecastTime)
+                    if (info->mForecastTimeUTC < forecastTimeUTC)
                     {
                       if (info->mParameterLevel == level || parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE)
                       {
-                        if (prevTimeSameLevel == nullptr || prevTimeSameLevel->mForecastTime < info->mForecastTime)
+                        if (prevTimeSameLevel == nullptr || prevTimeSameLevel->mForecastTimeUTC < info->mForecastTimeUTC)
                         {
                           prevTimeSameLevel = info;
                         }
@@ -4146,7 +4191,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
                       else
                       if (info->mParameterLevel < level)
                       {
-                        if (prevTimePrevLevel == nullptr || prevTimePrevLevel->mForecastTime < info->mForecastTime  || (prevTimePrevLevel->mForecastTime == info->mForecastTime  &&  prevTimePrevLevel->mParameterLevel < info->mParameterLevel))
+                        if (prevTimePrevLevel == nullptr || prevTimePrevLevel->mForecastTimeUTC < info->mForecastTimeUTC  || (prevTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC  &&  prevTimePrevLevel->mParameterLevel < info->mParameterLevel))
                         {
                           prevTimePrevLevel = info;
                         }
@@ -4154,14 +4199,14 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
                       else
                       if (info->mParameterLevel > level)
                       {
-                        if (prevTimeNextLevel == nullptr || prevTimeNextLevel->mForecastTime < info->mForecastTime  ||  (prevTimeNextLevel->mForecastTime == info->mForecastTime &&  prevTimeNextLevel->mParameterLevel > info->mParameterLevel))
+                        if (prevTimeNextLevel == nullptr || prevTimeNextLevel->mForecastTimeUTC < info->mForecastTimeUTC  ||  (prevTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  prevTimeNextLevel->mParameterLevel > info->mParameterLevel))
                         {
                           prevTimeNextLevel = info;
                         }
                       }
                     }
                     else
-                    if (info->mForecastTime > forecastTime)
+                    if (info->mForecastTimeUTC > forecastTimeUTC)
                     {
                       if (info->mParameterLevel == level || parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE)
                       {
@@ -4174,7 +4219,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
                       else
                       if (info->mParameterLevel < level)
                       {
-                        if (nextTimePrevLevel == nullptr || nextTimePrevLevel->mForecastTime > info->mForecastTime || (nextTimePrevLevel->mForecastTime == info->mForecastTime  &&  nextTimePrevLevel->mParameterLevel < info->mParameterLevel))
+                        if (nextTimePrevLevel == nullptr || nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC || (nextTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  nextTimePrevLevel->mParameterLevel < info->mParameterLevel))
                         {
                           nextTimePrevLevel = info;
                         }
@@ -4182,7 +4227,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
                       else
                       if (info->mParameterLevel > level)
                       {
-                        if (nextTimeNextLevel == nullptr || (nextTimePrevLevel != nullptr && nextTimePrevLevel->mForecastTime > info->mForecastTime) || (nextTimeNextLevel->mForecastTime == info->mForecastTime &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
+                        if (nextTimeNextLevel == nullptr || (nextTimePrevLevel != nullptr && nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC) || (nextTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
                         {
                           nextTimeNextLevel = info;
                           t = mLength;
@@ -4190,7 +4235,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
                       }
                     }
                     else
-                    if (info->mForecastTime == forecastTime)
+                    if (info->mForecastTimeUTC == forecastTimeUTC)
                     {
                       if (info->mParameterLevel == level || parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE)
                       {
@@ -4371,6 +4416,8 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
@@ -4382,7 +4429,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
       searchInfo.mProducerId = producerId;
       searchInfo.mGenerationId = generationId;
       searchInfo.mParameterLevel = level;
-      searchInfo.mForecastTime = forecastTime;
+      searchInfo.mForecastTimeUTC = forecastTimeUTC;
 
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
@@ -4418,7 +4465,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                   {
-                    if (info->mForecastTime == forecastTime)
+                    if (info->mForecastTimeUTC == forecastTimeUTC)
                     {
                       if (info->mParameterLevel == level || parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE)
                       {
@@ -4448,11 +4495,11 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
                       }
                     }
                     else
-                    if (info->mForecastTime < forecastTime)
+                    if (info->mForecastTimeUTC < forecastTimeUTC)
                     {
                       if (info->mParameterLevel == level || parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE)
                       {
-                        if (prevTimeSameLevel == nullptr || prevTimeSameLevel->mForecastTime < info->mForecastTime)
+                        if (prevTimeSameLevel == nullptr || prevTimeSameLevel->mForecastTimeUTC < info->mForecastTimeUTC)
                         {
                           prevTimeSameLevel = info;
                         }
@@ -4460,7 +4507,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
                       else
                       if (info->mParameterLevel < level)
                       {
-                        if (prevTimePrevLevel == nullptr || prevTimePrevLevel->mForecastTime < info->mForecastTime  || (prevTimePrevLevel->mForecastTime == info->mForecastTime  &&  prevTimePrevLevel->mParameterLevel < info->mParameterLevel))
+                        if (prevTimePrevLevel == nullptr || prevTimePrevLevel->mForecastTimeUTC < info->mForecastTimeUTC  || (prevTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC  &&  prevTimePrevLevel->mParameterLevel < info->mParameterLevel))
                         {
                           prevTimePrevLevel = info;
                         }
@@ -4468,14 +4515,14 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
                       else
                       if (info->mParameterLevel > level)
                       {
-                        if (prevTimeNextLevel == nullptr || prevTimeNextLevel->mForecastTime < info->mForecastTime  ||  (prevTimeNextLevel->mForecastTime == info->mForecastTime &&  prevTimeNextLevel->mParameterLevel > info->mParameterLevel))
+                        if (prevTimeNextLevel == nullptr || prevTimeNextLevel->mForecastTimeUTC < info->mForecastTimeUTC  ||  (prevTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  prevTimeNextLevel->mParameterLevel > info->mParameterLevel))
                         {
                           prevTimeNextLevel = info;
                         }
                       }
                     }
                     else
-                    if (info->mForecastTime > forecastTime)
+                    if (info->mForecastTimeUTC > forecastTimeUTC)
                     {
                       if (info->mParameterLevel == level || parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE)
                       {
@@ -4488,7 +4535,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
                       else
                       if (info->mParameterLevel < level)
                       {
-                        if (nextTimePrevLevel == nullptr || nextTimePrevLevel->mForecastTime > info->mForecastTime || (nextTimePrevLevel->mForecastTime == info->mForecastTime  &&  nextTimePrevLevel->mParameterLevel < info->mParameterLevel))
+                        if (nextTimePrevLevel == nullptr || nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC || (nextTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC  &&  nextTimePrevLevel->mParameterLevel < info->mParameterLevel))
                         {
                           nextTimePrevLevel = info;
                         }
@@ -4496,7 +4543,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
                       else
                       if (info->mParameterLevel > level)
                       {
-                        if (nextTimeNextLevel == nullptr || (nextTimePrevLevel != nullptr && nextTimePrevLevel->mForecastTime > info->mForecastTime) || (nextTimeNextLevel->mForecastTime == info->mForecastTime &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
+                        if (nextTimeNextLevel == nullptr || (nextTimePrevLevel != nullptr && nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC) || (nextTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
                         {
                           nextTimeNextLevel = info;
                           t = mLength;
@@ -4656,6 +4703,9 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
@@ -4696,13 +4746,13 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
                   {
                     if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                         next = info;
 
-                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                       {
                         if (contentInfoList.getReleaseObjects())
                           contentInfoList.addContentInfo(info->duplicate());
@@ -4785,6 +4835,9 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
@@ -4824,13 +4877,13 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
                   {
                     if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                         next = info;
 
-                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                       {
                         if (contentInfoList.getReleaseObjects())
                           contentInfoList.addContentInfo(info->duplicate());
@@ -4913,6 +4966,9 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time)
@@ -4949,13 +5005,13 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
                 {
                   if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                       next = info;
 
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                     {
                       if (contentInfoList.getReleaseObjects())
                         contentInfoList.addContentInfo(info->duplicate());
@@ -5032,6 +5088,9 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time)
@@ -5072,13 +5131,13 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
                   {
                     if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                         next = info;
 
-                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                       {
                         if (contentInfoList.getReleaseObjects())
                           contentInfoList.addContentInfo(info->duplicate());
@@ -5161,6 +5220,9 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time)
@@ -5200,13 +5262,13 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
                   {
                     if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                         next = info;
 
-                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                       {
                         if (contentInfoList.getReleaseObjects())
                           contentInfoList.addContentInfo(info->duplicate());
@@ -5288,6 +5350,9 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time)
@@ -5324,13 +5389,13 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(std::string newba
                 {
                   if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                       next = info;
 
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                     {
                       if (contentInfoList.getReleaseObjects())
                         contentInfoList.addContentInfo(info->duplicate());
@@ -5407,6 +5472,9 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time)
@@ -5447,13 +5515,13 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
                   {
                     if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                         next = info;
 
-                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                       {
                         if (contentInfoList.getReleaseObjects())
                           contentInfoList.addContentInfo(info->duplicate());
@@ -5536,6 +5604,9 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time)
@@ -5575,13 +5646,13 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
                   {
                     if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                         next = info;
 
-                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                       {
                         if (contentInfoList.getReleaseObjects())
                           contentInfoList.addContentInfo(info->duplicate());
@@ -5664,6 +5735,9 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time)
@@ -5700,13 +5774,13 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
                 {
                   if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                       next = info;
 
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                     {
                       if (contentInfoList.getReleaseObjects())
                         contentInfoList.addContentInfo(info->duplicate());
@@ -5783,6 +5857,9 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint pro
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time)
@@ -5823,13 +5900,13 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint pro
                   {
                     if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                         next = info;
 
-                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                       {
                         if (contentInfoList.getReleaseObjects())
                           contentInfoList.addContentInfo(info->duplicate());
@@ -5912,6 +5989,9 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time)
@@ -5951,13 +6031,13 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
                   {
                     if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                         next = info;
 
-                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                       {
                         if (contentInfoList.getReleaseObjects())
                           contentInfoList.addContentInfo(info->duplicate());
@@ -6042,6 +6122,9 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time)
@@ -6078,13 +6161,13 @@ void ContentInfoList::getContentInfoListByCdmParameterName(std::string cdmParame
                 {
                   if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                   {
-                    if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                    if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                       prev = info;
 
-                    if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                    if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                       next = info;
 
-                    if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                    if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                     {
                       if (contentInfoList.getReleaseObjects())
                         contentInfoList.addContentInfo(info->duplicate());
@@ -6161,6 +6244,9 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint p
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time)
@@ -6201,13 +6287,13 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint p
                   {
                     if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                         next = info;
 
-                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                       {
                         if (contentInfoList.getReleaseObjects())
                           contentInfoList.addContentInfo(info->duplicate());
@@ -6290,6 +6376,9 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time)
@@ -6329,13 +6418,13 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
                   {
                     if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
                     {
-                      if (info->mForecastTime < startTime  && (prev == nullptr || prev->mForecastTime < info->mForecastTime))
+                      if (info->mForecastTimeUTC < startTimeUTC && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
                         prev = info;
 
-                      if (info->mForecastTime > endTime  && (next == nullptr || next->mForecastTime > info->mForecastTime))
+                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
                         next = info;
 
-                      if (info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                       {
                         if (contentInfoList.getReleaseObjects())
                           contentInfoList.addContentInfo(info->duplicate());
@@ -6780,12 +6869,15 @@ void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint gene
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());

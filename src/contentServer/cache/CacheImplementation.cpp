@@ -4000,7 +4000,7 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
 
     contentInfoList.clear();
 
-    std::string startTime = "13000101T000000";
+    std::string startTime = "19000101T000000";
     std::string endTime = "23000101T000000";
 
     T::ParamLevel minLevel = level;
