@@ -20,6 +20,8 @@ FileInfo::FileInfo()
     mGroupFlags = 0;
     mFlags = 0;
     mSourceId = 0;
+    mModificationTime = 0;
+    mDeletionTime = 0;
   }
   catch (...)
   {
@@ -145,7 +147,7 @@ std::string FileInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%s;%u;%u;%u;%u;%u;%s;%s",
+    sprintf(st,"%u;%u;%s;%u;%u;%u;%u;%u;%ld;%ld",
         mFileId,
         mFileType,
         mName.c_str(),
@@ -154,8 +156,8 @@ std::string FileInfo::getCsv()
         mGroupFlags,
         mFlags,
         mSourceId,
-        mModificationTime.c_str(),
-        mDeletionTime.c_str());
+        mModificationTime,
+        mDeletionTime);
 
     return std::string(st);
   }
@@ -173,7 +175,7 @@ std::string FileInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "fileId;fileType;name;producerId;generationId;groupFlags;flags;sourceId;modificationTime;deletionTime";
+    std::string header = "fileId;fileType;name;producerId;generationId;groupFlags;flags;sourceId;modificationTimeT;deletionTimeT";
     return header;
   }
   catch (...)
@@ -223,9 +225,9 @@ void FileInfo::setCsv(const char *csv)
       mFlags = toUInt32(field[6]);
       mSourceId = toUInt32(field[7]);
       if (c >= 8)
-        mModificationTime = field[8];
+        mModificationTime = toInt64(field[8]);
       if (c >= 9)
-        mDeletionTime = field[9];
+        mDeletionTime = toInt64(field[9]);
     }
   }
   catch (...)
@@ -313,8 +315,8 @@ void FileInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mGroupFlags       = " << mGroupFlags << "\n";
     stream << space(level) << "- mFlags            = " << mFlags << "\n";
     stream << space(level) << "- mSourceId         = " << mSourceId << "\n";
-    stream << space(level) << "- mModificationTime = " << mModificationTime << "\n";
-    stream << space(level) << "- mDeletionTime     = " << mDeletionTime << "\n";
+    stream << space(level) << "- mModificationTime = " << utcTimeFromTimeT(mModificationTime) << "\n";
+    stream << space(level) << "- mDeletionTime     = " << utcTimeFromTimeT(mDeletionTime) << "\n";
   }
   catch (...)
   {

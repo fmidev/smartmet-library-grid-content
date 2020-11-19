@@ -60,6 +60,7 @@ class FileInfoList
     void           getFileInfoListBySourceId(uint sourceId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
     std::size_t    getHash();
     std::size_t    getHashByProducerId(uint producerId);
+    time_t         getLastFileDeletionTimeByGenerationId(uint generationId);
     uint           getLength();
     bool           getReleaseObjects();
     void           increaseSize(uint newSize);

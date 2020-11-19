@@ -73,7 +73,8 @@ void Converter::convert(T::ContentInfo& source,ContentServer::Corba::CorbaConten
     target.flags = source.mFlags;
     target.sourceId = source.mSourceId;
     target.geometryId = source.mGeometryId;
-    target.modificationTime = CORBA::string_dup(source.mModificationTime.c_str());
+    target.modificationTime = source.mModificationTime;
+    target.deletionTime = source.mDeletionTime;
   }
   catch (...)
   {
@@ -118,6 +119,7 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::
     target.mSourceId = source.sourceId;
     target.mGeometryId = source.geometryId;
     target.mModificationTime = source.modificationTime;
+    target.mDeletionTime = source.deletionTime;
   }
   catch (...)
   {
@@ -190,8 +192,8 @@ void Converter::convert(T::FileInfo& source,ContentServer::Corba::CorbaFileInfo&
     target.name = CORBA::string_dup(source.mName.c_str());
     target.flags = source.mFlags;
     target.sourceId = source.mSourceId;
-    target.modificationTime = CORBA::string_dup(source.mModificationTime.c_str());
-    target.deletionTime = CORBA::string_dup(source.mDeletionTime.c_str());
+    target.modificationTime = source.mModificationTime;
+    target.deletionTime = source.mDeletionTime;
   }
   catch (...)
   {
@@ -378,6 +380,7 @@ void Converter::convert(T::GenerationInfo& source,ContentServer::Corba::CorbaGen
     target.status = (CORBA::Octet)source.mStatus;
     target.flags = source.mFlags;
     target.sourceId = source.mSourceId;
+    target.deletionTime = source.mDeletionTime;
   }
   catch (...)
   {
@@ -402,6 +405,7 @@ void Converter::convert(const ContentServer::Corba::CorbaGenerationInfo& source,
     target.mStatus = source.status;
     target.mFlags = source.flags;
     target.mSourceId = source.sourceId;
+    target.mDeletionTime = source.deletionTime;
   }
   catch (...)
   {

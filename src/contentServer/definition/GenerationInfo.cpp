@@ -19,6 +19,7 @@ GenerationInfo::GenerationInfo()
     mStatus = Status::Disabled;
     mFlags = 0;
     mSourceId = 0;
+    mDeletionTime = 0;
   }
   catch (...)
   {
@@ -43,6 +44,7 @@ GenerationInfo::GenerationInfo(const GenerationInfo& generationInfo)
     mStatus = generationInfo.mStatus;
     mFlags = generationInfo.mFlags;
     mSourceId = generationInfo.mSourceId;
+    mDeletionTime = generationInfo.mDeletionTime;
   }
   catch (...)
   {
@@ -102,6 +104,7 @@ GenerationInfo& GenerationInfo::operator=(const GenerationInfo& generationInfo)
     mStatus = generationInfo.mStatus;
     mFlags = generationInfo.mFlags;
     mSourceId = generationInfo.mSourceId;
+    mDeletionTime = generationInfo.mDeletionTime;
 
     return *this;
   }
@@ -120,7 +123,7 @@ std::string GenerationInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%u;%s;%s;%s;%u;%u;%u",
+    sprintf(st,"%u;%u;%u;%s;%s;%s;%u;%u;%u;%ld",
         mGenerationId,
         mGenerationType,
         mProducerId,
@@ -129,7 +132,8 @@ std::string GenerationInfo::getCsv()
         mAnalysisTime.c_str(),
         mStatus,
         mFlags,
-        mSourceId);
+        mSourceId,
+        mDeletionTime);
 
     return std::string(st);
   }
@@ -147,7 +151,7 @@ std::string GenerationInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "generationId;generationType;producerId;name;description;analysisTime;status;flags;sourceId";
+    std::string header = "generationId;generationType;producerId;name;description;analysisTime;status;flags;sourceId;deletionTimeT";
     return header;
   }
   catch (...)
@@ -197,6 +201,8 @@ void GenerationInfo::setCsv(const char *csv)
       mStatus = toInt64(field[6]);
       mFlags = toInt64(field[7]);
       mSourceId = toInt64(field[8]);
+      if (c >= 9)
+        mDeletionTime = toInt64(field[9]);
     }
   }
   catch (...)
@@ -299,6 +305,7 @@ void GenerationInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mStatus         = " << C_INT(mStatus) << "\n";
     stream << space(level) << "- mFlags          = " << mFlags << "\n";
     stream << space(level) << "- mSourceId       = " << mSourceId << "\n";
+    stream << space(level) << "- mDeletionTime   = " << utcTimeFromTimeT(mDeletionTime) << "\n";
   }
   catch (...)
   {

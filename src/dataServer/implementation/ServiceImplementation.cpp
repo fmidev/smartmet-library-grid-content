@@ -340,10 +340,9 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
     if (mContentServer->getFileInfoById(mServerSessionId,fileId,fileInfo) == 0 &&
         mContentServer->getContentListByFileId(mServerSessionId,fileId,contentList) == 0)
     {
-      if (!fileInfo.mDeletionTime.empty())
+      if (fileInfo.mDeletionTime != 0)
       {
-        time_t delTime = utcTimeToTimeT(fileInfo.mDeletionTime);
-        if ((time(nullptr) + 120) > delTime)
+        if ((time(nullptr) + 120) > fileInfo.mDeletionTime)
         {
           // The grid file will be deleted soon. We should not access it anymore.
           return nullptr;
