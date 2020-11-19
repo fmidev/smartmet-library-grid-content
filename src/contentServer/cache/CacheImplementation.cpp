@@ -1334,7 +1334,7 @@ int CacheImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
     {
       T::ContentInfo *info = ssp->mContentInfoList[0].getContentInfoByIndex(t);
       char st[200];
-      sprintf(st,"%u;%u;%u;%d;%d;%s;%s;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->mForecastTime.c_str(),info->mModificationTime.c_str());
+      sprintf(st,"%u;%u;%u;%d;%d;%s;%ld;%ld;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->mForecastTime.c_str(),info->mModificationTime,info->mDeletionTime);
       std::string str = st;
 
 
@@ -4278,7 +4278,10 @@ int CacheImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
 
     paramKeyList.clear();
 
-    ssp->mContentInfoList[0].getContentParamKeyListByGenerationId(generationInfo->mProducerId,generationId,parameterKeyType,paramKeyList);
+    if (mContentInfoListEnabled[3])
+      ssp->mContentInfoList[3].getContentParamKeyListByGenerationId(generationInfo->mProducerId,generationId,parameterKeyType,paramKeyList);
+    else
+      ssp->mContentInfoList[0].getContentParamKeyListByGenerationId(generationInfo->mProducerId,generationId,parameterKeyType,paramKeyList);
     return Result::OK;
   }
   catch (...)
@@ -5832,6 +5835,16 @@ void CacheImplementation::swapData()
     if (mContentInfoListEnabled[7])
       nptr->mContentInfoList[7].sort(T::ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time);
 
+
+    // ### Updating generation deletion times
+/*
+    uint glen = nptr->mGenerationInfoList.getLength();
+    for (uint g=0; g<glen; g++)
+    {
+      auto gInfo = nptr->mGenerationInfoList.getGenerationInfoByIndex(g);
+      gInfo->mDeletionTime = nptr->mFileInfoList.getLastFileDeletionTimeByGenerationId(gInfo->mGenerationId);
+    }
+*/
     boost::atomic_store(&mSearchStructureSptr,nptr);
 
     mDataSwapTime = time(nullptr);

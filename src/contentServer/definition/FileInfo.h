@@ -72,9 +72,9 @@ class FileInfo
 
     uint          mSourceId;
 
-    std::string   mModificationTime;
+    time_t        mModificationTime;
 
-    std::string   mDeletionTime;
+    time_t        mDeletionTime;
 
     /* The FileInfo records can be sorted in different ways when they are stored
      * into the FileInfoList object. That's why the FileInfo class contains

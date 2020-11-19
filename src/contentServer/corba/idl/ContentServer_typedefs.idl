@@ -47,7 +47,8 @@ struct CorbaContentInfo
   unsigned long      flags;
   unsigned long      sourceId;
   long               geometryId;
-  string             modificationTime;
+  long long          modificationTime;
+  long long          deletionTime;
 };
 
 typedef sequence<CorbaContentInfo> CorbaContentInfoList;
@@ -79,8 +80,8 @@ struct CorbaFileInfo
   string             name;
   unsigned long      flags;
   unsigned long      sourceId;
-  string             modificationTime;
-  string             deletionTime;
+  long long          modificationTime;
+  long long          deletionTime;
 };
 
 typedef sequence<CorbaFileInfo> CorbaFileInfoList;
@@ -128,6 +129,7 @@ struct CorbaGenerationInfo
   octet              status;
   unsigned long      flags;
   unsigned long      sourceId;
+  long long          deletionTime;
 };
 
 typedef sequence<CorbaGenerationInfo> CorbaGenerationInfoList;

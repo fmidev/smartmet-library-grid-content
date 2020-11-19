@@ -61,8 +61,8 @@ class ContentInfo
     uint               mFlags;
     uint               mSourceId;
     T::GeometryId      mGeometryId;
-    std::string        mModificationTime;
-
+    time_t             mModificationTime;
+    time_t             mDeletionTime;
 
   protected:
 

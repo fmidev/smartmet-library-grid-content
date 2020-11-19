@@ -2372,12 +2372,21 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint producerId,uint 
 
 
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    time_t timeLimit = time(nullptr) + 120;
 
-    for (uint t=0; t<mLength; t++)
+    ContentInfo searchInfo;
+    searchInfo.mProducerId = producerId;
+    searchInfo.mGenerationId = generationId;
+
+    int idx = 0;
+    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
+      idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
+
+    for (uint t=idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
 
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  && (info->mDeletionTime == 0 || info->mDeletionTime > timeLimit))
       {
         switch (parameterKeyType)
         {
@@ -2437,6 +2446,8 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint producerId,uint 
             return;
         }
       }
+      if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time && info->mGenerationId != generationId)
+        return;
     }
   }
   catch (...)

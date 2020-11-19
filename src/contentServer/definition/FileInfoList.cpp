@@ -1992,6 +1992,40 @@ void FileInfoList::sort(uint comparisonMethod)
 
 
 
+time_t FileInfoList::getLastFileDeletionTimeByGenerationId(uint generationId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    time_t lastTime = 0;
+
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    for (uint t=0; t<mLength; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info->mGenerationId == generationId || (info->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
+        {
+          if (info->mDeletionTime > lastTime)
+            lastTime = info->mDeletionTime;
+        }
+      }
+    }
+    return lastTime;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 
 void FileInfoList::writeToFile(std::string filename)
 {

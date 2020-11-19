@@ -916,6 +916,12 @@ void ServiceImplementation::getParameterStringInfo(
 
     key = field[0];
 
+    std::string alias;
+    if (getAlias(key, alias))
+    {
+      key = alias;
+    }
+
     if (c > 1)
     {
       if (field[1][0] != '\0')
@@ -1723,7 +1729,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
             if (geometryId > 0)
               geomIdList.insert(geometryId);
             else
-            if (globalGeometryId > 0  &&  producerName.empty())
+            if (globalGeometryId > 0  &&  producerName.empty()  &&  qParam->mProducerId == 0)
               geomIdList.insert(globalGeometryId);
             else
               geomIdList = geometryIdList;
@@ -2081,7 +2087,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
               if (geometryId > 0)
                 geomIdList.insert(geometryId);
               else
-              if (globalGeometryId > 0  &&  producerName.empty())
+              if (globalGeometryId > 0  &&  producerName.empty()  &&  qParam->mProducerId == 0)
                 geomIdList.insert(globalGeometryId);
               else
                 geomIdList = geometryIdList;
@@ -5934,6 +5940,7 @@ void ServiceImplementation::getGridValues(
       }
     }
 
+    time_t requiredAccessTime = time(nullptr) + 120;
     std::string startTime = forecastTime;
     std::string endTime = forecastTime;
 
@@ -5973,7 +5980,6 @@ void ServiceImplementation::getGridValues(
           {
             cacheEntry->generationInfoList->getAnalysisTimes(analysisTimesVec,false);
             analysisTimes = &analysisTimesVec;
-
           }
 
           // Going through all the parameter mapping files, until we find a match.
@@ -6076,9 +6082,14 @@ void ServiceImplementation::getGridValues(
                     generationValid = true;
                 }
 
+                // ### Checking if the generation is going to be deleted in few minutes
+
+                T::GenerationInfo *generationInfo = cacheEntry->generationInfoList->getGenerationInfoByAnalysisTime((*analysisTimes)[g]);
+                if (generationInfo != nullptr &&  generationInfo->mDeletionTime > 0 && generationInfo->mDeletionTime < requiredAccessTime)
+                  generationValid = false;
+
                 if (generationValid)
                 {
-                  T::GenerationInfo* generationInfo = cacheEntry->generationInfoList->getGenerationInfoByAnalysisTime((*analysisTimes)[g]);
 
                   PRINT_DATA(mDebugLog, "      - Going through the parameter mappings\n");
                   for (auto pInfo = mappings.begin(); pInfo != mappings.end(); ++pInfo)
@@ -6590,6 +6601,8 @@ void ServiceImplementation::getGridValues(
       }
     }
 
+    time_t requiredAccessTime = time(nullptr) + 120;
+
     bool ignoreStartTimeValue = false;
     if ((queryFlags & Query::Flags::StartTimeNotIncluded) != 0)
       ignoreStartTimeValue = true;
@@ -6736,6 +6749,9 @@ void ServiceImplementation::getGridValues(
                         generationValid = true;
                       }
                     }
+
+                    if (gInfo != nullptr &&  gInfo->mDeletionTime > 0 && gInfo->mDeletionTime < requiredAccessTime)
+                      generationValid = false;
 
                     if (generationValid)
                     {
