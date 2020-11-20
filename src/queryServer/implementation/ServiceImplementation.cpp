@@ -915,13 +915,13 @@ void ServiceImplementation::getParameterStringInfo(
     }
 
     key = field[0];
-
     std::string alias;
     if (getAlias(key, alias))
     {
-      key = alias;
+      // Alias cannot be a function.
+      if (strchr(alias.c_str(),'{') == nullptr)
+        key = alias;
     }
-
     if (c > 1)
     {
       if (field[1][0] != '\0')
