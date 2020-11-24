@@ -80,6 +80,9 @@ FMI Grid Content library development files
 - Performance improvements
 - New C+ query functions
 - Improved redis locking mechanism
+- Fixed alias usage as a part of parameter identifier
+- Improved content deletion time handling
+- Added numeric forecastTime into the ContentInfo class
 * Thu Oct 22 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.10.22-1.fmi
 - Performance improvements
 * Thu Oct 15 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.10.15-1.fmi
