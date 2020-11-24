@@ -22,7 +22,7 @@ BuildRequires: omniORB-devel
 BuildRequires: postgresql95-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 20.10.28
-BuildRequires: smartmet-library-grid-files-devel >= 20.10.22
+BuildRequires: smartmet-library-grid-files-devel >= 20.11.24
 BuildRequires: smartmet-library-macgyver-devel >= 20.10.28
 BuildRequires: smartmet-library-spine-devel >= 20.11.23
 Requires: boost169-date-time
@@ -32,7 +32,7 @@ Requires: lua-devel
 Requires: omniORB
 Requires: postgresql95
 Requires: smartmet-library-gis >= 20.10.28
-Requires: smartmet-library-grid-files >= 20.10.22
+Requires: smartmet-library-grid-files >= 20.11.24
 Requires: smartmet-library-macgyver >= 20.10.28
 Requires: smartmet-library-spine >= 20.11.23
 Provides: %{SPECNAME}
