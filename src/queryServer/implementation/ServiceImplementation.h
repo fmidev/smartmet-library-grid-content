@@ -17,11 +17,12 @@ namespace QueryServer
 {
 
 typedef std::vector<std::pair<std::string,T::GeometryId>>   Producer_vec;
-typedef std::unordered_map<std::string,T::ProducerInfo>               Producer_map;
+typedef std::unordered_map<std::string,T::ProducerInfo>     Producer_map;
+typedef std::shared_ptr<Producer_map>                       Producer_map_sptr;
 typedef ContentServer::ServiceInterface*                    ContentServer_ptr;
 typedef DataServer::ServiceInterface*                       DataServer_ptr;
 typedef std::vector<std::pair<std::string,int>>             LevelHeightCache;
-typedef std::unordered_map<size_t,ParameterMapping_vec>               ParameterMappingCache;
+typedef std::unordered_map<size_t,ParameterMapping_vec>     ParameterMappingCache;
 typedef std::shared_ptr<std::vector<std::string>>           StringVector_sptr;
 
 class CacheEntry
@@ -549,58 +550,61 @@ class ServiceImplementation : public ServiceInterface
 
      CacheEntry_sptr getGenerationInfoListByProducerId(uint producerId);
 
+     bool            isValidGeometry(int geometryId,std::vector<std::vector<T::Coordinate>>& polygonPath);
+
+
 
   private:
 
      // Private attributes
 
-     AliasFileCollection    mAliasFileCollection;
-     AliasFileCollection    mProducerAliasFileCollection;
-     uint                   mFunctionParamId;
-     std::string            mGridConfigFile;
-     Lua::LuaFileCollection mLuaFileCollection;
-     string_vec             mParameterMappingFiles;
-     ProducerHash_map       mProducerHashMap;
-     ModificationLock       mProducerHashMap_modificationLock;
+     AliasFileCollection        mAliasFileCollection;
+     AliasFileCollection        mProducerAliasFileCollection;
+     uint                       mFunctionParamId;
+     std::string                mGridConfigFile;
+     Lua::LuaFileCollection     mLuaFileCollection;
+     string_vec                 mParameterMappingFiles;
+     ProducerHash_map           mProducerHashMap;
+     ModificationLock           mProducerHashMap_modificationLock;
 
-     std::string            mProducerFile;
-     time_t                 mProducerFile_modificationTime;
-     time_t                 mProducerFile_checkTime;
-     uint                   mProducerFile_checkInterval;
+     std::string                mProducerFile;
+     time_t                     mProducerFile_modificationTime;
+     time_t                     mProducerFile_checkTime;
+     uint                       mProducerFile_checkInterval;
 
-     Producer_vec           mProducerList;
-     ModificationLock       mProducerList_modificationLock;
+     Producer_vec               mProducerList;
+     ModificationLock           mProducerList_modificationLock;
 
-     Producer_map           mProducerMap;
-     ModificationLock       mProducerMap_modificationLock;
-     time_t                 mProducerMap_updateTime;
-     uint                   mProducerMap_checkInterval;
+     Producer_map_sptr          mProducerMap;
+     ModificationLock           mProducerMap_modificationLock;
+     time_t                     mProducerMap_updateTime;
+     uint                       mProducerMap_checkInterval;
 
-     T::GenerationInfoList  mGenerationInfoList;
-     ModificationLock       mGenerationInfoList_modificationLock;
-     time_t                 mGenerationInfoList_checkTime;
-     uint                   mGenerationInfoList_checkInterval;
+     T::GenerationInfoList_sptr mGenerationInfoList;
+     ModificationLock           mGenerationInfoList_modificationLock;
+     time_t                     mGenerationInfoList_checkTime;
+     uint                       mGenerationInfoList_checkInterval;
 
-     ContentServer_ptr      mContentServerPtr;
-     DataServer_ptr         mDataServerPtr;
-     LevelHeightCache       mLevelHeightCache;
-     ModificationLock       mHeightCache_modificationLock;
+     ContentServer_ptr          mContentServerPtr;
+     DataServer_ptr             mDataServerPtr;
+     LevelHeightCache           mLevelHeightCache;
+     ModificationLock           mHeightCache_modificationLock;
 
-     ParamMappingFile_vec   mParameterMappings;
-     time_t                 mParameterMapping_checkTime;
-     uint                   mParameterMapping_checkInterval;
+     ParamMappingFile_vec       mParameterMappings;
+     time_t                     mParameterMapping_checkTime;
+     uint                       mParameterMapping_checkInterval;
 
-     ParameterMappingCache  mParameterMappingCache;
-     ModificationLock       mParameterMappingCache_modificationLock;
+     ParameterMappingCache      mParameterMappingCache;
+     ModificationLock           mParameterMappingCache_modificationLock;
 
-     ContentCache           mContentCache;
-     ModificationLock       mContentCache_modificationLock;
+     ContentCache               mContentCache;
+     ModificationLock           mContentCache_modificationLock;
 
-     ContentSearchCache     mContentSearchCache;
-     ModificationLock       mContentSearchCache_modificationLock;
+     ContentSearchCache         mContentSearchCache;
+     ModificationLock           mContentSearchCache_modificationLock;
 
-     pthread_t              mThread;
-     bool                   mShutdownRequested;
+     pthread_t                  mThread;
+     bool                       mShutdownRequested;
 
      Functions::FunctionCollection     mFunctionCollection;
      boost::shared_ptr<Fmi::LandCover> mLandCover;

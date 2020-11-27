@@ -1,5 +1,6 @@
 #include "ParameterMappingFile.h"
 #include <grid-files/common/GeneralFunctions.h>
+#include <grid-files/common/AutoThreadLock.h>
 #include <macgyver/StringConversion.h>
 
 
@@ -62,7 +63,6 @@ void ParameterMappingFile::init()
 {
   try
   {
-    AutoWriteLock lock(&mModificationLock);
     loadFile();
   }
   catch (...)
@@ -83,7 +83,6 @@ bool ParameterMappingFile::checkUpdates()
     if (tt == mLastModified  ||  (tt+3) >= time(nullptr))
       return false;
 
-    AutoWriteLock lock(&mModificationLock);
     if (tt != mLastModified  &&  (tt+3) < time(nullptr))
     {
       loadFile();
@@ -121,9 +120,12 @@ uint ParameterMappingFile::getNumberOfMappings()
 {
   try
   {
+    if (!mMappingSearch)
+      return 0;
+
     AutoReadLock lock(&mModificationLock);
     uint cnt = 0;
-    for (auto it = mMappingSearch.begin(); it != mMappingSearch.end(); ++it)
+    for (auto it = mMappingSearch->begin(); it != mMappingSearch->end(); ++it)
     {
       cnt = cnt + it->second.size();
     }
@@ -143,11 +145,14 @@ ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
 {
   try
   {
+    if (!mMappingSearch)
+      return nullptr;
+
     AutoReadLock lock(&mModificationLock);
     std::string key = toLowerString(mapping.mProducerName + ":" + mapping.mParameterName + ":" + Fmi::to_string(mapping.mGeometryId));
 
-    auto s = mMappingSearch.find(key);
-    if (s == mMappingSearch.end())
+    auto s = mMappingSearch->find(key);
+    if (s == mMappingSearch->end())
       return nullptr;
 
     for (auto it = s->second.begin(); it != s->second.end(); ++it)
@@ -180,11 +185,14 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 {
   try
   {
+    if (!mMappingSearch)
+      return;
+
     AutoReadLock lock(&mModificationLock);
     std::string key = toLowerString(producerName + ":" + parameterName + ":" + Fmi::to_string(geometryId));
 
-    auto s = mMappingSearch.find(key);
-    if (s == mMappingSearch.end())
+    auto s = mMappingSearch->find(key);
+    if (s == mMappingSearch->end())
       return;
 
     for (auto it = s->second.begin(); it != s->second.end(); ++it)
@@ -217,16 +225,19 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 {
   try
   {
+    if (!mMappingSearch)
+      return;
+
     AutoReadLock lock(&mModificationLock);
 
     std::string key = toLowerString(producerName + ":" + parameterName + ":");
     int len = strlen(key.c_str());
 
-    auto s = mMappingSearch.lower_bound(key);
-    if (s == mMappingSearch.end())
+    auto s = mMappingSearch->lower_bound(key);
+    if (s == mMappingSearch->end())
       return;
 
-    while (s != mMappingSearch.end()  &&  strncasecmp(s->first.c_str(),key.c_str(),len) == 0)
+    while (s != mMappingSearch->end()  &&  strncasecmp(s->first.c_str(),key.c_str(),len) == 0)
     {
       for (auto it = s->second.begin(); it != s->second.end(); ++it)
       {
@@ -260,12 +271,15 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 {
   try
   {
+    if (!mMappingSearch)
+      return;
+
     AutoReadLock lock(&mModificationLock);
 
     std::string key = toLowerString(producerName + ":" + parameterName + ":" + Fmi::to_string(geometryId));
 
-    auto s = mMappingSearch.find(key);
-    if (s == mMappingSearch.end())
+    auto s = mMappingSearch->find(key);
+    if (s == mMappingSearch->end())
       return;
 
 
@@ -308,16 +322,19 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 {
   try
   {
+    if (!mMappingSearch)
+      return;
+
     AutoReadLock lock(&mModificationLock);
 
     std::string key = toLowerString(producerName + ":" + parameterName + ":");
     int len = strlen(key.c_str());
 
-    auto s = mMappingSearch.lower_bound(key);
-    if (s == mMappingSearch.end())
+    auto s = mMappingSearch->lower_bound(key);
+    if (s == mMappingSearch->end())
       return;
 
-    while (s != mMappingSearch.end()  &&  strncasecmp(s->first.c_str(),key.c_str(),len) == 0)
+    while (s != mMappingSearch->end()  &&  strncasecmp(s->first.c_str(),key.c_str(),len) == 0)
     {
       for (auto it = s->second.begin(); it != s->second.end(); ++it)
       {
@@ -360,6 +377,12 @@ void ParameterMappingFile::loadFile()
 {
   try
   {
+    AutoThreadLock fLock(&mFileReadLock);
+
+    time_t modTime = getFileModificationTime(mFilename.c_str());
+    if (mLastModified == modTime)
+      return;
+
     FILE *file = fopen(mFilename.c_str(),"re");
     if (file == nullptr)
     {
@@ -368,7 +391,7 @@ void ParameterMappingFile::loadFile()
       throw exception;
     }
 
-    mMappingSearch.clear();
+    MappingSearch *msearch = new MappingSearch();
 
     char st[1000];
 
@@ -458,8 +481,8 @@ void ParameterMappingFile::loadFile()
 
           std::string key = toLowerString(rec.mProducerName + ":" + rec.mParameterName + ":" + Fmi::to_string(rec.mGeometryId));
 
-          auto s = mMappingSearch.find(key);
-          if (s != mMappingSearch.end())
+          auto s = msearch->find(key);
+          if (s != msearch->end())
           {
             s->second.push_back(rec);
           }
@@ -467,15 +490,17 @@ void ParameterMappingFile::loadFile()
           {
             ParameterMapping_vec vec;
             vec.push_back(rec);
-            mMappingSearch.insert(std::pair<std::string,ParameterMapping_vec>(key,vec));
+            msearch->insert(std::pair<std::string,ParameterMapping_vec>(key,vec));
           }
-
         }
       }
     }
     fclose(file);
 
-    mLastModified = getFileModificationTime(mFilename.c_str());
+    AutoWriteLock lock(&mModificationLock);
+    mMappingSearch.reset(msearch);
+
+    mLastModified = modTime;
   }
   catch (...)
   {
@@ -493,7 +518,7 @@ void ParameterMappingFile::print(std::ostream& stream,uint level,uint optionFlag
   {
     AutoReadLock lock(&mModificationLock);
 
-    for (auto it = mMappingSearch.begin(); it != mMappingSearch.end(); ++it)
+    for (auto it = mMappingSearch->begin(); it != mMappingSearch->end(); ++it)
     {
       stream << it->first << "\n";
       for (auto s = it->second.begin(); s != it->second.end(); ++s)

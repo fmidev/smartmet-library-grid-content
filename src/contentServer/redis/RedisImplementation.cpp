@@ -137,10 +137,13 @@ void RedisImplementation::lock(const char *function,uint line,ulonglong& key,uin
 
     time_t startTime = time(nullptr);
 
-    while ((lockReleaseCounter+1) <= lockRequestCounter)
+    while (true)
     {
       if (mShutdownRequested)
+      {
+        key = lockRequestCounter;
         return;
+      }
 
       redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"GET %slockReleaseCounter",mTablePrefix.c_str()));
       if (reply == nullptr)
@@ -158,10 +161,11 @@ void RedisImplementation::lock(const char *function,uint line,ulonglong& key,uin
         key = lockRequestCounter;
         return;
       }
+
       time_usleep(0,100);
 
       time_t currentTime = time(nullptr);
-      if ((currentTime-startTime) >= waitTimeInSec)
+      if ((currentTime-startTime) >= waitTimeInSec || lockReleaseCounter >= lockRequestCounter)
       {
         if (resetLock)
         {

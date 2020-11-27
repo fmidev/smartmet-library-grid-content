@@ -232,8 +232,11 @@ bool ServiceImplementation::getProducerInfoByName(std::string& name,T::ProducerI
   {
     AutoReadLock lock(&mProducerMap_modificationLock);
 
-    auto it = mProducerMap.find(name);
-    if (it != mProducerMap.end())
+    if (!mProducerMap)
+      return false;
+
+    auto it = mProducerMap->find(name);
+    if (it != mProducerMap->end())
     {
       info = it->second;
       return true;
@@ -264,10 +267,12 @@ CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(uint pr
     }
 
     CacheEntry_sptr cacheEntry(new CacheEntry);
+    if (!mGenerationInfoList)
+      return cacheEntry;
 
     T::GenerationInfoList_sptr generationInfoList(new T::GenerationInfoList());
     AutoReadLock readLock(&mGenerationInfoList_modificationLock);
-    mGenerationInfoList.getGenerationInfoListByProducerIdAndStatus(producerId,*generationInfoList,T::GenerationInfo::Status::Ready);
+    mGenerationInfoList->getGenerationInfoListByProducerIdAndStatus(producerId,*generationInfoList,T::GenerationInfo::Status::Ready);
 
     StringVector_sptr analysisTimes(new std::vector<std::string>());
     generationInfoList->sort(T::GenerationInfo::ComparisonMethod::analysisTime_generationId);
@@ -1030,6 +1035,30 @@ bool ServiceImplementation::getAlias(std::string& name, std::string& alias)
 
 
 
+bool ServiceImplementation::isValidGeometry(int geometryId,std::vector<std::vector<T::Coordinate>>& polygonPath)
+{
+  try
+  {
+    for (auto cList = polygonPath.begin(); cList != polygonPath.end(); ++cList)
+    {
+      for (auto coordinate = cList->begin(); coordinate != cList->end(); ++coordinate)
+      {
+        double grid_i = ParamValueMissing;
+        double grid_j = ParamValueMissing;
+        if (!Identification::gridDef.getGridPointByGeometryIdAndLatLonCoordinates(geometryId, coordinate->y(), coordinate->x(), grid_i, grid_j))
+          return false;
+      }
+    }
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
 
 
 bool ServiceImplementation::parseFunction(
@@ -1671,6 +1700,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
         if (generationFlags == 0)
           generationFlags = query.mGenerationFlags;
 
+        bool useAlternative = false;
 
         getParameterStringInfo(qParam->mParam, paramName, geometryId, paramLevelId, paramLevel, forecastType, forecastNumber, producerName,producerId, generationFlags, areaInterpolationMethod,
             timeInterpolationMethod, levelInterpolationMethod);
@@ -1680,7 +1710,14 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
         try
         {
-          if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN)
+          if (qParam->mAlternativeParamId != 0  &&  geometryId > 0 && !isValidGeometry(geometryId,query.mAreaCoordinates))
+          {
+            useAlternative = true;
+            if (alternativeRequired.find(qParam->mAlternativeParamId) == alternativeRequired.end())
+              alternativeRequired.insert(qParam->mAlternativeParamId);
+          }
+
+          if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN  &&  !useAlternative)
           {
             std::string startTime = query.mStartTime;
             std::string endTime = query.mEndTime;
@@ -1992,11 +2029,20 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
         if (generationFlags == 0)
           generationFlags = query.mGenerationFlags;
 
+        bool useAlternative = false;
+
         getParameterStringInfo(qParam->mParam, paramName, geometryId,paramLevelId, paramLevel, forecastType, forecastNumber, producerName, producerId, generationFlags, areaInterpolationMethod,
             timeInterpolationMethod, levelInterpolationMethod);
 
         if (paramName.c_str()[0] == '$')
           paramName = paramName.c_str() + 1;
+
+        if (qParam->mAlternativeParamId != 0  &&  geometryId > 0 && !isValidGeometry(geometryId,query.mAreaCoordinates))
+        {
+          useAlternative = true;
+          if (alternativeRequired.find(qParam->mAlternativeParamId) == alternativeRequired.end())
+            alternativeRequired.insert(qParam->mAlternativeParamId);
+        }
 
         std::set < std::string > forecastTimeList = timeList;
         std::unordered_set < std::string > additionalTimeList;
@@ -2070,7 +2116,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
                 producerId = it->second;
             }
 
-            if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN)
+            if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN  &&  !useAlternative)
             {
               Producer_vec tmpProducers;
               if (producerName > " ")
@@ -7303,19 +7349,24 @@ void ServiceImplementation::checkProducerMapUpdates()
     if ((currentTime - mProducerMap_updateTime) < mProducerMap_checkInterval)
       return;
 
-    AutoWriteLock lock(&mProducerMap_modificationLock);
     T::ProducerInfoList producerInfoList;
     if (mContentServerPtr->getProducerInfoList(0,producerInfoList) == 0)
     {
-       mProducerMap.clear();
-       uint len = producerInfoList.getLength();
-       for (uint t=0; t<len; t++)
-       {
-         T::ProducerInfo *pinfo = producerInfoList.getProducerInfoByIndex(t);
-         if (pinfo != nullptr)
-           mProducerMap.insert(std::pair<std::string,T::ProducerInfo>(pinfo->mName,T::ProducerInfo(*pinfo)));
-       }
-       mProducerMap_updateTime = time(nullptr);
+      Producer_map *prodMap = new Producer_map();
+      uint len = producerInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::ProducerInfo *pinfo = producerInfoList.getProducerInfoByIndex(t);
+        if (pinfo != nullptr)
+          prodMap->insert(std::pair<std::string,T::ProducerInfo>(pinfo->mName,T::ProducerInfo(*pinfo)));
+      }
+
+      {
+        AutoWriteLock lock(&mProducerMap_modificationLock);
+        mProducerMap.reset(prodMap);
+      }
+
+      mProducerMap_updateTime = time(nullptr);
     }
   }
   catch (...)
@@ -7337,14 +7388,23 @@ void ServiceImplementation::checkGenerationUpdates()
     if ((currentTime - mGenerationInfoList_checkTime) < mGenerationInfoList_checkInterval)
       return;
 
-    AutoWriteLock lock(&mGenerationInfoList_modificationLock);
-    if (mContentServerPtr->getGenerationInfoList(0,mGenerationInfoList) == 0)
+
+    T::GenerationInfoList *generationInfoList = new T::GenerationInfoList();
+    if (mContentServerPtr->getGenerationInfoList(0,*generationInfoList) == 0)
     {
-      mGenerationInfoList.sort(T::GenerationInfo::ComparisonMethod::producerId);
+      generationInfoList->sort(T::GenerationInfo::ComparisonMethod::producerId);
+      {
+        AutoWriteLock lock(&mGenerationInfoList_modificationLock);
+        mGenerationInfoList.reset(generationInfoList);
+      }
       mGenerationInfoList_checkTime = time(nullptr);
 
       AutoWriteLock cacheLock(&mProducerGenerationListCacheModificationLock);
       mProducerGenerationListCache.clear();
+    }
+    else
+    {
+      delete generationInfoList;
     }
   }
   catch (...)

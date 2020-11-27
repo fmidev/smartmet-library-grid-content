@@ -13,6 +13,7 @@ namespace QueryServer
 {
 
 typedef std::map<std::string,ParameterMapping_vec> MappingSearch;
+typedef std::shared_ptr<MappingSearch> MappingSearch_sptr;
 
 class ParameterMappingFile
 {
@@ -38,8 +39,9 @@ class ParameterMappingFile
 
     std::string           mFilename;
     time_t                mLastModified;
-    MappingSearch         mMappingSearch;
+    MappingSearch_sptr    mMappingSearch;
     ModificationLock      mModificationLock;
+    ThreadLock            mFileReadLock;
 };
 
 
