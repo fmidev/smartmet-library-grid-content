@@ -18,6 +18,8 @@ class RedisImplementation : public ServiceInterface
      virtual        ~RedisImplementation();
 
      virtual void   init(const char *redisAddress,int redisPort,const char *tablePrefix);
+     virtual void   init(const char *redisAddress,int redisPort,const char *tablePrefix,bool databaseLockEnabled);
+     virtual void   init(const char *redisAddress,int redisPort,const char *tablePrefix,const char *redisSecondaryAddress,int redisSecondaryPort,bool databaseLockEnabled);
      virtual void   shutdown();
      virtual void   syncFilenames();
 
@@ -233,9 +235,12 @@ class RedisImplementation : public ServiceInterface
      T::EventInfo   mLastEvent;
      std::string    mRedisAddress;
      int            mRedisPort;
+     std::string    mRedisSecondaryAddress;
+     int            mRedisSecondaryPort;
      std::string    mFunction;
      uint           mLine;
      bool           mShutdownRequested;
+     bool           mDatabaseLockEnabled;
      ThreadLock     mThreadLock;
 
 };

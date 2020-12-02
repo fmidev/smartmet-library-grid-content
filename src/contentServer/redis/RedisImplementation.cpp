@@ -84,6 +84,7 @@ RedisImplementation::RedisImplementation()
     mRedisPort = 0;
     mLine = 0;
     mShutdownRequested = false;
+    mDatabaseLockEnabled = false;
   }
   catch (...)
   {
@@ -118,6 +119,9 @@ void RedisImplementation::lock(const char *function,uint line,ulonglong& key,uin
   FUNCTION_TRACE
   try
   {
+    if (!mDatabaseLockEnabled)
+      return;
+
     AutoThreadLock lock(&mThreadLock);
 
     mFunction = function;
@@ -199,6 +203,9 @@ void RedisImplementation::unlock(ulonglong key)
   FUNCTION_TRACE
   try
   {
+    if (!mDatabaseLockEnabled)
+      return;
+
     AutoThreadLock lock(&mThreadLock);
 
     redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"GET %slockReleaseCounter",mTablePrefix.c_str()));
@@ -241,6 +248,61 @@ void RedisImplementation::init(const char *redisAddress,int redisPort,const char
     mRedisAddress = redisAddress;
     mRedisPort = redisPort;
     mTablePrefix = tablePrefix;
+    mRedisSecondaryPort = 0;
+    mDatabaseLockEnabled = false;
+
+    openConnection();
+
+    if (mContext == nullptr)
+      throw Fmi::Exception(BCP,"Cannot connect to Redis!");
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void RedisImplementation::init(const char *redisAddress,int redisPort,const char *tablePrefix,bool databaseLockEnabled)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mRedisAddress = redisAddress;
+    mRedisPort = redisPort;
+    mTablePrefix = tablePrefix;
+    mRedisSecondaryPort = 0;
+    mDatabaseLockEnabled = databaseLockEnabled;
+
+    openConnection();
+
+    if (mContext == nullptr)
+      throw Fmi::Exception(BCP,"Cannot connect to Redis!");
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void RedisImplementation::init(const char *redisAddress,int redisPort,const char *tablePrefix,const char *redisSecondaryAddress,int redisSecondaryPort,bool databaseLockEnabled)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mRedisAddress = redisAddress;
+    mRedisPort = redisPort;
+    mTablePrefix = tablePrefix;
+    mRedisSecondaryAddress = redisSecondaryAddress;
+    mRedisSecondaryPort = redisSecondaryPort;
+    mDatabaseLockEnabled = databaseLockEnabled;
 
     openConnection();
 
@@ -273,17 +335,25 @@ int RedisImplementation::openConnection()
     mContext = redisConnectWithTimeout(mRedisAddress.c_str(), mRedisPort, timeout);
     if (mContext == nullptr || mContext->err)
     {
-      if (mContext)
+      printf("Redis primary connection error (%s:%d): %s",mRedisAddress.c_str(), mRedisPort,mContext->errstr);
+      if (mRedisSecondaryPort > 0)
       {
-        printf("Redis connection error (%s:%d): %s",mRedisAddress.c_str(), mRedisPort,mContext->errstr);
-        redisFree(mContext);
-        mContext = nullptr;
-        return Result::PERMANENT_STORAGE_ERROR;
-      }
-      else
-      {
-        printf("Redis connection error (%s:%d): can't allocate redis context\n",mRedisAddress.c_str(), mRedisPort);
-        return Result::PERMANENT_STORAGE_ERROR;
+        mContext = redisConnectWithTimeout(mRedisSecondaryAddress.c_str(), mRedisSecondaryPort, timeout);
+        if (mContext == nullptr || mContext->err)
+        {
+          if (mContext)
+          {
+            printf("Redis secondary connection error (%s:%d): %s",mRedisSecondaryAddress.c_str(), mRedisSecondaryPort,mContext->errstr);
+            redisFree(mContext);
+            mContext = nullptr;
+            return Result::PERMANENT_STORAGE_ERROR;
+          }
+          else
+          {
+            printf("Redis secondary connection error (%s:%d): can't allocate redis context\n",mRedisSecondaryAddress.c_str(), mRedisSecondaryPort);
+            return Result::PERMANENT_STORAGE_ERROR;
+          }
+        }
       }
     }
 
