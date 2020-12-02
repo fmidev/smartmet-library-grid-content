@@ -4147,6 +4147,8 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
 
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
+    //std::cout << "SEARCH : " << forecastTime << " " << level << "\n";
+
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
     {
       // ### This search is possible only if the content list is sorted as we want.
@@ -4172,6 +4174,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
       ContentInfo *nextTimePrevLevel = nullptr;
       ContentInfo *nextTimeNextLevel = nullptr;
 
+
       while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
@@ -4190,12 +4193,14 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                   {
+                    //std::cout << info->mForecastTime << " " << info->mParameterLevel << " ------ \n";
                     if (info->mForecastTimeUTC < forecastTimeUTC)
                     {
                       if (info->mParameterLevel == level || parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE)
                       {
                         if (prevTimeSameLevel == nullptr || prevTimeSameLevel->mForecastTimeUTC < info->mForecastTimeUTC)
                         {
+                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time same level\n";
                           prevTimeSameLevel = info;
                         }
                       }
@@ -4204,6 +4209,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
                       {
                         if (prevTimePrevLevel == nullptr || prevTimePrevLevel->mForecastTimeUTC < info->mForecastTimeUTC  || (prevTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC  &&  prevTimePrevLevel->mParameterLevel < info->mParameterLevel))
                         {
+                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time prev level\n";
                           prevTimePrevLevel = info;
                         }
                       }
@@ -4212,6 +4218,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
                       {
                         if (prevTimeNextLevel == nullptr || prevTimeNextLevel->mForecastTimeUTC < info->mForecastTimeUTC  ||  (prevTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  prevTimeNextLevel->mParameterLevel > info->mParameterLevel))
                         {
+                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time next level\n";
                           prevTimeNextLevel = info;
                         }
                       }
@@ -4223,6 +4230,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
                       {
                         if (nextTimeSameLevel == nullptr)
                         {
+                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " next time same level\n";
                           nextTimeSameLevel = info;
                           t = mLength;
                         }
@@ -4232,6 +4240,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
                       {
                         if (nextTimePrevLevel == nullptr || nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC || (nextTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  nextTimePrevLevel->mParameterLevel < info->mParameterLevel))
                         {
+                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " next time prev level\n";
                           nextTimePrevLevel = info;
                         }
                       }
@@ -4240,6 +4249,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
                       {
                         if (nextTimeNextLevel == nullptr || (nextTimePrevLevel != nullptr && nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC) || (nextTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
                         {
+                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << "next time next level\n";
                           nextTimeNextLevel = info;
                           t = mLength;
                         }
@@ -4260,6 +4270,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
                       {
                         if (sameTimePrevLevel == nullptr || sameTimePrevLevel->mParameterLevel < info->mParameterLevel)
                         {
+                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " same time prev level\n";
                           sameTimePrevLevel = info;
                         }
                       }
@@ -4268,11 +4279,11 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
                       {
                         if (sameTimeNextLevel == nullptr || sameTimeNextLevel->mParameterLevel > info->mParameterLevel)
                         {
+                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " same time next level\n";
                           sameTimeNextLevel = info;
                           t = mLength;
                         }
                       }
-
                     }
                   }
                 }
@@ -4431,6 +4442,8 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
 
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
+    //std::cout << "SEARCH2 : " << forecastTime << " " << level << "\n";
+
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
     {
       // ### This search is possible only if the content list is sorted as we want.
@@ -4444,8 +4457,16 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
 
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
+      if ( mArray[idx] != nullptr  &&  mArray[idx]->mParameterLevel < level)
+      {
+        int lev = mArray[idx]->mParameterLevel;
+        while (C_UINT(idx) > 0  &&  mArray[idx-1] != nullptr  &&  mArray[idx-1]->mParameterLevel == lev)
+          idx--;
+      }
+
       if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) < 0)
         idx++;
+
 
       uint t = C_UINT(idx);
 
@@ -4461,6 +4482,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
       while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
+        //std::cout << info->mForecastTime << " " << info->mParameterLevel << " ***** \n";
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           if (strcmp(info->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) == 0)
@@ -4476,6 +4498,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
                       (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
                       (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
                   {
+                    //std::cout << info->mForecastTime << " " << info->mParameterLevel << " ------ \n";
                     if (info->mForecastTimeUTC == forecastTimeUTC)
                     {
                       if (info->mParameterLevel == level || parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE)
@@ -4492,6 +4515,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
                       {
                         if (sameTimePrevLevel == nullptr || sameTimePrevLevel->mParameterLevel < info->mParameterLevel)
                         {
+                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " same time prev level\n";
                           sameTimePrevLevel = info;
                         }
                       }
@@ -4500,6 +4524,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
                       {
                         if (sameTimeNextLevel == nullptr || sameTimeNextLevel->mParameterLevel > info->mParameterLevel)
                         {
+                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " same time next level\n";
                           sameTimeNextLevel = info;
                           t = mLength;
                         }
@@ -4512,6 +4537,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
                       {
                         if (prevTimeSameLevel == nullptr || prevTimeSameLevel->mForecastTimeUTC < info->mForecastTimeUTC)
                         {
+                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time same level\n";
                           prevTimeSameLevel = info;
                         }
                       }
@@ -4520,6 +4546,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
                       {
                         if (prevTimePrevLevel == nullptr || prevTimePrevLevel->mForecastTimeUTC < info->mForecastTimeUTC  || (prevTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC  &&  prevTimePrevLevel->mParameterLevel < info->mParameterLevel))
                         {
+                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time prev level\n";
                           prevTimePrevLevel = info;
                         }
                       }
@@ -4528,6 +4555,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
                       {
                         if (prevTimeNextLevel == nullptr || prevTimeNextLevel->mForecastTimeUTC < info->mForecastTimeUTC  ||  (prevTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  prevTimeNextLevel->mParameterLevel > info->mParameterLevel))
                         {
+                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time next level\n";
                           prevTimeNextLevel = info;
                         }
                       }
@@ -4539,6 +4567,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
                       {
                         if (nextTimeSameLevel == nullptr)
                         {
+                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " next time same level\n";
                           nextTimeSameLevel = info;
                           t = mLength;
                         }
@@ -4548,6 +4577,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
                       {
                         if (nextTimePrevLevel == nullptr || nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC || (nextTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC  &&  nextTimePrevLevel->mParameterLevel < info->mParameterLevel))
                         {
+                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " next time prev level\n";
                           nextTimePrevLevel = info;
                         }
                       }
@@ -4556,6 +4586,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
                       {
                         if (nextTimeNextLevel == nullptr || (nextTimePrevLevel != nullptr && nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC) || (nextTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
                         {
+                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " next time next level\n";
                           nextTimeNextLevel = info;
                           t = mLength;
                         }
@@ -4714,6 +4745,8 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    //std::cout << "****************** SEARCH " << startTime << " : " <<  endTime << " : " << minLevel << " : "  << maxLevel << "\n";
+
     time_t startTimeUTC = utcTimeToTimeT(startTime);
     time_t endTimeUTC = utcTimeToTimeT(endTime);
 
@@ -4740,6 +4773,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
       while (t < mLength  &&  mArray[t] != nullptr)
       {
         ContentInfo *info = mArray[t];
+        //std::cout << info->mForecastTime << " " << info->mParameterLevel << "\n";
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           if (strcmp(info->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) == 0)

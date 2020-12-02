@@ -2580,11 +2580,12 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     boost::hash_combine(hash,parameterKey);
     boost::hash_combine(hash,parameterLevelIdType);
     boost::hash_combine(hash,parameterLevelId);
-    boost::hash_combine(hash,level);
     boost::hash_combine(hash,forecastType);
     boost::hash_combine(hash,forecastNumber);
     boost::hash_combine(hash,geometryId);
-
+    std::size_t hash3 = hash;
+    boost::hash_combine(hash,level);
+    boost::hash_combine(hash3,999999999);
 
     std::size_t hash2 = hash;
     boost::hash_combine(hash2,forecastTime);
@@ -2606,31 +2607,50 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     {
       AutoReadLock readLock(&mContentCache_modificationLock);
       auto cc = mContentCache.find(hash);
+      auto cc3 = cc;
+
       if (cc != mContentCache.end())
       {
         entry = &cc->second;
       }
       else
       {
-        // No cache entry available
-
-        std::string startTime = "19000101T000000";
-        std::string endTime = "23000101T000000";
-
-        mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,rec.contentInfoList);
-        rec.generationId = generationId;
-        rec.producerHash = producerHash;
-
-        switch (parameterKeyType)
+        cc3 = mContentCache.find(hash3);
+        if (cc3 != mContentCache.end())
         {
-          case T::ParamKeyTypeValue::FMI_ID:
-            break;
-          case T::ParamKeyTypeValue::FMI_NAME:
-            rec.contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
-            break;
-          case T::ParamKeyTypeValue::GRIB_ID:
-            rec.contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time);
-            break;
+          entry = &cc3->second;
+          hash = hash3;
+        }
+        else
+        {
+          // No cache entry available
+
+          std::string startTime = "19000101T000000";
+          std::string endTime = "23000101T000000";
+
+          mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,rec.contentInfoList);
+
+          if (entry->contentInfoList.getLength() == 0)
+          {
+            mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,0,1000000000,forecastType,forecastNumber,geometryId,startTime,endTime,0,rec.contentInfoList);
+            if (entry->contentInfoList.getLength() == 0)
+              hash = hash3;
+          }
+
+          rec.generationId = generationId;
+          rec.producerHash = producerHash;
+
+          switch (parameterKeyType)
+          {
+            case T::ParamKeyTypeValue::FMI_ID:
+              break;
+            case T::ParamKeyTypeValue::FMI_NAME:
+              rec.contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
+              break;
+            case T::ParamKeyTypeValue::GRIB_ID:
+              rec.contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time);
+              break;
+          }
         }
       }
     }
@@ -2645,6 +2665,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
         std::string endTime = "23000101T000000";
 
         mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,entry->contentInfoList);
+
         entry->producerHash = producerHash;
         entry->generationId = generationId;
 
@@ -4133,6 +4154,7 @@ bool ServiceImplementation::getPointValuesByHeight(
     if (forecastTimeList.find(forecastTime) != forecastTimeList.end())
     {
       tmpContentList.getContentInfoListByForecastTime(forecastTime,tmpContentList2);
+      PRINT_DATA(mDebugLog, "         + Time match\n");
       timeMatch = true;
     }
     else
@@ -4145,11 +4167,21 @@ bool ServiceImplementation::getPointValuesByHeight(
           next = *it;
       }
 
+      PRINT_DATA(mDebugLog, "         + Times : %s  %s\n",prev.c_str(),next.c_str());
       tmpContentList.getContentInfoListByForecastTime(prev,tmpContentList2);
-      tmpContentList.getContentInfoListByForecastTime(next,tmpContentList2);
+
+      T::ContentInfoList tmpContentList4;
+      tmpContentList.getContentInfoListByForecastTime(next,tmpContentList4);
+      tmpContentList2.addContentInfoList(tmpContentList4);
     }
 
     PRINT_DATA(mDebugLog, "         + Found %u tmp2 content records\n", tmpContentList2.getLength());
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
+    {
+      std::stringstream stream;
+      tmpContentList2.print(stream, 0, 4);
+      PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
+    }
 
     for (auto coordinateList = areaCoordinates.begin(); coordinateList != areaCoordinates.end(); ++coordinateList)
     {
@@ -4234,6 +4266,8 @@ bool ServiceImplementation::getPointValuesByHeight(
           else
             iplMethod = T::LevelInterpolationMethod::Logarithmic;
         }
+        PRINT_DATA(mDebugLog, "         + Level interpolation method = %d\n",iplMethod);
+
 
         T::ContentInfo* contentInfo1 = contentList.getContentInfoByIndex(0);
         T::ContentInfo* contentInfo2 = contentList.getContentInfoByIndex(1);
@@ -7255,6 +7289,7 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
   FUNCTION_TRACE
   try
   {
+    PRINT_DATA(mDebugLog, "convertLevelsToHeights()\n");
     uint contentLen = contentList.getLength();
     for (uint t=0; t<contentLen; t++)
     {
@@ -7302,6 +7337,8 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
         if (cList->getLength() == 1)
         {
           T::ContentInfo* cInfo = cList->getContentInfoByIndex(0);
+          PRINT_DATA(mDebugLog, "  -- Height was found\n");
+
           T::ParamValue value = 0;
           int result = mDataServerPtr->getGridValueByPoint(0, cInfo->mFileId, cInfo->mMessageIndex, coordinateType,x,y,T::AreaInterpolationMethod::Linear,value);
           if (result != 0)
@@ -7325,6 +7362,59 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
               mLevelHeightCache.erase(mLevelHeightCache.begin(), mLevelHeightCache.begin() + 1000);
 
             mLevelHeightCache.push_back(std::pair<std::string,int>(cacheKey,newContentInfo->mParameterLevel));
+          }
+        }
+        else
+        {
+          T::ParamKeyType paramKeyType = T::ParamKeyTypeValue::FMI_NAME;
+          std::string paramKey = "ZH-GPM";
+          T::ParamLevelIdType levelIdType = T::ParamLevelIdTypeValue::FMI;
+          T::ParamLevelId levelId = contentInfo->mFmiParameterLevelId;
+          T::ParamLevel level = contentInfo->mParameterLevel;
+
+          std::shared_ptr<T::ContentInfoList> cList(new T::ContentInfoList());
+
+
+          int result = getContentListByParameterGenerationIdAndForecastTime(0, contentInfo->mProducerId, contentInfo->mGenerationId, paramKeyType, paramKey, levelIdType,
+            levelId, level, -1, -1, contentInfo->mGeometryId, contentInfo->mForecastTime, cList);
+
+          if (result != 0)
+          {
+            Fmi::Exception exception(BCP, "ContentServer returns an error!");
+            exception.addParameter("Service", "getContentListByParameterGenerationIdAndForecastTime");
+            exception.addParameter("Message", ContentServer::getResultString(result));
+            throw exception;
+          }
+
+          if (cList->getLength() == 1)
+          {
+            T::ContentInfo* cInfo = cList->getContentInfoByIndex(0);
+            PRINT_DATA(mDebugLog, "  -- Height was found\n");
+
+            T::ParamValue value = 0;
+            int result = mDataServerPtr->getGridValueByPoint(0, cInfo->mFileId, cInfo->mMessageIndex, coordinateType,x,y,T::AreaInterpolationMethod::Linear,value);
+            if (result != 0)
+            {
+              Fmi::Exception exception(BCP, "DataServer returns an error!");
+              exception.addParameter("Service", "getGridValueByPoint");
+              exception.addParameter("Message", DataServer::getResultString(result));
+              std::string errorMsg = exception.getStackTrace();
+              PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+            }
+            else
+            {
+              T::ContentInfo *newContentInfo = contentInfo->duplicate();
+
+              newContentInfo->mFmiParameterLevelId = 0;
+              newContentInfo->mParameterLevel = (T::ParamLevel)(value);
+              newContentList.addContentInfo(newContentInfo);
+
+              AutoWriteLock lock(&mHeightCache_modificationLock);
+              if (mLevelHeightCache.size() >= 5000)
+                mLevelHeightCache.erase(mLevelHeightCache.begin(), mLevelHeightCache.begin() + 1000);
+
+              mLevelHeightCache.push_back(std::pair<std::string,int>(cacheKey,newContentInfo->mParameterLevel));
+            }
           }
         }
       }
