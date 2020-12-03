@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 20.11.30
+Version: 20.12.3
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -22,7 +22,7 @@ BuildRequires: omniORB-devel
 BuildRequires: postgresql95-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 20.10.28
-BuildRequires: smartmet-library-grid-files-devel >= 20.11.24
+BuildRequires: smartmet-library-grid-files-devel >= 20.12.3
 BuildRequires: smartmet-library-macgyver-devel >= 20.11.24
 BuildRequires: smartmet-library-spine-devel >= 20.11.23
 Requires: boost169-date-time
@@ -32,7 +32,7 @@ Requires: lua-devel
 Requires: omniORB
 Requires: postgresql95
 Requires: smartmet-library-gis >= 20.10.28
-Requires: smartmet-library-grid-files >= 20.11.24
+Requires: smartmet-library-grid-files >= 20.12.3
 Requires: smartmet-library-macgyver >= 20.11.24
 Requires: smartmet-library-spine >= 20.11.23
 Provides: %{SPECNAME}
@@ -76,6 +76,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Dec  3 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.3-1.fmi
+- Enabled use of a secondary redis server
+- Improved level handling
 * Mon Nov 30 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.11.30-1.fmi
 - Improved updating of configuration structures
 * Tue Nov 24 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.11.24-2.fmi
