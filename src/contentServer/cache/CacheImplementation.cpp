@@ -5771,6 +5771,9 @@ void CacheImplementation::swapData()
   //FUNCTION_TRACE
   try
   {
+    if (mReloadActivated)
+      return;
+
     long diff = time(nullptr) - mDataSwapTime;
 
     if (diff < 180)

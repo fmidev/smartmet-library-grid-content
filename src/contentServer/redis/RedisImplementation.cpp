@@ -335,7 +335,10 @@ int RedisImplementation::openConnection()
     mContext = redisConnectWithTimeout(mRedisAddress.c_str(), mRedisPort, timeout);
     if (mContext == nullptr || mContext->err)
     {
-      printf("Redis primary connection error (%s:%d): %s",mRedisAddress.c_str(), mRedisPort,mContext->errstr);
+      if (mContext)
+        redisFree(mContext);
+
+      printf("Redis primary connection error (%s:%d): %s\n",mRedisAddress.c_str(), mRedisPort,mContext->errstr);
       if (mRedisSecondaryPort > 0)
       {
         mContext = redisConnectWithTimeout(mRedisSecondaryAddress.c_str(), mRedisSecondaryPort, timeout);
@@ -343,7 +346,7 @@ int RedisImplementation::openConnection()
         {
           if (mContext)
           {
-            printf("Redis secondary connection error (%s:%d): %s",mRedisSecondaryAddress.c_str(), mRedisSecondaryPort,mContext->errstr);
+            printf("Redis secondary connection error (%s:%d): %s\n",mRedisSecondaryAddress.c_str(), mRedisSecondaryPort,mContext->errstr);
             redisFree(mContext);
             mContext = nullptr;
             return Result::PERMANENT_STORAGE_ERROR;
