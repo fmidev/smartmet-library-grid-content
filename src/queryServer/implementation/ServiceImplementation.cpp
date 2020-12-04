@@ -70,6 +70,7 @@ ServiceImplementation::ServiceImplementation()
     mGenerationInfoList_checkTime = 0;
     mProducerMap_updateTime = 0;
     mShutdownRequested = false;
+    mContentServerStartTime = 0;
   }
   catch (...)
   {
@@ -7569,6 +7570,58 @@ void ServiceImplementation::updateProcessing()
   {
     while (!mShutdownRequested)
     {
+
+      try
+      {
+        T::EventInfo eventInfo;
+        int result = mContentServerPtr->getLastEventInfo(0,0,eventInfo);
+        if (result == Result::DATA_NOT_FOUND || result == Result::OK)
+        {
+          if (eventInfo.mServerTime > mContentServerStartTime)
+          {
+            if (mContentServerStartTime > 0)
+            {
+              // Content Server has been restarted. We should delete all cached information.
+
+              PRINT_DATA(mDebugLog, "#### Content server restart detected, clearing cached information #######\n");
+
+              {
+                AutoWriteLock cacheLock(&mProducerGenerationListCacheModificationLock);
+                mProducerGenerationListCache.clear();
+              }
+
+              {
+                AutoWriteLock lock(&mContentSearchCache_modificationLock);
+                mContentSearchCache.clear();
+              }
+
+              {
+                AutoWriteLock lock(&mContentCache_modificationLock);
+                mContentCache.clear();
+              }
+
+              {
+                AutoWriteLock lock(&mHeightCache_modificationLock);
+                mLevelHeightCache.clear();
+              }
+
+              {
+                AutoWriteLock lock(&mProducerHashMap_modificationLock);
+                mProducerHashMap.clear();
+              }
+
+
+              mProducerMap_updateTime = 0;
+              mGenerationInfoList_checkTime = 0;
+            }
+          }
+          mContentServerStartTime = eventInfo.mServerTime;
+        }
+      }
+      catch (...)
+      {
+      }
+
       try
       {
         checkProducerMapUpdates();

@@ -2907,6 +2907,8 @@ int MemoryImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
   FUNCTION_TRACE
   try
   {
+    eventInfo.mServerTime = mStartTime;
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -2917,7 +2919,6 @@ int MemoryImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
       return Result::DATA_NOT_FOUND;
 
     eventInfo = *lastEvent;
-    eventInfo.mServerTime = mStartTime;
 
     return Result::OK;
   }

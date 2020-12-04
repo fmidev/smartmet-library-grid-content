@@ -585,6 +585,7 @@ class ServiceImplementation : public ServiceInterface
      time_t                     mGenerationInfoList_checkTime;
      uint                       mGenerationInfoList_checkInterval;
 
+     time_t                     mContentServerStartTime;
      ContentServer_ptr          mContentServerPtr;
      DataServer_ptr             mDataServerPtr;
      LevelHeightCache           mLevelHeightCache;

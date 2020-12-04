@@ -85,6 +85,7 @@ RedisImplementation::RedisImplementation()
     mLine = 0;
     mShutdownRequested = false;
     mDatabaseLockEnabled = false;
+    mReloadRequired = false;
   }
   catch (...)
   {
@@ -292,7 +293,7 @@ void RedisImplementation::init(const char *redisAddress,int redisPort,const char
 
 
 
-void RedisImplementation::init(const char *redisAddress,int redisPort,const char *tablePrefix,const char *redisSecondaryAddress,int redisSecondaryPort,bool databaseLockEnabled)
+void RedisImplementation::init(const char *redisAddress,int redisPort,const char *tablePrefix,const char *redisSecondaryAddress,int redisSecondaryPort,bool databaseLockEnabled,bool reloadRequired)
 {
   FUNCTION_TRACE
   try
@@ -303,6 +304,7 @@ void RedisImplementation::init(const char *redisAddress,int redisPort,const char
     mRedisSecondaryAddress = redisSecondaryAddress;
     mRedisSecondaryPort = redisSecondaryPort;
     mDatabaseLockEnabled = databaseLockEnabled;
+    mReloadRequired = reloadRequired;
 
     openConnection();
 
@@ -325,30 +327,32 @@ int RedisImplementation::openConnection()
   try
   {
     if (mContext != nullptr)
-    {
-      redisFree(mContext);
-      mContext = nullptr;
-    }
+      return Result::OK;
 
     struct timeval timeout = { 1, 500000 }; // 1.5 seconds
 
-    mContext = redisConnectWithTimeout(mRedisAddress.c_str(), mRedisPort, timeout);
-    if (mContext == nullptr || mContext->err)
-    {
-      if (mContext)
-        redisFree(mContext);
+    redisContext *context = nullptr;
 
-      printf("Redis primary connection error (%s:%d): %s\n",mRedisAddress.c_str(), mRedisPort,mContext->errstr);
+    context = redisConnectWithTimeout(mRedisAddress.c_str(), mRedisPort, timeout);
+    if (context == nullptr || context->err)
+    {
+      if (context)
+      {
+        printf("Redis primary connection error (%s:%d): %s\n",mRedisAddress.c_str(), mRedisPort,context->errstr);
+        redisFree(context);
+        context = nullptr;
+      }
+
       if (mRedisSecondaryPort > 0)
       {
-        mContext = redisConnectWithTimeout(mRedisSecondaryAddress.c_str(), mRedisSecondaryPort, timeout);
-        if (mContext == nullptr || mContext->err)
+        context = redisConnectWithTimeout(mRedisSecondaryAddress.c_str(), mRedisSecondaryPort, timeout);
+        if (context == nullptr || context->err)
         {
-          if (mContext)
+          if (context)
           {
-            printf("Redis secondary connection error (%s:%d): %s\n",mRedisSecondaryAddress.c_str(), mRedisSecondaryPort,mContext->errstr);
-            redisFree(mContext);
-            mContext = nullptr;
+            printf("Redis secondary connection error (%s:%d): %s\n",mRedisSecondaryAddress.c_str(), mRedisSecondaryPort,context->errstr);
+            redisFree(context);
+            context = nullptr;
             return Result::PERMANENT_STORAGE_ERROR;
           }
           else
@@ -360,8 +364,28 @@ int RedisImplementation::openConnection()
       }
     }
 
-    mStartTime = time(nullptr);
-    return Result::OK;
+    if (context == NULL)
+      return Result::PERMANENT_STORAGE_ERROR;
+
+    while (true)
+    {
+      redisReply *reply = static_cast<redisReply*>(redisCommand(context,"PING"));
+      if (reply != nullptr)
+      {
+        if (strcasecmp(reply->str,"PONG") == 0)
+        {
+          mContext = context;
+          freeReplyObject(reply);
+          if (mStartTime == 0 || mReloadRequired)
+            mStartTime = time(nullptr);
+
+          return Result::OK;
+        }
+        freeReplyObject(reply);
+      }
+      sleep(1);
+    }
+
   }
   catch (...)
   {
@@ -3374,6 +3398,8 @@ int RedisImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
   try
   {
     //RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    eventInfo.mServerTime = mStartTime;
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;

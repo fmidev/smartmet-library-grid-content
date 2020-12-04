@@ -19,7 +19,7 @@ class RedisImplementation : public ServiceInterface
 
      virtual void   init(const char *redisAddress,int redisPort,const char *tablePrefix);
      virtual void   init(const char *redisAddress,int redisPort,const char *tablePrefix,bool databaseLockEnabled);
-     virtual void   init(const char *redisAddress,int redisPort,const char *tablePrefix,const char *redisSecondaryAddress,int redisSecondaryPort,bool databaseLockEnabled);
+     virtual void   init(const char *redisAddress,int redisPort,const char *tablePrefix,const char *redisSecondaryAddress,int redisSecondaryPort,bool databaseLockEnabled,bool reloadRequired);
      virtual void   shutdown();
      virtual void   syncFilenames();
 
@@ -241,6 +241,7 @@ class RedisImplementation : public ServiceInterface
      uint           mLine;
      bool           mShutdownRequested;
      bool           mDatabaseLockEnabled;
+     bool           mReloadRequired;
      ThreadLock     mThreadLock;
 
 };

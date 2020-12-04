@@ -4122,6 +4122,8 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
       return;
 
     time_t checkTime = time(nullptr);
+    std::string filename = mDataDir + "/" + fileInfo.mName;
+
     GRID::GridFile_sptr storageFile = mGridFileManager.getFileByIdNoMapping(fileInfo.mFileId);
 
     GRID::GridFile *gridFile = nullptr;
@@ -4129,11 +4131,21 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
     {
       // File already in the content storage
       gridFile = storageFile.get();
+
+      if (gridFile->getFileName() != filename)
+      {
+        // The filename does not match to the found grid file. We should remove the old file.
+
+        // std::cout << "DELETING FILE INFO : " << gridFile->getFileName() << " : " << filename << "\n";
+        mGridFileManager.deleteFileById(fileInfo.mFileId);
+        gridFile = nullptr;
+      }
     }
-    else
+
+    if (gridFile == nullptr)
     {
       gridFile = new GRID::PhysicalGridFile();
-      gridFile->setFileName(mDataDir + "/" + fileInfo.mName);
+      gridFile->setFileName(filename);
       gridFile->setPointCacheEnabled(mPointCacheEnabled);
 
       gridFile->setFileId(fileInfo.mFileId);
@@ -4245,6 +4257,9 @@ void ServiceImplementation::fullUpdate()
     else
     {
     }
+
+    // Removing all file mappings
+    mGridFileManager.clear();
 
     uint counter = 0;
     time_t checkTime = time(nullptr);
@@ -5184,19 +5199,22 @@ void ServiceImplementation::processEvents()
 
     T::EventInfo eventInfo;
     int result = mContentServer->getLastEventInfo(mServerSessionId,mServerId,eventInfo);
-    if (result == Result::OK)
+    if (result == Result::DATA_NOT_FOUND)
     {
-      if (eventInfo.mServerTime > mContentServerStartTime)
+      if (mContentServerStartTime > 0 &&  eventInfo.mServerTime > mContentServerStartTime)
       {
         if (mContentServerStartTime > 0)
         {
-          PRINT_DATA(mDebugLog,"**** The content server was restarted! *****\n");
+          PRINT_DATA(mDebugLog, "#### Content server restart detected, full update required #######\n");
           fullUpdate();
         }
-
-        mContentServerStartTime = eventInfo.mServerTime;
-        return;
       }
+      mContentServerStartTime = eventInfo.mServerTime;
+      return;
+    }
+
+    if (result == Result::OK)
+    {
       if (eventInfo.mEventId == mLastProcessedEventId)
       {
         // There are no events to process.

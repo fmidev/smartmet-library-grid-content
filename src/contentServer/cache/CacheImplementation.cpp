@@ -324,29 +324,22 @@ void CacheImplementation::reloadData()
   FUNCTION_TRACE
   try
   {
+    mReloadActivated = true;
     if (mContentStorage != nullptr)
     {
       AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
 
+      T::EventInfo eventInfo;
       mUpdateInProgress = true;
-      mLastProcessedEventId = 0;
+      mContentStorage->getLastEventInfo(0,0,eventInfo);
+
+      mLastProcessedEventId = eventInfo.mEventId;
+      //mContentStorageStartTime = eventInfo.mServerTime;
 
       mProducerCount = 0xFFFFFFFF;
       mGenerationCount = 0xFFFFFFFF;
       mFileCount = 0xFFFFFFFF;
       mContentCount = 0xFFFFFFFF;
-
-      mFileInfoList.clear();
-      mProducerInfoList.clear();
-      mGenerationInfoList.clear();
-      mEventInfoList.clear();
-      mContentInfoList.clear();
-
-      T::EventInfo eventInfo;
-      mContentStorage->getLastEventInfo(mSessionId,0,eventInfo);
-
-      mLastProcessedEventId = eventInfo.mEventId;
-      mContentStorageStartTime = eventInfo.mServerTime;
 
       readProducerList();
       readGenerationList();
@@ -354,23 +347,26 @@ void CacheImplementation::reloadData()
 
       mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
 
+      mContentInfoListEnabled[0] = true;
+      mContentInfoListEnabled[1] = true;
+      for (int t=1; t<CONTENT_LIST_COUNT; t++)
+      {
+        if ((mContentSortingFlags & (1 << t)) != 0)
+          mContentInfoListEnabled[t] = true;
+        else
+          mContentInfoListEnabled[t] = false;
+      }
+
       readContentList();
 
-      mContentInfoList.sort(T::ContentInfo::ComparisonMethod::file_message);
-
       mUpdateInProgress = false;
-
-      mStartTime = time(nullptr);
-
-      T::EventInfo event;
-      event.mType = EventType::CONTENT_SERVER_RELOAD;
-      mContentStorage->addEventInfo(mSessionId,event);
-
-      mReloadActivated = false;
     }
+    mReloadActivated = false;
+    swapData();
   }
   catch (...)
   {
+    mReloadActivated = false;
     mUpdateInProgress = false;
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
@@ -2564,6 +2560,11 @@ int CacheImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
   FUNCTION_TRACE
   try
   {
+    eventInfo.mServerTime = mContentStorageStartTime;
+
+    if (mReloadActivated)
+      return Result::DATA_NOT_FOUND;
+
     if (mUpdateInProgress &&  !mRequestForwardEnabled)
       return Result::OK;
 
@@ -2580,7 +2581,6 @@ int CacheImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
       return Result::DATA_NOT_FOUND;
 
     eventInfo = *lastEvent;
-    eventInfo.mServerTime = mStartTime;
 
     return Result::OK;
   }
@@ -4687,6 +4687,7 @@ void CacheImplementation::readContentList()
       T::ContentInfoList contentInfoList;
 
       int result = mContentStorage->getContentList(mSessionId,startFileId,startMessageIndex,50000,contentInfoList);
+
       if (result != 0)
       {
         Fmi::Exception exception(BCP,"Cannot read the content list from the content storage!");
@@ -4695,6 +4696,7 @@ void CacheImplementation::readContentList()
       }
 
       len = contentInfoList.getLength();
+
       for (uint t=0; t<len; t++)
       {
         T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
@@ -5603,20 +5605,25 @@ void CacheImplementation::processEvents(bool eventThread)
       len = 0;
       T::EventInfo eventInfo;
       int result = mContentStorage->getLastEventInfo(mSessionId,0,eventInfo);
+      if (result == Result::DATA_NOT_FOUND || result == Result::OK)
+      {
+        if (eventThread  &&  mContentStorageStartTime > 0 &&  mContentStorageStartTime < eventInfo.mServerTime)
+        {
+          PRINT_DATA(mDebugLog, "#### Content server restart detected, reload required #######\n");
+          mEventInfoList.clear();
+          reloadData();
+          mDataSwapTime = 0;
+          swapData();
+          mContentStorageStartTime = eventInfo.mServerTime;
+          return;
+        }
+      }
+
       if (result != Result::OK)
         return;
 
       if (eventThread  &&  mContentStorageStartTime == 0)
         mContentStorageStartTime = eventInfo.mServerTime;
-
-      if (eventThread  &&  mContentStorageStartTime < eventInfo.mServerTime)
-      {
-        mReloadActivated = true;
-        reloadData();
-        mContentStorageStartTime = eventInfo.mServerTime;
-        mReloadActivated = false;
-        return;
-      }
 
       if (eventInfo.mEventId > mLastProcessedEventId)
       {
@@ -5645,7 +5652,7 @@ void CacheImplementation::processEvents(bool eventThread)
 
 
           T::EventInfo *event = it->duplicate();
-          event->mServerTime = mStartTime;
+          //event->mServerTime = mContentStorageStartTime;
           mEventInfoList.addEventInfo(event);
           mLastProcessedEventId = it->mEventId;
 
@@ -5789,6 +5796,8 @@ void CacheImplementation::swapData()
       {
         // Nothing has changed. No swapping needed.
 
+        PRINT_DATA(mDebugLog, "#### No cache switch required #######\n");
+
         mDataSwapTime = time(nullptr);
         return;
       }
@@ -5848,6 +5857,7 @@ void CacheImplementation::swapData()
       gInfo->mDeletionTime = nptr->mFileInfoList.getLastFileDeletionTimeByGenerationId(gInfo->mGenerationId);
     }
 */
+    PRINT_DATA(mDebugLog, "#### Cache switched #######\n");
     boost::atomic_store(&mSearchStructureSptr,nptr);
 
     mDataSwapTime = time(nullptr);
