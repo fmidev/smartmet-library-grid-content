@@ -3281,7 +3281,14 @@ int CacheImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
 
     contentInfoList.clear();
 
-    ssp->mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mProducerId,generationId,startTime,endTime,contentInfoList);
+    if (mContentInfoListEnabled[2])
+      ssp->mContentInfoList[2].getContentInfoListByGenerationId(generationInfo->mProducerId,generationId,startTime,endTime,contentInfoList);
+    else
+    if (mContentInfoListEnabled[1])
+      ssp->mContentInfoList[1].getContentInfoListByGenerationId(generationInfo->mProducerId,generationId,startTime,endTime,contentInfoList);
+    else
+      ssp->mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mProducerId,generationId,startTime,endTime,contentInfoList);
+
     return Result::OK;
   }
   catch (...)
@@ -3318,7 +3325,14 @@ int CacheImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
 
     contentInfoList.clear();
 
-    ssp->mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,startTime,endTime,contentInfoList);
+    if (mContentInfoListEnabled[2])
+      ssp->mContentInfoList[2].getContentInfoListByGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,startTime,endTime,contentInfoList);
+    else
+    if (mContentInfoListEnabled[1])
+      ssp->mContentInfoList[1].getContentInfoListByGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,startTime,endTime,contentInfoList);
+    else
+      ssp->mContentInfoList[0].getContentInfoListByGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,startTime,endTime,contentInfoList);
+
     return Result::OK;
   }
   catch (...)
@@ -4177,7 +4191,14 @@ int CacheImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
 
     geometryIdList.clear();
 
-    ssp->mContentInfoList[0].getContentGeometryIdListByGenerationId(generationInfo->mProducerId,generationId,geometryIdList);
+    if (mContentInfoListEnabled[2])
+      ssp->mContentInfoList[2].getContentGeometryIdListByGenerationId(generationInfo->mProducerId,generationId,geometryIdList);
+    else
+    if (mContentInfoListEnabled[1])
+      ssp->mContentInfoList[1].getContentGeometryIdListByGenerationId(generationInfo->mProducerId,generationId,geometryIdList);
+    else
+      ssp->mContentInfoList[0].getContentGeometryIdListByGenerationId(generationInfo->mProducerId,generationId,geometryIdList);
+
     return Result::OK;
   }
   catch (...)
@@ -4365,7 +4386,13 @@ int CacheImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
 
     contentTimeList.clear();
 
-    ssp->mContentInfoList[0].getForecastTimeListByGenerationAndGeometry(generationInfo->mProducerId,generationId,geometryId,contentTimeList);
+    if (mContentInfoListEnabled[2])
+      ssp->mContentInfoList[2].getForecastTimeListByGenerationAndGeometry(generationInfo->mProducerId,generationId,geometryId,contentTimeList);
+    else
+    if (mContentInfoListEnabled[1])
+      ssp->mContentInfoList[1].getForecastTimeListByGenerationAndGeometry(generationInfo->mProducerId,generationId,geometryId,contentTimeList);
+    else
+      ssp->mContentInfoList[0].getForecastTimeListByGenerationAndGeometry(generationInfo->mProducerId,generationId,geometryId,contentTimeList);
 
     return Result::OK;
   }

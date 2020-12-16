@@ -2471,15 +2471,45 @@ void ContentInfoList::getContentGeometryIdListByGenerationId(uint producerId,uin
       return;
 
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
-    for (uint t=0; t<mLength; t++)
+
+    ContentInfo searchInfo;
+    searchInfo.mProducerId = producerId;
+    searchInfo.mGenerationId = generationId;
+
+    int idx = 0;
+    bool sorted = false;
+    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time)
+    {
+      sorted = true;
+    }
+
+    if (sorted)
+      idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
+
+
+    for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
 
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
-        if (geometryIdList.find(info->mGeometryId) == geometryIdList.end())
+        if (info->mGenerationId == generationId)
         {
-          geometryIdList.insert(info->mGeometryId);
+          if (geometryIdList.find(info->mGeometryId) == geometryIdList.end())
+          {
+            geometryIdList.insert(info->mGeometryId);
+          }
+        }
+        else
+        {
+          if (sorted && t > (uint)idx)
+            return;
         }
       }
     }
@@ -6919,15 +6949,46 @@ void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint gene
 
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
 
-    for (uint t=0; t<mLength; t++)
+    ContentInfo searchInfo;
+    searchInfo.mProducerId = producerId;
+    searchInfo.mGenerationId = generationId;
+
+    int idx = 0;
+    bool sorted = false;
+    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time)
+    {
+      sorted = true;
+    }
+
+    if (sorted)
+      idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
+
+    for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(info->duplicate());
+        if (info->mGenerationId == generationId)
+        {
+          if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
+          {
+            if (contentInfoList.getReleaseObjects())
+              contentInfoList.addContentInfo(info->duplicate());
+            else
+              contentInfoList.addContentInfo(info);
+          }
+        }
         else
-          contentInfoList.addContentInfo(info);
+        {
+          if (sorted && t > (uint)idx)
+            return;
+        }
       }
     }
   }
@@ -7175,16 +7236,46 @@ void ContentInfoList::getForecastTimeListByGenerationId(uint producerId,uint gen
       return;
 
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
-    for (uint t=0; t<mLength; t++)
+
+    ContentInfo searchInfo;
+    searchInfo.mProducerId = producerId;
+    searchInfo.mGenerationId = generationId;
+
+    int idx = 0;
+    bool sorted = false;
+    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time)
+    {
+      sorted = true;
+    }
+
+    if (sorted)
+      idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
+
+
+    for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
       if (info != nullptr)
       {
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId)
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
+          if (info->mGenerationId == generationId)
           {
-            forecastTimeList.insert(info->mForecastTime);
+            if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
+            {
+              forecastTimeList.insert(info->mForecastTime);
+            }
+          }
+          else
+          {
+            if (sorted && t > (uint)idx)
+              return;
           }
         }
       }
@@ -7211,16 +7302,48 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(uint producerId
       return;
 
     AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
-    for (uint t=0; t<mLength; t++)
+
+    ContentInfo searchInfo;
+    searchInfo.mProducerId = producerId;
+    searchInfo.mGenerationId = generationId;
+
+    int idx = 0;
+    bool sorted = false;
+    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time)
+    {
+      sorted = true;
+    }
+
+    if (sorted)
+      idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
+
+    for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
       if (info != nullptr)
       {
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
+          if (info->mGenerationId == generationId)
           {
-            forecastTimeList.insert(info->mForecastTime);
+            if (info->mGeometryId == geometryId)
+            {
+              if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
+              {
+                forecastTimeList.insert(info->mForecastTime);
+              }
+            }
+          }
+          else
+          {
+            if (sorted && t > (uint)idx)
+              return;
           }
         }
       }
