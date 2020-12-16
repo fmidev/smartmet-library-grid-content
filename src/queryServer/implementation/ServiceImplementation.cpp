@@ -817,7 +817,8 @@ void ServiceImplementation::getParameterMappings(
 
       for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
       {
-        m->getMappings(producerName, parameterName, geometryId, onlySearchEnabled, mappings);
+        //m->getMappings(producerName, parameterName, geometryId, onlySearchEnabled, mappings);
+        m->getMappings(producerName, parameterName, geometryId, levelIdType, levelId, level, onlySearchEnabled, mappings);
       }
     }
 
