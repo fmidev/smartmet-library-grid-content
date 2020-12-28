@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 20.12.3
+Version: 20.12.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -12,29 +12,27 @@ Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: boost169-devel
 BuildRequires: gcc-c++
-BuildRequires: gdal-devel
+BuildRequires: gdal32-devel
 BuildRequires: hiredis-devel
 BuildRequires: libcurl-devel
 BuildRequires: libicu-devel
 BuildRequires: lua-devel
 BuildRequires: make
 BuildRequires: omniORB-devel
-BuildRequires: postgresql95-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 20.10.28
-BuildRequires: smartmet-library-grid-files-devel >= 20.12.3
-BuildRequires: smartmet-library-macgyver-devel >= 20.11.24
-BuildRequires: smartmet-library-spine-devel >= 20.11.23
+BuildRequires: smartmet-library-gis-devel >= 20.12.15
+BuildRequires: smartmet-library-grid-files-devel >= 20.12.28
+BuildRequires: smartmet-library-macgyver-devel >= 20.12.15
+BuildRequires: smartmet-library-spine-devel >= 20.12.15
 Requires: boost169-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
-Requires: postgresql95
-Requires: smartmet-library-gis >= 20.10.28
-Requires: smartmet-library-grid-files >= 20.12.3
-Requires: smartmet-library-macgyver >= 20.11.24
-Requires: smartmet-library-spine >= 20.11.23
+Requires: smartmet-library-gis >= 20.12.15
+Requires: smartmet-library-grid-files >= 20.12.28
+Requires: smartmet-library-macgyver >= 20.12.15
+Requires: smartmet-library-spine >= 20.12.15
 Provides: %{SPECNAME}
 
 %description
@@ -76,6 +74,10 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Dec 28 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.28-1.fmi
+- Updated GDAL dependencies
+- Updated postgresql dependencies
+
 * Thu Dec  3 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.3-1.fmi
 - Enabled use of a secondary redis server
 - Improved level handling

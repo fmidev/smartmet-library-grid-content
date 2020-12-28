@@ -7,27 +7,9 @@ INCDIR = smartmet/$(SUBNAME)
 
 CORBA = enabled
 
+REQUIRES = gdal
 
-# Installation directories
-
-processor := $(shell uname -p)
-
-ifeq ($(origin PREFIX), undefined)
-  PREFIX = /usr
-else
-  PREFIX = $(PREFIX)
-endif
-
-ifeq ($(processor), x86_64)
-  libdir = $(PREFIX)/lib64
-else
-  libdir = $(PREFIX)/lib
-endif
-
-bindir = $(PREFIX)/bin
-includedir = $(PREFIX)/include
-datadir = $(PREFIX)/share
-objdir = obj
+include $(shell echo $${PREFIX-/usr})/share/smartmet/devel/makefile.inc
 
 # Compiler options
 
@@ -42,47 +24,15 @@ else
   CORBA_LIBS = -lomniORB4 -lomnithread
 endif
 
-# Boost 1.69
+FLAGS += $(CORBA_FLAGS)
+INCLUDES += $(CORBA_INCLUDE)
 
-ifneq "$(wildcard /usr/include/boost169)" ""
-  INCLUDES += -isystem /usr/include/boost169
-  LIBS += -L/usr/lib64/boost169
-endif
-
-
-FLAGS = -std=c++11 -fdiagnostics-color=always -fPIC -MD -fno-omit-frame-pointer -Wall -W -Wno-unused-parameter $(CORBA_FLAGS)
-
-FLAGS_DEBUG = \
-	-Wcast-align \
-	-Winline \
-	-Wno-multichar \
-	-Wno-pmf-conversions \
-	-Woverloaded-virtual  \
-	-Wpointer-arith \
-	-Wcast-qual \
-	-Wredundant-decls \
-	-Wwrite-strings \
-	-Wno-sign-promo \
-	-Wno-unknown-pragmas \
-	-Wno-inline
-
-FLAGS_RELEASE = -Wuninitialized
-
-INCLUDES += \
-	-I$(includedir)/smartmet \
+FLAGS += \
 	-isystem /usr/include/lua \
-	-isystem /usr/include/postgresql \
-	-isystem /usr/pgsql-9.5/include \
-	$(pkg-config --cflags icu-i18n) \
-	$(CORBA_INCLUDE)
+	$(pkg-config --cflags icu-i18n)
 
-# Compile options in detault, debug and profile modes
-
-CFLAGS         = $(DEFINES) $(FLAGS) $(FLAGS_RELEASE) -DNDEBUG -O2 -g
-CFLAGS_DEBUG   = $(DEFINES) $(FLAGS) $(FLAGS_DEBUG)   -Werror  -Og -g
-CFLAGS_PROFILE = $(DEFINES) $(FLAGS) $(FLAGS_PROFILE) -DNDEBUG -O2 -g -pg
-
-LIBS += -L$(libdir) \
+LIBS += $(REQUIRED_LIBS) $(CORBA_LIBS) \
+	-L$(libdir) \
 	-lsmartmet-grid-files \
 	-lsmartmet-spine \
 	-lsmartmet-macgyver \
@@ -91,9 +41,9 @@ LIBS += -L$(libdir) \
 	-lhiredis \
 	-lcurl \
 	-llua \
-	-lpthread \
-	-L/usr/pgsql-9.5/lib -lpq \
-	$(CORBA_LIBS)
+	-lpthread
+
+#-L/usr/pgsql-9.5/lib -lpq
 
 # What to install
 
@@ -103,17 +53,6 @@ LIBFILE = libsmartmet-$(SUBNAME).so
 
 INSTALL_PROG = install -p -m 775
 INSTALL_DATA = install -p -m 664
-
-# Compile option overrides
-
-ifneq (,$(findstring debug,$(MAKECMDGOALS)))
-  CFLAGS = $(CFLAGS_DEBUG)
-endif
-
-ifneq (,$(findstring profile,$(MAKECMDGOALS)))
-  CFLAGS = $(CFLAGS_PROFILE)
-endif
-
 
 ifeq ($(CORBA), disabled)
 
@@ -424,7 +363,7 @@ rpm: clean $(SPEC).spec
 
 
 obj/%.o: %.cpp
-	$(CXX) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+	$(CXX) $(FLAGS) $(INCLUDES) -c -o $@ $<
 
 ifneq ($(wildcard obj/*.d),)
 -include $(wildcard obj/*.d)
