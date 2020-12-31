@@ -14,7 +14,7 @@ class ParameterValues
 {
   public:
                             ParameterValues();
-                            ParameterValues(const ParameterValues& parameterValues);
+                            //ParameterValues(const ParameterValues& parameterValues);
     virtual                 ~ParameterValues();
 
     void                    print(std::ostream& stream,uint level,uint optionFlags);

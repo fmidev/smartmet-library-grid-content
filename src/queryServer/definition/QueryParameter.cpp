@@ -45,7 +45,7 @@ QueryParameter::QueryParameter()
 
 
 
-
+/*
 QueryParameter::QueryParameter(const QueryParameter& queryParameter)
 {
   try
@@ -91,7 +91,7 @@ QueryParameter::QueryParameter(const QueryParameter& queryParameter)
     throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
-
+*/
 
 
 

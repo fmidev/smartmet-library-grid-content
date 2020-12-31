@@ -35,7 +35,7 @@ ParameterMapping::ParameterMapping()
 
 
 
-
+/*
 ParameterMapping::ParameterMapping(const ParameterMapping& mapping)
 {
   try
@@ -63,7 +63,7 @@ ParameterMapping::ParameterMapping(const ParameterMapping& mapping)
     throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
-
+*/
 
 
 

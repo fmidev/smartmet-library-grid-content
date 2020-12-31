@@ -25,7 +25,7 @@ ParameterMappingFile::ParameterMappingFile(const std::string& filename)
 
 
 
-
+/*
 ParameterMappingFile::ParameterMappingFile(const ParameterMappingFile& mappingFile)
 {
   try
@@ -38,7 +38,7 @@ ParameterMappingFile::ParameterMappingFile(const ParameterMappingFile& mappingFi
     throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
-
+*/
 
 
 

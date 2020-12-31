@@ -60,7 +60,7 @@ AliasFile::AliasFile(const std::string& filename,bool duplicatesAllowed)
 
 
 
-
+/*
 AliasFile::AliasFile(const AliasFile& aliasFile)
 {
   try
@@ -75,7 +75,7 @@ AliasFile::AliasFile(const AliasFile& aliasFile)
     throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
-
+*/
 
 
 

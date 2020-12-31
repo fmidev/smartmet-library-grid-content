@@ -13,7 +13,7 @@ class ParameterDef
 {
   public:
                                 ParameterDef();
-                                ParameterDef(const ParameterDef& def);
+                                //ParameterDef(const ParameterDef& def);
                                 ParameterDef(const std::string& paramStr);
     virtual                     ~ParameterDef();
 

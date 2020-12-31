@@ -22,7 +22,7 @@ Alias::Alias()
 
 
 
-
+/*
 Alias::Alias(const Alias& alias)
 {
   try
@@ -35,7 +35,7 @@ Alias::Alias(const Alias& alias)
     throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
-
+*/
 
 
 

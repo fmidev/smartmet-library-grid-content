@@ -38,7 +38,7 @@ ParameterValues::ParameterValues()
 
 
 
-
+/*
 ParameterValues::ParameterValues(const ParameterValues& parameterValues)
 {
   try
@@ -75,7 +75,7 @@ ParameterValues::ParameterValues(const ParameterValues& parameterValues)
     throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
-
+*/
 
 
 

@@ -24,7 +24,7 @@ ParameterDef::ParameterDef()
 
 
 
-
+/*
 ParameterDef::ParameterDef(const ParameterDef& def)
 {
   try
@@ -45,7 +45,7 @@ ParameterDef::ParameterDef(const ParameterDef& def)
     throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
-
+*/
 
 
 

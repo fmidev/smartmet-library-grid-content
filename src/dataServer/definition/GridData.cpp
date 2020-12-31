@@ -40,7 +40,7 @@ GridData::GridData()
 
 
 
-
+/*
 
 GridData::GridData(GridData& gridData)
 {
@@ -83,7 +83,7 @@ GridData::GridData(GridData& gridData)
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
-
+*/
 
 
 

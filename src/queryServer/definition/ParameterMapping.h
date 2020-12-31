@@ -13,7 +13,7 @@ class ParameterMapping
 {
   public:
                                 ParameterMapping();
-                                ParameterMapping(const ParameterMapping& mapping);
+                                //ParameterMapping(const ParameterMapping& mapping);
     virtual                     ~ParameterMapping();
 
     virtual std::size_t         getHash();

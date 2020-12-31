@@ -14,7 +14,7 @@ class Query
 {
   public:
                         Query();
-                        Query(const Query& query);
+                        //Query(const Query& query);
     virtual             ~Query();
 
     bool                parameterInQuery(const std::string& param);

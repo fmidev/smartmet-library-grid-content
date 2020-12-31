@@ -42,7 +42,7 @@ AliasFileCollection::AliasFileCollection(string_vec& filenames)
 
 
 
-
+/*
 AliasFileCollection::AliasFileCollection(const AliasFileCollection& aliasFileCollection)
 {
   try
@@ -56,7 +56,7 @@ AliasFileCollection::AliasFileCollection(const AliasFileCollection& aliasFileCol
     throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
-
+*/
 
 
 

@@ -13,7 +13,7 @@ class Alias
 {
   public:
                    Alias();
-                   Alias(const Alias& alias);
+                   //Alias(const Alias& alias);
     virtual        ~Alias();
 
     void           print(std::ostream& stream,uint level,uint optionFlags);

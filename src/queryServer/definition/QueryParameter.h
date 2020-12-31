@@ -18,7 +18,7 @@ class QueryParameter
 {
   public:
                                 QueryParameter();
-                                QueryParameter(const QueryParameter& queryParameter);
+                                //QueryParameter(const QueryParameter& queryParameter);
     virtual                     ~QueryParameter();
 
     std::size_t                 getHash();

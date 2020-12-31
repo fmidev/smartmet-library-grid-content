@@ -15,7 +15,7 @@ class GridData
 {
   public:
                         GridData();
-                        GridData(GridData& gridData);
+                        //GridData(GridData& gridData);
     virtual             ~GridData();
 
     virtual void        print(std::ostream& stream,uint level,uint optionFlags);

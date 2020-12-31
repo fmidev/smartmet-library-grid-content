@@ -2425,7 +2425,7 @@ void ServerInterface::addFileInfoListWithContent(T::RequestMessage& request,T::R
       return;
     }
 
-    char msg[200];
+    char msg[300];
     char tmp[200];
 
     std::vector<T::FileAndContent> fileAndContentList;

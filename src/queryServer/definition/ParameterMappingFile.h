@@ -19,7 +19,7 @@ class ParameterMappingFile
 {
   public:
                           ParameterMappingFile(const std::string& filename);
-                          ParameterMappingFile(const ParameterMappingFile& mappingFile);
+                          //ParameterMappingFile(const ParameterMappingFile& mappingFile);
     virtual               ~ParameterMappingFile();
 
     virtual void          init();

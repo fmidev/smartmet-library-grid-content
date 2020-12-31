@@ -34,7 +34,7 @@ Query::Query()
 
 
 
-
+/*
 Query::Query(const Query& query)
 {
   try
@@ -64,7 +64,7 @@ Query::Query(const Query& query)
     throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
-
+*/
 
 
 
