@@ -2104,10 +2104,14 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
         int ftLen = forecastTimeList.size();
         qParam->mValueList.reserve(ftLen);
+
+        std::vector<std::shared_ptr<ParameterValues>> tmpValueList;
+        tmpValueList.reserve(ftLen);
+
         for (auto fTime = forecastTimeList.rbegin(); fTime != forecastTimeList.rend(); ++fTime)
         {
           auto valueList = std::shared_ptr<ParameterValues>(new ParameterValues());
-          qParam->mValueList.insert(qParam->mValueList.begin(),valueList);
+          tmpValueList.push_back(valueList);
 
           try
           {
@@ -2226,8 +2230,15 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
           if (additionalTimeList.find(*fTime) != additionalTimeList.end())
             valueList->mFlags = valueList->mFlags | QueryServer::ParameterValues::Flags::AggregationValue;
         }
+
+        for (auto aa = tmpValueList.rbegin(); aa != tmpValueList.rend(); aa++)
+        {
+          qParam->mValueList.push_back(*aa);
+        }
+
       }
     }
+
 
     // Finding out which forecast time are found from the forecast data. The point is that different
     // parameters might contain different forecast times, and we want a list of all forecast times.
