@@ -220,7 +220,7 @@ void Function_feelsLike::executeFunctionCall9(uint columns,uint rows,std::vector
       double temp = inParameters[2][t];
       double rad = inParameters[3][t];
 
-      outParameters.push_back(feelsLike(wind,rh,temp,rad));
+      outParameters.emplace_back(feelsLike(wind,rh,temp,rad));
     }
   }
   catch (...)
@@ -249,7 +249,7 @@ void Function_feelsLike::executeFunctionCall9(uint columns,uint rows,std::vector
       double temp = inParameters[2][t];
       double rad = inParameters[3][t];
 
-      outParameters.push_back(feelsLike(wind,rh,temp,rad));
+      outParameters.emplace_back(feelsLike(wind,rh,temp,rad));
     }
   }
   catch (...)

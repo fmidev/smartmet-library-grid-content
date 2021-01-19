@@ -90,7 +90,7 @@ void Function_windDir::executeFunctionCall4(uint columns,uint rows,std::vector<f
       else
         d = c - (PI-a);
 
-      outParameters.push_back(270-((d*180)/PI));
+      outParameters.emplace_back(270-((d*180)/PI));
     }
   }
   catch (...)
@@ -138,7 +138,7 @@ void Function_windDir::executeFunctionCall4(uint columns,uint rows,std::vector<d
       else
         d = c - (PI-a);
 
-      outParameters.push_back(270-((d*180)/PI));
+      outParameters.emplace_back(270-((d*180)/PI));
     }
   }
   catch (...)

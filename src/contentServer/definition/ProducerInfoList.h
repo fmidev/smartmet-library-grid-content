@@ -30,8 +30,8 @@ class ProducerInfoList
     void              deleteProducerInfoListBySourceId(uint sourceId);
     ProducerInfo*     getProducerInfoById(uint producerId);
     bool              getProducerInfoById(uint producerId,ProducerInfo& producerInfo);
-    ProducerInfo*     getProducerInfoByName(std::string producerName);
-    bool              getProducerInfoByName(std::string producerName,ProducerInfo& producerInfo);
+    ProducerInfo*     getProducerInfoByName(const std::string& producerName);
+    bool              getProducerInfoByName(const std::string& producerName,ProducerInfo& producerInfo);
     ProducerInfo*     getProducerInfoByIndex(uint index);
     ProducerInfo*     getProducerInfoByIndexNoCheck(uint index);
     void              getProducerInfoListBySourceId(uint sourceId,ProducerInfoList& producerInfoList);
@@ -42,7 +42,7 @@ class ProducerInfoList
     void              lock();
     void              unlock();
     void              print(std::ostream& stream,uint level,uint optionFlags);
-    void              writeToFile(std::string filename);
+    void              writeToFile(const std::string& filename);
 
   protected:
 

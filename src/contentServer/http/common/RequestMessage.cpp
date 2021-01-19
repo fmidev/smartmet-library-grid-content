@@ -61,7 +61,7 @@ void RequestMessage::addLine(const char *line)
 {
   try
   {
-    mLines.push_back(std::string(line));
+    mLines.emplace_back(std::string(line));
   }
   catch (...)
   {
@@ -73,11 +73,11 @@ void RequestMessage::addLine(const char *line)
 
 
 
-void RequestMessage::addLine(std::string line)
+void RequestMessage::addLine(const std::string& line)
 {
   try
   {
-    mLines.push_back(line);
+    mLines.emplace_back(line);
   }
   catch (...)
   {
@@ -92,7 +92,7 @@ void RequestMessage::addLine(unsigned long long line)
 {
   try
   {
-    mLines.push_back(std::to_string(line));
+    mLines.emplace_back(std::to_string(line));
   }
   catch (...)
   {
@@ -108,7 +108,7 @@ void RequestMessage::addLine(int line)
 {
   try
   {
-    mLines.push_back(Fmi::to_string(line));
+    mLines.emplace_back(Fmi::to_string(line));
   }
   catch (...)
   {
@@ -124,7 +124,7 @@ void RequestMessage::addLine(uint line)
 {
   try
   {
-    mLines.push_back(Fmi::to_string(line));
+    mLines.emplace_back(Fmi::to_string(line));
   }
   catch (...)
   {
@@ -140,7 +140,7 @@ void RequestMessage::addLine(const char *key,const char *line)
 {
   try
   {
-    mLines.push_back(std::string(key) + "=" + std::string(line));
+    mLines.emplace_back(std::string(key) + "=" + std::string(line));
   }
   catch (...)
   {
@@ -152,11 +152,11 @@ void RequestMessage::addLine(const char *key,const char *line)
 
 
 
-void RequestMessage::addLine(const char *key,std::string line)
+void RequestMessage::addLine(const char *key,const std::string& line)
 {
   try
   {
-    mLines.push_back(std::string(key) + "=" + line);
+    mLines.emplace_back(std::string(key) + "=" + line);
   }
   catch (...)
   {
@@ -171,7 +171,7 @@ void RequestMessage::addLine(const char *key,unsigned long long line)
 {
   try
   {
-    mLines.push_back(std::string(key) + "=" + std::to_string(line));
+    mLines.emplace_back(std::string(key) + "=" + std::to_string(line));
   }
   catch (...)
   {
@@ -187,7 +187,7 @@ void RequestMessage::addLine(const char *key,int line)
 {
   try
   {
-    mLines.push_back(std::string(key) + "=" + Fmi::to_string(line));
+    mLines.emplace_back(std::string(key) + "=" + Fmi::to_string(line));
   }
   catch (...)
   {
@@ -203,7 +203,7 @@ void RequestMessage::addLine(const char *key,uint line)
 {
   try
   {
-    mLines.push_back(std::string(key) + "=" + Fmi::to_string(line));
+    mLines.emplace_back(std::string(key) + "=" + Fmi::to_string(line));
   }
   catch (...)
   {
@@ -540,7 +540,7 @@ uint RequestMessage::getLinesByKey(const char *key,std::vector<std::string>& val
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        values.push_back(std::string(s+len+1));
+        values.emplace_back(std::string(s+len+1));
       }
     }
 

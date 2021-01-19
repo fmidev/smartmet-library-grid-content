@@ -19,7 +19,7 @@ class ContentInfo
 
     ContentInfo&       operator=(const ContentInfo& contentInfo);
 
-    bool               hasKey(T::ParamKeyType parameterKeyType,std::string parameterKey);
+    bool               hasKey(T::ParamKeyType parameterKeyType,const std::string& parameterKey);
     std::string        getCsv();
     std::string        getCsvHeader();
     ulonglong          getRequestCounterKey();
@@ -28,7 +28,7 @@ class ContentInfo
     void               setFmiParameterName(const std::string& name);
 
     void               setCsv(const char *csv);
-    void               setCsv(std::string csv);
+    void               setCsv(const std::string& csv);
     int                compare(uint comparisonMethod,ContentInfo *contentInfo);
     ContentInfo*       duplicate();
     void               print(std::ostream& stream,uint level,uint optionFlags);

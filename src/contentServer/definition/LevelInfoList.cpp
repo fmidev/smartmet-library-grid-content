@@ -33,7 +33,7 @@ LevelInfoList::LevelInfoList(LevelInfoList& levelInfoList)
     {
       LevelInfo *info = levelInfoList.getLevelInfoByIndexNoCheck(t);
       if (info != nullptr)
-        mList.push_back(info->duplicate());
+        mList.emplace_back(info->duplicate());
     }
   }
   catch (...)
@@ -81,7 +81,7 @@ LevelInfoList& LevelInfoList::operator=(LevelInfoList& levelInfoList)
     {
       LevelInfo *info = levelInfoList.getLevelInfoByIndexNoCheck(t);
       if (info != nullptr)
-        mList.push_back(info->duplicate());
+        mList.emplace_back(info->duplicate());
     }
     return *this;
   }
@@ -99,7 +99,7 @@ void LevelInfoList::addLevelInfo(LevelInfo* levelInfo)
 {
   try
   {
-    mList.push_back(levelInfo);
+    mList.emplace_back(levelInfo);
   }
   catch (...)
   {

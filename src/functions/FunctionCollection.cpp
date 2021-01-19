@@ -59,7 +59,7 @@ void FunctionCollection::addFunction(const char *functionName,FunctionPtr functi
 
 
 
-void FunctionCollection::addFunction(std::string& functionName,FunctionPtr function)
+void FunctionCollection::addFunction(const std::string& functionName,FunctionPtr function)
 {
   try
   {
@@ -83,7 +83,7 @@ void FunctionCollection::addFunction(std::string& functionName,FunctionPtr funct
 
 
 
-FunctionPtr FunctionCollection::getFunction(std::string& functionName)
+FunctionPtr FunctionCollection::getFunction(const std::string& functionName)
 {
   try
   {
@@ -104,7 +104,7 @@ FunctionPtr FunctionCollection::getFunction(std::string& functionName)
 
 
 
-float FunctionCollection::executeFunctionCall1(std::string& functionName,std::vector<float>& parameters)
+float FunctionCollection::executeFunctionCall1(const std::string& functionName,std::vector<float>& parameters)
 {
   try
   {
@@ -128,7 +128,7 @@ float FunctionCollection::executeFunctionCall1(std::string& functionName,std::ve
 
 
 
-double FunctionCollection::executeFunctionCall1(std::string& functionName,std::vector<double>& parameters)
+double FunctionCollection::executeFunctionCall1(const std::string& functionName,std::vector<double>& parameters)
 {
   try
   {
@@ -152,7 +152,7 @@ double FunctionCollection::executeFunctionCall1(std::string& functionName,std::v
 
 
 
-void FunctionCollection::executeFunctionCall4(std::string& functionName,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters)
+void FunctionCollection::executeFunctionCall4(const std::string& functionName,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters)
 {
   try
   {
@@ -176,7 +176,7 @@ void FunctionCollection::executeFunctionCall4(std::string& functionName,uint col
 
 
 
-void FunctionCollection::executeFunctionCall4(std::string& functionName,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters)
+void FunctionCollection::executeFunctionCall4(const std::string& functionName,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters)
 {
   try
   {
@@ -200,7 +200,7 @@ void FunctionCollection::executeFunctionCall4(std::string& functionName,uint col
 
 
 
-void FunctionCollection::executeFunctionCall9(std::string& functionName,uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void FunctionCollection::executeFunctionCall9(const std::string& functionName,uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try
   {
@@ -224,7 +224,7 @@ void FunctionCollection::executeFunctionCall9(std::string& functionName,uint col
 
 
 
-void FunctionCollection::executeFunctionCall9(std::string& functionName,uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void FunctionCollection::executeFunctionCall9(const std::string& functionName,uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
   {

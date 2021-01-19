@@ -92,7 +92,7 @@ void Function_vectorU::executeFunctionCall4(uint columns,uint rows,std::vector<f
         d = c - (PI-a);
 
       double val = hh * cos(d);
-      outParameters.push_back(val);
+      outParameters.emplace_back(val);
     }
   }
   catch (...)
@@ -143,7 +143,7 @@ void Function_vectorU::executeFunctionCall4(uint columns,uint rows,std::vector<d
 
 
       double val = hh * cos(d);
-      outParameters.push_back(val);
+      outParameters.emplace_back(val);
     }
   }
   catch (...)

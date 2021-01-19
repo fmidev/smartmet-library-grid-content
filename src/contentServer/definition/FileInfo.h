@@ -23,7 +23,7 @@ class FileInfo
                       uint generationId,
                       uint groupFlags,
                       uchar type,
-                      std::string filename,
+                      const std::string& filename,
                       uint sourceId);
 
                   FileInfo(const char *csv);
@@ -34,7 +34,7 @@ class FileInfo
     std::string   getCsv();
     std::string   getCsvHeader();
     void          setCsv(const char *csv);
-    void          setCsv(std::string csv);
+    void          setCsv(const std::string& csv);
 
     int           compare(uint comparisonMethod,FileInfo *fileInfo);
     FileInfo*     duplicate();

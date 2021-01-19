@@ -119,7 +119,7 @@ void Converter::convert(const QueryServer::Corba::CorbaULongList& source,std::ve
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      target.push_back(source[t]);
+      target.emplace_back(source[t]);
     }
   }
   catch (...)
@@ -207,7 +207,7 @@ void Converter::convert(QueryServer::Corba::CorbaStringList& source,string_vec& 
     target.reserve(len);
     for (uint t=0; t<len; t++)
     {
-      target.push_back(std::string(source[t]));
+      target.emplace_back(std::string(source[t]));
     }
   }
   catch (...)
@@ -330,7 +330,7 @@ void Converter::convert(const QueryServer::Corba::CorbaParamValueList& source,T:
     target.reserve(len);
     for (uint t=0; t<len; t++)
     {
-      target.push_back(source[t]);
+      target.emplace_back(source[t]);
     }
   }
   catch (...)
@@ -649,7 +649,7 @@ void Converter::convert(SmartMet::QueryServer::Corba::CorbaFunctionParamList& so
       QueryServer::Corba::CorbaFunctionParam corbaObject = source[t];
       QueryServer::FunctionParam obj;
       convert(corbaObject,obj);
-      target.push_back(obj);
+      target.emplace_back(obj);
     }
   }
   catch (...)
@@ -698,7 +698,7 @@ void Converter::convert(QueryServer::Corba::CorbaParameterValuesList& source,Que
       QueryServer::Corba::CorbaParameterValues corbaObject = source[t];
       QueryServer::ParameterValues *obj = new QueryServer::ParameterValues();
       convert(corbaObject,*obj);
-      target.push_back(std::shared_ptr<QueryServer::ParameterValues>(obj));
+      target.emplace_back(std::shared_ptr<QueryServer::ParameterValues>(obj));
     }
   }
   catch (...)
@@ -848,7 +848,7 @@ void Converter::convert(QueryServer::Corba::CorbaQueryParameterList& source,Quer
       QueryServer::Corba::CorbaQueryParameter corbaObject = source[t];
       QueryServer::QueryParameter obj;
       convert(corbaObject,obj);
-      target.push_back(obj);
+      target.emplace_back(obj);
     }
   }
   catch (...)
@@ -929,7 +929,7 @@ void Converter::convert(QueryServer::Corba::CorbaCoordinateList& source,T::Coord
       QueryServer::Corba::CorbaCoordinate corbaObject = source[t];
       T::Coordinate obj;
       convert(corbaObject,obj);
-      target.push_back(obj);
+      target.emplace_back(obj);
     }
   }
   catch (...)
@@ -977,7 +977,7 @@ void Converter::convert(QueryServer::Corba::CorbaAreaCoordinates& source,T::Area
       QueryServer::Corba::CorbaCoordinateList corbaObject = source[t];
       T::Coordinate_vec obj;
       convert(corbaObject,obj);
-      target.push_back(obj);
+      target.emplace_back(obj);
     }
   }
   catch (...)
@@ -1114,7 +1114,7 @@ void Converter::convert(const SmartMet::QueryServer::Corba::CorbaByteData& sourc
     target.reserve(len);
     for (uint t=0; t<len; t++)
     {
-      target.push_back(source[t]);
+      target.emplace_back(source[t]);
     }
   }
   catch (...)
@@ -1163,7 +1163,7 @@ void Converter::convert(const SmartMet::QueryServer::Corba::CorbaByteDataSequenc
       QueryServer::Corba::CorbaByteData corbaObject = source[t];
       T::ByteData obj;
       convert(corbaObject,obj);
-      target.push_back(obj);
+      target.emplace_back(obj);
     }
   }
   catch (...)

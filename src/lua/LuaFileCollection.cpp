@@ -81,7 +81,7 @@ void LuaFileCollection::init()
 
     for (auto it = mFilenames.begin(); it != mFilenames.end(); ++it)
     {
-      mLuaFileList.push_back(LuaFile(*it));
+      mLuaFileList.emplace_back(LuaFile(*it));
     }
 
     for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
@@ -191,7 +191,7 @@ bool LuaFileCollection::getFunction(const std::string& functionName,const uint f
 
 
 
-std::string LuaFileCollection::executeFunctionCall5(std::string& function,std::string language,std::vector<float>& parameters)
+std::string LuaFileCollection::executeFunctionCall5(const std::string& function,const std::string& language,std::vector<float>& parameters)
 {
   try
   {
@@ -220,7 +220,7 @@ std::string LuaFileCollection::executeFunctionCall5(std::string& function,std::s
 
 
 
-std::string LuaFileCollection::executeFunctionCall5(std::string& function,std::string language,std::vector<double>& parameters)
+std::string LuaFileCollection::executeFunctionCall5(const std::string& function,const std::string& language,std::vector<double>& parameters)
 {
   try
   {
@@ -249,7 +249,7 @@ std::string LuaFileCollection::executeFunctionCall5(std::string& function,std::s
 
 
 
-float LuaFileCollection::executeFunctionCall1(std::string& function,std::vector<float>& parameters)
+float LuaFileCollection::executeFunctionCall1(const std::string& function,std::vector<float>& parameters)
 {
   try
   {
@@ -278,7 +278,7 @@ float LuaFileCollection::executeFunctionCall1(std::string& function,std::vector<
 
 
 
-double LuaFileCollection::executeFunctionCall1(std::string& function,std::vector<double>& parameters)
+double LuaFileCollection::executeFunctionCall1(const std::string& function,std::vector<double>& parameters)
 {
   try
   {
@@ -307,7 +307,7 @@ double LuaFileCollection::executeFunctionCall1(std::string& function,std::vector
 
 
 
-void LuaFileCollection::executeFunctionCall4(std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters)
+void LuaFileCollection::executeFunctionCall4(const std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters)
 {
   try
   {
@@ -337,7 +337,7 @@ void LuaFileCollection::executeFunctionCall4(std::string& function,uint columns,
 
 
 
-void LuaFileCollection::executeFunctionCall4(std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters)
+void LuaFileCollection::executeFunctionCall4(const std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters)
 {
   try
   {
@@ -367,7 +367,7 @@ void LuaFileCollection::executeFunctionCall4(std::string& function,uint columns,
 
 
 
-std::string LuaFileCollection::executeFunctionCall6(std::string& function,std::vector<std::string>& params)
+std::string LuaFileCollection::executeFunctionCall6(const std::string& function,std::vector<std::string>& params)
 {
   try
   {
@@ -397,11 +397,11 @@ std::string LuaFileCollection::executeFunctionCall6(std::string& function,std::v
 
 
 std::string LuaFileCollection::executeFunctionCall6(
-                  std::string& function,
-                  std::string& producerName,
-                  std::string& parameterName,
+                  const std::string& function,
+                  const std::string& producerName,
+                  const std::string& parameterName,
                   T::ParamKeyType parameterKeyType,
-                  std::string& parameterKey,
+                  const std::string& parameterKey,
                   T::ParamLevelIdType parameterLevelIdType,
                   short parameterLevelId,
                   int parameterLevel,
@@ -439,7 +439,7 @@ std::string LuaFileCollection::executeFunctionCall6(
 
 
 
-void LuaFileCollection::executeFunctionCall9(std::string& function,uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void LuaFileCollection::executeFunctionCall9(const std::string& function,uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try
   {
@@ -469,7 +469,7 @@ void LuaFileCollection::executeFunctionCall9(std::string& function,uint columns,
 
 
 
-void LuaFileCollection::executeFunctionCall9(std::string& function,uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void LuaFileCollection::executeFunctionCall9(const std::string& function,uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
   {

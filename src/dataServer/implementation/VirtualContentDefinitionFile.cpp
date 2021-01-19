@@ -157,7 +157,7 @@ void VirtualContentDefinitionFile::getContentDefinitions(T::ContentInfo& content
       if ((contentInfo.mForecastNumber <= 0  &&  it->mSourceParameterNames.find(s1) != it->mSourceParameterNames.end()) ||
           it->mSourceParameterNames.find(s2) != it->mSourceParameterNames.end())
       {
-        definitions.push_back(*it);
+        definitions.emplace_back(*it);
       }
     }
   }
@@ -215,14 +215,14 @@ void VirtualContentDefinitionFile::loadFile()
               {
                 ParameterDef newdef(pdef);
                 newdef.mForecastNumber = Fmi::to_string(startp);
-                rec.mSourceParameters.push_back(newdef);
+                rec.mSourceParameters.emplace_back(newdef);
                 rec.mSourceParameterNames.insert(toLowerString(newdef.getName()));
                 startp++;
               }
             }
             else
             {
-              rec.mSourceParameters.push_back(pdef);
+              rec.mSourceParameters.emplace_back(pdef);
               rec.mSourceParameterNames.insert(toLowerString(*it));
             }
           }
@@ -230,7 +230,7 @@ void VirtualContentDefinitionFile::loadFile()
           rec.mFunctionName = partList[2];
           rec.mFunctionCallMethod = toUInt32(partList[3].c_str());
           splitString(partList[4],',',rec.mFunctionParameters);
-          mContentDefList.push_back(rec);
+          mContentDefList.emplace_back(rec);
         }
       }
     }

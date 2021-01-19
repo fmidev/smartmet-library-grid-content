@@ -819,7 +819,7 @@ void ContentSync::updateFiles(ServiceInterface *targetInterface)
                 contentInfo->mFileId = 0;
               }
 
-              fileAndContentList.push_back(fc);
+              fileAndContentList.emplace_back(fc);
 
               if (fileAndContentList.size() > 50000)
               {

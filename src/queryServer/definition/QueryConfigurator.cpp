@@ -361,8 +361,8 @@ void QueryConfigurator::configureLocation(Query& query,T::AttributeList& attribu
         throw Fmi::Exception(BCP, "Invalid number of coordinates in 'lonlat' parameter!");
 
       T::Coordinate_vec coordinates;
-      coordinates.push_back(T::Coordinate(coordinateList[0],coordinateList[1]));
-      query.mAreaCoordinates.push_back(coordinates);
+      coordinates.emplace_back(T::Coordinate(coordinateList[0],coordinateList[1]));
+      query.mAreaCoordinates.emplace_back(coordinates);
     }
 
     if (latlonStr != nullptr)
@@ -373,8 +373,8 @@ void QueryConfigurator::configureLocation(Query& query,T::AttributeList& attribu
         throw Fmi::Exception(BCP, "Invalid number of coordinates in 'latlon' parameter!");
 
       T::Coordinate_vec coordinates;
-      coordinates.push_back(T::Coordinate(coordinateList[1],coordinateList[0]));
-      query.mAreaCoordinates.push_back(coordinates);
+      coordinates.emplace_back(T::Coordinate(coordinateList[1],coordinateList[0]));
+      query.mAreaCoordinates.emplace_back(coordinates);
     }
 
     if (radiusStr != nullptr)
@@ -475,13 +475,13 @@ void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attri
             if (levelCount == 0)
             {
               param.mParameterKeyType = T::ParamKeyTypeValue::BUILD_IN;
-              query.mQueryParameterList.push_back(param);
+              query.mQueryParameterList.emplace_back(param);
             }
           }
           else
           {
             configureParameter(query,param,attributeList);
-            query.mQueryParameterList.push_back(param);
+            query.mQueryParameterList.emplace_back(param);
           }
         }
       }

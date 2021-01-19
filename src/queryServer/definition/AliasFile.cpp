@@ -256,7 +256,7 @@ void AliasFile::getAliasList(const std::string& name,std::vector<std::string>& a
       auto a = mAliasList.find(toLowerString(name));
       if (a != mAliasList.end())
       {
-        aliasList.push_back(a->second.mAliasString);
+        aliasList.emplace_back(a->second.mAliasString);
       }
       return;
     }
@@ -264,7 +264,7 @@ void AliasFile::getAliasList(const std::string& name,std::vector<std::string>& a
     for (auto it = mAliasVector.begin(); it != mAliasVector.end(); ++it)
     {
       if (strcasecmp(it->mName.c_str(),name.c_str()) == 0)
-        aliasList.push_back(it->mAliasString);
+        aliasList.emplace_back(it->mAliasString);
     }
   }
   catch (...)
@@ -360,7 +360,7 @@ void AliasFile::loadFile()
             }
             else
             {
-              mAliasVector.push_back(rec);
+              mAliasVector.emplace_back(rec);
             }
           }
         }

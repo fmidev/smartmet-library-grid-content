@@ -2458,7 +2458,7 @@ void ServerInterface::addFileInfoListWithContent(T::RequestMessage& request,T::R
         fc.mContentInfoList.addContentInfo(info);
       }
 
-      fileAndContentList.push_back(fc);
+      fileAndContentList.emplace_back(fc);
     }
 
     int result = mService->addFileInfoListWithContent(sessionId,requestFlags,fileAndContentList);
@@ -2593,7 +2593,7 @@ void ServerInterface::deleteFileInfoListByForecastTimeList(T::RequestMessage& re
     for (uint t=0; t<len; t++)
     {
       T::ForecastTime ft(csvLines[t].c_str());
-      forecastTimeList.push_back(ft);
+      forecastTimeList.emplace_back(ft);
     }
 
     int result = mService->deleteFileInfoListByForecastTimeList(sessionId,forecastTimeList);
@@ -3086,7 +3086,7 @@ void ServerInterface::getFileInfoListByFileIdList(T::RequestMessage& request,T::
     std::vector<uint> fileIdList;
     for (auto it=csvLines.begin(); it!=csvLines.end(); ++it)
     {
-      fileIdList.push_back(toInt64(it->c_str()));
+      fileIdList.emplace_back(toInt64(it->c_str()));
     }
 
     T::FileInfoList fileInfoList;
@@ -4521,7 +4521,7 @@ void ServerInterface::getContentListByFileId(T::RequestMessage& request,T::Respo
     std::vector<uint> fileIdList;
     for (auto it=csvLines.begin(); it!=csvLines.end(); ++it)
     {
-      fileIdList.push_back(toInt64(it->c_str()));
+      fileIdList.emplace_back(toInt64(it->c_str()));
     }
 
 

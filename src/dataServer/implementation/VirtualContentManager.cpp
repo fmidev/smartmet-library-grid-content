@@ -89,7 +89,7 @@ void VirtualContentManager::addVirtualContentFactory(VirtualContentFactory_ptr f
   FUNCTION_TRACE
   try
   {
-    mFactoryList.push_back(factory);
+    mFactoryList.emplace_back(factory);
   }
   catch (...)
   {

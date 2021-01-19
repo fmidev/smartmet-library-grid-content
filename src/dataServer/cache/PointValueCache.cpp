@@ -189,7 +189,7 @@ void PointValueCache::deleteValuesByFileId(uint fileId)
     for (auto it=mValueList.begin(); it != mValueList.end(); ++it)
     {
       if (it->second->fileId == fileId)
-        keyList.push_back(it->first);
+        keyList.emplace_back(it->first);
     }
 
     for (auto it=keyList.begin(); it != keyList.end(); ++it)
@@ -219,7 +219,7 @@ void PointValueCache::deleteValuesByAge(uint maxAge)
     for (auto it=mValueList.begin(); it != mValueList.end(); ++it)
     {
       if (it->second->lastAccessTime < lastAccess)
-        keyList.push_back(it->first);
+        keyList.emplace_back(it->first);
     }
 
     for (auto it=keyList.begin(); it != keyList.end(); ++it)

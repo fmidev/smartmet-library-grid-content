@@ -54,7 +54,7 @@ void QueryStreamer::addQuery(Query& query)
 {
   try
   {
-    mQueryList.push_back(query);
+    mQueryList.emplace_back(query);
   }
   catch (...)
   {

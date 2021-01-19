@@ -202,11 +202,11 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
         if (onlySearchEnabled)
         {
           if (it->mSearchEnabled)
-            mappings.push_back(*it);
+            mappings.emplace_back(*it);
         }
         else
         {
-          mappings.push_back(*it);
+          mappings.emplace_back(*it);
         }
       }
     }
@@ -246,11 +246,11 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
           if (onlySearchEnabled)
           {
             if (it->mSearchEnabled)
-              mappings.push_back(*it);
+              mappings.emplace_back(*it);
           }
           else
           {
-            mappings.push_back(*it);
+            mappings.emplace_back(*it);
           }
         }
       }
@@ -296,11 +296,11 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
               if (onlySearchEnabled)
               {
                 if (it->mSearchEnabled)
-                  mappings.push_back(*it);
+                  mappings.emplace_back(*it);
               }
               else
               {
-                mappings.push_back(*it);
+                mappings.emplace_back(*it);
               }
             }
           }
@@ -349,11 +349,11 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
                 if (onlySearchEnabled)
                 {
                   if (it->mSearchEnabled)
-                    mappings.push_back(*it);
+                    mappings.emplace_back(*it);
                 }
                 else
                 {
-                  mappings.push_back(*it);
+                  mappings.emplace_back(*it);
                 }
               }
             }
@@ -484,12 +484,12 @@ void ParameterMappingFile::loadFile()
           auto s = msearch->find(key);
           if (s != msearch->end())
           {
-            s->second.push_back(rec);
+            s->second.emplace_back(rec);
           }
           else
           {
             ParameterMapping_vec vec;
-            vec.push_back(rec);
+            vec.emplace_back(rec);
             msearch->insert(std::pair<std::string,ParameterMapping_vec>(key,vec));
           }
         }

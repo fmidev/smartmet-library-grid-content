@@ -36,16 +36,16 @@ class GenerationInfoList
     bool                getGenerationInfoById(uint generationId,GenerationInfo& generationInfo);
     GenerationInfo*     getGenerationInfoByIndex(uint index);
     GenerationInfo*     getGenerationInfoByIndexNoCheck(uint index);
-    GenerationInfo*     getGenerationInfoByName(std::string generationName);
-    bool                getGenerationInfoByName(std::string generationName,GenerationInfo& generationInfo);
-    GenerationInfo*     getGenerationInfoByAnalysisTime(std::string analysisTime);
-    int                 getGenerationInfoIndexByAnalysisTime(std::string analysisTime);
+    GenerationInfo*     getGenerationInfoByName(const std::string& generationName);
+    bool                getGenerationInfoByName(const std::string& generationName,GenerationInfo& generationInfo);
+    GenerationInfo*     getGenerationInfoByAnalysisTime(const std::string& analysisTime);
+    int                 getGenerationInfoIndexByAnalysisTime(const std::string& analysisTime);
     int                 getGenerationInfoIndexByGenerationId(uint generationId);
-    void                getGenerationInfoListByAnalysisTime(std::string analysisTime,GenerationInfoList& generationInfoList);
+    void                getGenerationInfoListByAnalysisTime(const std::string& analysisTime,GenerationInfoList& generationInfoList);
     void                getGenerationInfoListByProducerId(uint producerId,GenerationInfoList& generationInfoList);
     void                getGenerationInfoListByProducerIdAndStatus(uint producerId,GenerationInfoList& generationInfoList,uchar generationStatus);
     void                getGenerationInfoListBySourceId(uint sourceId,GenerationInfoList& generationInfoList);
-    GenerationInfo*     getPrevGenerationInfoByProducerId(uint producerId,std::string nextGenerationName);
+    GenerationInfo*     getPrevGenerationInfoByProducerId(uint producerId,const std::string& nextGenerationName);
     GenerationInfo*     getLastGenerationInfoByAnalysisTime();
     GenerationInfo*     getLastGenerationInfoByProducerId(uint producerId);
     GenerationInfo*     getLastGenerationInfoByProducerIdAndStatus(uint producerId,uchar generationStatus);
@@ -64,7 +64,7 @@ class GenerationInfoList
     void                sort(uint comparisonMethod);
     void                increaseSize(uint newSize);
     void                print(std::ostream& stream,uint level,uint optionFlags);
-    void                writeToFile(std::string filename);
+    void                writeToFile(const std::string& filename);
 
 
 

@@ -671,7 +671,7 @@ int FileInfoList::getClosestIndexNoLock(uint comparisonMethod,FileInfo& fileInfo
 
 
 
-FileInfo* FileInfoList::getFileInfoByName(std::string filename)
+FileInfo* FileInfoList::getFileInfoByName(const std::string& filename)
 {
   FUNCTION_TRACE
   try
@@ -703,7 +703,7 @@ FileInfo* FileInfoList::getFileInfoByName(std::string filename)
 
 
 
-bool FileInfoList::getFileInfoByName(std::string filename,FileInfo& fileInfo)
+bool FileInfoList::getFileInfoByName(const std::string& filename,FileInfo& fileInfo)
 {
   FUNCTION_TRACE
   try
@@ -1392,7 +1392,7 @@ bool FileInfoList::deleteFileInfoById(uint fileId)
 
 
 
-bool FileInfoList::deleteFileInfoByName(std::string filename)
+bool FileInfoList::deleteFileInfoByName(const std::string& filename)
 {
   FUNCTION_TRACE
   try
@@ -2027,7 +2027,7 @@ time_t FileInfoList::getLastFileDeletionTimeByGenerationId(uint generationId)
 
 
 
-void FileInfoList::writeToFile(std::string filename)
+void FileInfoList::writeToFile(const std::string& filename)
 {
   FUNCTION_TRACE
   try
@@ -2044,7 +2044,7 @@ void FileInfoList::writeToFile(std::string filename)
 
 
 
-void FileInfoList::writeToFile(std::string filename,const char *filemode)
+void FileInfoList::writeToFile(const std::string& filename,const char *filemode)
 {
   FUNCTION_TRACE
   try

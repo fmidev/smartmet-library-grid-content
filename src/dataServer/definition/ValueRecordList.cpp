@@ -32,7 +32,7 @@ ValueRecordList::ValueRecordList(ValueRecordList& valueRecordList)
     {
       ValueRecord *rec = valueRecordList.getValueRecordByIndex(t);
       if (rec != nullptr)
-        mList.push_back(new ValueRecord(*rec));
+        mList.emplace_back(new ValueRecord(*rec));
     }
   }
   catch (...)
@@ -60,7 +60,7 @@ ValueRecordList::ValueRecordList(ContentInfoList& contentInfoList,CoordinateType
       rec->mAreaInterpolationMethod = interpolationMethod;
       rec->mX = x;
       rec->mY = y;
-      mList.push_back(new ValueRecord(*rec));
+      mList.emplace_back(new ValueRecord(*rec));
     }
   }
   catch (...)
@@ -109,7 +109,7 @@ ValueRecordList& ValueRecordList::operator=(ValueRecordList& valueRecordList)
     {
       ValueRecord *rec = valueRecordList.getValueRecordByIndex(t);
       if (rec != nullptr)
-        mList.push_back(new ValueRecord(*rec));
+        mList.emplace_back(new ValueRecord(*rec));
     }
     return *this;
   }
@@ -126,7 +126,7 @@ void ValueRecordList::addValueRecord(ValueRecord *valueRecord)
 {
   try
   {
-    mList.push_back(valueRecord);
+    mList.emplace_back(valueRecord);
   }
   catch (...)
   {

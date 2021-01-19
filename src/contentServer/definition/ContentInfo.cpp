@@ -391,7 +391,7 @@ void ContentInfo::setCsv(const char *csv)
 
 
 
-void ContentInfo::setCsv(std::string csv)
+void ContentInfo::setCsv(const std::string& csv)
 {
   try
   {
@@ -407,7 +407,7 @@ void ContentInfo::setCsv(std::string csv)
 
 
 
-bool ContentInfo::hasKey(T::ParamKeyType parameterKeyType,std::string parameterKey)
+bool ContentInfo::hasKey(T::ParamKeyType parameterKeyType,const std::string& parameterKey)
 {
   try
   {

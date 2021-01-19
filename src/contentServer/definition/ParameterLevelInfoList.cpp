@@ -33,7 +33,7 @@ ParameterLevelInfoList::ParameterLevelInfoList(ParameterLevelInfoList& parameter
     {
       ParameterLevelInfo *info = parameterLevelInfoList.getParameterLevelInfoByIndexNoCheck(t);
       if (info != nullptr)
-        mList.push_back(info->duplicate());
+        mList.emplace_back(info->duplicate());
     }
   }
   catch (...)
@@ -81,7 +81,7 @@ ParameterLevelInfoList& ParameterLevelInfoList::operator=(ParameterLevelInfoList
     {
       ParameterLevelInfo *info = parameterLevelInfoList.getParameterLevelInfoByIndexNoCheck(t);
       if (info != nullptr)
-        mList.push_back(info->duplicate());
+        mList.emplace_back(info->duplicate());
     }
     return *this;
   }
@@ -99,7 +99,7 @@ void ParameterLevelInfoList::addParameterLevelInfo(ParameterLevelInfo* parameter
 {
   try
   {
-    mList.push_back(parameterLevelInfo);
+    mList.emplace_back(parameterLevelInfo);
   }
   catch (...)
   {

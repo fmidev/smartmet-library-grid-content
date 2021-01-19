@@ -43,7 +43,7 @@ ProducerInfoList::ProducerInfoList(ProducerInfoList& producerInfoList)
     {
       ProducerInfo *info = producerInfoList.getProducerInfoByIndexNoCheck(t);
       if (info != nullptr)
-        mList.push_back(info->duplicate());
+        mList.emplace_back(info->duplicate());
     }
     producerInfoList.unlock();
   }
@@ -97,7 +97,7 @@ ProducerInfoList& ProducerInfoList::operator=(ProducerInfoList& producerInfoList
     {
       ProducerInfo *info = producerInfoList.getProducerInfoByIndexNoCheck(t);
       if (info != nullptr)
-        mList.push_back(info->duplicate());
+        mList.emplace_back(info->duplicate());
     }
     return *this;
   }
@@ -117,7 +117,7 @@ void ProducerInfoList::addProducerInfo(ProducerInfo *producerInfo)
   try
   {
     AutoWriteLock lock(&mModificationLock);
-    mList.push_back(producerInfo);
+    mList.emplace_back(producerInfo);
   }
   catch (...)
   {
@@ -260,7 +260,7 @@ bool ProducerInfoList::getProducerInfoById(uint producerId,ProducerInfo& produce
 
 
 
-ProducerInfo* ProducerInfoList::getProducerInfoByName(std::string producerName)
+ProducerInfo* ProducerInfoList::getProducerInfoByName(const std::string& producerName)
 {
   FUNCTION_TRACE
   try
@@ -285,7 +285,7 @@ ProducerInfo* ProducerInfoList::getProducerInfoByName(std::string producerName)
 
 
 
-bool ProducerInfoList::getProducerInfoByName(std::string producerName,ProducerInfo& producerInfo)
+bool ProducerInfoList::getProducerInfoByName(const std::string& producerName,ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
   try
@@ -448,7 +448,7 @@ void ProducerInfoList::sortByName()
       {
         if ((*it)->mName == *n)
         {
-          newList.push_back(*it);
+          newList.emplace_back(*it);
         }
       }
     }
@@ -514,7 +514,7 @@ void ProducerInfoList::setLockingEnabled(bool lockingEnabled)
 
 
 
-void ProducerInfoList::writeToFile(std::string filename)
+void ProducerInfoList::writeToFile(const std::string& filename)
 {
   FUNCTION_TRACE
   try

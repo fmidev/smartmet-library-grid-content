@@ -19,12 +19,12 @@ class ResponseMessage
 
      void           addChar(char ch);
      void           addLine(const char *line);
-     void           addLine(std::string line);
+     void           addLine(const std::string& line);
      void           addLine(unsigned long long line);
      void           addLine(uint line);
      void           addLine(int line);
      void           addLine(const char *key,const char *line);
-     void           addLine(const char *key,std::string line);
+     void           addLine(const char *key,const std::string& line);
      void           addLine(const char *key,unsigned long long line);
      void           addLine(const char *key,uint line);
      void           addLine(const char *key,int line);

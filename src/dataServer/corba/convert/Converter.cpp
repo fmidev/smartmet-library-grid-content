@@ -136,7 +136,7 @@ void Converter::convert(const DataServer::Corba::CorbaGridData& source,T::GridDa
     target.mValues.reserve(len);
     for (uint t=0; t<len; t++)
     {
-      target.mValues.push_back(source.valueList[t]);
+      target.mValues.emplace_back(source.valueList[t]);
     }
   }
   catch (...)
@@ -277,7 +277,7 @@ void Converter::convert(const DataServer::Corba::CorbaGridCoordinates& source,T:
     {
       DataServer::Corba::CorbaCoordinate corbaObject = source.coordinateList[t];
       T::Coordinate coordinate(corbaObject.x,corbaObject.y);
-      target.mCoordinateList.push_back(coordinate);
+      target.mCoordinateList.emplace_back(coordinate);
     }
   }
   catch (...)
@@ -413,7 +413,7 @@ void Converter::convert(const DataServer::Corba::CorbaParamValueList& source,T::
     target.clear();
     for (uint t=0; t<len; t++)
     {
-      target.push_back(source[t]);
+      target.emplace_back(source[t]);
     }
   }
   catch (...)
@@ -582,7 +582,7 @@ void Converter::convert(const DataServer::Corba::CorbaCoordinateList& source,std
     for (uint t=0; t<len; t++)
     {
       DataServer::Corba::CorbaCoordinate corbaObject = source[t];
-      target.push_back(T::Coordinate(corbaObject.x,corbaObject.y));
+      target.emplace_back(T::Coordinate(corbaObject.x,corbaObject.y));
     }
   }
   catch (...)
@@ -631,7 +631,7 @@ void Converter::convert(const SmartMet::DataServer::Corba::CorbaPolygonPath& sou
       DataServer::Corba::CorbaCoordinateList corbaObject = source[t];
       std::vector<T::Coordinate> obj;
       convert(corbaObject,obj);
-      target.push_back(obj);
+      target.emplace_back(obj);
     }
   }
   catch (...)
@@ -674,7 +674,7 @@ void Converter::convert(const DataServer::Corba::CorbaDoubleList& source,double_
     target.reserve(len);
     for (uint t=0; t<len; t++)
     {
-      target.push_back(source[t]);
+      target.emplace_back(source[t]);
     }
   }
   catch (...)
@@ -717,7 +717,7 @@ void Converter::convert(const SmartMet::DataServer::Corba::CorbaByteData& source
     target.reserve(len);
     for (uint t=0; t<len; t++)
     {
-      target.push_back(source[t]);
+      target.emplace_back(source[t]);
     }
   }
   catch (...)
@@ -766,7 +766,7 @@ void Converter::convert(const SmartMet::DataServer::Corba::CorbaByteDataSequence
       DataServer::Corba::CorbaByteData corbaObject = source[t];
       T::ByteData obj;
       convert(corbaObject,obj);
-      target.push_back(obj);
+      target.emplace_back(obj);
     }
   }
   catch (...)
@@ -810,7 +810,7 @@ void Converter::convert(const DataServer::Corba::CorbaULongList& source,std::vec
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      target.push_back(source[t]);
+      target.emplace_back(source[t]);
     }
   }
   catch (...)

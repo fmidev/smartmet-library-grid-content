@@ -27,10 +27,10 @@ class VirtualMessage : public Message
                                     VirtualMessage(GRID::VirtualGridFile *gridFile,DataServer::ParameterDef& paramDef,std::vector<SourceMessage>& sourceMessages);
     virtual                         ~VirtualMessage();
 
-    virtual void                    setFunction(Functions::FunctionCollection *functionCollection,Lua::LuaFileCollection *luaFileCollection,std::string functionName,uint functionCallMethod,std::vector<double>& functionParameters);
+    virtual void                    setFunction(Functions::FunctionCollection *functionCollection,Lua::LuaFileCollection *luaFileCollection,const std::string& functionName,uint functionCallMethod,std::vector<double>& functionParameters);
 
     virtual uint                    getFileId() const;
-    virtual void                    getAttributeList(std::string prefix,T::AttributeList& attributeList) const;
+    virtual void                    getAttributeList(const std::string& prefix,T::AttributeList& attributeList) const;
     virtual T::TimeString           getForecastTime() const;
     virtual time_t                  getForecastTimeT() const;
     virtual short                   getForecastType() const;

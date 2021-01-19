@@ -252,7 +252,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
                 if (!sGridFile)
                   componentsFound = false;
                 else
-                  sourceMessages.push_back(GRID::SourceMessage(sGridFile,cInfo->mMessageIndex));
+                  sourceMessages.emplace_back(GRID::SourceMessage(sGridFile,cInfo->mMessageIndex));
               }
             }
 

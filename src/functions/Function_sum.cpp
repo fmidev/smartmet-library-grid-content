@@ -125,7 +125,7 @@ void Function_sum::executeFunctionCall9(uint columns,uint rows,std::vector<std::
             sum += val;
         }
       }
-      outParameters.push_back(sum);
+      outParameters.emplace_back(sum);
     }
   }
   catch (...)
@@ -158,7 +158,7 @@ void Function_sum::executeFunctionCall9(uint columns,uint rows,std::vector<std::
             sum += val;
         }
       }
-      outParameters.push_back(sum);
+      outParameters.emplace_back(sum);
     }
   }
   catch (...)

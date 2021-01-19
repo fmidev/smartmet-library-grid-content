@@ -22,7 +22,7 @@ class GenerationInfo
     std::string      getCsv();
     std::string      getCsvHeader();
     void             setCsv(const char *csv);
-    void             setCsv(std::string csv);
+    void             setCsv(const std::string& csv);
 
     int              compare(uint comparisonMethod,GenerationInfo *generationInfo);
     GenerationInfo&  operator=(const GenerationInfo& generationInfo);

@@ -420,7 +420,7 @@ int CacheImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint pro
 
 
 
-int CacheImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::string producerName)
+int CacheImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
   try
@@ -499,7 +499,7 @@ int CacheImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionI
 
 
 
-int CacheImplementation::_getProducerInfoByName(T::SessionId sessionId,std::string producerName,T::ProducerInfo& producerInfo)
+int CacheImplementation::_getProducerInfoByName(T::SessionId sessionId,const std::string& producerName,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
   try
@@ -1195,7 +1195,7 @@ int CacheImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint g
 
 
 
-int CacheImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std::string generationName)
+int CacheImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,const std::string& generationName)
 {
   FUNCTION_TRACE
   try
@@ -1261,7 +1261,7 @@ int CacheImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sess
 
 
 
-int CacheImplementation::_deleteGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName)
+int CacheImplementation::_deleteGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
   try
@@ -1428,7 +1428,7 @@ int CacheImplementation::_getGenerationInfoById(T::SessionId sessionId,uint gene
 
 
 
-int CacheImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::string generationName,T::GenerationInfo& generationInfo)
+int CacheImplementation::_getGenerationInfoByName(T::SessionId sessionId,const std::string& generationName,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -1533,7 +1533,7 @@ int CacheImplementation::_getGenerationInfoListByProducerId(T::SessionId session
 
 
 
-int CacheImplementation::_getGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName,T::GenerationInfoList& generationInfoList)
+int CacheImplementation::_getGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1643,7 +1643,7 @@ int CacheImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
 
 
 
-int CacheImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,std::string producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
+int CacheImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,const std::string& producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -1735,7 +1735,7 @@ int CacheImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uin
 
 
 
-int CacheImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,std::string generationName,uchar status)
+int CacheImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status)
 {
   FUNCTION_TRACE
   try
@@ -1841,7 +1841,7 @@ int CacheImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
 
 
 
-int CacheImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::string filename)
+int CacheImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std::string& filename)
 {
   FUNCTION_TRACE
   try
@@ -1907,7 +1907,7 @@ int CacheImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,
 
 
 
-int CacheImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionId,std::string producerName)
+int CacheImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
   try
@@ -1951,7 +1951,7 @@ int CacheImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
 
 
 
-int CacheImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,std::string forecastTime)
+int CacheImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,const std::string& forecastTime)
 {
   FUNCTION_TRACE
   try
@@ -1995,7 +1995,7 @@ int CacheImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sess
 
 
 
-int CacheImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName)
+int CacheImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
   FUNCTION_TRACE
   try
@@ -2096,7 +2096,7 @@ int CacheImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::
 
 
 
-int CacheImplementation::_getFileInfoByName(T::SessionId sessionId,std::string filename,T::FileInfo& fileInfo)
+int CacheImplementation::_getFileInfoByName(T::SessionId sessionId,const std::string& filename,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
   try
@@ -2233,7 +2233,7 @@ int CacheImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uin
 
 
 
-int CacheImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,std::string producerName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int CacheImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2307,7 +2307,7 @@ int CacheImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,u
 
 
 
-int CacheImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int CacheImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2740,7 +2740,7 @@ int CacheImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint 
 
 
 
-int CacheImplementation::_deleteContentListByFileName(T::SessionId sessionId,std::string filename)
+int CacheImplementation::_deleteContentListByFileName(T::SessionId sessionId,const std::string& filename)
 {
   FUNCTION_TRACE
   try
@@ -2806,7 +2806,7 @@ int CacheImplementation::_deleteContentListByProducerId(T::SessionId sessionId,u
 
 
 
-int CacheImplementation::_deleteContentListByProducerName(T::SessionId sessionId,std::string producerName)
+int CacheImplementation::_deleteContentListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
   try
@@ -2850,7 +2850,7 @@ int CacheImplementation::_deleteContentListByGenerationId(T::SessionId sessionId
 
 
 
-int CacheImplementation::_deleteContentListByGenerationName(T::SessionId sessionId,std::string generationName)
+int CacheImplementation::_deleteContentListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
   FUNCTION_TRACE
   try
@@ -3036,7 +3036,7 @@ int CacheImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
 
 
 
-int CacheImplementation::_getContentListByFileName(T::SessionId sessionId,std::string filename,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByFileName(T::SessionId sessionId,const std::string& filename,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3143,7 +3143,7 @@ int CacheImplementation::_getContentListByProducerId(T::SessionId sessionId,uint
 
 
 
-int CacheImplementation::_getContentListByProducerName(T::SessionId sessionId,std::string producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3220,7 +3220,7 @@ int CacheImplementation::_getContentListByGenerationId(T::SessionId sessionId,ui
 
 
 
-int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3257,7 +3257,7 @@ int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,
 
 
 
-int CacheImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3301,7 +3301,7 @@ int CacheImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
 
 
 
-int CacheImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,std::string generationName,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3378,7 +3378,7 @@ int CacheImplementation::_getContentListBySourceId(T::SessionId sessionId,uint s
 
 
 
-int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3494,7 +3494,7 @@ int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
 
 
 
-int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3614,7 +3614,7 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
 
 
 
-int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,std::string generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3731,7 +3731,7 @@ int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionI
 
 
 
-int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3848,7 +3848,7 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
 
 
 
-int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,std::string producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3966,7 +3966,7 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
 
 
 
-int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string forecastTime,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try

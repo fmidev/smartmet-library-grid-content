@@ -65,7 +65,7 @@ class EventInfo
     std::string    getCsv();
     std::string    getCsvHeader();
     void           setCsv(const char *csv);
-    void           setCsv(std::string csv);
+    void           setCsv(const std::string& csv);
     EventInfo*     duplicate();
     void           print(std::ostream& stream,uint level,uint optionFlags);
 

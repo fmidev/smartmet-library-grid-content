@@ -136,11 +136,11 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
       if (a != ParamValueMissing)
       {
         float c = (float)(a + mValueToAdd);
-        outParameters.push_back(c);
+        outParameters.emplace_back(c);
       }
       else
       {
-        outParameters.push_back(ParamValueMissing);
+        outParameters.emplace_back(ParamValueMissing);
       }
     }
   }
@@ -170,11 +170,11 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
       if (a != ParamValueMissing)
       {
         double c = (double)(a + mValueToAdd);
-        outParameters.push_back(c);
+        outParameters.emplace_back(c);
       }
       else
       {
-        outParameters.push_back(ParamValueMissing);
+        outParameters.emplace_back(ParamValueMissing);
       }
     }
   }

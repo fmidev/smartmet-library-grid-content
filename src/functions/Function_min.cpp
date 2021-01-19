@@ -125,7 +125,7 @@ void Function_min::executeFunctionCall9(uint columns,uint rows,std::vector<std::
             min = val;
         }
       }
-      outParameters.push_back(min);
+      outParameters.emplace_back(min);
     }
   }
   catch (...)
@@ -158,7 +158,7 @@ void Function_min::executeFunctionCall9(uint columns,uint rows,std::vector<std::
             min = val;
         }
       }
-      outParameters.push_back(min);
+      outParameters.emplace_back(min);
     }
   }
   catch (...)

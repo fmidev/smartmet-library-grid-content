@@ -32,7 +32,7 @@ class FileInfoList
     uint           deleteFileInfoByGenerationId(uint generationId);
     uint           deleteFileInfoByGenerationIdList(std::set<uint>& generationIdList);
     bool           deleteFileInfoByIndex(uint index);
-    bool           deleteFileInfoByName(std::string filename);
+    bool           deleteFileInfoByName(const std::string& filename);
     uint           deleteFileInfoBySourceId(uint sourceId);
     uint           deleteFileInfoByFileIdList(std::set<uint>& fileIdList);
     uint           deleteVirtualFiles();
@@ -42,8 +42,8 @@ class FileInfoList
     FileInfo*      getFileInfoById(uint fileId);
     bool           getFileInfoById(uint fileId,FileInfo& fileInfo);
     FileInfo*      getFileInfoByIdNoLock(uint fileId);
-    FileInfo*      getFileInfoByName(std::string filename);
-    bool           getFileInfoByName(std::string filename,FileInfo& fileInfo);
+    FileInfo*      getFileInfoByName(const std::string& filename);
+    bool           getFileInfoByName(const std::string& filename,FileInfo& fileInfo);
     FileInfo*      getFileInfoByIndex(uint index);
     FileInfo*      getFileInfoByIndexNoCheck(uint index);
     uint           getFileInfoCountByProducerId(uint producerId);
@@ -74,8 +74,8 @@ class FileInfoList
     void           unlock();
     void           print(std::ostream& stream,uint level,uint optionFlags);
 
-    void           writeToFile(std::string filename);
-    void           writeToFile(std::string filename,const char *filemode);
+    void           writeToFile(const std::string& filename);
+    void           writeToFile(const std::string& filename,const char *filemode);
 
     ModificationLock*  getModificationLockPtr();
     void               setModificationLockPtr(ModificationLock* modificationLockPtr);

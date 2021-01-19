@@ -58,7 +58,7 @@ FileInfo::FileInfo(const FileInfo& fileInfo)
 
 
 
-FileInfo::FileInfo(uint producerId,uint generationId,uint groupFlags,uchar type,std::string filename,uint sourceId)
+FileInfo::FileInfo(uint producerId,uint generationId,uint groupFlags,uchar type,const std::string& filename,uint sourceId)
 {
   try
   {
@@ -240,7 +240,7 @@ void FileInfo::setCsv(const char *csv)
 
 
 
-void FileInfo::setCsv(std::string csv)
+void FileInfo::setCsv(const std::string& csv)
 {
   try
   {

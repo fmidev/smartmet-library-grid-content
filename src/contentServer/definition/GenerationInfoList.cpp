@@ -761,7 +761,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByIndexNoCheck(uint index)
 
 
 
-GenerationInfo* GenerationInfoList::getGenerationInfoByName(std::string generationName)
+GenerationInfo* GenerationInfoList::getGenerationInfoByName(const std::string& generationName)
 {
   FUNCTION_TRACE
   try
@@ -788,7 +788,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByName(std::string generati
 
 
 
-bool GenerationInfoList::getGenerationInfoByName(std::string generationName,GenerationInfo& generationInfo)
+bool GenerationInfoList::getGenerationInfoByName(const std::string& generationName,GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -818,7 +818,7 @@ bool GenerationInfoList::getGenerationInfoByName(std::string generationName,Gene
 
 
 
-GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(std::string analysisTime)
+GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(const std::string& analysisTime)
 {
   FUNCTION_TRACE
   try
@@ -845,7 +845,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(std::string 
 
 
 
-int GenerationInfoList::getGenerationInfoIndexByAnalysisTime(std::string analysisTime)
+int GenerationInfoList::getGenerationInfoIndexByAnalysisTime(const std::string& analysisTime)
 {
   FUNCTION_TRACE
   try
@@ -1097,7 +1097,7 @@ void GenerationInfoList::getGenerationInfoListByProducerIdAndStatus(uint produce
 
 
 
-void GenerationInfoList::getGenerationInfoListByAnalysisTime(std::string analysisTime,GenerationInfoList& generationInfoList)
+void GenerationInfoList::getGenerationInfoListByAnalysisTime(const std::string& analysisTime,GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1219,7 +1219,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(uint produ
 
 
 
-GenerationInfo*  GenerationInfoList::getPrevGenerationInfoByProducerId(uint producerId,std::string nextGenerationName)
+GenerationInfo*  GenerationInfoList::getPrevGenerationInfoByProducerId(uint producerId,const std::string& nextGenerationName)
 {
   FUNCTION_TRACE
   try
@@ -1374,14 +1374,14 @@ void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTime
     {
       for (auto it = newList.begin(); it != newList.end(); ++it)
       {
-        analysisTimes.push_back(*it);
+        analysisTimes.emplace_back(*it);
       }
     }
     else
     {
       for (auto it = newList.rbegin(); it != newList.rend(); ++it)
       {
-        analysisTimes.push_back(*it);
+        analysisTimes.emplace_back(*it);
       }
     }
   }
@@ -1472,7 +1472,7 @@ void GenerationInfoList::sort(uint comparisonMethod)
 
 
 
-void GenerationInfoList::writeToFile(std::string filename)
+void GenerationInfoList::writeToFile(const std::string& filename)
 {
   FUNCTION_TRACE
   try

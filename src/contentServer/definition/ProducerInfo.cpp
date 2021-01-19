@@ -195,7 +195,7 @@ void ProducerInfo::setCsv(const char *csv)
 
 
 
-void ProducerInfo::setCsv(std::string csv)
+void ProducerInfo::setCsv(const std::string& csv)
 {
   try
   {

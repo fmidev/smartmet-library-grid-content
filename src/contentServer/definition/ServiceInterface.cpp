@@ -230,7 +230,7 @@ int ServiceInterface::deleteProducerInfoById(T::SessionId sessionId,uint produce
 
 
 
-int ServiceInterface::deleteProducerInfoByName(T::SessionId sessionId,std::string producerName)
+int ServiceInterface::deleteProducerInfoByName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
   try
@@ -296,7 +296,7 @@ int ServiceInterface::getProducerInfoById(T::SessionId sessionId,uint producerId
 
 
 
-int ServiceInterface::getProducerInfoByName(T::SessionId sessionId,std::string producerName,T::ProducerInfo& producerInfo)
+int ServiceInterface::getProducerInfoByName(T::SessionId sessionId,const std::string& producerName,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
   try
@@ -516,7 +516,7 @@ int ServiceInterface::deleteGenerationInfoById(T::SessionId sessionId,uint gener
 
 
 
-int ServiceInterface::deleteGenerationInfoByName(T::SessionId sessionId,std::string generationName)
+int ServiceInterface::deleteGenerationInfoByName(T::SessionId sessionId,const std::string& generationName)
 {
   FUNCTION_TRACE
   try
@@ -582,7 +582,7 @@ int ServiceInterface::deleteGenerationInfoListByProducerId(T::SessionId sessionI
 
 
 
-int ServiceInterface::deleteGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName)
+int ServiceInterface::deleteGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
   try
@@ -670,7 +670,7 @@ int ServiceInterface::getGenerationInfoById(T::SessionId sessionId,uint generati
 
 
 
-int ServiceInterface::getGenerationInfoByName(T::SessionId sessionId,std::string generationName,T::GenerationInfo& generationInfo)
+int ServiceInterface::getGenerationInfoByName(T::SessionId sessionId,const std::string& generationName,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -736,7 +736,7 @@ int ServiceInterface::getGenerationInfoListByProducerId(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::getGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName,T::GenerationInfoList& generationInfoList)
+int ServiceInterface::getGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
   try
@@ -802,7 +802,7 @@ int ServiceInterface::getLastGenerationInfoByProducerIdAndStatus(T::SessionId se
 
 
 
-int ServiceInterface::getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,std::string producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
+int ServiceInterface::getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,const std::string& producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -868,7 +868,7 @@ int ServiceInterface::setGenerationInfoStatusById(T::SessionId sessionId,uint ge
 
 
 
-int ServiceInterface::setGenerationInfoStatusByName(T::SessionId sessionId,std::string generationName,uchar status)
+int ServiceInterface::setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status)
 {
   FUNCTION_TRACE
   try
@@ -978,7 +978,7 @@ int ServiceInterface::deleteFileInfoById(T::SessionId sessionId,uint fileId)
 
 
 
-int ServiceInterface::deleteFileInfoByName(T::SessionId sessionId,std::string filename)
+int ServiceInterface::deleteFileInfoByName(T::SessionId sessionId,const std::string& filename)
 {
   FUNCTION_TRACE
   try
@@ -1044,7 +1044,7 @@ int ServiceInterface::deleteFileInfoListByProducerId(T::SessionId sessionId,uint
 
 
 
-int ServiceInterface::deleteFileInfoListByProducerName(T::SessionId sessionId,std::string producerName)
+int ServiceInterface::deleteFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
   try
@@ -1088,7 +1088,7 @@ int ServiceInterface::deleteFileInfoListByGenerationId(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,std::string forecastTime)
+int ServiceInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,const std::string& forecastTime)
 {
   FUNCTION_TRACE
   try
@@ -1132,7 +1132,7 @@ int ServiceInterface::deleteFileInfoListByForecastTimeList(T::SessionId sessionI
 
 
 
-int ServiceInterface::deleteFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName)
+int ServiceInterface::deleteFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
   FUNCTION_TRACE
   try
@@ -1220,7 +1220,7 @@ int ServiceInterface::getFileInfoById(T::SessionId sessionId,uint fileId,T::File
 
 
 
-int ServiceInterface::getFileInfoByName(T::SessionId sessionId,std::string filename,T::FileInfo& fileInfo)
+int ServiceInterface::getFileInfoByName(T::SessionId sessionId,const std::string& filename,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
   try
@@ -1308,7 +1308,7 @@ int ServiceInterface::getFileInfoListByProducerId(T::SessionId sessionId,uint pr
 
 
 
-int ServiceInterface::getFileInfoListByProducerName(T::SessionId sessionId,std::string producerName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1352,7 +1352,7 @@ int ServiceInterface::getFileInfoListByGenerationId(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::getFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1685,7 +1685,7 @@ int ServiceInterface::deleteContentListByFileId(T::SessionId sessionId,uint file
 
 
 
-int ServiceInterface::deleteContentListByFileName(T::SessionId sessionId,std::string filename)
+int ServiceInterface::deleteContentListByFileName(T::SessionId sessionId,const std::string& filename)
 {
   FUNCTION_TRACE
   try
@@ -1751,7 +1751,7 @@ int ServiceInterface::deleteContentListByProducerId(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::deleteContentListByProducerName(T::SessionId sessionId,std::string producerName)
+int ServiceInterface::deleteContentListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
   try
@@ -1795,7 +1795,7 @@ int ServiceInterface::deleteContentListByGenerationId(T::SessionId sessionId,uin
 
 
 
-int ServiceInterface::deleteContentListByGenerationName(T::SessionId sessionId,std::string generationName)
+int ServiceInterface::deleteContentListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
   FUNCTION_TRACE
   try
@@ -1927,7 +1927,7 @@ int ServiceInterface::getContentListByFileIdList(T::SessionId sessionId,std::vec
 
 
 
-int ServiceInterface::getContentListByFileName(T::SessionId sessionId,std::string filename,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByFileName(T::SessionId sessionId,const std::string& filename,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1993,7 +1993,7 @@ int ServiceInterface::getContentListByProducerId(T::SessionId sessionId,uint pro
 
 
 
-int ServiceInterface::getContentListByProducerName(T::SessionId sessionId,std::string producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2059,7 +2059,7 @@ int ServiceInterface::getContentListByGenerationId(T::SessionId sessionId,uint g
 
 
 
-int ServiceInterface::getContentListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2081,7 +2081,7 @@ int ServiceInterface::getContentListByGenerationName(T::SessionId sessionId,std:
 
 
 
-int ServiceInterface::getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2103,7 +2103,7 @@ int ServiceInterface::getContentListByGenerationIdAndTimeRange(T::SessionId sess
 
 
 
-int ServiceInterface::getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,std::string generationName,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2125,7 +2125,7 @@ int ServiceInterface::getContentListByGenerationNameAndTimeRange(T::SessionId se
 
 
 
-int ServiceInterface::getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2147,7 +2147,7 @@ int ServiceInterface::getContentListByParameter(T::SessionId sessionId,T::ParamK
 
 
 
-int ServiceInterface::getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2169,7 +2169,7 @@ int ServiceInterface::getContentListByParameterAndGenerationId(T::SessionId sess
 
 
 
-int ServiceInterface::getContentListByParameterAndGenerationName(T::SessionId sessionId,std::string generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2191,7 +2191,7 @@ int ServiceInterface::getContentListByParameterAndGenerationName(T::SessionId se
 
 
 
-int ServiceInterface::getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2213,7 +2213,7 @@ int ServiceInterface::getContentListByParameterAndProducerId(T::SessionId sessio
 
 
 
-int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sessionId,std::string producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2235,7 +2235,7 @@ int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sess
 
 
 
-int ServiceInterface::getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string forecastTime,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2579,7 +2579,7 @@ int ServiceInterface::_deleteProducerInfoById(T::SessionId sessionId,uint produc
 
 
 
-int ServiceInterface::_deleteProducerInfoByName(T::SessionId sessionId,std::string producerName)
+int ServiceInterface::_deleteProducerInfoByName(T::SessionId sessionId,const std::string& producerName)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -2606,7 +2606,7 @@ int ServiceInterface::_getProducerInfoById(T::SessionId sessionId,uint producerI
 
 
 
-int ServiceInterface::_getProducerInfoByName(T::SessionId sessionId,std::string producerName,T::ProducerInfo& producerInfo)
+int ServiceInterface::_getProducerInfoByName(T::SessionId sessionId,const std::string& producerName,T::ProducerInfo& producerInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -2696,7 +2696,7 @@ int ServiceInterface::_deleteGenerationInfoById(T::SessionId sessionId,uint gene
 
 
 
-int ServiceInterface::_deleteGenerationInfoByName(T::SessionId sessionId,std::string generationName)
+int ServiceInterface::_deleteGenerationInfoByName(T::SessionId sessionId,const std::string& generationName)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -2723,7 +2723,7 @@ int ServiceInterface::_deleteGenerationInfoListByProducerId(T::SessionId session
 
 
 
-int ServiceInterface::_deleteGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName)
+int ServiceInterface::_deleteGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -2750,7 +2750,7 @@ int ServiceInterface::_getGenerationInfoById(T::SessionId sessionId,uint generat
 
 
 
-int ServiceInterface::_getGenerationInfoByName(T::SessionId sessionId,std::string generationName,T::GenerationInfo& generationInfo)
+int ServiceInterface::_getGenerationInfoByName(T::SessionId sessionId,const std::string& generationName,T::GenerationInfo& generationInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -2786,7 +2786,7 @@ int ServiceInterface::_getGenerationInfoListByProducerId(T::SessionId sessionId,
 
 
 
-int ServiceInterface::_getGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName,T::GenerationInfoList& generationInfoList)
+int ServiceInterface::_getGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::GenerationInfoList& generationInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -2813,7 +2813,7 @@ int ServiceInterface::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId s
 
 
 
-int ServiceInterface::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,std::string producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
+int ServiceInterface::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,const std::string& producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -2840,7 +2840,7 @@ int ServiceInterface::_setGenerationInfoStatusById(T::SessionId sessionId,uint g
 
 
 
-int ServiceInterface::_setGenerationInfoStatusByName(T::SessionId sessionId,std::string generationName,uchar status)
+int ServiceInterface::_setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -2885,7 +2885,7 @@ int ServiceInterface::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
 
 
 
-int ServiceInterface::_deleteFileInfoByName(T::SessionId sessionId,std::string filename)
+int ServiceInterface::_deleteFileInfoByName(T::SessionId sessionId,const std::string& filename)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -2912,7 +2912,7 @@ int ServiceInterface::_deleteFileInfoListByProducerId(T::SessionId sessionId,uin
 
 
 
-int ServiceInterface::_deleteFileInfoListByProducerName(T::SessionId sessionId,std::string producerName)
+int ServiceInterface::_deleteFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -2930,7 +2930,7 @@ int ServiceInterface::_deleteFileInfoListByGenerationId(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,std::string forecastTime)
+int ServiceInterface::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,const std::string& forecastTime)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -2948,7 +2948,7 @@ int ServiceInterface::_deleteFileInfoListByForecastTimeList(T::SessionId session
 
 
 
-int ServiceInterface::_deleteFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName)
+int ServiceInterface::_deleteFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -2984,7 +2984,7 @@ int ServiceInterface::_getFileInfoById(T::SessionId sessionId,uint fileId,T::Fil
 
 
 
-int ServiceInterface::_getFileInfoByName(T::SessionId sessionId,std::string filename,T::FileInfo& fileInfo)
+int ServiceInterface::_getFileInfoByName(T::SessionId sessionId,const std::string& filename,T::FileInfo& fileInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3020,7 +3020,7 @@ int ServiceInterface::_getFileInfoListByProducerId(T::SessionId sessionId,uint p
 
 
 
-int ServiceInterface::_getFileInfoListByProducerName(T::SessionId sessionId,std::string producerName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3038,7 +3038,7 @@ int ServiceInterface::_getFileInfoListByGenerationId(T::SessionId sessionId,uint
 
 
 
-int ServiceInterface::_getFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3173,7 +3173,7 @@ int ServiceInterface::_deleteContentListByFileId(T::SessionId sessionId,uint fil
 
 
 
-int ServiceInterface::_deleteContentListByFileName(T::SessionId sessionId,std::string filename)
+int ServiceInterface::_deleteContentListByFileName(T::SessionId sessionId,const std::string& filename)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3200,7 +3200,7 @@ int ServiceInterface::_deleteContentListByProducerId(T::SessionId sessionId,uint
 
 
 
-int ServiceInterface::_deleteContentListByProducerName(T::SessionId sessionId,std::string producerName)
+int ServiceInterface::_deleteContentListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3218,7 +3218,7 @@ int ServiceInterface::_deleteContentListByGenerationId(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::_deleteContentListByGenerationName(T::SessionId sessionId,std::string generationName)
+int ServiceInterface::_deleteContentListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3272,7 +3272,7 @@ int ServiceInterface::_getContentListByFileIdList(T::SessionId sessionId,std::ve
 
 
 
-int ServiceInterface::_getContentListByFileName(T::SessionId sessionId,std::string filename,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByFileName(T::SessionId sessionId,const std::string& filename,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3299,7 +3299,7 @@ int ServiceInterface::_getContentListByProducerId(T::SessionId sessionId,uint pr
 
 
 
-int ServiceInterface::_getContentListByProducerName(T::SessionId sessionId,std::string producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3326,7 +3326,7 @@ int ServiceInterface::_getContentListByGenerationId(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::_getContentListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3335,7 +3335,7 @@ int ServiceInterface::_getContentListByGenerationName(T::SessionId sessionId,std
 
 
 
-int ServiceInterface::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3344,7 +3344,7 @@ int ServiceInterface::_getContentListByGenerationIdAndTimeRange(T::SessionId ses
 
 
 
-int ServiceInterface::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,std::string generationName,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3353,7 +3353,7 @@ int ServiceInterface::_getContentListByGenerationNameAndTimeRange(T::SessionId s
 
 
 
-int ServiceInterface::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3362,7 +3362,7 @@ int ServiceInterface::_getContentListByParameter(T::SessionId sessionId,T::Param
 
 
 
-int ServiceInterface::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3371,7 +3371,7 @@ int ServiceInterface::_getContentListByParameterAndGenerationId(T::SessionId ses
 
 
 
-int ServiceInterface::_getContentListByParameterAndGenerationName(T::SessionId sessionId,std::string generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3380,7 +3380,7 @@ int ServiceInterface::_getContentListByParameterAndGenerationName(T::SessionId s
 
 
 
-int ServiceInterface::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3389,7 +3389,7 @@ int ServiceInterface::_getContentListByParameterAndProducerId(T::SessionId sessi
 
 
 
-int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId sessionId,std::string producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3398,7 +3398,7 @@ int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId ses
 
 
 
-int ServiceInterface::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string forecastTime,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }

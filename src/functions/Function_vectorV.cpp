@@ -92,7 +92,7 @@ void Function_vectorV::executeFunctionCall4(uint columns,uint rows,std::vector<f
         d = c - (PI-a);
 
       double val = hh * sin(d);
-      outParameters.push_back(val);
+      outParameters.emplace_back(val);
     }
   }
   catch (...)
@@ -142,7 +142,7 @@ void Function_vectorV::executeFunctionCall4(uint columns,uint rows,std::vector<d
         d = c - (PI-a);
 
       double val = hh * sin(d);
-      outParameters.push_back(val);
+      outParameters.emplace_back(val);
     }
   }
   catch (...)

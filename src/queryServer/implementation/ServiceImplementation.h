@@ -74,10 +74,10 @@ class ServiceImplementation : public ServiceInterface
      virtual void   init(
                        ContentServer::ServiceInterface *contentServerPtr,
                        DataServer::ServiceInterface *dataServerPtr,
-                       std::string gridConfigFile,
+                       const std::string& gridConfigFile,
                        string_vec& parameterMappingFiles,
                        string_vec& aliasFiles,
-                       std::string producerFile,
+                       const std::string& producerFile,
                        string_vec& producerAliasFiles,
                        string_vec& luaFileNames);
 
@@ -112,7 +112,7 @@ class ServiceImplementation : public ServiceInterface
      void           checkProducerFileUpdates();
      void           checkParameterMappingUpdates();
 
-     bool           getAlias(std::string& name,std::string& alias);
+     bool           getAlias(const std::string& name,std::string& alias);
      void           executeQueryFunctions(Query& query);
      int            executeTimeRangeQuery(Query& query);
      int            executeTimeStepQuery(Query& query);
@@ -123,10 +123,10 @@ class ServiceImplementation : public ServiceInterface
                        Producer_vec& producers,
                        std::set<T::GeometryId>& geometryIdList,
                        uint producerId,
-                       std::string& analysisTime,
+                       const std::string& analysisTime,
                        ulonglong generationFlags,
                        bool reverseGenerations,
-                       std::string& parameterKey,
+                       const std::string& parameterKey,
                        T::ParamLevelId paramLevelId,
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
@@ -136,7 +136,7 @@ class ServiceImplementation : public ServiceInterface
                        short areaInterpolationMethod,
                        short timeInterpolationMethod,
                        short levelInterpolationMethod,
-                       std::string forecastTime,
+                       const std::string& forecastTime,
                        bool timeMatchRequired,
                        uchar locationType,
                        uchar coordinateType,
@@ -154,9 +154,9 @@ class ServiceImplementation : public ServiceInterface
                        Producer_vec& producers,
                        std::set<T::GeometryId>& geometryIdList,
                        uint producerId,
-                       std::string& analysisTime,
+                       const std::string& analysisTime,
                        ulonglong generationFlags,
-                       std::string& parameterKey,
+                       const std::string& parameterKey,
                        T::ParamLevelId paramLevelId,
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
@@ -166,8 +166,8 @@ class ServiceImplementation : public ServiceInterface
                        short areaInterpolationMethod,
                        short timeInterpolationMethod,
                        short levelInterpolationMethod,
-                       std::string startTime,
-                       std::string endTime,
+                       const std::string& startTime,
+                       const std::string& endTime,
                        uint timesteps,
                        uint timestepSizeInMinutes,
                        uchar locationType,
@@ -183,7 +183,7 @@ class ServiceImplementation : public ServiceInterface
                        T::Coordinate_vec& coordinates);
 
      void           getParameterStringInfo(
-                       std::string& param,
+                       const std::string& param,
                        std::string& key,
                        T::GeometryId& geometryId,
                        T::ParamLevelId& paramLevelId,
@@ -198,7 +198,7 @@ class ServiceImplementation : public ServiceInterface
                        short& levelInterpolationMethod);
 
      void           getParameterStringInfo(
-                       std::string& param,
+                       const std::string& param,
                        std::string& key,
                        T::GeometryId& geometryId,
                        T::ParamLevelId& paramLevelId,
@@ -213,15 +213,15 @@ class ServiceImplementation : public ServiceInterface
                        short& levelInterpolationMethod);
 
      void          getParameterMappings(
-                       std::string& producerName,
-                       std::string& parameterName,
+                       const std::string& producerName,
+                       const std::string& parameterName,
                        T::GeometryId geometryId,
                        bool onlySearchEnabled,
                        ParameterMapping_vec& mappings);
 
      void          getParameterMappings(
-                       std::string& producerName,
-                       std::string& parameterName,
+                       const std::string& producerName,
+                       const std::string& parameterName,
                        T::GeometryId geometryId,
                        T::ParamLevelIdType levelIdType,
                        T::ParamLevelId levelId,
@@ -230,11 +230,11 @@ class ServiceImplementation : public ServiceInterface
                        ParameterMapping_vec& mappings);
 
      bool           getFunctionParams(
-                       std::string& functionParamsStr,
+                       const std::string& functionParamsStr,
                        FunctionParam_vec& functionParams);
 
      bool           getParameterFunctionInfo(
-                       std::string& paramStr,
+                       const std::string& paramStr,
                        std::string& function,
                        std::string& functionParams);
 
@@ -243,7 +243,7 @@ class ServiceImplementation : public ServiceInterface
                        Producer_vec& producers);
 
      void           getProducers(
-                       std::string& producerName,
+                       const std::string& producerName,
                        Producer_vec& producers);
 
      void           getGeometryIdListByCoordinates(
@@ -265,7 +265,7 @@ class ServiceImplementation : public ServiceInterface
 
      bool           parseFunction(
                        QueryParameter& queryParam,
-                       std::string& paramStr,
+                       const std::string& paramStr,
                        std::string& function,
                        FunctionParam_vec& functionParams,
                        uint recursionCounter,
@@ -274,26 +274,26 @@ class ServiceImplementation : public ServiceInterface
      void           updateQueryParameters(Query& query);
 
      bool           conversionFunction(
-                       std::string& conversionFunction,
+                       const std::string& conversionFunction,
                        std::string& function,
                        std::vector<std::string>& functionParams);
 
      void           executeConversion(
-                       std::string& function,
+                       const std::string& function,
                        std::vector<std::string>& functionParams,
-                       std::string& forecastTime,
+                       const std::string& forecastTime,
                        T::GridValueList& valueList);
 
      void           executeConversion(
-                       std::string& function,
+                       const std::string& function,
                        std::vector<std::string>& functionParams,
                        T::ParamValue_vec& valueList,
                        T::ParamValue_vec& newValueList);
 
      void           executeConversion(
-                       std::string& function,
+                       const std::string& function,
                        std::vector<std::string>& functionParams,
-                       std::string& forecastTime,
+                       const std::string& forecastTime,
                        T::Coordinate_vec& coordinates,
                        T::ParamValue_vec& valueList,
                        T::ParamValue_vec& newValueList);
@@ -302,10 +302,10 @@ class ServiceImplementation : public ServiceInterface
                        T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        uint generationId,
-                       std::string& analysisTime,
+                       const std::string& analysisTime,
                        ulonglong generationFlags,
                        ParameterMapping& pInfo,
-                       std::string& forecastTime,
+                       const std::string& forecastTime,
                        T::ParamLevelId paramLevelId,
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
@@ -324,10 +324,10 @@ class ServiceImplementation : public ServiceInterface
                        T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        uint generationId,
-                       std::string& analysisTime,
+                       const std::string& analysisTime,
                        ulonglong generationFlags,
                        ParameterMapping& pInfo,
-                       std::string& forecastTime,
+                       const std::string& forecastTime,
                        T::ParamLevelId paramLevelId,
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
@@ -345,10 +345,10 @@ class ServiceImplementation : public ServiceInterface
                        T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        uint generationId,
-                       std::string& analysisTime,
+                       const std::string& analysisTime,
                        ulonglong generationFlags,
                        ParameterMapping& pInfo,
-                       std::string& forecastTime,
+                       const std::string& forecastTime,
                        T::ParamLevelId paramLevelId,
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
@@ -368,10 +368,10 @@ class ServiceImplementation : public ServiceInterface
                        T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        uint generationId,
-                       std::string& analysisTime,
+                       const std::string& analysisTime,
                        ulonglong generationFlags,
                        ParameterMapping& pInfo,
-                       std::string& forecastTime,
+                       const std::string& forecastTime,
                        T::ParamLevelId paramLevelId,
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
@@ -390,10 +390,10 @@ class ServiceImplementation : public ServiceInterface
                        T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        uint generationId,
-                       std::string& analysisTime,
+                       const std::string& analysisTime,
                        ulonglong generationFlags,
                        ParameterMapping& pInfo,
-                       std::string& forecastTime,
+                       const std::string& forecastTime,
                        T::ParamLevelId paramLevelId,
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
@@ -413,10 +413,10 @@ class ServiceImplementation : public ServiceInterface
                        T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        uint generationId,
-                       std::string& analysisTime,
+                       const std::string& analysisTime,
                        ulonglong generationFlags,
                        ParameterMapping& pInfo,
-                       std::string& forecastTime,
+                       const std::string& forecastTime,
                        T::ParamLevelId paramLevelId,
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
@@ -439,10 +439,10 @@ class ServiceImplementation : public ServiceInterface
                        T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        uint generationId,
-                       std::string& analysisTime,
+                       const std::string& analysisTime,
                        ulonglong generationFlags,
                        ParameterMapping& pInfo,
-                       std::string& forecastTime,
+                       const std::string& forecastTime,
                        T::ParamLevelId paramLevelId,
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
@@ -465,10 +465,10 @@ class ServiceImplementation : public ServiceInterface
                        T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        uint generationId,
-                       std::string& analysisTime,
+                       const std::string& analysisTime,
                        ulonglong generationFlags,
                        ParameterMapping& pInfo,
-                       std::string& forecastTime,
+                       const std::string& forecastTime,
                        T::ParamLevelId paramLevelId,
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
@@ -490,10 +490,10 @@ class ServiceImplementation : public ServiceInterface
                        T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        uint generationId,
-                       std::string& analysisTime,
+                       const std::string& analysisTime,
                        ulonglong generationFlags,
                        ParameterMapping& pInfo,
-                       std::string& forecastTime,
+                       const std::string& forecastTime,
                        T::ParamLevelId paramLevelId,
                        T::ParamLevel paramLevel,
                        T::ForecastType forecastType,
@@ -518,18 +518,18 @@ class ServiceImplementation : public ServiceInterface
                        T::ContentInfoList& newContentList);
 
      T::ParamValue  getAdditionalValue(
-                       std::string& parameterName,
-                       std::string& forecastTime,
+                       const std::string& parameterName,
+                       const std::string& forecastTime,
                        double x,
                        double y);
 
      void           getAdditionalValues(
-                       std::string& parameterName,
+                       const std::string& parameterName,
                        uchar coordinateType,
                        T::Coordinate_vec& coordinates,
                        ParameterValues& values);
 
-     bool           getProducerInfoByName(std::string& name,T::ProducerInfo& info);
+     bool           getProducerInfoByName(const std::string& name,T::ProducerInfo& info);
 
      ulonglong      getProducerHash(uint producerId);
 
@@ -538,14 +538,14 @@ class ServiceImplementation : public ServiceInterface
                        uint producerId,
                        uint generationId,
                        T::ParamKeyType parameterKeyType,
-                       std::string& parameterKey,
+                       const std::string& parameterKey,
                        T::ParamLevelIdType parameterLevelIdType,
                        T::ParamLevelId parameterLevelId,
                        T::ParamLevel level,
                        T::ForecastType forecastType,
                        T::ForecastNumber forecastNumber,
                        T::GeometryId geometryId,
-                       std::string& forecastTime,
+                       const std::string& forecastTime,
                        std::shared_ptr<T::ContentInfoList>& contentInfoList);
 
      CacheEntry_sptr getGenerationInfoListByProducerId(uint producerId);

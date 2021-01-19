@@ -198,7 +198,7 @@ void LevelInfo::setCsv(const char *csv)
 
 
 
-void LevelInfo::setCsv(std::string csv)
+void LevelInfo::setCsv(const std::string& csv)
 {
   try
   {

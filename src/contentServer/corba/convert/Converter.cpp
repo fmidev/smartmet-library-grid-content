@@ -592,7 +592,7 @@ void Converter::convert(const ContentServer::Corba::CorbaStringList& source,stri
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      target.push_back(std::string(source[t]));
+      target.emplace_back(std::string(source[t]));
     }
   }
   catch (...)
@@ -680,7 +680,7 @@ void Converter::convert(const ContentServer::Corba::CorbaULongList& source,std::
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      target.push_back(source[t]);
+      target.emplace_back(source[t]);
     }
   }
   catch (...)
@@ -849,7 +849,7 @@ void Converter::convert(const ContentServer::Corba::CorbaFileContentList& source
     {
       T::FileAndContent fc;
       convert(source[t],fc);
-      target.push_back(fc);
+      target.emplace_back(fc);
     }
   }
   catch (...)
@@ -938,7 +938,7 @@ void Converter::convert(const SmartMet::ContentServer::Corba::CorbaForecastTimeL
     {
       T::ForecastTime ft;
       convert(source[t],ft);
-      target.push_back(ft);
+      target.emplace_back(ft);
     }
   }
   catch (...)

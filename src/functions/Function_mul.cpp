@@ -119,11 +119,11 @@ void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::
       if (a != ParamValueMissing  &&  b != ParamValueMissing)
       {
         float c = a*b;
-        outParameters.push_back(c);
+        outParameters.emplace_back(c);
       }
       else
       {
-        outParameters.push_back(ParamValueMissing);
+        outParameters.emplace_back(ParamValueMissing);
       }
     }
   }
@@ -154,11 +154,11 @@ void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::
       if (a != ParamValueMissing  &&  b != ParamValueMissing)
       {
         float c = a*b;
-        outParameters.push_back(c);
+        outParameters.emplace_back(c);
       }
       else
       {
-        outParameters.push_back(ParamValueMissing);
+        outParameters.emplace_back(ParamValueMissing);
       }
     }
   }

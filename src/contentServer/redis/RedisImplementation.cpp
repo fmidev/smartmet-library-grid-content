@@ -745,7 +745,7 @@ int RedisImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint pro
 
 
 
-int RedisImplementation::_deleteProducerInfoByName(T::SessionId sessionId,std::string producerName)
+int RedisImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
   try
@@ -840,7 +840,7 @@ int RedisImplementation::_getProducerInfoById(T::SessionId sessionId,uint produc
 
 
 
-int RedisImplementation::_getProducerInfoByName(T::SessionId sessionId,std::string producerName,T::ProducerInfo& producerInfo)
+int RedisImplementation::_getProducerInfoByName(T::SessionId sessionId,const std::string& producerName,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
   try
@@ -1504,7 +1504,7 @@ int RedisImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint g
 
 
 
-int RedisImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,std::string generationName)
+int RedisImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,const std::string& generationName)
 {
   FUNCTION_TRACE
   try
@@ -1615,7 +1615,7 @@ int RedisImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sess
 
 
 
-int RedisImplementation::_deleteGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName)
+int RedisImplementation::_deleteGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
   try
@@ -1712,7 +1712,7 @@ int RedisImplementation::_getGenerationInfoById(T::SessionId sessionId,uint gene
 
 
 
-int RedisImplementation::_getGenerationInfoByName(T::SessionId sessionId,std::string generationName,T::GenerationInfo& generationInfo)
+int RedisImplementation::_getGenerationInfoByName(T::SessionId sessionId,const std::string& generationName,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -1822,7 +1822,7 @@ int RedisImplementation::_getGenerationInfoListByProducerId(T::SessionId session
 
 
 
-int RedisImplementation::_getGenerationInfoListByProducerName(T::SessionId sessionId,std::string producerName,T::GenerationInfoList& generationInfoList)
+int RedisImplementation::_getGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1916,7 +1916,7 @@ int RedisImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
 
 
 
-int RedisImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,std::string producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
+int RedisImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,const std::string& producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -2044,7 +2044,7 @@ int RedisImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uin
 
 
 
-int RedisImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,std::string generationName,uchar status)
+int RedisImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status)
 {
   FUNCTION_TRACE
   try
@@ -2522,7 +2522,7 @@ int RedisImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
 
 
 
-int RedisImplementation::_deleteFileInfoByName(T::SessionId sessionId,std::string filename)
+int RedisImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std::string& filename)
 {
   FUNCTION_TRACE
   try
@@ -2635,7 +2635,7 @@ int RedisImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,
 
 
 
-int RedisImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionId,std::string producerName)
+int RedisImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
   try
@@ -2705,7 +2705,7 @@ int RedisImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
 
 
 
-int RedisImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,std::string forecastTime)
+int RedisImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,const std::string& forecastTime)
 {
   FUNCTION_TRACE
   try
@@ -2809,7 +2809,7 @@ int RedisImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sess
 
 
 
-int RedisImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName)
+int RedisImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
   FUNCTION_TRACE
   try
@@ -2937,7 +2937,7 @@ int RedisImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::
 
 
 
-int RedisImplementation::_getFileInfoByName(T::SessionId sessionId,std::string filename,T::FileInfo& fileInfo)
+int RedisImplementation::_getFileInfoByName(T::SessionId sessionId,const std::string& filename,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
   try
@@ -3060,7 +3060,7 @@ int RedisImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uin
 
 
 
-int RedisImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,std::string producerName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int RedisImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3122,7 +3122,7 @@ int RedisImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,u
 
 
 
-int RedisImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int RedisImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3796,7 +3796,7 @@ int RedisImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint 
 
 
 
-int RedisImplementation::_deleteContentListByFileName(T::SessionId sessionId,std::string filename)
+int RedisImplementation::_deleteContentListByFileName(T::SessionId sessionId,const std::string& filename)
 {
   FUNCTION_TRACE
   try
@@ -3897,7 +3897,7 @@ int RedisImplementation::_deleteContentListByProducerId(T::SessionId sessionId,u
 
 
 
-int RedisImplementation::_deleteContentListByProducerName(T::SessionId sessionId,std::string producerName)
+int RedisImplementation::_deleteContentListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
   try
@@ -3966,7 +3966,7 @@ int RedisImplementation::_deleteContentListByGenerationId(T::SessionId sessionId
 
 
 
-int RedisImplementation::_deleteContentListByGenerationName(T::SessionId sessionId,std::string generationName)
+int RedisImplementation::_deleteContentListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
   FUNCTION_TRACE
   try
@@ -4144,7 +4144,7 @@ int RedisImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
 
 
 
-int RedisImplementation::_getContentListByFileName(T::SessionId sessionId,std::string filename,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByFileName(T::SessionId sessionId,const std::string& filename,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4233,7 +4233,7 @@ int RedisImplementation::_getContentListByProducerId(T::SessionId sessionId,uint
 
 
 
-int RedisImplementation::_getContentListByProducerName(T::SessionId sessionId,std::string producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4296,7 +4296,7 @@ int RedisImplementation::_getContentListByGenerationId(T::SessionId sessionId,ui
 
 
 
-int RedisImplementation::_getContentListByGenerationName(T::SessionId sessionId,std::string generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4327,7 +4327,7 @@ int RedisImplementation::_getContentListByGenerationName(T::SessionId sessionId,
 
 
 
-int RedisImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4358,7 +4358,7 @@ int RedisImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
 
 
 
-int RedisImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,std::string generationName,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4416,7 +4416,7 @@ int RedisImplementation::_getContentListBySourceId(T::SessionId sessionId,uint s
 
 
 
-int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4467,7 +4467,7 @@ int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
 
 
 
-int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4522,7 +4522,7 @@ int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
 
 
 
-int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,std::string generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4577,7 +4577,7 @@ int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionI
 
 
 
-int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4632,7 +4632,7 @@ int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId se
 
 
 
-int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string forecastTime,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4706,7 +4706,7 @@ int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
 
 
 
-int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,std::string producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -7456,7 +7456,7 @@ int RedisImplementation::getVirtualContent(uint startFileId,uint startMessageInd
 
 
 
-int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyType,std::string parameterKey,T::ContentInfoList& contentInfoList)
+int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -7504,7 +7504,7 @@ int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyTyp
 
 
 
-int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
+int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -7565,7 +7565,7 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
 
 
 
-int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
+int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -7631,7 +7631,7 @@ int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,
 
 
 
-int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
+int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -7697,7 +7697,7 @@ int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::P
 
 
 
-int RedisImplementation::getContentByGenerationIdAndTimeRange(uint generationId,std::string startTime,std::string endTime,T::ContentInfoList& contentInfoList)
+int RedisImplementation::getContentByGenerationIdAndTimeRange(uint generationId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try

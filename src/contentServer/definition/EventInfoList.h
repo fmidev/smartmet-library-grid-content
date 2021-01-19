@@ -36,7 +36,7 @@ class EventInfoList
     void            unlock();
     void            setMaxLength(uint maxLength);
     void            print(std::ostream& stream,uint level,uint optionFlags);
-    void            writeToFile(std::string filename);
+    void            writeToFile(const std::string& filename);
 
   protected:
 

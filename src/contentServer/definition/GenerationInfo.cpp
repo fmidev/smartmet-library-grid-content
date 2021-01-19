@@ -215,7 +215,7 @@ void GenerationInfo::setCsv(const char *csv)
 
 
 
-void GenerationInfo::setCsv(std::string csv)
+void GenerationInfo::setCsv(const std::string& csv)
 {
   try
   {

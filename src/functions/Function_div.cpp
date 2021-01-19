@@ -119,11 +119,11 @@ void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::
       if (a != ParamValueMissing)
       {
         float c = (float)(a * mmuler);
-        outParameters.push_back(c);
+        outParameters.emplace_back(c);
       }
       else
       {
-        outParameters.push_back(ParamValueMissing);
+        outParameters.emplace_back(ParamValueMissing);
       }
     }
   }
@@ -153,11 +153,11 @@ void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::
       if (a != ParamValueMissing)
       {
         double c = (double)(a * mmuler);
-        outParameters.push_back(c);
+        outParameters.emplace_back(c);
       }
       else
       {
-        outParameters.push_back(ParamValueMissing);
+        outParameters.emplace_back(ParamValueMissing);
       }
     }
   }

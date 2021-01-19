@@ -471,7 +471,7 @@ void EventInfoList::unlock()
 
 
 
-void EventInfoList::writeToFile(std::string filename)
+void EventInfoList::writeToFile(const std::string& filename)
 {
   FUNCTION_TRACE
   try

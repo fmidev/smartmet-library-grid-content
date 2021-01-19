@@ -243,7 +243,7 @@ void EventInfo::setCsv(const char *csv)
 
 
 
-void EventInfo::setCsv(std::string csv)
+void EventInfo::setCsv(const std::string& csv)
 {
   try
   {

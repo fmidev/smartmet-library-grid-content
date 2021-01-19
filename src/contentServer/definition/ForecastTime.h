@@ -20,7 +20,7 @@ class ForecastTime
 
      std::string      getCsv();
      void             setCsv(const char *csv);
-     void             setCsv(std::string csv);
+     void             setCsv(const std::string& csv);
 
      void             print(std::ostream& stream,uint level,uint optionFlags);
 

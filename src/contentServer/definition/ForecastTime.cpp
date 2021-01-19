@@ -141,7 +141,7 @@ void ForecastTime::setCsv(const char *csv)
 
 
 
-void ForecastTime::setCsv(std::string csv)
+void ForecastTime::setCsv(const std::string& csv)
 {
   try
   {

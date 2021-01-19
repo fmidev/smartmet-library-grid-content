@@ -78,7 +78,7 @@ void VirtualMessage::initMessagePtrs() const
       }
       */
 
-      mMessageList.push_back(msg);
+      mMessageList.emplace_back(msg);
     }
   }
   catch (...)
@@ -91,7 +91,7 @@ void VirtualMessage::initMessagePtrs() const
 
 
 
-void VirtualMessage::setFunction(Functions::FunctionCollection *functionCollection,Lua::LuaFileCollection *luaFileCollection,std::string functionName,uint functionCallMethod,std::vector<double>& functionParameters)
+void VirtualMessage::setFunction(Functions::FunctionCollection *functionCollection,Lua::LuaFileCollection *luaFileCollection,const std::string& functionName,uint functionCallMethod,std::vector<double>& functionParameters)
 {
   FUNCTION_TRACE
   try
@@ -132,7 +132,7 @@ uint VirtualMessage::getFileId() const
 
 
 
-void VirtualMessage::getAttributeList(std::string prefix,T::AttributeList& attributeList) const
+void VirtualMessage::getAttributeList(const std::string& prefix,T::AttributeList& attributeList) const
 {
   FUNCTION_TRACE
   try
@@ -868,8 +868,8 @@ void VirtualMessage::getGridValueByPoint(T::CoordinateType coordinateType,double
           T::ParamValue val = 0;
           std::vector<double> inValues;
           mMessageList[t]->getGridValueByPoint(coordinateType,x,y,interpolationMethod,val);
-          inValues.push_back(val);
-          inParameters.push_back(inValues);
+          inValues.emplace_back(val);
+          inParameters.emplace_back(inValues);
         }
         executeFunctionCall9(1,1,inParameters,outParameters);
         break;
@@ -911,7 +911,7 @@ void VirtualMessage::getGridValueListByCircle(T::CoordinateType coordinateType,d
           T::GridValueList valList;
           mMessageList[t]->getGridValueListByCircle(coordinateType,origoX,origoY,radius,valList);
 
-          inValueList.push_back(valList);
+          inValueList.emplace_back(valList);
         }
         executeFunctionCall9(inValueList,valueList);
       }
@@ -950,7 +950,7 @@ void VirtualMessage::getGridValueListByPointList(T::CoordinateType coordinateTyp
           T::GridValueList valList;
           mMessageList[t]->getGridValueListByPointList(coordinateType,pointList,interpolationMethod,valList);
 
-          inValueList.push_back(valList);
+          inValueList.emplace_back(valList);
         }
         executeFunctionCall9(inValueList,valueList);
       }
@@ -989,7 +989,7 @@ void VirtualMessage::getGridValueListByPolygon(T::CoordinateType coordinateType,
           T::GridValueList valList;
           mMessageList[t]->getGridValueListByPolygon(coordinateType,polygonPoints,valList);
 
-          inValueList.push_back(valList);
+          inValueList.emplace_back(valList);
         }
         executeFunctionCall9(inValueList,valueList);
       }
@@ -1028,7 +1028,7 @@ void VirtualMessage::getGridValueListByPolygonPath(T::CoordinateType coordinateT
           T::GridValueList valList;
           mMessageList[t]->getGridValueListByPolygonPath(coordinateType,polygonPath,valList);
 
-          inValueList.push_back(valList);
+          inValueList.emplace_back(valList);
         }
         executeFunctionCall9(inValueList,valueList);
       }
@@ -1067,7 +1067,7 @@ void VirtualMessage::getGridValueListByRectangle(T::CoordinateType coordinateTyp
           T::GridValueList valList;
           mMessageList[t]->getGridValueListByRectangle(coordinateType,x1,y1,x2,y2,gridRectangle,valList);
 
-          inValueList.push_back(valList);
+          inValueList.emplace_back(valList);
         }
         executeFunctionCall9(inValueList,valueList);
       }
@@ -1110,7 +1110,7 @@ void VirtualMessage::getGridValueVector(T::ParamValue_vec& values) const
         {
           T::ParamValue_vec val;
           mMessageList[t]->getGridValueVector(val);
-          valueList.push_back(val);
+          valueList.emplace_back(val);
         }
         executeFunctionCall9(columns,rows,valueList,values);
       }
@@ -1154,7 +1154,7 @@ void VirtualMessage::getGridOriginalValueVector(T::ParamValue_vec& values) const
         {
           T::ParamValue_vec val;
           mMessageList[t]->getGridOriginalValueVector(val);
-          valueList.push_back(val);
+          valueList.emplace_back(val);
         }
         executeFunctionCall9(columns,rows,valueList,values);
       }
@@ -1271,8 +1271,8 @@ T::ParamValue VirtualMessage::getGridValueByGridPoint(uint grid_i,uint grid_j) c
         for (uint t=0; t<sz; t++)
         {
           T::ParamValue_vec inValues;
-          inValues.push_back(mMessageList[t]->getGridValueByGridPoint(grid_i,grid_j));
-          inParameters.push_back(inValues);
+          inValues.emplace_back(mMessageList[t]->getGridValueByGridPoint(grid_i,grid_j));
+          inParameters.emplace_back(inValues);
         }
         executeFunctionCall9(1,1,inParameters,values);
       }
@@ -1599,9 +1599,9 @@ void VirtualMessage::executeFunctionCall9(std::vector<T::GridValueList>& inValue
       {
         T::GridValue value;
         inValueList[t].getGridValueByIndex(i,value);
-        params.push_back(value.mValue);
+        params.emplace_back(value.mValue);
       }
-      inParameters.push_back(params);
+      inParameters.emplace_back(params);
     }
 
     executeFunctionCall9(inValueList[0].getLength(),1,inParameters,outParameters);

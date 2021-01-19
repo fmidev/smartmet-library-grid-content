@@ -144,9 +144,9 @@ void Function_avg::executeFunctionCall9(uint columns,uint rows,std::vector<std::
         }
       }
       if (cnt > 0)
-        outParameters.push_back(total/cnt);
+        outParameters.emplace_back(total/cnt);
       else
-        outParameters.push_back(ParamValueMissing);
+        outParameters.emplace_back(ParamValueMissing);
     }
   }
   catch (...)
@@ -184,9 +184,9 @@ void Function_avg::executeFunctionCall9(uint columns,uint rows,std::vector<std::
         }
       }
       if (cnt > 0)
-        outParameters.push_back(total/cnt);
+        outParameters.emplace_back(total/cnt);
       else
-        outParameters.push_back(ParamValueMissing);
+        outParameters.emplace_back(ParamValueMissing);
     }
   }
   catch (...)

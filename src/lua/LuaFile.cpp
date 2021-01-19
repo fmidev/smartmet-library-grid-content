@@ -286,7 +286,7 @@ uint LuaFile::getFunction(const std::string& functionName,std::string& function)
 
 
 
-float LuaFile::executeFunctionCall1(std::string& function,std::vector<float>& parameters)
+float LuaFile::executeFunctionCall1(const std::string& function,std::vector<float>& parameters)
 {
   try
   {
@@ -373,7 +373,7 @@ float LuaFile::executeFunctionCall1(std::string& function,std::vector<float>& pa
 
 
 
-double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& parameters)
+double LuaFile::executeFunctionCall1(const std::string& function,std::vector<double>& parameters)
 {
   try
   {
@@ -458,7 +458,7 @@ double LuaFile::executeFunctionCall1(std::string& function,std::vector<double>& 
 
 
 
-void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters)
+void LuaFile::executeFunctionCall4(const std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters)
 {
   try
   {
@@ -554,7 +554,7 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
         lua_pushnumber(L,t);
         lua_gettable(L, -2);
         float a = lua_tonumber(L, -1);
-        outParameters.push_back(a);
+        outParameters.emplace_back(a);
         lua_pop(L, 1);
       }
       lua_pop(L, 1);  // pop table from the stack
@@ -570,7 +570,7 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
 
 
 
-void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters)
+void LuaFile::executeFunctionCall4(const std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters)
 {
   try
   {
@@ -664,7 +664,7 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
         lua_pushnumber(L,t);
         lua_gettable(L, -2);
         double a = lua_tonumber(L, -1);
-        outParameters.push_back(a);
+        outParameters.emplace_back(a);
         lua_pop(L, 1);
       }
       lua_pop(L, 1);  // pop table from the stack
@@ -680,7 +680,7 @@ void LuaFile::executeFunctionCall4(std::string& function,uint columns,uint rows,
 
 
 
-std::string LuaFile::executeFunctionCall5(std::string& function,std::string language,std::vector<float>& parameters)
+std::string LuaFile::executeFunctionCall5(const std::string& function,const std::string& language,std::vector<float>& parameters)
 {
   try
   {
@@ -769,7 +769,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
 
 
 
-std::string LuaFile::executeFunctionCall5(std::string& function,std::string language,std::vector<double>& parameters)
+std::string LuaFile::executeFunctionCall5(const std::string& function,const std::string& language,std::vector<double>& parameters)
 {
   try
   {
@@ -858,7 +858,7 @@ std::string LuaFile::executeFunctionCall5(std::string& function,std::string lang
 
 
 
-std::string LuaFile::executeFunctionCall6(std::string& function,std::vector<std::string>& params)
+std::string LuaFile::executeFunctionCall6(const std::string& function,std::vector<std::string>& params)
 {
   try
   {
@@ -936,11 +936,11 @@ std::string LuaFile::executeFunctionCall6(std::string& function,std::vector<std:
 
 
 std::string LuaFile::executeFunctionCall6(
-                  std::string& function,
-                  std::string& producerName,
-                  std::string& parameterName,
+                  const std::string& function,
+                  const std::string& producerName,
+                  const std::string& parameterName,
                   T::ParamKeyType parameterKeyType,
-                  std::string& parameterKey,
+                  const std::string& parameterKey,
                   T::ParamLevelIdType parameterLevelIdType,
                   short parameterLevelId,
                   int parameterLevel,
@@ -951,16 +951,16 @@ std::string LuaFile::executeFunctionCall6(
   try
   {
     std::vector<std::string> params;
-    params.push_back(producerName);
-    params.push_back(parameterName);
-    params.push_back(Fmi::to_string(parameterKeyType));
-    params.push_back(parameterKey);
-    params.push_back(Fmi::to_string(parameterLevelIdType));
-    params.push_back(Fmi::to_string(parameterLevelId));
-    params.push_back(Fmi::to_string(parameterLevel));
-    params.push_back(Fmi::to_string(forecastType));
-    params.push_back(Fmi::to_string(forecastNumber));
-    params.push_back(Fmi::to_string(interpolationMethod));
+    params.emplace_back(producerName);
+    params.emplace_back(parameterName);
+    params.emplace_back(Fmi::to_string(parameterKeyType));
+    params.emplace_back(parameterKey);
+    params.emplace_back(Fmi::to_string(parameterLevelIdType));
+    params.emplace_back(Fmi::to_string(parameterLevelId));
+    params.emplace_back(Fmi::to_string(parameterLevel));
+    params.emplace_back(Fmi::to_string(forecastType));
+    params.emplace_back(Fmi::to_string(forecastNumber));
+    params.emplace_back(Fmi::to_string(interpolationMethod));
 
     return executeFunctionCall6(function,params);
 
@@ -1039,7 +1039,7 @@ std::string LuaFile::executeFunctionCall6(
 #if 0
 
 
-void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& inParameters3,std::vector<float>& outParameters)
+void LuaFile::executeFunctionCall7(const std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& inParameters3,std::vector<float>& outParameters)
 {
   try
   {
@@ -1126,7 +1126,7 @@ void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,
         lua_pushnumber(L,t);
         lua_gettable(L, -2);
         float a = lua_tonumber(L, -1);
-        outParameters.push_back(a);
+        outParameters.emplace_back(a);
         //printf("%d => %f\n",t,a);
         lua_pop(L, 1);
       }
@@ -1143,7 +1143,7 @@ void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,
 
 
 
-void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& inParameters3,std::vector<double>& outParameters)
+void LuaFile::executeFunctionCall7(const std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& inParameters3,std::vector<double>& outParameters)
 {
   try
   {
@@ -1230,7 +1230,7 @@ void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,
         lua_pushnumber(L,t);
         lua_gettable(L, -2);
         float a = lua_tonumber(L, -1);
-        outParameters.push_back(a);
+        outParameters.emplace_back(a);
         //printf("%d => %f\n",t,a);
         lua_pop(L, 1);
       }
@@ -1246,7 +1246,7 @@ void LuaFile::executeFunctionCall7(std::string& function,uint columns,uint rows,
 
 
 
-void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& inParameters3,std::vector<float>& inParameters4,std::vector<float>& outParameters)
+void LuaFile::executeFunctionCall8(const std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& inParameters3,std::vector<float>& inParameters4,std::vector<float>& outParameters)
 {
   try
   {
@@ -1342,7 +1342,7 @@ void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,
         lua_pushnumber(L,t);
         lua_gettable(L, -2);
         float a = lua_tonumber(L, -1);
-        outParameters.push_back(a);
+        outParameters.emplace_back(a);
         //printf("%d => %f\n",t,a);
         lua_pop(L, 1);
       }
@@ -1359,7 +1359,7 @@ void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,
 
 
 
-void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& inParameters3,std::vector<double>& inParameters4,std::vector<double>& outParameters)
+void LuaFile::executeFunctionCall8(const std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<double>& inParameters3,std::vector<double>& inParameters4,std::vector<double>& outParameters)
 {
   try
   {
@@ -1455,7 +1455,7 @@ void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,
         lua_pushnumber(L,t);
         lua_gettable(L, -2);
         float a = lua_tonumber(L, -1);
-        outParameters.push_back(a);
+        outParameters.emplace_back(a);
         //printf("%d => %f\n",t,a);
         lua_pop(L, 1);
       }
@@ -1472,7 +1472,7 @@ void LuaFile::executeFunctionCall8(std::string& function,uint columns,uint rows,
 
 
 
-void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void LuaFile::executeFunctionCall9(const std::string& function,uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try
   {
@@ -1555,7 +1555,7 @@ void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,
         lua_pushnumber(L,t);
         lua_gettable(L, -2);
         float a = lua_tonumber(L, -1);
-        outParameters.push_back(a);
+        outParameters.emplace_back(a);
         lua_pop(L, 1);
       }
       lua_pop(L, 1);  // pop table from the stack
@@ -1571,7 +1571,7 @@ void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,
 
 
 
-void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void LuaFile::executeFunctionCall9(const std::string& function,uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
   {
@@ -1654,7 +1654,7 @@ void LuaFile::executeFunctionCall9(std::string& function,uint columns,uint rows,
         lua_pushnumber(L,t);
         lua_gettable(L, -2);
         double a = lua_tonumber(L, -1);
-        outParameters.push_back(a);
+        outParameters.emplace_back(a);
         lua_pop(L, 1);
       }
       lua_pop(L, 1);  // pop table from the stack

@@ -86,9 +86,9 @@ void Function_outPrcnt::executeFunctionCall9(uint columns,uint rows,std::vector<
           agree++;
       }
       if (missing == sz)
-        outParameters.push_back(ParamValueMissing);
+        outParameters.emplace_back(ParamValueMissing);
       else
-        outParameters.push_back((float)agree*100/(float)len);
+        outParameters.emplace_back((float)agree*100/(float)len);
     }
   }
   catch (...)
@@ -132,9 +132,9 @@ void Function_outPrcnt::executeFunctionCall9(uint columns,uint rows,std::vector<
           agree++;
       }
       if (missing == sz)
-        outParameters.push_back(ParamValueMissing);
+        outParameters.emplace_back(ParamValueMissing);
       else
-        outParameters.push_back((double)agree*100/(double)len);
+        outParameters.emplace_back((double)agree*100/(double)len);
     }
   }
   catch (...)

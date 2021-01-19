@@ -231,7 +231,7 @@ int ServiceInterface::getValuesByGridPoint(T::SessionId sessionId,T::ContentInfo
 
 
 
-int ServiceInterface::getParameterValueByPointAndTime(T::SessionId sessionId,std::string producer,std::string parameter,T::CoordinateType coordinateType,double x,double y,std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
+int ServiceInterface::getParameterValueByPointAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,double x,double y,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -253,7 +253,7 @@ int ServiceInterface::getParameterValueByPointAndTime(T::SessionId sessionId,std
 
 
 
-int ServiceInterface::getParameterValuesByPointListAndTime(T::SessionId sessionId,std::string producer,std::string parameter,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,std::vector<T::ParamValue>& valueList)
+int ServiceInterface::getParameterValuesByPointListAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,std::vector<T::ParamValue>& valueList)
 {
   FUNCTION_TRACE
   try
@@ -275,7 +275,7 @@ int ServiceInterface::getParameterValuesByPointListAndTime(T::SessionId sessionI
 
 
 
-int ServiceInterface::getParameterValuesByPointAndTimeList(T::SessionId sessionId,std::string producer,std::string parameter,T::CoordinateType coordinateType,double x,double y,std::vector<std::string>& times,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue_vec& values)
+int ServiceInterface::getParameterValuesByPointAndTimeList(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,double x,double y,std::vector<std::string>& times,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -297,7 +297,7 @@ int ServiceInterface::getParameterValuesByPointAndTimeList(T::SessionId sessionI
 
 
 
-int ServiceInterface::getParameterValueVectorByGeometryAndTime(T::SessionId sessionId,std::string producer,std::string parameter,std::string& timeString,T::AttributeList& attributeList,T::ParamValue_vec& values)
+int ServiceInterface::getParameterValueVectorByGeometryAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,const std::string& timeString,T::AttributeList& attributeList,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -346,7 +346,7 @@ int ServiceInterface::_getValuesByGridPoint(T::SessionId sessionId,T::ContentInf
 
 
 
-int ServiceInterface::_getParameterValueByPointAndTime(T::SessionId sessionId,std::string producer,std::string parameter,T::CoordinateType coordinateType,double x,double y,std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
+int ServiceInterface::_getParameterValueByPointAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,double x,double y,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -368,8 +368,8 @@ int ServiceInterface::_getParameterValueByPointAndTime(T::SessionId sessionId,st
 
     query.mCoordinateType = coordinateType;
     T::Coordinate_vec cc;
-    cc.push_back(T::Coordinate(x,y));
-    query.mAreaCoordinates.push_back(cc);
+    cc.emplace_back(T::Coordinate(x,y));
+    query.mAreaCoordinates.emplace_back(cc);
 
     int result = _executeQuery(sessionId,query);
     if (result != 0)
@@ -398,7 +398,7 @@ int ServiceInterface::_getParameterValueByPointAndTime(T::SessionId sessionId,st
 
 
 
-int ServiceInterface::_getParameterValuesByPointListAndTime(T::SessionId sessionId,std::string producer,std::string parameter,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,std::vector<T::ParamValue>& valueList)
+int ServiceInterface::_getParameterValuesByPointListAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,std::vector<T::ParamValue>& valueList)
 {
   FUNCTION_TRACE
   try
@@ -419,7 +419,7 @@ int ServiceInterface::_getParameterValuesByPointListAndTime(T::SessionId session
     configurator.configure(query,attributeList);
 
     query.mCoordinateType = coordinateType;
-    query.mAreaCoordinates.push_back(coordinates);
+    query.mAreaCoordinates.emplace_back(coordinates);
 
     int result = _executeQuery(sessionId,query);
     if (result != 0)
@@ -432,9 +432,9 @@ int ServiceInterface::_getParameterValuesByPointListAndTime(T::SessionId session
       {
         auto valuePtr = (*query.mQueryParameterList[0].mValueList.begin())->mValueList.getGridValuePtrByIndex(t);
         if (valuePtr != nullptr)
-          valueList.push_back(valuePtr->mValue);
+          valueList.emplace_back(valuePtr->mValue);
         else
-          valueList.push_back(ParamValueMissing);
+          valueList.emplace_back(ParamValueMissing);
       }
     }
     return 0;
@@ -449,7 +449,7 @@ int ServiceInterface::_getParameterValuesByPointListAndTime(T::SessionId session
 
 
 
-int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId sessionId,std::string producer,std::string parameter,T::CoordinateType coordinateType,double x,double y,std::vector<std::string>& times,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue_vec& values)
+int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,double x,double y,std::vector<std::string>& times,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -480,8 +480,8 @@ int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId session
     query.mCoordinateType = coordinateType;
 
     T::Coordinate_vec cc;
-    cc.push_back(T::Coordinate(x,y));
-    query.mAreaCoordinates.push_back(cc);
+    cc.emplace_back(T::Coordinate(x,y));
+    query.mAreaCoordinates.emplace_back(cc);
 
     int result = _executeQuery(sessionId,query);
     if (result != 0)
@@ -494,16 +494,16 @@ int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId session
       {
         auto valuePtr = (*it)->mValueList.getGridValuePtrByIndex(0);
         if (valuePtr != nullptr)
-          values.push_back(valuePtr->mValue);
+          values.emplace_back(valuePtr->mValue);
         else
-          values.push_back(ParamValueMissing);
+          values.emplace_back(ParamValueMissing);
       }
     }
     else
     {
       for (uint t=0; t<len; t++)
       {
-        values.push_back(ParamValueMissing);
+        values.emplace_back(ParamValueMissing);
       }
     }
 
@@ -519,7 +519,7 @@ int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId session
 
 
 
-int ServiceInterface::_getParameterValueVectorByGeometryAndTime(T::SessionId sessionId,std::string producer,std::string parameter,std::string& timeString,T::AttributeList& attributeList,T::ParamValue_vec& values)
+int ServiceInterface::_getParameterValueVectorByGeometryAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,const std::string& timeString,T::AttributeList& attributeList,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try

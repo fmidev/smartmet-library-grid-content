@@ -125,7 +125,7 @@ void Function_max::executeFunctionCall9(uint columns,uint rows,std::vector<std::
             max = val;
         }
       }
-      outParameters.push_back(max);
+      outParameters.emplace_back(max);
     }
   }
   catch (...)
@@ -158,7 +158,7 @@ void Function_max::executeFunctionCall9(uint columns,uint rows,std::vector<std::
             max = val;
         }
       }
-      outParameters.push_back(max);
+      outParameters.emplace_back(max);
     }
   }
   catch (...)
