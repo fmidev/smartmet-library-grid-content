@@ -93,6 +93,16 @@ EventInfo::EventInfo(const char *csv)
 {
   try
   {
+    mEventId = 0;
+    mEventTime = time(nullptr);
+    mServerTime = 0;
+    mType = ContentServer::EventType::UNKNOWN;
+    mId1 = 0;
+    mId2 = 0;
+    mId3 = 0;
+    mFlags = 0;
+    nextItem = nullptr;
+    prevItem = nullptr;
     setCsv(csv);
   }
   catch (...)

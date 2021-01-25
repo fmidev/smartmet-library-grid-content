@@ -97,6 +97,27 @@ ContentInfo::ContentInfo(const char *csv)
 {
   try
   {
+    mServerFlags = 0;
+    mGroupFlags = 0;
+    mProducerId = 0;
+    mGenerationId = 0;
+    mFileType = T::FileTypeValue::Unknown;
+    mFileId = 0;
+    mMessageIndex = 0;
+    mFilePosition = 0;
+    mMessageSize = 0;
+    mFmiParameterLevelId = 0;
+    mGrib1ParameterLevelId = 0;
+    mGrib2ParameterLevelId = 0;
+    mParameterLevel = 0;
+    mForecastType = 0;
+    mForecastNumber = 0;
+    mFlags = 0;
+    mSourceId = 0;
+    mGeometryId = 0;
+    mForecastTimeUTC = 0;
+    mModificationTime = 0;
+    mDeletionTime = 0;
     setCsv(csv);
   }
   catch (...)

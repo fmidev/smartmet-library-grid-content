@@ -82,6 +82,7 @@ RedisImplementation::RedisImplementation()
     mContext = nullptr;
     mStartTime = time(nullptr);
     mRedisPort = 0;
+    mRedisSecondaryPort = 0;
     mLine = 0;
     mShutdownRequested = false;
     mDatabaseLockEnabled = false;
@@ -120,6 +121,7 @@ void RedisImplementation::lock(const char *function,uint line,ulonglong& key,uin
   FUNCTION_TRACE
   try
   {
+    key = 0;
     if (!mDatabaseLockEnabled)
       return;
 
@@ -127,7 +129,6 @@ void RedisImplementation::lock(const char *function,uint line,ulonglong& key,uin
 
     mFunction = function;
     mLine = line;
-    key = 0;
 
     redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"INCR %slockRequestCounter",mTablePrefix.c_str()));
     if (reply == nullptr)

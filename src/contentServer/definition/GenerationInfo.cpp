@@ -60,6 +60,13 @@ GenerationInfo::GenerationInfo(const char *csv)
 {
   try
   {
+    mGenerationId = 0;
+    mGenerationType = 0;
+    mProducerId = 0;
+    mStatus = Status::Disabled;
+    mFlags = 0;
+    mSourceId = 0;
+    mDeletionTime = 0;
     setCsv(csv);
   }
   catch (...)

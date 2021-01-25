@@ -54,6 +54,9 @@ ProducerInfo::ProducerInfo(const char *csv)
 {
   try
   {
+    mProducerId = 0;
+    mFlags = 0;
+    mSourceId = 0;
     setCsv(csv);
   }
   catch (...)

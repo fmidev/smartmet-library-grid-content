@@ -70,6 +70,8 @@ FileInfo::FileInfo(uint producerId,uint generationId,uint groupFlags,uchar type,
     mName = filename;
     mFlags = 0;
     mSourceId = sourceId;
+    mModificationTime = 0;
+    mDeletionTime = 0;
   }
   catch (...)
   {
@@ -85,6 +87,15 @@ FileInfo::FileInfo(const char *csv)
 {
   try
   {
+    mFileId = 0;
+    mFileType = T::FileTypeValue::Unknown;
+    mProducerId = 0;
+    mGenerationId = 0;
+    mGroupFlags = 0;
+    mFlags = 0;
+    mSourceId = 0;
+    mModificationTime = 0;
+    mDeletionTime = 0;
     setCsv(csv);
   }
   catch (...)
