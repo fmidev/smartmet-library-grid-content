@@ -9,6 +9,7 @@
 #include "../../functions/FunctionCollection.h"
 
 #include <unordered_map>
+#include <unordered_set>
 
 
 namespace SmartMet
@@ -553,6 +554,33 @@ class ServiceImplementation : public ServiceInterface
      bool            isValidGeometry(int geometryId,std::vector<std::vector<T::Coordinate>>& polygonPath);
 
 
+     void            getTimeRangeValues(Query& query,
+                                        const std::set < std::string >& timeList,
+                                        T::Coordinate_vec& coordinates);
+
+     void            getTimeStepValues(Query& query,
+                                       const std::set < std::string >& timeList,
+                                       const std::unordered_set < std::string >& additionalTimeList,
+                                       T::Coordinate_vec& coordinates);
+
+     std::set< T::GeometryId > getGeometryIdList(Query& query, Producer_vec& producers);
+  
+     void            getTimeRangeParameterData(Query& query,
+                                               const std::set < T::GeometryId > geometryIdList,
+                                               const Producer_vec& producers,
+                                               std::string& analysisTime,
+                                               std::unordered_map < std::string, uint >& parameterProducers,
+                                               T::Coordinate_vec& coordinates,
+                                               std::unordered_set< uint >& alternativeRequired);
+
+     void            getTimeStepParameterData(Query& query,
+                                              const std::set < T::GeometryId > geometryIdList,
+                                              const Producer_vec& producers,
+                                              const std::set < std::string >& timeList,
+                                              std::string& analysisTime,
+                                              std::unordered_map < std::string, uint >& parameterProducers,
+                                              T::Coordinate_vec& coordinates,
+                                              std::unordered_set< uint >& alternativeRequired);
 
   private:
 

@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 21.1.19
+Version: 21.1.22
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -74,6 +74,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Jan 22 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.22-1.fmi
+- Refactored code for easier perf profiling
 * Tue Jan 19 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.19-1.fmi
 - Performance improvements
 * Mon Jan 18 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.18-1.fmi
