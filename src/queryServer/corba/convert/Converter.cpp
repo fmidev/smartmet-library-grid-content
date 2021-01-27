@@ -527,6 +527,7 @@ void Converter::convert(QueryServer::Corba::CorbaParameterValues& source,QuerySe
   try
   {
     target.mForecastTime = source.forecastTime;
+    target.mForecastTimeUTC = (time_t)source.forecastTimeUTC;
     target.mProducerId = source.producerId;
     target.mGenerationId = source.generationId;
     target.mGenerationFlags = source.generationFlags;
@@ -568,6 +569,7 @@ void Converter::convert(QueryServer::ParameterValues& source,QueryServer::Corba:
   try
   {
     target.forecastTime = CORBA::string_dup(source.mForecastTime.c_str());
+    target.forecastTimeUTC = source.mForecastTimeUTC;
     target.producerId = source.mProducerId;
     target.generationId = source.mGenerationId;
     target.generationFlags = source.mGenerationFlags;

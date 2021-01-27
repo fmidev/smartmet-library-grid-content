@@ -345,7 +345,7 @@ int MemoryImplementation::_clear(T::SessionId sessionId)
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     mFileInfoListByName.clear();
     mFileInfoList.clear();
@@ -376,7 +376,7 @@ int MemoryImplementation::_reload(T::SessionId sessionId)
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     mFileInfoListByName.clear();
     mFileInfoList.clear();
@@ -449,7 +449,7 @@ int MemoryImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInf
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::ProducerInfo *info = mProducerInfoList.getProducerInfoByName(producerInfo.mName);
     if (info != nullptr)
@@ -492,7 +492,7 @@ int MemoryImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint pr
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::ProducerInfo *info = mProducerInfoList.getProducerInfoById(producerId);
     if (info == nullptr)
@@ -530,7 +530,7 @@ int MemoryImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::ProducerInfo *info = mProducerInfoList.getProducerInfoByName(producerName);
     if (info == nullptr)
@@ -568,7 +568,7 @@ int MemoryImplementation::_deleteProducerInfoListBySourceId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].deleteContentInfoBySourceId(sourceId);
@@ -602,7 +602,7 @@ int MemoryImplementation::_getProducerInfoById(T::SessionId sessionId,uint produ
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::ProducerInfo *info = mProducerInfoList.getProducerInfoById(producerId);
     if (info == nullptr)
@@ -629,7 +629,7 @@ int MemoryImplementation::_getProducerInfoByName(T::SessionId sessionId,const st
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::ProducerInfo *info = mProducerInfoList.getProducerInfoByName(producerName);
     if (info == nullptr)
@@ -656,7 +656,7 @@ int MemoryImplementation::_getProducerInfoList(T::SessionId sessionId,T::Produce
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     producerInfoList.clear();
 
@@ -681,7 +681,7 @@ int MemoryImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     producerInfoList.clear();
 
@@ -809,7 +809,7 @@ int MemoryImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     producerInfoList.clear();
 
@@ -856,7 +856,7 @@ int MemoryImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     list.clear();
 
@@ -904,7 +904,7 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
 
     list.clear();
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::ProducerInfoList producerList = mProducerInfoList;
     std::map<uint,T::ProducerInfo*> producers;
@@ -1065,7 +1065,7 @@ int MemoryImplementation::_getProducerParameterListByProducerId(T::SessionId ses
 
     list.clear();
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
     if (producerInfo == nullptr)
@@ -1217,7 +1217,7 @@ int MemoryImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generatio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(generationInfo.mProducerId);
     if (producerInfo == nullptr)
@@ -1254,7 +1254,7 @@ int MemoryImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(generationId);
     if (info == nullptr)
@@ -1290,7 +1290,7 @@ int MemoryImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,con
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoByName(generationName);
     if (info == nullptr)
@@ -1326,7 +1326,7 @@ int MemoryImplementation::_deleteGenerationInfoListByIdList(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].deleteContentInfoByGenerationIdList(generationIdList);
@@ -1360,7 +1360,7 @@ int MemoryImplementation::_deleteGenerationInfoListByProducerId(T::SessionId ses
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
     if (producerInfo == nullptr)
@@ -1397,7 +1397,7 @@ int MemoryImplementation::_deleteGenerationInfoListByProducerName(T::SessionId s
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
     if (producerInfo == nullptr)
@@ -1436,7 +1436,7 @@ int MemoryImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessi
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].deleteContentInfoBySourceId(sourceId);
@@ -1468,7 +1468,7 @@ int MemoryImplementation::_getGenerationInfoById(T::SessionId sessionId,uint gen
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(generationId);
     if (info == nullptr)
@@ -1495,7 +1495,7 @@ int MemoryImplementation::_getGenerationInfoByName(T::SessionId sessionId,const 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoByName(generationName);
     if (info == nullptr)
@@ -1522,7 +1522,7 @@ int MemoryImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Gener
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     generationInfoList.clear();
 
@@ -1547,7 +1547,7 @@ int MemoryImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     generationInfoList.clear();
 
@@ -1582,7 +1582,7 @@ int MemoryImplementation::_getGenerationInfoListByProducerId(T::SessionId sessio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
     if (producerInfo == nullptr)
@@ -1611,7 +1611,7 @@ int MemoryImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
     if (producerInfo == nullptr)
@@ -1640,7 +1640,7 @@ int MemoryImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     generationInfoList.clear();
 
@@ -1665,7 +1665,7 @@ int MemoryImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::Session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
     if (producerInfo == nullptr)
@@ -1696,7 +1696,7 @@ int MemoryImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessi
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
     if (producerInfo == nullptr)
@@ -1747,7 +1747,7 @@ int MemoryImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,ui
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
@@ -1777,7 +1777,7 @@ int MemoryImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
     if (generationInfo == nullptr)
@@ -1807,7 +1807,7 @@ int MemoryImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(fileInfo.mProducerId);
     if (producerInfo == nullptr)
@@ -1871,7 +1871,7 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(fileInfo.mProducerId);
     if (producerInfo == nullptr)
@@ -1972,7 +1972,7 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::FileInfoList tmpFileList;
     tmpFileList.setReleaseObjects(false);
@@ -2115,7 +2115,7 @@ int MemoryImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(fileId);
     if (fileInfo == nullptr)
@@ -2150,7 +2150,7 @@ int MemoryImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::FileInfo *fileInfo = mFileInfoList.getFileInfoByName(filename);
     if (fileInfo == nullptr)
@@ -2186,7 +2186,7 @@ int MemoryImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId ses
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
 
     for (auto fTime = forecastTimeList.begin(); fTime != forecastTimeList.end(); ++fTime)
@@ -2245,7 +2245,7 @@ int MemoryImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].deleteContentInfoByGroupFlags(groupFlags);
@@ -2275,7 +2275,7 @@ int MemoryImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
     if (producerInfo == nullptr)
@@ -2309,7 +2309,7 @@ int MemoryImplementation::_deleteFileInfoListByProducerName(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
     if (producerInfo == nullptr)
@@ -2343,7 +2343,7 @@ int MemoryImplementation::_deleteFileInfoListByGenerationId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
@@ -2369,7 +2369,7 @@ int MemoryImplementation::_deleteFileInfoListByGenerationId(T::SessionId session
 
 
 
-int MemoryImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,const std::string& forecastTime)
+int MemoryImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,time_t forecastTime)
 {
   FUNCTION_TRACE
   try
@@ -2377,7 +2377,7 @@ int MemoryImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Se
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
@@ -2431,7 +2431,7 @@ int MemoryImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessi
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
     if (generationInfo == nullptr)
@@ -2465,7 +2465,7 @@ int MemoryImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,u
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].deleteContentInfoBySourceId(sourceId);
@@ -2495,7 +2495,7 @@ int MemoryImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].deleteContentInfoByFileIdList(fileIdList);
@@ -2528,7 +2528,7 @@ int MemoryImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T:
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::FileInfo *info = mFileInfoList.getFileInfoById(fileId);
     if (info == nullptr)
@@ -2555,7 +2555,7 @@ int MemoryImplementation::_getFileInfoByName(T::SessionId sessionId,const std::s
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::FileInfo *info = mFileInfoListByName.getFileInfoByName(filename);
     if (info == nullptr)
@@ -2582,7 +2582,7 @@ int MemoryImplementation::_getFileInfoList(T::SessionId sessionId,uint startFile
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     fileInfoList.clear();
 
@@ -2607,7 +2607,7 @@ int MemoryImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,st
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     fileInfoList.clear();
 
@@ -2638,7 +2638,7 @@ int MemoryImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,ui
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
     if (producerInfo == nullptr)
@@ -2667,7 +2667,7 @@ int MemoryImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
     if (producerInfo == nullptr)
@@ -2696,7 +2696,7 @@ int MemoryImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
@@ -2725,7 +2725,7 @@ int MemoryImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
     if (generationInfo == nullptr)
@@ -2753,7 +2753,7 @@ int MemoryImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,ui
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     fileInfoList.clear();
 
@@ -2778,7 +2778,7 @@ int MemoryImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     fileInfoList.clear();
 
@@ -2887,7 +2887,7 @@ int MemoryImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eve
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     eventInfo.mEventId = addEvent(eventInfo.mType,eventInfo.mId1,eventInfo.mId2,eventInfo.mId3,eventInfo.mFlags);
     return Result::OK;
@@ -2912,7 +2912,7 @@ int MemoryImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::EventInfo *lastEvent = mEventInfoList.getLastEvent();
     if (lastEvent == nullptr)
@@ -2943,7 +2943,7 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
     if (!mEventsEnabled)
       return Result::DATA_NOT_FOUND;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     eventInfoList.clear();
 
@@ -3039,7 +3039,7 @@ int MemoryImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo&
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(contentInfo.mProducerId);
     if (producerInfo == nullptr)
@@ -3096,7 +3096,7 @@ int MemoryImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoL
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::ContentInfoList list;
     list.setReleaseObjects(false);
@@ -3167,7 +3167,7 @@ int MemoryImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(fileId,messageIndex);
     if (cInfo == nullptr)
@@ -3199,7 +3199,7 @@ int MemoryImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(fileId);
     if (fileInfo == nullptr)
@@ -3230,7 +3230,7 @@ int MemoryImplementation::_deleteContentListByFileName(T::SessionId sessionId,co
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::FileInfo *fileInfo = mFileInfoList.getFileInfoByName(filename);
     if (fileInfo == nullptr)
@@ -3261,7 +3261,7 @@ int MemoryImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].deleteContentInfoByGroupFlags(groupFlags);
@@ -3288,7 +3288,7 @@ int MemoryImplementation::_deleteContentListByProducerId(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
     if (producerInfo == nullptr)
@@ -3319,7 +3319,7 @@ int MemoryImplementation::_deleteContentListByProducerName(T::SessionId sessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
     if (producerInfo == nullptr)
@@ -3350,7 +3350,7 @@ int MemoryImplementation::_deleteContentListByGenerationId(T::SessionId sessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
@@ -3381,7 +3381,7 @@ int MemoryImplementation::_deleteContentListByGenerationName(T::SessionId sessio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
     if (generationInfo == nullptr)
@@ -3412,7 +3412,7 @@ int MemoryImplementation::_deleteContentListBySourceId(T::SessionId sessionId,ui
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].deleteContentInfoBySourceId(sourceId);
@@ -3439,7 +3439,7 @@ int MemoryImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uin
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(fileId,messageIndex);
     if (cInfo != nullptr)
@@ -3468,7 +3468,7 @@ int MemoryImplementation::_getContentList(T::SessionId sessionId,uint startFileI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     contentInfoList.clear();
 
@@ -3493,7 +3493,7 @@ int MemoryImplementation::_getContentListByFileId(T::SessionId sessionId,uint fi
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     contentInfoList.clear();
 
@@ -3518,7 +3518,7 @@ int MemoryImplementation::_getContentListByFileIdList(T::SessionId sessionId,std
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     contentInfoList.clear();
 
@@ -3549,7 +3549,7 @@ int MemoryImplementation::_getContentListByFileName(T::SessionId sessionId,const
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     contentInfoList.clear();
 
@@ -3578,7 +3578,7 @@ int MemoryImplementation::_getContentListByGroupFlags(T::SessionId sessionId,uin
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     contentInfoList.clear();
 
@@ -3603,7 +3603,7 @@ int MemoryImplementation::_getContentListByProducerId(T::SessionId sessionId,uin
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
     if (producerInfo == nullptr)
@@ -3632,7 +3632,7 @@ int MemoryImplementation::_getContentListByProducerName(T::SessionId sessionId,c
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
     if (producerInfo == nullptr)
@@ -3661,7 +3661,7 @@ int MemoryImplementation::_getContentListByGenerationId(T::SessionId sessionId,u
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
@@ -3690,7 +3690,7 @@ int MemoryImplementation::_getContentListByGenerationName(T::SessionId sessionId
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
     if (generationInfo == nullptr)
@@ -3711,7 +3711,7 @@ int MemoryImplementation::_getContentListByGenerationName(T::SessionId sessionId
 
 
 
-int MemoryImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3719,7 +3719,7 @@ int MemoryImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
@@ -3740,7 +3740,7 @@ int MemoryImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId
 
 
 
-int MemoryImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3748,7 +3748,7 @@ int MemoryImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
     if (generationInfo == nullptr)
@@ -3777,7 +3777,7 @@ int MemoryImplementation::_getContentListBySourceId(T::SessionId sessionId,uint 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     contentInfoList.clear();
 
@@ -3794,7 +3794,7 @@ int MemoryImplementation::_getContentListBySourceId(T::SessionId sessionId,uint 
 
 
 
-int MemoryImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3802,7 +3802,7 @@ int MemoryImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     char st[100];
     strcpy(st,parameterKey.c_str());
@@ -3901,7 +3901,7 @@ int MemoryImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
 
 
 
-int MemoryImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3909,7 +3909,7 @@ int MemoryImplementation::_getContentListByParameterAndGenerationId(T::SessionId
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
@@ -4012,7 +4012,7 @@ int MemoryImplementation::_getContentListByParameterAndGenerationId(T::SessionId
 
 
 
-int MemoryImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4020,7 +4020,7 @@ int MemoryImplementation::_getContentListByParameterAndGenerationName(T::Session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoByName(generationName);
     if (generationInfo == nullptr)
@@ -4122,7 +4122,7 @@ int MemoryImplementation::_getContentListByParameterAndGenerationName(T::Session
 
 
 
-int MemoryImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4130,7 +4130,7 @@ int MemoryImplementation::_getContentListByParameterAndProducerId(T::SessionId s
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
     if (producerInfo == nullptr)
@@ -4232,7 +4232,7 @@ int MemoryImplementation::_getContentListByParameterAndProducerId(T::SessionId s
 
 
 
-int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4240,7 +4240,7 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
@@ -4363,7 +4363,7 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
 
 
 
-int MemoryImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4371,7 +4371,7 @@ int MemoryImplementation::_getContentListByParameterAndProducerName(T::SessionId
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByName(producerName);
     if (producerInfo == nullptr)
@@ -4481,7 +4481,7 @@ int MemoryImplementation::_getContentListOfInvalidIntegrity(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     contentInfoList.clear();
 
@@ -4543,7 +4543,7 @@ int MemoryImplementation::_getContentGeometryIdListByGenerationId(T::SessionId s
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
@@ -4572,7 +4572,7 @@ int MemoryImplementation::_getContentParamListByGenerationId(T::SessionId sessio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
@@ -4628,7 +4628,7 @@ int MemoryImplementation::_getContentParamKeyListByGenerationId(T::SessionId ses
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
@@ -4657,7 +4657,7 @@ int MemoryImplementation::_getContentTimeListByGenerationId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
@@ -4687,7 +4687,7 @@ int MemoryImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
@@ -4716,7 +4716,7 @@ int MemoryImplementation::_getContentTimeListByProducerId(T::SessionId sessionId
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     contentTimeList.clear();
 
@@ -4742,7 +4742,7 @@ int MemoryImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessi
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     list.clear();
 
@@ -4854,7 +4854,7 @@ int MemoryImplementation::_deleteVirtualContent(T::SessionId sessionId)
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].deleteVirtualContent();
@@ -4884,7 +4884,7 @@ int MemoryImplementation::_updateVirtualContent(T::SessionId sessionId)
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
       mContentInfoList[t].deleteVirtualContent();
@@ -5177,7 +5177,7 @@ bool MemoryImplementation::syncProducerList()
     if (!mContentSyncEnabled)
       return true;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     uint len = mProducerInfoList.getLength();
     for (uint t=0; t<len; t++)
@@ -5278,7 +5278,7 @@ bool MemoryImplementation::syncGenerationList()
     if (!mContentSyncEnabled)
       return true;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     uint len = mGenerationInfoList.getLength();
     for (uint t=0; t<len; t++)
@@ -5387,7 +5387,7 @@ bool MemoryImplementation::syncFileList()
     if (!mContentSyncEnabled)
       return true;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::EventId startEventId = mMaxEventId;
     uint maxLen = 1000000000;
@@ -5521,7 +5521,7 @@ bool MemoryImplementation::syncContentList()
     if (!mContentSyncEnabled)
       return true;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::EventId startEventId = mMaxEventId;
     uint maxLen = 1000000000;

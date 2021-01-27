@@ -20,6 +20,7 @@ class ParameterValues
     void                    print(std::ostream& stream,uint level,uint optionFlags);
 
     std::string             mForecastTime;
+    time_t                  mForecastTimeUTC;
     uint                    mProducerId;
     uint                    mGenerationId;
     ulonglong               mGenerationFlags;

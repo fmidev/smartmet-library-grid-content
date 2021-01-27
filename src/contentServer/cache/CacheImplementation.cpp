@@ -116,7 +116,7 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
 
     if (mContentStorage != nullptr)
     {
-      AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+      AutoWriteLock lock(&mModificationLock);
 
       T::EventInfo eventInfo;
       mUpdateInProgress = true;
@@ -327,7 +327,7 @@ void CacheImplementation::reloadData()
     mReloadActivated = true;
     if (mContentStorage != nullptr)
     {
-      AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+      AutoWriteLock lock(&mModificationLock);
 
       T::EventInfo eventInfo;
       mUpdateInProgress = true;
@@ -613,8 +613,8 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
 
     T::ContentInfoList contentInfoList;
 
-    std::string startTime = "19000101T00000";
-    std::string endTime = "23000101T00000";
+    time_t startTime = 0;
+    time_t endTime = 0xFFFFFFFF;
 
     switch (parameterKeyType)
     {
@@ -1951,7 +1951,7 @@ int CacheImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
 
 
 
-int CacheImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,const std::string& forecastTime)
+int CacheImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,time_t forecastTime)
 {
   FUNCTION_TRACE
   try
@@ -2571,7 +2571,7 @@ int CacheImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
     if (mUpdateInProgress)
       return mContentStorage->getLastEventInfo(sessionId,requestingServerId,eventInfo);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2605,7 +2605,7 @@ int CacheImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
     if (mUpdateInProgress)
       return mContentStorage->getEventInfoList(sessionId,requestingServerId,startEventId,maxRecords,eventInfoList);
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -3257,7 +3257,7 @@ int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,
 
 
 
-int CacheImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3301,7 +3301,7 @@ int CacheImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
 
 
 
-int CacheImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3378,7 +3378,7 @@ int CacheImplementation::_getContentListBySourceId(T::SessionId sessionId,uint s
 
 
 
-int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3494,7 +3494,7 @@ int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
 
 
 
-int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3614,7 +3614,7 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
 
 
 
-int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3731,7 +3731,7 @@ int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionI
 
 
 
-int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3848,7 +3848,7 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
 
 
 
-int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3966,7 +3966,7 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
 
 
 
-int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4014,8 +4014,8 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
 
     contentInfoList.clear();
 
-    std::string startTime = "19000101T000000";
-    std::string endTime = "23000101T000000";
+    time_t startTime = 0;
+    time_t endTime = 0xFFFFFFFF;
 
     T::ParamLevel minLevel = level;
     T::ParamLevel maxLevel = level;
@@ -4751,7 +4751,7 @@ void CacheImplementation::event_clear(T::EventInfo& eventInfo)
   {
     PRINT_DATA(mDebugLog,"*** Clear event : Deleting all cached information!\n");
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     mContentTimeCache.clear();
 
@@ -4793,7 +4793,7 @@ void CacheImplementation::event_producerAdded(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::ProducerInfo producerInfo;
     if (mContentStorage->getProducerInfoById(mSessionId,eventInfo.mId1,producerInfo) == Result::OK)
@@ -4816,7 +4816,7 @@ void CacheImplementation::event_producerDeleted(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     mContentInfoList.deleteContentInfoByProducerId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoByProducerId(eventInfo.mId1);
@@ -4837,7 +4837,7 @@ void CacheImplementation::event_producerListDeletedBySourceId(T::EventInfo& even
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     mContentInfoList.deleteContentInfoBySourceId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoBySourceId(eventInfo.mId1);
@@ -4859,7 +4859,7 @@ void CacheImplementation::event_generationAdded(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::GenerationInfo generationInfo;
     if (mContentStorage->getGenerationInfoById(mSessionId,eventInfo.mId1,generationInfo) == Result::OK)
@@ -4882,7 +4882,7 @@ void CacheImplementation::event_generationDeleted(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     auto it = mContentTimeCache.find(eventInfo.mId1);
     if (it != mContentTimeCache.end())
@@ -4926,7 +4926,7 @@ void CacheImplementation::event_generationListDeletedByProducerId(T::EventInfo& 
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     mContentInfoList.deleteContentInfoByProducerId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoByProducerId(eventInfo.mId1);
@@ -4947,7 +4947,7 @@ void CacheImplementation::event_generationListDeletedBySourceId(T::EventInfo& ev
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     mContentInfoList.deleteContentInfoBySourceId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoBySourceId(eventInfo.mId1);
@@ -4968,7 +4968,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     uint len = eventInfo.mNote.length();
 
@@ -5008,7 +5008,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
               auto it = mContentTimeCache.find(contentInfo->mGenerationId);
               if (it != mContentTimeCache.end())
               {
-                if (it->second.find(contentInfo->mForecastTime) == it->second.end())
+                //if (it->second.find(contentInfo->mForecastTime) == it->second.end())
                   it->second.insert(contentInfo->mForecastTime);
               }
 
@@ -5065,7 +5065,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
                   auto it = mContentTimeCache.find(cInfo->mGenerationId);
                   if (it != mContentTimeCache.end())
                   {
-                    if (it->second.find(cInfo->mForecastTime) == it->second.end())
+                    //if (it->second.find(cInfo->mForecastTime) == it->second.end())
                       it->second.insert(cInfo->mForecastTime);
                   }
 
@@ -5100,7 +5100,7 @@ void CacheImplementation::event_fileDeleted(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     int cnt = mContentInfoList.markDeletedByFileId(eventInfo.mId1);
     if (cnt > 0)
@@ -5132,7 +5132,7 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::FileInfo fileInfo;
     if (mContentStorage->getFileInfoById(mSessionId,eventInfo.mId1,fileInfo) == Result::OK)
@@ -5196,7 +5196,7 @@ void CacheImplementation::event_fileListDeletedByGroupFlags(T::EventInfo& eventI
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     mContentInfoList.deleteContentInfoByGroupFlags(eventInfo.mId1);
     mFileInfoList.deleteFileInfoByGroupFlags(eventInfo.mId1);
@@ -5216,7 +5216,7 @@ void CacheImplementation::event_fileListDeletedByProducerId(T::EventInfo& eventI
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     mContentInfoList.deleteContentInfoByProducerId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoByProducerId(eventInfo.mId1);
@@ -5236,7 +5236,7 @@ void CacheImplementation::event_fileListDeletedByGenerationId(T::EventInfo& even
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     mContentInfoList.deleteContentInfoByGenerationId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoByGenerationId(eventInfo.mId1);
@@ -5257,7 +5257,7 @@ void CacheImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventInf
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     mContentInfoList.deleteContentInfoBySourceId(eventInfo.mId1);
     mFileInfoList.deleteFileInfoBySourceId(eventInfo.mId1);
@@ -5277,7 +5277,7 @@ void CacheImplementation::event_contentListDeletedByFileId(T::EventInfo& eventIn
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
     mContentInfoList.deleteContentInfoByFileId(eventInfo.mId1);
   }
   catch (...)
@@ -5295,7 +5295,7 @@ void CacheImplementation::event_contentListDeletedByGroupFlags(T::EventInfo& eve
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
     mContentInfoList.deleteContentInfoByGroupFlags(eventInfo.mId1);
   }
   catch (...)
@@ -5313,7 +5313,7 @@ void CacheImplementation::event_contentListDeletedByProducerId(T::EventInfo& eve
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
     mContentInfoList.deleteContentInfoByProducerId(eventInfo.mId1);
   }
   catch (...)
@@ -5331,7 +5331,7 @@ void CacheImplementation::event_contentListDeletedBySourceId(T::EventInfo& event
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
     mContentInfoList.deleteContentInfoBySourceId(eventInfo.mId1);
   }
   catch (...)
@@ -5349,7 +5349,7 @@ void CacheImplementation::event_contentListDeletedByGenerationId(T::EventInfo& e
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
     mContentInfoList.deleteContentInfoByGenerationId(eventInfo.mId1);
   }
   catch (...)
@@ -5367,7 +5367,7 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
     if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
@@ -5389,7 +5389,7 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
       auto it = mContentTimeCache.find(contentInfo.mGenerationId);
       if (it != mContentTimeCache.end())
       {
-        if (it->second.find(contentInfo.mForecastTime) == it->second.end())
+        //if (it->second.find(contentInfo.mForecastTime) == it->second.end())
           it->second.insert(contentInfo.mForecastTime);
       }
 
@@ -5420,7 +5420,7 @@ void CacheImplementation::event_contentDeleted(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     T::ContentInfo *contentInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
     if (contentInfo != nullptr)
@@ -5444,7 +5444,7 @@ void CacheImplementation::event_deleteVirtualContent(T::EventInfo& eventInfo)
   try
   {
     PRINT_DATA(mDebugLog,"Delete virtual content event received\n");
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     mContentInfoList.deleteVirtualContent();
     mFileInfoList.deleteVirtualFiles();
@@ -5465,7 +5465,7 @@ void CacheImplementation::event_updateVirtualContent(T::EventInfo& eventInfo)
   try
   {
     PRINT_DATA(mDebugLog,"Update virtual content event received\n");
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     mContentInfoList.deleteVirtualContent();
     mFileInfoList.deleteVirtualFiles();
@@ -5692,7 +5692,7 @@ void CacheImplementation::processEvents(bool eventThread)
     }
 
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     if (mFileDeleteCount > 0)
     {
@@ -5767,7 +5767,7 @@ void CacheImplementation::saveData()
   {
     if (mSaveEnabled)
     {
-      AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+      AutoReadLock lock(&mModificationLock);
 
       if (mProducerCount != mProducerInfoList.getLength())
         mProducerInfoList.writeToFile(mSaveDir + "/producer.csv");
@@ -5830,7 +5830,7 @@ void CacheImplementation::swapData()
       }
     }
 
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     SearchStructure_sptr nptr(new SearchStructure());
 
@@ -5873,6 +5873,24 @@ void CacheImplementation::swapData()
 
     if (mContentInfoListEnabled[7])
       nptr->mContentInfoList[7].sort(T::ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time);
+
+    uint pLen = nptr->mProducerInfoList.getLength();
+
+    for (uint p=0; p<pLen; p++)
+    {
+      T::ProducerInfo *producerInfo = nptr->mProducerInfoList.getProducerInfoByIndex(p);
+
+      std::size_t generationHash = nptr->mGenerationInfoList.getHashByProducerId(producerInfo->mProducerId);
+      std::size_t fileHash = nptr->mFileInfoList.getHashByProducerId(producerInfo->mProducerId);
+      std::size_t contentHash = nptr->mContentInfoList[0].getHashByProducerId(producerInfo->mProducerId);
+
+      std::size_t h = 0;
+      boost::hash_combine(h,generationHash);
+      boost::hash_combine(h,fileHash);
+      boost::hash_combine(h,contentHash);
+
+      producerInfo->mHash = h;
+    }
 
 
     // ### Updating generation deletion times

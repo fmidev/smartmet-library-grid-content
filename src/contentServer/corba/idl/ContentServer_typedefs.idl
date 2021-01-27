@@ -63,6 +63,7 @@ struct CorbaProducerInfo
   string             description;
   unsigned long      flags;
   unsigned long      sourceId;
+  unsigned long long hash;  
 };
 
 typedef sequence<CorbaProducerInfo> CorbaProducerInfoList;

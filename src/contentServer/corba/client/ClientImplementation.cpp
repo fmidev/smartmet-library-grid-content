@@ -1193,14 +1193,14 @@ int ClientImplementation::_deleteFileInfoListByGenerationId(T::SessionId session
 
 
 
-int ClientImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,const std::string& forecastTime)
+int ClientImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,time_t forecastTime)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    int result = mService->deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime.c_str());
+    int result = mService->deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime);
 
     mLastAccessTime = time(nullptr);
     return result;
@@ -2205,7 +2205,7 @@ int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId
 
 
 
-int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -2214,7 +2214,7 @@ int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
-    int result = mService->getContentListByGenerationIdAndTimeRange(sessionId, generationId, startTime.c_str(), endTime.c_str(), corbaContentInfoList);
+    int result = mService->getContentListByGenerationIdAndTimeRange(sessionId, generationId, startTime, endTime, corbaContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
@@ -2229,7 +2229,7 @@ int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId
 
 
 
-int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -2238,7 +2238,7 @@ int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
-    int result = mService->getContentListByGenerationNameAndTimeRange(sessionId, generationName.c_str(), startTime.c_str(), endTime.c_str(), corbaContentInfoList);
+    int result = mService->getContentListByGenerationNameAndTimeRange(sessionId, generationName.c_str(), startTime, endTime, corbaContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
@@ -2277,7 +2277,7 @@ int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId, uint
 
 
 
-int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -2286,7 +2286,7 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
-    int result = mService->getContentListByParameter(sessionId, (CORBA::Octet)parameterKeyType, parameterKey.c_str(),(CORBA::Octet)parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime.c_str(), endTime.c_str(), requestFlags,corbaContentInfoList);
+    int result = mService->getContentListByParameter(sessionId, (CORBA::Octet)parameterKeyType, parameterKey.c_str(),(CORBA::Octet)parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime, endTime, requestFlags,corbaContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
@@ -2301,7 +2301,7 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
 
 
 
-int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -2310,7 +2310,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
-    int result = mService->getContentListByParameterAndGenerationId(sessionId,generationId,(CORBA::Octet)parameterKeyType, parameterKey.c_str(),(CORBA::Octet)parameterLevelIdType,parameterLevelId,minLevel,maxLevel, forecastType, forecastNumber, geometryId, startTime.c_str(), endTime.c_str(), requestFlags, corbaContentInfoList);
+    int result = mService->getContentListByParameterAndGenerationId(sessionId,generationId,(CORBA::Octet)parameterKeyType, parameterKey.c_str(),(CORBA::Octet)parameterLevelIdType,parameterLevelId,minLevel,maxLevel, forecastType, forecastNumber, geometryId, startTime, endTime, requestFlags, corbaContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
@@ -2325,7 +2325,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId
 
 
 
-int ClientImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -2334,7 +2334,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
-    int result = mService->getContentListByParameterAndGenerationName(sessionId,generationName.c_str(),(CORBA::Octet)parameterKeyType, parameterKey.c_str(),(CORBA::Octet)parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime.c_str(), endTime.c_str(), requestFlags, corbaContentInfoList);
+    int result = mService->getContentListByParameterAndGenerationName(sessionId,generationName.c_str(),(CORBA::Octet)parameterKeyType, parameterKey.c_str(),(CORBA::Octet)parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime, endTime, requestFlags, corbaContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
@@ -2348,7 +2348,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
 
 
 
-int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -2357,31 +2357,7 @@ int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId s
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
-    int result = mService->getContentListByParameterAndProducerId(sessionId,producerId,(CORBA::Octet)parameterKeyType, parameterKey.c_str(),(CORBA::Octet)parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime.c_str(), endTime.c_str(), requestFlags, corbaContentInfoList);
-
-    if (result == 0)
-      ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
-
-    mLastAccessTime = time(nullptr);
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
-
-
-
-int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP, "The client is not initialized!");
-
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
-
-    int result = mService->getContentListByParameterAndProducerName(sessionId,producerName.c_str(),(CORBA::Octet)parameterKeyType, parameterKey.c_str(),(CORBA::Octet)parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime.c_str(), endTime.c_str(), requestFlags, corbaContentInfoList);
+    int result = mService->getContentListByParameterAndProducerId(sessionId,producerId,(CORBA::Octet)parameterKeyType, parameterKey.c_str(),(CORBA::Octet)parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime, endTime, requestFlags, corbaContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
@@ -2396,7 +2372,7 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
 
 
 
-int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -2405,7 +2381,31 @@ int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(
 
     ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
 
-    int result = mService->getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,(CORBA::Octet)parameterKeyType, parameterKey.c_str(),(CORBA::Octet)parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime.c_str(),corbaContentInfoList);
+    int result = mService->getContentListByParameterAndProducerName(sessionId,producerName.c_str(),(CORBA::Octet)parameterKeyType, parameterKey.c_str(),(CORBA::Octet)parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime, endTime, requestFlags, corbaContentInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& contentInfoList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+
+    int result = mService->getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,(CORBA::Octet)parameterKeyType, parameterKey.c_str(),(CORBA::Octet)parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,corbaContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);

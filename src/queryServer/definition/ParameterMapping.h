@@ -17,6 +17,7 @@ class ParameterMapping
     virtual                     ~ParameterMapping();
 
     virtual std::size_t         getHash();
+    virtual std::size_t         getKeyHash();
 
     void                        print(std::ostream& stream,uint level,uint optionFlags);
 
@@ -24,6 +25,7 @@ class ParameterMapping
     std::string                 mParameterName;
     T::ParamKeyType             mParameterKeyType;
     T::ParamId                  mParameterKey;
+    std::size_t                 mParameterKeyHash;
     T::GeometryId               mGeometryId;
     T::ParamLevelIdType         mParameterLevelIdType;
     T::ParamLevelId             mParameterLevelId;

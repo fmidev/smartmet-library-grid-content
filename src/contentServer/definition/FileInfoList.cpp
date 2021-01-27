@@ -119,7 +119,7 @@ FileInfoList::~FileInfoList()
     if (mArray == nullptr)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     if (mReleaseObjects)
     {
       for (uint t=0; t<mLength; t++)
@@ -153,7 +153,7 @@ FileInfoList& FileInfoList::operator=(FileInfoList& fileInfoList)
 
     clear();
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
 
     if (fileInfoList.getModificationLockPtr() != mModificationLockPtr)
       fileInfoList.lock();
@@ -192,7 +192,7 @@ void FileInfoList::addFileInfo(FileInfo *fileInfo)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
 
     if (mArray == nullptr  ||  mLength == mSize)
     {
@@ -242,7 +242,7 @@ void FileInfoList::addFileInfoList(FileInfoList& fileInfoList)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     addFileInfoListNoLock(fileInfoList);
   }
   catch (...)
@@ -359,7 +359,7 @@ void FileInfoList::clear()
     if (mArray == nullptr)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     if (mReleaseObjects && mLength > 0)
     {
       for (uint t=0; t<mLength; t++)
@@ -387,7 +387,7 @@ void FileInfoList::increaseSize(uint newSize)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     increaseSizeNoLock(newSize);
   }
   catch (...)
@@ -453,7 +453,7 @@ FileInfo* FileInfoList::getFileInfoById(uint fileId)
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     FileInfo search;
     search.mFileId = fileId;
@@ -485,7 +485,7 @@ bool FileInfoList::getFileInfoById(uint fileId,FileInfo& fileInfo)
     if (mArray == nullptr ||  mLength == 0)
       return false;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     FileInfo search;
     search.mFileId = fileId;
@@ -550,7 +550,7 @@ void FileInfoList::markFileInfoDeletedById(uint fileId)
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     FileInfo search;
     search.mFileId = fileId;
@@ -582,7 +582,7 @@ int FileInfoList::getClosestIndex(uint comparisonMethod,FileInfo& fileInfo)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     return getClosestIndexNoLock(comparisonMethod,fileInfo);
   }
   catch (...)
@@ -679,7 +679,7 @@ FileInfo* FileInfoList::getFileInfoByName(const std::string& filename)
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     FileInfo search;
     search.mName = filename;
@@ -711,7 +711,7 @@ bool FileInfoList::getFileInfoByName(const std::string& filename,FileInfo& fileI
     if (mArray == nullptr ||  mLength == 0)
       return false;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     FileInfo search;
     search.mName = filename;
@@ -745,7 +745,7 @@ FileInfo* FileInfoList::getFileInfoByIndex(uint index)
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     if (index > mLength)
       return nullptr;
 
@@ -779,7 +779,7 @@ void FileInfoList::getFileInfoList(uint startFileId,uint maxRecords,FileInfoList
       return;
     }
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     uint startIdx = 0;
     uint sz = getLength();
 
@@ -824,7 +824,7 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,FileInfoList& fil
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     uint sz = getLength();
 
     for (uint t=0; t<sz; t++)
@@ -865,7 +865,7 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,
       return;
     }
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     uint startIdx = 0;
     uint sz = getLength();
 
@@ -910,7 +910,7 @@ std::size_t FileInfoList::getHash()
     if (mArray == nullptr ||  mLength == 0)
       return hash;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     uint sz = getLength();
 
     for (uint t=0; t<sz; t++)
@@ -943,7 +943,7 @@ std::size_t FileInfoList::getHashByProducerId(uint producerId)
     if (mArray == nullptr ||  mLength == 0)
       return hash;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     uint sz = getLength();
 
     for (uint t=0; t<sz; t++)
@@ -976,7 +976,7 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,FileInfoList&
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     uint sz = getLength();
 
     for (uint t=0; t<sz; t++)
@@ -1017,7 +1017,7 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFil
       return;
     }
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     uint startIdx = 0;
     uint sz = getLength();
 
@@ -1062,7 +1062,7 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,FileInfoList& fil
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     uint sz = getLength();
 
     for (uint t=0; t<sz; t++)
@@ -1103,7 +1103,7 @@ void FileInfoList::getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,
       return;
     }
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     uint startIdx = 0;
     uint sz = getLength();
 
@@ -1148,7 +1148,7 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,FileInfoList& fileInf
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     uint sz = getLength();
 
     for (uint t=0; t<sz; t++)
@@ -1189,7 +1189,7 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,uint
       return;
     }
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     uint startIdx = 0;
     uint sz = getLength();
 
@@ -1232,7 +1232,7 @@ uint FileInfoList::getFileInfoCountByProducerId(uint producerId)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     uint count = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -1263,7 +1263,7 @@ uint FileInfoList::getFileInfoCountByGenerationId(uint generationId)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     uint count = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -1294,7 +1294,7 @@ uint FileInfoList::getFileInfoCountBySourceId(uint sourceId)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     uint count = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -1358,7 +1358,7 @@ bool FileInfoList::deleteFileInfoById(uint fileId)
     if (mArray == nullptr ||  mLength == 0)
       return false;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
 
     FileInfo search;
     search.mFileId = fileId;
@@ -1400,7 +1400,7 @@ bool FileInfoList::deleteFileInfoByName(const std::string& filename)
     if (mArray == nullptr ||  mLength == 0)
       return false;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
 
     FileInfo search;
     search.mName = filename;
@@ -1441,7 +1441,7 @@ uint FileInfoList::deleteFileInfoByGroupFlags(uint groupFlags)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1483,7 +1483,7 @@ uint FileInfoList::deleteFileInfoByProducerId(uint producerId)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1527,7 +1527,7 @@ uint FileInfoList::deleteMarkedFiles()
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1571,7 +1571,7 @@ uint FileInfoList::deleteFileInfoByGenerationId(uint generationId)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1614,7 +1614,7 @@ uint FileInfoList::deleteFileInfoByGenerationIdList(std::set<uint>& generationId
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1657,7 +1657,7 @@ bool FileInfoList::deleteFileInfoByIndex(uint index)
     if (mArray == nullptr ||  mLength == 0)
       return false;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
 
     if (index >= mLength)
       return false;
@@ -1694,7 +1694,7 @@ uint FileInfoList::deleteFileInfoBySourceId(uint sourceId)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1738,7 +1738,7 @@ uint FileInfoList::deleteFileInfoByFileIdList(std::set<uint>& fileIdList)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1782,7 +1782,7 @@ uint FileInfoList::deleteVirtualFiles()
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint count = 0;
     uint p = 0;
     for (uint t=0; t<mLength; t++)
@@ -1967,7 +1967,7 @@ void FileInfoList::sort(uint comparisonMethod)
     if (mComparisonMethod == comparisonMethod)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     mComparisonMethod = comparisonMethod;
 
     if (mArray == nullptr || mLength < 2)
@@ -2002,7 +2002,7 @@ time_t FileInfoList::getLastFileDeletionTimeByGenerationId(uint generationId)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
@@ -2049,7 +2049,7 @@ void FileInfoList::writeToFile(const std::string& filename,const char *filemode)
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     FILE *file = fopen(filename.c_str(),filemode);
     if (file == nullptr)
@@ -2080,7 +2080,7 @@ void FileInfoList::print(std::ostream& stream,uint level,uint optionFlags)
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     stream << space(level) << "FileInfoList\n";
     for (uint t=0; t<mLength; t++)

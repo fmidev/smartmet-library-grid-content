@@ -18,6 +18,7 @@ ProducerInfo::ProducerInfo()
     mProducerId = 0;
     mFlags = 0;
     mSourceId = 0;
+    mHash = 0;
   }
   catch (...)
   {
@@ -39,6 +40,7 @@ ProducerInfo::ProducerInfo(const ProducerInfo& producerInfo)
     mDescription = producerInfo.mDescription;
     mFlags = producerInfo.mFlags;
     mSourceId = producerInfo.mSourceId;
+    mHash = producerInfo.mHash;
   }
   catch (...)
   {
@@ -57,6 +59,7 @@ ProducerInfo::ProducerInfo(const char *csv)
     mProducerId = 0;
     mFlags = 0;
     mSourceId = 0;
+    mHash = 0;
     setCsv(csv);
   }
   catch (...)
@@ -97,6 +100,7 @@ ProducerInfo& ProducerInfo::operator=(const ProducerInfo& producerInfo)
     mDescription = producerInfo.mDescription;
     mFlags = producerInfo.mFlags;
     mSourceId = producerInfo.mSourceId;
+    mHash = producerInfo.mHash;
 
     return *this;
   }

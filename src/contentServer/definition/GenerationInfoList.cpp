@@ -151,7 +151,7 @@ GenerationInfoList::~GenerationInfoList()
     if (mArray == nullptr)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     if (mReleaseObjects && mLength > 0)
     {
       for (uint t=0; t<mLength; t++)
@@ -183,7 +183,7 @@ GenerationInfoList& GenerationInfoList::operator=(GenerationInfoList& generation
 
     clear();
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
 
     if (generationInfoList.getModificationLockPtr() != mModificationLockPtr)
       generationInfoList.lock();
@@ -303,7 +303,7 @@ GenerationInfo* GenerationInfoList::addGenerationInfo(GenerationInfo *generation
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
 
     if (mArray == nullptr  ||  mLength == mSize)
     {
@@ -408,7 +408,7 @@ void GenerationInfoList::clear()
     if (mArray == nullptr)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     if (mReleaseObjects && mLength > 0)
     {
       for (uint t=0; t<mLength; t++)
@@ -442,7 +442,7 @@ int GenerationInfoList::getClosestIndex(uint comparisonMethod,GenerationInfo& ge
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     return getClosestIndexNoLock(comparisonMethod,generationInfo);
   }
   catch (...)
@@ -539,7 +539,7 @@ bool GenerationInfoList::deleteGenerationInfoById(uint generationId)
     if (mArray == nullptr ||  mLength == 0)
       return false;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
 
     GenerationInfo search;
     search.mGenerationId = generationId;
@@ -581,7 +581,7 @@ void GenerationInfoList::deleteGenerationInfoListByProducerId(uint producerId)
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -621,7 +621,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoById(uint generationId)
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     GenerationInfo search;
     search.mGenerationId = generationId;
@@ -653,7 +653,7 @@ bool GenerationInfoList::getGenerationInfoById(uint generationId,GenerationInfo&
     if (mArray == nullptr ||  mLength == 0)
       return false;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     GenerationInfo search;
     search.mGenerationId = generationId;
@@ -688,7 +688,7 @@ void GenerationInfoList::deleteGenerationInfoListBySourceId(uint sourceId)
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -728,7 +728,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByIndex(uint index)
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     if (index >= mLength)
       return nullptr;
 
@@ -769,7 +769,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByName(const std::string& g
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
@@ -796,7 +796,7 @@ bool GenerationInfoList::getGenerationInfoByName(const std::string& generationNa
     if (mArray == nullptr ||  mLength == 0)
       return false;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
@@ -826,7 +826,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(const std::s
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
@@ -853,7 +853,7 @@ int GenerationInfoList::getGenerationInfoIndexByAnalysisTime(const std::string& 
     if (mArray == nullptr ||  mLength == 0)
       return -1;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
@@ -881,7 +881,7 @@ int GenerationInfoList::getGenerationInfoIndexByGenerationId(uint generationId)
     if (mArray == nullptr ||  mLength == 0)
       return -1;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
@@ -910,7 +910,7 @@ void GenerationInfoList::getGenerationInfoListByProducerId(uint producerId,Gener
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     int len =  getLength();
     int idx = 0;
@@ -965,7 +965,7 @@ std::size_t GenerationInfoList::getHash()
     if (mArray == nullptr ||  mLength == 0)
       return hash;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     int len = getLength();
     for (int t=0; t<len; t++)
@@ -997,7 +997,7 @@ std::size_t GenerationInfoList::getHashByProducerId(uint producerId)
     if (mArray == nullptr ||  mLength == 0)
       return hash;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     int len =  getLength();
     int idx = 0;
@@ -1051,7 +1051,7 @@ void GenerationInfoList::getGenerationInfoListByProducerIdAndStatus(uint produce
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     int len =  getLength();
     int idx = 0;
@@ -1107,7 +1107,7 @@ void GenerationInfoList::getGenerationInfoListByAnalysisTime(const std::string& 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
@@ -1138,7 +1138,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(u
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
@@ -1165,7 +1165,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByAnalysisTime()
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     T::GenerationInfo *generationInfo = nullptr;
     for (uint t=0; t<mLength; t++)
     {
@@ -1196,7 +1196,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(uint produ
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     T::GenerationInfo *generationInfo = nullptr;
     for (uint t=0; t<mLength; t++)
     {
@@ -1227,7 +1227,7 @@ GenerationInfo*  GenerationInfoList::getPrevGenerationInfoByProducerId(uint prod
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     T::GenerationInfo *generationInfo = nullptr;
     for (uint t=0; t<mLength; t++)
     {
@@ -1260,7 +1260,7 @@ void GenerationInfoList::getGenerationInfoListBySourceId(uint sourceId,Generatio
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
@@ -1358,7 +1358,7 @@ void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTime
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     std::set<std::string> newList;
 
@@ -1440,7 +1440,7 @@ void GenerationInfoList::sort(uint comparisonMethod)
     if (mComparisonMethod == comparisonMethod)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     mComparisonMethod = comparisonMethod;
 
     if (mArray == nullptr || mLength < 2)
@@ -1477,7 +1477,7 @@ void GenerationInfoList::writeToFile(const std::string& filename)
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     FILE *file = fopen(filename.c_str(),"we");
     if (file == nullptr)
@@ -1510,7 +1510,7 @@ void GenerationInfoList::print(std::ostream& stream,uint level,uint optionFlags)
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     stream << space(level) << "GenerationInfoList\n";
     for (uint t=0; t<mLength; t++)

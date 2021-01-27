@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <grid-files/common/Typedefs.h>
 
 
 
@@ -34,6 +35,7 @@ class ProducerInfo
     std::string     mDescription;
     uint            mFlags;
     uint            mSourceId;
+    ulonglong       mHash;
 };
 
 

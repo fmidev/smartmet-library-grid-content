@@ -288,6 +288,7 @@ void Converter::convert(T::ProducerInfo& source,ContentServer::Corba::CorbaProdu
     target.description = CORBA::string_dup(source.mDescription.c_str());
     target.flags = source.mFlags;
     target.sourceId = source.mSourceId;
+    target.hash = source.mHash;
   }
   catch (...)
   {
@@ -309,6 +310,7 @@ void Converter::convert(const ContentServer::Corba::CorbaProducerInfo& source,T:
     target.mDescription = source.description;
     target.mFlags = source.flags;
     target.mSourceId = source.sourceId;
+    target.mHash = source.hash;
   }
   catch (...)
   {

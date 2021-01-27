@@ -489,7 +489,7 @@ void ServiceImplementation::getGeometryIdListByCoordinates(uint gridWidth,uint g
 
     for (auto coordinate = coordinates.begin(); coordinate != coordinates.end(); ++coordinate)
     {
-      std::set < T::GeometryId > idList;
+      std::set<T::GeometryId> idList;
       Identification::gridDef.getGeometryIdListByLatLon(coordinate->y(), coordinate->x(), idList);
 
       for (auto g = idList.begin(); g != idList.end(); ++g)
@@ -746,13 +746,22 @@ bool ServiceImplementation::getFunctionParams(const std::string& functionParamsS
 
 
 
-void ServiceImplementation::getParameterMappings(const std::string& producerName,const std::string& parameterName,T::GeometryId geometryId, bool onlySearchEnabled, ParameterMapping_vec& mappings)
+void ServiceImplementation::getParameterMappings(const std::string& producerName,uint producerId,const std::string& parameterName,std::size_t parameterHash,T::GeometryId geometryId, bool onlySearchEnabled, ParameterMapping_vec_sptr& mappings)
 {
   try
   {
     std::size_t hash = 0;
-    boost::hash_combine(hash,producerName);
-    boost::hash_combine(hash,parameterName);
+
+    if (producerId != 0)
+      boost::hash_combine(hash,producerId);
+    else
+      boost::hash_combine(hash,producerName);
+
+    if (parameterHash != 0)
+      boost::hash_combine(hash,parameterHash);
+    else
+      boost::hash_combine(hash,parameterName);
+
     boost::hash_combine(hash,geometryId);
     boost::hash_combine(hash,onlySearchEnabled);
 
@@ -765,15 +774,17 @@ void ServiceImplementation::getParameterMappings(const std::string& producerName
         return;
       }
 
+      mappings.reset(new ParameterMapping_vec);
+
       for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
       {
-        m->getMappings(producerName, parameterName, geometryId, onlySearchEnabled, mappings);
+        m->getMappings(producerName, parameterName, geometryId, onlySearchEnabled, *mappings);
       }
     }
 
     AutoWriteLock lock(&mParameterMappingCache_modificationLock);
     if (mParameterMappingCache.find(hash) == mParameterMappingCache.end())
-      mParameterMappingCache.insert(std::pair<std::size_t, ParameterMapping_vec>(hash, mappings));
+      mParameterMappingCache.insert(std::pair<std::size_t, ParameterMapping_vec_sptr>(hash, mappings));
   }
   catch (...)
   {
@@ -787,19 +798,30 @@ void ServiceImplementation::getParameterMappings(const std::string& producerName
 
 void ServiceImplementation::getParameterMappings(
     const std::string& producerName,
+    uint producerId,
     const std::string& parameterName,
+    std::size_t parameterHash,
     T::GeometryId geometryId,
     T::ParamLevelIdType levelIdType,
     T::ParamLevelId levelId,
     T::ParamLevel level,
     bool onlySearchEnabled,
-    ParameterMapping_vec& mappings)
+    ParameterMapping_vec_sptr& mappings)
 {
   try
   {
     std::size_t hash = 0;
-    boost::hash_combine(hash,producerName);
-    boost::hash_combine(hash,parameterName);
+
+    if (producerId != 0)
+      boost::hash_combine(hash,producerId);
+    else
+      boost::hash_combine(hash,producerName);
+
+    if (parameterHash != 0)
+      boost::hash_combine(hash,parameterHash);
+    else
+      boost::hash_combine(hash,parameterName);
+
     boost::hash_combine(hash,geometryId);
     boost::hash_combine(hash,levelIdType);
     boost::hash_combine(hash,levelId);
@@ -815,16 +837,18 @@ void ServiceImplementation::getParameterMappings(
         return;
       }
 
+      mappings.reset(new ParameterMapping_vec);
+
       for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
       {
         //m->getMappings(producerName, parameterName, geometryId, onlySearchEnabled, mappings);
-        m->getMappings(producerName, parameterName, geometryId, levelIdType, levelId, level, onlySearchEnabled, mappings);
+        m->getMappings(producerName, parameterName, geometryId, levelIdType, levelId, level, onlySearchEnabled, *mappings);
       }
     }
 
     AutoWriteLock lock(&mParameterMappingCache_modificationLock);
     if (mParameterMappingCache.find(hash) == mParameterMappingCache.end())
-      mParameterMappingCache.insert(std::pair<std::size_t, ParameterMapping_vec>(hash, mappings));
+      mParameterMappingCache.insert(std::pair<std::size_t, ParameterMapping_vec_sptr>(hash, mappings));
   }
   catch (...)
   {
@@ -855,7 +879,7 @@ void ServiceImplementation::getParameterStringInfo(
   FUNCTION_TRACE
   try
   {
-    std::vector < T::ForecastNumber > forecastNumberVec;
+    std::vector<T::ForecastNumber> forecastNumberVec;
     getParameterStringInfo(param, key, geometryId,paramLevelId, paramLevel, forecastType, forecastNumberVec, producerName, producerId, generationFlags, areaInterpolationMethod,
         timeInterpolationMethod, levelInterpolationMethod);
 
@@ -968,7 +992,7 @@ void ServiceImplementation::getParameterStringInfo(
     {
       if (field[6][0] != '\0')
       {
-        std::vector < std::string > partList;
+        std::vector<std::string> partList;
         splitString(field[6], '-', partList);
         size_t sz = partList.size();
         if (sz == 1)
@@ -1136,7 +1160,7 @@ bool ServiceImplementation::parseFunction(
     }
     else
     {
-      std::vector < T::ForecastNumber > forecastNumberVec;
+      std::vector<T::ForecastNumber> forecastNumberVec;
       std::string producerName;
 
       std::string paramName;
@@ -1301,7 +1325,7 @@ void ServiceImplementation::updateQueryParameters(Query& query)
 
         PRINT_DATA(mDebugLog, " * PARAMETER: %s\n", qParam->mSymbolicName.c_str());
 
-        std::vector < T::ForecastNumber > forecastNumberVec;
+        std::vector<T::ForecastNumber> forecastNumberVec;
 
         getParameterStringInfo(qParam->mParam, qParam->mParameterKey, qParam->mGeometryId, qParam->mParameterLevelId, qParam->mParameterLevel, qParam->mForecastType, forecastNumberVec, qParam->mProducerName,
             qParam->mProducerId, qParam->mGenerationFlags, qParam->mAreaInterpolationMethod, qParam->mTimeInterpolationMethod, qParam->mLevelInterpolationMethod);
@@ -1622,7 +1646,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
     // Getting geometries that support support the given coordinates.
 
-    std::set < T::GeometryId > geometryIdList;
+    std::set<T::GeometryId> geometryIdList;
 
     if (query.mGeometryIdList.size() > 0)
     {
@@ -1660,7 +1684,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
       }
     }
 
-    std::unordered_map < std::string, uint > parameterProducers;
+    std::unordered_map<std::string,uint > parameterProducers;
 
     // Parsing parameters and functions in the query.
 
@@ -1712,45 +1736,48 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
         try
         {
+          std::size_t paramHash = 0;
+          boost::hash_combine(paramHash,paramName);
+
           if (qParam->mAlternativeParamId != 0  &&  geometryId > 0 && !isValidGeometry(geometryId,query.mAreaCoordinates))
           {
             useAlternative = true;
-            if (alternativeRequired.find(qParam->mAlternativeParamId) == alternativeRequired.end())
+            //if (alternativeRequired.find(qParam->mAlternativeParamId) == alternativeRequired.end())
               alternativeRequired.insert(qParam->mAlternativeParamId);
           }
 
           if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN  &&  !useAlternative)
           {
-            std::string startTime = query.mStartTime;
-            std::string endTime = query.mEndTime;
+            time_t startTime = utcTimeToTimeT(query.mStartTime);
+            time_t endTime = utcTimeToTimeT(query.mEndTime);
 
             if (qParam->mTimestepsBefore > 0)
             {
-              auto ss = toTimeStamp(startTime) - boost::posix_time::seconds(((qParam->mTimestepsBefore + 1) * qParam->mTimestepSizeInMinutes * 60));
-              startTime = Fmi::to_iso_string(ss);
+              startTime = startTime - ((qParam->mTimestepsBefore + 1) * qParam->mTimestepSizeInMinutes * 60);
             }
 
             if (qParam->mTimestepsAfter > 0)
             {
-              auto ss = toTimeStamp(endTime) - boost::posix_time::seconds((qParam->mTimestepsAfter * qParam->mTimestepSizeInMinutes * 60));
-              endTime = Fmi::to_iso_string(ss);
+              endTime = endTime + (qParam->mTimestepsAfter * qParam->mTimestepSizeInMinutes * 60);
             }
 
             if ((query.mFlags & Query::Flags::StartTimeFromData) != 0)
             {
-              startTime = "15000101T000000";  // Start time is the start time of the data
+              startTime = 0;  // Start time is the start time of the data
             }
 
             if ((query.mFlags & Query::Flags::EndTimeFromData) != 0)
             {
-              endTime = "30000101T000000";    // End time is the end time of the data
+              endTime = 0xFFFFFFFF;    // End time is the end time of the data
             }
 
             if (producerId == 0)
             {
               auto it = parameterProducers.find(paramName + ":" + producerName);
               if (it != parameterProducers.end())
+              {
                 producerId = it->second;
+              }
             }
 
             Producer_vec tmpProducers;
@@ -1764,7 +1791,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
             else
               tmpProducers = producers;
 
-            std::set < T::GeometryId > geomIdList;
+            std::set<T::GeometryId> geomIdList;
             if (geometryId > 0)
               geomIdList.insert(geometryId);
             else
@@ -1781,7 +1808,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
               }
             }
 
-            getGridValues(qParam->mType,tmpProducers, geomIdList, producerId, analysisTime, generationFlags, paramName, paramLevelId, paramLevel, forecastType,
+            getGridValues(qParam->mType,tmpProducers, geomIdList, producerId, analysisTime, generationFlags, paramName, paramHash, paramLevelId, paramLevel, forecastType,
                 forecastNumber, queryFlags, parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, startTime, endTime, query.mTimesteps,
                 query.mTimestepSizeInMinutes,qParam->mLocationType, query.mCoordinateType, query.mAreaCoordinates, qParam->mContourLowValues, qParam->mContourHighValues, query.mAttributeList,
                 query.mRadius, query.mMaxParameterValues, qParam->mPrecision, qParam->mValueList,qParam->mCoordinates);
@@ -1818,14 +1845,12 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
               if (len == 0  || ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0  &&  (qParam->mValueList[0]->mFlags & ParameterValues::Flags::DataAvailable) == 0))
               {
-                if (alternativeRequired.find(qParam->mAlternativeParamId) == alternativeRequired.end())
-                  alternativeRequired.insert(qParam->mAlternativeParamId);
+                alternativeRequired.insert(qParam->mAlternativeParamId);
               }
             }
             else
             {
-              if (alternativeRequired.find(qParam->mAlternativeParamId) == alternativeRequired.end())
-                alternativeRequired.insert(qParam->mAlternativeParamId);
+              alternativeRequired.insert(qParam->mAlternativeParamId);
             }
           }
         }
@@ -1840,13 +1865,12 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
     // Finding out which forecast time are found from the forecast data. The point is that different
     // parameters might contain different forecast times, and we want a list of all forecast times.
 
-    std::set < std::string > timeList;
+    std::set<std::string> timeList;
     for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
     {
       for (auto it = qParam->mValueList.begin(); it != qParam->mValueList.end(); ++it)
       {
-        if (timeList.find((*it)->mForecastTime) == timeList.end())
-          timeList.insert((*it)->mForecastTime);
+        timeList.insert((*it)->mForecastTime);
       }
     }
 
@@ -1949,7 +1973,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
     if (producers.size() == 0)
       return Result::NO_PRODUCERS_FOUND;
 
-    std::set < T::GeometryId > geometryIdList;
+    std::set<T::GeometryId> geometryIdList;
 
     if (query.mGeometryIdList.size() > 0)
     {
@@ -1981,7 +2005,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
       }
     }
 
-    std::unordered_map < std::string, uint > parameterProducers;
+    //std::unordered_map<std::string,uint> parameterProducers;
 
     // Parsing parameters and functions in the query.
 
@@ -2005,11 +2029,12 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
     // points are fetched. The area can be defined by using single or multiple polygons.
     // That's why the coordinates are defined as a vector of coordinate vectors.
 
-    std::set < std::string > timeList;
+    std::set<time_t> originalTimeList;
     for (const auto &fTime : query.mForecastTimeList)
     {
-      timeList.insert(fTime);
+      originalTimeList.insert(utcTimeToTimeT(fTime));
     }
+
 
     for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
     {
@@ -2039,53 +2064,48 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
         if (paramName.c_str()[0] == '$')
           paramName = paramName.c_str() + 1;
 
+        std::size_t paramHash = 0;
+        boost::hash_combine(paramHash,paramName);
+
         if (qParam->mAlternativeParamId != 0  &&  geometryId > 0 && !isValidGeometry(geometryId,query.mAreaCoordinates))
         {
           useAlternative = true;
-          if (alternativeRequired.find(qParam->mAlternativeParamId) == alternativeRequired.end())
-            alternativeRequired.insert(qParam->mAlternativeParamId);
+          alternativeRequired.insert(qParam->mAlternativeParamId);
         }
 
-        std::set < std::string > forecastTimeList = timeList;
-        std::unordered_set < std::string > additionalTimeList;
+        std::set<time_t> *forecastTimeList = &originalTimeList;
+        std::set<time_t> forecastTimeList2;
 
         if (qParam->mTimestepsBefore > 0 || qParam->mTimestepsAfter > 0)
         {
-          for (const auto &fTime : timeList)
+          forecastTimeList = &forecastTimeList2;
+          forecastTimeList2 = originalTimeList;
+          for (const auto &fTime : originalTimeList)
           {
             if (qParam->mTimestepsBefore > 0)
             {
-              auto ss = toTimeStamp(fTime) - boost::posix_time::seconds(((qParam->mTimestepsBefore + 1) * qParam->mTimestepSizeInMinutes * 60));
+              time_t ss = fTime - ((qParam->mTimestepsBefore + 1) * qParam->mTimestepSizeInMinutes * 60);
 
               for (uint t = 0; t < qParam->mTimestepsBefore; t++)
               {
-                ss = ss + boost::posix_time::seconds(qParam->mTimestepSizeInMinutes * 60);
-                std::string str = Fmi::to_iso_string(ss);
-                if (forecastTimeList.find(str) == forecastTimeList.end())
-                {
-                  additionalTimeList.insert(str);
-                  forecastTimeList.insert(str);
-                }
+                ss = ss + (qParam->mTimestepSizeInMinutes * 60);
+                forecastTimeList2.insert(ss);
               }
             }
 
             if (qParam->mTimestepsAfter > 0)
             {
-              auto ss = toTimeStamp(fTime);
+              time_t ss = fTime;
 
               for (uint t = 0; t < qParam->mTimestepsAfter; t++)
               {
-                ss = ss + boost::posix_time::seconds(qParam->mTimestepSizeInMinutes * 60);
-                std::string str = Fmi::to_iso_string(ss);
-                if (forecastTimeList.find(str) == forecastTimeList.end())
-                {
-                  additionalTimeList.insert(str);
-                  forecastTimeList.insert(str);
-                }
+                ss = ss + (qParam->mTimestepSizeInMinutes * 60);
+                forecastTimeList2.insert(ss);
               }
             }
           }
         }
+
 
         if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
         {
@@ -2102,69 +2122,86 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
         ulonglong gflags = generationFlags;
 
-        int ftLen = forecastTimeList.size();
+        int ftLen = forecastTimeList->size();
         qParam->mValueList.reserve(ftLen);
 
         std::vector<std::shared_ptr<ParameterValues>> tmpValueList;
         tmpValueList.reserve(ftLen);
 
-        for (auto fTime = forecastTimeList.rbegin(); fTime != forecastTimeList.rend(); ++fTime)
+        Producer_vec tmpProducers;
+        std::set<T::GeometryId> tmpGeomIdList;
+
+
+        for (auto fTime = forecastTimeList->rbegin(); fTime != forecastTimeList->rend(); ++fTime)
         {
           auto valueList = std::shared_ptr<ParameterValues>(new ParameterValues());
           tmpValueList.emplace_back(valueList);
 
           try
           {
+            /*
             if (producerId == 0)
             {
               auto it = parameterProducers.find(paramName + ":" + producerName);
               if (it != parameterProducers.end())
+              {
                 producerId = it->second;
+              }
             }
+            */
 
             if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN  &&  !useAlternative)
             {
-              Producer_vec tmpProducers;
+              Producer_vec *producersPtr = &producers;
+              std::set<T::GeometryId> *geomIdListPtr = &geometryIdList;
+
               if (producerName > " ")
               {
-                if (geometryId > 0)
-                  tmpProducers.emplace_back(std::pair<std::string, T::GeometryId>(producerName, geometryId));
-                else
-                  getProducers(producerName,tmpProducers);
-              }
-              else
-                tmpProducers = producers;
-
-              std::set < T::GeometryId > geomIdList;
-              if (geometryId > 0)
-                geomIdList.insert(geometryId);
-              else
-              if (globalGeometryId > 0  &&  producerName.empty()  &&  qParam->mProducerId == 0)
-                geomIdList.insert(globalGeometryId);
-              else
-                geomIdList = geometryIdList;
-
-              if (qParam->mType != QueryParameter::Type::PointValues &&  geomIdList.size() == 0)
-              {
-                for (auto pp = tmpProducers.begin(); pp != tmpProducers.end(); ++pp)
+                if (tmpProducers.size() == 0)
                 {
-                  geomIdList.insert(pp->second);
+                  if (geometryId > 0)
+                    tmpProducers.emplace_back(std::pair<std::string, T::GeometryId>(producerName, geometryId));
+                  else
+                    getProducers(producerName,tmpProducers);
                 }
               }
 
-              getGridValues(qParam->mType,tmpProducers, geomIdList, producerId, analysisTime, gflags, reverseGenerations, paramName, paramLevelId, paramLevel, forecastType,
+              if (tmpProducers.size() > 0)
+                producersPtr = &tmpProducers;
+
+              if (geometryId > 0)
+              {
+                if (tmpGeomIdList.size() == 0)
+                  tmpGeomIdList.insert(geometryId);
+              }
+              else
+              if (globalGeometryId > 0  &&  producerName.empty()  &&  qParam->mProducerId == 0)
+                tmpGeomIdList.insert(globalGeometryId);
+
+              if (qParam->mType != QueryParameter::Type::PointValues &&  tmpGeomIdList.size() == 0)
+              {
+                for (auto pp = tmpProducers.begin(); pp != tmpProducers.end(); ++pp)
+                {
+                  tmpGeomIdList.insert(pp->second);
+                }
+              }
+
+              if (tmpGeomIdList.size() > 0)
+                geomIdListPtr = &tmpGeomIdList;
+
+              getGridValues(qParam->mType,*producersPtr, *geomIdListPtr, producerId, analysisTime, gflags, reverseGenerations, paramName, paramHash, paramLevelId, paramLevel, forecastType,
                   forecastNumber,queryFlags,parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, *fTime, false, qParam->mLocationType,
                   query.mCoordinateType, query.mAreaCoordinates, qParam->mContourLowValues, qParam->mContourHighValues, query.mAttributeList,query.mRadius,qParam->mPrecision,*valueList,qParam->mCoordinates);
 
+              /*
               if (producerId == 0 && valueList->mProducerId != 0)
               {
                 parameterProducers.insert(std::pair<std::string, uint>(paramName + ":" + producerName, valueList->mProducerId));
               }
-
+              */
               if (valueList->mValueList.getLength() == 0  || ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0  &&  (valueList->mFlags & ParameterValues::Flags::DataAvailable) == 0))
               {
-                if (alternativeRequired.find(qParam->mAlternativeParamId) == alternativeRequired.end())
-                  alternativeRequired.insert(qParam->mAlternativeParamId);
+                alternativeRequired.insert(qParam->mAlternativeParamId);
               }
 
               if (valueList->mValueList.getLength() > 0  || ((parameterFlags & QueryParameter::Flags::NoReturnValues) != 0  &&  (valueList->mFlags & ParameterValues::Flags::DataAvailable) != 0))
@@ -2225,9 +2262,12 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
           }
 
           if (valueList->mValueList.getLength() == 0)
-            valueList->mForecastTime = *fTime;
+          {
+            valueList->mForecastTime = utcTimeFromTimeT(*fTime);
+            valueList->mForecastTimeUTC = *fTime;
+          }
 
-          if (additionalTimeList.find(*fTime) != additionalTimeList.end())
+          if (originalTimeList.find(*fTime) == originalTimeList.end())
             valueList->mFlags = valueList->mFlags | QueryServer::ParameterValues::Flags::AggregationValue;
         }
 
@@ -2243,18 +2283,17 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
     // Finding out which forecast time are found from the forecast data. The point is that different
     // parameters might contain different forecast times, and we want a list of all forecast times.
 
-    timeList.clear();
-    std::unordered_set < std::string > additionalTimeList;
+    std::set<time_t> timeList;
+    std::unordered_set<time_t> additionalTimeList;
 
     for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
     {
       for (auto it = qParam->mValueList.begin(); it != qParam->mValueList.end(); ++it)
       {
-        if (timeList.find((*it)->mForecastTime) == timeList.end())
-          timeList.insert((*it)->mForecastTime);
+        timeList.insert((*it)->mForecastTimeUTC);
 
-        if (((*it)->mFlags & QueryServer::ParameterValues::Flags::AggregationValue) != 0 && additionalTimeList.find((*it)->mForecastTime) == additionalTimeList.end())
-          additionalTimeList.insert((*it)->mForecastTime);
+        if (((*it)->mFlags & QueryServer::ParameterValues::Flags::AggregationValue) != 0)
+          additionalTimeList.insert((*it)->mForecastTimeUTC);
       }
     }
 
@@ -2266,7 +2305,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
     for (const auto &tt : timeList)
     {
-      query.mForecastTimeList.insert(tt);
+      query.mForecastTimeList.insert(utcTimeFromTimeT(tt));
 
       for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
       {
@@ -2276,11 +2315,10 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
           uint cnt = 0;
           for (auto it = qParam->mValueList.begin(); it != qParam->mValueList.end() && !found; ++it)
           {
-            int cmp = strcmp((*it)->mForecastTime.c_str(),tt.c_str());
-            if (cmp < 0)
+            if ((*it)->mForecastTimeUTC < tt)
               cnt++;
             else
-            if (cmp == 0)
+            if ((*it)->mForecastTimeUTC == tt)
             {
               found = true;
               if ((*it)->mValueList.getLength() == 0)
@@ -2296,7 +2334,8 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
             // with an empty value list.
 
             auto pValues = std::shared_ptr<ParameterValues>(new ParameterValues());
-            pValues->mForecastTime = tt;
+            pValues->mForecastTimeUTC = tt;
+            pValues->mForecastTime = utcTimeFromTimeT(tt);
 
             if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN)
               pValues->mFlags = pValues->mFlags | QueryServer::ParameterValues::Flags::AdditionalValue;
@@ -2392,7 +2431,7 @@ bool ServiceImplementation::conversionFunction(const std::string& conversionFunc
 
 
 
-void ServiceImplementation::executeConversion(const std::string& function, std::vector<std::string>& functionParams,const std::string& forecastTime,T::Coordinate_vec& coordinates,T::ParamValue_vec& valueList, T::ParamValue_vec& newValueList)
+void ServiceImplementation::executeConversion(const std::string& function, std::vector<std::string>& functionParams,time_t forecastTime,T::Coordinate_vec& coordinates,T::ParamValue_vec& valueList, T::ParamValue_vec& newValueList)
 {
   try
   {
@@ -2484,11 +2523,12 @@ void ServiceImplementation::executeConversion(const std::string& function, std::
 
 
 
-void ServiceImplementation::executeConversion(const std::string& function, std::vector<std::string>& functionParams,const std::string& forecastTime,T::GridValueList& valueList)
+void ServiceImplementation::executeConversion(const std::string& function, std::vector<std::string>& functionParams,time_t forecastTime,T::GridValueList& valueList)
 {
   try
   {
-    boost::local_time::local_date_time utcTime(toTimeStamp(forecastTime), nullptr);
+    // ******************** TODO: Make this conversion better ******************
+    boost::local_time::local_date_time utcTime(toTimeStamp(utcTimeFromTimeT(forecastTime)), nullptr);
     auto functionPtr = mFunctionCollection.getFunction(function);
 
     uint vLen = valueList.getLength();
@@ -2582,15 +2622,16 @@ ulonglong ServiceImplementation::getProducerHash(uint producerId)
 
 
 
-int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint producerId,uint generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,std::shared_ptr<T::ContentInfoList>& contentInfoList)
+int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint producerId,ulonglong producerHash,uint generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,std::size_t parameterKeyHash,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,std::shared_ptr<T::ContentInfoList>& contentInfoList)
 {
   try
   {
     std::size_t hash = 0;
     boost::hash_combine(hash,producerId);
     boost::hash_combine(hash,generationId);
-    boost::hash_combine(hash,parameterKeyType);
-    boost::hash_combine(hash,parameterKey);
+//    boost::hash_combine(hash,parameterKeyType);
+    //boost::hash_combine(hash,parameterKey);
+    boost::hash_combine(hash,parameterKeyHash);
     boost::hash_combine(hash,parameterLevelIdType);
     boost::hash_combine(hash,parameterLevelId);
     boost::hash_combine(hash,forecastType);
@@ -2602,7 +2643,8 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
     std::size_t hash2 = hash;
     boost::hash_combine(hash2,forecastTime);
-    auto producerHash = getProducerHash(producerId);
+    if (producerHash == 0)
+      producerHash = getProducerHash(producerId);
 
     {
       AutoReadLock readLock(&mContentSearchCache_modificationLock);
@@ -2638,8 +2680,8 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
         {
           // No cache entry available
 
-          std::string startTime = "19000101T000000";
-          std::string endTime = "23000101T000000";
+          time_t startTime = 0;
+          time_t endTime = 0xFFFFFFFF;
 
           mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,rec.contentInfoList);
 
@@ -2674,8 +2716,8 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       AutoWriteLock lock(&mContentCache_modificationLock);
       if (entry->producerHash != producerHash)
       {
-        std::string startTime = "19000101T000000";
-        std::string endTime = "23000101T000000";
+        time_t startTime = 0;
+        time_t endTime = 0xFFFFFFFF;
 
         mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,entry->contentInfoList);
 
@@ -2775,7 +2817,7 @@ bool ServiceImplementation::getSpecialValues(
     const std::string& analysisTime,
     ulonglong generationFlags,
     ParameterMapping& pInfo,
-    const std::string& forecastTime,
+    time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -2794,15 +2836,12 @@ bool ServiceImplementation::getSpecialValues(
   FUNCTION_TRACE
   try
   {
-    std::string startTime = forecastTime;
-    std::string endTime = forecastTime;
-
     std::string function;
-    std::vector < std::string > functionParams;
+    std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    int result = getContentListByParameterGenerationIdAndForecastTime(0,producerInfo.mProducerId,generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
+    int result = getContentListByParameterGenerationIdAndForecastTime(0,producerInfo.mProducerId,producerInfo.mHash,generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.getKeyHash(), pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
     if (result != 0)
     {
@@ -2832,7 +2871,8 @@ bool ServiceImplementation::getSpecialValues(
     valueList.mParameterKey = pInfo.mParameterKey;
     valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
     valueList.mParameterLevelId = paramLevelId;
-    valueList.mForecastTime = forecastTime;
+    valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+    valueList.mForecastTimeUTC = forecastTime;
     valueList.mProducerId = contentInfo1->mProducerId;
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGeometryId = contentInfo1->mGeometryId;
@@ -2850,7 +2890,7 @@ bool ServiceImplementation::getSpecialValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
+      if (contentInfo1->mForecastTimeUTC == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
       {
         // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
@@ -2926,13 +2966,13 @@ bool ServiceImplementation::getSpecialValues(
 
     if (contentLen == 2  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
     {
-      if (!(contentInfo1->mForecastTime < forecastTime && contentInfo2->mForecastTime > forecastTime))
+      if (!(contentInfo1->mForecastTimeUTC < forecastTime && contentInfo2->mForecastTimeUTC > forecastTime))
       {
         Fmi::Exception exception(BCP, "Unexpected result!");
         exception.addDetail("The given forecast time should been between the found content times.");
         exception.addParameter("Content 1 ForecastTime", contentInfo1->mForecastTime);
         exception.addParameter("Content 2 ForecastTime", contentInfo2->mForecastTime);
-        exception.addParameter("Request ForecastTime", forecastTime);
+        exception.addParameter("Request ForecastTime", utcTimeFromTimeT(forecastTime));
         throw exception;
       }
 
@@ -2997,7 +3037,7 @@ bool ServiceImplementation::getSpecialValues(
         }
 
         T::GridValueList list;
-        timeInterpolation(list1,list2,contentInfo1->mForecastTime, contentInfo2->mForecastTime,forecastTime,timeInterpolationMethod,list);
+        timeInterpolation(list1,list2,contentInfo1->mForecastTimeUTC, contentInfo2->mForecastTimeUTC,forecastTime,timeInterpolationMethod,list);
 
         if (conversionByFunction)
           executeConversion(function, functionParams, forecastTime, list);
@@ -3042,7 +3082,7 @@ bool ServiceImplementation::getValueVectors(
     const std::string& analysisTime,
     ulonglong generationFlags,
     ParameterMapping& pInfo,
-    const std::string& forecastTime,
+    time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -3064,15 +3104,12 @@ bool ServiceImplementation::getValueVectors(
   try
   {
     std::string function;
-    std::vector < std::string > functionParams;
+    std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
     T::ParamValue_vec valueVector;
 
-    std::string startTime = forecastTime;
-    std::string endTime = forecastTime;
-
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
+    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, producerInfo.mHash, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.getKeyHash(), pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
 
     if (result != 0)
@@ -3105,7 +3142,8 @@ bool ServiceImplementation::getValueVectors(
     valueList.mParameterKey = pInfo.mParameterKey;
     valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
     valueList.mParameterLevelId = paramLevelId;
-    valueList.mForecastTime = forecastTime;
+    valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+    valueList.mForecastTimeUTC = forecastTime;
     valueList.mProducerId = contentInfo1->mProducerId;
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
@@ -3128,7 +3166,7 @@ bool ServiceImplementation::getValueVectors(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
+      if (contentInfo1->mForecastTimeUTC == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
       {
         // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
@@ -3218,7 +3256,7 @@ bool ServiceImplementation::getValueVectors(
 
     if (contentLen == 2)
     {
-      if (contentInfo1->mForecastTime < forecastTime && contentInfo2->mForecastTime > forecastTime  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
+      if (contentInfo1->mForecastTimeUTC < forecastTime && contentInfo2->mForecastTimeUTC > forecastTime  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
       {
         // We did not find a grid with the exact forecast time, but we find grids that
         // are before and after the current forecast time. This means that we should do
@@ -3299,7 +3337,7 @@ bool ServiceImplementation::getValueVectors(
         return true;
       }
 
-      if (contentInfo1->mForecastTime == forecastTime  &&  contentInfo2->mForecastTime == forecastTime && contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
+      if (contentInfo1->mForecastTimeUTC == forecastTime  &&  contentInfo2->mForecastTimeUTC == forecastTime && contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
         // We did not find a grid with the exact level but we find grids that
         // are before and after the current level. This means that we should do
@@ -3375,7 +3413,7 @@ bool ServiceImplementation::getValueVectors(
 
     if (contentLen == 4)
     {
-      if (contentInfo1->mForecastTime < forecastTime  &&  contentInfo2->mForecastTime < forecastTime  &&  contentInfo3->mForecastTime > forecastTime  &&  contentInfo4->mForecastTime > forecastTime  &&
+      if (contentInfo1->mForecastTimeUTC < forecastTime  &&  contentInfo2->mForecastTimeUTC < forecastTime  &&  contentInfo3->mForecastTimeUTC > forecastTime  &&  contentInfo4->mForecastTimeUTC > forecastTime  &&
           contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&  contentInfo3->mParameterLevel < paramLevel  &&  contentInfo4->mParameterLevel > paramLevel
           &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden   &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
@@ -3470,7 +3508,7 @@ bool ServiceImplementation::getGridFiles(
     const std::string& analysisTime,
     ulonglong generationFlags,
     ParameterMapping& pInfo,
-    const std::string& forecastTime,
+    time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -3491,16 +3529,13 @@ bool ServiceImplementation::getGridFiles(
   try
   {
     std::string function;
-    std::vector < std::string > functionParams;
+    std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
     T::ParamValue_vec valueVector;
     T::ParamValue_vec newValueVector;
 
-    std::string startTime = forecastTime;
-    std::string endTime = forecastTime;
-
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
+    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, producerInfo.mHash, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.getKeyHash(), pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
 
     if (result != 0)
@@ -3533,7 +3568,8 @@ bool ServiceImplementation::getGridFiles(
     valueList.mParameterKey = pInfo.mParameterKey;
     valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
     valueList.mParameterLevelId = paramLevelId;
-    valueList.mForecastTime = forecastTime;
+    valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+    valueList.mForecastTimeUTC = forecastTime;
     valueList.mProducerId = contentInfo1->mProducerId;
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
@@ -3564,8 +3600,10 @@ bool ServiceImplementation::getGridFiles(
     attrList.setCaseSensitive(false);
 
 
+    std::string ftime = utcTimeFromTimeT(forecastTime);
+
     int year = 0, month = 0, day = 0, hour = 0, minute = 0, second = 0;
-    splitTimeString(forecastTime,year,month,day,hour,minute,second);
+    splitTimeString(ftime,year,month,day,hour,minute,second);
 
     const char *version1 = queryAttributeList.getAttributeValue("Grib1.IndicatorSection.EditionNumber");
     const char *version2 = queryAttributeList.getAttributeValue("Grib2.IndicatorSection.EditionNumber");
@@ -3881,7 +3919,7 @@ bool ServiceImplementation::getGridFiles(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
+      if (contentInfo1->mForecastTimeUTC == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
       {
         // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
@@ -3941,7 +3979,7 @@ bool ServiceImplementation::getGridFiles(
 
     if (contentLen == 2)
     {
-      if (contentInfo1->mForecastTime < forecastTime && contentInfo2->mForecastTime > forecastTime  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
+      if (contentInfo1->mForecastTimeUTC < forecastTime && contentInfo2->mForecastTimeUTC > forecastTime  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
       {
         // We did not find a grid with the exact forecast time, but we find grids that
         // are before and after the current forecast time. This means that we should do
@@ -3989,7 +4027,7 @@ bool ServiceImplementation::getGridFiles(
         return true;
       }
 
-      if (contentInfo1->mForecastTime == forecastTime  &&  contentInfo2->mForecastTime == forecastTime && contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
+      if (contentInfo1->mForecastTimeUTC == forecastTime  &&  contentInfo2->mForecastTimeUTC == forecastTime && contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
         // We did not find a grid with the exact level but we find grids that
         // are before and after the current level. This means that we should do
@@ -4041,7 +4079,7 @@ bool ServiceImplementation::getGridFiles(
 
     if (contentLen == 4)
     {
-      if (contentInfo1->mForecastTime < forecastTime  &&  contentInfo2->mForecastTime < forecastTime  &&  contentInfo3->mForecastTime > forecastTime  &&  contentInfo4->mForecastTime > forecastTime  &&
+      if (contentInfo1->mForecastTimeUTC < forecastTime  &&  contentInfo2->mForecastTimeUTC < forecastTime  &&  contentInfo3->mForecastTimeUTC > forecastTime  &&  contentInfo4->mForecastTimeUTC > forecastTime  &&
           contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&  contentInfo3->mParameterLevel < paramLevel  &&  contentInfo4->mParameterLevel > paramLevel
           &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
@@ -4108,7 +4146,7 @@ bool ServiceImplementation::getPointValuesByHeight(
     const std::string& analysisTime,
     ulonglong generationFlags,
     ParameterMapping& pInfo,
-    const std::string& forecastTime,
+    time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -4128,13 +4166,12 @@ bool ServiceImplementation::getPointValuesByHeight(
   {
     PRINT_DATA(mDebugLog, "getPointValuesByHeight()\n");
     std::string function;
-    std::vector < std::string > functionParams;
+    std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
-    std::string fTime = forecastTime;
-    std::string startTime = addSeconds(forecastTime,-4*3600);
-    std::string endTime = addSeconds(forecastTime,4*3600);
-
+    time_t fTime = forecastTime;
+    time_t startTime = forecastTime -4*3600;
+    time_t endTime = forecastTime + 4*3600;
 
     T::ContentInfoList tmpContentList;
 
@@ -4155,13 +4192,13 @@ bool ServiceImplementation::getPointValuesByHeight(
 
     tmpContentList.sort(T::ContentInfo::ComparisonMethod::starttime_fmiName_fmiLevelId_level_file_message);
 
-    std::set<std::string> forecastTimeList;
+    std::set<time_t> forecastTimeList;
 
     tmpContentList.getForecastTimeList(forecastTimeList);
 
     T::ContentInfoList tmpContentList2;
-    std::string prev;
-    std::string next;
+    time_t prev = 0;
+    time_t next = 0;
 
     bool timeMatch = false;
     if (forecastTimeList.find(forecastTime) != forecastTimeList.end())
@@ -4176,11 +4213,11 @@ bool ServiceImplementation::getPointValuesByHeight(
       {
         if (*it < forecastTime)
           prev = *it;
-        if (*it > forecastTime  &&  (next.empty() ||  *it < next))
+        if (*it > forecastTime  &&  (next == 0 ||  *it < next))
           next = *it;
       }
 
-      PRINT_DATA(mDebugLog, "         + Times : %s  %s\n",prev.c_str(),next.c_str());
+      PRINT_DATA(mDebugLog, "         + Times : %s  %s\n",utcTimeFromTimeT(prev).c_str(),utcTimeFromTimeT(next).c_str());
       tmpContentList.getContentInfoListByForecastTime(prev,tmpContentList2);
 
       T::ContentInfoList tmpContentList4;
@@ -4217,7 +4254,7 @@ bool ServiceImplementation::getPointValuesByHeight(
         for (uint t=0; t<cLen; t++)
         {
           T::ContentInfo *cInfo = tmpContentList3.getContentInfoByIndex(t);
-          if (cInfo->mForecastTime == prev)
+          if (cInfo->mForecastTimeUTC == prev)
           {
             if (cInfo->mParameterLevel <= paramLevel)
               prevContent = cInfo;
@@ -4241,7 +4278,7 @@ bool ServiceImplementation::getPointValuesByHeight(
           for (uint t=0; t<cLen; t++)
           {
             T::ContentInfo *cInfo = tmpContentList3.getContentInfoByIndex(t);
-            if (cInfo->mForecastTime == next)
+            if (cInfo->mForecastTimeUTC == next)
             {
               if (cInfo->mParameterLevel <= paramLevel)
                 prevContent = cInfo;
@@ -4291,7 +4328,8 @@ bool ServiceImplementation::getPointValuesByHeight(
         valueList.mParameterKey = pInfo.mParameterKey;
         valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
         valueList.mParameterLevelId = paramLevelId;
-        valueList.mForecastTime = forecastTime;
+        valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+        valueList.mForecastTimeUTC = forecastTime;
         valueList.mProducerId = contentInfo1->mProducerId;
         valueList.mGenerationId = contentInfo1->mGenerationId;
         valueList.mGenerationFlags = generationFlags;
@@ -4311,7 +4349,7 @@ bool ServiceImplementation::getPointValuesByHeight(
 
         if (contentLen == 1)
         {
-          if (contentInfo1->mForecastTime == fTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
+          if (contentInfo1->mForecastTimeUTC == fTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
           {
             // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
@@ -4352,7 +4390,7 @@ bool ServiceImplementation::getPointValuesByHeight(
 
         if (contentLen == 2)
         {
-          if (contentInfo1->mForecastTime == fTime  &&  contentInfo2->mForecastTime == fTime  &&
+          if (contentInfo1->mForecastTimeUTC == fTime  &&  contentInfo2->mForecastTimeUTC == fTime  &&
               contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&
               levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
           {
@@ -4400,7 +4438,7 @@ bool ServiceImplementation::getPointValuesByHeight(
 
         if (contentLen == 4)
         {
-          if (contentInfo1->mForecastTime < fTime  &&  contentInfo2->mForecastTime < fTime  &&  contentInfo3->mForecastTime > fTime  &&  contentInfo4->mForecastTime > fTime  &&
+          if (contentInfo1->mForecastTimeUTC < fTime  &&  contentInfo2->mForecastTimeUTC < fTime  &&  contentInfo3->mForecastTimeUTC > fTime  &&  contentInfo4->mForecastTimeUTC > fTime  &&
               contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&  contentInfo3->mParameterLevel < paramLevel  &&  contentInfo4->mParameterLevel > paramLevel
               &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
           {
@@ -4473,7 +4511,7 @@ bool ServiceImplementation::getPointValues(
     const std::string& analysisTime,
     ulonglong generationFlags,
     ParameterMapping& pInfo,
-    const std::string& forecastTime,
+    time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -4504,14 +4542,11 @@ bool ServiceImplementation::getPointValues(
     if ((pInfo.mGroupFlags & QueryServer::ParameterMapping::GroupFlags::climatology) != 0)
       climatologyParam = true;
 
-    std::string startTime = forecastTime;
-    std::string endTime = forecastTime;
-
     std::string function;
-    std::vector < std::string > functionParams;
+    std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
-    std::string fTime = forecastTime;
+    time_t fTime = forecastTime;
 
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
     if (climatologyParam)
@@ -4532,10 +4567,12 @@ bool ServiceImplementation::getPointValues(
         return false;
 
       T::ContentInfo* cInfo = contentList2.getContentInfoByIndex(0);
-      fTime = cInfo->mForecastTime.substr(0, 4) + forecastTime.substr(4);
+      std::string tmp1 = utcTimeFromTimeT(forecastTime);
+      std::string tmp2 = cInfo->mForecastTime.substr(0, 4) + tmp1.substr(4);
+      fTime = utcTimeToTimeT(tmp2);
     }
 
-    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
+    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, producerInfo.mHash, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.getKeyHash(), pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, fTime, contentList);
 
     if (result != 0)
@@ -4577,7 +4614,8 @@ bool ServiceImplementation::getPointValues(
     valueList.mParameterKey = pInfo.mParameterKey;
     valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
     valueList.mParameterLevelId = paramLevelId;
-    valueList.mForecastTime = forecastTime;
+    valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+    valueList.mForecastTimeUTC = forecastTime;
     valueList.mProducerId = contentInfo1->mProducerId;
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
@@ -4596,7 +4634,7 @@ bool ServiceImplementation::getPointValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == fTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
+      if (contentInfo1->mForecastTimeUTC == fTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
       {
         // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
@@ -4640,7 +4678,7 @@ bool ServiceImplementation::getPointValues(
 
     if (contentLen == 2)
     {
-      if (contentInfo1->mForecastTime == fTime  &&  contentInfo2->mForecastTime == fTime  &&
+      if (contentInfo1->mForecastTimeUTC == fTime  &&  contentInfo2->mForecastTimeUTC == fTime  &&
           contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&
           levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
@@ -4683,7 +4721,7 @@ bool ServiceImplementation::getPointValues(
       }
 
 
-      if (contentInfo1->mForecastTime < fTime  &&  contentInfo2->mForecastTime > fTime  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
+      if (contentInfo1->mForecastTimeUTC < fTime  &&  contentInfo2->mForecastTimeUTC > fTime  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
       {
         // Content records have different times, but most likely the same levels, so we need to do time interpolation.
 
@@ -4718,7 +4756,7 @@ bool ServiceImplementation::getPointValues(
 
     if (contentLen == 4)
     {
-      if (contentInfo1->mForecastTime < fTime  &&  contentInfo2->mForecastTime < fTime  &&  contentInfo3->mForecastTime > fTime  &&  contentInfo4->mForecastTime > fTime  &&
+      if (contentInfo1->mForecastTimeUTC < fTime  &&  contentInfo2->mForecastTimeUTC < fTime  &&  contentInfo3->mForecastTimeUTC > fTime  &&  contentInfo4->mForecastTimeUTC > fTime  &&
           contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&  contentInfo3->mParameterLevel < paramLevel  &&  contentInfo4->mParameterLevel > paramLevel
           &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
@@ -4777,7 +4815,7 @@ bool ServiceImplementation::getCircleValues(
     const std::string& analysisTime,
     ulonglong generationFlags,
     ParameterMapping& pInfo,
-    const std::string& forecastTime,
+    time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -4796,15 +4834,12 @@ bool ServiceImplementation::getCircleValues(
   FUNCTION_TRACE
   try
   {
-    std::string startTime = forecastTime;
-    std::string endTime = forecastTime;
-
     std::string function;
-    std::vector < std::string > functionParams;
+    std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
+    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, producerInfo.mHash, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.getKeyHash(), pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
     if (result != 0)
     {
@@ -4846,7 +4881,8 @@ bool ServiceImplementation::getCircleValues(
     valueList.mParameterKey = pInfo.mParameterKey;
     valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
     valueList.mParameterLevelId = pInfo.mParameterLevelId;
-    valueList.mForecastTime = forecastTime;
+    valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+    valueList.mForecastTimeUTC = forecastTime;
     valueList.mProducerId = contentInfo1->mProducerId;
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
@@ -4865,7 +4901,7 @@ bool ServiceImplementation::getCircleValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
+      if (contentInfo1->mForecastTimeUTC == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
       {
         // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
@@ -4908,7 +4944,7 @@ bool ServiceImplementation::getCircleValues(
 
     if (contentLen == 2)
     {
-      if (contentInfo1->mForecastTime < forecastTime && contentInfo2->mForecastTime > forecastTime  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
+      if (contentInfo1->mForecastTimeUTC < forecastTime && contentInfo2->mForecastTimeUTC > forecastTime  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
       {
         // We did not find a grid with the exact forecast time, but we find grids that
         // are before and after the current forecast time. This means that we should do
@@ -4942,7 +4978,7 @@ bool ServiceImplementation::getCircleValues(
         return true;
       }
 
-      if (contentInfo1->mForecastTime == forecastTime  &&  contentInfo2->mForecastTime == forecastTime  &&
+      if (contentInfo1->mForecastTimeUTC == forecastTime  &&  contentInfo2->mForecastTimeUTC == forecastTime  &&
           contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel
           &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
@@ -4979,7 +5015,7 @@ bool ServiceImplementation::getCircleValues(
 
     if (contentLen == 4)
     {
-      if (contentInfo1->mForecastTime < forecastTime  &&  contentInfo2->mForecastTime < forecastTime  &&  contentInfo3->mForecastTime > forecastTime  &&  contentInfo4->mForecastTime > forecastTime  &&
+      if (contentInfo1->mForecastTimeUTC < forecastTime  &&  contentInfo2->mForecastTimeUTC < forecastTime  &&  contentInfo3->mForecastTimeUTC > forecastTime  &&  contentInfo4->mForecastTimeUTC > forecastTime  &&
           contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&  contentInfo3->mParameterLevel < paramLevel  &&  contentInfo4->mParameterLevel > paramLevel
           &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
@@ -5038,7 +5074,7 @@ bool ServiceImplementation::getPolygonValues(
     const std::string& analysisTime,
     ulonglong generationFlags,
     ParameterMapping& pInfo,
-    const std::string& forecastTime,
+    time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -5055,15 +5091,12 @@ bool ServiceImplementation::getPolygonValues(
   FUNCTION_TRACE
   try
   {
-    std::string startTime = forecastTime;
-    std::string endTime = forecastTime;
-
     std::string function;
-    std::vector < std::string > functionParams;
+    std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
+    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, producerInfo.mHash, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.getKeyHash(), pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
     if (result != 0)
     {
@@ -5108,7 +5141,8 @@ bool ServiceImplementation::getPolygonValues(
     valueList.mParameterKey = pInfo.mParameterKey;
     valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
     valueList.mParameterLevelId = paramLevelId;
-    valueList.mForecastTime = forecastTime;
+    valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+    valueList.mForecastTimeUTC = forecastTime;
     valueList.mProducerId = contentInfo1->mProducerId;
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
@@ -5128,7 +5162,7 @@ bool ServiceImplementation::getPolygonValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
+      if (contentInfo1->mForecastTimeUTC == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
       {
         // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
@@ -5172,7 +5206,7 @@ bool ServiceImplementation::getPolygonValues(
 
     if (contentLen == 2)
     {
-      if (contentInfo1->mForecastTime < forecastTime  &&  contentInfo2->mForecastTime > forecastTime  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
+      if (contentInfo1->mForecastTimeUTC < forecastTime  &&  contentInfo2->mForecastTimeUTC > forecastTime  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
       {
         // Content records have different times, but most likely the same levels, so we need to do time interpolation.
 
@@ -5203,7 +5237,7 @@ bool ServiceImplementation::getPolygonValues(
         return true;
       }
 
-      if (contentInfo1->mForecastTime == forecastTime  &&  contentInfo2->mForecastTime == forecastTime  &&
+      if (contentInfo1->mForecastTimeUTC == forecastTime  &&  contentInfo2->mForecastTimeUTC == forecastTime  &&
           contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&
           levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
@@ -5241,7 +5275,7 @@ bool ServiceImplementation::getPolygonValues(
 
     if (contentLen == 4)
     {
-      if (contentInfo1->mForecastTime < forecastTime  &&  contentInfo2->mForecastTime < forecastTime  &&  contentInfo3->mForecastTime > forecastTime  &&  contentInfo4->mForecastTime > forecastTime  &&
+      if (contentInfo1->mForecastTimeUTC < forecastTime  &&  contentInfo2->mForecastTimeUTC < forecastTime  &&  contentInfo3->mForecastTimeUTC > forecastTime  &&  contentInfo4->mForecastTimeUTC > forecastTime  &&
           contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&  contentInfo3->mParameterLevel < paramLevel  &&  contentInfo4->mParameterLevel > paramLevel
           &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
@@ -5301,7 +5335,7 @@ bool ServiceImplementation::getIsolineValues(
     const std::string& analysisTime,
     ulonglong generationFlags,
     ParameterMapping& pInfo,
-    const std::string& forecastTime,
+    time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -5327,7 +5361,7 @@ bool ServiceImplementation::getIsolineValues(
     T::ParamValue_vec newContourValues;
 
     std::string function;
-    std::vector < std::string > functionParams;
+    std::vector<std::string> functionParams;
     if (conversionFunction(pInfo.mReverseConversionFunction, function, functionParams))
       executeConversion(function,functionParams,contourValues,newContourValues);
     else
@@ -5336,11 +5370,8 @@ bool ServiceImplementation::getIsolineValues(
     const char *gridWidthStr = queryAttributeList.getAttributeValue("grid.width");
     const char *gridHeightStr = queryAttributeList.getAttributeValue("grid.height");
 
-    std::string startTime = forecastTime;
-    std::string endTime = forecastTime;
-
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
+    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, producerInfo.mHash, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.getKeyHash(), pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
 
     if (result != 0)
@@ -5374,7 +5405,8 @@ bool ServiceImplementation::getIsolineValues(
     valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
     valueList.mParameterLevelId = paramLevelId;
 
-    valueList.mForecastTime = forecastTime;
+    valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+    valueList.mForecastTimeUTC = forecastTime;
     valueList.mProducerId = contentInfo1->mProducerId;
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
@@ -5397,7 +5429,7 @@ bool ServiceImplementation::getIsolineValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
+      if (contentInfo1->mForecastTimeUTC == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
       {
         // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
@@ -5455,7 +5487,7 @@ bool ServiceImplementation::getIsolineValues(
 
     if (contentLen == 2)
     {
-      if (contentInfo1->mForecastTime < forecastTime && contentInfo2->mForecastTime > forecastTime  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
+      if (contentInfo1->mForecastTimeUTC < forecastTime && contentInfo2->mForecastTimeUTC > forecastTime  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
       {
         // We did not find a grid with the exact forecast time, but we find grids that
         // are before and after the current forecast time. This means that we should do
@@ -5554,7 +5586,7 @@ bool ServiceImplementation::getIsolineValues(
 
     if (contentLen == 4)
     {
-      if (contentInfo1->mForecastTime < forecastTime  &&  contentInfo2->mForecastTime < forecastTime  &&  contentInfo3->mForecastTime > forecastTime  &&  contentInfo4->mForecastTime > forecastTime  &&
+      if (contentInfo1->mForecastTimeUTC < forecastTime  &&  contentInfo2->mForecastTimeUTC < forecastTime  &&  contentInfo3->mForecastTimeUTC > forecastTime  &&  contentInfo4->mForecastTimeUTC > forecastTime  &&
           contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&  contentInfo3->mParameterLevel < paramLevel  &&  contentInfo4->mParameterLevel > paramLevel
           &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
@@ -5625,7 +5657,7 @@ bool ServiceImplementation::getIsobandValues(
     const std::string& analysisTime,
     ulonglong generationFlags,
     ParameterMapping& pInfo,
-    const std::string& forecastTime,
+    time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -5653,7 +5685,7 @@ bool ServiceImplementation::getIsobandValues(
     T::ParamValue_vec newContourHighValues;
 
     std::string function;
-    std::vector < std::string > functionParams;
+    std::vector<std::string> functionParams;
     if (conversionFunction(pInfo.mReverseConversionFunction, function, functionParams))
     {
       executeConversion(function,functionParams,contourLowValues,newContourLowValues);
@@ -5668,11 +5700,8 @@ bool ServiceImplementation::getIsobandValues(
     const char *gridWidthStr = queryAttributeList.getAttributeValue("grid.width");
     const char *gridHeightStr = queryAttributeList.getAttributeValue("grid.height");
 
-    std::string startTime = forecastTime;
-    std::string endTime = forecastTime;
-
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.mParameterLevelIdType,
+    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, producerInfo.mHash, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.getKeyHash(), pInfo.mParameterLevelIdType,
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
 
     if (result != 0)
@@ -5705,7 +5734,8 @@ bool ServiceImplementation::getIsobandValues(
     valueList.mParameterKey = pInfo.mParameterKey;
     valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
     valueList.mParameterLevelId = paramLevelId;
-    valueList.mForecastTime = forecastTime;
+    valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+    valueList.mForecastTimeUTC = forecastTime;
     valueList.mProducerId = contentInfo1->mProducerId;
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
@@ -5727,7 +5757,7 @@ bool ServiceImplementation::getIsobandValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTime == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
+      if (contentInfo1->mForecastTimeUTC == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
       {
         // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
@@ -5785,7 +5815,7 @@ bool ServiceImplementation::getIsobandValues(
 
     if (contentLen == 2)
     {
-      if (contentInfo1->mForecastTime < forecastTime && contentInfo2->mForecastTime > forecastTime  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
+      if (contentInfo1->mForecastTimeUTC < forecastTime && contentInfo2->mForecastTimeUTC > forecastTime  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
       {
         // We did not find a grid with the exact forecast time, but we find grids that
         // are before and after the current forecast time. This means that we should do
@@ -5885,7 +5915,7 @@ bool ServiceImplementation::getIsobandValues(
 
     if (contentLen == 4)
     {
-      if (contentInfo1->mForecastTime < forecastTime  &&  contentInfo2->mForecastTime < forecastTime  &&  contentInfo3->mForecastTime > forecastTime  &&  contentInfo4->mForecastTime > forecastTime  &&
+      if (contentInfo1->mForecastTimeUTC < forecastTime  &&  contentInfo2->mForecastTimeUTC < forecastTime  &&  contentInfo3->mForecastTimeUTC > forecastTime  &&  contentInfo4->mForecastTimeUTC > forecastTime  &&
           contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&  contentInfo3->mParameterLevel < paramLevel  &&  contentInfo4->mParameterLevel > paramLevel
           &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
       {
@@ -5958,6 +5988,7 @@ void ServiceImplementation::getGridValues(
     ulonglong generationFlags,
     bool reverseGenerations,
     const std::string& parameterKey,
+    std::size_t parameterHash,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -5967,7 +5998,7 @@ void ServiceImplementation::getGridValues(
     short areaInterpolationMethod,
     short timeInterpolationMethod,
     short levelInterpolationMethod,
-    const std::string& forecastTime,
+    time_t forecastTime,
     bool timeMatchRequired,
     uchar locationType,
     uchar coordinateType,
@@ -6005,7 +6036,7 @@ void ServiceImplementation::getGridValues(
       PRINT_DATA(mDebugLog, "  - areaInterpolationMethod  : %d\n", areaInterpolationMethod);
       PRINT_DATA(mDebugLog, "  - timeInterpolationMethod  : %d\n", timeInterpolationMethod);
       PRINT_DATA(mDebugLog, "  - levelInterpolationMethod : %d\n", levelInterpolationMethod);
-      PRINT_DATA(mDebugLog, "  - forecastTime             : %s\n", forecastTime.c_str());
+      PRINT_DATA(mDebugLog, "  - forecastTime             : %s\n", utcTimeFromTimeT(forecastTime).c_str());
       PRINT_DATA(mDebugLog, "  - timeMatchRequired        : %d\n", timeMatchRequired);
       PRINT_DATA(mDebugLog, "  - locationType             : %d\n", locationType);
       PRINT_DATA(mDebugLog, "  - coordinateType           : %d\n", coordinateType);
@@ -6034,8 +6065,6 @@ void ServiceImplementation::getGridValues(
     }
 
     time_t requiredAccessTime = time(nullptr) + 120;
-    std::string startTime = forecastTime;
-    std::string endTime = forecastTime;
 
     // Going through the producer list.
 
@@ -6067,8 +6096,8 @@ void ServiceImplementation::getGridValues(
 
           // Sorting generation analysis times.
 
-          std::vector <std::string> analysisTimesVec;
-          std::vector <std::string> *analysisTimes = cacheEntry->analysisTimes.get();
+          std::vector<std::string> analysisTimesVec;
+          std::vector<std::string> *analysisTimes = cacheEntry->analysisTimes.get();
           if (reverseGenerations)
           {
             cacheEntry->generationInfoList->getAnalysisTimes(analysisTimesVec,false);
@@ -6079,26 +6108,26 @@ void ServiceImplementation::getGridValues(
 
           // for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
           {
-            ParameterMapping_vec mappings;
+            ParameterMapping_vec_sptr mappings;
             if (paramLevelId > 0 || paramLevel > 0)
             {
-              getParameterMappings(producerInfo.mName, parameterKey, producerGeometryId, T::ParamLevelIdTypeValue::ANY, paramLevelId, paramLevel, false, mappings);
-              if (mappings.size() == 0)
+              getParameterMappings(producerInfo.mName,producerInfo.mProducerId,parameterKey,parameterHash,producerGeometryId, T::ParamLevelIdTypeValue::ANY, paramLevelId, paramLevel, false, mappings);
+              if (mappings->size() == 0)
               {
                 // Getting a mapping by using the levelId. This probably returns all levels belonging
                 // to the current levelId. We need just one for mapping.
-                ParameterMapping_vec tmpMappings;
-                getParameterMappings(producerInfo.mName, parameterKey, producerGeometryId, T::ParamLevelIdTypeValue::ANY, paramLevelId, -1,false, tmpMappings);
-                if (tmpMappings.size() > 0)
-                  mappings.emplace_back(tmpMappings[0]);
+                ParameterMapping_vec_sptr tmpMappings;
+                getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, T::ParamLevelIdTypeValue::ANY, paramLevelId, -1,false, tmpMappings);
+                if (tmpMappings->size() > 0)
+                  mappings->emplace_back((*tmpMappings)[0]);
               }
             }
             else
             {
-              getParameterMappings(producerInfo.mName, parameterKey, producerGeometryId, true, mappings);
+              getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, true, mappings);
             }
 
-            if (mappings.size() == 0 &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+            if (mappings->size() == 0 &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
             {
               ParameterMapping mp;
               mp.mProducerName = producerInfo.mName;
@@ -6121,14 +6150,14 @@ void ServiceImplementation::getGridValues(
               //mp.mConversionFunction;
               //mp.mReverseConversionFunction;
               //mp.mDefaultPrecision;
-              mappings.emplace_back(mp);
+              mappings->emplace_back(mp);
             }
 
 
-            if (mappings.size() == 0)
+            if (mappings->size() == 0)
               PRINT_DATA(mDebugLog, "    - No parameter mappings '%s:%s:%d:%d:%d' found!\n", producerInfo.mName.c_str(), parameterKey.c_str(), producerGeometryId, paramLevelId, paramLevel);
 
-            if (mappings.size() > 0)
+            if (mappings->size() > 0)
             {
               // PRINT_DATA(mDebugLog,"    - Parameter mappings '%s:%s' found from the file
               // '%s'!\n",producerInfo.mName.c_str(),parameterKey.c_str(),m->getFilename().c_str());
@@ -6185,7 +6214,7 @@ void ServiceImplementation::getGridValues(
                 {
 
                   PRINT_DATA(mDebugLog, "      - Going through the parameter mappings\n");
-                  for (auto pInfo = mappings.begin(); pInfo != mappings.end(); ++pInfo)
+                  for (auto pInfo = mappings->begin(); pInfo != mappings->end(); ++pInfo)
                   {
                     if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
                     {
@@ -6323,7 +6352,8 @@ void ServiceImplementation::getGridValues(
                           std::string paramList = mLuaFileCollection.executeFunctionCall6(infoFunction, producerInfo.mName, pInfo->mParameterName, pInfo->mParameterKeyType,
                               pInfo->mParameterKey, pInfo->mParameterLevelIdType, pLevelId, pLevel, forecastType, forecastNumber, areaInterpolation);
 
-                          valueList.mForecastTime = forecastTime;
+                          valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+                          valueList.mForecastTimeUTC = forecastTime;
                           valueList.mProducerId = producerInfo.mProducerId;
                           valueList.mGenerationId = generationInfo->mGenerationId;
                           valueList.mAnalysisTime = generationInfo->mAnalysisTime;
@@ -6341,7 +6371,7 @@ void ServiceImplementation::getGridValues(
                           std::vector<double> constParams;
                           std::vector<ParameterValues> valueListVec;
 
-                          std::vector < std::string > paramVec;
+                          std::vector <std::string> paramVec;
                           splitString(paramList, ';', paramVec);
 
                           // ### Processing interpolation instructions and fetching required data
@@ -6362,12 +6392,12 @@ void ServiceImplementation::getGridValues(
                             short a_areaInterpolationMethod = areaInterpolationMethod;
                             short a_timeInterpolationMethod = timeInterpolationMethod;
                             short a_levelInterpolationMethod = levelInterpolationMethod;
-                            std::string a_forecastTime = forecastTime;
+                            time_t a_forecastTime = forecastTime;
                             bool a_timeMatchRequired = timeMatchRequired;
                             uchar a_locationType = locationType;
                             double a_radius = radius;
 
-                            std::vector < std::string > paramParts;
+                            std::vector<std::string> paramParts;
                             splitString(*param, ':', paramParts);
 
                             if (paramParts.size() == 2)
@@ -6393,7 +6423,7 @@ void ServiceImplementation::getGridValues(
                               }
                               else if (paramParts[0] == "Q" ||  paramParts[0] == "P")
                               {
-                                std::vector < std::string > pv;
+                                std::vector<std::string> pv;
                                 splitString(paramParts[1], ',', pv);
 
                                 if (pv.size() == 8)
@@ -6420,13 +6450,13 @@ void ServiceImplementation::getGridValues(
                                   {
                                     T::ContentInfoList contentList;
                                     if (mContentServerPtr->getContentListByParameterAndGenerationId(0, generationInfo->mGenerationId, T::ParamKeyTypeValue::FMI_NAME, a_parameterKey,
-                                        T::ParamLevelIdTypeValue::FMI, a_paramLevel, a_paramLevel, a_paramLevel, a_forecastType, a_forecastNumber, producerGeometryId, "19000101T000000",
-                                        "30000101T000000", 0, contentList) == 0)
+                                        T::ParamLevelIdTypeValue::FMI, a_paramLevel, a_paramLevel, a_paramLevel, a_forecastType, a_forecastNumber, producerGeometryId, 0,
+                                        0xFFFFFFFF, 0, contentList) == 0)
                                     {
                                       if (contentList.getLength() > 0)
                                       {
                                         T::ContentInfo* cInfo = contentList.getContentInfoByIndex(0);
-                                        a_forecastTime = cInfo->mForecastTime;
+                                        a_forecastTime = cInfo->mForecastTimeUTC;
                                       }
                                     }
                                   }
@@ -6437,11 +6467,11 @@ void ServiceImplementation::getGridValues(
                                   // We should search data only from similar geometries. Otherwise
                                   // the size and location of the grid cells are different.
 
-                                  std::set < T::GeometryId > geomIdList;
+                                  std::set<T::GeometryId> geomIdList;
                                   geomIdList.insert(producerGeometryId);
 
                                   ParameterValues valList;
-                                  getGridValues(queryType,producers, geomIdList, a_producerId, a_analysisTime, a_generationFlags, a_reverseGenerations, a_parameterKey, a_paramLevelId,
+                                  getGridValues(queryType,producers, geomIdList, a_producerId, a_analysisTime, a_generationFlags, a_reverseGenerations, a_parameterKey, 0, a_paramLevelId,
                                       a_paramLevel, a_forecastType, a_forecastNumber, a_queryFlags, a_parameterFlags, a_areaInterpolationMethod, a_timeInterpolationMethod,
                                       a_levelInterpolationMethod, a_forecastTime, a_timeMatchRequired, a_locationType, coordinateType, areaCoordinates, contourLowValues, contourHighValues,
                                       queryAttributeList,a_radius, precision, valList,coordinates);
@@ -6523,7 +6553,7 @@ void ServiceImplementation::getGridValues(
                             valueList.mValueList.addGridValue(rec);
 
                             std::string function;
-                            std::vector < std::string > functionParams;
+                            std::vector<std::string> functionParams;
                             bool conversionByFunction = conversionFunction(pInfo->mConversionFunction, function, functionParams);
                             if (conversionByFunction)
                               executeConversion(function, functionParams, forecastTime, valueList.mValueList);
@@ -6614,6 +6644,7 @@ void ServiceImplementation::getGridValues(
     const std::string& analysisTime,
     ulonglong generationFlags,
     const std::string& parameterKey,
+    std::size_t parameterHash,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
     T::ForecastType forecastType,
@@ -6623,8 +6654,8 @@ void ServiceImplementation::getGridValues(
     short areaInterpolationMethod,
     short timeInterpolationMethod,
     short levelInterpolationMethod,
-    const std::string& startTime,
-    const std::string& endTime,
+    time_t startTime,
+    time_t endTime,
     uint timesteps,
     uint timestepSizeInMinutes,
     uchar locationType,
@@ -6663,8 +6694,8 @@ void ServiceImplementation::getGridValues(
       PRINT_DATA(mDebugLog, "  - areaInterpolationMethod  : %d\n", areaInterpolationMethod);
       PRINT_DATA(mDebugLog, "  - timeInterpolationMethod  : %d\n", timeInterpolationMethod);
       PRINT_DATA(mDebugLog, "  - levelInterpolationMethod : %d\n", levelInterpolationMethod);
-      PRINT_DATA(mDebugLog, "  - startTime                : %s\n", startTime.c_str());
-      PRINT_DATA(mDebugLog, "  - endTime                  : %s\n", endTime.c_str());
+      PRINT_DATA(mDebugLog, "  - startTime                : %s\n", utcTimeFromTimeT(startTime).c_str());
+      PRINT_DATA(mDebugLog, "  - endTime                  : %s\n", utcTimeFromTimeT(endTime).c_str());
       PRINT_DATA(mDebugLog, "  - timesteps                : %u\n", timesteps);
       PRINT_DATA(mDebugLog, "  - timestepSizeInMinutes    : %u\n", timestepSizeInMinutes);
       PRINT_DATA(mDebugLog, "  - locationType             : %d\n", locationType);
@@ -6731,13 +6762,13 @@ void ServiceImplementation::getGridValues(
 
           if (gLen > 0)
           {
-            ParameterMapping_vec mappings;
+            ParameterMapping_vec_sptr mappings;
             if (paramLevelId > 0 || paramLevel > 0)
-              getParameterMappings(producerInfo.mName, parameterKey, producerGeometryId, T::ParamLevelIdTypeValue::ANY, paramLevelId, paramLevel, false, mappings);
+              getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, T::ParamLevelIdTypeValue::ANY, paramLevelId, paramLevel, false, mappings);
             else
-              getParameterMappings(producerInfo.mName, parameterKey, producerGeometryId, true, mappings);
+              getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, true, mappings);
 
-            if (mappings.size() == 0 &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+            if (mappings->size() == 0 &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
             {
               ParameterMapping mp;
               mp.mProducerName = producerInfo.mName;
@@ -6760,12 +6791,12 @@ void ServiceImplementation::getGridValues(
               //mp.mConversionFunction;
               //mp.mReverseConversionFunction;
               //mp.mDefaultPrecision;
-              mappings.emplace_back(mp);
+              mappings->emplace_back(mp);
             }
 
-            if (mappings.size() > 0)
+            if (mappings->size() > 0)
             {
-              for (auto pInfo = mappings.begin(); pInfo != mappings.end(); ++pInfo)
+              for (auto pInfo = mappings->begin(); pInfo != mappings->end(); ++pInfo)
               {
                 if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
                 {
@@ -6774,7 +6805,7 @@ void ServiceImplementation::getGridValues(
                   PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
                 }
 
-                std::map<std::string,std::string> contentTimeList;
+                std::map<time_t,std::string> contentTimeList;
 
                 T::ContentInfoList contentInfoList;
                 int result = mContentServerPtr->getContentListByParameterAndProducerId(0, producerInfo.mProducerId, pInfo->mParameterKeyType, pInfo->mParameterKey,
@@ -6797,8 +6828,8 @@ void ServiceImplementation::getGridValues(
                 {
                   contentInfoList.sort(T::ContentInfo::ComparisonMethod::starttime_generationId_file_message);
                   T::ContentInfo* cFirst = contentInfoList.getContentInfoByIndex(0);
-                  std::string firstTime = "30000101T000000";
-                  std::string lastTime = startTime;
+                  time_t firstTime = 0xFFFFFFFF;
+                  time_t lastTime = startTime;
 
                   uint c = 0;
                   for (int g=gLen-1; g>=0; g--)
@@ -6853,19 +6884,19 @@ void ServiceImplementation::getGridValues(
                         T::ContentInfo* cInfo = contentInfoList.getContentInfoByIndex(t);
                         if (cInfo != nullptr &&  cInfo->mGenerationId == gInfo->mGenerationId)
                         {
-                          if (cInfo->mForecastTime >= startTime  &&  cInfo->mForecastTime <= endTime  &&  cInfo->mForecastType == cFirst->mForecastType  &&  cInfo->mForecastNumber == cFirst->mForecastNumber)
+                          if (cInfo->mForecastTimeUTC >= startTime  &&  cInfo->mForecastTimeUTC <= endTime  &&  cInfo->mForecastType == cFirst->mForecastType  &&  cInfo->mForecastNumber == cFirst->mForecastNumber)
                           {
-                            if (cInfo->mForecastTime > lastTime)
+                            if (cInfo->mForecastTimeUTC > lastTime)
                             {
                               contentTimeList.clear();
-                              lastTime = cInfo->mForecastTime;
-                              firstTime = "30000101T000000";
+                              lastTime = cInfo->mForecastTimeUTC;
+                              firstTime = 0xFFFFFFFF;
                             }
 
-                            if (cInfo->mForecastTime < firstTime)
+                            if (cInfo->mForecastTimeUTC < firstTime)
                             {
-                              contentTimeList.insert(std::pair<std::string,std::string>(cInfo->mForecastTime,gInfo->mAnalysisTime));
-                              firstTime = cInfo->mForecastTime;
+                              contentTimeList.insert(std::pair<time_t,std::string>(cInfo->mForecastTimeUTC,gInfo->mAnalysisTime));
+                              firstTime = cInfo->mForecastTimeUTC;
                             }
                           }
                         }
@@ -6888,21 +6919,21 @@ void ServiceImplementation::getGridValues(
                     std::set<T::GeometryId> geometryIdList2;
                     geometryIdList2.insert(producerGeometryId);
 
-                    std::map<std::string,std::string> contentTimeList2;
+                    std::map<time_t,std::string> contentTimeList2;
 
                     if (timestepSizeInMinutes > 0 && (queryFlags & Query::Flags::StartTimeFromData) != 0  &&  (queryFlags & Query::Flags::EndTimeFromData) == 0)
                     {
                       auto it = contentTimeList.begin();
-                      time_t  tt = utcTimeToTimeT(it->first);
+                      time_t  tt = it->first;
                       time_t  et = tt + timesteps * timestepSizeInMinutes*60;
 
                       if (timesteps == 0)
-                        et = utcTimeToTimeT(endTime);
+                        et = endTime;
 
                       while (tt <= et)
                       {
-                        std::string ts = utcTimeFromTimeT(tt);
-                        contentTimeList2.insert(std::pair<std::string,std::string>(ts,it->second));
+                        //std::string ts = utcTimeFromTimeT(tt);
+                        contentTimeList2.insert(std::pair<time_t,std::string>(tt,it->second));
                         tt = tt + timestepSizeInMinutes*60;
                       }
                     }
@@ -6910,17 +6941,16 @@ void ServiceImplementation::getGridValues(
                     if (timestepSizeInMinutes > 0 && (queryFlags & Query::Flags::StartTimeFromData) == 0  &&  (queryFlags & Query::Flags::EndTimeFromData) != 0)
                     {
                       auto it = contentTimeList.rbegin();
-                      time_t  tt = utcTimeToTimeT(it->first);
+                      time_t  tt = it->first;
 
                       time_t  et = tt - timesteps * timestepSizeInMinutes*60;
 
                       if (timesteps == 0)
-                        et = utcTimeToTimeT(startTime);
+                        et = startTime;
 
                       while (tt >= et)
                       {
-                        std::string ts = utcTimeFromTimeT(tt);
-                        contentTimeList2.insert(std::pair<std::string,std::string>(ts,it->second));
+                        contentTimeList2.insert(std::pair<time_t,std::string>(tt,it->second));
                         tt = tt - timestepSizeInMinutes*60;
                       }
                     }
@@ -6928,15 +6958,14 @@ void ServiceImplementation::getGridValues(
                     if (timestepSizeInMinutes > 0 && (queryFlags & Query::Flags::StartTimeFromData) != 0  &&  (queryFlags & Query::Flags::EndTimeFromData) != 0)
                     {
                       auto it1 = contentTimeList.begin();
-                      time_t  tt = utcTimeToTimeT(it1->first);
+                      time_t  tt = it1->first;
 
                       auto it2 = contentTimeList.rbegin();
-                      time_t  et = utcTimeToTimeT(it2->first);
+                      time_t  et = it2->first;
 
                       while (tt <= et)
                       {
-                        std::string ts = utcTimeFromTimeT(tt);
-                        contentTimeList2.insert(std::pair<std::string,std::string>(ts,it1->second));
+                        contentTimeList2.insert(std::pair<time_t,std::string>(tt,it1->second));
                         tt = tt + timestepSizeInMinutes*60;
                       }
                     }
@@ -6951,7 +6980,7 @@ void ServiceImplementation::getGridValues(
                       if (((forecastTime->first == startTime && !ignoreStartTimeValue) || (forecastTime->first > startTime && forecastTime->first <= endTime)))
                       {
                         auto valList = std::shared_ptr<ParameterValues>(new ParameterValues());
-                        getGridValues(queryType,producers2, geometryIdList2, producerInfo.mProducerId, forecastTime->second, 0, reverseGenerations, parameterKey, paramLevelId, paramLevel,
+                        getGridValues(queryType,producers2, geometryIdList2, producerInfo.mProducerId, forecastTime->second, 0, reverseGenerations, parameterKey, parameterHash, paramLevelId, paramLevel,
                             forecastType, forecastNumber, queryFlags, parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, forecastTime->first, true,
                             locationType, coordinateType, areaCoordinates, contourLowValues, contourHighValues, queryAttributeList, radius, precision, *valList, coordinates);
 
@@ -7014,7 +7043,9 @@ void ServiceImplementation::getAdditionalValues(
   {
 
     std::string param = toLowerString(parameterName);
-    boost::local_time::local_date_time utcTime(toTimeStamp(values.mForecastTime), nullptr);
+
+    auto dt = boost::posix_time::from_time_t(values.mForecastTimeUTC);
+    boost::local_time::local_date_time utcTime(dt, nullptr);
 
     for (auto c = coordinates.begin(); c != coordinates.end(); ++c)
     {
@@ -7211,7 +7242,7 @@ void ServiceImplementation::getAdditionalValues(
 
 T::ParamValue ServiceImplementation::getAdditionalValue(
     const std::string& parameterName,
-    const std::string& forecastTime,
+    time_t forecastTime,
     double x,
     double y)
 {
@@ -7219,7 +7250,8 @@ T::ParamValue ServiceImplementation::getAdditionalValue(
   try
   {
     std::string param = toLowerString(parameterName);
-    boost::local_time::local_date_time utcTime(toTimeStamp(forecastTime), nullptr);
+    auto dt = boost::posix_time::from_time_t(forecastTime);
+    boost::local_time::local_date_time utcTime(dt, nullptr);
 
     if (param == "dem")
     {
@@ -7336,8 +7368,8 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
         T::ParamLevel level = contentInfo->mParameterLevel;
 
         std::shared_ptr<T::ContentInfoList> cList(new T::ContentInfoList());
-        int result = getContentListByParameterGenerationIdAndForecastTime(0, contentInfo->mProducerId, contentInfo->mGenerationId, paramKeyType, paramKey, levelIdType,
-          levelId, level, -1, -1, contentInfo->mGeometryId, contentInfo->mForecastTime, cList);
+        int result = getContentListByParameterGenerationIdAndForecastTime(0, contentInfo->mProducerId, 0, contentInfo->mGenerationId, paramKeyType, paramKey, 0xFFFFFFFF, levelIdType,
+          levelId, level, -1, -1, contentInfo->mGeometryId, contentInfo->mForecastTimeUTC, cList);
 
         if (result != 0)
         {
@@ -7388,8 +7420,8 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
           std::shared_ptr<T::ContentInfoList> cList(new T::ContentInfoList());
 
 
-          int result = getContentListByParameterGenerationIdAndForecastTime(0, contentInfo->mProducerId, contentInfo->mGenerationId, paramKeyType, paramKey, levelIdType,
-            levelId, level, -1, -1, contentInfo->mGeometryId, contentInfo->mForecastTime, cList);
+          int result = getContentListByParameterGenerationIdAndForecastTime(0, contentInfo->mProducerId, 0, contentInfo->mGenerationId, paramKeyType, paramKey, 0xFFFFFFFE, levelIdType,
+            levelId, level, -1, -1, contentInfo->mGeometryId, contentInfo->mForecastTimeUTC, cList);
 
           if (result != 0)
           {

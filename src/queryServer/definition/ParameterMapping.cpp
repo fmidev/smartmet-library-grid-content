@@ -25,6 +25,7 @@ ParameterMapping::ParameterMapping()
     mSearchEnabled = false;
     mIgnore = false;
     mDefaultPrecision = -1;
+    mParameterKeyHash = 0;
   }
   catch (...)
   {
@@ -117,6 +118,27 @@ std::size_t ParameterMapping::getHash()
 
 
 
+std::size_t ParameterMapping::getKeyHash()
+{
+  try
+  {
+    if (mParameterKeyHash != 0)
+      return mParameterKeyHash;
+
+    boost::hash_combine(mParameterKeyHash,C_INT(mParameterKeyType));
+    boost::hash_combine(mParameterKeyHash,mParameterKey);
+
+    return mParameterKeyHash;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 void ParameterMapping::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try
@@ -126,6 +148,7 @@ void ParameterMapping::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mParameterName             = " << mParameterName << "\n";
     stream << space(level) << "- mParameterKeyType          = " << C_INT(mParameterKeyType) << "\n";
     stream << space(level) << "- mParameterKey              = " << mParameterKey << "\n";
+    stream << space(level) << "- mParameterKeyHash          = " << mParameterKeyHash << "\n";
     stream << space(level) << "- mGeometryId                = " << mGeometryId << "\n";
     stream << space(level) << "- mParameterLevelIdType      = " << C_INT(mParameterLevelIdType) << "\n";
     stream << space(level) << "- mParameterLevelId          = " << C_INT(mParameterLevelId) << "\n";

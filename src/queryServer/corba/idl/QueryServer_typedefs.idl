@@ -90,6 +90,7 @@ typedef sequence<CorbaFunctionParam> CorbaFunctionParamList;
 struct CorbaParameterValues
 {
   string                  forecastTime;
+  unsigned long long      forecastTimeUTC;
   unsigned long           producerId;
   unsigned long           generationId;
   unsigned long long      generationFlags;

@@ -53,7 +53,7 @@ void PointValueCache::addValue(uint fileId,uint messageIndex,T::CoordinateType c
     }
 
     std::size_t key = getKey(fileId,messageIndex,coordinateType,x,y,interpolationMethod);
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     auto it = mValueList.find(key);
 
@@ -88,7 +88,7 @@ bool PointValueCache::getValue(uint fileId,uint messageIndex,T::CoordinateType c
   try
   {
     std::size_t key = getKey(fileId,messageIndex,coordinateType,x,y,interpolationMethod);
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     auto it = mValueList.find(key);
 
@@ -114,7 +114,7 @@ void PointValueCache::clear()
 {
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
 
     for (auto it=mValueList.begin(); it != mValueList.end(); ++it)
     {
@@ -137,7 +137,7 @@ void PointValueCache::deleteValue(uint fileId,uint messageIndex,T::CoordinateTyp
   try
   {
     std::size_t key = getKey(fileId,messageIndex,coordinateType,x,y,interpolationMethod);
-    AutoReadLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoReadLock lock(&mModificationLock);
 
     auto it = mValueList.find(key);
 
@@ -183,7 +183,7 @@ void PointValueCache::deleteValuesByFileId(uint fileId)
 {
   try
   {
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
     std::vector<std::size_t> keyList;
 
     for (auto it=mValueList.begin(); it != mValueList.end(); ++it)
@@ -213,7 +213,7 @@ void PointValueCache::deleteValuesByAge(uint maxAge)
   {
     time_t lastAccess = time(nullptr) - maxAge;
 
-    AutoWriteLock lock(&mModificationLock,__FILE__,__LINE__);
+    AutoWriteLock lock(&mModificationLock);
     std::vector<std::size_t> keyList;
 
     for (auto it=mValueList.begin(); it != mValueList.end(); ++it)

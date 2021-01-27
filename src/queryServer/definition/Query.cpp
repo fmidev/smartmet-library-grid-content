@@ -239,7 +239,7 @@ void Query::getResultProducerIdList(std::set<uint>& producerIdList)
     {
       for (auto val = param->mValueList.begin(); val != param->mValueList.end(); val++)
       {
-        if (producerIdList.find((*val)->mProducerId) == producerIdList.end())
+        //if (producerIdList.find((*val)->mProducerId) == producerIdList.end())
           producerIdList.insert((*val)->mProducerId);
       }
     }

@@ -417,7 +417,7 @@ ContentInfoList::~ContentInfoList()
     if (mArray == nullptr)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     if (mReleaseObjects  && mLength > 0)
     {
       for (uint t=0; t<mLength; t++)
@@ -450,7 +450,7 @@ ContentInfoList& ContentInfoList::operator=(ContentInfoList& contentInfoList)
 
     clear();
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
 
     if (contentInfoList.getModificationLockPtr() != mModificationLockPtr)
       contentInfoList.lock();
@@ -505,7 +505,7 @@ ContentInfoList& ContentInfoList::operator=(const ContentInfoList& contentInfoLi
 
     clear();
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     mArray = nullptr;
     mSize = contentInfoList.getSize();
     mLength = contentInfoList.getLength();
@@ -553,7 +553,7 @@ ContentInfo* ContentInfoList::addContentInfo(ContentInfo *contentInfo)
     if (contentInfo->mForecastTimeUTC == 0)
       contentInfo->mForecastTimeUTC = utcTimeToTimeT(contentInfo->mForecastTime);
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
 
     if (mArray == nullptr  ||  mLength == mSize)
     {
@@ -611,7 +611,7 @@ void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     addContentInfoListNoLock(contentInfoList);
   }
   catch (...)
@@ -792,7 +792,7 @@ void ContentInfoList::clear()
     if (mArray == nullptr)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     if (mReleaseObjects &&  mLength > 0)
     {
       for (uint t=0; t<mSize; t++)
@@ -826,7 +826,7 @@ bool ContentInfoList::containsSameForecastTimes()
 
     std::set<time_t> timeList;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     for (uint t=0; t<mLength; t++)
     {
@@ -860,7 +860,7 @@ uint ContentInfoList::deleteContentInfoByFileId(uint fileId)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
 
     uint p = 0;
     uint count = 0;
@@ -902,7 +902,7 @@ uint ContentInfoList::deleteMarkedContent()
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
 
     uint p = 0;
     uint count = 0;
@@ -944,7 +944,7 @@ uint ContentInfoList::markDeletedByFileId(uint fileId)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     uint cnt = 0;
     if (mComparisonMethod == ContentInfo::ComparisonMethod::file_message)
@@ -1011,7 +1011,7 @@ uint ContentInfoList::markDeletedByGenerationId(uint generationId)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     uint cnt = 0;
     for (uint t=0; t<mLength; t++)
@@ -1046,7 +1046,7 @@ uint ContentInfoList::markDeletedByProducerId(uint producerId)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     uint cnt = 0;
     for (uint t=0; t<mLength; t++)
@@ -1080,7 +1080,7 @@ uint ContentInfoList::deleteContentInfo(ContentInfo& contentInfo)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
 
     int idx = getClosestIndexNoLock(mComparisonMethod,contentInfo);
 
@@ -1131,7 +1131,7 @@ uint ContentInfoList::deleteContentInfoByFileIdAndMessageIndex(uint fileId,uint 
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
 
     uint p = 0;
     uint count = 0;
@@ -1172,7 +1172,7 @@ uint ContentInfoList::deleteContentInfoByGroupFlags(uint groupFlags)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -1213,7 +1213,7 @@ uint ContentInfoList::deleteContentInfoByProducerId(uint producerId)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -1256,7 +1256,7 @@ void ContentInfoList::getLevelInfoList(T::LevelInfoList& levelInfoList)
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
 
     std::set<std::size_t> list;
     for (uint t=0; t<mLength; t++)
@@ -1298,7 +1298,7 @@ uint ContentInfoList::deleteContentInfoByGenerationId(uint generationId)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -1339,7 +1339,7 @@ uint ContentInfoList::deleteContentInfoByGenerationIdList(std::set<uint>& genera
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -1380,7 +1380,7 @@ uint ContentInfoList::deleteContentInfoByGenerationAndGeometry(uint generationId
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -1418,12 +1418,28 @@ uint ContentInfoList::deleteContentInfoByGenerationGeometryAndForecastTime(uint 
   FUNCTION_TRACE
   try
   {
+    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
+    return deleteContentInfoByGenerationGeometryAndForecastTime(generationId,geometryId,forecastTimeUTC);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint ContentInfoList::deleteContentInfoByGenerationGeometryAndForecastTime(uint generationId,T::GeometryId geometryId,time_t forecastTimeUTC)
+{
+  FUNCTION_TRACE
+  try
+  {
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
-
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -1464,7 +1480,7 @@ uint ContentInfoList::deleteContentInfoBySourceId(uint sourceId)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -1505,7 +1521,7 @@ uint ContentInfoList::deleteContentInfoByFileIdList(std::set<uint>& fileIdList)
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -1546,7 +1562,7 @@ uint ContentInfoList::deleteVirtualContent()
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
     uint count = 0;
     for (uint t=0; t<mLength; t++)
@@ -1587,7 +1603,7 @@ void ContentInfoList::keepContentInfoByGeometryIdList(std::set<T::GeometryId>& g
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -1624,7 +1640,7 @@ void ContentInfoList::keepContentInfoByGeometryId(T::GeometryId geometryId)
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -1661,7 +1677,7 @@ void ContentInfoList::keepContentInfoByGroupFlags(uint groupFlags)
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -1698,7 +1714,7 @@ void ContentInfoList::keepContentInfoByProducerId(uint producerId)
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -1735,7 +1751,7 @@ void ContentInfoList::keepContentInfoByGenerationId(uint generationId)
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -1772,7 +1788,7 @@ void ContentInfoList::keepContentInfoBySourceId(uint sourceId)
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
     for (uint t=0; t<mLength; t++)
     {
@@ -1805,14 +1821,30 @@ void ContentInfoList::getContentListByForecastTime(const std::string& forecastTi
   FUNCTION_TRACE
   try
   {
+    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
+    getContentListByForecastTime(forecastTimeUTC,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentListByForecastTime(time_t forecastTimeUTC,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     ContentInfo *prevInfo = nullptr;
     ContentInfo *nextInfo = nullptr;
@@ -1871,7 +1903,7 @@ int ContentInfoList::getClosestIndex(uint comparisonMethod,ContentInfo& contentI
     if (mArray == nullptr ||  mLength == 0)
       return 0;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     return getClosestIndexNoLock(comparisonMethod,contentInfo);
   }
   catch (...)
@@ -1972,7 +2004,7 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     ContentInfo contentInfo;
     contentInfo.mFileId = fileId;
     contentInfo.mMessageIndex = messageIndex;
@@ -2037,7 +2069,7 @@ bool ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,uint mes
     if (mArray == nullptr ||  mLength == 0)
       return false;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     ContentInfo contentInfo;
     contentInfo.mFileId = fileId;
     contentInfo.mMessageIndex = messageIndex;
@@ -2074,7 +2106,7 @@ ContentInfo* ContentInfoList::getContentInfoByIndex(uint index) const
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
-    //AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    //AutoReadLock lock(mModificationLockPtr);
     if (index >= mLength)
       return nullptr;
 
@@ -2115,7 +2147,7 @@ ContentInfo* ContentInfoList::getContentInfoByParameterLevelInfo(T::ParameterLev
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     for (uint t=0; t<mLength; t++)
     {
@@ -2166,7 +2198,7 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelIn
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     for (uint t=0; t<mLength; t++)
     {
@@ -2253,7 +2285,7 @@ void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex
       return;
     }
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
     contentInfo.mMessageIndex = startMessageIndex;
@@ -2322,7 +2354,7 @@ void ContentInfoList::getContentInfoListByGroupFlags(uint groupFlags,uint startF
       return;
     }
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
     contentInfo.mMessageIndex = startMessageIndex;
@@ -2371,7 +2403,7 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint producerId,uint 
       return;
 
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     time_t timeLimit = time(nullptr) + 120;
 
     ContentInfo searchInfo;
@@ -2391,54 +2423,54 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint producerId,uint 
         switch (parameterKeyType)
         {
           case T::ParamKeyTypeValue::FMI_ID:
-            if (info->mFmiParameterId > " "  &&  paramKeyList.find(info->mFmiParameterId) == paramKeyList.end())
+            if (info->mFmiParameterId > " " /* &&  paramKeyList.find(info->mFmiParameterId) == paramKeyList.end()*/)
               paramKeyList.insert(info->mFmiParameterId);
             break;
 
           case T::ParamKeyTypeValue::FMI_NAME:
             if (info->getFmiParameterName() > " ")
             {
-              if (paramKeyList.find(info->getFmiParameterName()) == paramKeyList.end())
+              //if (paramKeyList.find(info->getFmiParameterName()) == paramKeyList.end())
                 paramKeyList.insert(info->getFmiParameterName());
             }
             else
             if (info->mNewbaseParameterId > " ")
             {
               std::string id = "NB-" + info->mNewbaseParameterId;
-              if (paramKeyList.find(id) == paramKeyList.end())
+              //if (paramKeyList.find(id) == paramKeyList.end())
                 paramKeyList.insert(id);
             }
             else
             if (info->mGribParameterId > " ")
             {
               std::string id = "GRIB-" + info->mGribParameterId;
-              if (paramKeyList.find(id) == paramKeyList.end())
+              //if (paramKeyList.find(id) == paramKeyList.end())
                 paramKeyList.insert(id);
             }
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
-            if (info->mGribParameterId > " "  &&  paramKeyList.find(info->mGribParameterId) == paramKeyList.end())
+            if (info->mGribParameterId > " "  /*&&  paramKeyList.find(info->mGribParameterId) == paramKeyList.end()*/)
               paramKeyList.insert(info->mGribParameterId);
             break;
 
           case T::ParamKeyTypeValue::NEWBASE_ID:
-            if (info->mNewbaseParameterId > " "  &&  paramKeyList.find(info->mNewbaseParameterId) == paramKeyList.end())
+            if (info->mNewbaseParameterId > " "  /*&&  paramKeyList.find(info->mNewbaseParameterId) == paramKeyList.end()*/)
               paramKeyList.insert(info->mNewbaseParameterName);
             break;
 
           case T::ParamKeyTypeValue::NEWBASE_NAME:
-            if (info->mNewbaseParameterName > " "  &&  paramKeyList.find(info->mNewbaseParameterName) == paramKeyList.end())
+            if (info->mNewbaseParameterName > " " /* &&  paramKeyList.find(info->mNewbaseParameterName) == paramKeyList.end()*/)
               paramKeyList.insert(info->mNewbaseParameterName);
             break;
 
           case T::ParamKeyTypeValue::CDM_ID:
-            if (info->mCdmParameterId > " " &&  paramKeyList.find(info->mCdmParameterId) == paramKeyList.end())
+            if (info->mCdmParameterId > " " /*&&  paramKeyList.find(info->mCdmParameterId) == paramKeyList.end()*/)
               paramKeyList.insert(info->mCdmParameterId);
             break;
 
           case T::ParamKeyTypeValue::CDM_NAME:
-            if (info->mCdmParameterName > " " &&  paramKeyList.find(info->mCdmParameterName) == paramKeyList.end())
+            if (info->mCdmParameterName > " " /*&&  paramKeyList.find(info->mCdmParameterName) == paramKeyList.end()*/)
               paramKeyList.insert(info->mCdmParameterName);
             break;
 
@@ -2470,7 +2502,7 @@ void ContentInfoList::getContentGeometryIdListByGenerationId(uint producerId,uin
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     ContentInfo searchInfo;
     searchInfo.mProducerId = producerId;
@@ -2501,7 +2533,7 @@ void ContentInfoList::getContentGeometryIdListByGenerationId(uint producerId,uin
       {
         if (info->mGenerationId == generationId)
         {
-          if (geometryIdList.find(info->mGeometryId) == geometryIdList.end())
+          //if (geometryIdList.find(info->mGeometryId) == geometryIdList.end())
           {
             geometryIdList.insert(info->mGeometryId);
           }
@@ -2534,14 +2566,14 @@ void ContentInfoList::getContentGeometryIdList(std::set<T::GeometryId>& geometry
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
 
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
-        if (geometryIdList.find(info->mGeometryId) == geometryIdList.end())
+        //if (geometryIdList.find(info->mGeometryId) == geometryIdList.end())
         {
           geometryIdList.insert(info->mGeometryId);
         }
@@ -2568,14 +2600,14 @@ void ContentInfoList::getGenerationIdListByGeometryId(T::GeometryId geometryId,s
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
 
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGeometryId == geometryId)
       {
-        if (generationIdList.find(info->mGenerationId) == generationIdList.end())
+        //if (generationIdList.find(info->mGenerationId) == generationIdList.end())
         {
           generationIdList.insert(info->mGenerationId);
         }
@@ -2602,7 +2634,7 @@ void ContentInfoList::getContentInfoListByFileId(uint fileId,ContentInfoList& co
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::file_message)
     {
@@ -2668,7 +2700,7 @@ void ContentInfoList::getContentInfoListByGeometryId(T::GeometryId geometryId,Co
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     for (uint t=0; t<mLength; t++)
     {
@@ -2702,7 +2734,7 @@ void ContentInfoList::getContentInfoListByRequestCounterKey(ulonglong key,Conten
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     for (uint t=0; t<mLength; t++)
     {
@@ -2731,14 +2763,30 @@ void ContentInfoList::getContentInfoListByForecastTime(const std::string& foreca
   FUNCTION_TRACE
   try
   {
+    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
+    getContentInfoListByForecastTime(forecastTimeUTC,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByForecastTime(time_t forecastTimeUTC,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::starttime_fmiId_fmiLevelId_level_file_message)
     {
@@ -2806,7 +2854,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
     if (strncasecmp(gribParameterId.c_str(),"GRIB-",5) == 0)
       gribParameter = gribParameterId.c_str()+5;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -2834,15 +2882,31 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByGribParameterId(gribParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::gribId_producer_generation_level_time)
     {
@@ -2942,7 +3006,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::gribId_producer_generation_level_time);
-      list.getContentInfoListByGribParameterId(gribParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByGribParameterId(gribParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -2960,14 +3024,30 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
   FUNCTION_TRACE
   try
   {
+    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
+    getContentInfoListByGribParameterIdAndGenerationId(producerId,generationId,gribParameterId,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTimeUTC,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint producerId,uint generationId,const std::string& gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::gribId_producer_generation_level_time)
     {
@@ -3230,7 +3310,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::gribId_producer_generation_level_time);
-      list.getContentInfoListByGribParameterIdAndGenerationId(producerId,generationId,gribParameterId,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
+      list.getContentInfoListByGribParameterIdAndGenerationId(producerId,generationId,gribParameterId,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTimeUTC,contentInfoList);
     }
   }
   catch (...)
@@ -3248,15 +3328,31 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByGribParameterIdAndGenerationId(producerId,generationId,gribParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint producerId,uint generationId,T::ParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::gribId_producer_generation_level_time)
     {
@@ -3366,7 +3462,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::gribId_producer_generation_level_time);
-      list.getContentInfoListByGribParameterIdAndGenerationId(producerId,generationId,gribParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByGribParameterIdAndGenerationId(producerId,generationId,gribParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -3384,15 +3480,30 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByGribParameterIdAndProducerId(producerId,gribParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint producerId,T::ParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::gribId_producer_generation_level_time)
     {
@@ -3496,7 +3607,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::gribId_producer_generation_level_time);
-      list.getContentInfoListByGribParameterIdAndProducerId(producerId,gribParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByGribParameterIdAndProducerId(producerId,gribParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -3519,7 +3630,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -3547,15 +3658,31 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByFmiParameterId(fmiParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time)
     {
@@ -3651,7 +3778,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time);
-      list.getContentInfoListByFmiParameterId(fmiParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByFmiParameterId(fmiParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -3669,15 +3796,31 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint pro
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByFmiParameterIdAndGenerationId(producerId,generationId,fmiParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint producerId,uint generationId,T::ParamId fmiParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time)
     {
@@ -3783,7 +3926,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint pro
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time);
-      list.getContentInfoListByFmiParameterIdAndGenerationId(producerId,generationId,fmiParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByFmiParameterIdAndGenerationId(producerId,generationId,fmiParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -3801,15 +3944,30 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByFmiParameterIdAndProducerId(producerId,fmiParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint producerId,T::ParamId fmiParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time)
     {
@@ -3912,7 +4070,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time);
-      list.getContentInfoListByFmiParameterIdAndProducerId(producerId,fmiParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByFmiParameterIdAndProducerId(producerId,fmiParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -3929,15 +4087,31 @@ void ContentInfoList::getContentInfoListByFmiParameterName(const std::string& fm
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByFmiParameterName(fmiParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByFmiParameterName(const std::string& fmiParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
     {
@@ -4033,7 +4207,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(const std::string& fm
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
-      list.getContentInfoListByFmiParameterName(fmiParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByFmiParameterName(fmiParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -4050,11 +4224,28 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(ui
   FUNCTION_TRACE
   try
   {
+    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
+    return getContentInfoByFmiParameterNameAndGenerationId(producerId,generationId,fmiParameterName,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTimeUTC);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(uint producerId,uint generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC)
+{
+  FUNCTION_TRACE
+  try
+  {
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
-    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
 
     ContentInfo searchInfo;
@@ -4107,12 +4298,28 @@ ContentInfo* ContentInfoList::getContentInfoByGribParameterIdAndGenerationId(uin
   FUNCTION_TRACE
   try
   {
+    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
+    return getContentInfoByGribParameterIdAndGenerationId(producerId,generationId,gribParameterId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTimeUTC);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+ContentInfo* ContentInfoList::getContentInfoByGribParameterIdAndGenerationId(uint producerId,uint generationId,const std::string& gribParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC)
+{
+  FUNCTION_TRACE
+  try
+  {
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
-    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     ContentInfo searchInfo;
     searchInfo.mProducerId = producerId;
@@ -4191,7 +4398,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     //std::cout << "SEARCH : " << forecastTime << " " << level << "\n";
 
@@ -4479,14 +4686,30 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
   FUNCTION_TRACE
   try
   {
+    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
+    getContentInfoListByFmiParameterNameAndGenerationId2(producerId,generationId,fmiParameterName,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTimeUTC,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint producerId,uint generationId,const std::string& fmiParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     //std::cout << "SEARCH2 : " << forecastTime << " " << level << "\n";
 
@@ -4768,7 +4991,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
-      list.getContentInfoListByFmiParameterNameAndGenerationId(producerId,generationId,fmiParameterName,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
+      list.getContentInfoListByFmiParameterNameAndGenerationId2(producerId,generationId,fmiParameterName,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTimeUTC,contentInfoList);
     }
   }
   catch (...)
@@ -4786,17 +5009,31 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByFmiParameterNameAndGenerationId(producerId,generationId,fmiParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint producerId,uint generationId,const std::string& fmiParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    //std::cout << "****************** SEARCH " << startTime << " : " <<  endTime << " : " << minLevel << " : "  << maxLevel << "\n";
-
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
     {
@@ -4903,7 +5140,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
-      list.getContentInfoListByFmiParameterNameAndGenerationId(producerId,generationId,fmiParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByFmiParameterNameAndGenerationId(producerId,generationId,fmiParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -4921,15 +5158,31 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByFmiParameterNameAndProducerId(producerId,fmiParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint producerId,const std::string& fmiParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
     {
@@ -5034,7 +5287,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
-      list.getContentInfoListByFmiParameterNameAndProducerId(producerId,fmiParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByFmiParameterNameAndProducerId(producerId,fmiParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -5052,15 +5305,31 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByNewbaseParameterId(newbaseParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time)
     {
@@ -5156,7 +5425,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time);
-      list.getContentInfoListByNewbaseParameterId(newbaseParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByNewbaseParameterId(newbaseParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -5174,15 +5443,31 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByNewbaseParameterIdAndGenerationId(producerId,generationId,newbaseParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint producerId,uint generationId,T::ParamId newbaseParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time)
     {
@@ -5288,7 +5573,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time);
-      list.getContentInfoListByNewbaseParameterIdAndGenerationId(producerId,generationId,newbaseParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByNewbaseParameterIdAndGenerationId(producerId,generationId,newbaseParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -5306,15 +5591,31 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByNewbaseParameterIdAndProducerId(producerId,newbaseParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint producerId,T::ParamId newbaseParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time)
     {
@@ -5419,7 +5720,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time);
-      list.getContentInfoListByNewbaseParameterIdAndProducerId(producerId,newbaseParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByNewbaseParameterIdAndProducerId(producerId,newbaseParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -5431,7 +5732,27 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
 
 
 
+
 void ContentInfoList::getContentInfoListByNewbaseParameterName(const std::string& newbaseParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByNewbaseParameterName(newbaseParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByNewbaseParameterName(const std::string& newbaseParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5441,10 +5762,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(const std::string
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time)
     {
@@ -5540,7 +5858,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(const std::string
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time);
-      list.getContentInfoListByNewbaseParameterName(newbaseParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByNewbaseParameterName(newbaseParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -5558,15 +5876,31 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByNewbaseParameterNameAndGenerationId(producerId,generationId,newbaseParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(uint producerId,uint generationId,const std::string& newbaseParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time)
     {
@@ -5672,7 +6006,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time);
-      list.getContentInfoListByNewbaseParameterNameAndGenerationId(producerId,generationId,newbaseParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByNewbaseParameterNameAndGenerationId(producerId,generationId,newbaseParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -5690,15 +6024,31 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByNewbaseParameterNameAndProducerId(producerId,newbaseParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint producerId,const std::string& newbaseParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time)
     {
@@ -5803,7 +6153,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time);
-      list.getContentInfoListByNewbaseParameterNameAndProducerId(producerId,newbaseParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByNewbaseParameterNameAndProducerId(producerId,newbaseParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -5821,15 +6171,31 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByCdmParameterId(cdmParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time)
     {
@@ -5925,7 +6291,7 @@ void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameter
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time);
-      list.getContentInfoListByCdmParameterId(cdmParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByCdmParameterId(cdmParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -5943,15 +6309,30 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint pro
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByCdmParameterIdAndGenerationId(producerId,generationId,cdmParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint producerId,uint generationId,T::ParamId cdmParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time)
     {
@@ -6057,7 +6438,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint pro
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time);
-      list.getContentInfoListByCdmParameterIdAndGenerationId(producerId,generationId,cdmParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByCdmParameterIdAndGenerationId(producerId,generationId,cdmParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -6075,15 +6456,31 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByCdmParameterIdAndProducerId(producerId,cdmParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint producerId,T::ParamId cdmParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time)
     {
@@ -6190,7 +6587,7 @@ void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint produ
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time);
-      list.getContentInfoListByCdmParameterIdAndProducerId(producerId,cdmParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByCdmParameterIdAndProducerId(producerId,cdmParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -6208,15 +6605,31 @@ void ContentInfoList::getContentInfoListByCdmParameterName(const std::string& cd
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByCdmParameterName(cdmParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByCdmParameterName(const std::string& cdmParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time)
     {
@@ -6312,7 +6725,7 @@ void ContentInfoList::getContentInfoListByCdmParameterName(const std::string& cd
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time);
-      list.getContentInfoListByCdmParameterName(cdmParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByCdmParameterName(cdmParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -6330,15 +6743,31 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint p
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByCdmParameterNameAndGenerationId(producerId,generationId,cdmParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint producerId,uint generationId,const std::string& cdmParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time)
     {
@@ -6444,7 +6873,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint p
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time);
-      list.getContentInfoListByCdmParameterNameAndGenerationId(producerId,generationId,cdmParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByCdmParameterNameAndGenerationId(producerId,generationId,cdmParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -6462,15 +6891,31 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByCdmParameterNameAndProducerId(producerId,cdmParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint producerId,const std::string& cdmParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time)
     {
@@ -6575,7 +7020,7 @@ void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint pro
       list.setReleaseObjects(false);
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time);
-      list.getContentInfoListByCdmParameterNameAndProducerId(producerId,cdmParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+      list.getContentInfoListByCdmParameterNameAndProducerId(producerId,cdmParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -6620,7 +7065,7 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startF
       return;
     }
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
     contentInfo.mMessageIndex = startMessageIndex;
@@ -6683,7 +7128,7 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,ContentInfo
       return;
     }
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     ContentInfo contentInfo;
     contentInfo.mProducerId = producerId;
 
@@ -6753,7 +7198,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint gene
       return;
     }
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
     contentInfo.mMessageIndex = startMessageIndex;
@@ -6797,7 +7242,7 @@ std::size_t ContentInfoList::getHash()
     if (mArray == nullptr ||  mLength == 0)
       return hash;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     for (uint t=0; t<mLength; t++)
     {
@@ -6847,7 +7292,7 @@ std::size_t ContentInfoList::getHashByProducerId(uint producerId)
       return hash;
     }
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     ContentInfo contentInfo;
     contentInfo.mProducerId = producerId;
 
@@ -6916,7 +7361,7 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(uint producerI
       return;
     }
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
     contentInfo.mMessageIndex = startMessageIndex;
@@ -6955,15 +7400,31 @@ void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint gene
   FUNCTION_TRACE
   try
   {
+    time_t startTimeUTC = utcTimeToTimeT(startTime);
+    time_t endTimeUTC = utcTimeToTimeT(endTime);
+    getContentInfoListByGenerationId(producerId,generationId,startTimeUTC,endTimeUTC,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint generationId,time_t startTimeUTC,time_t endTimeUTC,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     contentInfoList.clear();
 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     ContentInfo searchInfo;
     searchInfo.mProducerId = producerId;
@@ -7050,7 +7511,7 @@ void ContentInfoList::getContentInfoListBySourceId(uint sourceId,uint startFileI
     }
 
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
     contentInfo.mMessageIndex = startMessageIndex;
@@ -7094,7 +7555,7 @@ void ContentInfoList::getFmiParamLevelIdListByFmiParameterId(T::ParamId fmiParam
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -7147,13 +7608,13 @@ void ContentInfoList::getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFmiParameterLevelId == paramLevelId)
       {
-        if (paramLevelList.find(info->mParameterLevel) == paramLevelList.end())
+        //if (paramLevelList.find(info->mParameterLevel) == paramLevelList.end())
           paramLevelList.insert(info->mParameterLevel);
       }
     }
@@ -7178,7 +7639,7 @@ void ContentInfoList::getParamLevelInfoListByFmiParameterId(T::ParamId fmiParame
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -7215,7 +7676,7 @@ void ContentInfoList::getForecastTimeList(std::set<std::string>& forecastTimeLis
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -7223,9 +7684,45 @@ void ContentInfoList::getForecastTimeList(std::set<std::string>& forecastTimeLis
       {
         if (info != nullptr)
         {
-          if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
+          //if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
           {
             forecastTimeList.insert(info->mForecastTime);
+          }
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getForecastTimeList(std::set<time_t>& forecastTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    forecastTimeList.clear();
+
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
+    AutoReadLock lock(mModificationLockPtr);
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      {
+        if (info != nullptr)
+        {
+          //if (forecastTimeList.find(info->mForecastTimeUTC) == forecastTimeList.end())
+          {
+            forecastTimeList.insert(info->mForecastTimeUTC);
           }
         }
       }
@@ -7251,7 +7748,7 @@ void ContentInfoList::getForecastTimeListByGenerationId(uint producerId,uint gen
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     ContentInfo searchInfo;
     searchInfo.mProducerId = producerId;
@@ -7283,7 +7780,7 @@ void ContentInfoList::getForecastTimeListByGenerationId(uint producerId,uint gen
         {
           if (info->mGenerationId == generationId)
           {
-            if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
+            //if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
             {
               forecastTimeList.insert(info->mForecastTime);
             }
@@ -7317,7 +7814,7 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(uint producerId
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     ContentInfo searchInfo;
     searchInfo.mProducerId = producerId;
@@ -7350,7 +7847,7 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(uint producerId
           {
             if (info->mGeometryId == geometryId)
             {
-              if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
+              //if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
               {
                 forecastTimeList.insert(info->mForecastTime);
               }
@@ -7385,7 +7882,7 @@ void ContentInfoList::getForecastTimeListByProducerId(uint producerId,std::set<s
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -7393,7 +7890,7 @@ void ContentInfoList::getForecastTimeListByProducerId(uint producerId,std::set<s
       {
         if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId)
         {
-          if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
+          //if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
           {
             forecastTimeList.insert(info->mForecastTime);
           }
@@ -7610,7 +8107,7 @@ void ContentInfoList::sort(uint comparisonMethod)
     if (mComparisonMethod == comparisonMethod)
       return;
 
-    AutoWriteLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoWriteLock lock(mModificationLockPtr);
     mComparisonMethod = comparisonMethod;
 
     if (mArray == nullptr || mLength < 2)
@@ -7713,7 +8210,7 @@ void ContentInfoList::writeToFile(const std::string& filename,const char *filemo
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
 
     FILE *file = fopen(filename.c_str(),filemode);
     if (file == nullptr)
@@ -7747,7 +8244,7 @@ void ContentInfoList::print(std::ostream& stream,uint level,uint optionFlags)
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(mModificationLockPtr,__FILE__,__LINE__);
+    AutoReadLock lock(mModificationLockPtr);
     stream << space(level) << "ContentInfoList\n";
     for (uint t=0; t<mLength; t++)
     {
