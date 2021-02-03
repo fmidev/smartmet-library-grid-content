@@ -101,7 +101,7 @@ void ParameterValues::print(std::ostream& stream,uint level,uint optionFlags)
   try
   {
     stream << space(level) << "ParameterValues\n";
-    stream << space(level) << "- mForecastTime         = " << mForecastTime << "\n";
+    stream << space(level) << "- mForecastTime         = " << utcTimeFromTimeT(mForecastTimeUTC) << "\n";
     stream << space(level) << "- mForecastTimeUTC      = " << mForecastTimeUTC << "\n";
     stream << space(level) << "- mProducerId           = " << mProducerId << "\n";
     stream << space(level) << "- mGenerationId         = " << mGenerationId << "\n";

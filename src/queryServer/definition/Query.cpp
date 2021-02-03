@@ -21,6 +21,8 @@ Query::Query()
     mGenerationFlags = 0;
     mCoordinateType = T::CoordinateTypeValue::LATLON_COORDINATES;
     mRadius = 0;
+    mStartTime = 0;
+    mEndTime = 0;
     mTimesteps = 0;
     mTimestepSizeInMinutes = 0;
     mMaxParameterValues = 1000000;
@@ -283,8 +285,16 @@ void Query::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "Query\n";
     stream << space(level) << "- mSearchType             = " << C_INT(mSearchType) << "\n";
     stream << space(level) << "- mTimezone               = " << mTimezone << "\n";
-    stream << space(level) << "- mStartTime              = " << mStartTime << "\n";
-    stream << space(level) << "- mEndTime                = " << mEndTime << "\n";
+    if (mStartTime > 0)
+      stream << space(level) << "- mStartTime              = " << utcTimeFromTimeT(mStartTime) << "\n";
+    else
+      stream << space(level) << "- mStartTime              = \n";
+
+    if (mEndTime > 0)
+      stream << space(level) << "- mEndTime                = " << utcTimeFromTimeT(mEndTime) << "\n";
+    else
+      stream << space(level) << "- mEndTime                = \n";
+
     stream << space(level) << "- mTimesteps              = " << mTimesteps << "\n";
     stream << space(level) << "- mTimestepSizeInMinutes  = " << mTimestepSizeInMinutes << "\n";
     stream << space(level) << "- mAnalysisTime           = " << mAnalysisTime << "\n";
@@ -305,7 +315,7 @@ void Query::print(std::ostream& stream,uint level,uint optionFlags)
 
     stream << space(level) << "- mForecastTimeList\n";
     for (auto it = mForecastTimeList.begin(); it != mForecastTimeList.end(); ++it)
-      stream << space(level) << "   * " << *it << "\n";
+      stream << space(level) << "   * " << utcTimeFromTimeT(*it) << "\n";
 
     stream << space(level) << "- mProducerNameList       = \n";
     for (auto it = mProducerNameList.begin(); it != mProducerNameList.end(); ++it)

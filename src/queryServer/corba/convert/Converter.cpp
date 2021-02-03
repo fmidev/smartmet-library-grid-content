@@ -87,6 +87,57 @@ void Converter::convert(const QueryServer::Corba::CorbaLongList& source,std::set
 
 
 
+
+
+
+
+
+
+void Converter::convert(std::set<time_t>& source,QueryServer::Corba::CorbaULongLongList& target)
+{
+  try
+  {
+    uint len = source.size();
+    target.length(len);
+
+    uint t = 0;
+    for (auto it=source.begin(); it!=source.end(); ++it)
+    {
+      target[t] = *it;
+      t++;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const QueryServer::Corba::CorbaULongLongList& source,std::set<time_t>& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      target.insert(source[t]);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void Converter::convert(std::vector<uint>& source,QueryServer::Corba::CorbaULongList& target)
 {
   try
@@ -349,7 +400,7 @@ void Converter::convert(T::GridPointValue& source,QueryServer::Corba::CorbaGridP
   {
     target.fileId = source.mFileId;
     target.messageIndex = source.mMessageIndex;
-    target.time  = CORBA::string_dup(source.mTime.c_str());
+    target.time  = source.mTime;
     target.value = source.mValue;
     target.x = source.mX;
     target.y = source.mY;
@@ -526,7 +577,7 @@ void Converter::convert(QueryServer::Corba::CorbaParameterValues& source,QuerySe
 {
   try
   {
-    target.mForecastTime = source.forecastTime;
+    //target.mForecastTime = source.forecastTime;
     target.mForecastTimeUTC = (time_t)source.forecastTimeUTC;
     target.mProducerId = source.producerId;
     target.mGenerationId = source.generationId;
@@ -568,7 +619,7 @@ void Converter::convert(QueryServer::ParameterValues& source,QueryServer::Corba:
 {
   try
   {
-    target.forecastTime = CORBA::string_dup(source.mForecastTime.c_str());
+    //target.forecastTime = CORBA::string_dup(source.mForecastTime.c_str());
     target.forecastTimeUTC = source.mForecastTimeUTC;
     target.producerId = source.mProducerId;
     target.generationId = source.mGenerationId;
@@ -1058,8 +1109,8 @@ void Converter::convert(QueryServer::Query& source,QueryServer::Corba::CorbaQuer
     target.searchType = (::CORBA::Octet)source.mSearchType;
     convert(source.mProducerNameList,target.producerNameList);
     target.timezone = CORBA::string_dup(source.mTimezone.c_str());
-    target.startTime = CORBA::string_dup(source.mStartTime.c_str());
-    target.endTime = CORBA::string_dup(source.mEndTime.c_str());
+    target.startTime = source.mStartTime;
+    target.endTime = source.mEndTime;
     target.timesteps = source.mTimesteps;
     target.timestepSizeInMinutes = source.mTimestepSizeInMinutes;
     target.analysisTime = CORBA::string_dup(source.mAnalysisTime.c_str());

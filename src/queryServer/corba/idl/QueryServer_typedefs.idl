@@ -21,6 +21,7 @@ typedef sequence<CorbaParamValue> CorbaParamValueList;
 typedef sequence<string> CorbaStringList;
 
 typedef sequence<long> CorbaLongList;
+typedef sequence<unsigned long long> CorbaULongLongList;
 typedef sequence<unsigned long> CorbaULongList;
 
 
@@ -50,7 +51,7 @@ struct CorbaGridPointValue
 {
   unsigned long fileId;
   unsigned long messageIndex;
-  string        time;
+  long long     time;
   double        value;
   double        x;
   double        y;
@@ -89,7 +90,7 @@ typedef sequence<CorbaFunctionParam> CorbaFunctionParamList;
 
 struct CorbaParameterValues
 {
-  string                  forecastTime;
+  // string               forecastTime;
   unsigned long long      forecastTimeUTC;
   unsigned long           producerId;
   unsigned long           generationId;
@@ -164,13 +165,13 @@ struct CorbaQuery
   octet                    searchType;
   CorbaStringList          producerNameList;
   string                   timezone;
-  string                   startTime;
-  string                   endTime;
+  unsigned long long       startTime;
+  unsigned long long       endTime;
   unsigned long            timesteps;
   unsigned long            timestepSizeInMinutes;
   string                   analysisTime;
   CorbaLongList            geometryIdList;
-  CorbaStringList          forecastTimeList;
+  CorbaULongLongList       forecastTimeList;
   CorbaAttributeList       attributeList;
   octet                    coordinateType;
   CorbaAreaCoordinates     areaCoordinates;

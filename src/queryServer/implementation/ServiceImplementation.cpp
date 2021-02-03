@@ -1435,7 +1435,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
         for (auto tt = query.mForecastTimeList.begin(); tt != query.mForecastTimeList.end(); ++tt)
         {
           auto pValues = std::shared_ptr<ParameterValues>(new ParameterValues());
-          pValues->mForecastTime = *tt;
+          pValues->mForecastTimeUTC = *tt;
 
           std::vector<double> areaParameters;
           std::vector<double> extParameters;
@@ -1748,8 +1748,8 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
           if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN  &&  !useAlternative)
           {
-            time_t startTime = utcTimeToTimeT(query.mStartTime);
-            time_t endTime = utcTimeToTimeT(query.mEndTime);
+            time_t startTime = query.mStartTime;
+            time_t endTime = query.mEndTime;
 
             if (qParam->mTimestepsBefore > 0)
             {
@@ -1865,12 +1865,12 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
     // Finding out which forecast time are found from the forecast data. The point is that different
     // parameters might contain different forecast times, and we want a list of all forecast times.
 
-    std::set<std::string> timeList;
+    std::set<time_t> timeList;
     for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
     {
       for (auto it = qParam->mValueList.begin(); it != qParam->mValueList.end(); ++it)
       {
-        timeList.insert((*it)->mForecastTime);
+        timeList.insert((*it)->mForecastTimeUTC);
       }
     }
 
@@ -1896,15 +1896,15 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
           for (auto it = qParam->mValueList.begin(); it != qParam->mValueList.end() && !found; ++it)
           {
             if ((query.mFlags & Query::Flags::StartTimeFromData) == 0
-                && (((*it)->mForecastTime < query.mStartTime || (*it)->mForecastTime > query.mEndTime) ||
-                    ((*it)->mForecastTime == query.mStartTime &&  (query.mFlags & Query::Flags::StartTimeNotIncluded) != 0))
+                && (((*it)->mForecastTimeUTC < query.mStartTime || (*it)->mForecastTimeUTC > query.mEndTime) ||
+                    ((*it)->mForecastTimeUTC == query.mStartTime &&  (query.mFlags & Query::Flags::StartTimeNotIncluded) != 0))
             )
               (*it)->mFlags = (*it)->mFlags | QueryServer::ParameterValues::Flags::AggregationValue;
 
-            if ((*it)->mForecastTime < *tt)
+            if ((*it)->mForecastTimeUTC < *tt)
               cnt++;
             else
-            if ((*it)->mForecastTime == *tt)
+            if ((*it)->mForecastTimeUTC == *tt)
             {
               found = true;
 
@@ -1921,7 +1921,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
             // with an empty value list.
 
             auto pValues = std::shared_ptr<ParameterValues>(new ParameterValues());
-            pValues->mForecastTime = *tt;
+            pValues->mForecastTimeUTC = *tt;
 
             if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN)
             {
@@ -2029,12 +2029,6 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
     // points are fetched. The area can be defined by using single or multiple polygons.
     // That's why the coordinates are defined as a vector of coordinate vectors.
 
-    std::set<time_t> originalTimeList;
-    for (const auto &fTime : query.mForecastTimeList)
-    {
-      originalTimeList.insert(utcTimeToTimeT(fTime));
-    }
-
 
     for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
     {
@@ -2073,14 +2067,14 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
           alternativeRequired.insert(qParam->mAlternativeParamId);
         }
 
-        std::set<time_t> *forecastTimeList = &originalTimeList;
+        std::set<time_t> *forecastTimeList = &query.mForecastTimeList;
         std::set<time_t> forecastTimeList2;
 
         if (qParam->mTimestepsBefore > 0 || qParam->mTimestepsAfter > 0)
         {
           forecastTimeList = &forecastTimeList2;
-          forecastTimeList2 = originalTimeList;
-          for (const auto &fTime : originalTimeList)
+          forecastTimeList2 = query.mForecastTimeList;
+          for (const auto &fTime : query.mForecastTimeList)
           {
             if (qParam->mTimestepsBefore > 0)
             {
@@ -2263,11 +2257,11 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
           if (valueList->mValueList.getLength() == 0)
           {
-            valueList->mForecastTime = utcTimeFromTimeT(*fTime);
+            //valueList->mForecastTime = utcTimeFromTimeT(*fTime);
             valueList->mForecastTimeUTC = *fTime;
           }
 
-          if (originalTimeList.find(*fTime) == originalTimeList.end())
+          if (query.mForecastTimeList.find(*fTime) == query.mForecastTimeList.end())
             valueList->mFlags = valueList->mFlags | QueryServer::ParameterValues::Flags::AggregationValue;
         }
 
@@ -2305,7 +2299,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
     for (const auto &tt : timeList)
     {
-      query.mForecastTimeList.insert(utcTimeFromTimeT(tt));
+      query.mForecastTimeList.insert(tt);
 
       for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
       {
@@ -2335,7 +2329,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
             auto pValues = std::shared_ptr<ParameterValues>(new ParameterValues());
             pValues->mForecastTimeUTC = tt;
-            pValues->mForecastTime = utcTimeFromTimeT(tt);
+            //pValues->mForecastTime = utcTimeFromTimeT(tt);
 
             if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN)
               pValues->mFlags = pValues->mFlags | QueryServer::ParameterValues::Flags::AdditionalValue;
@@ -2387,11 +2381,11 @@ int ServiceImplementation::_getValuesByGridPoint(
       int res = mDataServerPtr->getGridValueByPoint(sessionId, contentInfo->mFileId, contentInfo->mMessageIndex, coordinateType, x, y, areaInterpolationMethod, value);
       if (res == DataServer::Result::OK)
       {
-        valueList.addGridPointValue(new T::GridPointValue(contentInfo->mFileId, contentInfo->mMessageIndex, x, y, contentInfo->mParameterLevel, contentInfo->mForecastTime, value));
+        valueList.addGridPointValue(new T::GridPointValue(contentInfo->mFileId, contentInfo->mMessageIndex, x, y, contentInfo->mParameterLevel, contentInfo->mForecastTimeUTC, value));
       }
       else
       {
-        valueList.addGridPointValue(new T::GridPointValue(contentInfo->mFileId, contentInfo->mMessageIndex, x, y, contentInfo->mParameterLevel, contentInfo->mForecastTime, ParamValueMissing));
+        valueList.addGridPointValue(new T::GridPointValue(contentInfo->mFileId, contentInfo->mMessageIndex, x, y, contentInfo->mParameterLevel, contentInfo->mForecastTimeUTC, ParamValueMissing));
       }
     }
     return 0;
@@ -2871,7 +2865,7 @@ bool ServiceImplementation::getSpecialValues(
     valueList.mParameterKey = pInfo.mParameterKey;
     valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
     valueList.mParameterLevelId = paramLevelId;
-    valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+    //valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
     valueList.mForecastTimeUTC = forecastTime;
     valueList.mProducerId = contentInfo1->mProducerId;
     valueList.mGenerationId = contentInfo1->mGenerationId;
@@ -3142,7 +3136,7 @@ bool ServiceImplementation::getValueVectors(
     valueList.mParameterKey = pInfo.mParameterKey;
     valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
     valueList.mParameterLevelId = paramLevelId;
-    valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+    //valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
     valueList.mForecastTimeUTC = forecastTime;
     valueList.mProducerId = contentInfo1->mProducerId;
     valueList.mGenerationId = contentInfo1->mGenerationId;
@@ -3568,7 +3562,7 @@ bool ServiceImplementation::getGridFiles(
     valueList.mParameterKey = pInfo.mParameterKey;
     valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
     valueList.mParameterLevelId = paramLevelId;
-    valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+    //valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
     valueList.mForecastTimeUTC = forecastTime;
     valueList.mProducerId = contentInfo1->mProducerId;
     valueList.mGenerationId = contentInfo1->mGenerationId;
@@ -4328,7 +4322,7 @@ bool ServiceImplementation::getPointValuesByHeight(
         valueList.mParameterKey = pInfo.mParameterKey;
         valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
         valueList.mParameterLevelId = paramLevelId;
-        valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+        //valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
         valueList.mForecastTimeUTC = forecastTime;
         valueList.mProducerId = contentInfo1->mProducerId;
         valueList.mGenerationId = contentInfo1->mGenerationId;
@@ -4614,7 +4608,7 @@ bool ServiceImplementation::getPointValues(
     valueList.mParameterKey = pInfo.mParameterKey;
     valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
     valueList.mParameterLevelId = paramLevelId;
-    valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+    //valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
     valueList.mForecastTimeUTC = forecastTime;
     valueList.mProducerId = contentInfo1->mProducerId;
     valueList.mGenerationId = contentInfo1->mGenerationId;
@@ -4881,7 +4875,7 @@ bool ServiceImplementation::getCircleValues(
     valueList.mParameterKey = pInfo.mParameterKey;
     valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
     valueList.mParameterLevelId = pInfo.mParameterLevelId;
-    valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+    //valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
     valueList.mForecastTimeUTC = forecastTime;
     valueList.mProducerId = contentInfo1->mProducerId;
     valueList.mGenerationId = contentInfo1->mGenerationId;
@@ -5141,7 +5135,7 @@ bool ServiceImplementation::getPolygonValues(
     valueList.mParameterKey = pInfo.mParameterKey;
     valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
     valueList.mParameterLevelId = paramLevelId;
-    valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+    //valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
     valueList.mForecastTimeUTC = forecastTime;
     valueList.mProducerId = contentInfo1->mProducerId;
     valueList.mGenerationId = contentInfo1->mGenerationId;
@@ -5405,7 +5399,7 @@ bool ServiceImplementation::getIsolineValues(
     valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
     valueList.mParameterLevelId = paramLevelId;
 
-    valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+    //valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
     valueList.mForecastTimeUTC = forecastTime;
     valueList.mProducerId = contentInfo1->mProducerId;
     valueList.mGenerationId = contentInfo1->mGenerationId;
@@ -5734,7 +5728,7 @@ bool ServiceImplementation::getIsobandValues(
     valueList.mParameterKey = pInfo.mParameterKey;
     valueList.mParameterLevelIdType = pInfo.mParameterLevelIdType;
     valueList.mParameterLevelId = paramLevelId;
-    valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+    //valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
     valueList.mForecastTimeUTC = forecastTime;
     valueList.mProducerId = contentInfo1->mProducerId;
     valueList.mGenerationId = contentInfo1->mGenerationId;
@@ -6352,7 +6346,7 @@ void ServiceImplementation::getGridValues(
                           std::string paramList = mLuaFileCollection.executeFunctionCall6(infoFunction, producerInfo.mName, pInfo->mParameterName, pInfo->mParameterKeyType,
                               pInfo->mParameterKey, pInfo->mParameterLevelIdType, pLevelId, pLevel, forecastType, forecastNumber, areaInterpolation);
 
-                          valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+                          //valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
                           valueList.mForecastTimeUTC = forecastTime;
                           valueList.mProducerId = producerInfo.mProducerId;
                           valueList.mGenerationId = generationInfo->mGenerationId;
@@ -6986,8 +6980,8 @@ void ServiceImplementation::getGridValues(
 
                         if (valList->mValueList.getLength() > 0 || valList->mValueData.size() > 0 || valList->mValueVector.size() > 0)
                         {
-                          if (valList->mForecastTime <= " ")
-                            valList->mForecastTime = forecastTime->first;
+                          if (valList->mForecastTimeUTC == 0)
+                            valList->mForecastTimeUTC = forecastTime->first;
 
                           valueList.emplace_back(valList);
                         }

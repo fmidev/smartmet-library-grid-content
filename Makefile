@@ -363,7 +363,7 @@ rpm: clean $(SPEC).spec
 
 
 obj/%.o: %.cpp
-	$(CXX) $(FLAGS) $(INCLUDES) -c -o $@ $<
+	$(CXX) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
 ifneq ($(wildcard obj/*.d),)
 -include $(wildcard obj/*.d)

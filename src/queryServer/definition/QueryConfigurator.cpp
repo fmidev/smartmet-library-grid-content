@@ -257,7 +257,7 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
         struct tm tt;
         gmtime_r(&tim,&tt);
         sprintf(tmp,"%04d%02d%02dT%02d%02d%02d",tt.tm_year + 1900,tt.tm_mon + 1,tt.tm_mday,tt.tm_hour,tt.tm_min,tt.tm_sec);
-        query.mForecastTimeList.insert(std::string(tmp));
+        query.mForecastTimeList.insert(utcTimeToTimeT(tmp));
       }
       startTime = 0;
       endTime = 0;
@@ -285,11 +285,11 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
 
       gmtime_r(&startTime,&tt);
       sprintf(tmp,"%04d%02d%02dT%02d%02d%02d",tt.tm_year + 1900,tt.tm_mon + 1,tt.tm_mday,tt.tm_hour,tt.tm_min,tt.tm_sec);
-      query.mStartTime = tmp;
+      query.mStartTime = utcTimeToTimeT(tmp);
     }
     else
     {
-      query.mStartTime = "15000101T000000";
+      query.mStartTime = 0;
     }
 
     if (endTime > 0)
@@ -297,11 +297,11 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
       struct tm tt;
       gmtime_r(&endTime,&tt);
       sprintf(tmp,"%04d%02d%02dT%02d%02d%02d",tt.tm_year + 1900,tt.tm_mon + 1,tt.tm_mday,tt.tm_hour,tt.tm_min,tt.tm_sec);
-      query.mEndTime = tmp;
+      query.mEndTime = utcTimeToTimeT(tmp);
     }
     else
     {
-      query.mEndTime = "30000101T000000";
+      query.mEndTime = 0xFFFFFFFF;
     }
 
 
@@ -321,7 +321,7 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
           if (timeList.size() == 0  ||  timeList.find(tmp) != timeList.end())
           {
             sprintf(tmp,"%04d%02d%02dT%02d%02d%02d",tt.tm_year + 1900,tt.tm_mon + 1,tt.tm_mday,tt.tm_hour,tt.tm_min,tt.tm_sec);
-            query.mForecastTimeList.insert(std::string(tmp));
+            query.mForecastTimeList.insert(utcTimeToTimeT(tmp));
           }
         }
         s += timestep;

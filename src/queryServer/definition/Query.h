@@ -28,15 +28,15 @@ class Query
 
     uchar               mSearchType;
     string_vec          mProducerNameList;
-    string_set          mForecastTimeList;
+    std::set<time_t>    mForecastTimeList; // UTC times in time_t
     T::AttributeList    mAttributeList;
     T::CoordinateType   mCoordinateType;
     T::AreaCoordinates  mAreaCoordinates;
     double              mRadius;
     QueryParameter_vec  mQueryParameterList;
     std::string         mTimezone;            // Needed when UTC times are converted back to local times.
-    std::string         mStartTime;
-    std::string         mEndTime;
+    time_t              mStartTime;           // UTC time in time_t
+    time_t              mEndTime;             // UTC time in time_t
     uint                mTimesteps;
     uint                mTimestepSizeInMinutes;
     std::string         mAnalysisTime;
