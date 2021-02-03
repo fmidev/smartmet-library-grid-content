@@ -24,10 +24,10 @@ else
   CORBA_LIBS = -lomniORB4 -lomnithread
 endif
 
-FLAGS += $(CORBA_FLAGS)
+CFLAGS += $(CORBA_FLAGS)
 INCLUDES += $(CORBA_INCLUDE)
 
-FLAGS += \
+CFLAGS += \
 	-isystem /usr/include/lua \
 	$(pkg-config --cflags icu-i18n)
 
