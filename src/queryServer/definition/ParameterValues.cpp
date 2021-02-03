@@ -24,6 +24,7 @@ ParameterValues::ParameterValues()
     mForecastNumber = -1;
     mFlags = 0;
     mForecastTimeUTC = 0;
+    mModificationTime = 0;
 
     for (uint t=0;t<4; t++)
     {
@@ -117,7 +118,7 @@ void ParameterValues::print(std::ostream& stream,uint level,uint optionFlags)
       }
     }
 
-    stream << space(level) << "- mModificationTime     = " << mModificationTime << "\n";
+    stream << space(level) << "- mModificationTime     = " << utcTimeFromTimeT(mModificationTime) << "\n";
     stream << space(level) << "- mAnalysisTime         = " << mAnalysisTime << "\n";
     stream << space(level) << "- mParameterKeyType     = " << C_INT(mParameterKeyType) << "\n";
     stream << space(level) << "- mParameterKey         = " << mParameterKey << "\n";

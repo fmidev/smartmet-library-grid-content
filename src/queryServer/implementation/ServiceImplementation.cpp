@@ -2872,7 +2872,7 @@ bool ServiceImplementation::getSpecialValues(
     valueList.mGeometryId = contentInfo1->mGeometryId;
     valueList.mFileId[0] = contentInfo1->mFileId;
     valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
-    valueList.mModificationTime = utcTimeFromTimeT(contentInfo1->mModificationTime);
+    valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mAnalysisTime = analysisTime;
     valueList.mForecastType = contentInfo1->mForecastType;
     valueList.mForecastNumber = contentInfo1->mForecastNumber;
@@ -3144,7 +3144,7 @@ bool ServiceImplementation::getValueVectors(
     valueList.mGeometryId = contentInfo1->mGeometryId;
     valueList.mFileId[0] = contentInfo1->mFileId;
     valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
-    valueList.mModificationTime = utcTimeFromTimeT(contentInfo1->mModificationTime);
+    valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mAnalysisTime = analysisTime;
     valueList.mForecastType = contentInfo1->mForecastType;
     valueList.mForecastNumber = contentInfo1->mForecastNumber;
@@ -3568,7 +3568,7 @@ bool ServiceImplementation::getGridFiles(
     valueList.mGenerationId = contentInfo1->mGenerationId;
     valueList.mGenerationFlags = generationFlags;
     valueList.mGeometryId = contentInfo1->mGeometryId;
-    valueList.mModificationTime = utcTimeFromTimeT(contentInfo1->mModificationTime);
+    valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mAnalysisTime = analysisTime;
     valueList.mForecastType = contentInfo1->mForecastType;
     valueList.mForecastNumber = contentInfo1->mForecastNumber;
@@ -4330,7 +4330,7 @@ bool ServiceImplementation::getPointValuesByHeight(
         valueList.mGeometryId = contentInfo1->mGeometryId;
         valueList.mFileId[0] = contentInfo1->mFileId;
         valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
-        valueList.mModificationTime = utcTimeFromTimeT(contentInfo1->mModificationTime);
+        valueList.mModificationTime = contentInfo1->mModificationTime;
         valueList.mAnalysisTime = analysisTime;
         valueList.mForecastType = contentInfo1->mForecastType;
         valueList.mForecastNumber = contentInfo1->mForecastNumber;
@@ -4616,7 +4616,7 @@ bool ServiceImplementation::getPointValues(
     valueList.mGeometryId = contentInfo1->mGeometryId;
     valueList.mFileId[0] = contentInfo1->mFileId;
     valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
-    valueList.mModificationTime = utcTimeFromTimeT(contentInfo1->mModificationTime);
+    valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mAnalysisTime = analysisTime;
     valueList.mForecastType = contentInfo1->mForecastType;
     valueList.mForecastNumber = contentInfo1->mForecastNumber;
@@ -4883,7 +4883,7 @@ bool ServiceImplementation::getCircleValues(
     valueList.mGeometryId = contentInfo1->mGeometryId;
     valueList.mFileId[0] = contentInfo1->mFileId;
     valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
-    valueList.mModificationTime = utcTimeFromTimeT(contentInfo1->mModificationTime);
+    valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mAnalysisTime = analysisTime;
     valueList.mForecastType = contentInfo1->mForecastType;
     valueList.mForecastNumber = contentInfo1->mForecastNumber;
@@ -5143,7 +5143,7 @@ bool ServiceImplementation::getPolygonValues(
     valueList.mGeometryId = contentInfo1->mGeometryId;
     valueList.mFileId[0] = contentInfo1->mFileId;
     valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
-    valueList.mModificationTime = utcTimeFromTimeT(contentInfo1->mModificationTime);
+    valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mAnalysisTime = analysisTime;
     valueList.mForecastType = contentInfo1->mForecastType;
     valueList.mForecastNumber = contentInfo1->mForecastNumber;
@@ -5407,7 +5407,7 @@ bool ServiceImplementation::getIsolineValues(
     valueList.mGeometryId = contentInfo1->mGeometryId;
     valueList.mFileId[0] = contentInfo1->mFileId;
     valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
-    valueList.mModificationTime = utcTimeFromTimeT(contentInfo1->mModificationTime);
+    valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mAnalysisTime = analysisTime;
     valueList.mForecastType = contentInfo1->mForecastType;
     valueList.mForecastNumber = contentInfo1->mForecastNumber;
@@ -5736,7 +5736,7 @@ bool ServiceImplementation::getIsobandValues(
     valueList.mGeometryId = contentInfo1->mGeometryId;
     valueList.mFileId[0] = contentInfo1->mFileId;
     valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
-    valueList.mModificationTime = utcTimeFromTimeT(contentInfo1->mModificationTime);
+    valueList.mModificationTime = contentInfo1->mModificationTime;
     valueList.mAnalysisTime = analysisTime;
     valueList.mForecastType = contentInfo1->mForecastType;
     valueList.mForecastNumber = contentInfo1->mForecastNumber;

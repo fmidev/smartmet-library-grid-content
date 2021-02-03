@@ -98,7 +98,7 @@ struct CorbaParameterValues
   unsigned long           geometryId;
   unsigned long           fileId[4];
   unsigned long           messageIndex[4];
-  string                  modificationTime;
+  unsigned long long      modificationTime;
   string                  analysisTime;
   octet                   parameterKeyType;
   string                  parameterKey;

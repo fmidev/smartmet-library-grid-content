@@ -28,7 +28,7 @@ class ParameterValues
     uint                    mFileId[4];
     uint                    mMessageIndex[4];
     std::string             mAnalysisTime;
-    std::string             mModificationTime;
+    time_t                  mModificationTime;
 
     T::ParamKeyType         mParameterKeyType;
     T::ParamId              mParameterKey;

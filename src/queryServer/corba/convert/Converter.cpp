@@ -632,7 +632,7 @@ void Converter::convert(QueryServer::ParameterValues& source,QueryServer::Corba:
       target.messageIndex[t] = source.mMessageIndex[t];
     }
 
-    target.modificationTime = CORBA::string_dup(source.mModificationTime.c_str());
+    target.modificationTime = source.mModificationTime;
     target.analysisTime = CORBA::string_dup(source.mAnalysisTime.c_str());
     target.parameterKeyType = (::CORBA::Octet)source.mParameterKeyType;
     target.parameterKey = CORBA::string_dup(source.mParameterKey.c_str());
