@@ -29,6 +29,9 @@ class ServiceInterface
      virtual void   setDebugLog(Log *debugLog);
      virtual void   setProcessingLog(Log *processingLog);
 
+     virtual void   setEnabled(bool enabled);
+     virtual bool   isEnabled();
+
      virtual void   shutdown();
 
      virtual int    getGridAttributeList(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList);
@@ -241,6 +244,7 @@ class ServiceInterface
 
      virtual int    _getMultipleGridValues(T::SessionId sessionId,T::ValueRecordList& valueRecordList);
 
+     bool           mEnabled;
      Log            *mDebugLog;
      Log            *mProcessingLog;
 };

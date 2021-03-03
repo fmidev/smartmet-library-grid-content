@@ -92,6 +92,7 @@ class QueryParameter
         static const uint  NoReturnValues               = 1 << 3;
         static const uint  SameAnalysisTime             = 1 << 4;
         static const uint  AlternativeParameter         = 1 << 5;
+        static const uint  InvisibleParameter           = 1 << 6;
     };
 };
 

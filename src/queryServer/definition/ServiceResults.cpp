@@ -27,6 +27,9 @@ std::string getResultString(int resultCode)
       case Result::UNEXPECTED_EXCEPTION:
         return std::string("Unexpected exception!");
 
+      case Result::SERVICE_DISABLED:
+        return std::string("Service disabled!");
+
       case Result::NO_PRODUCERS_FOUND:
         return std::string("No producers found!");
     }

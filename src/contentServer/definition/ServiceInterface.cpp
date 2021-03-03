@@ -22,6 +22,7 @@ ServiceInterface::ServiceInterface()
     mDebugLog = nullptr;
     mProcessingLog = nullptr;
     mImplementationType = Implementation::Interface;
+    mEnabled = true;
   }
   catch (...)
   {
@@ -43,6 +44,39 @@ ServiceInterface::~ServiceInterface()
   {
     Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
+  }
+}
+
+
+
+
+
+void ServiceInterface::setEnabled(bool enabled)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mEnabled = enabled;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+bool ServiceInterface::isEnabled()
+{
+  FUNCTION_TRACE
+  try
+  {
+    return mEnabled;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
 
@@ -155,6 +189,9 @@ int ServiceInterface::clear(T::SessionId sessionId)
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     int result = _clear(sessionId);
     return result;
   }
@@ -173,6 +210,9 @@ int ServiceInterface::reload(T::SessionId sessionId)
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     int result = _reload(sessionId);
     return result;
   }
@@ -191,6 +231,9 @@ int ServiceInterface::addProducerInfo(T::SessionId sessionId,T::ProducerInfo& pr
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _addProducerInfo(sessionId,producerInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -213,6 +256,9 @@ int ServiceInterface::deleteProducerInfoById(T::SessionId sessionId,uint produce
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteProducerInfoById(sessionId,producerId);
     unsigned long requestTime = getTime() - timeStart;
@@ -235,6 +281,9 @@ int ServiceInterface::deleteProducerInfoByName(T::SessionId sessionId,const std:
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteProducerInfoByName(sessionId,producerName);
     unsigned long requestTime = getTime() - timeStart;
@@ -257,6 +306,9 @@ int ServiceInterface::deleteProducerInfoListBySourceId(T::SessionId sessionId,ui
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteProducerInfoListBySourceId(sessionId,sourceId);
     unsigned long requestTime = getTime() - timeStart;
@@ -279,6 +331,9 @@ int ServiceInterface::getProducerInfoById(T::SessionId sessionId,uint producerId
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getProducerInfoById(sessionId,producerId,producerInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -301,6 +356,9 @@ int ServiceInterface::getProducerInfoByName(T::SessionId sessionId,const std::st
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getProducerInfoByName(sessionId,producerName,producerInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -323,6 +381,9 @@ int ServiceInterface::getProducerInfoList(T::SessionId sessionId,T::ProducerInfo
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getProducerInfoList(sessionId,producerInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -345,6 +406,9 @@ int ServiceInterface::getProducerInfoListByParameter(T::SessionId sessionId,T::P
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getProducerInfoListByParameter(sessionId,parameterKeyType,parameterKey,producerInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -367,6 +431,9 @@ int ServiceInterface::getProducerInfoListBySourceId(T::SessionId sessionId,uint 
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getProducerInfoListBySourceId(sessionId,sourceId,producerInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -389,6 +456,9 @@ int ServiceInterface::getProducerInfoCount(T::SessionId sessionId,uint& count)
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getProducerInfoCount(sessionId,count);
     unsigned long requestTime = getTime() - timeStart;
@@ -411,6 +481,9 @@ int ServiceInterface::getProducerNameAndGeometryList(T::SessionId sessionId,std:
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getProducerNameAndGeometryList(sessionId,list);
     unsigned long requestTime = getTime() - timeStart;
@@ -433,6 +506,9 @@ int ServiceInterface::getProducerParameterList(T::SessionId sessionId,T::ParamKe
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getProducerParameterList(sessionId,sourceParameterKeyType,targetParameterKeyType,list);
     unsigned long requestTime = getTime() - timeStart;
@@ -455,6 +531,9 @@ int ServiceInterface::getProducerParameterListByProducerId(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getProducerParameterListByProducerId(sessionId,producerId,sourceParameterKeyType,targetParameterKeyType,list);
     unsigned long requestTime = getTime() - timeStart;
@@ -477,6 +556,9 @@ int ServiceInterface::addGenerationInfo(T::SessionId sessionId,T::GenerationInfo
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _addGenerationInfo(sessionId,generationInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -499,6 +581,9 @@ int ServiceInterface::deleteGenerationInfoById(T::SessionId sessionId,uint gener
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteGenerationInfoById(sessionId,generationId);
     unsigned long requestTime = getTime() - timeStart;
@@ -521,6 +606,9 @@ int ServiceInterface::deleteGenerationInfoByName(T::SessionId sessionId,const st
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteGenerationInfoByName(sessionId,generationName);
     unsigned long requestTime = getTime() - timeStart;
@@ -543,6 +631,9 @@ int ServiceInterface::deleteGenerationInfoListByIdList(T::SessionId sessionId,st
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteGenerationInfoListByIdList(sessionId,generationIdList);
     unsigned long requestTime = getTime() - timeStart;
@@ -565,6 +656,9 @@ int ServiceInterface::deleteGenerationInfoListByProducerId(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteGenerationInfoListByProducerId(sessionId,producerId);
     unsigned long requestTime = getTime() - timeStart;
@@ -587,6 +681,9 @@ int ServiceInterface::deleteGenerationInfoListByProducerName(T::SessionId sessio
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteGenerationInfoListByProducerName(sessionId,producerName);
     unsigned long requestTime = getTime() - timeStart;
@@ -609,6 +706,9 @@ int ServiceInterface::deleteGenerationInfoListBySourceId(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteGenerationInfoListBySourceId(sessionId,sourceId);
     unsigned long requestTime = getTime() - timeStart;
@@ -631,6 +731,9 @@ int ServiceInterface::getGenerationInfoListByGeometryId(T::SessionId sessionId,T
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGenerationInfoListByGeometryId(sessionId,geometryId,generationInfoList);;
     unsigned long requestTime = getTime() - timeStart;
@@ -653,6 +756,9 @@ int ServiceInterface::getGenerationInfoById(T::SessionId sessionId,uint generati
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGenerationInfoById(sessionId,generationId,generationInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -675,6 +781,9 @@ int ServiceInterface::getGenerationInfoByName(T::SessionId sessionId,const std::
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGenerationInfoByName(sessionId,generationName,generationInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -697,6 +806,9 @@ int ServiceInterface::getGenerationInfoList(T::SessionId sessionId,T::Generation
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGenerationInfoList(sessionId,generationInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -719,6 +831,9 @@ int ServiceInterface::getGenerationInfoListByProducerId(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGenerationInfoListByProducerId(sessionId,producerId,generationInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -741,6 +856,9 @@ int ServiceInterface::getGenerationInfoListByProducerName(T::SessionId sessionId
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGenerationInfoListByProducerName(sessionId,producerName,generationInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -763,6 +881,9 @@ int ServiceInterface::getGenerationInfoListBySourceId(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGenerationInfoListBySourceId(sessionId,sourceId,generationInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -785,6 +906,9 @@ int ServiceInterface::getLastGenerationInfoByProducerIdAndStatus(T::SessionId se
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getLastGenerationInfoByProducerIdAndStatus(sessionId,producerId,generationStatus,generationInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -807,6 +931,9 @@ int ServiceInterface::getLastGenerationInfoByProducerNameAndStatus(T::SessionId 
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getLastGenerationInfoByProducerNameAndStatus(sessionId,producerName,generationStatus,generationInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -829,6 +956,9 @@ int ServiceInterface::getGenerationInfoCount(T::SessionId sessionId,uint& count)
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGenerationInfoCount(sessionId,count);
     unsigned long requestTime = getTime() - timeStart;
@@ -851,6 +981,9 @@ int ServiceInterface::setGenerationInfoStatusById(T::SessionId sessionId,uint ge
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _setGenerationInfoStatusById(sessionId,generationId,status);
     unsigned long requestTime = getTime() - timeStart;
@@ -873,6 +1006,9 @@ int ServiceInterface::setGenerationInfoStatusByName(T::SessionId sessionId,const
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _setGenerationInfoStatusByName(sessionId,generationName,status);
     unsigned long requestTime = getTime() - timeStart;
@@ -895,6 +1031,9 @@ int ServiceInterface::addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _addFileInfo(sessionId,fileInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -917,6 +1056,9 @@ int ServiceInterface::addFileInfoWithContentList(T::SessionId sessionId,T::FileI
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _addFileInfoWithContentList(sessionId,fileInfo,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -939,6 +1081,9 @@ int ServiceInterface::addFileInfoListWithContent(T::SessionId sessionId,uint req
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _addFileInfoListWithContent(sessionId,requestFlags,fileAndContentList);
     unsigned long requestTime = getTime() - timeStart;
@@ -961,6 +1106,9 @@ int ServiceInterface::deleteFileInfoById(T::SessionId sessionId,uint fileId)
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoById(sessionId,fileId);
     unsigned long requestTime = getTime() - timeStart;
@@ -983,6 +1131,9 @@ int ServiceInterface::deleteFileInfoByName(T::SessionId sessionId,const std::str
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoByName(sessionId,filename);
     unsigned long requestTime = getTime() - timeStart;
@@ -1005,6 +1156,9 @@ int ServiceInterface::deleteFileInfoListByGroupFlags(T::SessionId sessionId,uint
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByGroupFlags(sessionId,groupFlags);
     unsigned long requestTime = getTime() - timeStart;
@@ -1027,6 +1181,9 @@ int ServiceInterface::deleteFileInfoListByProducerId(T::SessionId sessionId,uint
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByProducerId(sessionId,producerId);
     unsigned long requestTime = getTime() - timeStart;
@@ -1049,6 +1206,9 @@ int ServiceInterface::deleteFileInfoListByProducerName(T::SessionId sessionId,co
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByProducerName(sessionId,producerName);
     unsigned long requestTime = getTime() - timeStart;
@@ -1071,6 +1231,9 @@ int ServiceInterface::deleteFileInfoListByGenerationId(T::SessionId sessionId,ui
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByGenerationId(sessionId,generationId);
     unsigned long requestTime = getTime() - timeStart;
@@ -1093,6 +1256,9 @@ int ServiceInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Session
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime);
     unsigned long requestTime = getTime() - timeStart;
@@ -1115,6 +1281,9 @@ int ServiceInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Session
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime);
     unsigned long requestTime = getTime() - timeStart;
@@ -1137,6 +1306,9 @@ int ServiceInterface::deleteFileInfoListByForecastTimeList(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByForecastTimeList(sessionId,forecastTimeList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1159,6 +1331,9 @@ int ServiceInterface::deleteFileInfoListByGenerationName(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByGenerationName(sessionId,generationName);
     unsigned long requestTime = getTime() - timeStart;
@@ -1181,6 +1356,9 @@ int ServiceInterface::deleteFileInfoListBySourceId(T::SessionId sessionId,uint s
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListBySourceId(sessionId,sourceId);
     unsigned long requestTime = getTime() - timeStart;
@@ -1203,6 +1381,9 @@ int ServiceInterface::deleteFileInfoListByFileIdList(T::SessionId sessionId,std:
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByFileIdList(sessionId,fileIdList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1225,6 +1406,9 @@ int ServiceInterface::getFileInfoById(T::SessionId sessionId,uint fileId,T::File
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoById(sessionId,fileId,fileInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -1247,6 +1431,9 @@ int ServiceInterface::getFileInfoByName(T::SessionId sessionId,const std::string
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoByName(sessionId,filename,fileInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -1269,6 +1456,9 @@ int ServiceInterface::getFileInfoList(T::SessionId sessionId,uint startFileId,ui
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoList(sessionId,startFileId,maxRecords,fileInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1291,6 +1481,9 @@ int ServiceInterface::getFileInfoListByFileIdList(T::SessionId sessionId,std::ve
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoListByFileIdList(sessionId,fileIdList,fileInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1313,6 +1506,9 @@ int ServiceInterface::getFileInfoListByProducerId(T::SessionId sessionId,uint pr
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoListByProducerId(sessionId,producerId,startFileId,maxRecords,fileInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1335,6 +1531,9 @@ int ServiceInterface::getFileInfoListByProducerName(T::SessionId sessionId,const
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoListByProducerName(sessionId,producerName,startFileId,maxRecords,fileInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1357,6 +1556,9 @@ int ServiceInterface::getFileInfoListByGenerationId(T::SessionId sessionId,uint 
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoListByGenerationId(sessionId,generationId,startFileId,maxRecords,fileInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1379,6 +1581,9 @@ int ServiceInterface::getFileInfoListByGenerationName(T::SessionId sessionId,con
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoListByGenerationName(sessionId,generationName,startFileId,maxRecords,fileInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1401,6 +1606,9 @@ int ServiceInterface::getFileInfoListByGroupFlags(T::SessionId sessionId,uint gr
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoListByGroupFlags(sessionId,groupFlags,startFileId,maxRecords,fileInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1423,6 +1631,9 @@ int ServiceInterface::getFileInfoListBySourceId(T::SessionId sessionId,uint sour
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoListBySourceId(sessionId,sourceId,startFileId,maxRecords,fileInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1445,6 +1656,9 @@ int ServiceInterface::getFileInfoCount(T::SessionId sessionId,uint& count)
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoCount(sessionId,count);
     unsigned long requestTime = getTime() - timeStart;
@@ -1467,6 +1681,9 @@ int ServiceInterface::getFileInfoCountByProducerId(T::SessionId sessionId,uint p
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoCountByProducerId(sessionId,producerId,count);
     unsigned long requestTime = getTime() - timeStart;
@@ -1489,6 +1706,9 @@ int ServiceInterface::getFileInfoCountByGenerationId(T::SessionId sessionId,uint
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoCountByGenerationId(sessionId,generationId,count);
     unsigned long requestTime = getTime() - timeStart;
@@ -1511,6 +1731,9 @@ int ServiceInterface::getFileInfoCountBySourceId(T::SessionId sessionId,uint sou
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoCountBySourceId(sessionId,sourceId,count);
     unsigned long requestTime = getTime() - timeStart;
@@ -1533,6 +1756,9 @@ int ServiceInterface::addEventInfo(T::SessionId sessionId,T::EventInfo& eventInf
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _addEventInfo(sessionId,eventInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -1555,6 +1781,9 @@ int ServiceInterface::getLastEventInfo(T::SessionId sessionId,uint requestingSer
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     // ### This method is polled all the time. Let's not write these calls to the processing log.
 
     //unsigned long long timeStart = getTime();
@@ -1579,6 +1808,9 @@ int ServiceInterface::getEventInfoList(T::SessionId sessionId,uint requestingSer
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getEventInfoList(sessionId,requestingServerId,startEventId,maxRecords,eventInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1602,6 +1834,9 @@ int ServiceInterface::getEventInfoCount(T::SessionId sessionId,uint& count)
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getEventInfoCount(sessionId,count);
     unsigned long requestTime = getTime() - timeStart;
@@ -1624,6 +1859,9 @@ int ServiceInterface::addContentInfo(T::SessionId sessionId,T::ContentInfo& cont
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _addContentInfo(sessionId,contentInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -1646,6 +1884,9 @@ int ServiceInterface::addContentList(T::SessionId sessionId,T::ContentInfoList& 
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _addContentList(sessionId,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1668,6 +1909,9 @@ int ServiceInterface::deleteContentInfo(T::SessionId sessionId,uint fileId,uint 
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteContentInfo(sessionId,fileId,messageIndex);
     unsigned long requestTime = getTime() - timeStart;
@@ -1690,6 +1934,9 @@ int ServiceInterface::deleteContentListByFileId(T::SessionId sessionId,uint file
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteContentListByFileId(sessionId,fileId);
     unsigned long requestTime = getTime() - timeStart;
@@ -1712,6 +1959,9 @@ int ServiceInterface::deleteContentListByFileName(T::SessionId sessionId,const s
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteContentListByFileName(sessionId,filename);
     unsigned long requestTime = getTime() - timeStart;
@@ -1734,6 +1984,9 @@ int ServiceInterface::deleteContentListByGroupFlags(T::SessionId sessionId,uint 
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteContentListByGroupFlags(sessionId,groupFlags);
     unsigned long requestTime = getTime() - timeStart;
@@ -1756,6 +2009,9 @@ int ServiceInterface::deleteContentListByProducerId(T::SessionId sessionId,uint 
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteContentListByProducerId(sessionId,producerId);
     unsigned long requestTime = getTime() - timeStart;
@@ -1778,6 +2034,9 @@ int ServiceInterface::deleteContentListByProducerName(T::SessionId sessionId,con
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteContentListByProducerName(sessionId,producerName);
     unsigned long requestTime = getTime() - timeStart;
@@ -1800,6 +2059,9 @@ int ServiceInterface::deleteContentListByGenerationId(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteContentListByGenerationId(sessionId,generationId);
     unsigned long requestTime = getTime() - timeStart;
@@ -1822,6 +2084,9 @@ int ServiceInterface::deleteContentListByGenerationName(T::SessionId sessionId,c
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteContentListByGenerationName(sessionId,generationName);
     unsigned long requestTime = getTime() - timeStart;
@@ -1844,6 +2109,9 @@ int ServiceInterface::deleteContentListBySourceId(T::SessionId sessionId,uint so
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteContentListBySourceId(sessionId,sourceId);
     unsigned long requestTime = getTime() - timeStart;
@@ -1866,6 +2134,9 @@ int ServiceInterface::getContentInfo(T::SessionId sessionId,uint fileId,uint mes
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentInfo(sessionId,fileId,messageIndex,contentInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -1888,6 +2159,9 @@ int ServiceInterface::getContentList(T::SessionId sessionId,uint startFileId,uin
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentList(sessionId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1910,6 +2184,9 @@ int ServiceInterface::getContentListByFileId(T::SessionId sessionId,uint fileId,
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByFileId(sessionId,fileId,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1932,6 +2209,9 @@ int ServiceInterface::getContentListByFileIdList(T::SessionId sessionId,std::vec
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByFileIdList(sessionId,fileIdList,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1954,6 +2234,9 @@ int ServiceInterface::getContentListByFileName(T::SessionId sessionId,const std:
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByFileName(sessionId,filename,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1976,6 +2259,9 @@ int ServiceInterface::getContentListByGroupFlags(T::SessionId sessionId,uint gro
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByGroupFlags(sessionId,groupFlags,startFileId,startMessageIndex,maxRecords,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1998,6 +2284,9 @@ int ServiceInterface::getContentListByProducerId(T::SessionId sessionId,uint pro
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByProducerId(sessionId,producerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2020,6 +2309,9 @@ int ServiceInterface::getContentListByProducerName(T::SessionId sessionId,const 
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByProducerName(sessionId,producerName,startFileId,startMessageIndex,maxRecords,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2042,6 +2334,9 @@ int ServiceInterface::getContentListBySourceId(T::SessionId sessionId,uint sourc
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListBySourceId(sessionId,sourceId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2064,6 +2359,9 @@ int ServiceInterface::getContentListByGenerationId(T::SessionId sessionId,uint g
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByGenerationId(sessionId,generationId,startFileId,startMessageIndex,maxRecords,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2086,6 +2384,9 @@ int ServiceInterface::getContentListByGenerationName(T::SessionId sessionId,cons
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByGenerationName(sessionId,generationName,startFileId,startMessageIndex,maxRecords,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2108,6 +2409,9 @@ int ServiceInterface::getContentListByGenerationIdAndTimeRange(T::SessionId sess
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByGenerationIdAndTimeRange(sessionId,generationId,startTime,endTime,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2130,6 +2434,9 @@ int ServiceInterface::getContentListByGenerationIdAndTimeRange(T::SessionId sess
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByGenerationIdAndTimeRange(sessionId,generationId,startTime,endTime,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2152,6 +2459,9 @@ int ServiceInterface::getContentListByGenerationNameAndTimeRange(T::SessionId se
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByGenerationNameAndTimeRange(sessionId,generationName,startTime,endTime,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2174,6 +2484,9 @@ int ServiceInterface::getContentListByGenerationNameAndTimeRange(T::SessionId se
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByGenerationNameAndTimeRange(sessionId,generationName,startTime,endTime,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2196,6 +2509,9 @@ int ServiceInterface::getContentListByParameter(T::SessionId sessionId,T::ParamK
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameter(sessionId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2218,6 +2534,9 @@ int ServiceInterface::getContentListByParameter(T::SessionId sessionId,T::ParamK
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameter(sessionId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2240,6 +2559,9 @@ int ServiceInterface::getContentListByParameterAndGenerationId(T::SessionId sess
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2262,6 +2584,9 @@ int ServiceInterface::getContentListByParameterAndGenerationId(T::SessionId sess
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2284,6 +2609,9 @@ int ServiceInterface::getContentListByParameterAndGenerationName(T::SessionId se
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2306,6 +2634,9 @@ int ServiceInterface::getContentListByParameterAndGenerationName(T::SessionId se
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2328,6 +2659,9 @@ int ServiceInterface::getContentListByParameterAndProducerId(T::SessionId sessio
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2350,6 +2684,9 @@ int ServiceInterface::getContentListByParameterAndProducerId(T::SessionId sessio
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2372,6 +2709,9 @@ int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sess
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2394,6 +2734,9 @@ int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sess
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2416,6 +2759,9 @@ int ServiceInterface::getContentListByParameterGenerationIdAndForecastTime(T::Se
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2438,6 +2784,9 @@ int ServiceInterface::getContentListByParameterGenerationIdAndForecastTime(T::Se
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2460,6 +2809,9 @@ int ServiceInterface::getContentListOfInvalidIntegrity(T::SessionId sessionId,T:
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentListOfInvalidIntegrity(sessionId,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2482,6 +2834,9 @@ int ServiceInterface::getContentGeometryIdListByGenerationId(T::SessionId sessio
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentGeometryIdListByGenerationId(sessionId,generationId,geometryIdList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2504,6 +2859,9 @@ int ServiceInterface::getContentParamListByGenerationId(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentParamListByGenerationId(sessionId,generationId,contentParamList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2526,6 +2884,9 @@ int ServiceInterface::getContentParamKeyListByGenerationId(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentParamKeyListByGenerationId(sessionId,generationId,parameterKeyType,paramKeyList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2547,6 +2908,9 @@ int ServiceInterface::getContentTimeListByGenerationId(T::SessionId sessionId,ui
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentTimeListByGenerationId(sessionId,generationId,contentTimeList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2569,6 +2933,9 @@ int ServiceInterface::getContentTimeListByGenerationAndGeometryId(T::SessionId s
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentTimeListByGenerationAndGeometryId(sessionId,generationId,geometryId,contentTimeList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2591,6 +2958,9 @@ int ServiceInterface::getContentTimeListByProducerId(T::SessionId sessionId,uint
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentTimeListByProducerId(sessionId,producerId,contentTimeList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2613,6 +2983,9 @@ int ServiceInterface::getGenerationIdGeometryIdAndForecastTimeList(T::SessionId 
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGenerationIdGeometryIdAndForecastTimeList(sessionId,list);
     unsigned long requestTime = getTime() - timeStart;
@@ -2635,6 +3008,9 @@ int ServiceInterface::getContentCount(T::SessionId sessionId,uint& count)
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getContentCount(sessionId,count);
     unsigned long requestTime = getTime() - timeStart;
@@ -2657,6 +3033,9 @@ int ServiceInterface::getHashByProducerId(T::SessionId sessionId,uint producerId
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getHashByProducerId(sessionId,producerId,hash);
     unsigned long requestTime = getTime() - timeStart;
@@ -2679,6 +3058,9 @@ int ServiceInterface::getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& 
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getLevelInfoList(sessionId,levelInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2702,6 +3084,9 @@ int ServiceInterface::deleteVirtualContent(T::SessionId sessionId)
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _deleteVirtualContent(sessionId);
     unsigned long requestTime = getTime() - timeStart;
@@ -2724,6 +3109,9 @@ int ServiceInterface::updateVirtualContent(T::SessionId sessionId)
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _updateVirtualContent(sessionId);
     unsigned long requestTime = getTime() - timeStart;

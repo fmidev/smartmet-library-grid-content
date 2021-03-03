@@ -20,6 +20,7 @@ ServiceInterface::ServiceInterface()
   FUNCTION_TRACE
   try
   {
+    mEnabled = true;
     mDebugLog = nullptr;
     mProcessingLog = nullptr;
   }
@@ -149,6 +150,39 @@ void ServiceInterface::setLandCover(boost::shared_ptr<Fmi::LandCover> landCover)
 
 
 
+void ServiceInterface::setEnabled(bool enabled)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mEnabled = enabled;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+bool ServiceInterface::isEnabled()
+{
+  FUNCTION_TRACE
+  try
+  {
+    return mEnabled;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ServiceInterface::shutdown()
 {
   FUNCTION_TRACE
@@ -170,6 +204,9 @@ int ServiceInterface::executeQuery(T::SessionId sessionId,Query& query)
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _executeQuery(sessionId,query);
     unsigned long requestTime = getTime() - timeStart;
@@ -192,6 +229,9 @@ int ServiceInterface::getProducerList(T::SessionId sessionId,string_vec& produce
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getProducerList(sessionId,producerList);
     unsigned long requestTime = getTime() - timeStart;
@@ -214,6 +254,9 @@ int ServiceInterface::getValuesByGridPoint(T::SessionId sessionId,T::ContentInfo
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getValuesByGridPoint(sessionId,contentInfoList,coordinateType,x,y,interpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -236,6 +279,9 @@ int ServiceInterface::getParameterValueByPointAndTime(T::SessionId sessionId,con
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getParameterValueByPointAndTime(sessionId,producer,parameter,coordinateType,x,y,timeString,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,value);
     unsigned long requestTime = getTime() - timeStart;
@@ -258,6 +304,9 @@ int ServiceInterface::getParameterValuesByPointListAndTime(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getParameterValuesByPointListAndTime(sessionId,producer,parameter,coordinateType,coordinates,timeString,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -280,6 +329,9 @@ int ServiceInterface::getParameterValuesByPointAndTimeList(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getParameterValuesByPointAndTimeList(sessionId,producer,parameter,coordinateType,x,y,times,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -302,6 +354,9 @@ int ServiceInterface::getParameterValueVectorByGeometryAndTime(T::SessionId sess
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getParameterValueVectorByGeometryAndTime(sessionId,producer,parameter,timeString,attributeList,values);
     unsigned long requestTime = getTime() - timeStart;

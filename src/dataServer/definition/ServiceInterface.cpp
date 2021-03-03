@@ -19,6 +19,7 @@ ServiceInterface::ServiceInterface()
   FUNCTION_TRACE
   try
   {
+    mEnabled = true;
     mDebugLog = nullptr;
     mProcessingLog = nullptr;
   }
@@ -116,6 +117,39 @@ void ServiceInterface::setDebugLog(Log *debugLog)
 
 
 
+void ServiceInterface::setEnabled(bool enabled)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mEnabled = enabled;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+bool ServiceInterface::isEnabled()
+{
+  FUNCTION_TRACE
+  try
+  {
+    return mEnabled;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ServiceInterface::shutdown()
 {
   FUNCTION_TRACE
@@ -137,6 +171,9 @@ int ServiceInterface::getGridCoordinates(T::SessionId sessionId,uint fileId,uint
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridCoordinates(sessionId,fileId,messageIndex,coordinateType,coordinates);
     unsigned long requestTime = getTime() - timeStart;
@@ -159,6 +196,9 @@ int ServiceInterface::getGridData(T::SessionId sessionId,uint fileId,uint messag
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridData(sessionId,fileId,messageIndex,data);
     unsigned long requestTime = getTime() - timeStart;
@@ -181,6 +221,9 @@ int ServiceInterface::getGridAttributeList(T::SessionId sessionId,uint fileId,ui
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridAttributeList(sessionId,fileId,messageIndex,attributeList);
     unsigned long requestTime = getTime() - timeStart;
@@ -203,6 +246,9 @@ int ServiceInterface::getGridFileCount(T::SessionId sessionId,uint& count)
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridFileCount(sessionId,count);
     unsigned long requestTime = getTime() - timeStart;
@@ -225,6 +271,9 @@ int ServiceInterface::getGridMessagePreloadCount(T::SessionId sessionId,uint& co
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridMessagePreloadCount(sessionId,count);
     unsigned long requestTime = getTime() - timeStart;
@@ -247,6 +296,9 @@ int ServiceInterface::getGridMessageBytes(T::SessionId sessionId,uint fileId,uin
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridMessageBytes(sessionId,fileId,messageIndex,messageBytes,messageSections);
     unsigned long requestTime = getTime() - timeStart;
@@ -269,6 +321,9 @@ int ServiceInterface::getGridValueByPoint(T::SessionId sessionId,uint fileId,uin
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueByPoint(sessionId,fileId,messageIndex,coordinateType,x,y,areaInterpolationMethod,value);
     unsigned long requestTime = getTime() - timeStart;
@@ -291,6 +346,9 @@ int ServiceInterface::getGridValueByLevelAndPoint(T::SessionId sessionId,uint fi
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueByLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,newLevel,coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,value);
     unsigned long requestTime = getTime() - timeStart;
@@ -313,6 +371,9 @@ int ServiceInterface::getGridValueByTimeAndPoint(T::SessionId sessionId,uint fil
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueByTimeAndPoint(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,value);
     unsigned long requestTime = getTime() - timeStart;
@@ -335,6 +396,9 @@ int ServiceInterface::getGridValueByTimeAndPoint(T::SessionId sessionId,uint fil
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueByTimeAndPoint(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,value);
     unsigned long requestTime = getTime() - timeStart;
@@ -357,6 +421,9 @@ int ServiceInterface::getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueByTimeLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,newTime,newLevel,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,value);
     unsigned long requestTime = getTime() - timeStart;
@@ -379,6 +446,9 @@ int ServiceInterface::getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueByTimeLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,newTime,newLevel,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,value);
     unsigned long requestTime = getTime() - timeStart;
@@ -401,6 +471,9 @@ int ServiceInterface::getGridValueListByCircle(T::SessionId sessionId,uint fileI
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByCircle(sessionId,fileId,messageIndex,coordinateType,origoX,origoY,radius,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -423,6 +496,9 @@ int ServiceInterface::getGridValueListByLevelAndCircle(T::SessionId sessionId,ui
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByLevelAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,origoX,origoY,radius,levelInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -445,6 +521,9 @@ int ServiceInterface::getGridValueListByTimeAndCircle(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByTimeAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,origoX,origoY,radius,timeInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -467,6 +546,9 @@ int ServiceInterface::getGridValueListByTimeAndCircle(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByTimeAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,origoX,origoY,radius,timeInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -489,6 +571,9 @@ int ServiceInterface::getGridValueListByTimeLevelAndCircle(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByTimeLevelAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,origoX,origoY,radius,timeInterpolationMethod,levelInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -511,6 +596,9 @@ int ServiceInterface::getGridValueListByTimeLevelAndCircle(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByTimeLevelAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,origoX,origoY,radius,timeInterpolationMethod,levelInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -533,6 +621,9 @@ int ServiceInterface::getGridValueListByPointList(T::SessionId sessionId,uint fi
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByPointList(sessionId,fileId,messageIndex,coordinateType,pointList,areaInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -555,6 +646,9 @@ int ServiceInterface::getGridValueListByLevelAndPointList(T::SessionId sessionId
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByLevelAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,pointList,areaInterpolationMethod,levelInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -577,6 +671,9 @@ int ServiceInterface::getGridValueListByTimeAndPointList(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByTimeAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,pointList,areaInterpolationMethod,timeInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -599,6 +696,9 @@ int ServiceInterface::getGridValueListByTimeAndPointList(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByTimeAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,pointList,areaInterpolationMethod,timeInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -621,6 +721,9 @@ int ServiceInterface::getGridValueListByTimeLevelAndPointList(T::SessionId sessi
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByTimeLevelAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,pointList,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -643,6 +746,9 @@ int ServiceInterface::getGridValueListByTimeLevelAndPointList(T::SessionId sessi
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByTimeLevelAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,pointList,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -665,6 +771,9 @@ int ServiceInterface::getGridValueListByPolygon(T::SessionId sessionId,uint file
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByPolygon(sessionId,fileId,messageIndex,coordinateType,polygonPoints,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -687,6 +796,9 @@ int ServiceInterface::getGridValueListByLevelAndPolygon(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByLevelAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,polygonPoints,levelInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -709,6 +821,9 @@ int ServiceInterface::getGridValueListByTimeAndPolygon(T::SessionId sessionId,ui
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByTimeAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,polygonPoints,timeInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -731,6 +846,9 @@ int ServiceInterface::getGridValueListByTimeAndPolygon(T::SessionId sessionId,ui
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByTimeAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,polygonPoints,timeInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -753,6 +871,9 @@ int ServiceInterface::getGridValueListByTimeLevelAndPolygon(T::SessionId session
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByTimeLevelAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,polygonPoints,timeInterpolationMethod,levelInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -775,6 +896,9 @@ int ServiceInterface::getGridValueListByTimeLevelAndPolygon(T::SessionId session
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByTimeLevelAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,polygonPoints,timeInterpolationMethod,levelInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -797,6 +921,9 @@ int ServiceInterface::getGridValueListByPolygonPath(T::SessionId sessionId,uint 
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByPolygonPath(sessionId,fileId,messageIndex,coordinateType,polygonPath,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -819,6 +946,9 @@ int ServiceInterface::getGridValueListByLevelAndPolygonPath(T::SessionId session
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByLevelAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,polygonPath,levelInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -841,6 +971,9 @@ int ServiceInterface::getGridValueListByTimeAndPolygonPath(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByTimeAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,polygonPath,timeInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -863,6 +996,9 @@ int ServiceInterface::getGridValueListByTimeAndPolygonPath(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByTimeAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,polygonPath,timeInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -885,6 +1021,9 @@ int ServiceInterface::getGridValueListByTimeLevelAndPolygonPath(T::SessionId ses
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByTimeLevelAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,polygonPath,timeInterpolationMethod,levelInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -907,6 +1046,9 @@ int ServiceInterface::getGridValueListByTimeLevelAndPolygonPath(T::SessionId ses
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByTimeLevelAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,polygonPath,timeInterpolationMethod,levelInterpolationMethod,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -929,6 +1071,9 @@ int ServiceInterface::getGridValueListByRectangle(T::SessionId sessionId,uint fi
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueListByRectangle(sessionId,fileId,messageIndex,coordinateType,x1,y1,x2,y2,valueList);
     unsigned long requestTime = getTime() - timeStart;
@@ -951,6 +1096,9 @@ int ServiceInterface::getGridValueVector(T::SessionId sessionId,uint fileId,uint
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVector(sessionId,fileId,messageIndex,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -973,6 +1121,9 @@ int ServiceInterface::getGridValueVectorByLevel(T::SessionId sessionId,uint file
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,levelInterpolationMethod,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -995,6 +1146,9 @@ int ServiceInterface::getGridValueVectorByTime(T::SessionId sessionId,uint fileI
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,timeInterpolationMethod,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -1017,6 +1171,9 @@ int ServiceInterface::getGridValueVectorByTime(T::SessionId sessionId,uint fileI
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,timeInterpolationMethod,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -1039,6 +1196,9 @@ int ServiceInterface::getGridValueVectorByCoordinateList(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByCoordinateList(sessionId,fileId,messageIndex,coordinateType,coordinates,areaInterpolationMethod,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -1061,6 +1221,9 @@ int ServiceInterface::getGridValueVectorByLevelAndCoordinateList(T::SessionId se
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByLevelAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,coordinates,attributeList,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -1083,6 +1246,9 @@ int ServiceInterface::getGridValueVectorByTimeAndCoordinateList(T::SessionId ses
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByTimeAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,coordinates,attributeList,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -1106,6 +1272,9 @@ int ServiceInterface::getGridValueVectorByTimeAndCoordinateList(T::SessionId ses
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByTimeAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,coordinates,attributeList,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -1129,6 +1298,9 @@ int ServiceInterface::getGridValueVectorByGeometry(T::SessionId sessionId,uint f
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByGeometry(sessionId,fileId,messageIndex,attributeList,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -1151,6 +1323,9 @@ int ServiceInterface::getGridValueVectorByRectangle(T::SessionId sessionId,uint 
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByRectangle(sessionId,fileId,messageIndex,coordinateType,columns,rows,x,y,xStep,yStep,areaInterpolationMethod,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -1173,6 +1348,9 @@ int ServiceInterface::getGridValueVectorByPoint(T::SessionId sessionId,uint file
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByPoint(sessionId,fileId,messageIndex,coordinateType,x,y,vectorType,valueVector);
     unsigned long requestTime = getTime() - timeStart;
@@ -1195,6 +1373,9 @@ int ServiceInterface::getGridValueVectorByLevelAndGeometry(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,attributeList,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -1217,6 +1398,9 @@ int ServiceInterface::getGridValueVectorByTimeAndGeometry(T::SessionId sessionId
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -1239,6 +1423,9 @@ int ServiceInterface::getGridValueVectorByTimeAndGeometry(T::SessionId sessionId
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -1261,6 +1448,9 @@ int ServiceInterface::getGridValueVectorByTimeAndLevel(T::SessionId sessionId,ui
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -1283,6 +1473,9 @@ int ServiceInterface::getGridValueVectorByTimeAndLevel(T::SessionId sessionId,ui
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -1305,6 +1498,9 @@ int ServiceInterface::getGridValueVectorByTimeLevelAndGeometry(T::SessionId sess
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,attributeList,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -1327,6 +1523,9 @@ int ServiceInterface::getGridValueVectorByTimeLevelAndGeometry(T::SessionId sess
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,attributeList,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -1349,6 +1548,9 @@ int ServiceInterface::getGridValueVectorByTimeLevelAndCoordinateList(T::SessionI
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByTimeLevelAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,coordinates,attributeList,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -1371,6 +1573,9 @@ int ServiceInterface::getGridValueVectorByTimeLevelAndCoordinateList(T::SessionI
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridValueVectorByTimeLevelAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,coordinates,attributeList,values);
     unsigned long requestTime = getTime() - timeStart;
@@ -1393,6 +1598,9 @@ int ServiceInterface::getGridIsobands(T::SessionId sessionId,uint fileId,uint me
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsobands(sessionId,fileId,messageIndex,contourLowValues,contourHighValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1415,6 +1623,9 @@ int ServiceInterface::getGridIsobandsByGeometry(T::SessionId sessionId,uint file
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsobandsByGeometry(sessionId,fileId,messageIndex,contourLowValues,contourHighValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1437,6 +1648,9 @@ int ServiceInterface::getGridIsobandsByGrid(T::SessionId sessionId,uint fileId,u
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsobandsByGrid(sessionId,fileId,messageIndex,contourLowValues,contourHighValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1459,6 +1673,9 @@ int ServiceInterface::getGridIsobandsByLevel(T::SessionId sessionId,uint fileId1
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsobandsByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourLowValues,contourHighValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1481,6 +1698,9 @@ int ServiceInterface::getGridIsobandsByTime(T::SessionId sessionId,uint fileId1,
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsobandsByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues,contourHighValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1503,6 +1723,9 @@ int ServiceInterface::getGridIsobandsByTime(T::SessionId sessionId,uint fileId1,
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsobandsByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues,contourHighValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1525,6 +1748,9 @@ int ServiceInterface::getGridIsobandsByTimeAndLevel(T::SessionId sessionId,uint 
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsobandsByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues,contourHighValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1547,6 +1773,9 @@ int ServiceInterface::getGridIsobandsByTimeAndLevel(T::SessionId sessionId,uint 
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsobandsByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues,contourHighValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1569,6 +1798,9 @@ int ServiceInterface::getGridIsobandsByTimeLevelAndGeometry(T::SessionId session
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsobandsByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues,contourHighValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1591,6 +1823,9 @@ int ServiceInterface::getGridIsobandsByTimeLevelAndGeometry(T::SessionId session
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsobandsByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues,contourHighValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1613,6 +1848,9 @@ int ServiceInterface::getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsobandsByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues,contourHighValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1635,6 +1873,9 @@ int ServiceInterface::getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsobandsByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues,contourHighValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1657,6 +1898,9 @@ int ServiceInterface::getGridIsobandsByLevelAndGeometry(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsobandsByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourLowValues,contourHighValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1679,6 +1923,9 @@ int ServiceInterface::getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,ui
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsobandsByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues,contourHighValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1701,6 +1948,9 @@ int ServiceInterface::getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,ui
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsobandsByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues,contourHighValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1723,6 +1973,9 @@ int ServiceInterface::getGridIsobandsByLevelAndGrid(T::SessionId sessionId,uint 
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsobandsByLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourLowValues,contourHighValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1745,6 +1998,9 @@ int ServiceInterface::getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint f
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsobandsByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues,contourHighValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1766,6 +2022,9 @@ int ServiceInterface::getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint f
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsobandsByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues,contourHighValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1787,6 +2046,9 @@ int ServiceInterface::getGridIsolines(T::SessionId sessionId,uint fileId,uint me
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsolines(sessionId,fileId,messageIndex,contourValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1809,6 +2071,9 @@ int ServiceInterface::getGridIsolinesByGeometry(T::SessionId sessionId,uint file
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsolinesByGeometry(sessionId,fileId,messageIndex,contourValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1831,6 +2096,9 @@ int ServiceInterface::getGridIsolinesByGrid(T::SessionId sessionId,uint fileId,u
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsolinesByGrid(sessionId,fileId,messageIndex,contourValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1853,6 +2121,9 @@ int ServiceInterface::getGridIsolinesByLevel(T::SessionId sessionId,uint fileId1
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsolinesByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1875,6 +2146,9 @@ int ServiceInterface::getGridIsolinesByTime(T::SessionId sessionId,uint fileId1,
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsolinesByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1897,6 +2171,9 @@ int ServiceInterface::getGridIsolinesByTime(T::SessionId sessionId,uint fileId1,
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsolinesByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1919,6 +2196,9 @@ int ServiceInterface::getGridIsolinesByLevelAndGeometry(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsolinesByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1941,6 +2221,9 @@ int ServiceInterface::getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,ui
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsolinesByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1963,6 +2246,9 @@ int ServiceInterface::getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,ui
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsolinesByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -1985,6 +2271,9 @@ int ServiceInterface::getGridIsolinesByLevelAndGrid(T::SessionId sessionId,uint 
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsolinesByLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -2007,6 +2296,9 @@ int ServiceInterface::getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint f
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsolinesByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -2029,6 +2321,9 @@ int ServiceInterface::getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint f
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsolinesByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -2051,6 +2346,9 @@ int ServiceInterface::getGridIsolinesByTimeAndLevel(T::SessionId sessionId,uint 
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsolinesByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -2073,6 +2371,9 @@ int ServiceInterface::getGridIsolinesByTimeAndLevel(T::SessionId sessionId,uint 
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsolinesByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -2095,6 +2396,9 @@ int ServiceInterface::getGridIsolinesByTimeLevelAndGeometry(T::SessionId session
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsolinesByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -2117,6 +2421,9 @@ int ServiceInterface::getGridIsolinesByTimeLevelAndGeometry(T::SessionId session
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsolinesByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -2139,6 +2446,9 @@ int ServiceInterface::getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsolinesByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -2161,6 +2471,9 @@ int ServiceInterface::getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getGridIsolinesByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,contours);
     unsigned long requestTime = getTime() - timeStart;
@@ -2183,6 +2496,9 @@ int ServiceInterface::getMultipleGridValues(T::SessionId sessionId,T::ValueRecor
   FUNCTION_TRACE
   try
   {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
     unsigned long long timeStart = getTime();
     int result = _getMultipleGridValues(sessionId,valueRecordList);
     unsigned long requestTime = getTime() - timeStart;

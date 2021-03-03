@@ -53,6 +53,9 @@ class ServiceInterface
      virtual void   setProcessingLog(Log *processingLog);
      virtual void   shutdown();
 
+     virtual void   setEnabled(bool enabled);
+     virtual bool   isEnabled();
+
      virtual int    clear(T::SessionId sessionId);
      virtual int    reload(T::SessionId sessionId);
 
@@ -317,6 +320,7 @@ class ServiceInterface
      virtual int    _deleteVirtualContent(T::SessionId sessionId);
      virtual int    _updateVirtualContent(T::SessionId sessionId);
 
+     bool           mEnabled;
      Log            *mDebugLog;
      Log            *mProcessingLog;
      Implementation mImplementationType;

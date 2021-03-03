@@ -24,6 +24,9 @@ std::string getResultString(int resultCode)
       case Result::DATA_NOT_FOUND:
         return std::string("Requested data not found!");
 
+      case Result::SERVICE_DISABLED:
+        return std::string("Service disabled!");
+
       case Result::UNEXPECTED_EXCEPTION:
         return std::string("Unexpected exception!");
 

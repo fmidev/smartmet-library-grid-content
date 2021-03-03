@@ -30,6 +30,9 @@ class ServiceInterface
      virtual void   setDebugLog(Log *debugLog);
      virtual void   setProcessingLog(Log *processingLog);
 
+     virtual void   setEnabled(bool enabled);
+     virtual bool   isEnabled();
+
      virtual void   shutdown();
      virtual void   setDem(boost::shared_ptr<Fmi::DEM> dem);
      virtual void   setLandCover(boost::shared_ptr<Fmi::LandCover> landCover);
@@ -56,6 +59,7 @@ class ServiceInterface
 
      virtual int    _getParameterValueVectorByGeometryAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,const std::string& timeString,T::AttributeList& attributeList,T::ParamValue_vec& values);
 
+     bool           mEnabled;
      Log            *mDebugLog;
      Log            *mProcessingLog;
 };

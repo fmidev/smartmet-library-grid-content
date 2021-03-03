@@ -21,6 +21,7 @@ enum Result
   NO_CONNECTION_TO_PERMANENT_STORAGE          = -8,
   INVALID_SESSION                             = -10,
   UNKNOWN_METHOD                              = -11,
+  SERVICE_DISABLED                            = -20,
   SERVER_ID_ALREADY_REGISTERED                = -1000,
   SERVER_NAME_ALREADY_REGISTERED              = -1001,
   SERVER_IOR_ALREADY_REGISTERED               = -1002,
