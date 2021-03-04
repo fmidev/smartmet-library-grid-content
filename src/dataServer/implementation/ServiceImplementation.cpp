@@ -4167,32 +4167,36 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
 
 
     uint cLen = contentList.getLength();
-    for (uint t=0; t<cLen; t++)
+
+    if (gridFile->getNumberOfMessages() < cLen)
     {
-      T::ContentInfo *info = contentList.getContentInfoByIndex(t);
-
-      GRID::MessageInfo mInfo;
-
-      mInfo.mFilePosition = info->mFilePosition;
-      mInfo.mMessageSize = info->mMessageSize;
-      mInfo.mProducerId = info->mProducerId;
-      mInfo.mGenerationId = info->mGenerationId;
-      mInfo.mFmiParameterId = info->mFmiParameterId;
-      mInfo.mFmiParameterName = info->getFmiParameterName();
-      mInfo.mFmiParameterLevelId = info->mFmiParameterLevelId;
-      mInfo.mParameterLevel = info->mParameterLevel;
-      mInfo.mForecastType = info->mForecastType;
-      mInfo.mForecastNumber = info->mForecastNumber;
-      mInfo.mGeometryId = info->mGeometryId;
-
-      gridFile->newMessage(info->mMessageIndex,mInfo);
-
-      if (mContentPreloadEnabled)
+      for (uint t=0; t<cLen; t++)
       {
-        char tmp[200];
-        sprintf(tmp,"%u;%s;%u;1;%u;%05u;%d;%d;1",info->mProducerId,info->getFmiParameterName().c_str(),info->mGeometryId,info->mFmiParameterLevelId,info->mParameterLevel,info->mForecastType,info->mForecastNumber);
-        if (mPreloadDefList.find(toLowerString(std::string(tmp))) != mPreloadDefList.end())
-          mPreloadList.emplace_back(std::pair<uint,uint>(info->mFileId,info->mMessageIndex));
+        T::ContentInfo *info = contentList.getContentInfoByIndex(t);
+
+        GRID::MessageInfo mInfo;
+
+        mInfo.mFilePosition = info->mFilePosition;
+        mInfo.mMessageSize = info->mMessageSize;
+        mInfo.mProducerId = info->mProducerId;
+        mInfo.mGenerationId = info->mGenerationId;
+        mInfo.mFmiParameterId = info->mFmiParameterId;
+        mInfo.mFmiParameterName = info->getFmiParameterName();
+        mInfo.mFmiParameterLevelId = info->mFmiParameterLevelId;
+        mInfo.mParameterLevel = info->mParameterLevel;
+        mInfo.mForecastType = info->mForecastType;
+        mInfo.mForecastNumber = info->mForecastNumber;
+        mInfo.mGeometryId = info->mGeometryId;
+
+        gridFile->newMessage(info->mMessageIndex,mInfo);
+
+        if (mContentPreloadEnabled)
+        {
+          char tmp[200];
+          sprintf(tmp,"%u;%s;%u;1;%u;%05u;%d;%d;1",info->mProducerId,info->getFmiParameterName().c_str(),info->mGeometryId,info->mFmiParameterLevelId,info->mParameterLevel,info->mForecastType,info->mForecastNumber);
+          if (mPreloadDefList.find(toLowerString(std::string(tmp))) != mPreloadDefList.end())
+            mPreloadList.emplace_back(std::pair<uint,uint>(info->mFileId,info->mMessageIndex));
+        }
       }
     }
 
