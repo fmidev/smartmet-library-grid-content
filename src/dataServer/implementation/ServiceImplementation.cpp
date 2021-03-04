@@ -4166,27 +4166,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
     }
 
 
-    if (gridFile->getModificationTime() != 0)
-    {
-      if (!storageFile)
-      {
-        mGridFileManager.addFile(gridFile);
-      }
-    }
-    else
-    {
-      // The grid file does not exist.
-
-      if (!storageFile)
-        delete gridFile;
-
-      return;
-    }
-
-    gridFile->setCheckTime(checkTime);
-
     uint cLen = contentList.getLength();
-    GRID::GridFile_sptr gFile;
     for (uint t=0; t<cLen; t++)
     {
       T::ContentInfo *info = contentList.getContentInfoByIndex(t);
@@ -4215,6 +4195,25 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
           mPreloadList.emplace_back(std::pair<uint,uint>(info->mFileId,info->mMessageIndex));
       }
     }
+
+    if (gridFile->getModificationTime() != 0)
+    {
+      if (!storageFile)
+      {
+        mGridFileManager.addFile(gridFile);
+      }
+    }
+    else
+    {
+      // The grid file does not exist.
+
+      if (!storageFile)
+        delete gridFile;
+
+      return;
+    }
+
+    gridFile->setCheckTime(checkTime);
 
     if (mVirtualContentEnabled)
       mVirtualContentManager.addFile(producerInfo,generationInfo,fileInfo,contentList,mGridFileMap);
