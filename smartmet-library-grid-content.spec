@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 21.3.4
+Version: 21.3.15
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -65,6 +65,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
+Requires: smartmet-library-macgyver-devel >= 21.2.25
+Requires: smartmet-library-gis-devel >= 21.2.26
+Requires: smartmet-library-spine-devel >= 21.3.1
+Requires: smartmet-library-grid-files-devel >= 21.3.4
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -74,6 +78,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Mar 15 2021 Andris Pavēnis <andris.pavenis@fmi.fi> - 21.3.15-1.fmi
+- Add missing dependencies for devel package
 * Thu Mar  4 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.3.4-1.fmi
 - Checking that the grid messages are not added multiple times
 - Initializing messages before the grid file is added into the GridFileManager
