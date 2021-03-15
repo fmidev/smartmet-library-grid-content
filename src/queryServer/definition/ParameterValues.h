@@ -17,6 +17,7 @@ class ParameterValues
                             //ParameterValues(const ParameterValues& parameterValues);
     virtual                 ~ParameterValues();
 
+    void                    clear();
     void                    print(std::ostream& stream,uint level,uint optionFlags);
 
     //std::string             mForecastTime;

@@ -97,6 +97,43 @@ ParameterValues::~ParameterValues()
 
 
 
+void ParameterValues::clear()
+{
+  try
+  {
+    mProducerId = 0;
+    mGenerationId = 0;
+    mGenerationFlags = 0;
+    mGeometryId = 0;
+    mParameterKeyType = T::ParamKeyTypeValue::UNKNOWN;
+    mParameterLevelIdType = T::ParamLevelIdTypeValue::ANY;
+    mParameterLevelId = 0;
+    mParameterLevel = 0;
+    mForecastType = -1;
+    mForecastNumber = -1;
+    mFlags = 0;
+    mForecastTimeUTC = 0;
+    mModificationTime = 0;
+
+    for (uint t=0;t<4; t++)
+    {
+      mFileId[t] = 0;
+      mMessageIndex[t] = 0;
+    }
+
+    mValueList.clear();
+    mValueVector.clear();
+    mValueData.clear();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
 void ParameterValues::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try

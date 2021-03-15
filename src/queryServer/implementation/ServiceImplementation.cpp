@@ -2953,7 +2953,11 @@ bool ServiceImplementation::getSpecialValues(
         // So, we should use this producer.
 
         newProducerId = producerInfo.mProducerId;
+        valueList.clear();
         valueList.mProducerId = producerInfo.mProducerId;
+        valueList.mParameterKeyType = pInfo.mParameterKeyType;
+        valueList.mParameterKey = pInfo.mParameterKey;
+        valueList.mForecastTimeUTC = forecastTime;
         return false;
       }
     }
@@ -3243,7 +3247,11 @@ bool ServiceImplementation::getValueVectors(
         // So, we should use this producer.
 
         newProducerId = producerInfo.mProducerId;
+        valueList.clear();
         valueList.mProducerId = producerInfo.mProducerId;
+        valueList.mParameterKeyType = pInfo.mParameterKeyType;
+        valueList.mParameterKey = pInfo.mParameterKey;
+        valueList.mForecastTimeUTC = forecastTime;
         return false;
       }
     }
@@ -4377,7 +4385,11 @@ bool ServiceImplementation::getPointValuesByHeight(
             // So, we should use this producer.
 
             newProducerId = producerInfo.mProducerId;
+            valueList.clear();
             valueList.mProducerId = producerInfo.mProducerId;
+            valueList.mParameterKeyType = pInfo.mParameterKeyType;
+            valueList.mParameterKey = pInfo.mParameterKey;
+            valueList.mForecastTimeUTC = forecastTime;
           }
         }
 
@@ -4664,7 +4676,11 @@ bool ServiceImplementation::getPointValues(
         // So, we should use this producer.
 
         newProducerId = producerInfo.mProducerId;
+        valueList.clear();
         valueList.mProducerId = producerInfo.mProducerId;
+        valueList.mParameterKeyType = pInfo.mParameterKeyType;
+        valueList.mParameterKey = pInfo.mParameterKey;
+        valueList.mForecastTimeUTC = forecastTime;
         return false;
       }
     }
@@ -4931,7 +4947,11 @@ bool ServiceImplementation::getCircleValues(
         // So, we should use this producer.
 
         newProducerId = producerInfo.mProducerId;
+        valueList.clear();
         valueList.mProducerId = producerInfo.mProducerId;
+        valueList.mParameterKeyType = pInfo.mParameterKeyType;
+        valueList.mParameterKey = pInfo.mParameterKey;
+        valueList.mForecastTimeUTC = forecastTime;
         return false;
       }
     }
@@ -5192,7 +5212,11 @@ bool ServiceImplementation::getPolygonValues(
         // So, we should use this producer.
 
         newProducerId = producerInfo.mProducerId;
+        valueList.clear();
         valueList.mProducerId = producerInfo.mProducerId;
+        valueList.mParameterKeyType = pInfo.mParameterKeyType;
+        valueList.mParameterKey = pInfo.mParameterKey;
+        valueList.mForecastTimeUTC = forecastTime;
         return false;
       }
     }
@@ -5474,7 +5498,11 @@ bool ServiceImplementation::getIsolineValues(
         // So, we should use this producer.
 
         newProducerId = producerInfo.mProducerId;
+        valueList.clear();
         valueList.mProducerId = producerInfo.mProducerId;
+        valueList.mParameterKeyType = pInfo.mParameterKeyType;
+        valueList.mParameterKey = pInfo.mParameterKey;
+        valueList.mForecastTimeUTC = forecastTime;
         return false;
       }
     }
@@ -5802,7 +5830,11 @@ bool ServiceImplementation::getIsobandValues(
         // So, we should use this producer.
 
         newProducerId = producerInfo.mProducerId;
+        valueList.clear();
         valueList.mProducerId = producerInfo.mProducerId;
+        valueList.mParameterKeyType = pInfo.mParameterKeyType;
+        valueList.mParameterKey = pInfo.mParameterKey;
+        valueList.mForecastTimeUTC = forecastTime;
         return false;
       }
     }
