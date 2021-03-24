@@ -2906,6 +2906,7 @@ bool ServiceImplementation::getSpecialValues(
         }
 
         uint vSize = valueVector.size();
+        PRINT_DATA(mDebugLog, "-- Value vector size %u\n",vSize);
         if (vSize > 0)
         {
           // The first number indicates the number of the constant values
@@ -6338,6 +6339,124 @@ void ServiceImplementation::getGridValues(
 
                       if (locationType == QueryParameter::LocationType::Point)
                       {
+                        if (areaInterpolation == T::AreaInterpolationMethod::Landscape && areaCoordinates.size() == 1 && areaCoordinates[0].size() == 1)
+                        {
+                          double x = areaCoordinates[0][0].x();
+                          double y = areaCoordinates[0][0].y();
+
+                          if (getSpecialValues(producerInfo, producerGeometryId, generationInfo->mGenerationId, generationInfo->mAnalysisTime, gflags, *pInfo, forecastTime, pLevelId, pLevel, forecastType, forecastNumber,
+                              parameterFlags, T::AreaInterpolationMethod::List, timeInterpolationMethod, levelInterpolationMethod, coordinateType, x, y, producerId, precision, valueList))
+                          {
+                            Producer_vec pList;
+                            std::set<T::GeometryId> gList;
+
+                            pList.emplace_back(std::pair<std::string,T::GeometryId>(it->first,it->second));
+                            gList.insert(it->second);
+
+                            std::string pname = "GeopHeight";
+                            ParameterValues zhValueList;
+                            getGridValues(queryType,pList,gList,producerInfo.mProducerId,
+                                analysisTime,generationFlags,reverseGenerations,pname,0,6,0,
+                                forecastType,forecastNumber,queryFlags,parameterFlags,500,timeInterpolationMethod,
+                                levelInterpolationMethod,forecastTime,timeMatchRequired,locationType,
+                                coordinateType,areaCoordinates,contourLowValues,contourHighValues,
+                                queryAttributeList,radius,precision,zhValueList,coordinates);
+
+                            pname = "LapseRate";
+                            ParameterValues lrValueList;
+                            getGridValues(queryType,pList,gList,producerInfo.mProducerId,
+                                analysisTime,generationFlags,reverseGenerations,pname,0,6,0,
+                                forecastType,forecastNumber,queryFlags,parameterFlags,500,timeInterpolationMethod,
+                                levelInterpolationMethod,forecastTime,timeMatchRequired,locationType,
+                                coordinateType,areaCoordinates,contourLowValues,contourHighValues,
+                                queryAttributeList,radius,precision,lrValueList,coordinates);
+
+                            pname = "LandSeaMask";
+                            ParameterValues lsValueList;
+                            getGridValues(queryType,pList,gList,producerInfo.mProducerId,
+                                analysisTime,generationFlags,reverseGenerations,pname,0,6,0,
+                                forecastType,forecastNumber,queryFlags,parameterFlags,500,timeInterpolationMethod,
+                                levelInterpolationMethod,forecastTime,timeMatchRequired,locationType,
+                                coordinateType,areaCoordinates,contourLowValues,contourHighValues,
+                                queryAttributeList,radius,precision,lsValueList,coordinates);
+
+                            //printf("***** VAL\n");
+                            //valueList.print(std::cout,0,0);
+
+                            //printf("***** ZH\n");
+                            //zhValueList.print(std::cout,0,0);
+
+                            //printf("***** LR\n");
+                            //lrValueList.print(std::cout,0,0);
+
+                            //printf("***** LS\n");
+                            //lsValueList.print(std::cout,0,0);
+
+
+                            std::vector<double> vList;
+                            std::vector<double> zhList;
+                            std::vector<double> lrList;
+                            std::vector<double> lsList;
+                            std::vector<double> missingList = {ParamValueMissing,ParamValueMissing,ParamValueMissing,ParamValueMissing,ParamValueMissing,ParamValueMissing,ParamValueMissing};
+
+                            double dem = getAdditionalValue("dem",forecastTime,x,y);
+                            int coverType = getAdditionalValue("coverType",forecastTime,x,y);
+
+                            if (zhValueList.mValueList.getLength() == 1)
+                            {
+                              T::GridValue *v = zhValueList.mValueList.getGridValuePtrByIndex(0);
+                              if (v != nullptr)
+                                splitString(v->mValueString,';',zhList);
+                            }
+                            if (zhList.size() == 0)
+                              zhList = missingList;
+
+                            if (lrValueList.mValueList.getLength() == 1)
+                            {
+                              T::GridValue *v = lrValueList.mValueList.getGridValuePtrByIndex(0);
+                              if (v != nullptr)
+                                splitString(v->mValueString,';',lrList);
+                            }
+                            if (lrList.size() == 0)
+                              lrList = missingList;
+
+                            if (lsValueList.mValueList.getLength() == 1)
+                            {
+                              T::GridValue *v = lsValueList.mValueList.getGridValuePtrByIndex(0);
+                              if (v != nullptr)
+                                splitString(v->mValueString,';',lsList);
+                            }
+                            if (lsList.size() == 0)
+                              lsList = missingList;
+
+
+                            if (valueList.mValueList.getLength() == 1)
+                            {
+                              T::GridValue *v = valueList.mValueList.getGridValuePtrByIndex(0);
+                              if (v != nullptr)
+                              {
+                                splitString(v->mValueString,';',vList);
+                                if (vList.size() == 0)
+                                  return;
+
+                                double val = landscapeInterpolation(
+                                    dem,coverType,
+                                    vList[1],vList[2],vList[3],vList[4],vList[5],vList[6],
+                                    zhList[3],zhList[4],zhList[5],zhList[6],
+                                    lrList[3],lrList[4],lrList[5],lrList[6],
+                                    lsList[3],lsList[4],lsList[5],lsList[6]);
+
+                                //printf("VALUE %f\n",val);
+                                v->mValueString = "";
+                                v->mValue = val;
+                                return;
+                              }
+                            }
+                          }
+                          return;
+                        }
+
+
                         if (areaInterpolation < T::AreaInterpolationMethod::List)
                         {
                           // ### Simple interpolation

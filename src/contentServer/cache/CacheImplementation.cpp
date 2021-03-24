@@ -3753,6 +3753,9 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
     if (producerInfo == nullptr)
       return Result::UNKNOWN_PRODUCER_ID;
 
+    T::GenerationInfoList generationList;
+    ssp->mGenerationInfoList.getGenerationInfoListByProducerId(producerId,generationList);
+
     char st[100];
     strcpy(st,parameterKey.c_str());
 
@@ -3790,9 +3793,9 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
 
       case T::ParamKeyTypeValue::FMI_NAME:
         if (mContentInfoListEnabled[2])
-          ssp->mContentInfoList[2].getContentInfoListByFmiParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          ssp->mContentInfoList[2].getContentInfoListByFmiParameterNameAndGenerationList(generationList,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         else
-          ssp->mContentInfoList[0].getContentInfoListByFmiParameterNameAndProducerId(producerInfo->mProducerId,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+          ssp->mContentInfoList[0].getContentInfoListByFmiParameterNameAndGenerationList(generationList,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
         return Result::OK;
 
       case T::ParamKeyTypeValue::GRIB_ID:

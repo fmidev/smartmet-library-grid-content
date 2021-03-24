@@ -509,13 +509,13 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return num_compare(mMessageIndex,contentInfo->mMessageIndex);
 
       case ContentInfo::ComparisonMethod::gribId_producer_generation_level_time:
-        res = strcmp(mGribParameterId.c_str(),contentInfo->mGribParameterId.c_str());
-        if (res != 0)
-          return res;
         res = num_compare(mProducerId,contentInfo->mProducerId);
         if (res != 0)
           return res;
         res = num_compare(mGenerationId,contentInfo->mGenerationId);
+        if (res != 0)
+          return res;
+        res = strcmp(mGribParameterId.c_str(),contentInfo->mGribParameterId.c_str());
         if (res != 0)
           return res;
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
@@ -546,13 +546,13 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time:
-        res = strcmp(mFmiParameterId.c_str(),contentInfo->mFmiParameterId.c_str());
-        if (res != 0)
-          return res;
         res = num_compare(mProducerId,contentInfo->mProducerId);
         if (res != 0)
           return res;
         res = num_compare(mGenerationId,contentInfo->mGenerationId);
+        if (res != 0)
+          return res;
+        res = strcmp(mFmiParameterId.c_str(),contentInfo->mFmiParameterId.c_str());
         if (res != 0)
           return res;
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
@@ -580,13 +580,13 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return num_compare(mMessageIndex,contentInfo->mMessageIndex);
 
       case ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time:
-        res = strcmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
-        if (res != 0)
-          return res;
         res = num_compare(mProducerId,contentInfo->mProducerId);
         if (res != 0)
           return res;
         res = num_compare(mGenerationId,contentInfo->mGenerationId);
+        if (res != 0)
+          return res;
+        res = strcmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
         if (res != 0)
           return res;
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
@@ -617,13 +617,13 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time:
-        res = strcmp(mNewbaseParameterId.c_str(),contentInfo->mNewbaseParameterId.c_str());
-        if (res != 0)
-          return res;
         res = num_compare(mProducerId,contentInfo->mProducerId);
         if (res != 0)
           return res;
         res = num_compare(mGenerationId,contentInfo->mGenerationId);
+        if (res != 0)
+          return res;
+        res = strcmp(mNewbaseParameterId.c_str(),contentInfo->mNewbaseParameterId.c_str());
         if (res != 0)
           return res;
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
@@ -654,9 +654,6 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time:
-        res = strcasecmp(mNewbaseParameterName.c_str(),contentInfo->mNewbaseParameterName.c_str());
-        if (res != 0)
-          return res;
         res = num_compare(mProducerId,contentInfo->mProducerId);
         if (res != 0)
           return res;
@@ -664,6 +661,9 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         if (res != 0)
           return res;
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
+        if (res != 0)
+          return res;
+        res = strcasecmp(mNewbaseParameterName.c_str(),contentInfo->mNewbaseParameterName.c_str());
         if (res != 0)
           return res;
         //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
@@ -691,13 +691,13 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time:
-        res = strcasecmp(mCdmParameterId.c_str(),contentInfo->mCdmParameterId.c_str());
-        if (res != 0)
-          return res;
         res = num_compare(mProducerId,contentInfo->mProducerId);
         if (res != 0)
           return res;
         res = num_compare(mGenerationId,contentInfo->mGenerationId);
+        if (res != 0)
+          return res;
+        res = strcasecmp(mCdmParameterId.c_str(),contentInfo->mCdmParameterId.c_str());
         if (res != 0)
           return res;
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
@@ -728,13 +728,13 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time:
-        res = strcasecmp(mCdmParameterName.c_str(),contentInfo->mCdmParameterName.c_str());
-        if (res != 0)
-          return res;
         res = num_compare(mProducerId,contentInfo->mProducerId);
         if (res != 0)
           return res;
         res = num_compare(mGenerationId,contentInfo->mGenerationId);
+        if (res != 0)
+          return res;
+        res = strcasecmp(mCdmParameterName.c_str(),contentInfo->mCdmParameterName.c_str());
         if (res != 0)
           return res;
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
