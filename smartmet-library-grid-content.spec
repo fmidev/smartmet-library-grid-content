@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 21.3.29
+Version: 21.5.25
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -20,19 +20,19 @@ BuildRequires: lua-devel
 BuildRequires: make
 BuildRequires: omniORB-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 21.2.26
-BuildRequires: smartmet-library-grid-files-devel >= 21.3.4
-BuildRequires: smartmet-library-macgyver-devel >= 21.2.25
-BuildRequires: smartmet-library-spine-devel >= 21.3.1
+BuildRequires: smartmet-library-gis-devel >= 21.5.24
+BuildRequires: smartmet-library-grid-files-devel >= 21.5.25
+BuildRequires: smartmet-library-macgyver-devel >= 21.5.21
+BuildRequires: smartmet-library-spine-devel >= 21.5.21
 Requires: boost169-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
-Requires: smartmet-library-gis >= 21.2.26
-Requires: smartmet-library-grid-files >= 21.3.4
-Requires: smartmet-library-macgyver >= 21.2.25
-Requires: smartmet-library-spine >= 21.3.1
+Requires: smartmet-library-gis >= 21.5.24
+Requires: smartmet-library-grid-files >= 21.5.25
+Requires: smartmet-library-macgyver >= 21.5.21
+Requires: smartmet-library-spine >= 21.5.21
 Provides: %{SPECNAME}
 
 %description
@@ -65,10 +65,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 21.2.25
-Requires: smartmet-library-gis-devel >= 21.2.26
-Requires: smartmet-library-spine-devel >= 21.3.1
-Requires: smartmet-library-grid-files-devel >= 21.3.4
+Requires: smartmet-library-macgyver-devel >= 21.5.21
+Requires: smartmet-library-gis-devel >= 21.5.24
+Requires: smartmet-library-spine-devel >= 21.5.21
+Requires: smartmet-library-grid-files-devel >= 21.5.25
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -78,6 +78,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue May 25 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.25-1.fmi
+- Repackaged due to grid-files ABI changes
 * Mon Mar 29 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.3.29-1.fmi
 - Updated content sorting/searching orders
 * Mon Mar 15 2021 Andris Pavēnis <andris.pavenis@fmi.fi> - 21.3.15-1.fmi
