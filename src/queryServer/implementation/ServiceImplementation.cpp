@@ -1368,7 +1368,7 @@ void ServiceImplementation::updateQueryParameters(Query& query)
         if (qParam->mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID)
         {
           Identification::NewbaseParameterDef paramDef;
-          if (Identification::gridDef.getNewbaseParameterDefById(qParam->mParameterKey, paramDef))
+          if (Identification::gridDef.getNewbaseParameterDefById(toUInt32(qParam->mParameterKey), paramDef))
           {
             PRINT_DATA(mDebugLog, "   + Newbase name: %s\n", paramDef.mParameterName.c_str());
             qParam->mParam = paramDef.mParameterName;
@@ -2748,13 +2748,13 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
         case T::ParamKeyTypeValue::GRIB_ID:
         {
-          T::ContentInfo *cInfo = entry->contentInfoList.getContentInfoByGribParameterIdAndGenerationId(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
+          T::ContentInfo *cInfo = entry->contentInfoList.getContentInfoByGribParameterIdAndGenerationId(producerId,generationId,toUInt32(parameterKey),parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
           if (cInfo != nullptr)
           {
             contentInfoList->addContentInfo(cInfo->duplicate());
             return Result::OK;
           }
-          entry->contentInfoList.getContentInfoListByGribParameterIdAndGenerationId(producerId,generationId,parameterKey,parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
+          entry->contentInfoList.getContentInfoListByGribParameterIdAndGenerationId(producerId,generationId,toUInt32(parameterKey),parameterLevelIdType,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
         }
         break;
       }
@@ -2969,8 +2969,8 @@ bool ServiceImplementation::getSpecialValues(
       {
         Fmi::Exception exception(BCP, "Unexpected result!");
         exception.addDetail("The given forecast time should been between the found content times.");
-        exception.addParameter("Content 1 ForecastTime", contentInfo1->mForecastTime);
-        exception.addParameter("Content 2 ForecastTime", contentInfo2->mForecastTime);
+        exception.addParameter("Content 1 ForecastTime", contentInfo1->getForecastTime());
+        exception.addParameter("Content 2 ForecastTime", contentInfo2->getForecastTime());
         exception.addParameter("Request ForecastTime", utcTimeFromTimeT(forecastTime));
         throw exception;
       }
@@ -4575,7 +4575,8 @@ bool ServiceImplementation::getPointValues(
 
       T::ContentInfo* cInfo = contentList2.getContentInfoByIndex(0);
       std::string tmp1 = utcTimeFromTimeT(forecastTime);
-      std::string tmp2 = cInfo->mForecastTime.substr(0, 4) + tmp1.substr(4);
+      std::string ft = cInfo->getForecastTime();
+      std::string tmp2 = ft.substr(0, 4) + tmp1.substr(4);
       fTime = utcTimeToTimeT(tmp2);
     }
 
@@ -7486,7 +7487,7 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
       T::ContentInfo* contentInfo = contentList.getContentInfoByIndex(t);
 
       bool found = false;
-      std::string cacheKey = Fmi::to_string(contentInfo->mGenerationId) + ":" + contentInfo->mForecastTime + ":" + Fmi::to_string(contentInfo->mFmiParameterLevelId) + ":" + Fmi::to_string(contentInfo->mParameterLevel) + Fmi::to_string(x) + Fmi::to_string(y);
+      std::string cacheKey = Fmi::to_string(contentInfo->mGenerationId) + ":" + std::string(contentInfo->getForecastTime()) + ":" + Fmi::to_string(contentInfo->mFmiParameterLevelId) + ":" + Fmi::to_string(contentInfo->mParameterLevel) + Fmi::to_string(x) + Fmi::to_string(y);
       if (mLevelHeightCache.size() > 0)
       {
         AutoReadLock lock(&mHeightCache_modificationLock);

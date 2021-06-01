@@ -27,7 +27,6 @@ class FileInfoList
     void           addFileInfoListNoLock(FileInfoList& fileInfoList);
     void           clear();
     bool           deleteFileInfoById(uint fileId);
-    uint           deleteFileInfoByGroupFlags(uint groupFlags);
     uint           deleteFileInfoByProducerId(uint producerId);
     uint           deleteFileInfoByGenerationId(uint generationId);
     uint           deleteFileInfoByGenerationIdList(std::set<uint>& generationIdList);
@@ -50,8 +49,6 @@ class FileInfoList
     uint           getFileInfoCountByGenerationId(uint generationId);
     uint           getFileInfoCountBySourceId(uint sourceId);
     void           getFileInfoList(uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
-    void           getFileInfoListByGroupFlags(uint groupFlags,FileInfoList& fileInfoList);
-    void           getFileInfoListByGroupFlags(uint groupFlags,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
     void           getFileInfoListByProducerId(uint producerId,FileInfoList& fileInfoList);
     void           getFileInfoListByProducerId(uint producerId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
     void           getFileInfoListByGenerationId(uint generationId,FileInfoList& fileInfoList);

@@ -17,7 +17,6 @@ FileInfo::FileInfo()
     mFileType = T::FileTypeValue::Unknown;
     mProducerId = 0;
     mGenerationId = 0;
-    mGroupFlags = 0;
     mFlags = 0;
     mSourceId = 0;
     mModificationTime = 0;
@@ -42,7 +41,6 @@ FileInfo::FileInfo(const FileInfo& fileInfo)
     mName = fileInfo.mName;
     mProducerId = fileInfo.mProducerId;
     mGenerationId = fileInfo.mGenerationId;
-    mGroupFlags = fileInfo.mGroupFlags;
     mFlags = fileInfo.mFlags;
     mSourceId = fileInfo.mSourceId;
     mModificationTime = fileInfo.mModificationTime;
@@ -58,13 +56,12 @@ FileInfo::FileInfo(const FileInfo& fileInfo)
 
 
 
-FileInfo::FileInfo(uint producerId,uint generationId,uint groupFlags,uchar type,const std::string& filename,uint sourceId)
+FileInfo::FileInfo(uint producerId,uint generationId,uchar type,const std::string& filename,uint sourceId)
 {
   try
   {
     mProducerId = producerId;
     mGenerationId = generationId;
-    mGroupFlags = groupFlags;
     mFileId = 0;
     mFileType = type;
     mName = filename;
@@ -91,7 +88,6 @@ FileInfo::FileInfo(const char *csv)
     mFileType = T::FileTypeValue::Unknown;
     mProducerId = 0;
     mGenerationId = 0;
-    mGroupFlags = 0;
     mFlags = 0;
     mSourceId = 0;
     mModificationTime = 0;
@@ -136,7 +132,6 @@ FileInfo& FileInfo::operator=(const FileInfo& fileInfo)
     mName = fileInfo.mName;
     mProducerId = fileInfo.mProducerId;
     mGenerationId = fileInfo.mGenerationId;
-    mGroupFlags = fileInfo.mGroupFlags;
     mFlags = fileInfo.mFlags;
     mSourceId = fileInfo.mSourceId;
     mModificationTime = fileInfo.mModificationTime;
@@ -158,13 +153,13 @@ std::string FileInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%s;%u;%u;%u;%u;%u;%ld;%ld",
+    sprintf(st,"%u;%u;%s;%u;%u;;%u;%u;%ld;%ld",
         mFileId,
         mFileType,
         mName.c_str(),
         mProducerId,
         mGenerationId,
-        mGroupFlags,
+        //mGroupFlags,
         mFlags,
         mSourceId,
         mModificationTime,
@@ -186,7 +181,7 @@ std::string FileInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "fileId;fileType;name;producerId;generationId;groupFlags;flags;sourceId;modificationTimeT;deletionTimeT";
+    std::string header = "fileId;fileType;name;producerId;generationId;;flags;sourceId;modificationTimeT;deletionTimeT";
     return header;
   }
   catch (...)
@@ -232,7 +227,7 @@ void FileInfo::setCsv(const char *csv)
       mName = field[2];
       mProducerId = toUInt32(field[3]);
       mGenerationId = toUInt32(field[4]);
-      mGroupFlags = toUInt32(field[5]);
+      //mGroupFlags = toUInt32(field[5]);
       mFlags = toUInt32(field[6]);
       mSourceId = toUInt32(field[7]);
       if (c >= 8)
@@ -323,7 +318,6 @@ void FileInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mName             = " << mName << "\n";
     stream << space(level) << "- mProducerId       = " << mProducerId << "\n";
     stream << space(level) << "- mGenerationId     = " << mGenerationId << "\n";
-    stream << space(level) << "- mGroupFlags       = " << mGroupFlags << "\n";
     stream << space(level) << "- mFlags            = " << mFlags << "\n";
     stream << space(level) << "- mSourceId         = " << mSourceId << "\n";
     stream << space(level) << "- mModificationTime = " << utcTimeFromTimeT(mModificationTime) << "\n";

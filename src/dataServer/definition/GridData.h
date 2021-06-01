@@ -21,7 +21,6 @@ class GridData
     virtual void        print(std::ostream& stream,uint level,uint optionFlags);
 
     uint                mServerId;
-    uint                mGroupFlags;
     uint                mProducerId;
     uint                mGenerationId;
     uint                mFileId;
@@ -33,13 +32,9 @@ class GridData
     T::ParamLevelId     mGrib1ParameterLevelId;
     T::ParamLevelId     mGrib2ParameterLevelId;
     std::string         mGribParameterName;
-    std::string         mGribParameterUnits;
     T::ParamId          mFmiParameterId;
     T::ParamLevelId     mFmiParameterLevelId;
     std::string         mFmiParameterName;
-    std::string         mFmiParameterUnits;
-    T::ParamId          mCdmParameterId;
-    std::string         mCdmParameterName;
     T::ParamId          mNewbaseParameterId;
     std::string         mNewbaseParameterName;
     T::ParamLevel       mParameterLevel;

@@ -73,7 +73,6 @@ typedef sequence<CorbaGridValue> CorbaGridValueList;
 struct CorbaGridData
 {
   unsigned long       serverId;
-  unsigned long       groupFlags;
   unsigned long       producerId;
   unsigned long       generationId;
   unsigned long       fileId;
@@ -87,13 +86,9 @@ struct CorbaGridData
   unsigned long       grib1ParameterLevelId;
   unsigned long       grib2ParameterLevelId;
   string              gribParameterName;
-  string              gribParameterUnits;  
   string              fmiParameterId;
   unsigned long       fmiParameterLevelId;
   string              fmiParameterName;
-  string              fmiParameterUnits;  
-  string              cdmParameterId;
-  string              cdmParameterName;
   string              newbaseParameterId;
   string              newbaseParameterName;
   long                parameterLevel;

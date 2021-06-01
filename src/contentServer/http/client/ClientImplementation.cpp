@@ -1421,34 +1421,6 @@ int ClientImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId ses
 
 
 
-int ClientImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags)
-{
-  try
-  {
-    T::RequestMessage request;
-
-    request.addLine("method","deleteFileInfoListByGroupFlags");
-    request.addLine("sessionId",sessionId);
-    request.addLine("groupFlags",groupFlags);
-
-    T::ResponseMessage response;
-
-    sendRequest(request,response);
-
-    int result = response.getLineValueByKey("result");
-
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int ClientImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,uint producerId)
 {
   try
@@ -1955,47 +1927,6 @@ int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
 
 
 
-int ClientImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
-{
-  try
-  {
-    T::RequestMessage request;
-
-    request.addLine("method","getFileInfoListByGroupFlags");
-    request.addLine("sessionId",sessionId);
-    request.addLine("groupFlags",groupFlags);
-    request.addLine("startFileId",startFileId);
-    request.addLine("maxRecords",maxRecords);
-
-    T::ResponseMessage response;
-
-    sendRequest(request,response);
-
-    int result = response.getLineValueByKey("result");
-    if (result == Result::OK)
-    {
-      string_vec lines;
-      uint len = response.getLinesByKey("fileInfo",lines);
-      for (uint t=0; t<len; t++)
-      {
-        T::FileInfo *info = new T::FileInfo();
-        info->setCsv(lines[t]);
-        fileInfoList.addFileInfo(info);
-      }
-    }
-
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int ClientImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
 {
   try
@@ -2444,34 +2375,6 @@ int ClientImplementation::_deleteContentListByFileName(T::SessionId sessionId,co
 
 
 
-int ClientImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,uint groupFlags)
-{
-  try
-  {
-    T::RequestMessage request;
-
-    request.addLine("method","deleteContentListByGroupFlags");
-    request.addLine("sessionId",sessionId);
-    request.addLine("groupFlags",groupFlags);
-
-    T::ResponseMessage response;
-
-    sendRequest(request,response);
-
-    int result = response.getLineValueByKey("result");
-
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int ClientImplementation::_deleteContentListByProducerId(T::SessionId sessionId,uint producerId)
 {
   try
@@ -2773,48 +2676,6 @@ int ClientImplementation::_getContentListByFileName(T::SessionId sessionId,const
     request.addLine("method","getContentListByFileName");
     request.addLine("sessionId",sessionId);
     request.addLine("filename",filename);
-
-    T::ResponseMessage response;
-
-    sendRequest(request,response);
-
-    int result = response.getLineValueByKey("result");
-    if (result == Result::OK)
-    {
-      string_vec lines;
-      uint len = response.getLinesByKey("contentInfo",lines);
-      for (uint t=0; t<len; t++)
-      {
-        T::ContentInfo *info = new T::ContentInfo();
-        info->setCsv(lines[t]);
-        contentInfoList.addContentInfo(info);
-      }
-    }
-
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int ClientImplementation::_getContentListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
-{
-  try
-  {
-    T::RequestMessage request;
-
-    request.addLine("method","getContentListByGroupFlags");
-    request.addLine("sessionId",sessionId);
-    request.addLine("groupFlags",groupFlags);
-    request.addLine("startFileId",startFileId);
-    request.addLine("startMessageIndex",startMessageIndex);
-    request.addLine("maxRecords",maxRecords);
 
     T::ResponseMessage response;
 

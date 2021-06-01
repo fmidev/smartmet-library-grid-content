@@ -2,6 +2,8 @@
 
 #include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
+#include <grid-files/common/GeneralDefinitions.h>
+#include <grid-files/common/StringFactory.h>
 #include <string.h>
 
 
@@ -10,13 +12,10 @@ namespace SmartMet
 namespace T
 {
 
-
 ContentInfo::ContentInfo()
 {
   try
   {
-    mServerFlags = 0;
-    mGroupFlags = 0;
     mProducerId = 0;
     mGenerationId = 0;
     mFileType = T::FileTypeValue::Unknown;
@@ -24,6 +23,9 @@ ContentInfo::ContentInfo()
     mMessageIndex = 0;
     mFilePosition = 0;
     mMessageSize = 0;
+    mFmiParameterId = 0;
+    mGribParameterId =  0;
+    mNewbaseParameterId = 0;
     mFmiParameterLevelId = 0;
     mGrib1ParameterLevelId = 0;
     mGrib2ParameterLevelId = 0;
@@ -36,6 +38,9 @@ ContentInfo::ContentInfo()
     mForecastTimeUTC = 0;
     mModificationTime = 0;
     mDeletionTime = 0;
+    mFmiParameterName = 0;//(char*)EMPTY_STRING;
+    mNewbaseParameterName = 0;//(char*)EMPTY_STRING;
+    mForecastTime = 0;//(char*)EMPTY_STRING;
   }
   catch (...)
   {
@@ -51,8 +56,6 @@ ContentInfo::ContentInfo(const ContentInfo& contentInfo)
 {
   try
   {
-    mServerFlags = contentInfo.mServerFlags;
-    mGroupFlags = contentInfo.mGroupFlags;
     mProducerId = contentInfo.mProducerId;
     mGenerationId = contentInfo.mGenerationId;
     mFileType = contentInfo.mFileType;
@@ -60,21 +63,16 @@ ContentInfo::ContentInfo(const ContentInfo& contentInfo)
     mMessageIndex = contentInfo.mMessageIndex;
     mFilePosition = contentInfo.mFilePosition;
     mMessageSize = contentInfo.mMessageSize;
-    mForecastTime = contentInfo.mForecastTime;
     mForecastTimeUTC = contentInfo.mForecastTimeUTC;
     mFmiParameterId = contentInfo.mFmiParameterId;
     mFmiParameterName = contentInfo.mFmiParameterName;
     mGribParameterId = contentInfo.mGribParameterId;
-    mCdmParameterId = contentInfo.mCdmParameterId;
-    mCdmParameterName = contentInfo.mCdmParameterName;
     mNewbaseParameterId = contentInfo.mNewbaseParameterId;
     mNewbaseParameterName = contentInfo.mNewbaseParameterName;
     mFmiParameterLevelId = contentInfo.mFmiParameterLevelId;
     mGrib1ParameterLevelId = contentInfo.mGrib1ParameterLevelId;
     mGrib2ParameterLevelId = contentInfo.mGrib2ParameterLevelId;
     mParameterLevel = contentInfo.mParameterLevel;
-    mFmiParameterUnits = contentInfo.mFmiParameterUnits;
-    mGribParameterUnits = contentInfo.mGribParameterUnits;
     mForecastType = contentInfo.mForecastType;
     mForecastNumber = contentInfo.mForecastNumber;
     mFlags = contentInfo.mFlags;
@@ -82,6 +80,20 @@ ContentInfo::ContentInfo(const ContentInfo& contentInfo)
     mGeometryId = contentInfo.mGeometryId;
     mModificationTime = contentInfo.mModificationTime;
     mDeletionTime = contentInfo.mDeletionTime;
+
+    mFmiParameterName = contentInfo.mFmiParameterName;
+    mNewbaseParameterName = contentInfo.mNewbaseParameterName;
+    mForecastTime = contentInfo.mForecastTime;
+/*
+    mFmiParameterName = (char*)EMPTY_STRING;
+    mNewbaseParameterName = (char*)EMPTY_STRING;
+
+    if (contentInfo.mFmiParameterName != EMPTY_STRING)
+      setFmiParameterName(contentInfo.mFmiParameterName);
+
+    if (contentInfo.mNewbaseParameterName != EMPTY_STRING)
+      setNewbaseParameterName(contentInfo.mNewbaseParameterName);
+*/
   }
   catch (...)
   {
@@ -97,8 +109,6 @@ ContentInfo::ContentInfo(const char *csv)
 {
   try
   {
-    mServerFlags = 0;
-    mGroupFlags = 0;
     mProducerId = 0;
     mGenerationId = 0;
     mFileType = T::FileTypeValue::Unknown;
@@ -106,6 +116,9 @@ ContentInfo::ContentInfo(const char *csv)
     mMessageIndex = 0;
     mFilePosition = 0;
     mMessageSize = 0;
+    mFmiParameterId = 0;
+    mGribParameterId =  0;
+    mNewbaseParameterId = 0;
     mFmiParameterLevelId = 0;
     mGrib1ParameterLevelId = 0;
     mGrib2ParameterLevelId = 0;
@@ -115,6 +128,7 @@ ContentInfo::ContentInfo(const char *csv)
     mFlags = 0;
     mSourceId = 0;
     mGeometryId = 0;
+    mForecastTime = 0;
     mForecastTimeUTC = 0;
     mModificationTime = 0;
     mDeletionTime = 0;
@@ -133,6 +147,23 @@ ContentInfo::~ContentInfo()
 {
   try
   {
+    /*
+    if (mFmiParameterName != EMPTY_STRING)
+    {
+      delete[] mFmiParameterName;
+    }
+
+    if (mNewbaseParameterName != EMPTY_STRING)
+    {
+      delete[] mNewbaseParameterName;
+    }
+
+    if (mForecastTime != EMPTY_STRING)
+    {
+      delete[] mForecastTime;
+    }
+    */
+
   }
   catch (...)
   {
@@ -152,8 +183,6 @@ ContentInfo& ContentInfo::operator=(const ContentInfo& contentInfo)
     if (&contentInfo == this)
       return *this;
 
-    mServerFlags = contentInfo.mServerFlags;
-    mGroupFlags = contentInfo.mGroupFlags;
     mProducerId = contentInfo.mProducerId;
     mGenerationId = contentInfo.mGenerationId;
     mFileType = contentInfo.mFileType;
@@ -161,21 +190,15 @@ ContentInfo& ContentInfo::operator=(const ContentInfo& contentInfo)
     mMessageIndex = contentInfo.mMessageIndex;
     mFilePosition = contentInfo.mFilePosition;
     mMessageSize = contentInfo.mMessageSize;
-    mForecastTime = contentInfo.mForecastTime;
     mForecastTimeUTC = contentInfo.mForecastTimeUTC;
     mFmiParameterId = contentInfo.mFmiParameterId;
     mFmiParameterName = contentInfo.mFmiParameterName;
     mGribParameterId = contentInfo.mGribParameterId;
-    mCdmParameterId = contentInfo.mCdmParameterId;
-    mCdmParameterName = contentInfo.mCdmParameterName;
     mNewbaseParameterId = contentInfo.mNewbaseParameterId;
-    mNewbaseParameterName = contentInfo.mNewbaseParameterName;
     mFmiParameterLevelId = contentInfo.mFmiParameterLevelId;
     mGrib1ParameterLevelId = contentInfo.mGrib1ParameterLevelId;
     mGrib2ParameterLevelId = contentInfo.mGrib2ParameterLevelId;
     mParameterLevel = contentInfo.mParameterLevel;
-    mFmiParameterUnits = contentInfo.mFmiParameterUnits;
-    mGribParameterUnits = contentInfo.mGribParameterUnits;
     mForecastType = contentInfo.mForecastType;
     mForecastNumber = contentInfo.mForecastNumber;
     mFlags = contentInfo.mFlags;
@@ -184,6 +207,16 @@ ContentInfo& ContentInfo::operator=(const ContentInfo& contentInfo)
     mModificationTime = contentInfo.mModificationTime;
     mDeletionTime = contentInfo.mDeletionTime;
 
+    mForecastTime = contentInfo.mForecastTime;
+    mFmiParameterName = contentInfo.mFmiParameterName;
+    mNewbaseParameterName = contentInfo.mNewbaseParameterName;
+/*
+    if (contentInfo.mFmiParameterName != EMPTY_STRING)
+      setFmiParameterName(contentInfo.mFmiParameterName);
+
+    if (contentInfo.mNewbaseParameterName != EMPTY_STRING)
+      setNewbaseParameterName(contentInfo.mNewbaseParameterName);
+*/
     return *this;
   }
   catch (...)
@@ -196,11 +229,12 @@ ContentInfo& ContentInfo::operator=(const ContentInfo& contentInfo)
 
 
 
-const std::string& ContentInfo::getFmiParameterName()
+char* ContentInfo::getFmiParameterName()
 {
   try
   {
-    return mFmiParameterName;
+    return stringFactory[mFmiParameterName];
+    //return mFmiParameterName;
   }
   catch (...)
   {
@@ -216,7 +250,28 @@ void ContentInfo::setFmiParameterName(const char *name)
 {
   try
   {
-    mFmiParameterName = toUpperString(name);
+    uint len = strlen(name);
+    char buf[200];
+    for (uint t=0; t<=len; t++)
+      buf[t] = toupper(name[t]);
+
+    mFmiParameterName = stringFactory.create(buf);
+/*
+
+    if (mFmiParameterName != EMPTY_STRING)
+    {
+      delete[] mFmiParameterName;
+      mFmiParameterName = (char*)EMPTY_STRING;
+    }
+
+    if (name != nullptr)
+    {
+      uint len = strlen(name);
+      mFmiParameterName = new char[len+1];
+      for (uint t=0; t<=len; t++)
+        mFmiParameterName[t] = toupper(name[t]);
+    }
+*/
   }
   catch (...)
   {
@@ -232,7 +287,140 @@ void ContentInfo::setFmiParameterName(const std::string& name)
 {
   try
   {
-    mFmiParameterName = toUpperString(name);
+    setFmiParameterName(name.c_str());
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+char* ContentInfo::getNewbaseParameterName()
+{
+  try
+  {
+    return stringFactory[mNewbaseParameterName];
+    //return mNewbaseParameterName;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfo::setNewbaseParameterName(const char *name)
+{
+  try
+  {
+    uint len = strlen(name);
+    char buf[200];
+    for (uint t=0; t<=len; t++)
+      buf[t] = toupper(name[t]);
+
+    mNewbaseParameterName = stringFactory.create(buf);
+/*
+    if (mNewbaseParameterName != EMPTY_STRING)
+    {
+      delete[] mNewbaseParameterName;
+      mNewbaseParameterName = (char*)EMPTY_STRING;
+    }
+
+    if (name != nullptr)
+    {
+      uint len = strlen(name);
+      mNewbaseParameterName = new char[len+1];
+      for (uint t=0; t<=len; t++)
+        mNewbaseParameterName[t] = tolower(name[t]);
+    }
+*/
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfo::setNewbaseParameterName(const std::string& name)
+{
+  try
+  {
+    setNewbaseParameterName(name.c_str());
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+char* ContentInfo::getForecastTime()
+{
+  try
+  {
+    return stringFactory[mForecastTime];
+    //return mForecastTime;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfo::setForecastTime(const char *ftime)
+{
+  try
+  {
+    mForecastTime = stringFactory.create(ftime);
+/*
+
+    if (mForecastTime != EMPTY_STRING)
+    {
+      delete[] mForecastTime;
+      mForecastTime = (char*)EMPTY_STRING;
+    }
+
+    if (ftime != nullptr)
+    {
+      uint len = strlen(ftime);
+      mForecastTime = new char[len+1];
+      strcpy(mForecastTime,ftime);
+    }
+*/
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfo::setForecastTime(const std::string& ftime)
+{
+  try
+  {
+    setForecastTime(ftime.c_str());
   }
   catch (...)
   {
@@ -249,7 +437,7 @@ std::string ContentInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%u;%llu;%u;%u;%u;%u;%s;%s;%s;%s;%s;%s;%s;%s;%u;%u;%u;%d;%s;%s;%d;%d;%llu;%u;%u;%u;%ld;%ld",
+    sprintf(st,"%u;%u;%u;%llu;%u;%u;%u;;%s;%u;%s;%u;;;%u;%s;%u;%u;%u;%d;;;%d;%d;;%u;%u;%u;%ld;%ld",
         mFileId,
         mMessageIndex,
         mFileType,
@@ -257,24 +445,24 @@ std::string ContentInfo::getCsv()
         mMessageSize,
         mProducerId,
         mGenerationId,
-        mGroupFlags,
-        mForecastTime.c_str(),
-        mFmiParameterId.c_str(),
-        mFmiParameterName.c_str(),
-        mGribParameterId.c_str(),
-        mCdmParameterId.c_str(),
-        mCdmParameterName.c_str(),
-        mNewbaseParameterId.c_str(),
-        mNewbaseParameterName.c_str(),
+        //mGroupFlags,
+        getForecastTime(),
+        mFmiParameterId,
+        getFmiParameterName(),
+        mGribParameterId,
+        //mCdmParameterId.c_str(),
+        //mCdmParameterName.c_str(),
+        mNewbaseParameterId,
+        getNewbaseParameterName(),
         mFmiParameterLevelId,
         mGrib1ParameterLevelId,
         mGrib2ParameterLevelId,
         mParameterLevel,
-        mFmiParameterUnits.c_str(),
-        mGribParameterUnits.c_str(),
+        //mFmiParameterUnits.c_str(),
+        //mGribParameterUnits.c_str(),
         mForecastType,
         mForecastNumber,
-        mServerFlags,
+        //mServerFlags,
         mFlags,
         mSourceId,
         mGeometryId,
@@ -301,7 +489,7 @@ ulonglong ContentInfo::getRequestCounterKey()
     ulonglong geometryId = C_UINT64(mGeometryId);
     ulonglong level = C_UINT64(mParameterLevel);
     ulonglong levelId = C_UINT64(mFmiParameterLevelId);
-    ulonglong paramId = toUInt64(mFmiParameterId);
+    ulonglong paramId = mFmiParameterId;
     ulonglong key = (geometryId << 48) + (levelId << 40) + (level << 20) + paramId;
 
     ulonglong producerId = C_UINT64(mProducerId);
@@ -324,7 +512,7 @@ std::string ContentInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "fileId;messageIndex;fileType;filePosition;messageSize;producerId;generationId;groupFlags;startTime;fmiParameterId;fmiParameterName;gribParameterId;cdmParameterId;cdmParameterName;newbaseParameterId;newbaseParameterName;fmiParameterLevelId;grib1ParameterLevelId;grib2ParameterLevelId;parameterLevel;fmiParameterUnits;gribParameterUnits;mForecastType;mForecastNumber;serverFlags;flags;sourceId;geometryId;modificationTimeT;deletionTimeT";
+    std::string header = "fileId;messageIndex;fileType;filePosition;messageSize;producerId;generationId;;startTime;fmiParameterId;fmiParameterName;gribParameterId;;;newbaseParameterId;newbaseParameterName;fmiParameterLevelId;grib1ParameterLevelId;grib2ParameterLevelId;parameterLevel;;;mForecastType;mForecastNumber;serverFlags;flags;sourceId;geometryId;modificationTimeT;deletionTimeT";
     return header;
   }
   catch (...)
@@ -374,25 +562,25 @@ void ContentInfo::setCsv(const char *csv)
       mMessageSize = toUInt32(field[4]);
       mProducerId = toUInt32(field[5]);
       mGenerationId = toUInt32(field[6]);
-      mGroupFlags = toUInt32(field[7]);
-      mForecastTime = field[8];
-      mForecastTimeUTC = utcTimeToTimeT(mForecastTime);
-      mFmiParameterId = field[9];
-      mFmiParameterName = toUpperString(field[10]);
-      mGribParameterId = field[11];
-      mCdmParameterId = field[12];
-      mCdmParameterName = field[13];
-      mNewbaseParameterId = field[14];
-      mNewbaseParameterName = field[15];
+      //mGroupFlags = toUInt32(field[7]);
+      setForecastTime(field[8]);
+      mForecastTimeUTC = utcTimeToTimeT(getForecastTime());
+      mFmiParameterId = toUInt32(field[9]);
+      setFmiParameterName(field[10]);
+      mGribParameterId = toUInt32(field[11]);
+      //mCdmParameterId = field[12];
+      //mCdmParameterName = field[13];
+      mNewbaseParameterId = toUInt32(field[14]);
+      setNewbaseParameterName(field[15]);
       mFmiParameterLevelId = toUInt8(field[16]);
       mGrib1ParameterLevelId = toUInt8(field[17]);
       mGrib2ParameterLevelId = toUInt8(field[18]);
       mParameterLevel = toInt32(field[19]);
-      mFmiParameterUnits = field[20];
-      mGribParameterUnits = field[21];
+      //mFmiParameterUnits = field[20];
+      //mGribParameterUnits = field[21];
       mForecastType = toInt16(field[22]);
       mForecastNumber = toInt16(field[23]);
-      mServerFlags = toUInt64(field[24]);
+      //mServerFlags = toUInt64(field[24]);
       mFlags = toUInt32(field[25]);
       mSourceId = toUInt32(field[26]);
       mGeometryId = toInt32(field[27]);
@@ -435,43 +623,31 @@ bool ContentInfo::hasKey(T::ParamKeyType parameterKeyType,const std::string& par
     switch (parameterKeyType)
     {
       case T::ParamKeyTypeValue::FMI_ID:
-        if (strcasecmp(mFmiParameterId.c_str(),parameterKey.c_str()) == 0)
+        if (mFmiParameterId != 0 && mFmiParameterId == toUInt32(parameterKey.c_str()))
           return true;
         else
           return false;
 
       case T::ParamKeyTypeValue::FMI_NAME:
-        if (strcasecmp(mFmiParameterName.c_str(),parameterKey.c_str()) == 0)
+        if (strcasecmp(getFmiParameterName(),parameterKey.c_str()) == 0)
           return true;
         else
           return false;
 
       case T::ParamKeyTypeValue::GRIB_ID:
-        if (strcasecmp(mGribParameterId.c_str(),parameterKey.c_str()) == 0)
+        if (mGribParameterId != 0  &&  mGribParameterId == toUInt32(parameterKey))
           return true;
         else
           return false;
 
       case T::ParamKeyTypeValue::NEWBASE_ID:
-        if (strcasecmp(mNewbaseParameterId.c_str(),parameterKey.c_str()) == 0)
+        if (mNewbaseParameterId != 0 && mNewbaseParameterId == toUInt32(parameterKey.c_str()))
           return true;
         else
           return false;
 
       case T::ParamKeyTypeValue::NEWBASE_NAME:
-        if (strcasecmp(mNewbaseParameterName.c_str(),parameterKey.c_str()) == 0)
-          return true;
-        else
-          return false;
-
-      case T::ParamKeyTypeValue::CDM_ID:
-        if (strcasecmp(mCdmParameterId.c_str(),parameterKey.c_str()) == 0)
-          return true;
-        else
-          return false;
-
-      case T::ParamKeyTypeValue::CDM_NAME:
-        if (strcasecmp(mCdmParameterName.c_str(),parameterKey.c_str()) == 0)
+        if (strcasecmp(getNewbaseParameterName(),parameterKey.c_str()) == 0)
           return true;
         else
           return false;
@@ -515,13 +691,12 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = num_compare(mGenerationId,contentInfo->mGenerationId);
         if (res != 0)
           return res;
-        res = strcmp(mGribParameterId.c_str(),contentInfo->mGribParameterId.c_str());
+        res = num_compare(mGribParameterId,contentInfo->mGribParameterId);
         if (res != 0)
           return res;
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
-        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
@@ -552,13 +727,12 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = num_compare(mGenerationId,contentInfo->mGenerationId);
         if (res != 0)
           return res;
-        res = strcmp(mFmiParameterId.c_str(),contentInfo->mFmiParameterId.c_str());
+        res = num_compare(mFmiParameterId,contentInfo->mFmiParameterId);
         if (res != 0)
           return res;
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
-        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
@@ -586,13 +760,12 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = num_compare(mGenerationId,contentInfo->mGenerationId);
         if (res != 0)
           return res;
-        res = strcmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
+        res = num_compare(mFmiParameterName,contentInfo->mFmiParameterName);
         if (res != 0)
           return res;
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
-        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
@@ -623,13 +796,12 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = num_compare(mGenerationId,contentInfo->mGenerationId);
         if (res != 0)
           return res;
-        res = strcmp(mNewbaseParameterId.c_str(),contentInfo->mNewbaseParameterId.c_str());
+        res = num_compare(mNewbaseParameterId,contentInfo->mNewbaseParameterId);
         if (res != 0)
           return res;
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
-        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
@@ -663,84 +835,9 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
         if (res != 0)
           return res;
-        res = strcasecmp(mNewbaseParameterName.c_str(),contentInfo->mNewbaseParameterName.c_str());
+        res = num_compare(mNewbaseParameterName,contentInfo->mNewbaseParameterName);
         if (res != 0)
           return res;
-        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
-        res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
-        if (res != 0)
-          return res;
-        res = num_compare(mGeometryId,contentInfo->mGeometryId);
-        if (res != 0)
-          return res;
-        res = num_compare(mForecastType,contentInfo->mForecastType);
-        if (res != 0)
-          return res;
-        res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
-        if (res != 0)
-          return res;
-        res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
-        if (res != 0)
-          return res;
-        res = num_compare(mFileId,contentInfo->mFileId);
-        if (res != 0)
-          return res;
-        res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
-        if (res != 0)
-          return res;
-        return 0;
-
-      case ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time:
-        res = num_compare(mProducerId,contentInfo->mProducerId);
-        if (res != 0)
-          return res;
-        res = num_compare(mGenerationId,contentInfo->mGenerationId);
-        if (res != 0)
-          return res;
-        res = strcasecmp(mCdmParameterId.c_str(),contentInfo->mCdmParameterId.c_str());
-        if (res != 0)
-          return res;
-        res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
-        if (res != 0)
-          return res;
-        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
-        res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
-        if (res != 0)
-          return res;
-        res = num_compare(mGeometryId,contentInfo->mGeometryId);
-        if (res != 0)
-          return res;
-        res = num_compare(mForecastType,contentInfo->mForecastType);
-        if (res != 0)
-          return res;
-        res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
-        if (res != 0)
-          return res;
-        res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
-        if (res != 0)
-          return res;
-        res = num_compare(mFileId,contentInfo->mFileId);
-        if (res != 0)
-          return res;
-        res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
-        if (res != 0)
-          return res;
-        return 0;
-
-      case ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time:
-        res = num_compare(mProducerId,contentInfo->mProducerId);
-        if (res != 0)
-          return res;
-        res = num_compare(mGenerationId,contentInfo->mGenerationId);
-        if (res != 0)
-          return res;
-        res = strcasecmp(mCdmParameterName.c_str(),contentInfo->mCdmParameterName.c_str());
-        if (res != 0)
-          return res;
-        res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
-        if (res != 0)
-          return res;
-        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
@@ -765,7 +862,6 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::starttime_file_message:
-        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
@@ -775,10 +871,9 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return num_compare(mMessageIndex,contentInfo->mMessageIndex);
 
       case ContentInfo::ComparisonMethod::fmiName_starttime_level_file_message:
-        res = strcmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
+        res = num_compare(mFmiParameterName,contentInfo->mFmiParameterName);
         if (res != 0)
           return res;
-        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
@@ -794,7 +889,7 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::fmiId_fmiLevelId_level_starttime_file_message:
-        res = strcmp(mFmiParameterId.c_str(),contentInfo->mFmiParameterId.c_str());
+        res = num_compare(mFmiParameterId,contentInfo->mFmiParameterId);
         if (res != 0)
           return res;
         res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
@@ -809,7 +904,6 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
         if (res != 0)
           return res;
-        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
@@ -825,11 +919,10 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::starttime_fmiId_fmiLevelId_level_file_message:
-        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
-        res = strcmp(mFmiParameterId.c_str(),contentInfo->mFmiParameterId.c_str());
+        res = num_compare(mFmiParameterId,contentInfo->mFmiParameterId);
         if (res != 0)
           return res;
         res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
@@ -856,11 +949,10 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::starttime_fmiName_fmiLevelId_level_file_message:
-        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
-        res = strcmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
+        res = num_compare(mFmiParameterName,contentInfo->mFmiParameterName);
         if (res != 0)
           return res;
         res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
@@ -890,7 +982,6 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = num_compare(mGenerationId,contentInfo->mGenerationId);
         if (res != 0)
           return res;
-        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
@@ -903,7 +994,7 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::fmiName_fmiLevelId_level_starttime_file_message:
-        res = strcmp(mFmiParameterName.c_str(),contentInfo->mFmiParameterName.c_str());
+        res = num_compare(mFmiParameterName,contentInfo->mFmiParameterName);
         if (res != 0)
           return res;
         res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
@@ -921,7 +1012,6 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         res = num_compare(mGeometryId,contentInfo->mGeometryId);
         if (res != 0)
           return res;
-        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
@@ -934,7 +1024,6 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         return 0;
 
       case ContentInfo::ComparisonMethod::starttime_generationId_file_message:
-        //res = strcmp(mForecastTime.c_str(),contentInfo->mForecastTime.c_str());
         res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
         if (res != 0)
           return res;
@@ -1014,30 +1103,24 @@ void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mMessageSize            = " << mMessageSize << "\n";
     stream << space(level) << "- mProducerId             = " << mProducerId << "\n";
     stream << space(level) << "- mGenerationId           = " << mGenerationId << "\n";
-    stream << space(level) << "- mGroupFlags             = " << mGroupFlags << "\n";
-    stream << space(level) << "- mForecastTime           = " << mForecastTime << "\n";
+    stream << space(level) << "- mForecastTime           = " << getForecastTime() << "\n";
     stream << space(level) << "- mForecastTimeUTC        = " << mForecastTimeUTC << "\n";
     stream << space(level) << "- mFmiParameterId         = " << mFmiParameterId << "\n";
-    stream << space(level) << "- mFmiParameterName       = " << mFmiParameterName << "\n";
+    stream << space(level) << "- mFmiParameterName       = " << getFmiParameterName() << "\n";
     stream << space(level) << "- mGribParameterId        = " << mGribParameterId << "\n";
-    stream << space(level) << "- mCdmParameterId         = " << mCdmParameterId << "\n";
-    stream << space(level) << "- mCdmParameterName       = " << mCdmParameterName << "\n";
     stream << space(level) << "- mNewbaseParameterId     = " << mNewbaseParameterId << "\n";
-    stream << space(level) << "- mNewbaseParameterName   = " << mNewbaseParameterName << "\n";
+    stream << space(level) << "- mNewbaseParameterName   = " << getNewbaseParameterName() << "\n";
     stream << space(level) << "- mFmiParameterLevelId    = " << C_INT(mFmiParameterLevelId) << "\n";
     stream << space(level) << "- mGrib1ParameterLevelId  = " << C_INT(mGrib1ParameterLevelId) << "\n";
     stream << space(level) << "- mGrib2ParameterLevelId  = " << C_INT(mGrib2ParameterLevelId) << "\n";
     stream << space(level) << "- mParameterLevel         = " << mParameterLevel << "\n";
-    stream << space(level) << "- mFmiParameterUnits      = " << mFmiParameterUnits << "\n";
-    stream << space(level) << "- mGribParameterUnits     = " << mGribParameterUnits << "\n";
     stream << space(level) << "- mForecastType           = " << mForecastType << "\n";
     stream << space(level) << "- mForecastNumber         = " << mForecastNumber << "\n";
-    stream << space(level) << "- mServerFlags            = " << mServerFlags << "\n";
     stream << space(level) << "- mFlags                  = " << mFlags << "\n";
     stream << space(level) << "- mSourceId               = " << mSourceId << "\n";
     stream << space(level) << "- mGeometryId             = " << mGeometryId << "\n";
-    stream << space(level) << "- mModificationTime = " << utcTimeFromTimeT(mModificationTime) << "\n";
-    stream << space(level) << "- mDeletionTime     = " << utcTimeFromTimeT(mDeletionTime) << "\n";
+    stream << space(level) << "- mModificationTime       = " << utcTimeFromTimeT(mModificationTime) << "\n";
+    stream << space(level) << "- mDeletionTime           = " << utcTimeFromTimeT(mDeletionTime) << "\n";
   }
   catch (...)
   {

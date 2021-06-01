@@ -1117,25 +1117,6 @@ int ClientImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std
 
 
 
-int ClientImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId, uint groupFlags)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP, "The client is not initialized!");
-
-    int result = mService->deleteFileInfoListByGroupFlags(sessionId, groupFlags);
-
-    mLastAccessTime = time(nullptr);
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
-
-
-
 int ClientImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId, uint producerId)
 {
   try
@@ -1488,30 +1469,6 @@ int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
 
 
 
-int ClientImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId, uint groupFlags, uint startFileId, uint maxRecords, T::FileInfoList& fileInfoList)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP, "The client is not initialized!");
-
-    ContentServer::Corba::CorbaFileInfoList_var corbaFileInfoList;
-
-    int result = mService->getFileInfoListByGroupFlags(sessionId, groupFlags, startFileId, maxRecords, corbaFileInfoList);
-
-    if (result == 0)
-      ContentServer::Corba::Converter::convert(corbaFileInfoList, fileInfoList);
-
-    mLastAccessTime = time(nullptr);
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
-
-
-
 int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId, uint sourceId, uint startFileId, uint maxRecords, T::FileInfoList& fileInfoList)
 {
   try
@@ -1848,25 +1805,6 @@ int ClientImplementation::_deleteContentListByFileName(T::SessionId sessionId,co
 
 
 
-int ClientImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId, uint groupFlags)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP, "The client is not initialized!");
-
-    int result = mService->deleteContentListByGroupFlags(sessionId, groupFlags);
-
-    mLastAccessTime = time(nullptr);
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
-
-
-
 int ClientImplementation::_deleteContentListByProducerId(T::SessionId sessionId, uint producerId)
 {
   try
@@ -2078,30 +2016,6 @@ int ClientImplementation::_getContentListByFileName(T::SessionId sessionId,const
   }
   CATCH_EXCEPTION
 }
-
-
-
-
-int ClientImplementation::_getContentListByGroupFlags(T::SessionId sessionId, uint groupFlags, uint startFileId, uint startMessageIndex, uint maxRecords, T::ContentInfoList& contentInfoList)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP, "The client is not initialized!");
-
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
-
-    int result = mService->getContentListByGroupFlags(sessionId, groupFlags, startFileId, startMessageIndex, maxRecords, corbaContentInfoList);
-
-    if (result == 0)
-      ContentServer::Corba::Converter::convert(corbaContentInfoList, contentInfoList);
-
-    mLastAccessTime = time(nullptr);
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
 
 
 

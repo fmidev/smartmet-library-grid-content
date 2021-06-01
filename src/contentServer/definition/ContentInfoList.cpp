@@ -3,6 +3,7 @@
 
 #include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
+#include <grid-files/common/GeneralDefinitions.h>
 #include <grid-files/common/AutoThreadLock.h>
 #include <grid-files/common/AutoReadLock.h>
 #include <grid-files/common/AutoWriteLock.h>
@@ -551,7 +552,7 @@ ContentInfo* ContentInfoList::addContentInfo(ContentInfo *contentInfo)
       throw Fmi::Exception(BCP,"The 'contentInfo' parameter points to NULL!");
 
     if (contentInfo->mForecastTimeUTC == 0)
-      contentInfo->mForecastTimeUTC = utcTimeToTimeT(contentInfo->mForecastTime);
+      contentInfo->mForecastTimeUTC = utcTimeToTimeT(contentInfo->getForecastTime());
 
     AutoWriteLock lock(mModificationLockPtr);
 
@@ -636,7 +637,7 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
     {
       ContentInfo *cInfo = contentInfoList.getContentInfoByIndex(t);
       if (cInfo->mForecastTimeUTC == 0)
-        cInfo->mForecastTimeUTC = utcTimeToTimeT(cInfo->mForecastTime);
+        cInfo->mForecastTimeUTC = utcTimeToTimeT(cInfo->getForecastTime());
     }
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::none)
@@ -1164,47 +1165,6 @@ uint ContentInfoList::deleteContentInfoByFileIdAndMessageIndex(uint fileId,uint 
 
 
 
-uint ContentInfoList::deleteContentInfoByGroupFlags(uint groupFlags)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mArray == nullptr ||  mLength == 0)
-      return 0;
-
-    AutoWriteLock lock(mModificationLockPtr);
-    uint p = 0;
-    uint count = 0;
-    for (uint t=0; t<mLength; t++)
-    {
-      ContentInfo *info = mArray[t];
-      mArray[t] = nullptr;
-      if (info != nullptr  &&  ((info->mGroupFlags & groupFlags) != 0  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
-      {
-        if (mReleaseObjects)
-          delete info;
-
-        count++;
-      }
-      else
-      {
-        mArray[p] = info;
-        p++;
-      }
-    }
-    mLength = p;
-    return count;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 uint ContentInfoList::deleteContentInfoByProducerId(uint producerId)
 {
   FUNCTION_TRACE
@@ -1669,43 +1629,6 @@ void ContentInfoList::keepContentInfoByGeometryId(T::GeometryId geometryId)
 
 
 
-void ContentInfoList::keepContentInfoByGroupFlags(uint groupFlags)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mArray == nullptr ||  mLength == 0)
-      return;
-
-    AutoWriteLock lock(mModificationLockPtr);
-    uint p = 0;
-    for (uint t=0; t<mLength; t++)
-    {
-      ContentInfo *info = mArray[t];
-      mArray[t] = nullptr;
-      if (info != nullptr  && ((info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0 || (info->mGroupFlags & groupFlags) == 0))
-      {
-        if (mReleaseObjects)
-          delete info;
-      }
-      else
-      {
-        mArray[p] = info;
-        p++;
-      }
-    }
-    mLength = p;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 void ContentInfoList::keepContentInfoByProducerId(uint producerId)
 {
   FUNCTION_TRACE
@@ -2147,6 +2070,8 @@ ContentInfo* ContentInfoList::getContentInfoByParameterLevelInfo(T::ParameterLev
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
+    auto pkey = toUInt32(levelInfo.mParameterKey.c_str());
+
     AutoReadLock lock(mModificationLockPtr);
 
     for (uint t=0; t<mLength; t++)
@@ -2154,13 +2079,11 @@ ContentInfo* ContentInfoList::getContentInfoByParameterLevelInfo(T::ParameterLev
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mParameterLevel == levelInfo.mLevel)
       {
-        if ((levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_ID  &&  info->mFmiParameterId == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_NAME  &&  info->getFmiParameterName() == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  &&  info->mNewbaseParameterId == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME  &&  info->mNewbaseParameterName == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::CDM_ID  &&  info->mCdmParameterId == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::CDM_NAME  &&  info->mCdmParameterName == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::GRIB_ID  &&  info->mGribParameterId == levelInfo.mParameterKey))
+        if ((levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_ID  &&  info->mFmiParameterId != 0  &&  info->mFmiParameterId == pkey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_NAME  &&  strcmp(info->getFmiParameterName(),levelInfo.mParameterKey.c_str()) == 0) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  &&  info->mNewbaseParameterId != 0 &&  info->mNewbaseParameterId == pkey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME  &&  strcmp(info->getNewbaseParameterName(),levelInfo.mParameterKey.c_str()) == 0) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::GRIB_ID  &&  info->mGribParameterId != 0  &&  info->mGribParameterId == pkey))
         {
           if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::FMI) &&
               info->mFmiParameterLevelId == levelInfo.mParameterLevelId)
@@ -2198,6 +2121,8 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelIn
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    auto pkey = toUInt32(levelInfo.mParameterKey.c_str());
+
     AutoReadLock lock(mModificationLockPtr);
 
     for (uint t=0; t<mLength; t++)
@@ -2205,13 +2130,11 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelIn
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mParameterLevel == levelInfo.mLevel)
       {
-        if ((levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_ID  &&  info->mFmiParameterId == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_NAME  &&  info->getFmiParameterName() == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  &&  info->mNewbaseParameterId == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME  &&  info->mNewbaseParameterName == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::CDM_ID  &&  info->mCdmParameterId == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::CDM_NAME  &&  info->mCdmParameterName == levelInfo.mParameterKey) ||
-            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::GRIB_ID  &&  info->mGribParameterId == levelInfo.mParameterKey))
+        if ((levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_ID  &&  info->mFmiParameterId != 0  &&  info->mFmiParameterId == pkey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_NAME  &&  strcmp(info->getFmiParameterName(),levelInfo.mParameterKey.c_str()) == 0) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  &&  info->mNewbaseParameterId != 0  &&  info->mNewbaseParameterId == pkey) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME  &&  strcmp(info->getNewbaseParameterName(),levelInfo.mParameterKey.c_str()) == 0) ||
+            (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::GRIB_ID  &&  info->mGribParameterId != 0  &&  info->mGribParameterId == pkey))
         {
           if ((levelInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::ANY || levelInfo.mParameterLevelIdType == T::ParamLevelIdTypeValue::FMI) &&
               info->mFmiParameterLevelId == levelInfo.mParameterLevelId)
@@ -2322,76 +2245,6 @@ void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex
 
 
 
-void ContentInfoList::getContentInfoListByGroupFlags(uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    contentInfoList.clear();
-
-    if (mArray == nullptr ||  mLength == 0)
-      return;
-
-    if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
-    {
-      // If the records are not sorted according to fileId and messageIndex then the startFileId parameter
-      // is used as the start index in the list.
-
-      for (uint t=startFileId; t<mLength; t++)
-      {
-        ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (info->mGroupFlags & groupFlags) != 0)
-        {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
-
-          if (contentInfoList.getLength() >= maxRecords)
-            return;
-        }
-      }
-      return;
-    }
-
-    AutoReadLock lock(mModificationLockPtr);
-    ContentInfo contentInfo;
-    contentInfo.mFileId = startFileId;
-    contentInfo.mMessageIndex = startMessageIndex;
-
-    int startIdx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
-    if (startIdx < 0)
-      startIdx = 0;
-
-    for (uint t=startIdx; t<mLength; t++)
-    {
-      ContentInfo *info = mArray[t];
-
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-      {
-        if ((info->mGroupFlags & groupFlags) != 0  &&  (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
-        {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
-
-          if (contentInfoList.getLength() >= maxRecords)
-            return;
-        }
-      }
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 void ContentInfoList::getContentParamKeyListByGenerationId(uint producerId,uint generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
@@ -2423,55 +2276,42 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint producerId,uint 
         switch (parameterKeyType)
         {
           case T::ParamKeyTypeValue::FMI_ID:
-            if (info->mFmiParameterId > " " /* &&  paramKeyList.find(info->mFmiParameterId) == paramKeyList.end()*/)
-              paramKeyList.insert(info->mFmiParameterId);
+            if (info->mFmiParameterId > 0)
+              paramKeyList.insert(std::to_string(info->mFmiParameterId));
             break;
 
           case T::ParamKeyTypeValue::FMI_NAME:
-            if (info->getFmiParameterName() > " ")
+            if (info->getFmiParameterName() != EMPTY_STRING)
             {
-              //if (paramKeyList.find(info->getFmiParameterName()) == paramKeyList.end())
-                paramKeyList.insert(info->getFmiParameterName());
+              paramKeyList.insert(info->getFmiParameterName());
             }
             else
-            if (info->mNewbaseParameterId > " ")
+            if (info->mNewbaseParameterId > 0)
             {
-              std::string id = "NB-" + info->mNewbaseParameterId;
-              //if (paramKeyList.find(id) == paramKeyList.end())
-                paramKeyList.insert(id);
+              std::string id = "NB-" + std::to_string(info->mNewbaseParameterId);
+              paramKeyList.insert(id);
             }
             else
-            if (info->mGribParameterId > " ")
+            if (info->mGribParameterId > 0)
             {
               std::string id = "GRIB-" + info->mGribParameterId;
-              //if (paramKeyList.find(id) == paramKeyList.end())
-                paramKeyList.insert(id);
+              paramKeyList.insert(id);
             }
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
-            if (info->mGribParameterId > " "  /*&&  paramKeyList.find(info->mGribParameterId) == paramKeyList.end()*/)
-              paramKeyList.insert(info->mGribParameterId);
+            if (info->mGribParameterId > 0)
+              paramKeyList.insert(std::to_string(info->mGribParameterId));
             break;
 
           case T::ParamKeyTypeValue::NEWBASE_ID:
-            if (info->mNewbaseParameterId > " "  /*&&  paramKeyList.find(info->mNewbaseParameterId) == paramKeyList.end()*/)
-              paramKeyList.insert(info->mNewbaseParameterName);
+            if (info->mNewbaseParameterId > 0)
+              paramKeyList.insert(std::to_string(info->mNewbaseParameterId));
             break;
 
           case T::ParamKeyTypeValue::NEWBASE_NAME:
-            if (info->mNewbaseParameterName > " " /* &&  paramKeyList.find(info->mNewbaseParameterName) == paramKeyList.end()*/)
-              paramKeyList.insert(info->mNewbaseParameterName);
-            break;
-
-          case T::ParamKeyTypeValue::CDM_ID:
-            if (info->mCdmParameterId > " " /*&&  paramKeyList.find(info->mCdmParameterId) == paramKeyList.end()*/)
-              paramKeyList.insert(info->mCdmParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::CDM_NAME:
-            if (info->mCdmParameterName > " " /*&&  paramKeyList.find(info->mCdmParameterName) == paramKeyList.end()*/)
-              paramKeyList.insert(info->mCdmParameterName);
+            if (info->getNewbaseParameterName() != EMPTY_STRING /* &&  paramKeyList.find(info->mNewbaseParameterName) == paramKeyList.end()*/)
+              paramKeyList.insert(info->getNewbaseParameterName());
             break;
 
           default:
@@ -2515,9 +2355,7 @@ void ContentInfoList::getContentGeometryIdListByGenerationId(uint producerId,uin
         mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time ||
         mComparisonMethod == T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time ||
         mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time)
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time)
     {
       sorted = true;
     }
@@ -2841,7 +2679,7 @@ void ContentInfoList::getContentInfoListByForecastTime(time_t forecastTimeUTC,Co
 
 
 
-void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParameterId,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByGribParameterId(T::GribParamId gribParameterId,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2851,15 +2689,11 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    std::string gribParameter = gribParameterId;
-    if (strncasecmp(gribParameterId.c_str(),"GRIB-",5) == 0)
-      gribParameter = gribParameterId.c_str()+5;
-
     AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  strcmp(info->mGribParameterId.c_str(),gribParameter.c_str()) == 0)
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGribParameterId == gribParameterId)
       {
         if (contentInfoList.getReleaseObjects())
           contentInfoList.addContentInfo(info->duplicate());
@@ -2878,7 +2712,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
 
 
 
-void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByGribParameterId(T::GribParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2897,7 +2731,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
 
 
 
-void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByGribParameterId(T::GribParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2907,10 +2741,6 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
     if (mArray == nullptr || mLength == 0)
       return;
 
-    std::string gribParameter = gribParameterId;
-    if (strncasecmp(gribParameterId.c_str(),"GRIB-",5) == 0)
-      gribParameter = gribParameterId.c_str()+5;
-
     AutoReadLock lock(mModificationLockPtr);
 
     for (uint t = 0; t < mLength; t++)
@@ -2918,7 +2748,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
       ContentInfo *info = mArray[t];
       if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
-        if (strcmp(info->mGribParameterId.c_str(), gribParameterId.c_str()) == 0)
+        if (info->mGribParameterId == gribParameterId)
         {
           if (forecastType < 0 || (info->mForecastType == forecastType && (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
           {
@@ -2959,7 +2789,7 @@ void ContentInfoList::getContentInfoListByGribParameterId(T::ParamId gribParamet
 
 
 
-void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint producerId,uint generationId,const std::string& gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint producerId,uint generationId,T::GribParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2977,7 +2807,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
 
 
 
-void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint producerId,uint generationId,const std::string& gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint producerId,uint generationId,T::GribParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2998,12 +2828,9 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
       searchInfo.mGenerationId = generationId;
       searchInfo.mGribParameterId = gribParameterId;
 
-      if (strncasecmp(gribParameterId.c_str(),"GRIB-",5) == 0)
-        searchInfo.mGribParameterId = gribParameterId.c_str()+5;
-
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  mArray[idx]->mGribParameterId < searchInfo.mGribParameterId)
         idx++;
 
       uint t = C_UINT(idx);
@@ -3023,7 +2850,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (strcmp(info->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) == 0)
+          if (info->mGribParameterId == searchInfo.mGribParameterId)
           {
             if (info->mGenerationId == generationId)
             {
@@ -3263,7 +3090,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
 
 
 
-void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint producerId,uint generationId,T::ParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint producerId,uint generationId,T::GribParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3282,7 +3109,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
 
 
 
-void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint producerId,uint generationId,T::ParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint producerId,uint generationId,T::GribParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3303,12 +3130,9 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
       searchInfo.mGenerationId = generationId;
       searchInfo.mGribParameterId = gribParameterId;
 
-      if (strncasecmp(gribParameterId.c_str(),"GRIB-",5) == 0)
-        searchInfo.mGribParameterId = gribParameterId.c_str()+5;
-
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) != 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  mArray[idx]->mGribParameterId < searchInfo.mGribParameterId)
         idx++;
 
       uint t = C_UINT(idx);
@@ -3321,7 +3145,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (strcmp(info->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) == 0)
+          if (info->mGribParameterId == searchInfo.mGribParameterId)
           {
             if (info->mGenerationId == generationId)
             {
@@ -3415,7 +3239,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndGenerationId(uint pr
 
 
 
-void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint producerId,T::ParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint producerId,T::GribParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3433,7 +3257,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
 
 
 
-void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint producerId,T::ParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint producerId,T::GribParamId gribParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3466,7 +3290,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
         {
           if (info->mProducerId == producerId)
           {
-            if (strcmp(info->mGribParameterId.c_str(),searchInfo.mGribParameterId.c_str()) == 0)
+            if (info->mGribParameterId == searchInfo.mGribParameterId)
             {
               if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
@@ -3553,7 +3377,7 @@ void ContentInfoList::getContentInfoListByGribParameterIdAndProducerId(uint prod
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameterId,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterId(T::FmiParamId fmiParameterId,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3586,7 +3410,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterId(T::FmiParamId fmiParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3605,7 +3429,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterId(T::FmiParamId fmiParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3622,7 +3446,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
       ContentInfo *info = mArray[t];
       if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
-        if (strcmp(info->mFmiParameterId.c_str(), fmiParameterId.c_str()) == 0)
+        if (info->mFmiParameterId == fmiParameterId)
         {
           if (forecastType < 0 || (info->mForecastType == forecastType && (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
           {
@@ -3663,7 +3487,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::ParamId fmiParameter
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint producerId,uint generationId,T::ParamId fmiParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint producerId,uint generationId,T::FmiParamId fmiParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3682,7 +3506,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint pro
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint producerId,uint generationId,T::ParamId fmiParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint producerId,uint generationId,T::FmiParamId fmiParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3716,7 +3540,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint pro
         {
           if (info->mGenerationId == generationId)
           {
-            if (strcmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
+            if (info->mFmiParameterId == fmiParameterId)
             {
               if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
@@ -3808,7 +3632,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint pro
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint producerId,T::ParamId fmiParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint producerId,T::FmiParamId fmiParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3826,7 +3650,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint producerId,T::ParamId fmiParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint producerId,T::FmiParamId fmiParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3858,7 +3682,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
         {
           if (info->mProducerId == producerId)
           {
-            if (strcmp(info->mFmiParameterId.c_str(),fmiParameterId.c_str()) == 0)
+            if (info->mFmiParameterId == fmiParameterId)
             {
               if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
@@ -3980,7 +3804,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(const std::string& fm
       ContentInfo *info = mArray[t];
       if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
-        if (strcmp(info->getFmiParameterName().c_str(), fmiParameterName.c_str()) == 0)
+        if (strcmp(info->getFmiParameterName(), fmiParameterName.c_str()) == 0)
         {
           if (forecastType < 0 || (info->mForecastType == forecastType && (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
           {
@@ -4094,7 +3918,7 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(ui
 
 
 
-ContentInfo* ContentInfoList::getContentInfoByGribParameterIdAndGenerationId(uint producerId,uint generationId,const std::string& gribParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime)
+ContentInfo* ContentInfoList::getContentInfoByGribParameterIdAndGenerationId(uint producerId,uint generationId,T::GribParamId gribParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime)
 {
   FUNCTION_TRACE
   try
@@ -4112,7 +3936,7 @@ ContentInfo* ContentInfoList::getContentInfoByGribParameterIdAndGenerationId(uin
 
 
 
-ContentInfo* ContentInfoList::getContentInfoByGribParameterIdAndGenerationId(uint producerId,uint generationId,const std::string& gribParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC)
+ContentInfo* ContentInfoList::getContentInfoByGribParameterIdAndGenerationId(uint producerId,uint generationId,T::GribParamId gribParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC)
 {
   FUNCTION_TRACE
   try
@@ -4133,10 +3957,6 @@ ContentInfo* ContentInfoList::getContentInfoByGribParameterIdAndGenerationId(uin
     searchInfo.mForecastType = forecastType;
     searchInfo.mForecastNumber = forecastNumber;
     searchInfo.mGeometryId = geometryId;
-
-    if (strncasecmp(gribParameterId.c_str(),"GRIB-",5) == 0)
-      searchInfo.mGribParameterId = gribParameterId.c_str()+5;
-
 
     int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
     for (int t=0; t < 2; t++)
@@ -4233,7 +4053,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
         {
           if (info->mGenerationId == generationId)
           {
-            if (strcmp(info->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) == 0)
+            if (strcmp(info->getFmiParameterName(),searchInfo.getFmiParameterName()) == 0)
             {
               if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
@@ -4531,7 +4351,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
           idx--;
       }
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) < 0)
+      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->getFmiParameterName(),searchInfo.getFmiParameterName()) < 0)
         idx++;
 
 
@@ -4552,7 +4372,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
         //std::cout << info->mForecastTime << " " << info->mParameterLevel << " ***** \n";
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (strcmp(info->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) == 0)
+          if (strcmp(info->getFmiParameterName(),searchInfo.getFmiParameterName()) == 0)
           {
             if (info->mGenerationId == generationId)
             {
@@ -4856,7 +4676,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
         {
           if (info->mGenerationId == generationId)
           {
-            if (strcmp(info->getFmiParameterName().c_str(),searchInfo.getFmiParameterName().c_str()) == 0)
+            if (strcmp(info->getFmiParameterName(),searchInfo.getFmiParameterName()) == 0)
             {
               if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
@@ -4985,7 +4805,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationList(T::G
           {
             if (info->mGenerationId == gInfo->mGenerationId)
             {
-              if (strcmp(info->getFmiParameterName().c_str(), searchInfo.getFmiParameterName().c_str()) == 0)
+              if (strcmp(info->getFmiParameterName(), searchInfo.getFmiParameterName()) == 0)
               {
                 if (forecastType < 0 || (info->mForecastType == forecastType && (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
                 {
@@ -5101,7 +4921,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
         {
           if (info->mProducerId == producerId)
           {
-            if (strcmp(info->getFmiParameterName().c_str(),fmiParameterName.c_str()) == 0)
+            if (strcmp(info->getFmiParameterName(),fmiParameterName.c_str()) == 0)
             {
               if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
@@ -5163,7 +4983,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
 
 
 
-void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByNewbaseParameterId(T::NewbaseParamId newbaseParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5182,7 +5002,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
 
 
 
-void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByNewbaseParameterId(T::NewbaseParamId newbaseParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5199,7 +5019,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
       ContentInfo *info = mArray[t];
       if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
-        if (strcmp(info->mNewbaseParameterId.c_str(), newbaseParameterId.c_str()) == 0)
+        if (info->mNewbaseParameterId == newbaseParameterId)
         {
           if (forecastType < 0 || (info->mForecastType == forecastType && (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
           {
@@ -5240,7 +5060,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterId(T::ParamId newbaseP
 
 
 
-void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint producerId,uint generationId,T::ParamId newbaseParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint producerId,uint generationId,T::NewbaseParamId newbaseParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5259,7 +5079,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
 
 
 
-void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint producerId,uint generationId,T::ParamId newbaseParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint producerId,uint generationId,T::NewbaseParamId newbaseParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5293,7 +5113,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
         {
           if (info->mGenerationId == generationId)
           {
-            if (strcmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
+            if (info->mNewbaseParameterId == newbaseParameterId)
             {
               if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
@@ -5385,7 +5205,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndGenerationId(uint
 
 
 
-void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint producerId,T::ParamId newbaseParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint producerId,T::NewbaseParamId newbaseParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5404,7 +5224,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
 
 
 
-void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint producerId,T::ParamId newbaseParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint producerId,T::NewbaseParamId newbaseParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5436,7 +5256,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterIdAndProducerId(uint p
         {
           if (info->mProducerId == producerId)
           {
-            if (strcmp(info->mNewbaseParameterId.c_str(),newbaseParameterId.c_str()) == 0)
+            if (info->mNewbaseParameterId == newbaseParameterId)
             {
               if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
@@ -5559,7 +5379,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterName(const std::string
       ContentInfo *info = mArray[t];
       if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
-        if (strcasecmp(info->mNewbaseParameterName.c_str(), newbaseParameterName.c_str()) == 0)
+        if (strcasecmp(info->getNewbaseParameterName(), newbaseParameterName.c_str()) == 0)
         {
           if (forecastType < 0 || (info->mForecastType == forecastType && (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
           {
@@ -5636,7 +5456,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
       // ### This search is possible only if the content list is sorted as we want.
 
       ContentInfo searchInfo;
-      searchInfo.mNewbaseParameterName = newbaseParameterName;
+      searchInfo.setNewbaseParameterName(newbaseParameterName);
       searchInfo.mProducerId = producerId;
       searchInfo.mGenerationId = generationId;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
@@ -5653,7 +5473,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndGenerationId(ui
         {
           if (info->mGenerationId == generationId)
           {
-            if (strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0)
+            if (strcasecmp(info->getNewbaseParameterName(),newbaseParameterName.c_str()) == 0)
             {
               if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
@@ -5796,7 +5616,7 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
         {
           if (info->mProducerId == producerId)
           {
-            if (strcasecmp(info->mNewbaseParameterName.c_str(),newbaseParameterName.c_str()) == 0)
+            if (strcasecmp(info->getNewbaseParameterName(),newbaseParameterName.c_str()) == 0)
             {
               if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
               {
@@ -5871,724 +5691,6 @@ void ContentInfoList::getContentInfoListByNewbaseParameterNameAndProducerId(uint
       list = *this;
       list.sort(ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time);
       list.getContentInfoListByNewbaseParameterNameAndProducerId(producerId,newbaseParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-    getContentInfoListByCdmParameterId(cdmParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ContentInfoList::getContentInfoListByCdmParameterId(T::ParamId cdmParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    contentInfoList.clear();
-
-    if (mArray == nullptr || mLength == 0)
-      return;
-
-    AutoReadLock lock(mModificationLockPtr);
-
-    for (uint t = 0; t < mLength; t++)
-    {
-      ContentInfo *info = mArray[t];
-      if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-      {
-        if (strcasecmp(info->mCdmParameterId.c_str(), cdmParameterId.c_str()) == 0)
-        {
-          if (forecastType < 0 || (info->mForecastType == forecastType && (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
-          {
-            if (geometryId < 0 || info->mGeometryId == geometryId)
-            {
-              if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || parameterLevelId == 0)
-                  || (info->mFmiParameterLevelId == parameterLevelId
-                      && (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY))
-                  || (info->mGrib1ParameterLevelId == parameterLevelId
-                      && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY))
-                  || (info->mGrib2ParameterLevelId == parameterLevelId
-                      && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
-              {
-                if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel && info->mParameterLevel <= maxLevel))
-                {
-                  if (info->mForecastTimeUTC >= startTimeUTC && info->mForecastTimeUTC <= endTimeUTC)
-                  {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-
-
-
-
-
-void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint producerId,uint generationId,T::ParamId cdmParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-    getContentInfoListByCdmParameterIdAndGenerationId(producerId,generationId,cdmParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-void ContentInfoList::getContentInfoListByCdmParameterIdAndGenerationId(uint producerId,uint generationId,T::ParamId cdmParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    contentInfoList.clear();
-
-    if (mArray == nullptr ||  mLength == 0)
-      return;
-
-    AutoReadLock lock(mModificationLockPtr);
-
-    if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time)
-    {
-      // ### This search is possible only if the content list is sorted as we want.
-
-      ContentInfo searchInfo;
-      searchInfo.mProducerId = producerId;
-      searchInfo.mGenerationId = generationId;
-      searchInfo.mCdmParameterId = cdmParameterId;
-      int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
-
-      uint t = C_UINT(idx);
-
-      ContentInfo *prev = nullptr;
-      ContentInfo *next = nullptr;
-
-      while (t < mLength  &&  mArray[t] != nullptr)
-      {
-        ContentInfo *info = mArray[t];
-        if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          if (info->mGenerationId == generationId)
-          {
-            if (strcasecmp(info->mCdmParameterId.c_str(),cdmParameterId.c_str()) == 0)
-            {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
-              {
-                if (geometryId < 0  ||  info->mGeometryId == geometryId)
-                {
-                  if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
-                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
-                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
-                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
-                  {
-                    if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
-                    {
-                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
-                        prev = info;
-
-                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
-                        next = info;
-
-                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
-                      {
-                        if (contentInfoList.getReleaseObjects())
-                          contentInfoList.addContentInfo(info->duplicate());
-                        else
-                          contentInfoList.addContentInfo(info);
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            else
-            {
-              if (t > C_UINT(idx))
-                t = mLength;
-            }
-          }
-          else
-          {
-            if (t > C_UINT(idx))
-              t = mLength;
-          }
-        }
-        t++;
-      }
-
-      if (contentInfoList.getLength() == 0)
-        return;
-
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
-      {
-        // We need to add the previous entry before the start time.
-
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(prev->duplicate());
-        else
-          contentInfoList.addContentInfo(prev);
-      }
-
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
-      {
-        // We need to add the next entry after the end time.
-
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(next->duplicate());
-        else
-          contentInfoList.addContentInfo(next);
-      }
-    }
-    else
-    {
-      // ### The content list is not sorted as we want. Let's take a copy of the list and sort it so that
-      // ### we can execute the search. This is not the most efficient way to do it, but this functionality
-      // ### should not be needed very often.
-
-      ContentInfoList list;
-      list.setReleaseObjects(false);
-      list = *this;
-      list.sort(ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time);
-      list.getContentInfoListByCdmParameterIdAndGenerationId(producerId,generationId,cdmParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint producerId,T::ParamId cdmParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-    getContentInfoListByCdmParameterIdAndProducerId(producerId,cdmParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ContentInfoList::getContentInfoListByCdmParameterIdAndProducerId(uint producerId,T::ParamId cdmParameterId,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    contentInfoList.clear();
-
-    if (mArray == nullptr ||  mLength == 0)
-      return;
-
-    AutoReadLock lock(mModificationLockPtr);
-
-    if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time)
-    {
-      // ### This search is possible only if the content list is sorted as we want.
-
-      ContentInfo searchInfo;
-      searchInfo.mProducerId = producerId;
-      int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
-
-      uint t = C_UINT(idx);
-
-      ContentInfo *prev = nullptr;
-      ContentInfo *next = nullptr;
-
-      while (t < mLength  &&  mArray[t] != nullptr)
-      {
-        ContentInfo *info = mArray[t];
-        if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          if (info->mProducerId == producerId)
-          {
-            if (strcasecmp(info->mCdmParameterId.c_str(),cdmParameterId.c_str()) == 0)
-            {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
-              {
-                if (geometryId < 0  ||  info->mGeometryId == geometryId)
-                {
-                  if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
-                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
-                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
-                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
-                  {
-                    if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
-                    {
-                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
-                        prev = info;
-
-                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
-                        next = info;
-
-                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
-                      {
-                        if (contentInfoList.getReleaseObjects())
-                          contentInfoList.addContentInfo(info->duplicate());
-                        else
-                          contentInfoList.addContentInfo(info);
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-          else
-          {
-            if (t > C_UINT(idx))
-              t = mLength;
-          }
-        }
-        t++;
-      }
-
-      if (contentInfoList.getLength() == 0)
-        return;
-
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
-      {
-        // We need to add the previous entry before the start time. Notice that this must be
-        // done in all requested levels.
-
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(prev->duplicate());
-        else
-          contentInfoList.addContentInfo(prev);
-      }
-
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
-      {
-        // We need to add the next entry after the end time. Notice that this must be
-        // done in all requested levels.
-
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(next->duplicate());
-        else
-          contentInfoList.addContentInfo(next);
-      }
-    }
-    else
-    {
-      // ### The content list is not sorted as we want. Let's take a copy of the list and sort it so that
-      // ### we can execute the search. This is not the most efficient way to do it, but this functionality
-      // ### should not be needed very often.
-
-      ContentInfoList list;
-      list.setReleaseObjects(false);
-      list = *this;
-      list.sort(ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time);
-      list.getContentInfoListByCdmParameterIdAndProducerId(producerId,cdmParameterId,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ContentInfoList::getContentInfoListByCdmParameterName(const std::string& cdmParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-    getContentInfoListByCdmParameterName(cdmParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ContentInfoList::getContentInfoListByCdmParameterName(const std::string& cdmParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    contentInfoList.clear();
-
-    if (mArray == nullptr || mLength == 0)
-      return;
-
-    AutoReadLock lock(mModificationLockPtr);
-
-    for (uint t = 0; t < mLength; t++)
-    {
-      ContentInfo *info = mArray[t];
-      if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-      {
-        if (strcasecmp(info->mCdmParameterName.c_str(), cdmParameterName.c_str()) == 0)
-        {
-          if (forecastType < 0 || (info->mForecastType == forecastType && (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
-          {
-            if (geometryId < 0 || info->mGeometryId == geometryId)
-            {
-              if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || parameterLevelId == 0)
-                  || (info->mFmiParameterLevelId == parameterLevelId
-                      && (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY))
-                  || (info->mGrib1ParameterLevelId == parameterLevelId
-                      && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY))
-                  || (info->mGrib2ParameterLevelId == parameterLevelId
-                      && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
-              {
-                if (info->mForecastTimeUTC >= startTimeUTC && info->mForecastTimeUTC <= endTimeUTC)
-                {
-                  if (contentInfoList.getReleaseObjects())
-                    contentInfoList.addContentInfo(info->duplicate());
-                  else
-                    contentInfoList.addContentInfo(info);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-
-
-
-
-
-void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint producerId,uint generationId,const std::string& cdmParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-    getContentInfoListByCdmParameterNameAndGenerationId(producerId,generationId,cdmParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ContentInfoList::getContentInfoListByCdmParameterNameAndGenerationId(uint producerId,uint generationId,const std::string& cdmParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    contentInfoList.clear();
-
-    if (mArray == nullptr ||  mLength == 0)
-      return;
-
-    AutoReadLock lock(mModificationLockPtr);
-
-    if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time)
-    {
-      // ### This search is possible only if the content list is sorted as we want.
-
-      ContentInfo searchInfo;
-      searchInfo.mProducerId = producerId;
-      searchInfo.mGenerationId = generationId;
-      searchInfo.mCdmParameterName = cdmParameterName;
-      int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
-
-      uint t = C_UINT(idx);
-
-      ContentInfo *prev = nullptr;
-      ContentInfo *next = nullptr;
-
-      while (t < mLength  &&  mArray[t] != nullptr)
-      {
-        ContentInfo *info = mArray[t];
-        if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          if (info->mGenerationId == generationId)
-          {
-            if (strcasecmp(info->mCdmParameterName.c_str(),cdmParameterName.c_str()) == 0)
-            {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
-              {
-                if (geometryId < 0  ||  info->mGeometryId == geometryId)
-                {
-                  if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
-                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
-                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
-                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
-                  {
-                    if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
-                    {
-                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
-                        prev = info;
-
-                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
-                        next = info;
-
-                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
-                      {
-                        if (contentInfoList.getReleaseObjects())
-                          contentInfoList.addContentInfo(info->duplicate());
-                        else
-                          contentInfoList.addContentInfo(info);
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            else
-            {
-              if (t > C_UINT(idx))
-                t = mLength;
-            }
-          }
-          else
-          {
-            if (t > C_UINT(idx))
-              t = mLength;
-          }
-        }
-        t++;
-      }
-
-      if (contentInfoList.getLength() == 0)
-        return;
-
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
-      {
-        // We need to add the previous entry before the start time.
-
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(prev->duplicate());
-        else
-          contentInfoList.addContentInfo(prev);
-      }
-
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
-      {
-        // We need to add the next entry after the end time.
-
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(next->duplicate());
-        else
-          contentInfoList.addContentInfo(next);
-      }
-    }
-    else
-    {
-      // ### The content list is not sorted as we want. Let's take a copy of the list and sort it so that
-      // ### we can execute the search. This is not the most efficient way to do it, but this functionality
-      // ### should not be needed very often.
-
-      ContentInfoList list;
-      list.setReleaseObjects(false);
-      list = *this;
-      list.sort(ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time);
-      list.getContentInfoListByCdmParameterNameAndGenerationId(producerId,generationId,cdmParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint producerId,const std::string& cdmParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    time_t startTimeUTC = utcTimeToTimeT(startTime);
-    time_t endTimeUTC = utcTimeToTimeT(endTime);
-    getContentInfoListByCdmParameterNameAndProducerId(producerId,cdmParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ContentInfoList::getContentInfoListByCdmParameterNameAndProducerId(uint producerId,const std::string& cdmParameterName,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    contentInfoList.clear();
-
-    if (mArray == nullptr ||  mLength == 0)
-      return;
-
-    AutoReadLock lock(mModificationLockPtr);
-
-    if (mComparisonMethod == ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time)
-    {
-      // ### This search is possible only if the content list is sorted as we want.
-
-      ContentInfo searchInfo;
-      searchInfo.mProducerId = producerId;
-      int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
-
-      uint t = C_UINT(idx);
-
-      ContentInfo *prev = nullptr;
-      ContentInfo *next = nullptr;
-
-      while (t < mLength  &&  mArray[t] != nullptr)
-      {
-        ContentInfo *info = mArray[t];
-        if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          if (info->mProducerId == producerId)
-          {
-            if (strcasecmp(info->mCdmParameterName.c_str(),cdmParameterName.c_str()) == 0)
-            {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
-              {
-                if (geometryId < 0  ||  info->mGeometryId == geometryId)
-                {
-                  if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE ||  parameterLevelId == 0) ||
-                      (info->mFmiParameterLevelId == parameterLevelId  &&  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
-                      (info->mGrib1ParameterLevelId == parameterLevelId && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)) ||
-                      (info->mGrib2ParameterLevelId == parameterLevelId  && (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 || parameterLevelIdType == T::ParamLevelIdTypeValue::ANY)))
-                  {
-                    if (parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
-                    {
-                      if (info->mForecastTimeUTC < startTimeUTC && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
-                        prev = info;
-
-                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
-                        next = info;
-
-                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
-                      {
-                        if (contentInfoList.getReleaseObjects())
-                          contentInfoList.addContentInfo(info->duplicate());
-                        else
-                          contentInfoList.addContentInfo(info);
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-          else
-          {
-            if (t > C_UINT(idx))
-              t = mLength;
-          }
-        }
-        t++;
-      }
-
-      if (contentInfoList.getLength() == 0)
-        return;
-
-      if (prev != nullptr  && (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
-      {
-        // We need to add the previous entry before the start time.
-
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(prev->duplicate());
-        else
-          contentInfoList.addContentInfo(prev);
-      }
-
-      if (next != nullptr  && (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
-      {
-        // We need to add the next entry after the end time.
-
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(next->duplicate());
-        else
-          contentInfoList.addContentInfo(next);
-      }
-    }
-    else
-    {
-      // ### The content list is not sorted as we want. Let's take a copy of the list and sort it so that
-      // ### we can execute the search. This is not the most efficient way to do it, but this functionality
-      // ### should not be needed very often.
-
-      ContentInfoList list;
-      list.setReleaseObjects(false);
-      list = *this;
-      list.sort(ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time);
-      list.getContentInfoListByCdmParameterNameAndProducerId(producerId,cdmParameterName,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
     }
   }
   catch (...)
@@ -7004,9 +6106,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint gene
         mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time ||
         mComparisonMethod == T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time ||
         mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time)
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time)
     {
       sorted = true;
     }
@@ -7113,7 +6213,7 @@ void ContentInfoList::getContentInfoListBySourceId(uint sourceId,uint startFileI
 
 
 
-void ContentInfoList::getFmiParamLevelIdListByFmiParameterId(T::ParamId fmiParameterId,std::vector<T::ParamLevelId>& paramLevelIdList)
+void ContentInfoList::getFmiParamLevelIdListByFmiParameterId(T::FmiParamId fmiParameterId,std::vector<T::ParamLevelId>& paramLevelIdList)
 {
   FUNCTION_TRACE
   try
@@ -7197,7 +6297,7 @@ void ContentInfoList::getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId
 
 
 
-void ContentInfoList::getParamLevelInfoListByFmiParameterId(T::ParamId fmiParameterId,ParameterLevelInfoList& parameterLevelInfoList)
+void ContentInfoList::getParamLevelInfoListByFmiParameterId(T::FmiParamId fmiParameterId,ParameterLevelInfoList& parameterLevelInfoList)
 {
   FUNCTION_TRACE
   try
@@ -7213,12 +6313,13 @@ void ContentInfoList::getParamLevelInfoListByFmiParameterId(T::ParamId fmiParame
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFmiParameterId == fmiParameterId)
       {
+        auto id = std::to_string(info->mFmiParameterId);
         ParameterLevelInfo *pInfo = parameterLevelInfoList.getParameterLevelInfo(T::ParamKeyTypeValue::FMI_ID,
-            info->mFmiParameterId,T::ParamLevelIdTypeValue::FMI,info->mFmiParameterLevelId,info->mParameterLevel);
+            id,T::ParamLevelIdTypeValue::FMI,info->mFmiParameterLevelId,info->mParameterLevel);
 
         if (pInfo == nullptr)
         {
-          pInfo = new ParameterLevelInfo(T::ParamKeyTypeValue::FMI_ID,info->mFmiParameterId,T::ParamLevelIdTypeValue::FMI,info->mFmiParameterLevelId,info->mParameterLevel);
+          pInfo = new ParameterLevelInfo(T::ParamKeyTypeValue::FMI_ID,id,T::ParamLevelIdTypeValue::FMI,info->mFmiParameterLevelId,info->mParameterLevel);
           parameterLevelInfoList.addParameterLevelInfo(pInfo);
         }
       }
@@ -7254,7 +6355,7 @@ void ContentInfoList::getForecastTimeList(std::set<std::string>& forecastTimeLis
         {
           //if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
           {
-            forecastTimeList.insert(info->mForecastTime);
+            forecastTimeList.insert(info->getForecastTime());
           }
         }
       }
@@ -7328,9 +6429,7 @@ void ContentInfoList::getForecastTimeListByGenerationId(uint producerId,uint gen
         mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time ||
         mComparisonMethod == T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time ||
         mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time)
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time)
     {
       sorted = true;
     }
@@ -7350,7 +6449,7 @@ void ContentInfoList::getForecastTimeListByGenerationId(uint producerId,uint gen
           {
             //if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
             {
-              forecastTimeList.insert(info->mForecastTime);
+              forecastTimeList.insert(info->getForecastTime());
             }
           }
           else
@@ -7394,9 +6493,7 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(uint producerId
         mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time ||
         mComparisonMethod == T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time ||
         mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::cdmId_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::cdmName_producer_generation_level_time)
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time)
     {
       sorted = true;
     }
@@ -7417,7 +6514,7 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(uint producerId
             {
               //if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
               {
-                forecastTimeList.insert(info->mForecastTime);
+                forecastTimeList.insert(info->getForecastTime());
               }
             }
           }
@@ -7460,7 +6557,7 @@ void ContentInfoList::getForecastTimeListByProducerId(uint producerId,std::set<s
         {
           //if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
           {
-            forecastTimeList.insert(info->mForecastTime);
+            forecastTimeList.insert(info->getForecastTime());
           }
         }
       }

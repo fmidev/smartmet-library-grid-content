@@ -19,8 +19,6 @@ typedef sequence<long> CorbaLongList;
 
 struct CorbaContentInfo
 {
-  unsigned long long serverFlags;
-  unsigned long      groupFlags;
   unsigned long      producerId;
   unsigned long      generationId;
   octet              fileType;
@@ -31,19 +29,15 @@ struct CorbaContentInfo
   string             forecastTime;
   short              forecastType;
   short              forecastNumber;
-  string             fmiParameterId;
+  unsigned long      fmiParameterId;
   string             fmiParameterName;
-  string             gribParameterId;
-  string             cdmParameterId;
-  string             cdmParameterName;
-  string             newbaseParameterId;
+  unsigned long      gribParameterId;
+  unsigned long      newbaseParameterId;
   string             newbaseParameterName;
   octet              fmiParameterLevelId;
   octet              grib1ParameterLevelId;
   octet              grib2ParameterLevelId;
   long               parameterLevel;
-  string             fmiParameterUnits;
-  string             gribParameterUnits;
   unsigned long      flags;
   unsigned long      sourceId;
   long               geometryId;
@@ -73,7 +67,6 @@ typedef sequence<CorbaProducerInfo> CorbaProducerInfoList;
 
 struct CorbaFileInfo
 {
-  unsigned long      groupFlags;
   unsigned long      producerId;
   unsigned long      generationId;
   unsigned long      fileId;

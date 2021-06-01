@@ -166,33 +166,6 @@ void GridFileManager::deleteFileById(uint fileId)
 
 
 
-void GridFileManager::deleteFilesByGroupFlags(uint groupFlags)
-{
-  FUNCTION_TRACE
-  try
-  {
-    AutoWriteLock lock(&mModificationLock);
-
-    std::vector<uint> idList;
-
-    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
-    {
-      if ((it->second->getGroupFlags() & groupFlags) != 0)
-        idList.emplace_back(it->first);
-    }
-
-    deleteFilesNoLock(idList,false);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 void GridFileManager::deleteFilesByProducerId(uint producerId)
 {
   FUNCTION_TRACE

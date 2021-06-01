@@ -1151,31 +1151,6 @@ int ServiceInterface::deleteFileInfoByName(T::SessionId sessionId,const std::str
 
 
 
-int ServiceInterface::deleteFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!mEnabled)
-      return Result::SERVICE_DISABLED;
-
-    unsigned long long timeStart = getTime();
-    int result = _deleteFileInfoListByGroupFlags(sessionId,groupFlags);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,groupFlags,result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int ServiceInterface::deleteFileInfoListByProducerId(T::SessionId sessionId,uint producerId)
 {
   FUNCTION_TRACE
@@ -1601,31 +1576,6 @@ int ServiceInterface::getFileInfoListByGenerationName(T::SessionId sessionId,con
 
 
 
-int ServiceInterface::getFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!mEnabled)
-      return Result::SERVICE_DISABLED;
-
-    unsigned long long timeStart = getTime();
-    int result = _getFileInfoListByGroupFlags(sessionId,groupFlags,startFileId,maxRecords,fileInfoList);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,groupFlags,startFileId,maxRecords,fileInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int ServiceInterface::getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -1979,31 +1929,6 @@ int ServiceInterface::deleteContentListByFileName(T::SessionId sessionId,const s
 
 
 
-int ServiceInterface::deleteContentListByGroupFlags(T::SessionId sessionId,uint groupFlags)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!mEnabled)
-      return Result::SERVICE_DISABLED;
-
-    unsigned long long timeStart = getTime();
-    int result = _deleteContentListByGroupFlags(sessionId,groupFlags);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,groupFlags,result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int ServiceInterface::deleteContentListByProducerId(T::SessionId sessionId,uint producerId)
 {
   FUNCTION_TRACE
@@ -2242,31 +2167,6 @@ int ServiceInterface::getContentListByFileName(T::SessionId sessionId,const std:
     unsigned long requestTime = getTime() - timeStart;
 
     PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,filename.c_str(),contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int ServiceInterface::getContentListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!mEnabled)
-      return Result::SERVICE_DISABLED;
-
-    unsigned long long timeStart = getTime();
-    int result = _getContentListByGroupFlags(sessionId,groupFlags,startFileId,startMessageIndex,maxRecords,contentInfoList);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,groupFlags,startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3480,15 +3380,6 @@ int ServiceInterface::_deleteFileInfoByName(T::SessionId sessionId,const std::st
 
 
 
-int ServiceInterface::_deleteFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
 int ServiceInterface::_deleteFileInfoListByProducerId(T::SessionId sessionId,uint producerId)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -3648,15 +3539,6 @@ int ServiceInterface::_getFileInfoListByGenerationName(T::SessionId sessionId,co
 
 
 
-int ServiceInterface::_getFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
 int ServiceInterface::_getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -3783,15 +3665,6 @@ int ServiceInterface::_deleteContentListByFileName(T::SessionId sessionId,const 
 
 
 
-int ServiceInterface::_deleteContentListByGroupFlags(T::SessionId sessionId,uint groupFlags)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
 int ServiceInterface::_deleteContentListByProducerId(T::SessionId sessionId,uint producerId)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -3874,15 +3747,6 @@ int ServiceInterface::_getContentListByFileIdList(T::SessionId sessionId,std::ve
 
 
 int ServiceInterface::_getContentListByFileName(T::SessionId sessionId,const std::string& filename,T::ContentInfoList& contentInfoList)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
-int ServiceInterface::_getContentListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }

@@ -71,9 +71,9 @@ void VirtualMessage::initMessagePtrs() const
     {
       auto msg = it->first->getMessageByIndex(it->second);
       /*
-      if (strcasecmp(msg->getFmiParameterName().c_str(),mOverrideParameter.c_str()) == 0  &&  mOverrideParameter.length() > 0)
+      if (strcasecmp(msg->getFmiParameterName(),mOverrideParameter.c_str()) == 0  &&  mOverrideParameter.length() > 0)
       {
-        printf("SET VIRTUAL MESSAGE %u:%u %s\n",getFileId(),getMessageIndex(),msg->getFmiParameterName().c_str());
+        printf("SET VIRTUAL MESSAGE %u:%u %s\n",getFileId(),getMessageIndex(),msg->getFmiParameterName());
         msg->setVirtualMessage(getFileId(),getMessageIndex());
       }
       */
