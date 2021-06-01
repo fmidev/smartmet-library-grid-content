@@ -327,12 +327,6 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
-    if (strcasecmp(method,"deleteFileInfoListByGroupFlags") == 0)
-    {
-      deleteFileInfoListByGroupFlags(request,response);
-      return;
-    }
-
     if (strcasecmp(method,"deleteFileInfoListByProducerId") == 0)
     {
       deleteFileInfoListByProducerId(request,response);
@@ -414,12 +408,6 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
     if (strcasecmp(method,"getFileInfoListByGenerationName") == 0)
     {
       getFileInfoListByGenerationName(request,response);
-      return;
-    }
-
-    if (strcasecmp(method,"getFileInfoListByGroupFlags") == 0)
-    {
-      getFileInfoListByGroupFlags(request,response);
       return;
     }
 
@@ -507,12 +495,6 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
-    if (strcasecmp(method,"deleteContentListByGroupFlags") == 0)
-    {
-      deleteContentListByGroupFlags(request,response);
-      return;
-    }
-
     if (strcasecmp(method,"deleteContentListByProducerId") == 0)
     {
       deleteContentListByProducerId(request,response);
@@ -570,12 +552,6 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
     if (strcasecmp(method,"getContentListByFileName") == 0)
     {
       getContentListByFileName(request,response);
-      return;
-    }
-
-    if (strcasecmp(method,"getContentListByGroupFlags") == 0)
-    {
-      getContentListByGroupFlags(request,response);
       return;
     }
 
@@ -2612,44 +2588,6 @@ void ServerInterface::deleteFileInfoListByForecastTimeList(T::RequestMessage& re
 
 
 
-void ServerInterface::deleteFileInfoListByGroupFlags(T::RequestMessage& request,T::ResponseMessage& response)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::SessionId sessionId = 0;
-    if (!request.getLineByKey("sessionId",sessionId))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: sessionId");
-      return;
-    }
-
-    uint groupFlags = 0;
-    if (!request.getLineByKey("groupFlags",groupFlags))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: groupFlags");
-      return;
-    }
-
-    int result = mService->deleteFileInfoListByGroupFlags(sessionId,groupFlags);
-
-    response.addLine("result",result);
-
-    if (result != Result::OK)
-      response.addLine("resultString",getResultString(result));
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 void ServerInterface::deleteFileInfoListByProducerId(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
@@ -3392,74 +3330,6 @@ void ServerInterface::getFileInfoListByGenerationName(T::RequestMessage& request
 
 
 
-void ServerInterface::getFileInfoListByGroupFlags(T::RequestMessage& request,T::ResponseMessage& response)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::SessionId sessionId = 0;
-    if (!request.getLineByKey("sessionId",sessionId))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: sessionId");
-      return;
-    }
-
-    uint groupFlags = 0;
-    if (!request.getLineByKey("groupFlags",groupFlags))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: groupFlags");
-      return;
-    }
-
-    uint startFileId = 0;
-    if (!request.getLineByKey("startFileId",startFileId))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: startFileId");
-      return;
-    }
-
-    uint maxRecords = 0;
-    if (!request.getLineByKey("maxRecords",maxRecords))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: maxRecords");
-      return;
-    }
-
-    T::FileInfoList fileInfoList;
-
-    int result = mService->getFileInfoListByGroupFlags(sessionId,groupFlags,startFileId,maxRecords,fileInfoList);
-
-    response.addLine("result",result);
-    if (result == Result::OK)
-    {
-      uint len = fileInfoList.getLength();
-      for (uint t=0; t<len; t++)
-      {
-        T::FileInfo *info = fileInfoList.getFileInfoByIndex(t);
-        if (t == 0)
-          response.addLine("fileInfoHeader",info->getCsvHeader());
-        response.addLine("fileInfo",info->getCsv());
-      }
-    }
-    else
-    {
-      response.addLine("resultString",getResultString(result));
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 void ServerInterface::getFileInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
@@ -4147,44 +4017,6 @@ void ServerInterface::deleteContentListByFileName(T::RequestMessage& request,T::
 
 
 
-void ServerInterface::deleteContentListByGroupFlags(T::RequestMessage& request,T::ResponseMessage& response)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::SessionId sessionId = 0;
-    if (!request.getLineByKey("sessionId",sessionId))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: sessionId");
-      return;
-    }
-
-    uint groupFlags = 0;
-    if (!request.getLineByKey("groupFlags",groupFlags))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: groupFlags");
-      return;
-    }
-
-    int result = mService->deleteContentListByGroupFlags(sessionId,groupFlags);
-
-    response.addLine("result",result);
-
-    if (result != Result::OK)
-      response.addLine("resultString",getResultString(result));
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 void ServerInterface::deleteContentListByProducerId(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
@@ -4630,82 +4462,6 @@ void ServerInterface::getContentListByFileName(T::RequestMessage& request,T::Res
     T::ContentInfoList contentInfoList;
 
     int result = mService->getContentListByFileName(sessionId,filename,contentInfoList);
-
-    response.addLine("result",result);
-    if (result == Result::OK)
-    {
-      uint len = contentInfoList.getLength();
-      for (uint t=0; t<len; t++)
-      {
-        T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
-        if (t == 0)
-          response.addLine("contentInfoHeader",info->getCsvHeader());
-        response.addLine("contentInfo",info->getCsv());
-      }
-    }
-    else
-    {
-      response.addLine("resultString",getResultString(result));
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ServerInterface::getContentListByGroupFlags(T::RequestMessage& request,T::ResponseMessage& response)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::SessionId sessionId = 0;
-    if (!request.getLineByKey("sessionId",sessionId))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: sessionId");
-      return;
-    }
-
-    uint groupFlags = 0;
-    if (!request.getLineByKey("groupFlags",groupFlags))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: groupFlags");
-      return;
-    }
-
-    uint startFileId = 0;
-    if (!request.getLineByKey("startFileId",startFileId))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: startFileId");
-      return;
-    }
-
-    uint startMessageIndex = 0;
-    if (!request.getLineByKey("startMessageIndex",startMessageIndex))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: startMessageIndex");
-      return;
-    }
-
-    uint maxRecords = 0;
-    if (!request.getLineByKey("maxRecords",maxRecords))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: maxRecords");
-      return;
-    }
-
-    T::ContentInfoList contentInfoList;
-
-    int result = mService->getContentListByGroupFlags(sessionId,groupFlags,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
     response.addLine("result",result);
     if (result == Result::OK)

@@ -45,8 +45,6 @@ void Converter::convert(T::ContentInfo& source,ContentServer::Corba::CorbaConten
 {
   try
   {
-    target.serverFlags = source.mServerFlags;
-    target.groupFlags = source.mGroupFlags;
     target.producerId = source.mProducerId;
     target.generationId = source.mGenerationId;
     target.fileType = (CORBA::Octet)source.mFileType;
@@ -54,22 +52,18 @@ void Converter::convert(T::ContentInfo& source,ContentServer::Corba::CorbaConten
     target.messageIndex = source.mMessageIndex;
     target.filePosition = source.mFilePosition;
     target.messageSize = source.mMessageSize;
-    target.forecastTime = CORBA::string_dup(source.mForecastTime.c_str());
+    target.forecastTime = CORBA::string_dup(source.getForecastTime());
     target.forecastType = source.mForecastType;
     target.forecastNumber = source.mForecastNumber;
-    target.fmiParameterId = CORBA::string_dup(source.mFmiParameterId.c_str());
-    target.fmiParameterName = CORBA::string_dup(source.getFmiParameterName().c_str());
-    target.gribParameterId = CORBA::string_dup(source.mGribParameterId.c_str());
-    target.cdmParameterId = CORBA::string_dup(source.mCdmParameterId.c_str());
-    target.cdmParameterName = CORBA::string_dup(source.mCdmParameterName.c_str());
-    target.newbaseParameterId = CORBA::string_dup(source.mNewbaseParameterId.c_str());
-    target.newbaseParameterName = CORBA::string_dup(source.mNewbaseParameterName.c_str());
+    target.fmiParameterId = source.mFmiParameterId;
+    target.fmiParameterName = CORBA::string_dup(source.getFmiParameterName());
+    target.gribParameterId = source.mGribParameterId;
+    target.newbaseParameterId = source.mNewbaseParameterId;
+    target.newbaseParameterName = CORBA::string_dup(source.getNewbaseParameterName());
     target.fmiParameterLevelId = source.mFmiParameterLevelId;
     target.grib1ParameterLevelId = source.mGrib1ParameterLevelId;
     target.grib2ParameterLevelId = source.mGrib2ParameterLevelId;
     target.parameterLevel = source.mParameterLevel;
-    target.fmiParameterUnits = CORBA::string_dup(source.mFmiParameterUnits.c_str());
-    target.gribParameterUnits = CORBA::string_dup(source.mGribParameterUnits.c_str());
     target.flags = source.mFlags;
     target.sourceId = source.mSourceId;
     target.geometryId = source.mGeometryId;
@@ -90,8 +84,6 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::
 {
   try
   {
-    target.mServerFlags = source.serverFlags;
-    target.mGroupFlags = source.groupFlags;
     target.mProducerId = source.producerId;
     target.mGenerationId = source.generationId;
     target.mFileType = source.fileType;
@@ -99,22 +91,18 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::
     target.mMessageIndex = source.messageIndex;
     target.mFilePosition = source.filePosition;
     target.mMessageSize = source.messageSize;
-    target.mForecastTime = source.forecastTime;
+    target.setForecastTime(source.forecastTime);
     target.mForecastType = source.forecastType;
     target.mForecastNumber = source.forecastNumber;
     target.mFmiParameterId = source.fmiParameterId;
     target.setFmiParameterName(source.fmiParameterName);
     target.mGribParameterId = source.gribParameterId;
-    target.mCdmParameterId = source.cdmParameterId;
-    target.mCdmParameterName = source.cdmParameterName;
     target.mNewbaseParameterId = source.newbaseParameterId;
-    target.mNewbaseParameterName = source.newbaseParameterName;
+    target.setNewbaseParameterName(source.newbaseParameterName);
     target.mFmiParameterLevelId = source.fmiParameterLevelId;
     target.mGrib1ParameterLevelId = source.grib1ParameterLevelId;
     target.mGrib2ParameterLevelId = source.grib2ParameterLevelId;
     target.mParameterLevel = source.parameterLevel;
-    target.mFmiParameterUnits = source.fmiParameterUnits;
-    target.mGribParameterUnits = source.gribParameterUnits;
     target.mFlags = source.flags;
     target.mSourceId = source.sourceId;
     target.mGeometryId = source.geometryId;
@@ -184,7 +172,6 @@ void Converter::convert(T::FileInfo& source,ContentServer::Corba::CorbaFileInfo&
 {
   try
   {
-    target.groupFlags = source.mGroupFlags;
     target.producerId = source.mProducerId;
     target.generationId = source.mGenerationId;
     target.fileId = source.mFileId;
@@ -209,7 +196,6 @@ void Converter::convert(const ContentServer::Corba::CorbaFileInfo& source,T::Fil
 {
   try
   {
-    target.mGroupFlags = source.groupFlags;
     target.mProducerId = source.producerId;
     target.mGenerationId = source.generationId;
     target.mFileId = source.fileId;

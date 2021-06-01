@@ -28,7 +28,6 @@ class GridFileManager
     void                deleteFile(GRID::GridFile *gridFile);
     void                deleteFileById(uint fileId);
     void                deleteFileByIndex(std::size_t fileIndex);
-    void                deleteFilesByGroupFlags(uint groupFlags);
     void                deleteFilesByProducerId(uint producerId);
     void                deleteFilesByGenerationId(uint generationId);
     void                deleteFilesBySourceId(uint sourceId);

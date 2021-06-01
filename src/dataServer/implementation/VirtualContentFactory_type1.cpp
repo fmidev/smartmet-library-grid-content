@@ -142,7 +142,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
             contentDef->mVirtualParameter.mForecastType.c_str(),
             contentDef->mVirtualParameter.mForecastNumber.c_str(),
             generationInfo.mGenerationId,
-            contentInfo.mForecastTime.c_str());
+            contentInfo.getForecastTime());
 
         if (gridFileMap.find(std::string(filename)) == gridFileMap.end())
         {
@@ -191,7 +191,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
                   geometryId = atoi(sourceParam->mGeometryId.c_str());
 
                 mContentServer->getContentListByParameterGenerationIdAndForecastTime(0,contentInfo.mGenerationId,T::ParamKeyTypeValue::FMI_NAME,sourceParam->mParameterName,
-                  T::ParamLevelIdTypeValue::FMI,levelId,level,forecastType,forecastNumber,geometryId,contentInfo.mForecastTime,contentList);
+                  T::ParamLevelIdTypeValue::FMI,levelId,level,forecastType,forecastNumber,geometryId,contentInfo.getForecastTime(),contentList);
 
                 //mContentServer->getContentListByParameterAndProducerName(0,producerName,T::ParamKeyTypeValue::FMI_NAME,sourceParam->mParameterName,T::ParamLevelIdTypeValue::FMI,levelId,level,level,forecastType,forecastNumber,geometryId,contentInfo.mForecastTime,contentInfo.mForecastTime,0,contentList);
 
@@ -199,7 +199,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
                 for (uint t = 0; t<len; t++)
                 {
                   T::ContentInfo *ci = contentList.getContentInfoByIndex(t);
-                  if (ci->mForecastTime == contentInfo.mForecastTime)
+                  if (ci->mForecastTimeUTC == contentInfo.mForecastTimeUTC)
                   {
                     if (ci->mGeometryId == contentInfo.mGeometryId)
                     {
@@ -214,7 +214,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
                 }
               }
 
-              if (cInfo == nullptr || (contentList.getLength() == 1  &&  cInfo->mForecastTime != contentInfo.mForecastTime))
+              if (cInfo == nullptr || (contentList.getLength() == 1  &&  cInfo->mForecastTimeUTC != contentInfo.mForecastTimeUTC))
               {
                  // Not found
                 componentsFound = false;
@@ -284,15 +284,12 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
               newContentInfo->mMessageIndex = 0;
               newContentInfo->mProducerId = contentInfo.mProducerId;
               newContentInfo->mGenerationId = contentInfo.mGenerationId;
-              newContentInfo->mGroupFlags = contentInfo.mGroupFlags;
-              newContentInfo->mForecastTime = contentInfo.mForecastTime;
+              newContentInfo->setForecastTime(contentInfo.getForecastTime());
               newContentInfo->mFmiParameterId = def.mFmiParameterId;
               newContentInfo->setFmiParameterName(def.mParameterName);
-              newContentInfo->mGribParameterId = "";
-              newContentInfo->mCdmParameterId = "";
-              newContentInfo->mCdmParameterName = "";
+              newContentInfo->mGribParameterId = 0;
               newContentInfo->mNewbaseParameterId = newbaseDef.mNewbaseParameterId;
-              newContentInfo->mNewbaseParameterName = newbaseDef.mParameterName;
+              newContentInfo->setNewbaseParameterName(newbaseDef.mParameterName);
 
               if (contentDef->mVirtualParameter.mLevelId > " ")
                 newContentInfo->mFmiParameterLevelId = atoi(contentDef->mVirtualParameter.mLevelId.c_str());
@@ -307,9 +304,6 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
               else
                 newContentInfo->mParameterLevel = contentInfo.mParameterLevel;
 
-              newContentInfo->mFmiParameterUnits = def.mParameterUnits;
-              newContentInfo->mGribParameterUnits = def.mParameterUnits;
-
               if (contentDef->mVirtualParameter.mForecastType > " ")
                 newContentInfo->mForecastType = atoi(contentDef->mVirtualParameter.mForecastType.c_str());
               else
@@ -320,7 +314,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
               else
                 newContentInfo->mForecastNumber = contentInfo.mForecastNumber;
 
-              newContentInfo->mServerFlags = contentInfo.mServerFlags;
+              //newContentInfo->mServerFlags = contentInfo.mServerFlags;
               newContentInfo->mFlags = T::ContentInfo::Flags::VirtualContent;
               newContentInfo->mSourceId = contentInfo.mSourceId;
               newContentInfo->mGeometryId = contentInfo.mGeometryId;

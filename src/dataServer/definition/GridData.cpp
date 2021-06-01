@@ -15,7 +15,6 @@ GridData::GridData()
   try
   {
     mServerId = 0;
-    mGroupFlags = 0;
     mProducerId = 0;
     mGenerationId = 0;
     mFileId = 0;
@@ -110,7 +109,6 @@ void GridData::print(std::ostream& stream,uint level,uint optionFlags)
   {
     stream << space(level) << "GridData\n";
     stream << space(level) << "- mServerId                 = " << mServerId << "\n";
-    stream << space(level) << "- mGroupFlags               = " << mGroupFlags << "\n";
     stream << space(level) << "- mProducerId               = " << mProducerId << "\n";
     stream << space(level) << "- mGenerationId             = " << mGenerationId << "\n";
     stream << space(level) << "- mFileId                   = " << mFileId << "\n";
@@ -122,13 +120,9 @@ void GridData::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mGrib1ParameterLevelId    = " << mGrib1ParameterLevelId << "\n";
     stream << space(level) << "- mGrib2ParameterLevelId    = " << mGrib2ParameterLevelId << "\n";
     stream << space(level) << "- mGribParameterName        = " << mGribParameterName << "\n";
-    stream << space(level) << "- mGribParameterUnits       = " << mGribParameterUnits << "\n";
     stream << space(level) << "- mFmiParameterId           = " << mFmiParameterId << "\n";
     stream << space(level) << "- mFmiParameterLevelId      = " << mFmiParameterLevelId << "\n";
     stream << space(level) << "- mFmiParameterName         = " << mFmiParameterName << "\n";
-    stream << space(level) << "- mFmiParameterUnits        = " << mFmiParameterUnits << "\n";
-    stream << space(level) << "- mCdmParameterId           = " << mCdmParameterId << "\n";
-    stream << space(level) << "- mCdmParameterName         = " << mCdmParameterName << "\n";
     stream << space(level) << "- mNewbaseParameterId       = " << mNewbaseParameterId << "\n";
     stream << space(level) << "- mNewbaseParameterName     = " << mNewbaseParameterName << "\n";
     stream << space(level) << "- mParameterLevel           = " << mParameterLevel << "\n";

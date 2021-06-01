@@ -71,7 +71,6 @@ class RedisImplementation : public ServiceInterface
      virtual int    _addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList);
      virtual int    _deleteFileInfoById(T::SessionId sessionId,uint fileId);
      virtual int    _deleteFileInfoByName(T::SessionId sessionId,const std::string& filename);
-     virtual int    _deleteFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags);
      virtual int    _deleteFileInfoListByProducerId(T::SessionId sessionId,uint producerId);
      virtual int    _deleteFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName);
      virtual int    _deleteFileInfoListByGenerationId(T::SessionId sessionId,uint generationId);
@@ -88,7 +87,6 @@ class RedisImplementation : public ServiceInterface
      virtual int    _getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      virtual int    _getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      virtual int    _getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
-     virtual int    _getFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      virtual int    _getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      virtual int    _getFileInfoCount(T::SessionId sessionId,uint& count);
      virtual int    _getFileInfoCountByProducerId(T::SessionId sessionId,uint producerId,uint& count);
@@ -105,7 +103,6 @@ class RedisImplementation : public ServiceInterface
      virtual int    _deleteContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex);
      virtual int    _deleteContentListByFileId(T::SessionId sessionId,uint fileId);
      virtual int    _deleteContentListByFileName(T::SessionId sessionId,const std::string& filename);
-     virtual int    _deleteContentListByGroupFlags(T::SessionId sessionId,uint groupFlags);
      virtual int    _deleteContentListByProducerId(T::SessionId sessionId,uint producerId);
      virtual int    _deleteContentListByProducerName(T::SessionId sessionId,const std::string& producerName);
      virtual int    _deleteContentListByGenerationId(T::SessionId sessionId,uint generationId);
@@ -117,7 +114,6 @@ class RedisImplementation : public ServiceInterface
      virtual int    _getContentListByFileId(T::SessionId sessionId,uint fileId,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByFileName(T::SessionId sessionId,const std::string& filename,T::ContentInfoList& contentInfoList);
-     virtual int    _getContentListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      virtual int    _getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList);
@@ -179,14 +175,12 @@ class RedisImplementation : public ServiceInterface
      int            deleteFileById(uint fileId,bool deleteContent);
      int            deleteFileListByGenerationId(uint generationId,bool deleteContent);
      int            deleteFileListByGenerationIdList(std::set<uint>& generationIdList,bool deleteContent);
-     int            deleteFileListByGroupFlags(uint groupFlags,bool deleteContent);
      int            deleteFileListByProducerId(uint producerId,bool deleteContent);
      int            deleteFileListBySourceId(uint sourceId,bool deleteContent);
      int            getFileById(uint fileId,T::FileInfo& fileInfo);
      int            getFileList(uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      int            getFileListByGenerationId(uint generationId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      int            getFileListByGenerationIdList(std::set<uint>& generationIdList,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
-     int            getFileListByGroupFlags(uint groupFlags,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      int            getFileListByProducerId(uint producerId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
      int            getFileListBySourceId(uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
 
@@ -198,7 +192,6 @@ class RedisImplementation : public ServiceInterface
      int            deleteContentByFileId(uint fileId);
      int            deleteContentByGenerationId(uint generationId);
      int            deleteContentByGenerationIdList(std::set<uint>& generationIdList);
-     int            deleteContentByGroupFlags(uint groupFlags);
      int            deleteContentByProducerId(uint producerId);
      int            deleteContentBySourceId(uint sourceId);
      int            getContent(uint fileId,uint messageIndex,T::ContentInfo& contentInfo);
@@ -208,7 +201,6 @@ class RedisImplementation : public ServiceInterface
      int            getContentByGenerationIdList(std::set<uint>& generationIdList,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      int            getContentByGenerationIdAndTimeRange(uint generationId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList);
      int            getContentByForecastTimeList(std::vector<T::ForecastTime>& forecastTimeList,T::ContentInfoList& contentInfoList);
-     int            getContentByGroupFlags(uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      int            getContentByProducerId(uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
      int            getContentByRequestCounterKey(ulonglong key,T::ContentInfoList& contentInfoList);
      int            getContentBySourceId(uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);

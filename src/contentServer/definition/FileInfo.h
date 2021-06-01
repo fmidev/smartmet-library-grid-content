@@ -21,7 +21,6 @@ class FileInfo
                   FileInfo(
                       uint producerId,
                       uint generationId,
-                      uint groupFlags,
                       uchar type,
                       const std::string& filename,
                       uint sourceId);
@@ -39,15 +38,6 @@ class FileInfo
     int           compare(uint comparisonMethod,FileInfo *fileInfo);
     FileInfo*     duplicate();
     void          print(std::ostream& stream,uint level,uint optionFlags);
-
-    /*! \brief A file can belong to 32 different groups. Each bit of this attribute represents a group.
-     * The basic idea is that we can divide files into different groups according to some criteria.
-     * After that we can use this information for different purposes. For example, we can define that
-     * if a file belongs to group N then the data server X will deliver data from the current file.
-     * On the other hand, if the file belongs to group M then the data server Y takes care of the
-     * data delivery from the current file. *** At the moment, group information is not used for
-     * any purposes. *****/
-    uint          mGroupFlags;
 
     /*! \brief The producer identifier. */
     uint          mProducerId;

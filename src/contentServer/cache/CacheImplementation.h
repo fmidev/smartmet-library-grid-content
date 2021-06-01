@@ -43,6 +43,7 @@ class CacheImplementation : public ServiceInterface
     virtual void    startEventProcessing();
     virtual void    setEventListMaxLength(uint maxLength);
     virtual void    setRequestForwardEnabled(bool enabled);
+    virtual void    setDataSwapEnabled(bool enabled);
     virtual void    shutdown();
     virtual void    synchronize();
 
@@ -93,7 +94,6 @@ class CacheImplementation : public ServiceInterface
     virtual int     _addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList);
     virtual int     _deleteFileInfoById(T::SessionId sessionId,uint fileId);
     virtual int     _deleteFileInfoByName(T::SessionId sessionId,const std::string& filename);
-    virtual int     _deleteFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags);
     virtual int     _deleteFileInfoListByProducerId(T::SessionId sessionId,uint producerId);
     virtual int     _deleteFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName);
     virtual int     _deleteFileInfoListByGenerationId(T::SessionId sessionId,uint generationId);
@@ -110,7 +110,6 @@ class CacheImplementation : public ServiceInterface
     virtual int     _getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
     virtual int     _getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
     virtual int     _getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
-    virtual int     _getFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
     virtual int     _getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList);
     virtual int     _getFileInfoCount(T::SessionId sessionId,uint& count);
     virtual int     _getFileInfoCountByProducerId(T::SessionId sessionId,uint producerId,uint& count);
@@ -127,7 +126,6 @@ class CacheImplementation : public ServiceInterface
     virtual int     _deleteContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex);
     virtual int     _deleteContentListByFileId(T::SessionId sessionId,uint fileId);
     virtual int     _deleteContentListByFileName(T::SessionId sessionId,const std::string& filename);
-    virtual int     _deleteContentListByGroupFlags(T::SessionId sessionId,uint groupFlags);
     virtual int     _deleteContentListByProducerId(T::SessionId sessionId,uint producerId);
     virtual int     _deleteContentListByProducerName(T::SessionId sessionId,const std::string& producerName);
     virtual int     _deleteContentListByGenerationId(T::SessionId sessionId,uint generationId);
@@ -139,7 +137,6 @@ class CacheImplementation : public ServiceInterface
     virtual int     _getContentListByFileId(T::SessionId sessionId,uint fileId,T::ContentInfoList& contentInfoList);
     virtual int     _getContentListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::ContentInfoList& contentInfoList);
     virtual int     _getContentListByFileName(T::SessionId sessionId,const std::string& filename,T::ContentInfoList& contentInfoList);
-    virtual int     _getContentListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
     virtual int     _getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
     virtual int     _getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList);
     virtual int     _getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList);
@@ -194,12 +191,10 @@ class CacheImplementation : public ServiceInterface
     virtual void    event_fileAdded(T::EventInfo& eventInfo);
     virtual void    event_fileDeleted(T::EventInfo& eventInfo);
     virtual void    event_fileUpdated(T::EventInfo& eventInfo);
-    virtual void    event_fileListDeletedByGroupFlags(T::EventInfo& eventInfo);
     virtual void    event_fileListDeletedByProducerId(T::EventInfo& eventInfo);
     virtual void    event_fileListDeletedByGenerationId(T::EventInfo& eventInfo);
     virtual void    event_fileListDeletedBySourceId(T::EventInfo& eventInfo);
     virtual void    event_contentListDeletedByFileId(T::EventInfo& eventInfo);
-    virtual void    event_contentListDeletedByGroupFlags(T::EventInfo& eventInfo);
     virtual void    event_contentListDeletedByProducerId(T::EventInfo& eventInfo);
     virtual void    event_contentListDeletedByGenerationId(T::EventInfo& eventInfo);
     virtual void    event_contentListDeletedBySourceId(T::EventInfo& eventInfo);
@@ -246,6 +241,7 @@ class CacheImplementation : public ServiceInterface
     ContentTimeCache       mContentTimeCache;
     SearchStructure_sptr   mSearchStructureSptr;
     time_t                 mDataSwapTime;
+    bool                   mDataSwapEnabled;
 };
 
 

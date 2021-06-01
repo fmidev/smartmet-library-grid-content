@@ -137,7 +137,7 @@ void VirtualContentDefinitionFile::getContentDefinitions(T::ContentInfo& content
     {
       char tmp[1000];
       char *p = tmp;
-      p += sprintf(p,"%s:%s:%d:%d:%d",contentInfo.getFmiParameterName().c_str(),producerName.c_str(),contentInfo.mGeometryId,
+      p += sprintf(p,"%s:%s:%d:%d:%d",contentInfo.getFmiParameterName(),producerName.c_str(),contentInfo.mGeometryId,
           contentInfo.mFmiParameterLevelId,contentInfo.mParameterLevel);
 
       std::string s1 = toLowerString(tmp);

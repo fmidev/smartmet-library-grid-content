@@ -1144,15 +1144,7 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
             break;
 
           case T::ParamKeyTypeValue::NEWBASE_NAME:
-            sourceParamKey = contentInfo->mNewbaseParameterName;
-            break;
-
-          case T::ParamKeyTypeValue::CDM_ID:
-            sourceParamKey = contentInfo->mCdmParameterId;
-            break;
-
-          case T::ParamKeyTypeValue::CDM_NAME:
-            sourceParamKey = contentInfo->mCdmParameterName;
+            sourceParamKey = contentInfo->getNewbaseParameterName();
             break;
 
           default:
@@ -1179,15 +1171,7 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
             break;
 
           case T::ParamKeyTypeValue::NEWBASE_NAME:
-            targetParamKey = contentInfo->mNewbaseParameterName;
-            break;
-
-          case T::ParamKeyTypeValue::CDM_ID:
-            targetParamKey = contentInfo->mCdmParameterId;
-            break;
-
-          case T::ParamKeyTypeValue::CDM_NAME:
-            targetParamKey = contentInfo->mCdmParameterName;
+            targetParamKey = contentInfo->getNewbaseParameterName();
             break;
 
           default:
@@ -1303,15 +1287,7 @@ int RedisImplementation::_getProducerParameterListByProducerId(T::SessionId sess
             break;
 
           case T::ParamKeyTypeValue::NEWBASE_NAME:
-            sourceParamKey = contentInfo->mNewbaseParameterName;
-            break;
-
-          case T::ParamKeyTypeValue::CDM_ID:
-            sourceParamKey = contentInfo->mCdmParameterId;
-            break;
-
-          case T::ParamKeyTypeValue::CDM_NAME:
-            sourceParamKey = contentInfo->mCdmParameterName;
+            sourceParamKey = contentInfo->getNewbaseParameterName();
             break;
 
           default:
@@ -1338,15 +1314,7 @@ int RedisImplementation::_getProducerParameterListByProducerId(T::SessionId sess
             break;
 
           case T::ParamKeyTypeValue::NEWBASE_NAME:
-            targetParamKey = contentInfo->mNewbaseParameterName;
-            break;
-
-          case T::ParamKeyTypeValue::CDM_ID:
-            targetParamKey = contentInfo->mCdmParameterId;
-            break;
-
-          case T::ParamKeyTypeValue::CDM_NAME:
-            targetParamKey = contentInfo->mCdmParameterName;
+            targetParamKey = contentInfo->getNewbaseParameterName();
             break;
 
           default:
@@ -2292,7 +2260,6 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
         info->mFileType = fileInfo.mFileType;
         info->mProducerId = fileInfo.mProducerId;
         info->mGenerationId = fileInfo.mGenerationId;
-        info->mGroupFlags = fileInfo.mGroupFlags;
         info->mFlags = info->mFlags;
 
         // ### Creating a key for the content.
@@ -2436,7 +2403,6 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
           info->mFileType = ff->mFileInfo.mFileType;
           info->mProducerId = ff->mFileInfo.mProducerId;
           info->mGenerationId = ff->mFileInfo.mGenerationId;
-          info->mGroupFlags = ff->mFileInfo.mGroupFlags;
           info->mFlags = info->mFlags;
 
           T::ContentInfo contentInfo;
@@ -2457,7 +2423,7 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
             freeReplyObject(reply);
 
             if (fileId > 0  &&  (requestFlags & 0x00000001) == 0)
-              addEvent(EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,info->mServerFlags);
+              addEvent(EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,0);
           }
         }
       }
@@ -2557,37 +2523,6 @@ int RedisImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std:
       else
         addEvent(EventType::FILE_DELETED,fileId,0,0,0);
     }
-
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int RedisImplementation::_deleteFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags)
-{
-  FUNCTION_TRACE
-  try
-  {
-    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-
-    int result = deleteFileListByGroupFlags(groupFlags,true);
-
-    if (result == Result::OK)
-      addEvent(EventType::FILE_LIST_DELETED_BY_GROUP_FLAGS,groupFlags,0,0,0);
 
     return result;
   }
@@ -3153,33 +3088,6 @@ int RedisImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
 
 
 
-int RedisImplementation::_getFileInfoListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    fileInfoList.clear();
-
-    return getFileListByGroupFlags(groupFlags,startFileId,maxRecords,fileInfoList);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int RedisImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -3639,7 +3547,7 @@ int RedisImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
 
     freeReplyObject(reply);
 
-    addEvent(EventType::CONTENT_ADDED,contentInfo.mFileId,contentInfo.mMessageIndex,0,contentInfo.mServerFlags);
+    addEvent(EventType::CONTENT_ADDED,contentInfo.mFileId,contentInfo.mMessageIndex,0,0);
 
     return Result::OK;
   }
@@ -3711,7 +3619,7 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
 
         freeReplyObject(reply);
 
-        addEvent(EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,info->mServerFlags);
+        addEvent(EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,0);
       }
     }
 
@@ -3819,37 +3727,6 @@ int RedisImplementation::_deleteContentListByFileName(T::SessionId sessionId,con
 
     if (result == Result::OK)
       addEvent(EventType::CONTENT_LIST_DELETED_BY_FILE_ID,fileId,0,0,0);
-
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int RedisImplementation::_deleteContentListByGroupFlags(T::SessionId sessionId,uint groupFlags)
-{
-  FUNCTION_TRACE
-  try
-  {
-    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-
-    int result = deleteContentByGroupFlags(groupFlags);
-
-    if (result == Result::OK)
-      addEvent(EventType::CONTENT_LIST_DELETED_BY_GROUP_FLAGS,groupFlags,0,0,0);
 
     return result;
   }
@@ -4165,33 +4042,6 @@ int RedisImplementation::_getContentListByFileName(T::SessionId sessionId,const 
     contentInfoList.clear();
 
     return getContentByFileId(fileId,contentInfoList);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int RedisImplementation::_getContentListByGroupFlags(T::SessionId sessionId,uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    contentInfoList.clear();
-
-    return getContentByGroupFlags(groupFlags,startFileId,startMessageIndex,maxRecords,contentInfoList);
   }
   catch (...)
   {
@@ -5909,39 +5759,6 @@ int RedisImplementation::deleteFileById(uint fileId,bool deleteContent)
 
 
 
-int RedisImplementation::deleteFileListByGroupFlags(uint groupFlags,bool deleteContent)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    if (deleteContent)
-      deleteContentByGroupFlags(groupFlags);
-
-    T::FileInfoList fileInfoList;
-    getFileListByGroupFlags(groupFlags,0,0xFFFFFFFF,fileInfoList);
-    uint len = fileInfoList.getLength();
-    for (uint t=0; t<len; t++)
-    {
-      T::FileInfo *fileInfo = fileInfoList.getFileInfoByIndex(t);
-      deleteFilename(fileInfo->mName);
-      deleteFileById(fileInfo->mFileId,false);
-    }
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int RedisImplementation::deleteFileListByGenerationId(uint generationId,bool deleteContent)
 {
   FUNCTION_TRACE
@@ -6207,80 +6024,6 @@ int RedisImplementation::getFileListByGenerationIdList(std::set<uint>& generatio
           {
             startFileId = fileInfo->mFileId + 1;
             if (generationIdList.find(fileInfo->mGenerationId) != generationIdList.end())
-              fileInfoList.addFileInfo(fileInfo);
-            else
-              delete fileInfo;
-
-            if (fileInfoList.getLength() == maxRecords)
-            {
-              freeReplyObject(reply);
-              return Result::OK;
-            }
-          }
-          else
-          {
-            delete fileInfo;
-          }
-        }
-        freeReplyObject(reply);
-      }
-      else
-      {
-        freeReplyObject(reply);
-        return Result::OK;
-      }
-    }
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int RedisImplementation::getFileListByGroupFlags(uint groupFlags,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    fileInfoList.clear();
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    uint prevFileId = 0xFFFFFFFF;
-
-    while (startFileId != prevFileId)
-    {
-      prevFileId = startFileId;
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %u %u LIMIT 0 10000",mTablePrefix.c_str(),startFileId,0xFFFFFFFF));
-      if (reply == nullptr)
-      {
-        closeConnection();
-        return Result::PERMANENT_STORAGE_ERROR;
-      }
-
-      if (reply->type == REDIS_REPLY_ARRAY)
-      {
-        if (reply->elements == 0)
-        {
-          freeReplyObject(reply);
-          return Result::OK;
-        }
-
-        for (uint t = 0; t < reply->elements; t++)
-        {
-          T::FileInfo *fileInfo = new T::FileInfo();
-          fileInfo->setCsv(reply->element[t]->str);
-
-          if (fileInfo->mFileId >= startFileId)
-          {
-            startFileId = fileInfo->mFileId + 1;
-            if ((fileInfo->mGroupFlags & groupFlags) != 0)
               fileInfoList.addFileInfo(fileInfo);
             else
               delete fileInfo;
@@ -6784,35 +6527,6 @@ int RedisImplementation::deleteContentByGenerationIdList(std::set<uint>& generat
 
 
 
-int RedisImplementation::deleteContentByGroupFlags(uint groupFlags)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    T::ContentInfoList contentInfoList;
-    getContentByGroupFlags(groupFlags,0,0,0xFFFFFFFF,contentInfoList);
-    uint len = contentInfoList.getLength();
-    for (uint t=0; t<len; t++)
-    {
-      T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
-      deleteContent(contentInfo->mFileId,contentInfo->mMessageIndex);
-    }
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int RedisImplementation::deleteContentBySourceId(uint sourceId)
 {
   FUNCTION_TRACE
@@ -7038,7 +6752,7 @@ int RedisImplementation::getGenerationTimeAndGeometryList(std::set<std::string>&
           contentInfo.setCsv(reply->element[t]->str);
 
           char st[200];
-          sprintf(st,"%u;%u;%u;%d;%d;%s;%ld;%ld;",contentInfo.mSourceId,contentInfo.mGenerationId,contentInfo.mGeometryId,contentInfo.mForecastType,contentInfo.mForecastNumber,contentInfo.mForecastTime.c_str(),contentInfo.mModificationTime,contentInfo.mDeletionTime);
+          sprintf(st,"%u;%u;%u;%d;%d;%s;%ld;%ld;",contentInfo.mSourceId,contentInfo.mGenerationId,contentInfo.mGeometryId,contentInfo.mForecastType,contentInfo.mForecastNumber,contentInfo.getForecastTime(),contentInfo.mModificationTime,contentInfo.mDeletionTime);
           std::string str = st;
 
           if (list.find(str) == list.end())
@@ -7190,85 +6904,6 @@ int RedisImplementation::getContentByGenerationIdList(std::set<uint>& generation
             startMessageIndex = contentInfo->mMessageIndex + 1;
 
             if (generationIdList.find(contentInfo->mGenerationId) != generationIdList.end())
-              contentInfoList.addContentInfo(contentInfo);
-            else
-              delete contentInfo;
-
-            if (contentInfoList.getLength() == maxRecords)
-            {
-              freeReplyObject(reply);
-              return Result::OK;
-            }
-          }
-          else
-          {
-            delete contentInfo;
-          }
-        }
-        freeReplyObject(reply);
-      }
-      else
-      {
-        freeReplyObject(reply);
-        return Result::OK;
-      }
-      startId = getContentKey(startFileId,startMessageIndex);
-    }
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int RedisImplementation::getContentByGroupFlags(uint groupFlags,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    contentInfoList.clear();
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    unsigned long long startId = getContentKey(startFileId,startMessageIndex);
-    unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
-
-    while (startId != prevStartId)
-    {
-      prevStartId = startId;
-
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF));
-      if (reply == nullptr)
-      {
-        closeConnection();
-        return Result::PERMANENT_STORAGE_ERROR;
-      }
-
-      if (reply->elements == 0)
-      {
-        freeReplyObject(reply);
-        return Result::OK;
-      }
-
-      if (reply->type == REDIS_REPLY_ARRAY)
-      {
-        for (uint t = 0; t < reply->elements; t++)
-        {
-          T::ContentInfo *contentInfo = new T::ContentInfo();
-          contentInfo->setCsv(reply->element[t]->str);
-
-          if (contentInfo->mFileId > startFileId  ||  (contentInfo->mFileId == startFileId   &&  contentInfo->mMessageIndex >= startMessageIndex))
-          {
-            startFileId = contentInfo->mFileId;
-            startMessageIndex = contentInfo->mMessageIndex + 1;
-
-            if ((contentInfo->mGroupFlags & groupFlags) != 0)
               contentInfoList.addContentInfo(contentInfo);
             else
               delete contentInfo;
@@ -7778,7 +7413,7 @@ int RedisImplementation::getContentByForecastTimeList(std::vector<T::ForecastTim
         T::ContentInfo *contentInfo = new T::ContentInfo();
         contentInfo->setCsv(reply->element[t]->str);
 
-        sprintf(tmp,"%d;%d;%d;%d;%s",contentInfo->mGenerationId,contentInfo->mGeometryId,contentInfo->mForecastType,contentInfo->mForecastNumber,contentInfo->mForecastTime.c_str());
+        sprintf(tmp,"%d;%d;%d;%d;%s",contentInfo->mGenerationId,contentInfo->mGeometryId,contentInfo->mForecastType,contentInfo->mForecastNumber,contentInfo->getForecastTime());
         if (searchList.find(tmp) != searchList.end())
           contentInfoList.addContentInfo(contentInfo);
         else

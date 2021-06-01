@@ -508,7 +508,6 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
       return Result::DATA_NOT_FOUND;
 
     data.mServerId = mServerId;
-    data.mGroupFlags = gridFile->getGroupFlags();
     data.mProducerId = gridFile->getProducerId();
     data.mGenerationId = gridFile->getGenerationId();
     data.mFileId = gridFile->getFileId();
@@ -524,13 +523,9 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
     data.mGrib1ParameterLevelId = message->getGrib1ParameterLevelId();
     data.mGrib2ParameterLevelId = message->getGrib2ParameterLevelId();
     data.mGribParameterName = message->getGribParameterName();
-    data.mGribParameterUnits = message->getGribParameterUnits();
     data.mFmiParameterId = message->getFmiParameterId();
     data.mFmiParameterLevelId = message->getFmiParameterLevelId();
     data.mFmiParameterName = message->getFmiParameterName();
-    data.mFmiParameterUnits = message->getFmiParameterUnits();
-    data.mCdmParameterId = message->getCdmParameterId();
-    data.mCdmParameterName = message->getCdmParameterName();
     data.mNewbaseParameterId = message->getNewbaseParameterId();
     data.mNewbaseParameterName = message->getNewbaseParameterName();
     data.mParameterLevel = message->getGridParameterLevel();
@@ -4149,7 +4144,6 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
       gridFile->setPointCacheEnabled(mPointCacheEnabled);
 
       gridFile->setFileId(fileInfo.mFileId);
-      gridFile->setGroupFlags(fileInfo.mGroupFlags);
       gridFile->setProducerId(fileInfo.mProducerId);
       gridFile->setGenerationId(fileInfo.mGenerationId);
       gridFile->setSourceId(fileInfo.mSourceId);
@@ -4181,7 +4175,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
         mInfo.mProducerId = info->mProducerId;
         mInfo.mGenerationId = info->mGenerationId;
         mInfo.mFmiParameterId = info->mFmiParameterId;
-        mInfo.mFmiParameterName = info->getFmiParameterName();
+        mInfo.mFmiParameterName = stringFactory.create(info->getFmiParameterName());
         mInfo.mFmiParameterLevelId = info->mFmiParameterLevelId;
         mInfo.mParameterLevel = info->mParameterLevel;
         mInfo.mForecastType = info->mForecastType;
@@ -4193,7 +4187,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
         if (mContentPreloadEnabled)
         {
           char tmp[200];
-          sprintf(tmp,"%u;%s;%u;1;%u;%05u;%d;%d;1",info->mProducerId,info->getFmiParameterName().c_str(),info->mGeometryId,info->mFmiParameterLevelId,info->mParameterLevel,info->mForecastType,info->mForecastNumber);
+          sprintf(tmp,"%u;%s;%u;1;%u;%05u;%d;%d;1",info->mProducerId,info->getFmiParameterName(),info->mGeometryId,info->mFmiParameterLevelId,info->mParameterLevel,info->mForecastType,info->mForecastNumber);
           if (mPreloadDefList.find(toLowerString(std::string(tmp))) != mPreloadDefList.end())
             mPreloadList.emplace_back(std::pair<uint,uint>(info->mFileId,info->mMessageIndex));
         }
@@ -4664,23 +4658,6 @@ void ServiceImplementation::event_fileUpdated(T::EventInfo& eventInfo)
 
 
 
-void ServiceImplementation::event_fileListDeletedByGroupFlags(T::EventInfo& eventInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    mGridFileManager.deleteFilesByGroupFlags(eventInfo.mId1);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 void ServiceImplementation::event_fileListDeletedByProducerId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -4734,22 +4711,6 @@ void ServiceImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventI
 
 
 void ServiceImplementation::event_contentListDeletedByFileId(T::EventInfo& eventInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ServiceImplementation::event_contentListDeletedByGroupFlags(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
   try
@@ -4841,7 +4802,7 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
         mInfo.mProducerId = contentInfo.mProducerId;
         mInfo.mGenerationId = contentInfo.mGenerationId;
         mInfo.mFmiParameterId = contentInfo.mFmiParameterId;
-        mInfo.mFmiParameterName = contentInfo.getFmiParameterName();
+        mInfo.mFmiParameterName = stringFactory.create(contentInfo.getFmiParameterName());
         mInfo.mFmiParameterLevelId = contentInfo.mFmiParameterLevelId;
         mInfo.mParameterLevel = contentInfo.mParameterLevel;
         mInfo.mForecastType = contentInfo.mForecastType;
@@ -4853,7 +4814,7 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
         if (mContentPreloadEnabled)
         {
           char tmp[200];
-          sprintf(tmp,"%u;%s;%u;1;%u;%05u;%d;%d;1",contentInfo.mProducerId,contentInfo.getFmiParameterName().c_str(),contentInfo.mGenerationId,contentInfo.mFmiParameterLevelId,contentInfo.mParameterLevel,contentInfo.mForecastType,contentInfo.mForecastNumber);
+          sprintf(tmp,"%u;%s;%u;1;%u;%05u;%d;%d;1",contentInfo.mProducerId,contentInfo.getFmiParameterName(),contentInfo.mGenerationId,contentInfo.mFmiParameterLevelId,contentInfo.mParameterLevel,contentInfo.mForecastType,contentInfo.mForecastNumber);
           if (mPreloadDefList.find(toLowerString(std::string(tmp))) != mPreloadDefList.end())
             mPreloadList.emplace_back(std::pair<uint,uint>(contentInfo.mFileId,contentInfo.mMessageIndex));
         }
@@ -5023,10 +4984,6 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *n
         event_fileUpdated(eventInfo);
         break;
 
-      case ContentServer::EventType::FILE_LIST_DELETED_BY_GROUP_FLAGS:
-        event_fileListDeletedByGroupFlags(eventInfo);
-        break;
-
       case ContentServer::EventType::FILE_LIST_DELETED_BY_PRODUCER_ID:
         event_fileListDeletedByProducerId(eventInfo);
         break;
@@ -5041,10 +4998,6 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *n
 
       case ContentServer::EventType::CONTENT_LIST_DELETED_BY_FILE_ID:
         event_contentListDeletedByFileId(eventInfo);
-        break;
-
-      case ContentServer::EventType::CONTENT_LIST_DELETED_BY_GROUP_FLAGS:
-        event_contentListDeletedByGroupFlags(eventInfo);
         break;
 
       case ContentServer::EventType::CONTENT_LIST_DELETED_BY_PRODUCER_ID:
@@ -5183,7 +5136,7 @@ void ServiceImplementation::processEvents()
         GRID::Message *message = gFile->getMessageByIndex(it.second);
         if (message != nullptr)
         {
-          PRINT_DATA(mDebugLog,"** PRELOAD (%lu) : %s:%u:%s:%u:%u:%d:%d\n",mPreloadList.size(),message->getForecastTime().c_str(),message->getProducerId(),message->getFmiParameterName().c_str(),message->getFmiParameterLevelId(),message->getGridParameterLevel(),message->getForecastType(),message->getForecastNumber());
+          PRINT_DATA(mDebugLog,"** PRELOAD (%lu) : %s:%u:%s:%u:%u:%d:%d\n",mPreloadList.size(),message->getForecastTime().c_str(),message->getProducerId(),message->getFmiParameterName(),message->getFmiParameterLevelId(),message->getGridParameterLevel(),message->getForecastType(),message->getForecastNumber());
 
           if (mPreloadMemoryLock)
             message->lockData();

@@ -137,12 +137,10 @@ class ServiceImplementation : public ServiceInterface
      virtual void   event_fileAdded(T::EventInfo& eventInfo,T::EventInfo *nextEventInfo);
      virtual void   event_fileDeleted(T::EventInfo& eventInfo);
      virtual void   event_fileUpdated(T::EventInfo& eventInfo);
-     virtual void   event_fileListDeletedByGroupFlags(T::EventInfo& eventInfo);
      virtual void   event_fileListDeletedByProducerId(T::EventInfo& eventInfo);
      virtual void   event_fileListDeletedByGenerationId(T::EventInfo& eventInfo);
      virtual void   event_fileListDeletedBySourceId(T::EventInfo& eventInfo);
      virtual void   event_contentListDeletedByFileId(T::EventInfo& eventInfo);
-     virtual void   event_contentListDeletedByGroupFlags(T::EventInfo& eventInfo);
      virtual void   event_contentListDeletedByProducerId(T::EventInfo& eventInfo);
      virtual void   event_contentListDeletedByGenerationId(T::EventInfo& eventInfo);
      virtual void   event_contentListDeletedBySourceId(T::EventInfo& eventInfo);

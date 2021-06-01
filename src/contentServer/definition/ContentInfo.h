@@ -15,7 +15,7 @@ class ContentInfo
                        ContentInfo();
                        ContentInfo(const ContentInfo& contentInfo);
                        ContentInfo(const char *csv);
-    virtual            ~ContentInfo();
+                       ~ContentInfo();
 
     ContentInfo&       operator=(const ContentInfo& contentInfo);
 
@@ -23,9 +23,18 @@ class ContentInfo
     std::string        getCsv();
     std::string        getCsvHeader();
     ulonglong          getRequestCounterKey();
-    const std::string& getFmiParameterName();
+
+    char*              getForecastTime();
+    void               setForecastTime(const char *ftime);
+    void               setForecastTime(const std::string& ftime);
+
+    char*              getFmiParameterName();
     void               setFmiParameterName(const char *name);
     void               setFmiParameterName(const std::string& name);
+
+    char*              getNewbaseParameterName();
+    void               setNewbaseParameterName(const char *name);
+    void               setNewbaseParameterName(const std::string& name);
 
     void               setCsv(const char *csv);
     void               setCsv(const std::string& csv);
@@ -34,39 +43,43 @@ class ContentInfo
     void               print(std::ostream& stream,uint level,uint optionFlags);
 
     uint               mFileId;
-    uchar              mFileType;
     uint               mMessageIndex;
     ulonglong          mFilePosition;
+
     uint               mMessageSize;
     uint               mProducerId;
+
     uint               mGenerationId;
-    uint               mGroupFlags;
-    std::string        mForecastTime;
-    time_t             mForecastTimeUTC;
-    T::ParamId         mFmiParameterId;
-    T::ParamId         mGribParameterId;
-    T::ParamId         mCdmParameterId;
-    std::string        mCdmParameterName;
-    T::ParamId         mNewbaseParameterId;
-    std::string        mNewbaseParameterName;
+    T::FmiParamId      mFmiParameterId;
+
+    T::NewbaseParamId  mNewbaseParameterId;
+    T::GribParamId     mGribParameterId;
+
+    uchar              mFileType;
     T::ParamLevelId    mFmiParameterLevelId;
     T::ParamLevelId    mGrib1ParameterLevelId;
     T::ParamLevelId    mGrib2ParameterLevelId;
     T::ParamLevel      mParameterLevel;
-    std::string        mFmiParameterUnits;
-    std::string        mGribParameterUnits;
-    T::ForecastType    mForecastType;
-    T::ForecastNumber  mForecastNumber;
-    unsigned long long mServerFlags;
-    uint               mFlags;
-    uint               mSourceId;
-    T::GeometryId      mGeometryId;
+
+    time_t             mForecastTimeUTC;
     time_t             mModificationTime;
     time_t             mDeletionTime;
 
+    T::ForecastType    mForecastType;
+    T::ForecastNumber  mForecastNumber;
+    T::GeometryId      mGeometryId;
+    ushort             mFlags;
+    ushort             mSourceId;
+
   protected:
 
-    std::string        mFmiParameterName;
+    //char*              mFmiParameterName;
+    //char*              mNewbaseParameterName;
+    //char*              mForecastTime;
+
+    uint              mFmiParameterName;
+    uint              mNewbaseParameterName;
+    uint              mForecastTime;
 
   public:
 
@@ -80,8 +93,6 @@ class ContentInfo
         static const uint gribId_producer_generation_level_time           = 4;
         static const uint newbaseId_producer_generation_level_time        = 5;
         static const uint newbaseName_producer_generation_level_time      = 6;
-        static const uint cdmId_producer_generation_level_time            = 7;
-        static const uint cdmName_producer_generation_level_time          = 8;
         static const uint starttime_file_message                          = 9;
         static const uint fmiName_starttime_level_file_message            = 10;
         static const uint fmiId_fmiLevelId_level_starttime_file_message   = 11;
@@ -96,10 +107,10 @@ class ContentInfo
     class Flags
     {
       public:
-        static const uint UnusedFlag              = 0x00000001;
-        static const uint VirtualContent          = 0x00000002;
-        static const uint PreloadRequired         = 0x00000004;
-        static const uint DeletedContent          = 0x00010000;
+        static const uint UnusedFlag              = 0x0001;
+        static const uint VirtualContent          = 0x0002;
+        static const uint PreloadRequired         = 0x0004;
+        static const uint DeletedContent          = 0x1000;
     };
 };
 

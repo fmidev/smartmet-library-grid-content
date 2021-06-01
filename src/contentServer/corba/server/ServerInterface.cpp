@@ -1176,28 +1176,6 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteFileInfoListByGroupFlags(::CORBA::LongLong sessionId, ::CORBA::ULong groupFlags)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mService == nullptr)
-      throw Fmi::Exception(BCP,"Service not initialized!");
-
-    return mService->deleteFileInfoListByGroupFlags(sessionId,groupFlags);
-  }
-  catch (...)
-  {
-    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
-
-
-
-
 ::CORBA::Long ServerInterface::deleteFileInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId)
 {
   FUNCTION_TRACE
@@ -1636,37 +1614,6 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getFileInfoListByGroupFlags(::CORBA::LongLong sessionId, ::CORBA::ULong groupFlags, ::CORBA::ULong startFileId, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::FileInfoList sFileInfoList;
-    ContentServer::Corba::CorbaFileInfoList *corbaFileInfoList = new ContentServer::Corba::CorbaFileInfoList();
-    fileInfoList = corbaFileInfoList;
-
-    if (mService == nullptr)
-      throw Fmi::Exception(BCP,"Service not initialized!");
-
-    int result = mService->getFileInfoListByGroupFlags(sessionId,groupFlags,startFileId,maxRecords,sFileInfoList);
-
-    if (result == 0)
-      ContentServer::Corba::Converter::convert(sFileInfoList,*corbaFileInfoList);
-
-    return result;
-  }
-  catch (...)
-  {
-    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
-
-
-
-
 ::CORBA::Long ServerInterface::getFileInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, ::CORBA::ULong startFileId, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
 {
   FUNCTION_TRACE
@@ -2062,28 +2009,6 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteContentListByGroupFlags(::CORBA::LongLong sessionId, ::CORBA::ULong groupFlags)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mService == nullptr)
-      throw Fmi::Exception(BCP,"Service not initialized!");
-
-    return mService->deleteContentListByGroupFlags(sessionId,groupFlags);
-  }
-  catch (...)
-  {
-    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
-
-
-
-
 ::CORBA::Long ServerInterface::deleteContentListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId)
 {
   FUNCTION_TRACE
@@ -2334,37 +2259,6 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
     int result = mService->getContentListByFileName(sessionId,filename,sContentInfoList);
-
-    if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
-
-    return result;
-  }
-  catch (...)
-  {
-    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
-
-
-
-
-::CORBA::Long ServerInterface::getContentListByGroupFlags(::CORBA::LongLong sessionId, ::CORBA::ULong groupFlags, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::ULong maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
-    contentInfoList = corbaContentInfoList;
-
-    if (mService == nullptr)
-      throw Fmi::Exception(BCP,"Service not initialized!");
-
-    int result = mService->getContentListByGroupFlags(sessionId,groupFlags,startFileId,startMessageIndex,maxRecords,sContentInfoList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
