@@ -2424,7 +2424,7 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint producerId,uint 
             else
             if (info->mGribParameterId > 0)
             {
-              std::string id = "GRIB-" + info->mGribParameterId;
+              std::string id = "GRIB-" + std::to_string(info->mGribParameterId);
               paramKeyList.insert(id);
             }
             break;
