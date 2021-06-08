@@ -27,8 +27,9 @@ class GenerationInfoList
     GenerationInfo*     addGenerationInfo(GenerationInfo *generationInfo);
     void                clear();
     bool                deleteGenerationInfoById(uint generationId);
-    void                deleteGenerationInfoListByProducerId(uint producerId);
-    void                deleteGenerationInfoListBySourceId(uint producerId);
+    uint                deleteGenerationInfoListByProducerId(uint producerId);
+    uint                deleteGenerationInfoListBySourceId(uint producerId);
+    uint                deleteMarkedGenerations();
     void                getAnalysisTimes(std::vector<std::string>& analysisTimes,bool reverseOrder);
     int                 getClosestIndex(uint comparisonMethod,GenerationInfo& generationInfo);
     int                 getClosestIndexNoLock(uint comparisonMethod,GenerationInfo& generationInfo);
@@ -49,12 +50,18 @@ class GenerationInfoList
     GenerationInfo*     getLastGenerationInfoByAnalysisTime();
     GenerationInfo*     getLastGenerationInfoByProducerId(uint producerId);
     GenerationInfo*     getLastGenerationInfoByProducerIdAndStatus(uint producerId,uchar generationStatus);
+    bool                getLastGenerationInfoByProducerIdAndStatus(uint producerId,uchar generationStatus,T::GenerationInfo& generationInfo);
     uint                getLength();
     std::size_t         getHash();
     std::size_t         getHashByProducerId(uint producerId);
     ModificationLock*   getModificationLockPtr();
     bool                getReleaseObjects();
     uint                getSize() const;
+    uint                markDeleted();
+    uint                markDeletedById(uint generationId);
+    uint                markDeletedByProducerId(uint producerId);
+    uint                markDeletedBySourceId(uint producerId);
+
     void                setLockingEnabled(bool lockingEnabled);
     void                setModificationLockPtr(ModificationLock* modificationLockPtr);
     void                setReleaseObjects(bool releaseObjects);

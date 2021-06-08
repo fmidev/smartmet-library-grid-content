@@ -62,7 +62,12 @@ class FileInfoList
     bool           getReleaseObjects();
     void           increaseSize(uint newSize);
     void           increaseSizeNoLock(uint newSize);
-    void           markFileInfoDeletedById(uint fileId);
+    uint           markDeleted();
+    uint           markDeletedById(uint fileId);
+    uint           markDeletedByProducerId(uint producerId);
+    uint           markDeletedByGenerationId(uint generationId);
+    uint           markDeletedBySourceId(uint sourceId);
+    uint           markDeletedByVirtualFlag();
     void           setLockingEnabled(bool lockingEnabled);
     void           setComparisonMethod(uint comparisonMethod);
     void           setReleaseObjects(bool releaseObjects);

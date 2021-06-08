@@ -36,6 +36,16 @@ class ProducerInfo
     uint            mFlags;
     uint            mSourceId;
     ulonglong       mHash;
+
+
+  public:
+
+    class Flags
+    {
+      public:
+        static const uint DeletedProducer  = 4;
+    };
+
 };
 
 

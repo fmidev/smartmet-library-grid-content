@@ -87,15 +87,19 @@ FileInfoList::FileInfoList(FileInfoList& fileInfoList)
     mSize = fileInfoList.mSize;
     mLength = fileInfoList.mLength;
     mArray = new FileInfoPtr[mSize];
+    uint p = 0;
     for (uint t=0; t<mSize; t++)
     {
+      mArray[t] = nullptr;
       FileInfo *info = fileInfoList.mArray[t];
       if (info != nullptr)
-        mArray[t] = info->duplicate();
-      else
-        mArray[t] = nullptr;
+      {
+        mArray[p] = info->duplicate();
+        p++;
+      }
     }
     mComparisonMethod = fileInfoList.mComparisonMethod;
+    mLength = p;
 
     if (fileInfoList.getModificationLockPtr() != mModificationLockPtr)
       fileInfoList.unlock();
@@ -158,22 +162,30 @@ FileInfoList& FileInfoList::operator=(FileInfoList& fileInfoList)
     if (fileInfoList.getModificationLockPtr() != mModificationLockPtr)
       fileInfoList.lock();
 
+    uint p = 0;
     mSize = fileInfoList.mSize;
     mLength = fileInfoList.mLength;
     mArray = new FileInfoPtr[mSize];
     for (uint t=0; t<mSize; t++)
     {
+      mArray[t] = nullptr;
       FileInfo *info = fileInfoList.mArray[t];
-      if (info != nullptr  &&  mReleaseObjects)
-        mArray[t] = info->duplicate();
-      else
-        mArray[t] = info;
+      if (info != nullptr  && (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
+      {
+        if (mReleaseObjects)
+          mArray[p] = info->duplicate();
+        else
+          mArray[p] = info;
+
+        p++;
+      }
     }
     mComparisonMethod = fileInfoList.mComparisonMethod;
 
     if (fileInfoList.getModificationLockPtr() != mModificationLockPtr)
       fileInfoList.unlock();
 
+    mLength = p;
     return *this;
   }
   catch (...)
@@ -284,17 +296,19 @@ void FileInfoList::addFileInfoListNoLock(FileInfoList& fileInfoList)
       return;
     }
 
-    uint newSize = len1 + len2;
-    FileInfoPtr *newArray = new FileInfoPtr[newSize + 100];
+    uint newSize = len1 + len2 + 100;
+    FileInfoPtr *newArray = new FileInfoPtr[newSize];
     uint a = 0;
     uint b = 0;
 
     fileInfoList.sort(mComparisonMethod);
 
+    uint c = 0;
     for (uint t=0; t<newSize; t++)
     {
       FileInfo *fInfo1 = nullptr;
       FileInfo *fInfo2 = nullptr;
+      newArray[t] = nullptr;
 
       if (a < len1)
         fInfo1 = mArray[a];
@@ -302,42 +316,52 @@ void FileInfoList::addFileInfoListNoLock(FileInfoList& fileInfoList)
       if (b < len2)
         fInfo2 = fileInfoList.getFileInfoByIndex(b);
 
+      if (fInfo1 == nullptr  &&  fInfo2 == nullptr)
+      {
+        a++;
+        b++;
+      }
+      else
       if (fInfo1 != nullptr  &&  fInfo2 == nullptr)
       {
-        newArray[t] = fInfo1;
+        newArray[c] = fInfo1;
         a++;
+        c++;
       }
       else
       if (fInfo1 == nullptr  &&  fInfo2 != nullptr)
       {
         if (mReleaseObjects)
-          newArray[t] = fInfo2->duplicate();
+          newArray[c] = fInfo2->duplicate();
         else
-          newArray[t] = fInfo2;
+          newArray[c] = fInfo2;
         b++;
+        c++;
       }
       else
       if (fInfo1 != nullptr  &&  fInfo2 != nullptr)
       {
         if (fInfo1->compare(mComparisonMethod,fInfo2) <= 0)
         {
-          newArray[t] = fInfo1;
+          newArray[c] = fInfo1;
           a++;
+          c++;
         }
         else
         {
           if (mReleaseObjects)
-            newArray[t] = fInfo2->duplicate();
+            newArray[c] = fInfo2->duplicate();
           else
-            newArray[t] = fInfo2;
+            newArray[c] = fInfo2;
 
           b++;
+          c++;
         }
       }
     }
 
-    mSize = newSize+100;
-    mLength = newSize;
+    mSize = newSize;
+    mLength = c;
 
     delete[] mArray;
     mArray = newArray;
@@ -542,27 +566,186 @@ FileInfo* FileInfoList::getFileInfoByIdNoLock(uint fileId)
 
 
 
-void FileInfoList::markFileInfoDeletedById(uint fileId)
+uint FileInfoList::markDeletedById(uint fileId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(mModificationLockPtr);
+
+    FileInfo *info = getFileInfoByIdNoLock(fileId);
+    if (info != nullptr  &&  info->mFileId == fileId)
+    {
+      info->mFlags |= T::FileInfo::Flags::DeletedFile;
+      return 1;
+    }
+    return 0;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint FileInfoList::markDeleted()
+{
+  FUNCTION_TRACE
+  try
+  {
+   if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    uint cnt = 0;
+    AutoWriteLock lock(mModificationLockPtr);
+    for (uint t=0; t<mLength; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        info->mFlags |= T::FileInfo::Flags::DeletedFile;
+        cnt++;
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint FileInfoList::markDeletedByProducerId(uint producerId)
 {
   FUNCTION_TRACE
   try
   {
     if (mArray == nullptr ||  mLength == 0)
-      return;
+      return 0;
 
-    AutoReadLock lock(mModificationLockPtr);
-
-    FileInfo search;
-    search.mFileId = fileId;
-    int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
-    if (idx < 0  ||  C_UINT(idx) >= getLength())
-      return;
-
-    FileInfo *info = getFileInfoByIndexNoCheck(idx);
-    if (info != nullptr  &&  info->mFileId == fileId)
+    uint cnt = 0;
+    AutoWriteLock lock(mModificationLockPtr);
+    for (uint t=0; t<mLength; t++)
     {
-      info->mFlags = info->mFlags | T::FileInfo::Flags::DeletedFile;
+      FileInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info->mProducerId == producerId)
+        {
+          info->mFlags |= T::FileInfo::Flags::DeletedFile;
+          cnt++;
+        }
+      }
     }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint FileInfoList::markDeletedByGenerationId(uint generationId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    uint cnt = 0;
+    AutoWriteLock lock(mModificationLockPtr);
+    for (uint t=0; t<mLength; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info->mGenerationId == generationId)
+        {
+          info->mFlags |= T::FileInfo::Flags::DeletedFile;
+          cnt++;
+        }
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+uint FileInfoList::markDeletedBySourceId(uint sourceId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    uint cnt = 0;
+    AutoWriteLock lock(mModificationLockPtr);
+    for (uint t=0; t<mLength; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info->mSourceId == sourceId)
+        {
+          info->mFlags |= T::FileInfo::Flags::DeletedFile;
+          cnt++;
+        }
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint FileInfoList::markDeletedByVirtualFlag()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    uint cnt = 0;
+    AutoWriteLock lock(mModificationLockPtr);
+    for (uint t=0; t<mLength; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info->mFlags & T::FileInfo::Flags::VirtualContent)
+        {
+          info->mFlags |= T::FileInfo::Flags::DeletedFile;
+          cnt++;
+        }
+      }
+    }
+    return cnt;
   }
   catch (...)
   {
@@ -749,8 +932,8 @@ FileInfo* FileInfoList::getFileInfoByIndex(uint index)
     if (index > mLength)
       return nullptr;
 
-    if (mArray[index] == nullptr || (mArray[index]->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
-      return nullptr;
+    //if (mArray[index] == nullptr || (mArray[index]->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
+    //  return nullptr;
 
     return mArray[index];
   }
@@ -1402,7 +1585,7 @@ uint FileInfoList::deleteMarkedFiles()
     AutoWriteLock lock(mModificationLockPtr);
     uint count = 0;
     uint p = 0;
-    for (uint t=0; t<mLength; t++)
+    for (uint t=0; t<mSize; t++)
     {
       FileInfo *info = mArray[t];
       mArray[t] = nullptr;
@@ -1410,7 +1593,6 @@ uint FileInfoList::deleteMarkedFiles()
       {
         if (info->mFlags & T::FileInfo::Flags::DeletedFile)
         {
-          mArray[t] = nullptr;
           if (mReleaseObjects)
             delete info;
           count++;

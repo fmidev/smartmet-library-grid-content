@@ -48,6 +48,13 @@ class GenerationInfo
         const static uchar Running     = 2;   // Can be accessed, but the generation process is still active
     };
 
+    class Flags
+    {
+      public:
+        static const uint DeletedGeneration  = 4;
+    };
+
+
     class ComparisonMethod
     {
       public:

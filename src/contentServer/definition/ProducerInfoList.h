@@ -27,7 +27,8 @@ class ProducerInfoList
     void              addProducerInfo(ProducerInfo *producerInfo);
     void              clear();
     bool              deleteProducerInfoById(uint producerId);
-    void              deleteProducerInfoListBySourceId(uint sourceId);
+    uint              deleteProducerInfoListBySourceId(uint sourceId);
+    uint              deleteMarkedProducers();
     ProducerInfo*     getProducerInfoById(uint producerId);
     bool              getProducerInfoById(uint producerId,ProducerInfo& producerInfo);
     ProducerInfo*     getProducerInfoByName(const std::string& producerName);
@@ -39,6 +40,8 @@ class ProducerInfoList
     std::size_t       getHash();
     void              setLockingEnabled(bool lockingEnabled);
     void              sortByName();
+    uint              markDeletedById(uint producerId);
+    uint              markDeletedBySourceId(uint sourceId);
     void              lock();
     void              unlock();
     void              print(std::ostream& stream,uint level,uint optionFlags);

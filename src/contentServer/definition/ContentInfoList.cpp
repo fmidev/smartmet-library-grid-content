@@ -460,29 +460,29 @@ ContentInfoList& ContentInfoList::operator=(ContentInfoList& contentInfoList)
     mSize = contentInfoList.getSize();
     mLength = contentInfoList.getLength();
     mComparisonMethod = contentInfoList.mComparisonMethod;
+    uint p = 0;
     if (mSize > 0)
     {
       mArray = new ContentInfoPtr[mSize];
-
       for (uint t=0; t<mSize; t++)
       {
+        mArray[t] = nullptr;
         ContentInfo *info = contentInfoList.getContentInfoByIndexNoCheck(t);
-        if (info != nullptr)
+        if (info != nullptr && (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           if (mReleaseObjects)
-            mArray[t] = info->duplicate();
+            mArray[p] = info->duplicate();
           else
-            mArray[t] = info;
-        }
-        else
-        {
-          mArray[t] = nullptr;
+            mArray[p] = info;
+
+          p++;
         }
       }
     }
     if (contentInfoList.getModificationLockPtr() != mModificationLockPtr)
       contentInfoList.unlock();
 
+    mLength = p;
     return *this;
   }
   catch (...)
@@ -511,26 +511,25 @@ ContentInfoList& ContentInfoList::operator=(const ContentInfoList& contentInfoLi
     mSize = contentInfoList.getSize();
     mLength = contentInfoList.getLength();
     mComparisonMethod = contentInfoList.mComparisonMethod;
+    uint p = 0;
     if (mSize > 0)
     {
       mArray = new ContentInfoPtr[mSize];
-
       for (uint t=0; t<mSize; t++)
       {
         ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
-        if (info != nullptr)
+        if (info != nullptr && (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           if (mReleaseObjects)
             mArray[t] = info->duplicate();
           else
             mArray[t] = info;
-        }
-        else
-        {
-          mArray[t] = nullptr;
+
+          p++;
         }
       }
     }
+    mLength = p;
     return *this;
   }
   catch (...)
@@ -668,7 +667,7 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
 
     contentInfoList.sort(mComparisonMethod);
 
-    uint cnt = 0;
+    uint c = 0;
 
     for (uint t=0; t<newSize; t++)
     {
@@ -683,24 +682,26 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
 
       if (cInfo1 == nullptr  &&  cInfo2 == nullptr)
       {
+        a++;
+        b++;
         newArray[t] = nullptr;
       }
       else
       if (cInfo1 != nullptr  &&  cInfo2 == nullptr)
       {
-        newArray[t] = cInfo1;
-        cnt++;
+        newArray[c] = cInfo1;
+        c++;
         a++;
       }
       else
       if (cInfo1 == nullptr  &&  cInfo2 != nullptr)
       {
         if (mReleaseObjects)
-          newArray[t] = cInfo2->duplicate();
+          newArray[c] = cInfo2->duplicate();
         else
-          newArray[t] = cInfo2;
+          newArray[c] = cInfo2;
 
-        cnt++;
+        c++;
         b++;
       }
       else
@@ -708,24 +709,25 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
       {
         if (cInfo2->compare(mComparisonMethod,cInfo1) > 0)
         {
-          newArray[t] = cInfo1;
+          newArray[c] = cInfo1;
           a++;
+          c++;
         }
         else
         {
           if (mReleaseObjects)
-            newArray[t] = cInfo2->duplicate();
+            newArray[c] = cInfo2->duplicate();
           else
-            newArray[t] = cInfo2;
+            newArray[c] = cInfo2;
 
           b++;
+          c++;
         }
-        cnt++;
       }
     }
 
     mSize = newSize;
-    mLength = cnt;
+    mLength = c;
 
     delete[] mArray;
     mArray = newArray;
@@ -907,7 +909,7 @@ uint ContentInfoList::deleteMarkedContent()
 
     uint p = 0;
     uint count = 0;
-    for (uint t=0; t<mLength; t++)
+    for (uint t=0; t<mSize; t++)
     {
       ContentInfo *info = mArray[t];
       mArray[t] = nullptr;
@@ -1004,6 +1006,64 @@ uint ContentInfoList::markDeletedByFileId(uint fileId)
 
 
 
+uint ContentInfoList::markDeletedByFileIdAndMessageIndex(uint fileId,uint messageIndex)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(mModificationLockPtr);
+
+    ContentInfo *info = getContentInfoByFileIdAndMessageIndexNoLock(fileId,messageIndex);
+    if (info != nullptr)
+    {
+      info->mFlags = info->mFlags | T::ContentInfo::Flags::DeletedContent;
+      return 1;
+    }
+    return 0;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+
+uint ContentInfoList::markDeleted()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    AutoReadLock lock(mModificationLockPtr);
+
+    uint cnt = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        info->mFlags = info->mFlags | T::ContentInfo::Flags::DeletedContent;
+        cnt++;
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 uint ContentInfoList::markDeletedByGenerationId(uint generationId)
 {
   FUNCTION_TRACE
@@ -1056,6 +1116,76 @@ uint ContentInfoList::markDeletedByProducerId(uint producerId)
       if (info != nullptr)
       {
         if (info->mProducerId == producerId)
+        {
+          info->mFlags = info->mFlags | T::ContentInfo::Flags::DeletedContent;
+          cnt++;
+        }
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint ContentInfoList::markDeletedBySourceId(uint sourceId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    AutoReadLock lock(mModificationLockPtr);
+
+    uint cnt = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info->mSourceId == sourceId)
+        {
+          info->mFlags = info->mFlags | T::ContentInfo::Flags::DeletedContent;
+          cnt++;
+        }
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint ContentInfoList::markDeletedByVirtualFlag()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    AutoReadLock lock(mModificationLockPtr);
+
+    uint cnt = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info->mFlags & T::ContentInfo::Flags::VirtualContent)
         {
           info->mFlags = info->mFlags | T::ContentInfo::Flags::DeletedContent;
           cnt++;

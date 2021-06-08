@@ -48,9 +48,13 @@ class ContentInfoList
     uint                deleteContentInfoByFileIdList(std::set<uint>& fileIdList);
     uint                deleteMarkedContent();
     uint                deleteVirtualContent();
+    uint                markDeleted();
+    uint                markDeletedByVirtualFlag();
     uint                markDeletedByFileId(uint fileId);
+    uint                markDeletedByFileIdAndMessageIndex(uint fileId,uint messageIndex);
     uint                markDeletedByGenerationId(uint generationId);
     uint                markDeletedByProducerId(uint fileId);
+    uint                markDeletedBySourceId(uint sourceId);
 
     void                keepContentInfoByGeometryIdList(std::set<T::GeometryId>& geometryIdList);
     void                keepContentInfoByGeometryId(T::GeometryId geometryId);

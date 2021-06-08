@@ -43,7 +43,8 @@ class CacheImplementation : public ServiceInterface
     virtual void    startEventProcessing();
     virtual void    setEventListMaxLength(uint maxLength);
     virtual void    setRequestForwardEnabled(bool enabled);
-    virtual void    setDataSwapEnabled(bool enabled);
+    virtual void    setContentSwapEnabled(bool enabled);
+    virtual void    setContentUpdateInterval(uint intervalInSec);
     virtual void    shutdown();
     virtual void    synchronize();
 
@@ -209,7 +210,7 @@ class CacheImplementation : public ServiceInterface
     virtual void    reloadData();
     virtual void    saveData();
 
-    virtual void    swapData();
+    virtual void    updateContent();
 
     bool                   mReloadActivated;
     bool                   mShutdownRequested;
@@ -227,21 +228,25 @@ class CacheImplementation : public ServiceInterface
     pthread_t              mThread;
     ThreadLock             mEventProcessingLock;
     ModificationLock       mModificationLock;
+    ModificationLock       mSearchModificationLock;
     ServiceInterface*      mContentStorage;
     time_t                 mContentStorageStartTime;
     bool                   mSaveEnabled;
     std::string            mSaveDir;
+    uint                   mFileDeleteCounter;
+    uint                   mContentDeleteCounter;
+    uint                   mProducerDeleteCounter;
+    uint                   mGenerationDeleteCounter;
     uint                   mContentSortingFlags;
     uint                   mProducerCount;
     uint                   mGenerationCount;
     uint                   mFileCount;
     uint                   mContentCount;
-    uint                   mContentDeleteCount;
-    uint                   mFileDeleteCount;
     ContentTimeCache       mContentTimeCache;
     SearchStructure_sptr   mSearchStructureSptr;
-    time_t                 mDataSwapTime;
-    bool                   mDataSwapEnabled;
+    time_t                 mContentUpdateTime;
+    uint                   mContentUpdateInterval;
+    bool                   mContentSwapEnabled;
 };
 
 

@@ -42,7 +42,7 @@ ProducerInfoList::ProducerInfoList(ProducerInfoList& producerInfoList)
     for (uint t=0; t<sz; t++)
     {
       ProducerInfo *info = producerInfoList.getProducerInfoByIndexNoCheck(t);
-      if (info != nullptr)
+      if (info != nullptr  &&  (info->mFlags & T::ProducerInfo::Flags::DeletedProducer) == 0)
         mList.emplace_back(info->duplicate());
     }
     producerInfoList.unlock();
@@ -96,7 +96,7 @@ ProducerInfoList& ProducerInfoList::operator=(ProducerInfoList& producerInfoList
     for (uint t=0; t<sz; t++)
     {
       ProducerInfo *info = producerInfoList.getProducerInfoByIndexNoCheck(t);
-      if (info != nullptr)
+      if (info != nullptr  &&  (info->mFlags & T::ProducerInfo::Flags::DeletedProducer) == 0)
         mList.emplace_back(info->duplicate());
     }
     return *this;
@@ -116,6 +116,16 @@ void ProducerInfoList::addProducerInfo(ProducerInfo *producerInfo)
   FUNCTION_TRACE
   try
   {
+    if (producerInfo == nullptr)
+      return;
+
+    ProducerInfo pInfo;
+    if (getProducerInfoById(producerInfo->mProducerId))
+      return; // Id exists
+
+    if (getProducerInfoByName(producerInfo->mName))
+      return; // Name exists
+
     AutoWriteLock lock(&mModificationLock);
     mList.emplace_back(producerInfo);
   }
@@ -180,22 +190,108 @@ bool ProducerInfoList::deleteProducerInfoById(uint producerId)
 
 
 
-void ProducerInfoList::deleteProducerInfoListBySourceId(uint sourceId)
+uint ProducerInfoList::deleteProducerInfoListBySourceId(uint sourceId)
 {
   FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
+    uint cnt = 0;
+    int sz = getLength()-1;
+    for (int t=sz; t>0; t--)
+    {
+      ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
+      if (info != nullptr  &&  info->mSourceId == sourceId)
+      {
+        cnt++;
+        delete mList[t];
+        mList.erase(mList.begin() + t);
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint ProducerInfoList::deleteMarkedProducers()
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+    uint cnt = 0;
+    int sz = getLength()-1;
+    for (int t=sz; t>0; t--)
+    {
+      ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
+      if (info != nullptr  &&  (info->mFlags & T::ProducerInfo::Flags::DeletedProducer))
+      {
+        cnt++;
+        delete mList[t];
+        mList.erase(mList.begin() + t);
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint ProducerInfoList::markDeletedById(uint producerId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+    ProducerInfo *info = getProducerInfoById(producerId);
+    if (info != nullptr  &&  info->mProducerId == producerId)
+    {
+      info->mFlags |= T::ProducerInfo::Flags::DeletedProducer;
+      return 1;
+    }
+    return 0;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint ProducerInfoList::markDeletedBySourceId(uint sourceId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+    uint cnt = 0;
     long sz = getLength()-1;
     for (long t=sz; t>=0; t--)
     {
       ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
       if (info != nullptr  &&  info->mSourceId == sourceId)
       {
-        delete mList[t];
-        mList.erase(mList.begin() + t);
+        info->mFlags |= T::ProducerInfo::Flags::DeletedProducer;
+        cnt++;
       }
     }
+    return cnt;
   }
   catch (...)
   {
@@ -217,7 +313,7 @@ ProducerInfo* ProducerInfoList::getProducerInfoById(uint producerId)
     for (uint t=0; t<sz; t++)
     {
       ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
-      if (info != nullptr  &&  info->mProducerId == producerId)
+      if (info != nullptr  &&  info->mProducerId == producerId  &&  (info->mFlags & T::ProducerInfo::Flags::DeletedProducer) == 0)
         return info;
     }
     return nullptr;
@@ -242,7 +338,7 @@ bool ProducerInfoList::getProducerInfoById(uint producerId,ProducerInfo& produce
     for (uint t=0; t<sz; t++)
     {
       ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
-      if (info != nullptr  &&  info->mProducerId == producerId)
+      if (info != nullptr  &&  info->mProducerId == producerId  &&  (info->mFlags & T::ProducerInfo::Flags::DeletedProducer) == 0)
       {
         producerInfo = *info;
         return true;
@@ -270,7 +366,7 @@ ProducerInfo* ProducerInfoList::getProducerInfoByName(const std::string& produce
     for (uint t=0; t<sz; t++)
     {
       ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
-      if (info != nullptr  &&  strcasecmp(info->mName.c_str(),producerName.c_str()) == 0)
+      if (info != nullptr  &&  strcasecmp(info->mName.c_str(),producerName.c_str()) == 0  &&  (info->mFlags & T::ProducerInfo::Flags::DeletedProducer) == 0)
         return info;
     }
     return nullptr;
@@ -295,7 +391,7 @@ bool ProducerInfoList::getProducerInfoByName(const std::string& producerName,Pro
     for (uint t=0; t<sz; t++)
     {
       ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
-      if (info != nullptr  &&  strcasecmp(info->mName.c_str(),producerName.c_str()) == 0)
+      if (info != nullptr  &&  strcasecmp(info->mName.c_str(),producerName.c_str()) == 0  &&  (info->mFlags & T::ProducerInfo::Flags::DeletedProducer) == 0)
       {
         producerInfo = *info;
         return true;
@@ -395,7 +491,7 @@ void ProducerInfoList::getProducerInfoListBySourceId(uint sourceId,ProducerInfoL
     for (uint t=0; t<sz; t++)
     {
       ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
-      if (info != nullptr  &&  info->mSourceId == sourceId)
+      if (info != nullptr  &&  info->mSourceId == sourceId  &&  (info->mFlags & T::ProducerInfo::Flags::DeletedProducer) == 0)
       {
         producerInfoList.addProducerInfo(info->duplicate());
       }

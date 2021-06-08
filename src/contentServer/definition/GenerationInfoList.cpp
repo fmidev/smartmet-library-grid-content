@@ -119,7 +119,7 @@ GenerationInfoList::GenerationInfoList(GenerationInfoList& generationInfoList)
       for (uint t=0; t<mSize; t++)
       {
         GenerationInfo *info = generationInfoList.getGenerationInfoByIndexNoCheck(t);
-        if (info != nullptr)
+        if (info != nullptr && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
         {
           mArray[t] = info->duplicate();
         }
@@ -189,6 +189,7 @@ GenerationInfoList& GenerationInfoList::operator=(GenerationInfoList& generation
       generationInfoList.lock();
 
     mArray = nullptr;
+    uint p = 0;
     mSize = generationInfoList.getSize();
     mLength = generationInfoList.getLength();
     mComparisonMethod = generationInfoList.mComparisonMethod;
@@ -198,23 +199,23 @@ GenerationInfoList& GenerationInfoList::operator=(GenerationInfoList& generation
 
       for (uint t=0; t<mSize; t++)
       {
+        mArray[t] = nullptr;
         GenerationInfo *info = generationInfoList.getGenerationInfoByIndexNoCheck(t);
-        if (info != nullptr)
+        if (info != nullptr && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
         {
           if (mReleaseObjects)
-            mArray[t] = info->duplicate();
+            mArray[p] = info->duplicate();
           else
-            mArray[t] = info;
-        }
-        else
-        {
-          mArray[t] = nullptr;
+            mArray[p] = info;
+
+          p++;
         }
       }
     }
     if (generationInfoList.getModificationLockPtr() != mModificationLockPtr)
       generationInfoList.unlock();
 
+    mLength = p;
     return *this;
   }
   catch (...)
@@ -303,6 +304,9 @@ GenerationInfo* GenerationInfoList::addGenerationInfo(GenerationInfo *generation
   FUNCTION_TRACE
   try
   {
+    if (generationInfo == nullptr)
+      return nullptr;
+
     AutoWriteLock lock(mModificationLockPtr);
 
     if (mArray == nullptr  ||  mLength == mSize)
@@ -321,7 +325,7 @@ GenerationInfo* GenerationInfoList::addGenerationInfo(GenerationInfo *generation
 
     if (idx < C_INT(mLength)  &&  mArray[idx] != nullptr  &&   mArray[idx]->compare(mComparisonMethod,generationInfo) == 0)
     {
-      // If generation with the same id exists, we should not add the new contet, because other generationLists might point
+      // If generation with the same id exists, we should not add the new content, because other generationLists might point
       // the existing generation record;
 
       return mArray[idx];
@@ -573,16 +577,17 @@ bool GenerationInfoList::deleteGenerationInfoById(uint generationId)
 
 
 
-void GenerationInfoList::deleteGenerationInfoListByProducerId(uint producerId)
+uint GenerationInfoList::deleteGenerationInfoListByProducerId(uint producerId)
 {
   FUNCTION_TRACE
   try
   {
     if (mArray == nullptr ||  mLength == 0)
-      return;
+      return 0;
 
     AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
+    uint cnt = 0;
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
@@ -591,6 +596,7 @@ void GenerationInfoList::deleteGenerationInfoListByProducerId(uint producerId)
       {
         if (info->mProducerId == producerId)
         {
+          cnt++;
           if (mReleaseObjects)
             delete info;
         }
@@ -602,6 +608,7 @@ void GenerationInfoList::deleteGenerationInfoListByProducerId(uint producerId)
       }
     }
     mLength = p;
+    return cnt;
   }
   catch (...)
   {
@@ -609,6 +616,172 @@ void GenerationInfoList::deleteGenerationInfoListByProducerId(uint producerId)
   }
 }
 
+
+
+
+
+uint GenerationInfoList::deleteMarkedGenerations()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    AutoWriteLock lock(mModificationLockPtr);
+    uint p = 0;
+    uint cnt = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      mArray[t] = nullptr;
+      if (info != nullptr)
+      {
+        if (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration)
+        {
+          cnt++;
+          if (mReleaseObjects)
+            delete info;
+        }
+        else
+        {
+          mArray[p] = info;
+          p++;
+        }
+      }
+    }
+    mLength = p;
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint GenerationInfoList::markDeleted()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    AutoWriteLock lock(mModificationLockPtr);
+    uint cnt = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        info->mFlags |= T::GenerationInfo::Flags::DeletedGeneration;
+        cnt++;
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint GenerationInfoList::markDeletedByProducerId(uint producerId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    AutoWriteLock lock(mModificationLockPtr);
+    uint cnt = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info->mProducerId == producerId)
+        {
+          info->mFlags |= T::GenerationInfo::Flags::DeletedGeneration;
+          cnt++;
+        }
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint GenerationInfoList::markDeletedBySourceId(uint sourceId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    AutoWriteLock lock(mModificationLockPtr);
+    uint cnt = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info->mSourceId == sourceId)
+        {
+          info->mFlags |= T::GenerationInfo::Flags::DeletedGeneration;
+          cnt++;
+        }
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint GenerationInfoList::markDeletedById(uint generationId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(mModificationLockPtr);
+
+    GenerationInfo *info  = getGenerationInfoById(generationId);
+    if (info != nullptr)
+    {
+      info->mFlags |= T::GenerationInfo::Flags::DeletedGeneration;
+      return 1;
+    }
+    return 0;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
 
 
 
@@ -630,7 +803,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoById(uint generationId)
       return nullptr;
 
     GenerationInfo *info = getGenerationInfoByIndexNoCheck(idx);
-    if (info != nullptr  &&  info->mGenerationId == generationId)
+    if (info != nullptr  &&  info->mGenerationId == generationId && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
       return info;
 
     return nullptr;
@@ -662,7 +835,7 @@ bool GenerationInfoList::getGenerationInfoById(uint generationId,GenerationInfo&
       return false;
 
     GenerationInfo *info = getGenerationInfoByIndexNoCheck(idx);
-    if (info != nullptr  &&  info->mGenerationId == generationId)
+    if (info != nullptr  &&  info->mGenerationId == generationId && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
     {
       generationInfo = *info;
       return true;
@@ -680,16 +853,17 @@ bool GenerationInfoList::getGenerationInfoById(uint generationId,GenerationInfo&
 
 
 
-void GenerationInfoList::deleteGenerationInfoListBySourceId(uint sourceId)
+uint GenerationInfoList::deleteGenerationInfoListBySourceId(uint sourceId)
 {
   FUNCTION_TRACE
   try
   {
     if (mArray == nullptr ||  mLength == 0)
-      return;
+      return 0;
 
     AutoWriteLock lock(mModificationLockPtr);
     uint p = 0;
+    uint cnt = 0;
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
@@ -698,6 +872,7 @@ void GenerationInfoList::deleteGenerationInfoListBySourceId(uint sourceId)
       {
         if (info->mSourceId == sourceId)
         {
+          cnt++;
           if (mReleaseObjects)
             delete info;
         }
@@ -709,6 +884,7 @@ void GenerationInfoList::deleteGenerationInfoListBySourceId(uint sourceId)
       }
     }
     mLength = p;
+    return cnt;
   }
   catch (...)
   {
@@ -773,7 +949,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByName(const std::string& g
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr  &&  strcasecmp(info->mName.c_str(),generationName.c_str()) == 0)
+      if (info != nullptr  &&  strcasecmp(info->mName.c_str(),generationName.c_str()) == 0 && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
         return info;
     }
     return nullptr;
@@ -800,7 +976,7 @@ bool GenerationInfoList::getGenerationInfoByName(const std::string& generationNa
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr  &&  strcasecmp(info->mName.c_str(),generationName.c_str()) == 0)
+      if (info != nullptr  &&  strcasecmp(info->mName.c_str(),generationName.c_str()) == 0 && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
       {
         generationInfo = *info;
         return true;
@@ -830,7 +1006,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(const std::s
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr  &&  strcmp(info->mAnalysisTime.c_str(),analysisTime.c_str()) == 0)
+      if (info != nullptr  &&  strcmp(info->mAnalysisTime.c_str(),analysisTime.c_str()) == 0 && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
         return info;
     }
     return nullptr;
@@ -857,7 +1033,7 @@ int GenerationInfoList::getGenerationInfoIndexByAnalysisTime(const std::string& 
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr  &&  strcmp(info->mAnalysisTime.c_str(),analysisTime.c_str()) == 0)
+      if (info != nullptr  &&  strcmp(info->mAnalysisTime.c_str(),analysisTime.c_str()) == 0 && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
         return t;
 
     }
@@ -885,7 +1061,7 @@ int GenerationInfoList::getGenerationInfoIndexByGenerationId(uint generationId)
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr  &&  info->mGenerationId == generationId)
+      if (info != nullptr  &&  info->mGenerationId == generationId && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
         return t;
     }
     return -1;
@@ -931,7 +1107,7 @@ void GenerationInfoList::getGenerationInfoListByProducerId(uint producerId,Gener
       GenerationInfo *info = mArray[t];
       if (info != nullptr)
       {
-        if (info->mProducerId == producerId)
+        if (info->mProducerId == producerId && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
         {
           if (generationInfoList.getReleaseObjects())
             generationInfoList.addGenerationInfo(info->duplicate());
@@ -971,7 +1147,7 @@ std::size_t GenerationInfoList::getHash()
     for (int t=0; t<len; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr)
+      if (info != nullptr && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
       {
         boost::hash_combine(hash,info->mGenerationId);
       }
@@ -1018,7 +1194,7 @@ std::size_t GenerationInfoList::getHashByProducerId(uint producerId)
       GenerationInfo *info = mArray[t];
       if (info != nullptr)
       {
-        if (info->mProducerId == producerId)
+        if (info->mProducerId == producerId && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
         {
           boost::hash_combine(hash,info->mGenerationId);
         }
@@ -1072,7 +1248,7 @@ void GenerationInfoList::getGenerationInfoListByProducerIdAndStatus(uint produce
       GenerationInfo *info = mArray[t];
       if (info != nullptr)
       {
-        if (info->mProducerId == producerId  &&  info->mStatus == generationStatus)
+        if (info->mProducerId == producerId  &&  info->mStatus == generationStatus && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
         {
           if (generationInfoList.getReleaseObjects())
             generationInfoList.addGenerationInfo(info->duplicate());
@@ -1111,7 +1287,7 @@ void GenerationInfoList::getGenerationInfoListByAnalysisTime(const std::string& 
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr  &&  info->mAnalysisTime == analysisTime)
+      if (info != nullptr  &&  info->mAnalysisTime == analysisTime && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
       {
         if (generationInfoList.getReleaseObjects())
           generationInfoList.addGenerationInfo(info->duplicate());
@@ -1142,7 +1318,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(u
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr  &&  info->mProducerId == producerId  &&  info->mStatus == generationStatus)
+      if (info != nullptr  &&  info->mProducerId == producerId  &&  info->mStatus == generationStatus && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
         return info;
     }
     return nullptr;
@@ -1154,6 +1330,26 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(u
 }
 
 
+
+
+
+bool GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(uint producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    GenerationInfo *info = getLastGenerationInfoByProducerIdAndStatus(producerId,generationStatus);
+    if (info == nullptr)
+      return false;
+
+    generationInfo = *info;
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
 
 
 
@@ -1170,7 +1366,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByAnalysisTime()
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr)
+      if (info != nullptr && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
       {
         if (generationInfo == nullptr  ||  generationInfo->mAnalysisTime < info->mAnalysisTime)
           generationInfo = info;
@@ -1201,7 +1397,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(uint produ
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr  &&  info->mProducerId == producerId)
+      if (info != nullptr  &&  info->mProducerId == producerId && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
       {
         if (generationInfo == nullptr  ||  generationInfo->mName < info->mName)
           generationInfo = info;
@@ -1232,7 +1428,7 @@ GenerationInfo*  GenerationInfoList::getPrevGenerationInfoByProducerId(uint prod
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr  &&  info->mProducerId == producerId)
+      if (info != nullptr  &&  info->mProducerId == producerId && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
       {
         if ((generationInfo == nullptr  &&  info->mName < nextGenerationName)  ||  (generationInfo != nullptr  &&  generationInfo->mName < info->mName  &&  info->mName < nextGenerationName))
           generationInfo = info;
@@ -1264,7 +1460,7 @@ void GenerationInfoList::getGenerationInfoListBySourceId(uint sourceId,Generatio
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr  &&  info->mSourceId == sourceId)
+      if (info != nullptr  &&  info->mSourceId == sourceId && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
       {
         if (generationInfoList.getReleaseObjects())
           generationInfoList.addGenerationInfo(info->duplicate());
@@ -1366,6 +1562,7 @@ void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTime
     for (uint t=0; t<sz; t++)
     {
       GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
+      if (info != nullptr && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
       newList.insert(info->mAnalysisTime);
     }
 
@@ -1490,7 +1687,7 @@ void GenerationInfoList::writeToFile(const std::string& filename)
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr)
+      if (info != nullptr && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
         fprintf(file,"%s\n",info->getCsv().c_str());
     }
     fclose(file);
