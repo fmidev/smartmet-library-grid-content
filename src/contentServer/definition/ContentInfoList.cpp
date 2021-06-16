@@ -2448,7 +2448,7 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint producerId,uint 
             return;
         }
       }
-      if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time && info->mGenerationId != generationId)
+      if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time && info != nullptr && info->mGenerationId != generationId)
         return;
     }
   }

@@ -5012,10 +5012,13 @@ void CacheImplementation::readFileList()
       for (uint t=0; t<len; t++)
       {
         T::FileInfo *fileInfo = fileInfoList.getFileInfoByIndex(t);
-        if (fileInfo != nullptr &&  fileInfo->mFileId >= startFileId)
-          startFileId = fileInfo->mFileId + 1;
+        if (fileInfo != nullptr)
+        {
+          if (fileInfo->mFileId >= startFileId)
+            startFileId = fileInfo->mFileId + 1;
 
-        mFileInfoList.addFileInfo(fileInfo->duplicate());
+          mFileInfoList.addFileInfo(fileInfo->duplicate());
+        }
       }
     }
   }

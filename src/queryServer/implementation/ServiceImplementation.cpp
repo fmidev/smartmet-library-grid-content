@@ -6235,7 +6235,7 @@ void ServiceImplementation::getGridValues(
                 // ### Checking if the generation is going to be deleted in few minutes
 
                 T::GenerationInfo *generationInfo = cacheEntry->generationInfoList->getGenerationInfoByAnalysisTime((*analysisTimes)[g]);
-                if (generationInfo != nullptr &&  generationInfo->mDeletionTime > 0 && generationInfo->mDeletionTime < requiredAccessTime)
+                if (generationInfo == nullptr || (generationInfo != nullptr && generationInfo->mDeletionTime > 0 && generationInfo->mDeletionTime < requiredAccessTime))
                   generationValid = false;
 
                 if (generationValid)
@@ -7020,7 +7020,7 @@ void ServiceImplementation::getGridValues(
                       }
                     }
 
-                    if (gInfo != nullptr &&  gInfo->mDeletionTime > 0 && gInfo->mDeletionTime < requiredAccessTime)
+                    if (gInfo == nullptr || (gInfo != nullptr &&  gInfo->mDeletionTime > 0 && gInfo->mDeletionTime < requiredAccessTime))
                       generationValid = false;
 
                     if (generationValid)
