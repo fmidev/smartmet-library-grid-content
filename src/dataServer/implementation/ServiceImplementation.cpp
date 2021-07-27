@@ -519,11 +519,11 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
       data.mFileName = fname;
     data.mMessageIndex = messageIndex;
     data.mForecastTime = message->getForecastTime();
-    data.mGribParameterId = message->getGribParameterId();
+    data.mGribParameterId = std::to_string(message->getGribParameterId());
     data.mGrib1ParameterLevelId = message->getGrib1ParameterLevelId();
     data.mGrib2ParameterLevelId = message->getGrib2ParameterLevelId();
     data.mGribParameterName = message->getGribParameterName();
-    data.mFmiParameterId = message->getFmiParameterId();
+    data.mFmiParameterId = std::to_string(message->getFmiParameterId());
     data.mFmiParameterLevelId = message->getFmiParameterLevelId();
     data.mFmiParameterName = message->getFmiParameterName();
     data.mNewbaseParameterId = message->getNewbaseParameterId();

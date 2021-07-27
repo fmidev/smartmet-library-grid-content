@@ -952,7 +952,7 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
         switch (sourceParameterKeyType)
         {
           case T::ParamKeyTypeValue::FMI_ID:
-            sourceParamKey = contentInfo->mFmiParameterId;
+            sourceParamKey = std::to_string(contentInfo->mFmiParameterId);
             break;
 
           case T::ParamKeyTypeValue::FMI_NAME:
@@ -960,11 +960,11 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
-            sourceParamKey = contentInfo->mGribParameterId;
+            sourceParamKey = std::to_string(contentInfo->mGribParameterId);
             break;
 
           case T::ParamKeyTypeValue::NEWBASE_ID:
-            sourceParamKey = contentInfo->mNewbaseParameterId;
+            sourceParamKey = std::to_string(contentInfo->mNewbaseParameterId);
             break;
 
           case T::ParamKeyTypeValue::NEWBASE_NAME:
@@ -979,7 +979,7 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
         switch (targetParameterKeyType)
         {
           case T::ParamKeyTypeValue::FMI_ID:
-            targetParamKey = contentInfo->mFmiParameterId;
+            targetParamKey = std::to_string(contentInfo->mFmiParameterId);
             break;
 
           case T::ParamKeyTypeValue::FMI_NAME:
@@ -987,11 +987,11 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
-            targetParamKey = contentInfo->mGribParameterId;
+            targetParamKey = std::to_string(contentInfo->mGribParameterId);
             break;
 
           case T::ParamKeyTypeValue::NEWBASE_ID:
-            targetParamKey = contentInfo->mNewbaseParameterId;
+            targetParamKey = std::to_string(contentInfo->mNewbaseParameterId);
             break;
 
           case T::ParamKeyTypeValue::NEWBASE_NAME:
@@ -1108,7 +1108,7 @@ int CacheImplementation::_getProducerParameterListByProducerId(T::SessionId sess
         switch (sourceParameterKeyType)
         {
           case T::ParamKeyTypeValue::FMI_ID:
-            sourceParamKey = contentInfo->mFmiParameterId;
+            sourceParamKey = std::to_string(contentInfo->mFmiParameterId);
             break;
 
           case T::ParamKeyTypeValue::FMI_NAME:
@@ -1116,11 +1116,11 @@ int CacheImplementation::_getProducerParameterListByProducerId(T::SessionId sess
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
-            sourceParamKey = contentInfo->mGribParameterId;
+            sourceParamKey = std::to_string(contentInfo->mGribParameterId);
             break;
 
           case T::ParamKeyTypeValue::NEWBASE_ID:
-            sourceParamKey = contentInfo->mNewbaseParameterId;
+            sourceParamKey = std::to_string(contentInfo->mNewbaseParameterId);
             break;
 
           case T::ParamKeyTypeValue::NEWBASE_NAME:
@@ -1135,7 +1135,7 @@ int CacheImplementation::_getProducerParameterListByProducerId(T::SessionId sess
         switch (targetParameterKeyType)
         {
           case T::ParamKeyTypeValue::FMI_ID:
-            targetParamKey = contentInfo->mFmiParameterId;
+            targetParamKey = std::to_string(contentInfo->mFmiParameterId);
             break;
 
           case T::ParamKeyTypeValue::FMI_NAME:
@@ -1143,11 +1143,11 @@ int CacheImplementation::_getProducerParameterListByProducerId(T::SessionId sess
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
-            targetParamKey = contentInfo->mGribParameterId;
+            targetParamKey = std::to_string(contentInfo->mGribParameterId);
             break;
 
           case T::ParamKeyTypeValue::NEWBASE_ID:
-            targetParamKey = contentInfo->mNewbaseParameterId;
+            targetParamKey = std::to_string(contentInfo->mNewbaseParameterId);
             break;
 
           case T::ParamKeyTypeValue::NEWBASE_NAME:

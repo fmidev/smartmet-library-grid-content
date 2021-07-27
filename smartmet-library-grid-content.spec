@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 21.6.8
+Version: 21.7.27
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -20,19 +20,19 @@ BuildRequires: lua-devel
 BuildRequires: make
 BuildRequires: omniORB-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 21.6.7
+BuildRequires: smartmet-library-gis-devel >= 21.6.18
 BuildRequires: smartmet-library-grid-files-devel >= 21.6.8
-BuildRequires: smartmet-library-macgyver-devel >= 21.5.31
-BuildRequires: smartmet-library-spine-devel >= 21.5.31
+BuildRequires: smartmet-library-macgyver-devel >= 21.7.20
+BuildRequires: smartmet-library-spine-devel >= 21.7.5
 Requires: boost169-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
-Requires: smartmet-library-gis >= 21.6.7
+Requires: smartmet-library-gis >= 21.6.18
 Requires: smartmet-library-grid-files >= 21.6.8
-Requires: smartmet-library-macgyver >= 21.5.31
-Requires: smartmet-library-spine >= 21.5.31
+Requires: smartmet-library-macgyver >= 21.7.20
+Requires: smartmet-library-spine >= 21.7.5
 Provides: %{SPECNAME}
 
 %description
@@ -65,9 +65,9 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 21.5.31
-Requires: smartmet-library-gis-devel >= 21.6.7
-Requires: smartmet-library-spine-devel >= 21.5.31
+Requires: smartmet-library-macgyver-devel >= 21.7.20
+Requires: smartmet-library-gis-devel >= 21.6.18
+Requires: smartmet-library-spine-devel >= 21.7.5
 Requires: smartmet-library-grid-files-devel >= 21.6.8
 
 %description -n %{SPECNAME}-devel
@@ -78,6 +78,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Jul 27 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.7.27-1.fmi
+- Fixed some integer to string assignments to use std::to_string
 * Tue Jun  8 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.8-1.fmi
 - Reduced memory use of data archive browsers
 * Tue Jun  1 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.1-1.fmi
