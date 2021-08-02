@@ -4,7 +4,7 @@
 
 #include <grid-files/common/ModificationLock.h>
 #include <pthread.h>
-
+#include <boost/smart_ptr/atomic_shared_ptr.hpp>
 
 
 
@@ -29,7 +29,7 @@ class SearchStructure
     T::ContentInfoList     mContentInfoList[CONTENT_LIST_COUNT];
 };
 
-typedef boost::shared_ptr<SearchStructure> SearchStructure_sptr;
+using SearchStructure_sptr = boost::atomic_shared_ptr<SearchStructure>;
 
 
 
