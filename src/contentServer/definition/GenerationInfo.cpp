@@ -267,6 +267,9 @@ int GenerationInfo::compare(uint comparisonMethod,GenerationInfo *generationInfo
           return res;
         return num_compare(mGenerationId,generationInfo->mGenerationId);
 
+      case GenerationInfo::ComparisonMethod::analysisTime:
+        return strcmp(mAnalysisTime.c_str(),generationInfo->mAnalysisTime.c_str());
+
       default:
         return num_compare(mGenerationId,generationInfo->mGenerationId);
     }

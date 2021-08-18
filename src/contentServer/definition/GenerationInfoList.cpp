@@ -74,6 +74,21 @@ int generationInfo_compare_4(const void *_val1,const void *_val2)
 
 
 
+int generationInfo_compare_5(const void *_val1,const void *_val2)
+{
+  if (_val1 != nullptr  &&  _val2 != nullptr)
+  {
+    GenerationInfoPtr *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
+    GenerationInfoPtr *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
+
+    return (*obj1)->compare(5,(*obj2));
+  }
+  return 0;
+}
+
+
+
+
 GenerationInfoList::GenerationInfoList()
 {
   FUNCTION_TRACE
@@ -994,6 +1009,49 @@ bool GenerationInfoList::getGenerationInfoByName(const std::string& generationNa
 
 
 
+GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(uint generationId,const std::string& analysisTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
+    AutoReadLock lock(mModificationLockPtr);
+
+    if (mComparisonMethod == T::GenerationInfo::ComparisonMethod::analysisTime_generationId)
+    {
+      GenerationInfo search;
+      search.mGenerationId = generationId;
+      search.mAnalysisTime = analysisTime;
+      int idx = getClosestIndexNoLock(mComparisonMethod,search);
+      if (idx >= 0  ||  C_UINT(idx) < getLength())
+      {
+        GenerationInfo *info = getGenerationInfoByIndexNoCheck(idx);
+        if (info != nullptr  &&  info->mAnalysisTime == analysisTime  && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
+          return info;
+      }
+      return nullptr;
+    }
+
+    for (uint t=0; t<mLength; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr  &&  info->mAnalysisTime ==  analysisTime && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
+        return info;
+    }
+    return nullptr;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(const std::string& analysisTime)
 {
   FUNCTION_TRACE
@@ -1003,13 +1061,72 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(const std::s
       return nullptr;
 
     AutoReadLock lock(mModificationLockPtr);
+
+    if (mComparisonMethod == T::GenerationInfo::ComparisonMethod::analysisTime)
+    {
+      GenerationInfo search;
+      search.mAnalysisTime = analysisTime;
+      int idx = getClosestIndexNoLock(T::GenerationInfo::ComparisonMethod::analysisTime,search);
+      if (idx >= 0  ||  C_UINT(idx) < getLength())
+      {
+        GenerationInfo *info = getGenerationInfoByIndexNoCheck(idx);
+        if (info != nullptr  &&  info->mAnalysisTime == analysisTime  && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
+          return info;
+      }
+      return nullptr;
+    }
+
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr  &&  strcmp(info->mAnalysisTime.c_str(),analysisTime.c_str()) == 0 && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
+      if (info != nullptr  &&  info->mAnalysisTime ==  analysisTime && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
         return info;
     }
     return nullptr;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int GenerationInfoList::getGenerationInfoIndexByAnalysisTime(uint generationId,const std::string& analysisTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return -1;
+
+    AutoReadLock lock(mModificationLockPtr);
+
+    if (mComparisonMethod == T::GenerationInfo::ComparisonMethod::analysisTime_generationId)
+    {
+      GenerationInfo search;
+      search.mGenerationId = generationId;
+      search.mAnalysisTime = analysisTime;
+      int idx = getClosestIndexNoLock(mComparisonMethod,search);
+      if (idx >= 0  ||  C_UINT(idx) < getLength())
+      {
+        GenerationInfo *info = getGenerationInfoByIndexNoCheck(idx);
+        if (info != nullptr  &&  info->mAnalysisTime == analysisTime  && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
+          return idx;
+      }
+      return -1;
+    }
+
+    for (uint t=0; t<mLength; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr  &&  info->mAnalysisTime == analysisTime && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
+        return t;
+
+    }
+    return -1;
   }
   catch (...)
   {
@@ -1030,10 +1147,25 @@ int GenerationInfoList::getGenerationInfoIndexByAnalysisTime(const std::string& 
       return -1;
 
     AutoReadLock lock(mModificationLockPtr);
+
+    if (mComparisonMethod == T::GenerationInfo::ComparisonMethod::analysisTime)
+    {
+      GenerationInfo search;
+      search.mAnalysisTime = analysisTime;
+      int idx = getClosestIndexNoLock(mComparisonMethod,search);
+      if (idx >= 0  ||  C_UINT(idx) < getLength())
+      {
+        GenerationInfo *info = getGenerationInfoByIndexNoCheck(idx);
+        if (info != nullptr  &&  info->mAnalysisTime == analysisTime  && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
+          return idx;
+      }
+      return -1;
+    }
+
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
-      if (info != nullptr  &&  strcmp(info->mAnalysisTime.c_str(),analysisTime.c_str()) == 0 && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
+      if (info != nullptr  &&  info->mAnalysisTime == analysisTime && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
         return t;
 
     }
@@ -1657,6 +1789,9 @@ void GenerationInfoList::sort(uint comparisonMethod)
       case 4:
         qsort(mArray,mLength,sizeof(GenerationInfoPtr),generationInfo_compare_4);
         break;
+      case 5:
+        qsort(mArray,mLength,sizeof(GenerationInfoPtr),generationInfo_compare_5);
+        break;
     }
   }
   catch (...)
@@ -1710,6 +1845,7 @@ void GenerationInfoList::print(std::ostream& stream,uint level,uint optionFlags)
     AutoReadLock lock(mModificationLockPtr);
 
     stream << space(level) << "GenerationInfoList\n";
+    stream << space(level) << "- mComparisonMethod  = " << mComparisonMethod << "\n";
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
