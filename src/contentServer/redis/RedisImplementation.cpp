@@ -2257,7 +2257,9 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
         // ### Making sure that content data matches the file data.
 
         info->mFileId = fileInfo.mFileId;
-        info->mFileType = fileInfo.mFileType;
+        if (info->mFileType == 0)
+          info->mFileType = fileInfo.mFileType;
+
         info->mProducerId = fileInfo.mProducerId;
         info->mGenerationId = fileInfo.mGenerationId;
         info->mFlags = info->mFlags;
@@ -2400,7 +2402,9 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
           // ### Making sure that content data matches the file data.
 
           info->mFileId = ff->mFileInfo.mFileId;
-          info->mFileType = ff->mFileInfo.mFileType;
+          if (info->mFileType == 0)
+            info->mFileType = ff->mFileInfo.mFileType;
+
           info->mProducerId = ff->mFileInfo.mProducerId;
           info->mGenerationId = ff->mFileInfo.mGenerationId;
           info->mFlags = info->mFlags;

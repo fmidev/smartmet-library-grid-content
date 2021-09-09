@@ -1868,7 +1868,8 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
         // ### Making sure that content data matches the file data.
 
         cInfo->mFileId = fileInfo.mFileId;
-        cInfo->mFileType = fileInfo.mFileType;
+        if (cInfo->mFileType == 0)
+          cInfo->mFileType = fileInfo.mFileType;
         cInfo->mProducerId = fileInfo.mProducerId;
         cInfo->mGenerationId = fileInfo.mGenerationId;
         cInfo->mFlags = cInfo->mFlags;
@@ -1985,7 +1986,9 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
           // ### Making sure that content data matches the file data.
 
           info->mFileId = ff->mFileInfo.mFileId;
-          info->mFileType = ff->mFileInfo.mFileType;
+          if (info->mFileType == 0)
+            info->mFileType = ff->mFileInfo.mFileType;
+
           info->mProducerId = ff->mFileInfo.mProducerId;
           info->mGenerationId = ff->mFileInfo.mGenerationId;
           info->mFlags = info->mFlags;

@@ -36,6 +36,10 @@ class ContentInfo
     void               setNewbaseParameterName(const char *name);
     void               setNewbaseParameterName(const std::string& name);
 
+    char*              getNetCdfParameterName();
+    void               setNetCdfParameterName(const char *name);
+    void               setNetCdfParameterName(const std::string& name);
+
     void               setCsv(const char *csv);
     void               setCsv(const std::string& csv);
     int                compare(uint comparisonMethod,ContentInfo *contentInfo);
@@ -79,6 +83,7 @@ class ContentInfo
 
     uint              mFmiParameterName;
     uint              mNewbaseParameterName;
+    uint              mNetCdfParameterName;
     uint              mForecastTime;
 
   public:

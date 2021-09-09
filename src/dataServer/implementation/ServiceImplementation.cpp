@@ -4171,6 +4171,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
         GRID::MessageInfo mInfo;
 
         mInfo.mFilePosition = info->mFilePosition;
+        mInfo.mMessageType = info->mFileType;
         mInfo.mMessageSize = info->mMessageSize;
         mInfo.mProducerId = info->mProducerId;
         mInfo.mGenerationId = info->mGenerationId;
@@ -4798,6 +4799,7 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
         GRID::MessageInfo mInfo;
 
         mInfo.mFilePosition = contentInfo.mFilePosition;
+        mInfo.mMessageType = contentInfo.mFileType;
         mInfo.mMessageSize = contentInfo.mMessageSize;
         mInfo.mProducerId = contentInfo.mProducerId;
         mInfo.mGenerationId = contentInfo.mGenerationId;

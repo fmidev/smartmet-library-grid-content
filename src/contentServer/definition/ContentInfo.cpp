@@ -38,9 +38,10 @@ ContentInfo::ContentInfo()
     mForecastTimeUTC = 0;
     mModificationTime = 0;
     mDeletionTime = 0;
-    mFmiParameterName = 0;//(char*)EMPTY_STRING;
-    mNewbaseParameterName = 0;//(char*)EMPTY_STRING;
-    mForecastTime = 0;//(char*)EMPTY_STRING;
+    mFmiParameterName = 0;
+    mNewbaseParameterName = 0;
+    mNetCdfParameterName = 0;
+    mForecastTime = 0;
   }
   catch (...)
   {
@@ -83,17 +84,8 @@ ContentInfo::ContentInfo(const ContentInfo& contentInfo)
 
     mFmiParameterName = contentInfo.mFmiParameterName;
     mNewbaseParameterName = contentInfo.mNewbaseParameterName;
+    mNetCdfParameterName = contentInfo.mNetCdfParameterName;
     mForecastTime = contentInfo.mForecastTime;
-/*
-    mFmiParameterName = (char*)EMPTY_STRING;
-    mNewbaseParameterName = (char*)EMPTY_STRING;
-
-    if (contentInfo.mFmiParameterName != EMPTY_STRING)
-      setFmiParameterName(contentInfo.mFmiParameterName);
-
-    if (contentInfo.mNewbaseParameterName != EMPTY_STRING)
-      setNewbaseParameterName(contentInfo.mNewbaseParameterName);
-*/
   }
   catch (...)
   {
@@ -120,6 +112,9 @@ ContentInfo::ContentInfo(const char *csv)
     mGribParameterId =  0;
     mNewbaseParameterId = 0;
     mFmiParameterLevelId = 0;
+    mFmiParameterName = 0;
+    mNewbaseParameterName = 0;
+    mNetCdfParameterName = 0;
     mGrib1ParameterLevelId = 0;
     mGrib2ParameterLevelId = 0;
     mParameterLevel = 0;
@@ -147,23 +142,6 @@ ContentInfo::~ContentInfo()
 {
   try
   {
-    /*
-    if (mFmiParameterName != EMPTY_STRING)
-    {
-      delete[] mFmiParameterName;
-    }
-
-    if (mNewbaseParameterName != EMPTY_STRING)
-    {
-      delete[] mNewbaseParameterName;
-    }
-
-    if (mForecastTime != EMPTY_STRING)
-    {
-      delete[] mForecastTime;
-    }
-    */
-
   }
   catch (...)
   {
@@ -210,13 +188,8 @@ ContentInfo& ContentInfo::operator=(const ContentInfo& contentInfo)
     mForecastTime = contentInfo.mForecastTime;
     mFmiParameterName = contentInfo.mFmiParameterName;
     mNewbaseParameterName = contentInfo.mNewbaseParameterName;
-/*
-    if (contentInfo.mFmiParameterName != EMPTY_STRING)
-      setFmiParameterName(contentInfo.mFmiParameterName);
+    mNetCdfParameterName = contentInfo.mNetCdfParameterName;
 
-    if (contentInfo.mNewbaseParameterName != EMPTY_STRING)
-      setNewbaseParameterName(contentInfo.mNewbaseParameterName);
-*/
     return *this;
   }
   catch (...)
@@ -256,22 +229,6 @@ void ContentInfo::setFmiParameterName(const char *name)
       buf[t] = toupper(name[t]);
 
     mFmiParameterName = stringFactory.create(buf);
-/*
-
-    if (mFmiParameterName != EMPTY_STRING)
-    {
-      delete[] mFmiParameterName;
-      mFmiParameterName = (char*)EMPTY_STRING;
-    }
-
-    if (name != nullptr)
-    {
-      uint len = strlen(name);
-      mFmiParameterName = new char[len+1];
-      for (uint t=0; t<=len; t++)
-        mFmiParameterName[t] = toupper(name[t]);
-    }
-*/
   }
   catch (...)
   {
@@ -304,7 +261,6 @@ char* ContentInfo::getNewbaseParameterName()
   try
   {
     return stringFactory[mNewbaseParameterName];
-    //return mNewbaseParameterName;
   }
   catch (...)
   {
@@ -326,21 +282,6 @@ void ContentInfo::setNewbaseParameterName(const char *name)
       buf[t] = toupper(name[t]);
 
     mNewbaseParameterName = stringFactory.create(buf);
-/*
-    if (mNewbaseParameterName != EMPTY_STRING)
-    {
-      delete[] mNewbaseParameterName;
-      mNewbaseParameterName = (char*)EMPTY_STRING;
-    }
-
-    if (name != nullptr)
-    {
-      uint len = strlen(name);
-      mNewbaseParameterName = new char[len+1];
-      for (uint t=0; t<=len; t++)
-        mNewbaseParameterName[t] = tolower(name[t]);
-    }
-*/
   }
   catch (...)
   {
@@ -357,6 +298,59 @@ void ContentInfo::setNewbaseParameterName(const std::string& name)
   try
   {
     setNewbaseParameterName(name.c_str());
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+char* ContentInfo::getNetCdfParameterName()
+{
+  try
+  {
+    return stringFactory[mNetCdfParameterName];
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfo::setNetCdfParameterName(const char *name)
+{
+  try
+  {
+    uint len = strlen(name);
+    char buf[200];
+    for (uint t=0; t<=len; t++)
+      buf[t] = toupper(name[t]);
+
+    mNetCdfParameterName = stringFactory.create(buf);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfo::setNetCdfParameterName(const std::string& name)
+{
+  try
+  {
+    setNetCdfParameterName(name.c_str());
   }
   catch (...)
   {
@@ -437,7 +431,7 @@ std::string ContentInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%u;%llu;%u;%u;%u;;%s;%u;%s;%u;;;%u;%s;%u;%u;%u;%d;;;%d;%d;;%u;%u;%u;%ld;%ld",
+    sprintf(st,"%u;%u;%u;%llu;%u;%u;%u;;%s;%u;%s;%u;%s;;%u;%s;%u;%u;%u;%d;;;%d;%d;;%u;%u;%u;%ld;%ld",
         mFileId,
         mMessageIndex,
         mFileType,
@@ -450,7 +444,7 @@ std::string ContentInfo::getCsv()
         mFmiParameterId,
         getFmiParameterName(),
         mGribParameterId,
-        //mCdmParameterId.c_str(),
+        getNetCdfParameterName(),
         //mCdmParameterName.c_str(),
         mNewbaseParameterId,
         getNewbaseParameterName(),
@@ -512,7 +506,7 @@ std::string ContentInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "fileId;messageIndex;fileType;filePosition;messageSize;producerId;generationId;;startTime;fmiParameterId;fmiParameterName;gribParameterId;;;newbaseParameterId;newbaseParameterName;fmiParameterLevelId;grib1ParameterLevelId;grib2ParameterLevelId;parameterLevel;;;mForecastType;mForecastNumber;serverFlags;flags;sourceId;geometryId;modificationTimeT;deletionTimeT";
+    std::string header = "fileId;messageIndex;fileType;filePosition;messageSize;producerId;generationId;;startTime;fmiParameterId;fmiParameterName;gribParameterId;netCdfParameterName;;newbaseParameterId;newbaseParameterName;fmiParameterLevelId;grib1ParameterLevelId;grib2ParameterLevelId;parameterLevel;;;mForecastType;mForecastNumber;serverFlags;flags;sourceId;geometryId;modificationTimeT;deletionTimeT";
     return header;
   }
   catch (...)
@@ -568,7 +562,7 @@ void ContentInfo::setCsv(const char *csv)
       mFmiParameterId = toUInt32(field[9]);
       setFmiParameterName(field[10]);
       mGribParameterId = toUInt32(field[11]);
-      //mCdmParameterId = field[12];
+      setNetCdfParameterName(field[12]);
       //mCdmParameterName = field[13];
       mNewbaseParameterId = toUInt32(field[14]);
       setNewbaseParameterName(field[15]);
@@ -1108,6 +1102,7 @@ void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mFmiParameterId         = " << mFmiParameterId << "\n";
     stream << space(level) << "- mFmiParameterName       = " << getFmiParameterName() << "\n";
     stream << space(level) << "- mGribParameterId        = " << mGribParameterId << "\n";
+    stream << space(level) << "- mNetCdfParameterName    = " << getNetCdfParameterName() << "\n";
     stream << space(level) << "- mNewbaseParameterId     = " << mNewbaseParameterId << "\n";
     stream << space(level) << "- mNewbaseParameterName   = " << getNewbaseParameterName() << "\n";
     stream << space(level) << "- mFmiParameterLevelId    = " << C_INT(mFmiParameterLevelId) << "\n";

@@ -3661,7 +3661,7 @@ bool ServiceImplementation::getGridFiles(
 
       Identification::FmiParameterId_grib1 def;
 
-      if (Identification::gridDef.getGrib1DefByFmiId(contentInfo1->mFmiParameterId,def))
+      if (Identification::gridDef.getGrib1ParameterMappingByFmiId(contentInfo1->mFmiParameterId,def))
       {
         newMessage->setProperty(Property::ProductSection::TableVersion,def.mGribTableVersion);
         newMessage->setProperty(Property::ProductSection::Centre,def.mCentre);
@@ -3805,7 +3805,7 @@ bool ServiceImplementation::getGridFiles(
 
       Identification::FmiParameterId_grib2 def;
 
-      if (Identification::gridDef.getGrib2DefByFmiId(contentInfo1->mFmiParameterId,def))
+      if (Identification::gridDef.getGrib2ParameterMappingByFmiId(contentInfo1->mFmiParameterId,def))
       {
         newMessage->setProperty(Property::IndicatorSection::Discipline,def.mDiscipline);
         newMessage->setProperty(Property::IdentificationSection::Centre,def.mCentre);
