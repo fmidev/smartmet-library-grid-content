@@ -60,6 +60,7 @@ void Converter::convert(T::ContentInfo& source,ContentServer::Corba::CorbaConten
     target.gribParameterId = source.mGribParameterId;
     target.newbaseParameterId = source.mNewbaseParameterId;
     target.newbaseParameterName = CORBA::string_dup(source.getNewbaseParameterName());
+    target.netCdfParameterName = CORBA::string_dup(source.getNetCdfParameterName());
     target.fmiParameterLevelId = source.mFmiParameterLevelId;
     target.grib1ParameterLevelId = source.mGrib1ParameterLevelId;
     target.grib2ParameterLevelId = source.mGrib2ParameterLevelId;
@@ -99,6 +100,7 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::
     target.mGribParameterId = source.gribParameterId;
     target.mNewbaseParameterId = source.newbaseParameterId;
     target.setNewbaseParameterName(source.newbaseParameterName);
+    target.setNetCdfParameterName(source.netCdfParameterName);
     target.mFmiParameterLevelId = source.fmiParameterLevelId;
     target.mGrib1ParameterLevelId = source.grib1ParameterLevelId;
     target.mGrib2ParameterLevelId = source.grib2ParameterLevelId;

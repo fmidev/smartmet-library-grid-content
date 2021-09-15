@@ -36,6 +36,10 @@ class ContentInfo
     void               setNewbaseParameterName(const char *name);
     void               setNewbaseParameterName(const std::string& name);
 
+    char*              getNetCdfParameterName();
+    void               setNetCdfParameterName(const char *name);
+    void               setNetCdfParameterName(const std::string& name);
+
     void               setCsv(const char *csv);
     void               setCsv(const std::string& csv);
     int                compare(uint comparisonMethod,ContentInfo *contentInfo);
@@ -73,12 +77,9 @@ class ContentInfo
 
   protected:
 
-    //char*              mFmiParameterName;
-    //char*              mNewbaseParameterName;
-    //char*              mForecastTime;
-
     uint              mFmiParameterName;
     uint              mNewbaseParameterName;
+    uint              mNetCdfParameterName;
     uint              mForecastTime;
 
   public:
@@ -93,6 +94,7 @@ class ContentInfo
         static const uint gribId_producer_generation_level_time           = 4;
         static const uint newbaseId_producer_generation_level_time        = 5;
         static const uint newbaseName_producer_generation_level_time      = 6;
+        static const uint netCdfName_producer_generation_level_time       = 7;
         static const uint starttime_file_message                          = 9;
         static const uint fmiName_starttime_level_file_message            = 10;
         static const uint fmiId_fmiLevelId_level_starttime_file_message   = 11;

@@ -34,6 +34,7 @@ struct CorbaContentInfo
   unsigned long      gribParameterId;
   unsigned long      newbaseParameterId;
   string             newbaseParameterName;
+  string             netCdfParameterName;
   octet              fmiParameterLevelId;
   octet              grib1ParameterLevelId;
   octet              grib2ParameterLevelId;
