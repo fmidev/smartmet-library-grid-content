@@ -923,6 +923,10 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
           sourceParamKey = contentInfo->getNewbaseParameterName();
           break;
 
+        case T::ParamKeyTypeValue::NETCDF_NAME:
+          sourceParamKey = contentInfo->getNetCdfParameterName();
+          break;
+
         default:
           break;
       }
@@ -948,6 +952,10 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
 
         case T::ParamKeyTypeValue::NEWBASE_NAME:
           targetParamKey = contentInfo->getNewbaseParameterName();
+          break;
+
+        case T::ParamKeyTypeValue::NETCDF_NAME:
+          targetParamKey = contentInfo->getNetCdfParameterName();
           break;
 
         default:
@@ -1064,6 +1072,10 @@ int MemoryImplementation::_getProducerParameterListByProducerId(T::SessionId ses
             sourceParamKey = contentInfo->getNewbaseParameterName();
             break;
 
+          case T::ParamKeyTypeValue::NETCDF_NAME:
+            sourceParamKey = contentInfo->getNetCdfParameterName();
+            break;
+
           default:
             break;
         }
@@ -1089,6 +1101,10 @@ int MemoryImplementation::_getProducerParameterListByProducerId(T::SessionId ses
 
           case T::ParamKeyTypeValue::NEWBASE_NAME:
             targetParamKey = contentInfo->getNewbaseParameterName();
+            break;
+
+          case T::ParamKeyTypeValue::NETCDF_NAME:
+            targetParamKey = contentInfo->getNetCdfParameterName();
             break;
 
           default:

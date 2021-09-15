@@ -1147,6 +1147,10 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
             sourceParamKey = contentInfo->getNewbaseParameterName();
             break;
 
+          case T::ParamKeyTypeValue::NETCDF_NAME:
+            sourceParamKey = contentInfo->getNetCdfParameterName();
+            break;
+
           default:
             break;
         }
@@ -1172,6 +1176,10 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
 
           case T::ParamKeyTypeValue::NEWBASE_NAME:
             targetParamKey = contentInfo->getNewbaseParameterName();
+            break;
+
+          case T::ParamKeyTypeValue::NETCDF_NAME:
+            targetParamKey = contentInfo->getNetCdfParameterName();
             break;
 
           default:
@@ -1290,6 +1298,10 @@ int RedisImplementation::_getProducerParameterListByProducerId(T::SessionId sess
             sourceParamKey = contentInfo->getNewbaseParameterName();
             break;
 
+          case T::ParamKeyTypeValue::NETCDF_NAME:
+            sourceParamKey = contentInfo->getNetCdfParameterName();
+            break;
+
           default:
             break;
         }
@@ -1315,6 +1327,10 @@ int RedisImplementation::_getProducerParameterListByProducerId(T::SessionId sess
 
           case T::ParamKeyTypeValue::NEWBASE_NAME:
             targetParamKey = contentInfo->getNewbaseParameterName();
+            break;
+
+          case T::ParamKeyTypeValue::NETCDF_NAME:
+            targetParamKey = contentInfo->getNetCdfParameterName();
             break;
 
           default:

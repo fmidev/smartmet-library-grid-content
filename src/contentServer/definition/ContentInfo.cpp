@@ -646,6 +646,12 @@ bool ContentInfo::hasKey(T::ParamKeyType parameterKeyType,const std::string& par
         else
           return false;
 
+      case T::ParamKeyTypeValue::NETCDF_NAME:
+        if (strcasecmp(getNetCdfParameterName(),parameterKey.c_str()) == 0)
+          return true;
+        else
+          return false;
+
       default:
         return false;
     }
@@ -830,6 +836,42 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
         if (res != 0)
           return res;
         res = num_compare(mNewbaseParameterName,contentInfo->mNewbaseParameterName);
+        if (res != 0)
+          return res;
+        res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
+        if (res != 0)
+          return res;
+        res = num_compare(mGeometryId,contentInfo->mGeometryId);
+        if (res != 0)
+          return res;
+        res = num_compare(mForecastType,contentInfo->mForecastType);
+        if (res != 0)
+          return res;
+        res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
+        if (res != 0)
+          return res;
+        res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
+        if (res != 0)
+          return res;
+        res = num_compare(mFileId,contentInfo->mFileId);
+        if (res != 0)
+          return res;
+        res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
+        if (res != 0)
+          return res;
+        return 0;
+
+      case ContentInfo::ComparisonMethod::netCdfName_producer_generation_level_time:
+        res = num_compare(mProducerId,contentInfo->mProducerId);
+        if (res != 0)
+          return res;
+        res = num_compare(mGenerationId,contentInfo->mGenerationId);
+        if (res != 0)
+          return res;
+        res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
+        if (res != 0)
+          return res;
+        res = num_compare(mNetCdfParameterName,contentInfo->mNetCdfParameterName);
         if (res != 0)
           return res;
         res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
