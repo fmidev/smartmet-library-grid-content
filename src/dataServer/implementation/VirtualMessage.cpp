@@ -150,6 +150,22 @@ void VirtualMessage::getAttributeList(const std::string& prefix,T::AttributeList
 
 
 
+bool VirtualMessage::hasAttributeValue(const char *attributeName, const char *attributeValue) const
+{
+  return false;
+}
+
+
+
+
+bool VirtualMessage::getAttributeValue(const char *attributeName, std::string& attributeValue) const
+{
+  return false;
+}
+
+
+
+
 /*! \brief The method returns the forecast time of the current grid.
 
         \return   The forecast time.
@@ -525,7 +541,7 @@ bool VirtualMessage::getGridOriginalCoordinatesByLatLonCoordinates(double lat,do
 
      \return   The layout of the grid (expressed as an enum value).
 */
-
+/*
 T::GridLayout VirtualMessage::getGridLayout() const
 {
   FUNCTION_TRACE
@@ -539,7 +555,7 @@ T::GridLayout VirtualMessage::getGridLayout() const
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
-
+*/
 
 
 
@@ -549,21 +565,21 @@ T::GridLayout VirtualMessage::getGridLayout() const
       \param row    The grid row index (= j-position).
       \return       The number of columns in the given grid row.
 */
-
-std::size_t VirtualMessage::getGridOriginalColumnCount(std::size_t row) const
+/*
+std::size_t VirtualMessage::getGridColumnCount(std::size_t row) const
 {
   FUNCTION_TRACE
   try
   {
     initMessagePtrs();
-    return mMessageList[0]->getGridOriginalColumnCount(row);
+    return mMessageList[0]->getGridColumnCount(row);
   }
   catch (...)
   {
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
-
+*/
 
 
 
@@ -573,21 +589,21 @@ std::size_t VirtualMessage::getGridOriginalColumnCount(std::size_t row) const
 
        \return   The maximum number of the columns in the grid.
 */
-
-std::size_t VirtualMessage::getGridOriginalColumnCount() const
+/*
+std::size_t VirtualMessage::getGridColumnCount() const
 {
   FUNCTION_TRACE
   try
   {
     initMessagePtrs();
-    return mMessageList[0]->getGridOriginalColumnCount();
+    return mMessageList[0]->getGridColumnCount();
   }
   catch (...)
   {
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
-
+*/
 
 
 
@@ -596,21 +612,21 @@ std::size_t VirtualMessage::getGridOriginalColumnCount() const
 
      \return   The number of the grid rows.
 */
-
-std::size_t VirtualMessage::getGridOriginalRowCount() const
+/*
+std::size_t VirtualMessage::getGridRowCount() const
 {
   FUNCTION_TRACE
   try
   {
     initMessagePtrs();
-    return mMessageList[0]->getGridOriginalRowCount();
+    return mMessageList[0]->getGridRowCount();
   }
   catch (...)
   {
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
-
+*/
 
 
 
@@ -776,7 +792,7 @@ void VirtualMessage::getGridProjectionAttributes(std::string prefix,T::Attribute
 
         \return   The projection used in the current grid (LatLon, Mercator, etc.)
 */
-
+/*
 std::string VirtualMessage::getGridProjectionString() const
 {
   FUNCTION_TRACE
@@ -790,7 +806,7 @@ std::string VirtualMessage::getGridProjectionString() const
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
-
+*/
 
 
 
@@ -1094,8 +1110,8 @@ void VirtualMessage::getGridValueVector(T::ParamValue_vec& values) const
     if (d.getDimensions() != 2)
       return;
 
-    uint columns = getGridOriginalColumnCount();
-    uint rows = getGridOriginalRowCount();
+    uint columns = getGridColumnCount();
+    uint rows = getGridRowCount();
 
     switch (mFunctionCallMethod)
     {
@@ -1138,8 +1154,8 @@ void VirtualMessage::getGridOriginalValueVector(T::ParamValue_vec& values) const
     if (d.getDimensions() != 2)
       return;
 
-    uint columns = getGridOriginalColumnCount();
-    uint rows = getGridOriginalRowCount();
+    uint columns = getGridColumnCount();
+    uint rows = getGridRowCount();
 
     switch (mFunctionCallMethod)
     {
@@ -1206,7 +1222,7 @@ T::ParamLevelId VirtualMessage::getGridParameterLevelId() const
 
 
 
-
+/*
 std::string VirtualMessage::getGridParameterLevelIdString() const
 {
   FUNCTION_TRACE
@@ -1220,7 +1236,7 @@ std::string VirtualMessage::getGridParameterLevelIdString() const
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
-
+*/
 
 
 

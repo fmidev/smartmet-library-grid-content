@@ -455,8 +455,8 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileI
 
     coordinates.mProjection = message->getGridProjection();
     message->getGridProjectionAttributes("",coordinates.mProjectionAttributes);
-    coordinates.mColumns = message->getGridOriginalColumnCount();
-    coordinates.mRows = message->getGridOriginalRowCount();
+    coordinates.mColumns = message->getGridColumnCount();
+    coordinates.mRows = message->getGridRowCount();
     coordinates.mCoordinateType = coordinateType;
 
     switch (coordinateType)
@@ -520,8 +520,8 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
     data.mMessageIndex = messageIndex;
     data.mForecastTime = message->getForecastTime();
     data.mGribParameterId = std::to_string(message->getGribParameterId());
-    data.mGrib1ParameterLevelId = message->getGrib1ParameterLevelId();
-    data.mGrib2ParameterLevelId = message->getGrib2ParameterLevelId();
+    //data.mGrib1ParameterLevelId = message->getGrib1ParameterLevelId();
+    //data.mGrib2ParameterLevelId = message->getGrib2ParameterLevelId();
     data.mGribParameterName = message->getGribParameterName();
     data.mFmiParameterId = std::to_string(message->getFmiParameterId());
     data.mFmiParameterLevelId = message->getFmiParameterLevelId();
@@ -531,8 +531,8 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
     data.mParameterLevel = message->getGridParameterLevel();
     data.mGeometryId = message->getGridGeometryId();
     data.mProjection = message->getGridProjection();
-    data.mColumns = message->getGridOriginalColumnCount();
-    data.mRows = message->getGridOriginalRowCount();
+    data.mColumns = message->getGridColumnCount();
+    data.mRows = message->getGridRowCount();
     data.mForecastType = message->getForecastType();
     data.mForecastNumber = message->getForecastNumber();
     message->getGridProjectionAttributes("",data.mProjectionAttributes);
