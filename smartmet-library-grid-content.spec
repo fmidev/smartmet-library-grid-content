@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 21.9.15
+Version: 21.10.4
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -20,19 +20,19 @@ BuildRequires: lua-devel
 BuildRequires: make
 BuildRequires: omniORB-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 21.9.13
-BuildRequires: smartmet-library-grid-files-devel >= 21.9.15
-BuildRequires: smartmet-library-macgyver-devel >= 21.9.13
-BuildRequires: smartmet-library-spine-devel >= 21.9.13
+BuildRequires: smartmet-library-gis-devel >= 21.9.24
+BuildRequires: smartmet-library-grid-files-devel >= 21.10.4
+BuildRequires: smartmet-library-macgyver-devel >= 21.9.21
+BuildRequires: smartmet-library-spine-devel >= 21.9.17
 Requires: boost169-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
-Requires: smartmet-library-gis >= 21.9.13
-Requires: smartmet-library-grid-files >= 21.9.15
-Requires: smartmet-library-macgyver >= 21.9.13
-Requires: smartmet-library-spine >= 21.9.13
+Requires: smartmet-library-gis >= 21.9.24
+Requires: smartmet-library-grid-files >= 21.10.4
+Requires: smartmet-library-macgyver >= 21.9.21
+Requires: smartmet-library-spine >= 21.9.17
 Provides: %{SPECNAME}
 
 %description
@@ -65,10 +65,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 21.9.13
-Requires: smartmet-library-gis-devel >= 21.9.13
-Requires: smartmet-library-spine-devel >= 21.9.13
-Requires: smartmet-library-grid-files-devel >= 21.9.15
+Requires: smartmet-library-macgyver-devel >= 21.9.21
+Requires: smartmet-library-gis-devel >= 21.9.24
+Requires: smartmet-library-spine-devel >= 21.9.17
+Requires: smartmet-library-grid-files-devel >= 21.10.4
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -78,6 +78,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Oct  4 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.10.4-1.fmi
+- Minor improvements
 * Wed Sep 15 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.9.15-1.fmi
 - NetCDF support
 * Tue Aug 31 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.8.31-1.fmi
