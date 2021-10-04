@@ -31,6 +31,8 @@ class VirtualMessage : public Message
 
     virtual uint                    getFileId() const;
     virtual void                    getAttributeList(const std::string& prefix,T::AttributeList& attributeList) const;
+    virtual bool                    getAttributeValue(const char *attributeName, std::string& attributeValue) const;
+    virtual bool                    hasAttributeValue(const char *attributeName, const char *attributeValue) const;
     virtual T::TimeString           getForecastTime() const;
     virtual time_t                  getForecastTimeT() const;
     virtual short                   getForecastType() const;
@@ -47,17 +49,17 @@ class VirtualMessage : public Message
     virtual bool                    getGridOriginalCoordinatesByGridPoint(uint grid_i,uint grid_j,double& x,double& y) const;
     virtual bool                    getGridOriginalCoordinatesByGridPosition(double grid_i,double grid_j,double& x,double& y) const;
     virtual bool                    getGridOriginalCoordinatesByLatLonCoordinates(double lat,double lon,double& x,double& y) const;
-    virtual T::GridLayout           getGridLayout() const;
-    virtual std::size_t             getGridOriginalColumnCount(std::size_t row) const;
-    virtual std::size_t             getGridOriginalColumnCount() const;
-    virtual std::size_t             getGridOriginalRowCount() const;
+    //virtual T::GridLayout           getGridLayout() const;
+    //virtual std::size_t             getGridColumnCount(std::size_t row) const;
+    //virtual std::size_t             getGridColumnCount() const;
+    //virtual std::size_t             getGridRowCount() const;
     virtual std::size_t             getGridOriginalValueCount() const;
     virtual int                     getGridOriginalValueIndex(uint grid_i,uint grid_j) const;
     virtual bool                    getGridPointByLatLonCoordinates(double lat,double lon,double& grid_i,double& grid_j) const;
     virtual bool                    getGridPointByOriginalCoordinates(double x,double y,double& grid_i,double& grid_j) const;
     virtual T::GridProjection       getGridProjection() const;
     virtual void                    getGridProjectionAttributes(std::string prefix,T::AttributeList& attributeList) const;
-    virtual std::string             getGridProjectionString() const;
+    //virtual std::string             getGridProjectionString() const;
 
     virtual void                    getGridValueByPoint(T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::ParamValue& value);
     virtual void                    getGridValueListByCircle(T::CoordinateType coordinateType,double origoX,double origoY,double radius,T::GridValueList& valueList);
@@ -69,7 +71,7 @@ class VirtualMessage : public Message
     virtual void                    getGridOriginalValueVector(T::ParamValue_vec& values) const;
     virtual T::ParamLevel           getGridParameterLevel() const;
     virtual T::ParamLevelId         getGridParameterLevelId() const;
-    virtual std::string             getGridParameterLevelIdString() const;
+    //virtual std::string             getGridParameterLevelIdString() const;
     virtual void                    getGridMinAndMaxValues(T::ParamValue& minValue,T::ParamValue& maxValue) const;
 
     virtual T::ParamValue           getGridValueByGridPoint(uint grid_i,uint grid_j) const;

@@ -3531,6 +3531,8 @@ bool ServiceImplementation::getGridFiles(
   FUNCTION_TRACE
   try
   {
+    // **************** DISABLED *************************
+#if 0
     std::string function;
     std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
@@ -3659,19 +3661,19 @@ bool ServiceImplementation::getGridFiles(
 
       // ### Trying to get parameter values accoding to parameter mapping definitions
 
-      Identification::FmiParameterId_grib1 def;
+      Identification::Grib1ParameterDef def;
 
-      if (Identification::gridDef.getGrib1ParameterMappingByFmiId(contentInfo1->mFmiParameterId,def))
+      if (Identification::gridDef.getGrib1ParameterDefByFmiId(contentInfo1->mFmiParameterId,def))
       {
-        newMessage->setProperty(Property::ProductSection::TableVersion,def.mGribTableVersion);
+        newMessage->setProperty(Property::ProductSection::TableVersion,def.mTable2Version);
         newMessage->setProperty(Property::ProductSection::Centre,def.mCentre);
-        newMessage->setProperty(Property::ProductSection::GeneratingProcessIdentifier,def.mGeneratingProcessIdentifier);
-        newMessage->setProperty(Property::ProductSection::IndicatorOfParameter,def.mGribParameterNumber);
+        //newMessage->setProperty(Property::ProductSection::GeneratingProcessIdentifier,def.mGeneratingProcessIdentifier);
+        newMessage->setProperty(Property::ProductSection::IndicatorOfParameter,def.mIndicatorOfParameter);
 
         if (contentInfo1->mGrib1ParameterLevelId == 0)
         {
           Identification::FmiLevelId_grib def2;
-          if (Identification::gridDef.getGrib1LevelDef(contentInfo1->mFmiParameterLevelId,def.mGeneratingProcessIdentifier,def.mCentre,def2))
+          if (Identification::gridDef.getGrib1LevelDef(contentInfo1->mFmiParameterLevelId,0,def.mCentre,def2))
           {
             newMessage->setProperty(Property::ProductSection::IndicatorOfTypeOfLevel,def2.mGribLevelId);
           }
@@ -3803,12 +3805,12 @@ bool ServiceImplementation::getGridFiles(
 
       // ### Trying to get parameter values accoding to parameter mapping definitions
 
-      Identification::FmiParameterId_grib2 def;
+      Identification::Grib2ParameterDef def;
 
-      if (Identification::gridDef.getGrib2ParameterMappingByFmiId(contentInfo1->mFmiParameterId,def))
+      if (Identification::gridDef.getGrib2ParameterDefByFmiId(contentInfo1->mFmiParameterId,def))
       {
         newMessage->setProperty(Property::IndicatorSection::Discipline,def.mDiscipline);
-        newMessage->setProperty(Property::IdentificationSection::Centre,def.mCentre);
+        newMessage->setProperty(Property::IdentificationSection::Centre,*(def.mCentre));
         //newMessage->setProperty(Property::IdentificationSection::SubCentre,255);
         //newMessage->setProperty(Property::IdentificationSection::TablesVersion,def.mGribTableVersion);
 
@@ -3817,7 +3819,7 @@ bool ServiceImplementation::getGridFiles(
         newMessage->setProperty(Property::ProductSection::ParameterSettings::ParameterNumber,def.mParameterNumber);
         //newMessage->setProperty(Property::ProductSection::ParameterSettings::TypeOfGeneratingProcess,2);
         //newMessage->setProperty(Property::ProductSection::ParameterSettings::BackgroundProcess,0LL);
-        newMessage->setProperty(Property::ProductSection::ParameterSettings::GeneratingProcessIdentifier,def.mGeneratingProcessIdentifier);
+        //newMessage->setProperty(Property::ProductSection::ParameterSettings::GeneratingProcessIdentifier,def.mGeneratingProcessIdentifier);
 
         if (contentInfo1->mGrib2ParameterLevelId == 0)
         {
@@ -4129,7 +4131,7 @@ bool ServiceImplementation::getGridFiles(
         return true;
       }
     }
-
+#endif
     return false;
   }
   catch (...)
