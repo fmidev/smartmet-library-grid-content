@@ -162,7 +162,6 @@ ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
         it->mGeometryId == mapping.mGeometryId &&
         it->mParameterKeyType == mapping.mParameterKeyType &&
         it->mParameterKey == mapping.mParameterKey &&
-        it->mParameterLevelIdType == mapping.mParameterLevelIdType &&
         it->mParameterLevelId == mapping.mParameterLevelId &&
         it->mParameterLevel == mapping.mParameterLevel)
       {
@@ -267,7 +266,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 
 
 
-void ParameterMappingFile::getMappings(const std::string& producerName,const std::string& parameterName,T::GeometryId geometryId,T::ParamLevelIdType levelIdType,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings)
+void ParameterMappingFile::getMappings(const std::string& producerName,const std::string& parameterName,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings)
 {
   try
   {
@@ -287,21 +286,18 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
     {
       if (!it->mIgnore)
       {
-        if (levelIdType == T::ParamLevelIdTypeValue::ANY || levelIdType == T::ParamLevelIdTypeValue::IGNORE ||  it->mParameterLevelIdType == levelIdType)
+        if (levelId <= 0 || it->mParameterLevelId == levelId)
         {
-          if (levelIdType == T::ParamLevelIdTypeValue::IGNORE || levelId == 0 || it->mParameterLevelId == levelId)
+          if (levelId <= 0 || level < 0  || it->mParameterLevel == level)
           {
-            if (levelIdType == T::ParamLevelIdTypeValue::IGNORE || level < 0  || it->mParameterLevel == level)
+            if (onlySearchEnabled)
             {
-              if (onlySearchEnabled)
-              {
-                if (it->mSearchEnabled)
-                  mappings.emplace_back(*it);
-              }
-              else
-              {
+              if (it->mSearchEnabled)
                 mappings.emplace_back(*it);
-              }
+            }
+            else
+            {
+              mappings.emplace_back(*it);
             }
           }
         }
@@ -318,7 +314,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 
 
 
-void ParameterMappingFile::getMappings(const std::string& producerName,const std::string& parameterName,T::ParamLevelIdType levelIdType,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings)
+void ParameterMappingFile::getMappings(const std::string& producerName,const std::string& parameterName,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings)
 {
   try
   {
@@ -340,21 +336,18 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
       {
         if (!it->mIgnore)
         {
-          if (levelIdType == T::ParamLevelIdTypeValue::ANY || levelIdType == T::ParamLevelIdTypeValue::IGNORE ||  it->mParameterLevelIdType == levelIdType)
+          if (levelId <= 0 || it->mParameterLevelId == levelId)
           {
-            if (levelIdType == T::ParamLevelIdTypeValue::IGNORE || levelId == 0 || it->mParameterLevelId == levelId)
+            if (levelId <= 0 || level < 0  || it->mParameterLevel == level)
             {
-              if (levelIdType == T::ParamLevelIdTypeValue::IGNORE || level < 0  || it->mParameterLevel == level)
+              if (onlySearchEnabled)
               {
-                if (onlySearchEnabled)
-                {
-                  if (it->mSearchEnabled)
-                    mappings.emplace_back(*it);
-                }
-                else
-                {
+                if (it->mSearchEnabled)
                   mappings.emplace_back(*it);
-                }
+              }
+              else
+              {
+                mappings.emplace_back(*it);
               }
             }
           }
@@ -441,8 +434,8 @@ void ParameterMappingFile::loadFile()
           if (field[4][0] != '\0')
             rec.mGeometryId = toInt32(field[4]);
 
-          if (field[5][0] != '\0')
-            rec.mParameterLevelIdType = toInt32(field[5]);
+          //if (field[5][0] != '\0')
+          //  rec.mParameterLevelIdType = toInt32(field[5]);
 
           if (field[6][0] != '\0')
             rec.mParameterLevelId = toInt32(field[6]);

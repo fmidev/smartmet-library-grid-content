@@ -191,7 +191,7 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
                   geometryId = atoi(sourceParam->mGeometryId.c_str());
 
                 mContentServer->getContentListByParameterGenerationIdAndForecastTime(0,contentInfo.mGenerationId,T::ParamKeyTypeValue::FMI_NAME,sourceParam->mParameterName,
-                  T::ParamLevelIdTypeValue::FMI,levelId,level,forecastType,forecastNumber,geometryId,contentInfo.getForecastTime(),contentList);
+                  levelId,level,forecastType,forecastNumber,geometryId,contentInfo.getForecastTime(),contentList);
 
                 //mContentServer->getContentListByParameterAndProducerName(0,producerName,T::ParamKeyTypeValue::FMI_NAME,sourceParam->mParameterName,T::ParamLevelIdTypeValue::FMI,levelId,level,level,forecastType,forecastNumber,geometryId,contentInfo.mForecastTime,contentInfo.mForecastTime,0,contentList);
 
@@ -287,17 +287,17 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
               newContentInfo->setForecastTime(contentInfo.getForecastTime());
               newContentInfo->mFmiParameterId = def.mFmiParameterId;
               newContentInfo->setFmiParameterName(def.mParameterName);
-              newContentInfo->mGribParameterId = 0;
-              newContentInfo->mNewbaseParameterId = newbaseDef.mNewbaseParameterId;
-              newContentInfo->setNewbaseParameterName(newbaseDef.mParameterName);
+              //newContentInfo->mGribParameterId = 0;
+              //newContentInfo->mNewbaseParameterId = newbaseDef.mNewbaseParameterId;
+              //newContentInfo->setNewbaseParameterName(newbaseDef.mParameterName);
 
               if (contentDef->mVirtualParameter.mLevelId > " ")
                 newContentInfo->mFmiParameterLevelId = atoi(contentDef->mVirtualParameter.mLevelId.c_str());
               else
                 newContentInfo->mFmiParameterLevelId = contentInfo.mFmiParameterLevelId;
 
-              newContentInfo->mGrib1ParameterLevelId = contentInfo.mGrib1ParameterLevelId;
-              newContentInfo->mGrib2ParameterLevelId = contentInfo.mGrib2ParameterLevelId;
+              //newContentInfo->mGrib1ParameterLevelId = contentInfo.mGrib1ParameterLevelId;
+              //newContentInfo->mGrib2ParameterLevelId = contentInfo.mGrib2ParameterLevelId;
 
               if (contentDef->mVirtualParameter.mLevel > " ")
                 newContentInfo->mParameterLevel = atoi(contentDef->mVirtualParameter.mLevel.c_str());

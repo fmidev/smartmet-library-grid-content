@@ -13,7 +13,6 @@ ParameterLevelInfo::ParameterLevelInfo()
   try
   {
     mParameterKeyType = T::ParamKeyTypeValue::FMI_ID;
-    mParameterLevelIdType = T::ParamLevelIdTypeValue::ANY;
     mParameterLevelId = 0;
     mLevel = 0;
   }
@@ -33,7 +32,6 @@ ParameterLevelInfo::ParameterLevelInfo(const ParameterLevelInfo& levelInfo)
   {
     mParameterKeyType = levelInfo.mParameterKeyType;
     mParameterKey = levelInfo.mParameterKey;
-    mParameterLevelIdType = levelInfo.mParameterLevelIdType;
     mParameterLevelId = levelInfo.mParameterLevelId;
     mLevel = levelInfo.mLevel;
   }
@@ -49,7 +47,6 @@ ParameterLevelInfo::ParameterLevelInfo(const ParameterLevelInfo& levelInfo)
 
 ParameterLevelInfo::ParameterLevelInfo(T::ParamKeyType parameterKeyType,
                    T::ParamId parameterKey,
-                   T::ParamLevelIdType parameterLevelIdType,
                    T::ParamLevelId parameterLevelId,
                    T::ParamLevel level)
 {
@@ -57,7 +54,6 @@ ParameterLevelInfo::ParameterLevelInfo(T::ParamKeyType parameterKeyType,
   {
     mParameterKeyType = parameterKeyType;
     mParameterKey = parameterKey;
-    mParameterLevelIdType = parameterLevelIdType;
     mParameterLevelId = parameterLevelId;
     mLevel = level;
   }
@@ -96,7 +92,6 @@ ParameterLevelInfo& ParameterLevelInfo::operator=(const ParameterLevelInfo& leve
 
     mParameterKeyType = levelInfo.mParameterKeyType;
     mParameterKey = levelInfo.mParameterKey;
-    mParameterLevelIdType = levelInfo.mParameterLevelIdType;
     mParameterLevelId = levelInfo.mParameterLevelId;
     mLevel = levelInfo.mLevel;
 
@@ -134,7 +129,6 @@ void ParameterLevelInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "ParameterLevelInfo\n";
     stream << space(level) << "- mParameterKeyType     = " << C_INT(mParameterKeyType) << "\n";
     stream << space(level) << "- mParameterKey         = " << mParameterKey << "\n";
-    stream << space(level) << "- mParameterLevelIdType = " << C_INT(mParameterLevelIdType) << "\n";
     stream << space(level) << "- mParameterLevelId     = " << C_INT(mParameterLevelId) << "\n";
     stream << space(level) << "- mLevel                = " << mLevel << "\n";
   }

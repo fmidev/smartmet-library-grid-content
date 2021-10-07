@@ -18,7 +18,6 @@ class ParameterLevelInfo
                          ParameterLevelInfo(
                              T::ParamKeyType parameterKeyType,
                              T::ParamId parameterKey,
-                             T::ParamLevelIdType parameterLevelIdType,
                              T::ParamLevelId parameterLevelId,
                              T::ParamLevel level);
 
@@ -31,7 +30,6 @@ class ParameterLevelInfo
 
     T::ParamKeyType      mParameterKeyType;
     T::ParamId           mParameterKey;
-    T::ParamLevelIdType  mParameterLevelIdType;
     T::ParamLevelId      mParameterLevelId;
     T::ParamLevel        mLevel;
 };

@@ -57,13 +57,13 @@ void Converter::convert(T::ContentInfo& source,ContentServer::Corba::CorbaConten
     target.forecastNumber = source.mForecastNumber;
     target.fmiParameterId = source.mFmiParameterId;
     target.fmiParameterName = CORBA::string_dup(source.getFmiParameterName());
-    target.gribParameterId = source.mGribParameterId;
-    target.newbaseParameterId = source.mNewbaseParameterId;
-    target.newbaseParameterName = CORBA::string_dup(source.getNewbaseParameterName());
-    target.netCdfParameterName = CORBA::string_dup(source.getNetCdfParameterName());
+    //target.gribParameterId = source.mGribParameterId;
+    //target.newbaseParameterId = source.mNewbaseParameterId;
+    //target.newbaseParameterName = CORBA::string_dup(source.getNewbaseParameterName());
+    //target.netCdfParameterName = CORBA::string_dup(source.getNetCdfParameterName());
     target.fmiParameterLevelId = source.mFmiParameterLevelId;
-    target.grib1ParameterLevelId = source.mGrib1ParameterLevelId;
-    target.grib2ParameterLevelId = source.mGrib2ParameterLevelId;
+    //target.grib1ParameterLevelId = source.mGrib1ParameterLevelId;
+    //target.grib2ParameterLevelId = source.mGrib2ParameterLevelId;
     target.parameterLevel = source.mParameterLevel;
     target.flags = source.mFlags;
     target.sourceId = source.mSourceId;
@@ -97,13 +97,13 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::
     target.mForecastNumber = source.forecastNumber;
     target.mFmiParameterId = source.fmiParameterId;
     target.setFmiParameterName(source.fmiParameterName);
-    target.mGribParameterId = source.gribParameterId;
-    target.mNewbaseParameterId = source.newbaseParameterId;
-    target.setNewbaseParameterName(source.newbaseParameterName);
-    target.setNetCdfParameterName(source.netCdfParameterName);
+    //target.mGribParameterId = source.gribParameterId;
+    //target.mNewbaseParameterId = source.newbaseParameterId;
+    //target.setNewbaseParameterName(source.newbaseParameterName);
+    //target.setNetCdfParameterName(source.netCdfParameterName);
     target.mFmiParameterLevelId = source.fmiParameterLevelId;
-    target.mGrib1ParameterLevelId = source.grib1ParameterLevelId;
-    target.mGrib2ParameterLevelId = source.grib2ParameterLevelId;
+    //target.mGrib1ParameterLevelId = source.grib1ParameterLevelId;
+    //target.mGrib2ParameterLevelId = source.grib2ParameterLevelId;
     target.mParameterLevel = source.parameterLevel;
     target.mFlags = source.flags;
     target.mSourceId = source.sourceId;
@@ -950,8 +950,8 @@ void Converter::convert(T::LevelInfo& source,ContentServer::Corba::CorbaLevelInf
     target.producerId = source.mProducerId;
     target.fmiParameterName = CORBA::string_dup(source.mFmiParameterName.c_str());
     target.fmiParameterLevelId = source.mFmiParameterLevelId;
-    target.grib1ParameterLevelId = source.mGrib1ParameterLevelId;
-    target.grib2ParameterLevelId = source.mGrib2ParameterLevelId;
+    //target.grib1ParameterLevelId = source.mGrib1ParameterLevelId;
+    //target.grib2ParameterLevelId = source.mGrib2ParameterLevelId;
     target.parameterLevel = source.mParameterLevel;
   }
   catch (...)
@@ -971,8 +971,8 @@ void Converter::convert(const ContentServer::Corba::CorbaLevelInfo& source,T::Le
     target.mProducerId = source.producerId;
     target.mFmiParameterName = source.fmiParameterName;
     target.mFmiParameterLevelId = source.fmiParameterLevelId;
-    target.mGrib1ParameterLevelId = source.grib1ParameterLevelId;
-    target.mGrib2ParameterLevelId = source.grib2ParameterLevelId;
+    //target.mGrib1ParameterLevelId = source.grib1ParameterLevelId;
+    //target.mGrib2ParameterLevelId = source.grib2ParameterLevelId;
     target.mParameterLevel = source.parameterLevel;
   }
   catch (...)

@@ -594,7 +594,6 @@ void Converter::convert(QueryServer::Corba::CorbaParameterValues& source,QuerySe
     target.mAnalysisTime = source.analysisTime;
     target.mParameterKeyType = source.parameterKeyType;
     target.mParameterKey = source.parameterKey;
-    target.mParameterLevelIdType = source.parameterLevelIdType;
     target.mParameterLevelId = source.parameterLevelId;
     target.mParameterLevel = source.parameterLevel;
     target.mForecastType = source.forecastType;
@@ -636,7 +635,6 @@ void Converter::convert(QueryServer::ParameterValues& source,QueryServer::Corba:
     target.analysisTime = CORBA::string_dup(source.mAnalysisTime.c_str());
     target.parameterKeyType = (::CORBA::Octet)source.mParameterKeyType;
     target.parameterKey = CORBA::string_dup(source.mParameterKey.c_str());
-    target.parameterLevelIdType = (::CORBA::Octet)source.mParameterLevelIdType;
     target.parameterLevelId = (::CORBA::Octet)source.mParameterLevelId;
     target.parameterLevel = source.mParameterLevel;
     target.forecastType = source.mForecastType;
@@ -804,7 +802,6 @@ void Converter::convert(QueryServer::Corba::CorbaQueryParameter& source,QuerySer
     target.mParameterKey = source.parameterKey;
     target.mProducerName = source.producerName;
     target.mGeometryId = source.geometryId;
-    target.mParameterLevelIdType = source.parameterLevelIdType;
     target.mParameterLevelId = source.parameterLevelId;
     target.mParameterLevel = source.parameterLevel;
     target.mForecastType = source.forecastType;
@@ -854,7 +851,6 @@ void Converter::convert(QueryServer::QueryParameter& source,QueryServer::Corba::
     target.parameterKey = CORBA::string_dup(source.mParameterKey.c_str());
     target.producerName = CORBA::string_dup(source.mProducerName.c_str());
     target.geometryId = source.mGeometryId;
-    target.parameterLevelIdType = (::CORBA::Octet)source.mParameterLevelIdType;
     target.parameterLevelId = (::CORBA::Octet)source.mParameterLevelId;
     target.parameterLevel = source.mParameterLevel;
     target.forecastType = source.mForecastType;

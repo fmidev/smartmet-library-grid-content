@@ -102,7 +102,6 @@ struct CorbaParameterValues
   string                  analysisTime;
   octet                   parameterKeyType;
   string                  parameterKey;
-  octet                   parameterLevelIdType;
   octet                   parameterLevelId;
   long                    parameterLevel;
   short                   forecastType;
@@ -130,7 +129,6 @@ struct CorbaQueryParameter
   long                     geometryId;
   octet                    parameterKeyType;
   string                   parameterKey;
-  octet                    parameterLevelIdType;
   octet                    parameterLevelId;
   long                     parameterLevel;
   short                    forecastType;

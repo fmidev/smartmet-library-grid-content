@@ -167,7 +167,6 @@ ParameterLevelInfo* ParameterLevelInfoList::getParameterLevelInfoByIndexNoCheck(
 ParameterLevelInfo* ParameterLevelInfoList::getParameterLevelInfo(
                         T::ParamKeyType parameterKeyType,
                         T::ParamId parameterKey,
-                        T::ParamLevelIdType parameterLevelIdType,
                         T::ParamLevelId parameterLevelId,
                         T::ParamLevel level)
 
@@ -179,7 +178,6 @@ ParameterLevelInfo* ParameterLevelInfoList::getParameterLevelInfo(
     {
       if (mList[t]->mParameterKeyType == parameterKeyType &&
           mList[t]->mParameterKey == parameterKey &&
-          mList[t]->mParameterLevelIdType == parameterLevelIdType &&
           mList[t]->mParameterLevelId == parameterLevelId &&
           mList[t]->mLevel == level)
       {

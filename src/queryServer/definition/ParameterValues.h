@@ -33,7 +33,6 @@ class ParameterValues
 
     T::ParamKeyType         mParameterKeyType;
     T::ParamId              mParameterKey;
-    T::ParamLevelIdType     mParameterLevelIdType;
     T::ParamLevelId         mParameterLevelId;
     T::ParamLevel           mParameterLevel;
     T::ForecastType         mForecastType;
