@@ -19,7 +19,6 @@ class ContentInfo
 
     ContentInfo&       operator=(const ContentInfo& contentInfo);
 
-    bool               hasKey(T::ParamKeyType parameterKeyType,const std::string& parameterKey);
     std::string        getCsv();
     std::string        getCsvHeader();
     ulonglong          getRequestCounterKey();
@@ -32,14 +31,6 @@ class ContentInfo
     void               setFmiParameterName(const char *name);
     void               setFmiParameterName(const std::string& name);
 
-    char*              getNewbaseParameterName();
-    void               setNewbaseParameterName(const char *name);
-    void               setNewbaseParameterName(const std::string& name);
-
-    char*              getNetCdfParameterName();
-    void               setNetCdfParameterName(const char *name);
-    void               setNetCdfParameterName(const std::string& name);
-
     void               setCsv(const char *csv);
     void               setCsv(const std::string& csv);
     int                compare(uint comparisonMethod,ContentInfo *contentInfo);
@@ -49,26 +40,16 @@ class ContentInfo
     uint               mFileId;
     uint               mMessageIndex;
     ulonglong          mFilePosition;
-
     uint               mMessageSize;
     uint               mProducerId;
-
     uint               mGenerationId;
     T::FmiParamId      mFmiParameterId;
-
-    T::NewbaseParamId  mNewbaseParameterId;
-    T::GribParamId     mGribParameterId;
-
     uchar              mFileType;
     T::ParamLevelId    mFmiParameterLevelId;
-    T::ParamLevelId    mGrib1ParameterLevelId;
-    T::ParamLevelId    mGrib2ParameterLevelId;
     T::ParamLevel      mParameterLevel;
-
     time_t             mForecastTimeUTC;
     time_t             mModificationTime;
     time_t             mDeletionTime;
-
     T::ForecastType    mForecastType;
     T::ForecastNumber  mForecastNumber;
     T::GeometryId      mGeometryId;
@@ -78,8 +59,6 @@ class ContentInfo
   protected:
 
     uint              mFmiParameterName;
-    uint              mNewbaseParameterName;
-    uint              mNetCdfParameterName;
     uint              mForecastTime;
 
   public:
@@ -91,19 +70,15 @@ class ContentInfo
         static const uint file_message                                    = 1;
         static const uint fmiId_producer_generation_level_time            = 2;
         static const uint fmiName_producer_generation_level_time          = 3;
-        static const uint gribId_producer_generation_level_time           = 4;
-        static const uint newbaseId_producer_generation_level_time        = 5;
-        static const uint newbaseName_producer_generation_level_time      = 6;
-        static const uint netCdfName_producer_generation_level_time       = 7;
-        static const uint starttime_file_message                          = 9;
-        static const uint fmiName_starttime_level_file_message            = 10;
-        static const uint fmiId_fmiLevelId_level_starttime_file_message   = 11;
-        static const uint starttime_fmiId_fmiLevelId_level_file_message   = 12;
-        static const uint starttime_fmiName_fmiLevelId_level_file_message = 13;
-        static const uint generationId_starttime_file_message             = 14;
-        static const uint fmiName_fmiLevelId_level_starttime_file_message = 15;
-        static const uint starttime_generationId_file_message             = 16;
-        static const uint producer_file_message                           = 17;
+        static const uint starttime_file_message                          = 4;
+        static const uint fmiName_starttime_level_file_message            = 5;
+        static const uint fmiId_fmiLevelId_level_starttime_file_message   = 6;
+        static const uint starttime_fmiId_fmiLevelId_level_file_message   = 7;
+        static const uint starttime_fmiName_fmiLevelId_level_file_message = 8;
+        static const uint generationId_starttime_file_message             = 9;
+        static const uint fmiName_fmiLevelId_level_starttime_file_message = 10;
+        static const uint starttime_generationId_file_message             = 11;
+        static const uint producer_file_message                           = 12;
     };
 
     class Flags

@@ -3,6 +3,7 @@
 #include <grid-files/common/AutoThreadLock.h>
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/common/GeneralFunctions.h>
+#include <grid-files/identification/GridDef.h>
 #include <boost/functional/hash.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/interprocess/sync/named_mutex.hpp>
@@ -907,29 +908,6 @@ int RedisImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     producerInfoList.clear();
-    char st[100];
-    strcpy(st,parameterKey.c_str());
-
-    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
-    {
-      if (strncasecmp(st,"GRIB-",5) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
-        parameterKey = st+5;
-      }
-      else
-      if (strncasecmp(st,"NB-",3) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
-        parameterKey = st+3;
-      }
-      else
-      if (strncasecmp(st,"NBN-",3) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
-        parameterKey = st+4;
-      }
-    }
 
     T::ContentInfoList contentInfoList;
     getContentByParameterId(parameterKeyType,parameterKey,contentInfoList);
@@ -1107,7 +1085,6 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
       T::ContentInfo *contentInfo = cList.getContentInfoByIndex(t);
       std::string sourceParamKey;
       std::string targetParamKey;
-      T::ParamLevelIdType paramLevelIdType = T::ParamLevelIdTypeValue::FMI;
       T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
 
       if (contentInfo->mProducerId != producerId)
@@ -1125,6 +1102,8 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
 
       if (producerInfo != nullptr  &&  producerInfo->mProducerId == contentInfo->mProducerId)
       {
+        auto fmiId = contentInfo->mFmiParameterId;
+
         switch (sourceParameterKeyType)
         {
           case T::ParamKeyTypeValue::FMI_ID:
@@ -1136,20 +1115,36 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
-            sourceParamKey = std::to_string(contentInfo->mGribParameterId);
-            break;
+          {
+            Identification::FmiParameterId_grib def;
+            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
+              sourceParamKey = std::to_string(def.mGribParameterId);
+          }
+          break;
 
           case T::ParamKeyTypeValue::NEWBASE_ID:
-            sourceParamKey = std::to_string(contentInfo->mNewbaseParameterId);
-            break;
+          {
+            Identification::FmiParameterId_newbase def;
+            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
+              sourceParamKey = std::to_string(def.mNewbaseParameterId);
+          }
+          break;
 
           case T::ParamKeyTypeValue::NEWBASE_NAME:
-            sourceParamKey = contentInfo->getNewbaseParameterName();
-            break;
+          {
+            Identification::NewbaseParameterDef def;
+            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
+              sourceParamKey = def.mParameterName;
+          }
+          break;
 
           case T::ParamKeyTypeValue::NETCDF_NAME:
-            sourceParamKey = contentInfo->getNetCdfParameterName();
-            break;
+          {
+            Identification::FmiParameterId_netCdf def;
+            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
+              sourceParamKey = def.mNetCdfParameterName;
+          }
+          break;
 
           default:
             break;
@@ -1167,20 +1162,36 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
-            targetParamKey = std::to_string(contentInfo->mGribParameterId);
-            break;
+          {
+            Identification::FmiParameterId_grib def;
+            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
+              targetParamKey = std::to_string(def.mGribParameterId);
+          }
+          break;
 
           case T::ParamKeyTypeValue::NEWBASE_ID:
-            targetParamKey = std::to_string(contentInfo->mNewbaseParameterId);
-            break;
+          {
+            Identification::FmiParameterId_newbase def;
+            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
+              targetParamKey = std::to_string(def.mNewbaseParameterId);
+          }
+          break;
 
           case T::ParamKeyTypeValue::NEWBASE_NAME:
-            targetParamKey = contentInfo->getNewbaseParameterName();
-            break;
+          {
+            Identification::NewbaseParameterDef def;
+            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
+              targetParamKey = def.mParameterName;
+          }
+          break;
 
           case T::ParamKeyTypeValue::NETCDF_NAME:
-            targetParamKey = contentInfo->getNetCdfParameterName();
-            break;
+          {
+            Identification::FmiParameterId_netCdf def;
+            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
+              targetParamKey = def.mNetCdfParameterName;
+          }
+          break;
 
           default:
             break;
@@ -1194,7 +1205,6 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
           boost::hash_combine(seed,targetParameterKeyType);
           boost::hash_combine(seed,targetParamKey);
           boost::hash_combine(seed,contentInfo->mGeometryId);
-          boost::hash_combine(seed,paramLevelIdType);
           boost::hash_combine(seed,paramLevelId);
           boost::hash_combine(seed,contentInfo->mParameterLevel);
           boost::hash_combine(seed,contentInfo->mForecastType);
@@ -1207,13 +1217,13 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
 
             char tmp[200];
             char *p = tmp;
-            p += sprintf(p,"%s;%s;%d;%s;%d;%d;%d;%05d;%d;%d",
+            p += sprintf(p,"%s;%s;%d;%s;%d;;%d;%05d;%d;%d",
                   producerInfo->mName.c_str(),
                   sourceParamKey.c_str(),
                   targetParameterKeyType,
                   targetParamKey.c_str(),
                   contentInfo->mGeometryId,
-                  paramLevelIdType,
+                  //paramLevelIdType,
                   paramLevelId,
                   contentInfo->mParameterLevel,
                   contentInfo->mForecastType,
@@ -1271,11 +1281,12 @@ int RedisImplementation::_getProducerParameterListByProducerId(T::SessionId sess
       T::ContentInfo *contentInfo = cList.getContentInfoByIndex(t);
       std::string sourceParamKey;
       std::string targetParamKey;
-      T::ParamLevelIdType paramLevelIdType = T::ParamLevelIdTypeValue::FMI;
       T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
 
       if (contentInfo->mProducerId == producerId)
       {
+        auto fmiId = contentInfo->mFmiParameterId;
+
         switch (sourceParameterKeyType)
         {
           case T::ParamKeyTypeValue::FMI_ID:
@@ -1287,20 +1298,36 @@ int RedisImplementation::_getProducerParameterListByProducerId(T::SessionId sess
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
-            sourceParamKey = std::to_string(contentInfo->mGribParameterId);
-            break;
+          {
+            Identification::FmiParameterId_grib def;
+            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
+              sourceParamKey = std::to_string(def.mGribParameterId);
+          }
+          break;
 
           case T::ParamKeyTypeValue::NEWBASE_ID:
-            sourceParamKey = std::to_string(contentInfo->mNewbaseParameterId);
-            break;
+          {
+            Identification::FmiParameterId_newbase def;
+            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
+              sourceParamKey = std::to_string(def.mNewbaseParameterId);
+          }
+          break;
 
           case T::ParamKeyTypeValue::NEWBASE_NAME:
-            sourceParamKey = contentInfo->getNewbaseParameterName();
-            break;
+          {
+            Identification::NewbaseParameterDef def;
+            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
+              sourceParamKey = def.mParameterName;
+          }
+          break;
 
           case T::ParamKeyTypeValue::NETCDF_NAME:
-            sourceParamKey = contentInfo->getNetCdfParameterName();
-            break;
+          {
+            Identification::FmiParameterId_netCdf def;
+            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
+              sourceParamKey = def.mNetCdfParameterName;
+          }
+          break;
 
           default:
             break;
@@ -1318,20 +1345,36 @@ int RedisImplementation::_getProducerParameterListByProducerId(T::SessionId sess
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
-            targetParamKey = std::to_string(contentInfo->mGribParameterId);
-            break;
+          {
+            Identification::FmiParameterId_grib def;
+            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
+              targetParamKey = std::to_string(def.mGribParameterId);
+          }
+          break;
 
           case T::ParamKeyTypeValue::NEWBASE_ID:
-            targetParamKey = std::to_string(contentInfo->mNewbaseParameterId);
-            break;
+          {
+            Identification::FmiParameterId_newbase def;
+            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
+              targetParamKey = std::to_string(def.mNewbaseParameterId);
+          }
+          break;
 
           case T::ParamKeyTypeValue::NEWBASE_NAME:
-            targetParamKey = contentInfo->getNewbaseParameterName();
-            break;
+          {
+            Identification::NewbaseParameterDef def;
+            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
+              targetParamKey = def.mParameterName;
+          }
+          break;
 
           case T::ParamKeyTypeValue::NETCDF_NAME:
-            targetParamKey = contentInfo->getNetCdfParameterName();
-            break;
+          {
+            Identification::FmiParameterId_netCdf def;
+            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
+              targetParamKey = def.mNetCdfParameterName;
+          }
+          break;
 
           default:
             break;
@@ -1345,7 +1388,6 @@ int RedisImplementation::_getProducerParameterListByProducerId(T::SessionId sess
           boost::hash_combine(seed,targetParameterKeyType);
           boost::hash_combine(seed,targetParamKey);
           boost::hash_combine(seed,contentInfo->mGeometryId);
-          boost::hash_combine(seed,paramLevelIdType);
           boost::hash_combine(seed,paramLevelId);
           boost::hash_combine(seed,contentInfo->mParameterLevel);
           boost::hash_combine(seed,contentInfo->mForecastType);
@@ -1358,13 +1400,13 @@ int RedisImplementation::_getProducerParameterListByProducerId(T::SessionId sess
 
             char tmp[200];
             char *p = tmp;
-            p += sprintf(p,"%s;%s;%d;%s;%d;%d;%d;%05d;%d;%d",
+            p += sprintf(p,"%s;%s;%d;%s;%d;;%d;%05d;%d;%d",
                   producerInfo.mName.c_str(),
                   sourceParamKey.c_str(),
                   targetParameterKeyType,
                   targetParamKey.c_str(),
                   contentInfo->mGeometryId,
-                  paramLevelIdType,
+                  //paramLevelIdType,
                   paramLevelId,
                   contentInfo->mParameterLevel,
                   contentInfo->mForecastType,
@@ -4287,7 +4329,7 @@ int RedisImplementation::_getContentListBySourceId(T::SessionId sessionId,uint s
 
 
 
-int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4302,31 +4344,7 @@ int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
 
     contentInfoList.clear();
 
-    char st[100];
-    strcpy(st,parameterKey.c_str());
-
-    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
-    {
-      if (strncasecmp(st,"GRIB-",5) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
-        parameterKey = st+5;
-      }
-      else
-      if (strncasecmp(st,"NB-",3) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
-        parameterKey = st+3;
-      }
-      else
-      if (strncasecmp(st,"NBN-",3) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
-        parameterKey = st+4;
-      }
-    }
-
-    return getContentByParameterIdAndTimeRange(parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
+    return getContentByParameterIdAndTimeRange(parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
   }
   catch (...)
   {
@@ -4338,7 +4356,7 @@ int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
 
 
 
-int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4357,31 +4375,7 @@ int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
 
     contentInfoList.clear();
 
-    char st[100];
-    strcpy(st,parameterKey.c_str());
-
-    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
-    {
-      if (strncasecmp(st,"GRIB-",5) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
-        parameterKey = st+5;
-      }
-      else
-      if (strncasecmp(st,"NB-",3) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
-        parameterKey = st+3;
-      }
-      else
-      if (strncasecmp(st,"NBN-",3) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
-        parameterKey = st+4;
-      }
-    }
-
-    return getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
+    return getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
   }
   catch (...)
   {
@@ -4393,7 +4387,7 @@ int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
 
 
 
-int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4412,31 +4406,7 @@ int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionI
 
     contentInfoList.clear();
 
-    char st[100];
-    strcpy(st,parameterKey.c_str());
-
-    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
-    {
-      if (strncasecmp(st,"GRIB-",5) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
-        parameterKey = st+5;
-      }
-      else
-      if (strncasecmp(st,"NB-",3) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
-        parameterKey = st+3;
-      }
-      else
-      if (strncasecmp(st,"NBN-",3) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
-        parameterKey = st+4;
-      }
-    }
-
-    return getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
+    return getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
   }
   catch (...)
   {
@@ -4448,7 +4418,7 @@ int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionI
 
 
 
-int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4465,33 +4435,9 @@ int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId se
     if (getProducerById(producerId,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
 
-    char st[100];
-    strcpy(st,parameterKey.c_str());
-
-    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
-    {
-      if (strncasecmp(st,"GRIB-",5) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
-        parameterKey = st+5;
-      }
-      else
-      if (strncasecmp(st,"NB-",3) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
-        parameterKey = st+3;
-      }
-      else
-      if (strncasecmp(st,"NBN-",3) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
-        parameterKey = st+4;
-      }
-    }
-
     contentInfoList.clear();
 
-    return getContentByParameterIdAndProducer(producerInfo.mProducerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
+    return getContentByParameterIdAndProducer(producerInfo.mProducerId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
   }
   catch (...)
   {
@@ -4503,7 +4449,7 @@ int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId se
 
 
 
-int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4520,37 +4466,13 @@ int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
 
-    char st[100];
-    strcpy(st,parameterKey.c_str());
-
-    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
-    {
-      if (strncasecmp(st,"GRIB-",5) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
-        parameterKey = st+5;
-      }
-      else
-      if (strncasecmp(st,"NB-",3) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
-        parameterKey = st+3;
-      }
-      else
-      if (strncasecmp(st,"NBN-",3) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
-        parameterKey = st+4;
-      }
-    }
-
     contentInfoList.clear();
 
     time_t startTime = 0;
     time_t endTime = 0xFFFFFFFF;
 
     T::ContentInfoList contentList;
-    int res = getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,contentList);
+    int res = getContentByParameterIdAndGeneration(generationInfo.mGenerationId,parameterKeyType,parameterKey,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,contentList);
 
     contentList.getContentListByForecastTime(forecastTime,contentInfoList);
 
@@ -4577,7 +4499,7 @@ int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
 
 
 
-int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4594,33 +4516,9 @@ int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId 
     if (getProducerByName(producerName,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_NAME;
 
-    char st[100];
-    strcpy(st,parameterKey.c_str());
-
-    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
-    {
-      if (strncasecmp(st,"GRIB-",5) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
-        parameterKey = st+5;
-      }
-      else
-      if (strncasecmp(st,"NB-",3) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
-        parameterKey = st+3;
-      }
-      else
-      if (strncasecmp(st,"NBN-",3) == 0)
-      {
-        parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
-        parameterKey = st+4;
-      }
-    }
-
     contentInfoList.clear();
 
-    return getContentByParameterIdAndProducer(producerInfo.mProducerId,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
+    return getContentByParameterIdAndProducer(producerInfo.mProducerId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,contentInfoList);
   }
   catch (...)
   {
@@ -7119,6 +7017,44 @@ int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyTyp
   {
     contentInfoList.clear();
 
+    T::FmiParamId fmiId = 0;
+
+    switch (parameterKeyType)
+    {
+      case T::ParamKeyTypeValue::FMI_ID:
+        fmiId = toUInt32(parameterKey);
+        break;
+
+      case T::ParamKeyTypeValue::FMI_NAME:
+        fmiId = Identification::gridDef.getFmiParameterIdByFmiName(parameterKey);
+        break;
+
+      case T::ParamKeyTypeValue::GRIB_ID:
+        fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey));
+        break;
+
+      case T::ParamKeyTypeValue::NEWBASE_ID:
+        fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey));
+        break;
+
+      case T::ParamKeyTypeValue::NEWBASE_NAME:
+        fmiId = Identification::gridDef.getFmiParameterIdByNewbaseName(parameterKey);
+        break;
+
+      case T::ParamKeyTypeValue::NETCDF_NAME:
+        fmiId = Identification::gridDef.getFmiParameterIdByNetCdfName(parameterKey);
+        break;
+
+      case T::ParamKeyTypeValue::BUILD_IN:
+        break;
+
+      default:
+        return Result::UNKNOWN_PARAMETER_KEY_TYPE;
+    }
+
+    if (fmiId == 0)
+      return Result::OK;
+
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
@@ -7136,7 +7072,7 @@ int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyTyp
         T::ContentInfo *info = new T::ContentInfo();
         info->setCsv(reply->element[t]->str);
 
-        if (info->hasKey(parameterKeyType,parameterKey))
+        if (info->mFmiParameterId == fmiId)
         {
           contentInfoList.addContentInfo(info);
           info = nullptr;
@@ -7160,12 +7096,51 @@ int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyTyp
 
 
 
-int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
+int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     contentInfoList.clear();
+
+    T::FmiParamId fmiId = 0;
+
+    switch (parameterKeyType)
+    {
+      case T::ParamKeyTypeValue::FMI_ID:
+        fmiId = toUInt32(parameterKey);
+        break;
+
+      case T::ParamKeyTypeValue::FMI_NAME:
+        fmiId = Identification::gridDef.getFmiParameterIdByFmiName(parameterKey);
+        break;
+
+      case T::ParamKeyTypeValue::GRIB_ID:
+        fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey));
+        break;
+
+      case T::ParamKeyTypeValue::NEWBASE_ID:
+        fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey));
+        break;
+
+      case T::ParamKeyTypeValue::NEWBASE_NAME:
+        fmiId = Identification::gridDef.getFmiParameterIdByNewbaseName(parameterKey);
+        break;
+
+      case T::ParamKeyTypeValue::NETCDF_NAME:
+        fmiId = Identification::gridDef.getFmiParameterIdByNetCdfName(parameterKey);
+        break;
+
+      case T::ParamKeyTypeValue::BUILD_IN:
+        break;
+
+      default:
+        return Result::UNKNOWN_PARAMETER_KEY_TYPE;
+    }
+
+    if (fmiId == 0)
+      return Result::OK;
+
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -7184,17 +7159,13 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
         T::ContentInfo *info = new T::ContentInfo();
         info->setCsv(reply->element[t]->str);
 
-        if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+        if (parameterLevelId < 0 || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
         {
           if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
           {
-            if (info->hasKey(parameterKeyType,parameterKey) &&  info->mForecastTimeUTC >= startTime  &&  info->mForecastTimeUTC <= endTime)
+            if (info->mFmiParameterId == fmiId &&  info->mForecastTimeUTC >= startTime  &&  info->mForecastTimeUTC <= endTime)
             {
-              if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE) ||
-                  (parameterLevelIdType == T::ParamLevelIdTypeValue::ANY) ||
-                  (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                  (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                  (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+              if (parameterLevelId < 0 ||  info->mFmiParameterLevelId == parameterLevelId)
               {
                 contentInfoList.addContentInfo(info);
                 info = nullptr;
@@ -7221,12 +7192,50 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
 
 
 
-int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
+int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     contentInfoList.clear();
+
+    T::FmiParamId fmiId = 0;
+
+    switch (parameterKeyType)
+    {
+      case T::ParamKeyTypeValue::FMI_ID:
+        fmiId = toUInt32(parameterKey);
+        break;
+
+      case T::ParamKeyTypeValue::FMI_NAME:
+        fmiId = Identification::gridDef.getFmiParameterIdByFmiName(parameterKey);
+        break;
+
+      case T::ParamKeyTypeValue::GRIB_ID:
+        fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey));
+        break;
+
+      case T::ParamKeyTypeValue::NEWBASE_ID:
+        fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey));
+        break;
+
+      case T::ParamKeyTypeValue::NEWBASE_NAME:
+        fmiId = Identification::gridDef.getFmiParameterIdByNewbaseName(parameterKey);
+        break;
+
+      case T::ParamKeyTypeValue::NETCDF_NAME:
+        fmiId = Identification::gridDef.getFmiParameterIdByNetCdfName(parameterKey);
+        break;
+
+      case T::ParamKeyTypeValue::BUILD_IN:
+        break;
+
+      default:
+        return Result::UNKNOWN_PARAMETER_KEY_TYPE;
+    }
+
+    if (fmiId == 0)
+      return Result::OK;
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -7247,19 +7256,15 @@ int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,
 
         if (info->mGenerationId == generationId)
         {
-          if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+          if (parameterLevelId < 0 || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
           {
             if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
-                if (info->hasKey(parameterKeyType,parameterKey) &&  info->mForecastTimeUTC >= startTime  &&  info->mForecastTimeUTC <= endTime)
+                if (info->mFmiParameterId == fmiId &&  info->mForecastTimeUTC >= startTime  &&  info->mForecastTimeUTC <= endTime)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE) ||
-                      (parameterLevelIdType == T::ParamLevelIdTypeValue::ANY) ||
-                      (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                  if (parameterLevelId < 0 || info->mFmiParameterLevelId == parameterLevelId)
                   {
                     contentInfoList.addContentInfo(info);
                     info = nullptr;
@@ -7287,12 +7292,51 @@ int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,
 
 
 
-int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
+int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     contentInfoList.clear();
+
+    T::FmiParamId fmiId = 0;
+
+    switch (parameterKeyType)
+    {
+      case T::ParamKeyTypeValue::FMI_ID:
+        fmiId = toUInt32(parameterKey);
+        break;
+
+      case T::ParamKeyTypeValue::FMI_NAME:
+        fmiId = Identification::gridDef.getFmiParameterIdByFmiName(parameterKey);
+        break;
+
+      case T::ParamKeyTypeValue::GRIB_ID:
+        fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey));
+        break;
+
+      case T::ParamKeyTypeValue::NEWBASE_ID:
+        fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey));
+        break;
+
+      case T::ParamKeyTypeValue::NEWBASE_NAME:
+        fmiId = Identification::gridDef.getFmiParameterIdByNewbaseName(parameterKey);
+        break;
+
+      case T::ParamKeyTypeValue::NETCDF_NAME:
+        fmiId = Identification::gridDef.getFmiParameterIdByNetCdfName(parameterKey);
+        break;
+
+      case T::ParamKeyTypeValue::BUILD_IN:
+        break;
+
+      default:
+        return Result::UNKNOWN_PARAMETER_KEY_TYPE;
+    }
+
+    if (fmiId == 0)
+      return Result::OK;
+
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -7313,19 +7357,15 @@ int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::P
 
         if (info->mProducerId == producerId)
         {
-          if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+          if (parameterLevelId < 0 || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
           {
             if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
             {
               if (geometryId < 0  ||  info->mGeometryId == geometryId)
               {
-                if (info->hasKey(parameterKeyType,parameterKey) &&  info->mForecastTimeUTC >= startTime  &&  info->mForecastTimeUTC <= endTime)
+                if (info->mFmiParameterId == fmiId &&  info->mForecastTimeUTC >= startTime  &&  info->mForecastTimeUTC <= endTime)
                 {
-                  if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE) ||
-                      (parameterLevelIdType == T::ParamLevelIdTypeValue::ANY) ||
-                      (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
+                  if (parameterLevelId < 0 || info->mFmiParameterLevelId == parameterLevelId)
                   {
                     contentInfoList.addContentInfo(info);
                     info = nullptr;

@@ -95,7 +95,7 @@ std::size_t ParameterMapping::getHash()
     boost::hash_combine(seed,C_INT(mParameterKeyType));
     boost::hash_combine(seed,mParameterKey);
     boost::hash_combine(seed,mGeometryId);
-    boost::hash_combine(seed,C_INT(mParameterLevelIdType));
+    //boost::hash_combine(seed,C_INT(mParameterLevelIdType));
     boost::hash_combine(seed,C_INT(mParameterLevelId));
     boost::hash_combine(seed,mParameterLevel);
     boost::hash_combine(seed,mAreaInterpolationMethod);
@@ -150,7 +150,7 @@ void ParameterMapping::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mParameterKey              = " << mParameterKey << "\n";
     stream << space(level) << "- mParameterKeyHash          = " << mParameterKeyHash << "\n";
     stream << space(level) << "- mGeometryId                = " << mGeometryId << "\n";
-    stream << space(level) << "- mParameterLevelIdType      = " << C_INT(mParameterLevelIdType) << "\n";
+    //stream << space(level) << "- mParameterLevelIdType      = " << C_INT(mParameterLevelIdType) << "\n";
     stream << space(level) << "- mParameterLevelId          = " << C_INT(mParameterLevelId) << "\n";
     stream << space(level) << "- mParameterLevel            = " << mParameterLevel << "\n";
     stream << space(level) << "- mAreaInterpolationMethod   = " << mAreaInterpolationMethod << "\n";

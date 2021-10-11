@@ -941,7 +941,6 @@ std::string LuaFile::executeFunctionCall6(
                   const std::string& parameterName,
                   T::ParamKeyType parameterKeyType,
                   const std::string& parameterKey,
-                  T::ParamLevelIdType parameterLevelIdType,
                   short parameterLevelId,
                   int parameterLevel,
                   short forecastType,
@@ -955,7 +954,6 @@ std::string LuaFile::executeFunctionCall6(
     params.emplace_back(parameterName);
     params.emplace_back(Fmi::to_string(parameterKeyType));
     params.emplace_back(parameterKey);
-    params.emplace_back(Fmi::to_string(parameterLevelIdType));
     params.emplace_back(Fmi::to_string(parameterLevelId));
     params.emplace_back(Fmi::to_string(parameterLevel));
     params.emplace_back(Fmi::to_string(forecastType));

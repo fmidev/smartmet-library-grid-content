@@ -5041,14 +5041,6 @@ void ServerInterface::getContentListByParameter(T::RequestMessage& request,T::Re
       return;
     }
 
-    uint parameterLevelIdType = 0;
-    if (!request.getLineByKey("parameterLevelIdType",parameterLevelIdType))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: parameterLevelIdType");
-      return;
-    }
-
     unsigned char parameterLevelId = 0;
     if (!request.getLineByKey("parameterLevelId",parameterLevelId))
     {
@@ -5124,7 +5116,7 @@ void ServerInterface::getContentListByParameter(T::RequestMessage& request,T::Re
     T::ContentInfoList contentInfoList;
 
     int result = mService->getContentListByParameter(sessionId,parameterKeyType,
-        parameterKey,parameterLevelIdType,parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
+        parameterKey,parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
         forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     response.addLine("result",result);
@@ -5188,14 +5180,6 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
     {
       response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKey");
-      return;
-    }
-
-    uint parameterLevelIdType = 0;
-    if (!request.getLineByKey("parameterLevelIdType",parameterLevelIdType))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: parameterLevelIdType");
       return;
     }
 
@@ -5274,7 +5258,7 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
     T::ContentInfoList contentInfoList;
 
     int result = mService->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,
-        parameterKey,parameterLevelIdType,parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
+        parameterKey,parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
         forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     response.addLine("result",result);
@@ -5338,14 +5322,6 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
     {
       response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKey");
-      return;
-    }
-
-    uint parameterLevelIdType = 0;
-    if (!request.getLineByKey("parameterLevelIdType",parameterLevelIdType))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: parameterLevelIdType");
       return;
     }
 
@@ -5424,7 +5400,7 @@ void ServerInterface::getContentListByParameterAndGenerationName(T::RequestMessa
     T::ContentInfoList contentInfoList;
 
     int result = mService->getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,
-        parameterKey,parameterLevelIdType,parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
+        parameterKey,parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
         forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     response.addLine("result",result);
@@ -5488,14 +5464,6 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
     {
       response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKey");
-      return;
-    }
-
-    uint parameterLevelIdType = 0;
-    if (!request.getLineByKey("parameterLevelIdType",parameterLevelIdType))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: parameterLevelIdType");
       return;
     }
 
@@ -5574,7 +5542,7 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
     T::ContentInfoList contentInfoList;
 
     int result = mService->getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,
-        parameterKey,parameterLevelIdType,parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
+        parameterKey,parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
         forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     response.addLine("result",result);
@@ -5637,14 +5605,6 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
     {
       response.addLine("result",Result::MISSING_PARAMETER);
       response.addLine("resultString","Missing parameter: parameterKey");
-      return;
-    }
-
-    uint parameterLevelIdType = 0;
-    if (!request.getLineByKey("parameterLevelIdType",parameterLevelIdType))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: parameterLevelIdType");
       return;
     }
 
@@ -5723,7 +5683,7 @@ void ServerInterface::getContentListByParameterAndProducerName(T::RequestMessage
     T::ContentInfoList contentInfoList;
 
     int result = mService->getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,
-        parameterKey,parameterLevelIdType,parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
+        parameterKey,parameterLevelId,(T::ParamLevel)minLevel,(T::ParamLevel)maxLevel,
         forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     response.addLine("result",result);
@@ -5790,14 +5750,6 @@ void ServerInterface::getContentListByParameterGenerationIdAndForecastTime(T::Re
       return;
     }
 
-    uint parameterLevelIdType = 0;
-    if (!request.getLineByKey("parameterLevelIdType",parameterLevelIdType))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: parameterLevelIdType");
-      return;
-    }
-
     unsigned char parameterLevelId = 0;
     if (!request.getLineByKey("parameterLevelId",parameterLevelId))
     {
@@ -5849,7 +5801,7 @@ void ServerInterface::getContentListByParameterGenerationIdAndForecastTime(T::Re
     T::ContentInfoList contentInfoList;
 
     int result = mService->getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,parameterKeyType,
-        parameterKey,parameterLevelIdType,parameterLevelId,(T::ParamLevel)level,
+        parameterKey,parameterLevelId,(T::ParamLevel)level,
         forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
 
     response.addLine("result",result);

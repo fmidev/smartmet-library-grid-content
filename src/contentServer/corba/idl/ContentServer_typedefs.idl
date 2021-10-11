@@ -31,13 +31,7 @@ struct CorbaContentInfo
   short              forecastNumber;
   unsigned long      fmiParameterId;
   string             fmiParameterName;
-  unsigned long      gribParameterId;
-  unsigned long      newbaseParameterId;
-  string             newbaseParameterName;
-  string             netCdfParameterName;
-  octet              fmiParameterLevelId;
-  octet              grib1ParameterLevelId;
-  octet              grib2ParameterLevelId;
+  short              fmiParameterLevelId;
   long               parameterLevel;
   unsigned long      flags;
   unsigned long      sourceId;
@@ -150,9 +144,9 @@ struct CorbaLevelInfo
 {
   unsigned long producerId;
   string        fmiParameterName;
-  octet         fmiParameterLevelId;
-  octet         grib1ParameterLevelId;
-  octet         grib2ParameterLevelId;
+  short         fmiParameterLevelId;
+  //octet         grib1ParameterLevelId;
+  //octet         grib2ParameterLevelId;
   long          parameterLevel;
 };
 

@@ -29,7 +29,6 @@ class ParameterLevelInfoList
     ParameterLevelInfo*     getParameterLevelInfo(
                                  T::ParamKeyType parameterKeyType,
                                  T::ParamId parameterKey,
-                                 T::ParamLevelIdType parameterLevelIdType,
                                  T::ParamLevelId parameterLevelId,
                                  T::ParamLevel level);
 

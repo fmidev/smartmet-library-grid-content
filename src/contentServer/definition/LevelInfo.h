@@ -19,8 +19,8 @@ class LevelInfo
                         uint producerId,
                         std::string fmiParameterName,
                         T::ParamLevelId fmiParameterLevelId,
-                        T::ParamLevelId grib1ParameterLevelId,
-                        T::ParamLevelId grib2ParameterLevelId,
+                        //T::ParamLevelId grib1ParameterLevelId,
+                        //T::ParamLevelId grib2ParameterLevelId,
                         T::ParamLevel parameterLevel);
 
     virtual         ~LevelInfo();
@@ -37,8 +37,8 @@ class LevelInfo
     uint            mProducerId;
     std::string     mFmiParameterName;
     T::ParamLevelId mFmiParameterLevelId;
-    T::ParamLevelId mGrib1ParameterLevelId;
-    T::ParamLevelId mGrib2ParameterLevelId;
+    //T::ParamLevelId mGrib1ParameterLevelId;
+    //T::ParamLevelId mGrib2ParameterLevelId;
     T::ParamLevel   mParameterLevel;
 };
 

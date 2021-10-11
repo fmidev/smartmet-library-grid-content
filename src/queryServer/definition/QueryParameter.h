@@ -36,7 +36,6 @@ class QueryParameter
     T::ParamId                  mParameterKey;
     std::string                 mProducerName;
     T::GeometryId               mGeometryId;
-    T::ParamLevelIdType         mParameterLevelIdType;
     T::ParamLevelId             mParameterLevelId;
     T::ParamLevel               mParameterLevel;
     T::ForecastType             mForecastType;

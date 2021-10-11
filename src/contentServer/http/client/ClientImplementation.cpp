@@ -2999,7 +2999,7 @@ int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId,uint 
 
 
 
-int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3009,7 +3009,6 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
     request.addLine("sessionId",sessionId);
     request.addLine("parameterKeyType",parameterKeyType);
     request.addLine("parameterKey",parameterKey);
-    request.addLine("parameterLevelIdType",parameterLevelIdType);
     request.addLine("parameterLevelId",parameterLevelId);
     request.addLine("minLevel",minLevel);
     request.addLine("maxLevel",maxLevel);
@@ -3048,7 +3047,7 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
 
 
 
-int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3059,7 +3058,6 @@ int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId
     request.addLine("generationId",generationId);
     request.addLine("parameterKeyType",parameterKeyType);
     request.addLine("parameterKey",parameterKey);
-    request.addLine("parameterLevelIdType",parameterLevelIdType);
     request.addLine("parameterLevelId",parameterLevelId);
     request.addLine("minLevel",minLevel);
     request.addLine("maxLevel",maxLevel);
@@ -3098,7 +3096,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId
 
 
 
-int ClientImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3109,7 +3107,6 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
     request.addLine("generationName",generationName);
     request.addLine("parameterKeyType",parameterKeyType);
     request.addLine("parameterKey",parameterKey);
-    request.addLine("parameterLevelIdType",parameterLevelIdType);
     request.addLine("parameterLevelId",parameterLevelId);
     request.addLine("minLevel",minLevel);
     request.addLine("maxLevel",maxLevel);
@@ -3146,7 +3143,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
 
 
 
-int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3157,7 +3154,6 @@ int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId s
     request.addLine("producerId",producerId);
     request.addLine("parameterKeyType",parameterKeyType);
     request.addLine("parameterKey",parameterKey);
-    request.addLine("parameterLevelIdType",parameterLevelIdType);
     request.addLine("parameterLevelId",parameterLevelId);
     request.addLine("minLevel",minLevel);
     request.addLine("maxLevel",maxLevel);
@@ -3195,7 +3191,7 @@ int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId s
 
 
 
-int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3206,7 +3202,6 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
     request.addLine("producerName",producerName);
     request.addLine("parameterKeyType",parameterKeyType);
     request.addLine("parameterKey",parameterKey);
-    request.addLine("parameterLevelIdType",parameterLevelIdType);
     request.addLine("parameterLevelId",parameterLevelId);
     request.addLine("minLevel",minLevel);
     request.addLine("maxLevel",maxLevel);
@@ -3245,7 +3240,7 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
 
 
 
-int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelIdType parameterLevelIdType,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3256,7 +3251,6 @@ int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(
     request.addLine("generationId",generationId);
     request.addLine("parameterKeyType",parameterKeyType);
     request.addLine("parameterKey",parameterKey);
-    request.addLine("parameterLevelIdType",parameterLevelIdType);
     request.addLine("parameterLevelId",parameterLevelId);
     request.addLine("level",level);
     request.addLine("forecastType",forecastType);

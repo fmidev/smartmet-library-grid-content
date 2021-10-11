@@ -17,7 +17,6 @@ ParameterValues::ParameterValues()
     mGenerationFlags = 0;
     mGeometryId = 0;
     mParameterKeyType = T::ParamKeyTypeValue::UNKNOWN;
-    mParameterLevelIdType = T::ParamLevelIdTypeValue::ANY;
     mParameterLevelId = 0;
     mParameterLevel = 0;
     mForecastType = -1;
@@ -55,7 +54,6 @@ ParameterValues::ParameterValues(const ParameterValues& parameterValues)
 
     mParameterKeyType = parameterValues.mParameterKeyType;
     mParameterKey = parameterValues.mParameterKey;
-    mParameterLevelIdType = parameterValues.mParameterLevelIdType;
     mParameterLevelId = parameterValues.mParameterLevelId;
     mParameterLevel = parameterValues.mParameterLevel;
     mForecastType = parameterValues.mForecastType;
@@ -106,7 +104,6 @@ void ParameterValues::clear()
     mGenerationFlags = 0;
     mGeometryId = 0;
     mParameterKeyType = T::ParamKeyTypeValue::UNKNOWN;
-    mParameterLevelIdType = T::ParamLevelIdTypeValue::ANY;
     mParameterLevelId = 0;
     mParameterLevel = 0;
     mForecastType = -1;
@@ -159,7 +156,6 @@ void ParameterValues::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mAnalysisTime         = " << mAnalysisTime << "\n";
     stream << space(level) << "- mParameterKeyType     = " << C_INT(mParameterKeyType) << "\n";
     stream << space(level) << "- mParameterKey         = " << mParameterKey << "\n";
-    stream << space(level) << "- mParameterLevelIdType = " << C_INT(mParameterLevelIdType) << "\n";
     stream << space(level) << "- mParameterLevelId     = " << C_INT(mParameterLevelId) << "\n";
     stream << space(level) << "- mParameterLevel       = " << mParameterLevel << "\n";
     stream << space(level) << "- mForecastType         = " << mForecastType << "\n";

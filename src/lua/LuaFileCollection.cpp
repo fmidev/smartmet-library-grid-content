@@ -402,7 +402,6 @@ std::string LuaFileCollection::executeFunctionCall6(
                   const std::string& parameterName,
                   T::ParamKeyType parameterKeyType,
                   const std::string& parameterKey,
-                  T::ParamLevelIdType parameterLevelIdType,
                   short parameterLevelId,
                   int parameterLevel,
                   short forecastType,
@@ -419,7 +418,7 @@ std::string LuaFileCollection::executeFunctionCall6(
       if (type == 6)
       {
         return it->executeFunctionCall6(functionName,producerName,
-            parameterName,parameterKeyType,parameterKey,parameterLevelIdType,parameterLevelId,
+            parameterName,parameterKeyType,parameterKey,parameterLevelId,
             parameterLevel,forecastType,forecastNumber,interpolationMethod);
       }
     }

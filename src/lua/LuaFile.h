@@ -50,7 +50,6 @@ class LuaFile
                         const std::string& parameterName,
                         T::ParamKeyType parameterKeyType,
                         const std::string& parameterKey,
-                        T::ParamLevelIdType parameterLevelIdType,
                         short parameterLevelId,
                         int parameterLevel,
                         short forecastType,

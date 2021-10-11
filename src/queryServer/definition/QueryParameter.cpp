@@ -18,7 +18,6 @@ QueryParameter::QueryParameter()
     mType = 0;
     mLocationType = 0;
     mParameterKeyType = T::ParamKeyTypeValue::UNKNOWN;
-    mParameterLevelIdType = T::ParamLevelIdTypeValue::ANY;
     mParameterLevelId = 0;
     mParameterLevel = -1;
     mForecastType = -1;
@@ -61,7 +60,6 @@ QueryParameter::QueryParameter(const QueryParameter& queryParameter)
     mParameterKey = queryParameter.mParameterKey;
     mProducerName = queryParameter.mProducerName;
     mGeometryId = queryParameter.mGeometryId;
-    mParameterLevelIdType = queryParameter.mParameterLevelIdType;
     mParameterLevelId = queryParameter.mParameterLevelId;
     mParameterLevel = queryParameter.mParameterLevel;
     mForecastType = queryParameter.mForecastType;
@@ -128,7 +126,6 @@ std::size_t QueryParameter::getHash()
     boost::hash_combine(hash,mParameterKey);
     boost::hash_combine(hash,mProducerName);
     boost::hash_combine(hash,mGeometryId);
-    boost::hash_combine(hash,mParameterLevelIdType);
     boost::hash_combine(hash,mParameterLevelId);
     boost::hash_combine(hash,mParameterLevel);
     boost::hash_combine(hash,mForecastType );
@@ -208,7 +205,6 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mParameterKey             = " << mParameterKey << "\n";
     stream << space(level) << "- mProducerName             = " << mProducerName << "\n";
     stream << space(level) << "- mGeometryId               = " << mGeometryId << "\n";
-    stream << space(level) << "- mParameterLevelIdType     = " << C_INT(mParameterLevelIdType) << "\n";
     stream << space(level) << "- mParameterLevelId         = " << C_INT(mParameterLevelId) << "\n";
     stream << space(level) << "- mParameterLevel           = " << mParameterLevel << "\n";
     stream << space(level) << "- mForecastType             = " << mForecastType << "\n";
