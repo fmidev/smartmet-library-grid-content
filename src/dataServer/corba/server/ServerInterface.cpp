@@ -254,7 +254,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueByPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short areaInterpolationMethod, SmartMet::DataServer::Corba::CorbaParamValue& value)
+::CORBA::Long ServerInterface::getGridValueByPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short areaInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -262,8 +262,11 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
     T::ParamValue sValue = 0;
-    int result = mService->getGridValueByPoint(sessionId,fileId,messageIndex,coordinateType,x,y,(short)areaInterpolationMethod,sValue);
+    int result = mService->getGridValueByPoint(sessionId,fileId,messageIndex,coordinateType,x,y,(short)areaInterpolationMethod,modificationOperation,modParams,sValue);
 
     if (result == 0)
       value = sValue;
@@ -282,7 +285,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueByLevelAndPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::Long level1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long level2, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short levelInterpolationMethod, SmartMet::DataServer::Corba::CorbaParamValue& value)
+::CORBA::Long ServerInterface::getGridValueByLevelAndPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::Long level1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long level2, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -290,8 +293,11 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
     T::ParamValue sValue = 0;
-    int result = mService->getGridValueByLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,newLevel,coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,sValue);
+    int result = mService->getGridValueByLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,newLevel,coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,modificationOperation,modParams,sValue);
 
     if (result == 0)
       value = sValue;
@@ -310,7 +316,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueByTimeAndPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short timeInterpolationMethod, SmartMet::DataServer::Corba::CorbaParamValue& value)
+::CORBA::Long ServerInterface::getGridValueByTimeAndPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short timeInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -318,8 +324,11 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
     T::ParamValue sValue = 0;
-    int result = mService->getGridValueByTimeAndPoint(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,sValue);
+    int result = mService->getGridValueByTimeAndPoint(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modParams,sValue);
 
     if (result == 0)
       value = sValue;
@@ -338,7 +347,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueByTimeLevelAndPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::Long level1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long level2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::Long level3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::Long level4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, SmartMet::DataServer::Corba::CorbaParamValue& value)
+::CORBA::Long ServerInterface::getGridValueByTimeLevelAndPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::Long level1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long level2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::Long level3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::Long level4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -346,8 +355,11 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
     T::ParamValue sValue = 0;
-    int result = mService->getGridValueByTimeLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,(time_t)newTime,newLevel,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,sValue);
+    int result = mService->getGridValueByTimeLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,(time_t)newTime,newLevel,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modParams,sValue);
 
     if (result == 0)
       value = sValue;
@@ -365,7 +377,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByCircle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::Double origoX, ::CORBA::Double origoY, ::CORBA::Double radius, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByCircle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::Double origoX, ::CORBA::Double origoY, ::CORBA::Double radius, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -377,7 +389,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByCircle(sessionId,fileId,messageIndex,coordinateType,origoX,origoY,radius,sValueList);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueListByCircle(sessionId,fileId,messageIndex,coordinateType,origoX,origoY,radius,modificationOperation,modParams,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -396,7 +411,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByLevelAndCircle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, ::CORBA::Double origoX, ::CORBA::Double origoY, ::CORBA::Double radius, ::CORBA::Short levelInterpolationMethod, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByLevelAndCircle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, ::CORBA::Double origoX, ::CORBA::Double origoY, ::CORBA::Double radius, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -408,7 +423,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByLevelAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,origoX,origoY,radius,levelInterpolationMethod,sValueList);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueListByLevelAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,origoX,origoY,radius,levelInterpolationMethod,modificationOperation,modParams,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -427,7 +445,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByTimeAndCircle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Octet coordinateType, ::CORBA::Double origoX, ::CORBA::Double origoY, ::CORBA::Double radius, ::CORBA::Short timeInterpolationMethod, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByTimeAndCircle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Octet coordinateType, ::CORBA::Double origoX, ::CORBA::Double origoY, ::CORBA::Double radius, ::CORBA::Short timeInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -439,7 +457,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByTimeAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,coordinateType,origoX,origoY,radius,timeInterpolationMethod,sValueList);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueListByTimeAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,coordinateType,origoX,origoY,radius,timeInterpolationMethod,modificationOperation,modParams,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -458,7 +479,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByTimeLevelAndCircle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, ::CORBA::Double origoX, ::CORBA::Double origoY, ::CORBA::Double radius, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByTimeLevelAndCircle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, ::CORBA::Double origoX, ::CORBA::Double origoY, ::CORBA::Double radius, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -470,7 +491,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByTimeLevelAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,coordinateType,origoX,origoY,radius,timeInterpolationMethod,levelInterpolationMethod,sValueList);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueListByTimeLevelAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,coordinateType,origoX,origoY,radius,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modParams,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -489,41 +513,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByPointList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& pointList, ::CORBA::Short areaInterpolationMethod, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::GridValueList sValueList;
-    std::vector<T::Coordinate> sPointList;
-    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
-    valueList = corbaValueList;
-
-    DataServer::Corba::Converter::convert(pointList,sPointList);
-
-    if (mService == nullptr)
-      throw Fmi::Exception(BCP,"Service not initialized!");
-
-    int result = mService->getGridValueListByPointList(sessionId,fileId,messageIndex,coordinateType,sPointList,(short)areaInterpolationMethod,sValueList);
-
-    if (result == 0)
-      DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
-
-    return result;
-  }
-  catch (...)
-  {
-    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
-
-
-
-
-::CORBA::Long ServerInterface::getGridValueListByLevelAndPointList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& pointList, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short levelInterpolationMethod, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByPointList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& pointList, ::CORBA::Short areaInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -538,7 +528,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByLevelAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,sPointList,(short)areaInterpolationMethod,(short)levelInterpolationMethod,sValueList);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueListByPointList(sessionId,fileId,messageIndex,coordinateType,sPointList,(short)areaInterpolationMethod,modificationOperation,modParams,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -557,7 +550,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByTimeAndPointList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& pointList, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short timeInterpolationMethod, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByLevelAndPointList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& pointList, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -572,7 +565,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByTimeAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,coordinateType,sPointList,(short)areaInterpolationMethod,(short)timeInterpolationMethod,sValueList);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueListByLevelAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,sPointList,(short)areaInterpolationMethod,(short)levelInterpolationMethod,modificationOperation,modParams,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -591,7 +587,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByTimeLevelAndPointList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& pointList, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByTimeAndPointList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& pointList, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short timeInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -606,7 +602,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByTimeLevelAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,coordinateType,sPointList,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,sValueList);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueListByTimeAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,coordinateType,sPointList,(short)areaInterpolationMethod,(short)timeInterpolationMethod,modificationOperation,modParams,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -625,7 +624,44 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByPolygon(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& polygonPoints, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByTimeLevelAndPointList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& pointList, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::GridValueList sValueList;
+    std::vector<T::Coordinate> sPointList;
+    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    valueList = corbaValueList;
+
+    DataServer::Corba::Converter::convert(pointList,sPointList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueListByTimeLevelAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,coordinateType,sPointList,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modParams,sValueList);
+
+    if (result == 0)
+      DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getGridValueListByPolygon(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& polygonPoints, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -640,7 +676,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByPolygon(sessionId,fileId,messageIndex,coordinateType,sPolygonPoints,sValueList);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueListByPolygon(sessionId,fileId,messageIndex,coordinateType,sPolygonPoints,modificationOperation,modParams,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -659,7 +698,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByLevelAndPolygon(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& polygonPoints, ::CORBA::Short levelInterpolationMethod, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByLevelAndPolygon(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& polygonPoints, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -674,7 +713,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByLevelAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,sPolygonPoints,levelInterpolationMethod,sValueList);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueListByLevelAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,sPolygonPoints,levelInterpolationMethod,modificationOperation,modParams,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -693,7 +735,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByTimeAndPolygon(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& polygonPoints, ::CORBA::Short timeInterpolationMethod, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByTimeAndPolygon(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& polygonPoints, ::CORBA::Short timeInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -708,7 +750,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByTimeAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,coordinateType,sPolygonPoints,timeInterpolationMethod,sValueList);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueListByTimeAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,coordinateType,sPolygonPoints,timeInterpolationMethod,modificationOperation,modParams,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -727,7 +772,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByTimeLevelAndPolygon(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& polygonPoints, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByTimeLevelAndPolygon(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& polygonPoints, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -742,7 +787,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByTimeLevelAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,coordinateType,sPolygonPoints,timeInterpolationMethod,levelInterpolationMethod,sValueList);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueListByTimeLevelAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,coordinateType,sPolygonPoints,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modParams,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -761,7 +809,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByPolygonPath(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaPolygonPath& polygonPath, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByPolygonPath(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaPolygonPath& polygonPath, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -776,7 +824,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByPolygonPath(sessionId,fileId,messageIndex,coordinateType,sPolygonPath,sValueList);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueListByPolygonPath(sessionId,fileId,messageIndex,coordinateType,sPolygonPath,modificationOperation,modParams,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -795,7 +846,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByLevelAndPolygonPath(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaPolygonPath& polygonPath, ::CORBA::Short levelInterpolationMethod, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByLevelAndPolygonPath(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaPolygonPath& polygonPath, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -810,7 +861,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByLevelAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,sPolygonPath,levelInterpolationMethod,sValueList);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueListByLevelAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,sPolygonPath,levelInterpolationMethod,modificationOperation,modParams,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -829,7 +883,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByTimeAndPolygonPath(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaPolygonPath& polygonPath, ::CORBA::Short timeInterpolationMethod, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByTimeAndPolygonPath(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaPolygonPath& polygonPath, ::CORBA::Short timeInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -844,7 +898,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByTimeAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,coordinateType,sPolygonPath,timeInterpolationMethod,sValueList);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueListByTimeAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,coordinateType,sPolygonPath,timeInterpolationMethod,modificationOperation,modParams,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -863,7 +920,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByTimeLevelAndPolygonPath(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaPolygonPath& polygonPath, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByTimeLevelAndPolygonPath(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaPolygonPath& polygonPath, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -878,7 +935,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByTimeLevelAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,coordinateType,sPolygonPath,timeInterpolationMethod,levelInterpolationMethod,sValueList);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueListByTimeLevelAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,coordinateType,sPolygonPath,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modParams,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -897,7 +957,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByRectangle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::Double x1, ::CORBA::Double y1, ::CORBA::Double x2, ::CORBA::Double y2, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+::CORBA::Long ServerInterface::getGridValueListByRectangle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::Double x1, ::CORBA::Double y1, ::CORBA::Double x2, ::CORBA::Double y2, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -909,7 +969,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueListByRectangle(sessionId,fileId,messageIndex,coordinateType,x1,y1,x2,y2,sValueList);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueListByRectangle(sessionId,fileId,messageIndex,coordinateType,x1,y1,x2,y2,modificationOperation,modParams,sValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueList,*corbaValueList);
@@ -928,7 +991,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVector(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+::CORBA::Long ServerInterface::getGridValueVector(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
 {
   FUNCTION_TRACE
   try
@@ -940,7 +1003,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueVector(sessionId,fileId,messageIndex,sValues);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueVector(sessionId,fileId,messageIndex,modificationOperation,modParams,sValues);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValues,*corbaValues);
@@ -959,7 +1025,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, ::CORBA::Short levelInterpolationMethod, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+::CORBA::Long ServerInterface::getGridValueVectorByLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
 {
   FUNCTION_TRACE
   try
@@ -971,7 +1037,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueVectorByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,levelInterpolationMethod,sValues);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueVectorByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,levelInterpolationMethod,modificationOperation,modParams,sValues);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValues,*corbaValues);
@@ -990,7 +1059,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByTime(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Short timeInterpolationMethod, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+::CORBA::Long ServerInterface::getGridValueVectorByTime(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Short timeInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
 {
   FUNCTION_TRACE
   try
@@ -1002,7 +1071,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueVectorByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,timeInterpolationMethod,sValues);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueVectorByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,timeInterpolationMethod,modificationOperation,modParams,sValues);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValues,*corbaValues);
@@ -1021,7 +1093,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+::CORBA::Long ServerInterface::getGridValueVectorByLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
 {
   FUNCTION_TRACE
   try
@@ -1036,7 +1108,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueVectorByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,sAttributeList,sValues);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueVectorByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,sAttributeList,modificationOperation,modParams,sValues);
 
     if (result == 0)
     {
@@ -1057,7 +1132,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByTimeAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+::CORBA::Long ServerInterface::getGridValueVectorByTimeAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
 {
   FUNCTION_TRACE
   try
@@ -1072,7 +1147,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueVectorByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,sAttributeList,sValues);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueVectorByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,sAttributeList,modificationOperation,modParams,sValues);
 
     if (result == 0)
     {
@@ -1094,7 +1172,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByCoordinateList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& coordinates, ::CORBA::Short areaInterpolationMethod, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+::CORBA::Long ServerInterface::getGridValueVectorByCoordinateList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& coordinates, ::CORBA::Short areaInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
 {
   FUNCTION_TRACE
   try
@@ -1109,7 +1187,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueVectorByCoordinateList(sessionId,fileId,messageIndex,coordinateType,sCoordinateList,areaInterpolationMethod,sValues);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueVectorByCoordinateList(sessionId,fileId,messageIndex,coordinateType,sCoordinateList,areaInterpolationMethod,modificationOperation,modParams,sValues);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValues,*corbaValues);
@@ -1128,7 +1209,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByLevelAndCoordinateList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& coordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+::CORBA::Long ServerInterface::getGridValueVectorByLevelAndCoordinateList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& coordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
 {
   FUNCTION_TRACE
   try
@@ -1145,7 +1226,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueVectorByLevelAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,sCoordinateList,sAttributeList,sValues);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueVectorByLevelAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,sCoordinateList,sAttributeList,modificationOperation,modParams,sValues);
 
     if (result == 0)
     {
@@ -1167,7 +1251,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByTimeAndCoordinateList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& coordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+::CORBA::Long ServerInterface::getGridValueVectorByTimeAndCoordinateList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& coordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
 {
   FUNCTION_TRACE
   try
@@ -1184,7 +1268,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueVectorByTimeAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,coordinateType,sCoordinateList,sAttributeList,sValues);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueVectorByTimeAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,coordinateType,sCoordinateList,sAttributeList,modificationOperation,modParams,sValues);
 
     if (result == 0)
     {
@@ -1206,7 +1293,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+::CORBA::Long ServerInterface::getGridValueVectorByGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
 {
   FUNCTION_TRACE
   try
@@ -1221,7 +1308,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueVectorByGeometry(sessionId,fileId,messageIndex,sAttributeList,sValues);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueVectorByGeometry(sessionId,fileId,messageIndex,sAttributeList,modificationOperation,modParams,sValues);
 
     if (result == 0)
     {
@@ -1243,7 +1333,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByRectangle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::ULong columns, ::CORBA::ULong rows, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Double xStep, ::CORBA::Double yStep, ::CORBA::Short areaInterpolationMethod, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+::CORBA::Long ServerInterface::getGridValueVectorByRectangle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::ULong columns, ::CORBA::ULong rows, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Double xStep, ::CORBA::Double yStep, ::CORBA::Short areaInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
 {
   FUNCTION_TRACE
   try
@@ -1255,7 +1345,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueVectorByRectangle(sessionId,fileId,messageIndex,coordinateType,columns,rows,x,y,xStep,yStep,(short)areaInterpolationMethod,sValues);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueVectorByRectangle(sessionId,fileId,messageIndex,coordinateType,columns,rows,x,y,xStep,yStep,(short)areaInterpolationMethod,modificationOperation,modParams,sValues);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValues,*corbaValues);
@@ -1274,7 +1367,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::ULong vectorType, SmartMet::DataServer::Corba::CorbaDoubleList_out valueVector)
+::CORBA::Long ServerInterface::getGridValueVectorByPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::ULong vectorType, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaDoubleList_out valueVector)
 {
   FUNCTION_TRACE
   try
@@ -1286,7 +1379,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueVectorByPoint(sessionId,fileId,messageIndex,coordinateType,x,y,vectorType,sValueVector);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueVectorByPoint(sessionId,fileId,messageIndex,coordinateType,x,y,vectorType,modificationOperation,modParams,sValueVector);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueVector,*corbaValueVector);
@@ -1305,7 +1401,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByTimeAndLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+::CORBA::Long ServerInterface::getGridValueVectorByTimeAndLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
 {
   FUNCTION_TRACE
   try
@@ -1317,7 +1413,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueVectorByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,sValues);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueVectorByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modParams,sValues);
 
     if (result == 0)
     {
@@ -1338,7 +1437,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByTimeLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+::CORBA::Long ServerInterface::getGridValueVectorByTimeLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
 {
   FUNCTION_TRACE
   try
@@ -1353,7 +1452,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueVectorByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,sAttributeList,sValues);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueVectorByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,sAttributeList,modificationOperation,modParams,sValues);
 
     if (result == 0)
     {
@@ -1375,7 +1477,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByTimeLevelAndCoordinateList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& coordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+::CORBA::Long ServerInterface::getGridValueVectorByTimeLevelAndCoordinateList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& coordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
 {
   FUNCTION_TRACE
   try
@@ -1393,7 +1495,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridValueVectorByTimeLevelAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,coordinateType,sCoordinateList,sAttributeList,sValues);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridValueVectorByTimeLevelAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,coordinateType,sCoordinateList,sAttributeList,modificationOperation,modParams,sValues);
 
     if (result == 0)
     {
@@ -1415,7 +1520,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsobands(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+::CORBA::Long ServerInterface::getGridIsobands(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -1436,7 +1541,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridIsobands(sessionId,fileId,messageIndex,sContourLowValues,sContourHighValues,sAttributeList,sContours);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsobands(sessionId,fileId,messageIndex,sContourLowValues,sContourHighValues,sAttributeList,modificationOperation,modParams,sContours);
 
     if (result == 0)
     {
@@ -1458,7 +1566,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsobandsByGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+::CORBA::Long ServerInterface::getGridIsobandsByGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -1478,7 +1586,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridIsobandsByGeometry(sessionId,fileId,messageIndex,sContourLowValues,sContourHighValues,sAttributeList,sContours);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsobandsByGeometry(sessionId,fileId,messageIndex,sContourLowValues,sContourHighValues,sAttributeList,modificationOperation,modParams,sContours);
 
     if (result == 0)
     {
@@ -1500,221 +1611,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsobandsByGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::ByteData_vec sContours;
-    T::ParamValue_vec sContourLowValues;
-    T::ParamValue_vec sContourHighValues;
-    std::vector<T::Coordinate> sCoordinateList;
-    T::AttributeList sAttributeList;
-
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
-    contours = corbaContours;
-
-    DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
-    DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
-    DataServer::Corba::Converter::convert(contourHighValues,sContourHighValues);
-    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
-
-    if (mService == nullptr)
-      throw Fmi::Exception(BCP,"Service not initialized!");
-
-    int result = mService->getGridIsobandsByGrid(sessionId,fileId,messageIndex,sContourLowValues,sContourHighValues,gridWidth,gridHeight,sCoordinateList,sAttributeList,sContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(sContours,*corbaContours);
-    }
-
-    return result;
-  }
-  catch (...)
-  {
-    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
-
-
-
-
-::CORBA::Long ServerInterface::getGridIsobandsByLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::ByteData_vec sContours;
-    T::ParamValue_vec sContourLowValues;
-    T::ParamValue_vec sContourHighValues;
-    T::AttributeList sAttributeList;
-
-
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
-    contours = corbaContours;
-
-    DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
-    DataServer::Corba::Converter::convert(contourHighValues,sContourHighValues);
-    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
-
-    if (mService == nullptr)
-      throw Fmi::Exception(BCP,"Service not initialized!");
-
-    int result = mService->getGridIsobandsByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,sContourLowValues,sContourHighValues,sAttributeList,sContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(sContours,*corbaContours);
-    }
-
-    return result;
-  }
-  catch (...)
-  {
-    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
-
-
-
-
-::CORBA::Long ServerInterface::getGridIsobandsByTime(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::ByteData_vec sContours;
-    T::ParamValue_vec sContourLowValues;
-    T::ParamValue_vec sContourHighValues;
-    T::AttributeList sAttributeList;
-
-
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
-    contours = corbaContours;
-
-    DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
-    DataServer::Corba::Converter::convert(contourHighValues,sContourHighValues);
-    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
-
-    if (mService == nullptr)
-      throw Fmi::Exception(BCP,"Service not initialized!");
-
-    int result = mService->getGridIsobandsByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,sContourLowValues,sContourHighValues,sAttributeList,sContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(sContours,*corbaContours);
-    }
-
-    return result;
-  }
-  catch (...)
-  {
-    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
-
-
-
-
-::CORBA::Long ServerInterface::getGridIsobandsByLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::ByteData_vec sContours;
-    T::ParamValue_vec sContourLowValues;
-    T::ParamValue_vec sContourHighValues;
-    T::AttributeList sAttributeList;
-
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
-    contours = corbaContours;
-
-    DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
-    DataServer::Corba::Converter::convert(contourHighValues,sContourHighValues);
-    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
-
-    if (mService == nullptr)
-      throw Fmi::Exception(BCP,"Service not initialized!");
-
-    int result = mService->getGridIsobandsByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,sContourLowValues,sContourHighValues,sAttributeList,sContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(sContours,*corbaContours);
-    }
-
-    return result;
-  }
-  catch (...)
-  {
-    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
-
-
-
-
-::CORBA::Long ServerInterface::getGridIsobandsByTimeAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::ByteData_vec sContours;
-    T::ParamValue_vec sContourLowValues;
-    T::ParamValue_vec sContourHighValues;
-    T::AttributeList sAttributeList;
-
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
-    contours = corbaContours;
-
-    DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
-    DataServer::Corba::Converter::convert(contourHighValues,sContourHighValues);
-    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
-
-    if (mService == nullptr)
-      throw Fmi::Exception(BCP,"Service not initialized!");
-
-    int result = mService->getGridIsobandsByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,sContourLowValues,sContourHighValues,sAttributeList,sContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(sContours,*corbaContours);
-    }
-
-    return result;
-  }
-  catch (...)
-  {
-    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
-
-
-
-
-::CORBA::Long ServerInterface::getGridIsobandsByLevelAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+::CORBA::Long ServerInterface::getGridIsobandsByGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -1736,7 +1633,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridIsobandsByLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,sContourLowValues,sContourHighValues,gridWidth,gridHeight,sCoordinateList,sAttributeList,sContours);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsobandsByGrid(sessionId,fileId,messageIndex,sContourLowValues,sContourHighValues,gridWidth,gridHeight,sCoordinateList,sAttributeList,modificationOperation,modParams,sContours);
 
     if (result == 0)
     {
@@ -1757,7 +1657,190 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsobandsByTimeAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+
+::CORBA::Long ServerInterface::getGridIsobandsByLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sContours;
+    T::ParamValue_vec sContourLowValues;
+    T::ParamValue_vec sContourHighValues;
+    T::AttributeList sAttributeList;
+
+
+    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    contours = corbaContours;
+
+    DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
+    DataServer::Corba::Converter::convert(contourHighValues,sContourHighValues);
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsobandsByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,sContourLowValues,sContourHighValues,sAttributeList,modificationOperation,modParams,sContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sContours,*corbaContours);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getGridIsobandsByTime(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sContours;
+    T::ParamValue_vec sContourLowValues;
+    T::ParamValue_vec sContourHighValues;
+    T::AttributeList sAttributeList;
+
+
+    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    contours = corbaContours;
+
+    DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
+    DataServer::Corba::Converter::convert(contourHighValues,sContourHighValues);
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsobandsByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,sContourLowValues,sContourHighValues,sAttributeList,modificationOperation,modParams,sContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sContours,*corbaContours);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getGridIsobandsByLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sContours;
+    T::ParamValue_vec sContourLowValues;
+    T::ParamValue_vec sContourHighValues;
+    T::AttributeList sAttributeList;
+
+    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    contours = corbaContours;
+
+    DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
+    DataServer::Corba::Converter::convert(contourHighValues,sContourHighValues);
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsobandsByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,sContourLowValues,sContourHighValues,sAttributeList,modificationOperation,modParams,sContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sContours,*corbaContours);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getGridIsobandsByTimeAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sContours;
+    T::ParamValue_vec sContourLowValues;
+    T::ParamValue_vec sContourHighValues;
+    T::AttributeList sAttributeList;
+
+    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    contours = corbaContours;
+
+    DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
+    DataServer::Corba::Converter::convert(contourHighValues,sContourHighValues);
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsobandsByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,sContourLowValues,sContourHighValues,sAttributeList,modificationOperation,modParams,sContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sContours,*corbaContours);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getGridIsobandsByLevelAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -1779,7 +1862,56 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridIsobandsByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,sContourLowValues,sContourHighValues,gridWidth,gridHeight,sCoordinateList,sAttributeList,sContours);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsobandsByLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,sContourLowValues,sContourHighValues,gridWidth,gridHeight,sCoordinateList,sAttributeList,modificationOperation,modParams,sContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sContours,*corbaContours);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+::CORBA::Long ServerInterface::getGridIsobandsByTimeAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sContours;
+    T::ParamValue_vec sContourLowValues;
+    T::ParamValue_vec sContourHighValues;
+    std::vector<T::Coordinate> sCoordinateList;
+    T::AttributeList sAttributeList;
+
+    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    contours = corbaContours;
+
+    DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
+    DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
+    DataServer::Corba::Converter::convert(contourHighValues,sContourHighValues);
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsobandsByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,sContourLowValues,sContourHighValues,gridWidth,gridHeight,sCoordinateList,sAttributeList,modificationOperation,modParams,sContours);
 
     if (result == 0)
     {
@@ -1801,7 +1933,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsobandsByTimeAndLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+::CORBA::Long ServerInterface::getGridIsobandsByTimeAndLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -1822,7 +1954,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridIsobandsByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,sContourLowValues,sContourHighValues,sAttributeList,sContours);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsobandsByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,sContourLowValues,sContourHighValues,sAttributeList,modificationOperation,modParams,sContours);
 
     if (result == 0)
     {
@@ -1844,7 +1979,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsobandsByTimeLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+::CORBA::Long ServerInterface::getGridIsobandsByTimeLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -1865,7 +2000,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridIsobandsByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,sContourLowValues,sContourHighValues,sAttributeList,sContours);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsobandsByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,sContourLowValues,sContourHighValues,sAttributeList,modificationOperation,modParams,sContours);
 
     if (result == 0)
     {
@@ -1887,7 +2025,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsobandsByTimeLevelAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+::CORBA::Long ServerInterface::getGridIsobandsByTimeLevelAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -1910,7 +2048,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridIsobandsByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,sContourLowValues,sContourHighValues,gridWidth,gridHeight,sCoordinateList,sAttributeList,sContours);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsobandsByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,sContourLowValues,sContourHighValues,gridWidth,gridHeight,sCoordinateList,sAttributeList,modificationOperation,modParams,sContours);
 
     if (result == 0)
     {
@@ -1932,7 +2073,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolinesByTimeAndLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+::CORBA::Long ServerInterface::getGridIsolinesByTimeAndLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -1951,7 +2092,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridIsolinesByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,sContourValues,sAttributeList,sContours);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsolinesByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,sContourValues,sAttributeList,modificationOperation,modParams,sContours);
 
     if (result == 0)
     {
@@ -1973,7 +2117,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolinesByTimeLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+::CORBA::Long ServerInterface::getGridIsolinesByTimeLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -1992,7 +2136,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridIsolinesByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,sContourValues,sAttributeList,sContours);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsolinesByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,sContourValues,sAttributeList,modificationOperation,modParams,sContours);
 
     if (result == 0)
     {
@@ -2014,7 +2161,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolines(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+::CORBA::Long ServerInterface::getGridIsolines(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2032,7 +2179,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridIsolines(sessionId,fileId,messageIndex,sContourValues,sAttributeList,sContours);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsolines(sessionId,fileId,messageIndex,sContourValues,sAttributeList,modificationOperation,modParams,sContours);
 
     if (result == 0)
     {
@@ -2054,7 +2204,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolinesByGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+::CORBA::Long ServerInterface::getGridIsolinesByGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2072,7 +2222,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridIsolinesByGeometry(sessionId,fileId,messageIndex,sContourValues,sAttributeList,sContours);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsolinesByGeometry(sessionId,fileId,messageIndex,sContourValues,sAttributeList,modificationOperation,modParams,sContours);
 
     if (result == 0)
     {
@@ -2094,209 +2247,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolinesByGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::ByteData_vec sContours;
-    T::ParamValue_vec sContourValues;
-    std::vector<T::Coordinate> sCoordinateList;
-    T::AttributeList sAttributeList;
-    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
-
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
-    contours = corbaContours;
-
-    DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
-    DataServer::Corba::Converter::convert(contourValues,sContourValues);
-
-    if (mService == nullptr)
-      throw Fmi::Exception(BCP,"Service not initialized!");
-
-    int result = mService->getGridIsolinesByGrid(sessionId,fileId,messageIndex,sContourValues,gridWidth,gridHeight,sCoordinateList,sAttributeList,sContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(sContours,*corbaContours);
-    }
-
-    return result;
-  }
-  catch (...)
-  {
-    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
-
-
-
-
-::CORBA::Long ServerInterface::getGridIsolinesByLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::ByteData_vec sContours;
-    T::ParamValue_vec sContourValues;
-    T::AttributeList sAttributeList;
-    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
-
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
-    contours = corbaContours;
-
-    DataServer::Corba::Converter::convert(contourValues,sContourValues);
-
-    if (mService == nullptr)
-      throw Fmi::Exception(BCP,"Service not initialized!");
-
-    int result = mService->getGridIsolinesByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,sContourValues,sAttributeList,sContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(sContours,*corbaContours);
-    }
-
-    return result;
-  }
-  catch (...)
-  {
-    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
-
-
-
-
-::CORBA::Long ServerInterface::getGridIsolinesByTime(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::ByteData_vec sContours;
-    T::ParamValue_vec sContourValues;
-    T::AttributeList sAttributeList;
-    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
-
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
-    contours = corbaContours;
-
-    DataServer::Corba::Converter::convert(contourValues,sContourValues);
-
-    if (mService == nullptr)
-      throw Fmi::Exception(BCP,"Service not initialized!");
-
-    int result = mService->getGridIsolinesByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,sContourValues,sAttributeList,sContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(sContours,*corbaContours);
-    }
-
-    return result;
-  }
-  catch (...)
-  {
-    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
-
-
-
-
-::CORBA::Long ServerInterface::getGridIsolinesByLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::ByteData_vec sContours;
-    T::ParamValue_vec sContourValues;
-    T::AttributeList sAttributeList;
-    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
-
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
-    contours = corbaContours;
-
-    DataServer::Corba::Converter::convert(contourValues,sContourValues);
-
-    if (mService == nullptr)
-      throw Fmi::Exception(BCP,"Service not initialized!");
-
-    int result = mService->getGridIsolinesByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,sContourValues,sAttributeList,sContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(sContours,*corbaContours);
-    }
-
-    return result;
-  }
-  catch (...)
-  {
-    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
-
-
-
-
-::CORBA::Long ServerInterface::getGridIsolinesByTimeAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::ByteData_vec sContours;
-    T::ParamValue_vec sContourValues;
-    T::AttributeList sAttributeList;
-    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
-
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
-    contours = corbaContours;
-
-    DataServer::Corba::Converter::convert(contourValues,sContourValues);
-
-    if (mService == nullptr)
-      throw Fmi::Exception(BCP,"Service not initialized!");
-
-    int result = mService->getGridIsolinesByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,sContourValues,sAttributeList,sContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(sContours,*corbaContours);
-    }
-
-    return result;
-  }
-  catch (...)
-  {
-    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
-
-
-
-
-::CORBA::Long ServerInterface::getGridIsolinesByLevelAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+::CORBA::Long ServerInterface::getGridIsolinesByGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2316,7 +2267,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridIsolinesByLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,sContourValues,gridWidth,gridHeight,sCoordinateList,sAttributeList,sContours);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsolinesByGrid(sessionId,fileId,messageIndex,sContourValues,gridWidth,gridHeight,sCoordinateList,sAttributeList,modificationOperation,modParams,sContours);
 
     if (result == 0)
     {
@@ -2338,7 +2292,179 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolinesByTimeAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+::CORBA::Long ServerInterface::getGridIsolinesByLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sContours;
+    T::ParamValue_vec sContourValues;
+    T::AttributeList sAttributeList;
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    contours = corbaContours;
+
+    DataServer::Corba::Converter::convert(contourValues,sContourValues);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsolinesByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,sContourValues,sAttributeList,modificationOperation,modParams,sContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sContours,*corbaContours);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getGridIsolinesByTime(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sContours;
+    T::ParamValue_vec sContourValues;
+    T::AttributeList sAttributeList;
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    contours = corbaContours;
+
+    DataServer::Corba::Converter::convert(contourValues,sContourValues);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsolinesByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,sContourValues,sAttributeList,modificationOperation,modParams,sContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sContours,*corbaContours);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getGridIsolinesByLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sContours;
+    T::ParamValue_vec sContourValues;
+    T::AttributeList sAttributeList;
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    contours = corbaContours;
+
+    DataServer::Corba::Converter::convert(contourValues,sContourValues);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsolinesByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,sContourValues,sAttributeList,modificationOperation,modParams,sContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sContours,*corbaContours);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getGridIsolinesByTimeAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sContours;
+    T::ParamValue_vec sContourValues;
+    T::AttributeList sAttributeList;
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    contours = corbaContours;
+
+    DataServer::Corba::Converter::convert(contourValues,sContourValues);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsolinesByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,sContourValues,sAttributeList,modificationOperation,modParams,sContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sContours,*corbaContours);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getGridIsolinesByLevelAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2358,7 +2484,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridIsolinesByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,sContourValues,gridWidth,gridHeight,sCoordinateList,sAttributeList,sContours);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsolinesByLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,sContourValues,gridWidth,gridHeight,sCoordinateList,sAttributeList,modificationOperation,modParams,sContours);
 
     if (result == 0)
     {
@@ -2380,7 +2509,52 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolinesByTimeLevelAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+::CORBA::Long ServerInterface::getGridIsolinesByTimeAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sContours;
+    T::ParamValue_vec sContourValues;
+    std::vector<T::Coordinate> sCoordinateList;
+    T::AttributeList sAttributeList;
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    contours = corbaContours;
+
+    DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
+    DataServer::Corba::Converter::convert(contourValues,sContourValues);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsolinesByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,(time_t)newTime,sContourValues,gridWidth,gridHeight,sCoordinateList,sAttributeList,modificationOperation,modParams,sContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sContours,*corbaContours);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getGridIsolinesByTimeLevelAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2401,7 +2575,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getGridIsolinesByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,sContourValues,gridWidth,gridHeight,sCoordinateList,sAttributeList,sContours);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridIsolinesByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,(time_t)newTime,newLevel,sContourValues,gridWidth,gridHeight,sCoordinateList,sAttributeList,modificationOperation,modParams,sContours);
 
     if (result == 0)
     {
@@ -2423,7 +2600,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getMultipleGridValues(::CORBA::LongLong sessionId, SmartMet::DataServer::Corba::CorbaValueRecordList& valueRecordList)
+::CORBA::Long ServerInterface::getMultipleGridValues(::CORBA::LongLong sessionId, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaValueRecordList& valueRecordList)
 {
   FUNCTION_TRACE
   try
@@ -2434,7 +2611,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::ValueRecordList sValueRecordList;
     DataServer::Corba::Converter::convert(valueRecordList,sValueRecordList);
 
-    int result = mService->getMultipleGridValues(sessionId,sValueRecordList);
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getMultipleGridValues(sessionId,modificationOperation,modParams,sValueRecordList);
     if (result == 0)
       DataServer::Corba::Converter::convert(sValueRecordList,valueRecordList);
 

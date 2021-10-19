@@ -254,7 +254,7 @@ int ClientImplementation::_getGridMessagePreloadCount(T::SessionId sessionId,uin
 
 
 
-int ClientImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,T::ParamValue& value)
+int ClientImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   try
   {
@@ -262,8 +262,10 @@ int ClientImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileI
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
     SmartMet::DataServer::Corba::CorbaParamValue corbaValue = 0;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueByPoint(sessionId,fileId,messageIndex,(CORBA::Octet)coordinateType,x,y,(CORBA::Short)areaInterpolationMethod,corbaValue);
+    int result = mService->getGridValueByPoint(sessionId,fileId,messageIndex,(CORBA::Octet)coordinateType,x,y,(CORBA::Short)areaInterpolationMethod,modificationOperation,corbaModParams,corbaValue);
 
     if (result == 0)
       value = corbaValue;
@@ -277,7 +279,7 @@ int ClientImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileI
 
 
 
-int ClientImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
+int ClientImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   try
   {
@@ -285,8 +287,10 @@ int ClientImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,ui
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
     SmartMet::DataServer::Corba::CorbaParamValue corbaValue = 0;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueByLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,newLevel,(CORBA::Octet)coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,corbaValue);
+    int result = mService->getGridValueByLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,newLevel,(CORBA::Octet)coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,modificationOperation,corbaModParams,corbaValue);
 
     if (result == 0)
       value = corbaValue;
@@ -300,7 +304,7 @@ int ClientImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,ui
 
 
 
-int ClientImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,T::ParamValue& value)
+int ClientImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   try
   {
@@ -308,8 +312,10 @@ int ClientImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,uin
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
     SmartMet::DataServer::Corba::CorbaParamValue corbaValue = 0;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueByTimeAndPoint(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,(CORBA::Octet)coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,corbaValue);
+    int result = mService->getGridValueByTimeAndPoint(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,(CORBA::Octet)coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,modificationOperation,corbaModParams,corbaValue);
 
     if (result == 0)
       value = corbaValue;
@@ -323,7 +329,7 @@ int ClientImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,uin
 
 
 
-int ClientImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,uint fileId3,uint messageIndex3,int level3,uint fileId4,uint messageIndex4,int level4,time_t newTime,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
+int ClientImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,uint fileId3,uint messageIndex3,int level3,uint fileId4,uint messageIndex4,int level4,time_t newTime,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   try
   {
@@ -331,8 +337,10 @@ int ClientImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId sessionI
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
     SmartMet::DataServer::Corba::CorbaParamValue corbaValue = 0;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueByTimeLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,newTime,newLevel,(CORBA::Octet)coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,corbaValue);
+    int result = mService->getGridValueByTimeLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,newTime,newLevel,(CORBA::Octet)coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,corbaModParams,corbaValue);
 
     if (result == 0)
       value = corbaValue;
@@ -346,7 +354,7 @@ int ClientImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId sessionI
 
 
 
-int ClientImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double origoX,double origoY,double radius,T::GridValueList& valueList)
+int ClientImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double origoX,double origoY,double radius,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -354,9 +362,10 @@ int ClientImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint 
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-
-    int result = mService->getGridValueListByCircle(sessionId,fileId,messageIndex,coordinateType,origoX,origoY,radius,corbaGridValueList);
+    int result = mService->getGridValueListByCircle(sessionId,fileId,messageIndex,coordinateType,origoX,origoY,radius,modificationOperation,corbaModParams,corbaGridValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
@@ -370,7 +379,7 @@ int ClientImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint 
 
 
 
-int ClientImplementation::_getGridValueListByLevelAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short levelInterpolationMethod,T::GridValueList& valueList)
+int ClientImplementation::_getGridValueListByLevelAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -378,9 +387,10 @@ int ClientImplementation::_getGridValueListByLevelAndCircle(T::SessionId session
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-
-    int result = mService->getGridValueListByLevelAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,origoX,origoY,radius,levelInterpolationMethod,corbaGridValueList);
+    int result = mService->getGridValueListByLevelAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,origoX,origoY,radius,levelInterpolationMethod,modificationOperation,corbaModParams,corbaGridValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
@@ -394,7 +404,7 @@ int ClientImplementation::_getGridValueListByLevelAndCircle(T::SessionId session
 
 
 
-int ClientImplementation::_getGridValueListByTimeAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,T::GridValueList& valueList)
+int ClientImplementation::_getGridValueListByTimeAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -402,9 +412,10 @@ int ClientImplementation::_getGridValueListByTimeAndCircle(T::SessionId sessionI
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-
-    int result = mService->getGridValueListByTimeAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,origoX,origoY,radius,timeInterpolationMethod,corbaGridValueList);
+    int result = mService->getGridValueListByTimeAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,origoX,origoY,radius,timeInterpolationMethod,modificationOperation,corbaModParams,corbaGridValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
@@ -418,7 +429,7 @@ int ClientImplementation::_getGridValueListByTimeAndCircle(T::SessionId sessionI
 
 
 
-int ClientImplementation::_getGridValueListByTimeLevelAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,short levelInterpolationMethod,T::GridValueList& valueList)
+int ClientImplementation::_getGridValueListByTimeLevelAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -426,9 +437,10 @@ int ClientImplementation::_getGridValueListByTimeLevelAndCircle(T::SessionId ses
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-
-    int result = mService->getGridValueListByTimeLevelAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,origoX,origoY,radius,timeInterpolationMethod,levelInterpolationMethod,corbaGridValueList);
+    int result = mService->getGridValueListByTimeLevelAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,origoX,origoY,radius,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,corbaModParams,corbaGridValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
@@ -442,34 +454,7 @@ int ClientImplementation::_getGridValueListByTimeLevelAndCircle(T::SessionId ses
 
 
 
-int ClientImplementation::_getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,T::GridValueList& valueList)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP,"The client is not initialized!");
-
-    DataServer::Corba::CorbaCoordinateList_var corbaPointList = new DataServer::Corba::CorbaCoordinateList();
-    DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
-
-    DataServer::Corba::Converter::convert(pointList,corbaPointList);
-
-
-    int result = mService->getGridValueListByPointList(sessionId,fileId,messageIndex,coordinateType,corbaPointList,(::CORBA::Short)areaInterpolationMethod,corbaGridValueList);
-
-    if (result == 0)
-      DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
-
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
-
-
-
-int ClientImplementation::_getGridValueListByLevelAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short levelInterpolationMethod,T::GridValueList& valueList)
+int ClientImplementation::_getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -478,11 +463,12 @@ int ClientImplementation::_getGridValueListByLevelAndPointList(T::SessionId sess
 
     DataServer::Corba::CorbaCoordinateList_var corbaPointList = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(pointList,corbaPointList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-
-    int result = mService->getGridValueListByLevelAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,corbaPointList,areaInterpolationMethod,levelInterpolationMethod,corbaGridValueList);
+    int result = mService->getGridValueListByPointList(sessionId,fileId,messageIndex,coordinateType,corbaPointList,(::CORBA::Short)areaInterpolationMethod,modificationOperation,corbaModParams,corbaGridValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
@@ -496,7 +482,7 @@ int ClientImplementation::_getGridValueListByLevelAndPointList(T::SessionId sess
 
 
 
-int ClientImplementation::_getGridValueListByTimeAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,T::GridValueList& valueList)
+int ClientImplementation::_getGridValueListByLevelAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -505,11 +491,12 @@ int ClientImplementation::_getGridValueListByTimeAndPointList(T::SessionId sessi
 
     DataServer::Corba::CorbaCoordinateList_var corbaPointList = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(pointList,corbaPointList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-
-    int result = mService->getGridValueListByTimeAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,corbaPointList,areaInterpolationMethod,timeInterpolationMethod,corbaGridValueList);
+    int result = mService->getGridValueListByLevelAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,corbaPointList,areaInterpolationMethod,levelInterpolationMethod,modificationOperation,corbaModParams,corbaGridValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
@@ -523,7 +510,7 @@ int ClientImplementation::_getGridValueListByTimeAndPointList(T::SessionId sessi
 
 
 
-int ClientImplementation::_getGridValueListByTimeLevelAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::GridValueList& valueList)
+int ClientImplementation::_getGridValueListByTimeAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -532,11 +519,12 @@ int ClientImplementation::_getGridValueListByTimeLevelAndPointList(T::SessionId 
 
     DataServer::Corba::CorbaCoordinateList_var corbaPointList = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(pointList,corbaPointList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-
-    int result = mService->getGridValueListByTimeLevelAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,corbaPointList,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,corbaGridValueList);
+    int result = mService->getGridValueListByTimeAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,corbaPointList,areaInterpolationMethod,timeInterpolationMethod,modificationOperation,corbaModParams,corbaGridValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
@@ -550,7 +538,35 @@ int ClientImplementation::_getGridValueListByTimeLevelAndPointList(T::SessionId 
 
 
 
-int ClientImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,T::GridValueList& valueList)
+int ClientImplementation::_getGridValueListByTimeLevelAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaCoordinateList_var corbaPointList = new DataServer::Corba::CorbaCoordinateList();
+    DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(pointList,corbaPointList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridValueListByTimeLevelAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,corbaPointList,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,corbaModParams,corbaGridValueList);
+
+    if (result == 0)
+      DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -559,11 +575,12 @@ int ClientImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint
 
     DataServer::Corba::CorbaCoordinateList_var corbaPolygonPoints = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(polygonPoints,corbaPolygonPoints);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-
-    int result = mService->getGridValueListByPolygon(sessionId,fileId,messageIndex,coordinateType,corbaPolygonPoints,corbaGridValueList);
+    int result = mService->getGridValueListByPolygon(sessionId,fileId,messageIndex,coordinateType,corbaPolygonPoints,modificationOperation,corbaModParams,corbaGridValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
@@ -577,7 +594,7 @@ int ClientImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint
 
 
 
-int ClientImplementation::_getGridValueListByLevelAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short levelInterpolationMethod,T::GridValueList& valueList)
+int ClientImplementation::_getGridValueListByLevelAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -586,11 +603,12 @@ int ClientImplementation::_getGridValueListByLevelAndPolygon(T::SessionId sessio
 
     DataServer::Corba::CorbaCoordinateList_var corbaPolygonPoints = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(polygonPoints,corbaPolygonPoints);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-
-    int result = mService->getGridValueListByLevelAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,corbaPolygonPoints,levelInterpolationMethod,corbaGridValueList);
+    int result = mService->getGridValueListByLevelAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,corbaPolygonPoints,levelInterpolationMethod,modificationOperation,corbaModParams,corbaGridValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
@@ -604,7 +622,7 @@ int ClientImplementation::_getGridValueListByLevelAndPolygon(T::SessionId sessio
 
 
 
-int ClientImplementation::_getGridValueListByTimeAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,T::GridValueList& valueList)
+int ClientImplementation::_getGridValueListByTimeAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -613,11 +631,12 @@ int ClientImplementation::_getGridValueListByTimeAndPolygon(T::SessionId session
 
     DataServer::Corba::CorbaCoordinateList_var corbaPolygonPoints = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(polygonPoints,corbaPolygonPoints);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-
-    int result = mService->getGridValueListByTimeAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,corbaPolygonPoints,timeInterpolationMethod,corbaGridValueList);
+    int result = mService->getGridValueListByTimeAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,corbaPolygonPoints,timeInterpolationMethod,modificationOperation,corbaModParams,corbaGridValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
@@ -631,7 +650,7 @@ int ClientImplementation::_getGridValueListByTimeAndPolygon(T::SessionId session
 
 
 
-int ClientImplementation::_getGridValueListByTimeLevelAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,short levelInterpolationMethod,T::GridValueList& valueList)
+int ClientImplementation::_getGridValueListByTimeLevelAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -640,11 +659,12 @@ int ClientImplementation::_getGridValueListByTimeLevelAndPolygon(T::SessionId se
 
     DataServer::Corba::CorbaCoordinateList_var corbaPolygonPoints = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(polygonPoints,corbaPolygonPoints);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-
-    int result = mService->getGridValueListByTimeLevelAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,corbaPolygonPoints,timeInterpolationMethod,levelInterpolationMethod,corbaGridValueList);
+    int result = mService->getGridValueListByTimeLevelAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,corbaPolygonPoints,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,corbaModParams,corbaGridValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
@@ -658,7 +678,7 @@ int ClientImplementation::_getGridValueListByTimeLevelAndPolygon(T::SessionId se
 
 
 
-int ClientImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,T::GridValueList& valueList)
+int ClientImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -667,10 +687,12 @@ int ClientImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,
 
     DataServer::Corba::CorbaPolygonPath_var corbaPolygonPath = new DataServer::Corba::CorbaPolygonPath();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(polygonPath,corbaPolygonPath);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueListByPolygonPath(sessionId,fileId,messageIndex,coordinateType,corbaPolygonPath,corbaGridValueList);
+    int result = mService->getGridValueListByPolygonPath(sessionId,fileId,messageIndex,coordinateType,corbaPolygonPath,modificationOperation,corbaModParams,corbaGridValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
@@ -684,7 +706,7 @@ int ClientImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,
 
 
 
-int ClientImplementation::_getGridValueListByLevelAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short levelInterpolationMethod,T::GridValueList& valueList)
+int ClientImplementation::_getGridValueListByLevelAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -693,10 +715,12 @@ int ClientImplementation::_getGridValueListByLevelAndPolygonPath(T::SessionId se
 
     DataServer::Corba::CorbaPolygonPath_var corbaPolygonPath = new DataServer::Corba::CorbaPolygonPath();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(polygonPath,corbaPolygonPath);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueListByLevelAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,corbaPolygonPath,levelInterpolationMethod,corbaGridValueList);
+    int result = mService->getGridValueListByLevelAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,corbaPolygonPath,levelInterpolationMethod,modificationOperation,corbaModParams,corbaGridValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
@@ -710,7 +734,7 @@ int ClientImplementation::_getGridValueListByLevelAndPolygonPath(T::SessionId se
 
 
 
-int ClientImplementation::_getGridValueListByTimeAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,T::GridValueList& valueList)
+int ClientImplementation::_getGridValueListByTimeAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -719,10 +743,12 @@ int ClientImplementation::_getGridValueListByTimeAndPolygonPath(T::SessionId ses
 
     DataServer::Corba::CorbaPolygonPath_var corbaPolygonPath = new DataServer::Corba::CorbaPolygonPath();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(polygonPath,corbaPolygonPath);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueListByTimeAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,corbaPolygonPath,timeInterpolationMethod,corbaGridValueList);
+    int result = mService->getGridValueListByTimeAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,corbaPolygonPath,timeInterpolationMethod,modificationOperation,corbaModParams,corbaGridValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
@@ -736,7 +762,7 @@ int ClientImplementation::_getGridValueListByTimeAndPolygonPath(T::SessionId ses
 
 
 
-int ClientImplementation::_getGridValueListByTimeLevelAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,short levelInterpolationMethod,T::GridValueList& valueList)
+int ClientImplementation::_getGridValueListByTimeLevelAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -745,10 +771,12 @@ int ClientImplementation::_getGridValueListByTimeLevelAndPolygonPath(T::SessionI
 
     DataServer::Corba::CorbaPolygonPath_var corbaPolygonPath = new DataServer::Corba::CorbaPolygonPath();
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(polygonPath,corbaPolygonPath);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueListByTimeLevelAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,corbaPolygonPath,timeInterpolationMethod,levelInterpolationMethod,corbaGridValueList);
+    int result = mService->getGridValueListByTimeLevelAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,corbaPolygonPath,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,corbaModParams,corbaGridValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
@@ -762,7 +790,7 @@ int ClientImplementation::_getGridValueListByTimeLevelAndPolygonPath(T::SessionI
 
 
 
-int ClientImplementation::_getGridValueListByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,T::GridValueList& valueList)
+int ClientImplementation::_getGridValueListByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -770,8 +798,10 @@ int ClientImplementation::_getGridValueListByRectangle(T::SessionId sessionId,ui
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaGridValueList_var corbaGridValueList;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueListByRectangle(sessionId,fileId,messageIndex,coordinateType,x1,y1,x2,y2,corbaGridValueList);
+    int result = mService->getGridValueListByRectangle(sessionId,fileId,messageIndex,coordinateType,x1,y1,x2,y2,modificationOperation,corbaModParams,corbaGridValueList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaGridValueList,valueList);
@@ -785,7 +815,7 @@ int ClientImplementation::_getGridValueListByRectangle(T::SessionId sessionId,ui
 
 
 
-int ClientImplementation::_getGridValueVector(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& values)
+int ClientImplementation::_getGridValueVector(T::SessionId sessionId,uint fileId,uint messageIndex,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -793,8 +823,10 @@ int ClientImplementation::_getGridValueVector(T::SessionId sessionId,uint fileId
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueVector(sessionId,fileId,messageIndex,corbaValues);
+    int result = mService->getGridValueVector(sessionId,fileId,messageIndex,modificationOperation,corbaModParams,corbaValues);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaValues,values);
@@ -808,7 +840,7 @@ int ClientImplementation::_getGridValueVector(T::SessionId sessionId,uint fileId
 
 
 
-int ClientImplementation::_getGridValueVectorByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,short levelInterpolationMethod,T::ParamValue_vec& values)
+int ClientImplementation::_getGridValueVectorByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -816,8 +848,10 @@ int ClientImplementation::_getGridValueVectorByLevel(T::SessionId sessionId,uint
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueVectorByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,levelInterpolationMethod,corbaValues);
+    int result = mService->getGridValueVectorByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,levelInterpolationMethod,modificationOperation,corbaModParams,corbaValues);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaValues,values);
@@ -831,7 +865,7 @@ int ClientImplementation::_getGridValueVectorByLevel(T::SessionId sessionId,uint
 
 
 
-int ClientImplementation::_getGridValueVectorByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,short timeInterpolationMethod,T::ParamValue_vec& values)
+int ClientImplementation::_getGridValueVectorByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -839,8 +873,10 @@ int ClientImplementation::_getGridValueVectorByTime(T::SessionId sessionId,uint 
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueVectorByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,timeInterpolationMethod,corbaValues);
+    int result = mService->getGridValueVectorByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,timeInterpolationMethod,modificationOperation,corbaModParams,corbaValues);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaValues,values);
@@ -854,7 +890,7 @@ int ClientImplementation::_getGridValueVectorByTime(T::SessionId sessionId,uint 
 
 
 
-int ClientImplementation::_getGridValueVectorByLevelAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,T::ParamValue_vec& values)
+int ClientImplementation::_getGridValueVectorByLevelAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -864,11 +900,13 @@ int ClientImplementation::_getGridValueVectorByLevelAndCoordinateList(T::Session
     DataServer::Corba::CorbaParamValueList_var corbaValues;
     DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
     DataServer::Corba::Converter::convert(coordinates,corbaCoordinates);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueVectorByLevelAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,corbaCoordinates,corbaAttributeList,corbaValues);
+    int result = mService->getGridValueVectorByLevelAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,corbaCoordinates,corbaAttributeList,modificationOperation,corbaModParams,corbaValues);
 
     if (result == 0)
     {
@@ -885,7 +923,7 @@ int ClientImplementation::_getGridValueVectorByLevelAndCoordinateList(T::Session
 
 
 
-int ClientImplementation::_getGridValueVectorByTimeAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,T::ParamValue_vec& values)
+int ClientImplementation::_getGridValueVectorByTimeAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -895,11 +933,13 @@ int ClientImplementation::_getGridValueVectorByTimeAndCoordinateList(T::SessionI
     DataServer::Corba::CorbaParamValueList_var corbaValues;
     DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
     DataServer::Corba::Converter::convert(coordinates,corbaCoordinates);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueVectorByTimeAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,corbaCoordinates,corbaAttributeList,corbaValues);
+    int result = mService->getGridValueVectorByTimeAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,corbaCoordinates,corbaAttributeList,modificationOperation,corbaModParams,corbaValues);
 
     if (result == 0)
     {
@@ -916,7 +956,7 @@ int ClientImplementation::_getGridValueVectorByTimeAndCoordinateList(T::SessionI
 
 
 
-int ClientImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::AttributeList& attributeList,T::ParamValue_vec& values)
+int ClientImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -925,10 +965,12 @@ int ClientImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId ses
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueVectorByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,corbaAttributeList,corbaValues);
+    int result = mService->getGridValueVectorByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,corbaAttributeList,modificationOperation,corbaModParams,corbaValues);
 
     if (result == 0)
     {
@@ -945,7 +987,7 @@ int ClientImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId ses
 
 
 
-int ClientImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::AttributeList& attributeList,T::ParamValue_vec& values)
+int ClientImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -954,10 +996,12 @@ int ClientImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId sess
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueVectorByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,corbaAttributeList,corbaValues);
+    int result = mService->getGridValueVectorByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,corbaAttributeList,modificationOperation,corbaModParams,corbaValues);
 
     if (result == 0)
     {
@@ -974,7 +1018,7 @@ int ClientImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId sess
 
 
 
-int ClientImplementation::_getGridValueVectorByCoordinateList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,short areaInterpolationMethod,T::ParamValue_vec& values)
+int ClientImplementation::_getGridValueVectorByCoordinateList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -983,10 +1027,12 @@ int ClientImplementation::_getGridValueVectorByCoordinateList(T::SessionId sessi
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
     DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(coordinates,corbaCoordinates);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueVectorByCoordinateList(sessionId,fileId,messageIndex,(::CORBA::Octet)coordinateType,corbaCoordinates,(::CORBA::Short)areaInterpolationMethod,corbaValues);
+    int result = mService->getGridValueVectorByCoordinateList(sessionId,fileId,messageIndex,(::CORBA::Octet)coordinateType,corbaCoordinates,(::CORBA::Short)areaInterpolationMethod,modificationOperation,corbaModParams,corbaValues);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaValues,values);
@@ -1000,7 +1046,7 @@ int ClientImplementation::_getGridValueVectorByCoordinateList(T::SessionId sessi
 
 
 
-int ClientImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList,T::ParamValue_vec& values)
+int ClientImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -1009,10 +1055,12 @@ int ClientImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,u
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueVectorByGeometry(sessionId,fileId,messageIndex,corbaAttributeList,corbaValues);
+    int result = mService->getGridValueVectorByGeometry(sessionId,fileId,messageIndex,corbaAttributeList,modificationOperation,corbaModParams,corbaValues);
 
     if (result == 0)
     {
@@ -1029,7 +1077,7 @@ int ClientImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,u
 
 
 
-int ClientImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,short areaInterpolationMethod,T::ParamValue_vec& values)
+int ClientImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -1037,8 +1085,10 @@ int ClientImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueVectorByRectangle(sessionId,fileId,messageIndex,(CORBA::Octet)coordinateType,columns,rows,x,y,xStep,yStep,(CORBA::Short)areaInterpolationMethod,corbaValues);
+    int result = mService->getGridValueVectorByRectangle(sessionId,fileId,messageIndex,(CORBA::Octet)coordinateType,columns,rows,x,y,xStep,yStep,(CORBA::Short)areaInterpolationMethod,modificationOperation,corbaModParams,corbaValues);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaValues,values);
@@ -1052,7 +1102,7 @@ int ClientImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,
 
 
 
-int ClientImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,uint vectorType,double_vec& valueVector)
+int ClientImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,uint vectorType,uint modificationOperation,double_vec& modificationParameters,double_vec& valueVector)
 {
   try
   {
@@ -1060,9 +1110,10 @@ int ClientImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,uint
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaDoubleList_var corbaValueVector;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-
-    int result = mService->getGridValueVectorByPoint(sessionId,fileId,messageIndex,coordinateType,x,y,vectorType,corbaValueVector);
+    int result = mService->getGridValueVectorByPoint(sessionId,fileId,messageIndex,coordinateType,x,y,vectorType,modificationOperation,corbaModParams,corbaValueVector);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaValueVector,valueVector);
@@ -1076,7 +1127,7 @@ int ClientImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,uint
 
 
 
-int ClientImplementation::_getGridValueVectorByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue_vec& values)
+int ClientImplementation::_getGridValueVectorByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -1084,9 +1135,10 @@ int ClientImplementation::_getGridValueVectorByTimeAndLevel(T::SessionId session
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-
-    int result = mService->getGridValueVectorByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,corbaValues);
+    int result = mService->getGridValueVectorByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,corbaModParams,corbaValues);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaValues,values);
@@ -1100,7 +1152,7 @@ int ClientImplementation::_getGridValueVectorByTimeAndLevel(T::SessionId session
 
 
 
-int ClientImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::AttributeList& attributeList,T::ParamValue_vec& values)
+int ClientImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -1109,11 +1161,12 @@ int ClientImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId
 
     DataServer::Corba::CorbaParamValueList_var corbaValues;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-
-    int result = mService->getGridValueVectorByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,corbaAttributeList,corbaValues);
+    int result = mService->getGridValueVectorByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,corbaAttributeList,modificationOperation,corbaModParams,corbaValues);
 
     if (result == 0)
     {
@@ -1130,7 +1183,7 @@ int ClientImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId
 
 
 
-int ClientImplementation::_getGridValueVectorByTimeLevelAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,T::ParamValue_vec& values)
+int ClientImplementation::_getGridValueVectorByTimeLevelAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -1140,11 +1193,13 @@ int ClientImplementation::_getGridValueVectorByTimeLevelAndCoordinateList(T::Ses
     DataServer::Corba::CorbaParamValueList_var corbaValues;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
     DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
     DataServer::Corba::Converter::convert(coordinates,corbaCoordinates);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridValueVectorByTimeLevelAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,corbaCoordinates,corbaAttributeList,corbaValues);
+    int result = mService->getGridValueVectorByTimeLevelAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,corbaCoordinates,corbaAttributeList,modificationOperation,corbaModParams,corbaValues);
 
     if (result == 0)
     {
@@ -1161,7 +1216,7 @@ int ClientImplementation::_getGridValueVectorByTimeLevelAndCoordinateList(T::Ses
 
 
 
-int ClientImplementation::_getGridIsobands(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
+int ClientImplementation::_getGridIsobands(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -1172,12 +1227,14 @@ int ClientImplementation::_getGridIsobands(T::SessionId sessionId,uint fileId,ui
     DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
     DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
     DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridIsobands(sessionId,fileId,messageIndex,corbaContourLowValues,corbaContourHighValues,corbaAttributeList,corbaContours);
+    int result = mService->getGridIsobands(sessionId,fileId,messageIndex,corbaContourLowValues,corbaContourHighValues,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
 
     if (result == 0)
     {
@@ -1194,7 +1251,7 @@ int ClientImplementation::_getGridIsobands(T::SessionId sessionId,uint fileId,ui
 
 
 
-int ClientImplementation::_getGridIsobandsByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
+int ClientImplementation::_getGridIsobandsByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -1205,12 +1262,14 @@ int ClientImplementation::_getGridIsobandsByGeometry(T::SessionId sessionId,uint
     DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
     DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
     DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridIsobandsByGeometry(sessionId,fileId,messageIndex,corbaContourLowValues,corbaContourHighValues,corbaAttributeList,corbaContours);
+    int result = mService->getGridIsobandsByGeometry(sessionId,fileId,messageIndex,corbaContourLowValues,corbaContourHighValues,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
 
     if (result == 0)
     {
@@ -1227,174 +1286,7 @@ int ClientImplementation::_getGridIsobandsByGeometry(T::SessionId sessionId,uint
 
 
 
-int ClientImplementation::_getGridIsobandsByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::ByteData_vec& contours)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP,"The client is not initialized!");
-
-    DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
-    DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
-    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
-    DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
-    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
-
-    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
-    DataServer::Corba::Converter::convert(gridLatLonCoordinates,corbaCoordinates);
-    DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
-    DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
-
-    int result = mService->getGridIsobandsByGrid(sessionId,fileId,messageIndex,corbaContourLowValues,corbaContourHighValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,corbaContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(corbaContours,contours);
-    }
-
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
-
-
-
-int ClientImplementation::_getGridIsobandsByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP,"The client is not initialized!");
-
-    DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
-    DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
-    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
-    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
-
-    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
-    DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
-    DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
-
-    int result = mService->getGridIsobandsByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,corbaContourLowValues,corbaContourHighValues,corbaAttributeList,corbaContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(corbaContours,contours);
-    }
-
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
-
-
-
-int ClientImplementation::_getGridIsobandsByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP,"The client is not initialized!");
-
-    DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
-    DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
-    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
-    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
-
-    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
-    DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
-    DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
-
-    int result = mService->getGridIsobandsByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,corbaContourLowValues,corbaContourHighValues,corbaAttributeList,corbaContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(corbaContours,contours);
-    }
-
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
-
-
-
-int ClientImplementation::_getGridIsobandsByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP,"The client is not initialized!");
-
-    DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
-    DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
-    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
-    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
-
-    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
-    DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
-    DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
-
-    int result = mService->getGridIsobandsByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,corbaContourLowValues,corbaContourHighValues,corbaAttributeList,corbaContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(corbaContours,contours);
-    }
-
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
-
-
-
-int ClientImplementation::_getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP,"The client is not initialized!");
-
-    DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
-    DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
-    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
-    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
-
-    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
-    DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
-    DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
-
-    int result = mService->getGridIsobandsByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,corbaContourLowValues,corbaContourHighValues,corbaAttributeList,corbaContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(corbaContours,contours);
-    }
-
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
-
-
-
-int ClientImplementation::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::ByteData_vec& contours)
+int ClientImplementation::_getGridIsobandsByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -1406,13 +1298,15 @@ int ClientImplementation::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId,
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
     DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,corbaCoordinates);
     DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
     DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridIsobandsByLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,corbaContourLowValues,corbaContourHighValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,corbaContours);
+    int result = mService->getGridIsobandsByGrid(sessionId,fileId,messageIndex,corbaContourLowValues,corbaContourHighValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
 
     if (result == 0)
     {
@@ -1429,7 +1323,147 @@ int ClientImplementation::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId,
 
 
 
-int ClientImplementation::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::ByteData_vec& contours)
+int ClientImplementation::_getGridIsobandsByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
+    DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridIsobandsByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,corbaContourLowValues,corbaContourHighValues,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsobandsByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
+    DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridIsobandsByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,corbaContourLowValues,corbaContourHighValues,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsobandsByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
+    DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridIsobandsByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,corbaContourLowValues,corbaContourHighValues,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
+    DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridIsobandsByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,corbaContourLowValues,corbaContourHighValues,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -1441,13 +1475,15 @@ int ClientImplementation::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,u
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
     DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,corbaCoordinates);
     DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
     DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridIsobandsByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,corbaContourLowValues,corbaContourHighValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,corbaContours);
+    int result = mService->getGridIsobandsByLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,corbaContourLowValues,corbaContourHighValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
 
     if (result == 0)
     {
@@ -1464,7 +1500,44 @@ int ClientImplementation::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,u
 
 
 
-int ClientImplementation::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
+int ClientImplementation::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourLowValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
+    DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(gridLatLonCoordinates,corbaCoordinates);
+    DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
+    DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridIsobandsByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,corbaContourLowValues,corbaContourHighValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -1475,12 +1548,14 @@ int ClientImplementation::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,
     DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
     DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
     DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridIsobandsByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,corbaContourLowValues,corbaContourHighValues,corbaAttributeList,corbaContours);
+    int result = mService->getGridIsobandsByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,corbaContourLowValues,corbaContourHighValues,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
 
     if (result == 0)
     {
@@ -1497,7 +1572,7 @@ int ClientImplementation::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,
 
 
 
-int ClientImplementation::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
+int ClientImplementation::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -1508,12 +1583,14 @@ int ClientImplementation::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId se
     DataServer::Corba::CorbaParamValueList_var corbaContourHighValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
     DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
     DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridIsobandsByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,corbaContourLowValues,corbaContourHighValues,corbaAttributeList,corbaContours);
+    int result = mService->getGridIsobandsByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,corbaContourLowValues,corbaContourHighValues,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
 
     if (result == 0)
     {
@@ -1530,7 +1607,7 @@ int ClientImplementation::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId se
 
 
 
-int ClientImplementation::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::ByteData_vec& contours)
+int ClientImplementation::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -1542,13 +1619,15 @@ int ClientImplementation::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessio
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
     DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,corbaCoordinates);
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
     DataServer::Corba::Converter::convert(contourLowValues,corbaContourLowValues);
     DataServer::Corba::Converter::convert(contourHighValues,corbaContourHighValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridIsobandsByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,corbaContourLowValues,corbaContourHighValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,corbaContours);
+    int result = mService->getGridIsobandsByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,corbaContourLowValues,corbaContourHighValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
 
     if (result == 0)
     {
@@ -1564,7 +1643,7 @@ int ClientImplementation::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessio
 
 
 
-int ClientImplementation::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
+int ClientImplementation::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -1574,11 +1653,13 @@ int ClientImplementation::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,
     DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
     DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridIsolinesByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,corbaContourValues,corbaAttributeList,corbaContours);
+    int result = mService->getGridIsolinesByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,corbaContourValues,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
 
     if (result == 0)
     {
@@ -1595,7 +1676,7 @@ int ClientImplementation::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,
 
 
 
-int ClientImplementation::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
+int ClientImplementation::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -1605,11 +1686,13 @@ int ClientImplementation::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId se
     DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
     DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridIsolinesByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,corbaContourValues,corbaAttributeList,corbaContours);
+    int result = mService->getGridIsolinesByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,corbaContourValues,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
 
     if (result == 0)
     {
@@ -1626,7 +1709,7 @@ int ClientImplementation::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId se
 
 
 
-int ClientImplementation::_getGridIsolines(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
+int ClientImplementation::_getGridIsolines(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -1636,11 +1719,13 @@ int ClientImplementation::_getGridIsolines(T::SessionId sessionId,uint fileId,ui
     DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
     DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridIsolines(sessionId,fileId,messageIndex,corbaContourValues,corbaAttributeList,corbaContours);
+    int result = mService->getGridIsolines(sessionId,fileId,messageIndex,corbaContourValues,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
 
     if (result == 0)
     {
@@ -1657,7 +1742,7 @@ int ClientImplementation::_getGridIsolines(T::SessionId sessionId,uint fileId,ui
 
 
 
-int ClientImplementation::_getGridIsolinesByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
+int ClientImplementation::_getGridIsolinesByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -1667,11 +1752,13 @@ int ClientImplementation::_getGridIsolinesByGeometry(T::SessionId sessionId,uint
     DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
     DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridIsolinesByGeometry(sessionId,fileId,messageIndex,corbaContourValues,corbaAttributeList,corbaContours);
+    int result = mService->getGridIsolinesByGeometry(sessionId,fileId,messageIndex,corbaContourValues,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
 
     if (result == 0)
     {
@@ -1688,164 +1775,7 @@ int ClientImplementation::_getGridIsolinesByGeometry(T::SessionId sessionId,uint
 
 
 
-int ClientImplementation::_getGridIsolinesByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::ByteData_vec& contours)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP,"The client is not initialized!");
-
-    DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
-    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
-    DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
-    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
-
-    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
-    DataServer::Corba::Converter::convert(gridLatLonCoordinates,corbaCoordinates);
-    DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
-
-    int result = mService->getGridIsolinesByGrid(sessionId,fileId,messageIndex,corbaContourValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,corbaContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(corbaContours,contours);
-    }
-
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
-
-
-
-int ClientImplementation::_getGridIsolinesByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP,"The client is not initialized!");
-
-    DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
-    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
-    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
-
-    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
-    DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
-
-    int result = mService->getGridIsolinesByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,corbaContourValues,corbaAttributeList,corbaContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(corbaContours,contours);
-    }
-
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
-
-
-
-int ClientImplementation::_getGridIsolinesByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP,"The client is not initialized!");
-
-    DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
-    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
-    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
-
-    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
-    DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
-
-    int result = mService->getGridIsolinesByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,corbaContourValues,corbaAttributeList,corbaContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(corbaContours,contours);
-    }
-
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
-
-
-
-int ClientImplementation::_getGridIsolinesByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP,"The client is not initialized!");
-
-    DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
-    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
-    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
-
-    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
-    DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
-
-    int result = mService->getGridIsolinesByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,corbaContourValues,corbaAttributeList,corbaContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(corbaContours,contours);
-    }
-
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
-
-
-
-int ClientImplementation::_getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,T::ByteData_vec& contours)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP,"The client is not initialized!");
-
-    DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
-    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
-    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
-
-    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
-    DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
-
-    int result = mService->getGridIsolinesByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,corbaContourValues,corbaAttributeList,corbaContours);
-
-    if (result == 0)
-    {
-      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
-      DataServer::Corba::Converter::convert(corbaContours,contours);
-    }
-
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
-
-
-
-int ClientImplementation::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::ByteData_vec& contours)
+int ClientImplementation::_getGridIsolinesByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -1856,12 +1786,14 @@ int ClientImplementation::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId,
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
     DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,corbaCoordinates);
     DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridIsolinesByLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,corbaContourValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,corbaContours);
+    int result = mService->getGridIsolinesByGrid(sessionId,fileId,messageIndex,corbaContourValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
 
     if (result == 0)
     {
@@ -1878,7 +1810,139 @@ int ClientImplementation::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId,
 
 
 
-int ClientImplementation::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::ByteData_vec& contours)
+int ClientImplementation::_getGridIsolinesByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridIsolinesByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,corbaContourValues,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsolinesByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridIsolinesByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,corbaContourValues,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsolinesByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridIsolinesByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,corbaContourValues,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridIsolinesByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,corbaContourValues,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -1889,12 +1953,14 @@ int ClientImplementation::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,u
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
     DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,corbaCoordinates);
     DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridIsolinesByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,corbaContourValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,corbaContours);
+    int result = mService->getGridIsolinesByLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,corbaContourValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
 
     if (result == 0)
     {
@@ -1911,7 +1977,42 @@ int ClientImplementation::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,u
 
 
 
-int ClientImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,T::ByteData_vec& contours)
+int ClientImplementation::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaContourValues = new DataServer::Corba::CorbaParamValueList();
+    DataServer::Corba::CorbaByteDataSequence_var corbaContours;
+    DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(gridLatLonCoordinates,corbaCoordinates);
+    DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridIsolinesByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,corbaContourValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaContours,contours);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -1922,12 +2023,14 @@ int ClientImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessio
     DataServer::Corba::CorbaByteDataSequence_var corbaContours;
     DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
     DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,corbaCoordinates);
     DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
     DataServer::Corba::Converter::convert(contourValues,corbaContourValues);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
 
-    int result = mService->getGridIsolinesByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,corbaContourValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,corbaContours);
+    int result = mService->getGridIsolinesByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,corbaContourValues,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,modificationOperation,corbaModParams,corbaContours);
 
     if (result == 0)
     {
@@ -1943,7 +2046,7 @@ int ClientImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessio
 
 
 
-int ClientImplementation::_getMultipleGridValues(T::SessionId sessionId,T::ValueRecordList& valueRecordList)
+int ClientImplementation::_getMultipleGridValues(T::SessionId sessionId,uint modificationOperation,double_vec& modificationParameters,T::ValueRecordList& valueRecordList)
 {
   try
   {
@@ -1951,9 +2054,12 @@ int ClientImplementation::_getMultipleGridValues(T::SessionId sessionId,T::Value
       throw Fmi::Exception(BCP,"The client is not initialized!");
 
     DataServer::Corba::CorbaValueRecordList_var corbaValueRecordList = new DataServer::Corba::CorbaValueRecordList();
-    DataServer::Corba::Converter::convert(valueRecordList,corbaValueRecordList);
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
 
-    int result = mService->getMultipleGridValues(sessionId,corbaValueRecordList);
+    DataServer::Corba::Converter::convert(valueRecordList,corbaValueRecordList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getMultipleGridValues(sessionId,modificationOperation,corbaModParams,corbaValueRecordList);
 
     if (result == 0)
       DataServer::Corba::Converter::convert(corbaValueRecordList,valueRecordList);

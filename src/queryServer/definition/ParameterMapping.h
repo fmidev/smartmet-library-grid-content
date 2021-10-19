@@ -27,7 +27,6 @@ class ParameterMapping
     T::ParamId                  mParameterKey;
     std::size_t                 mParameterKeyHash;
     T::GeometryId               mGeometryId;
-    //T::ParamLevelIdType         mParameterLevelIdType;
     T::ParamLevelId             mParameterLevelId;
     T::ParamLevel               mParameterLevel;
     short                       mAreaInterpolationMethod;
@@ -45,6 +44,7 @@ class ParameterMapping
     {
       public:
         static const uint       climatology = 1 << 0;
+        static const uint       bias = 1 << 1;
     };
 };
 

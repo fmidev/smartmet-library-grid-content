@@ -1381,7 +1381,7 @@ T::ParamValue VirtualMessage::getGridValueByLatLonCoordinate(double lat,double l
 
 
 
-
+/*
 T::ParamValue VirtualMessage::getGridValueByOriginalGridPoint(uint grid_i,uint grid_j) const
 {
   FUNCTION_TRACE
@@ -1395,7 +1395,7 @@ T::ParamValue VirtualMessage::getGridValueByOriginalGridPoint(uint grid_i,uint g
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
-
+*/
 
 
 
