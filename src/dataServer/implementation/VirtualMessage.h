@@ -79,7 +79,7 @@ class VirtualMessage : public Message
     virtual T::ParamValue           getGridValueByGridPoint_nearest(double grid_i,double grid_j) const;
     virtual T::ParamValue           getGridValueByGridPoint_linearInterpolation(double grid_i,double grid_j) const;
     virtual T::ParamValue           getGridValueByLatLonCoordinate(double lat,double lon,short interpolationMethod) const;
-    virtual T::ParamValue           getGridValueByOriginalGridPoint(uint grid_i,uint grid_j) const;
+    //virtual T::ParamValue           getGridValueByOriginalGridPoint(uint grid_i,uint grid_j) const;
     virtual void                    getGridValueVectorByRectangle(uint grid_i_start,uint grid_j_start,uint grid_i_end,uint grid_j_end,T::GridPointValue_vec& gridPointValues) const;
     virtual void                    getParameterValuesByRectangle(uint grid_i_start,uint grid_j_start,uint grid_i_end,uint grid_j_end,T::GridPointValueList& gridPointValues) const;
     virtual T::TimeString           getReferenceTime() const;

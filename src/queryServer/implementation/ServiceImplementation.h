@@ -615,6 +615,7 @@ class ServiceImplementation : public ServiceInterface
      pthread_t                  mThread;
      bool                       mShutdownRequested;
 
+     std::map<std::string,uint>        mOperationNames;
      Functions::FunctionCollection     mFunctionCollection;
      boost::shared_ptr<Fmi::LandCover> mLandCover;
      boost::shared_ptr<Fmi::DEM>       mDem;
