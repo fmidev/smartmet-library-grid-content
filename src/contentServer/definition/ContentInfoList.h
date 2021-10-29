@@ -75,7 +75,7 @@ class ContentInfoList
     ContentInfo*        getContentInfoByFmiParameterIdAndGenerationId(uint producerId,uint generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC);
 
     void                getContentInfoListByParameterLevelInfo(T::ParameterLevelInfo& levelInfo,ContentInfoList& contentInfoList);
-    void                getContentInfoList(uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
+    void                getContentInfoList(uint startFileId,uint startMessageIndex,int maxRecords,ContentInfoList& contentInfoList);
     void                getContentInfoListByGeometryId(T::GeometryId geometryId,ContentInfoList& contentInfoList);
     void                getContentInfoListByFileId(uint fileId,ContentInfoList& contentInfoList);
     void                getContentInfoListByForecastTime(const std::string& forecastTime,ContentInfoList& contentInfoList);
@@ -106,15 +106,15 @@ class ContentInfoList
     void                getContentListByForecastTime(const std::string& forecastTime,T::ContentInfoList& contentInfoList);
     void                getContentListByForecastTime(time_t forecastTimeUTC,T::ContentInfoList& contentInfoList);
 
-    void                getContentInfoListByGenerationId(uint producerId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
+    void                getContentInfoListByGenerationId(uint producerId,uint generationId,uint startFileId,uint startMessageIndex,int maxRecords,ContentInfoList& contentInfoList);
     void                getContentInfoListByGenerationId(uint producerId,uint generationId,const std::string& startTime,const std::string& endTime,ContentInfoList& contentInfoList);
     void                getContentInfoListByGenerationId(uint producerId,uint generationId,time_t startTimeUTC,time_t endTimeUTC,ContentInfoList& contentInfoList);
-    void                getContentInfoListByGenerationAndGeometryId(uint producerId,uint generationId,T::GeometryId geometryId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
+    void                getContentInfoListByGenerationAndGeometryId(uint producerId,uint generationId,T::GeometryId geometryId,uint startFileId,uint startMessageIndex,int maxRecords,ContentInfoList& contentInfoList);
     void                getContentInfoListByProducerId(uint producerId,ContentInfoList& contentInfoList);
-    void                getContentInfoListByProducerId(uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
+    void                getContentInfoListByProducerId(uint producerId,uint startFileId,uint startMessageIndex,int maxRecords,ContentInfoList& contentInfoList);
     int                 getClosestIndex(uint comparisonMethod,ContentInfo& contentInfo);
     int                 getClosestIndexNoLock(uint comparisonMethod,ContentInfo& contentInfo);
-    void                getContentInfoListBySourceId(uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList);
+    void                getContentInfoListBySourceId(uint sourceId,uint startFileId,uint startMessageIndex,int maxRecords,ContentInfoList& contentInfoList);
 
     void                getContentGeometryIdList(std::set<T::GeometryId>& geometryIdList);
     void                getContentGeometryIdListByGenerationId(uint producerId,uint generationId,std::set<T::GeometryId>& geometryIdList);

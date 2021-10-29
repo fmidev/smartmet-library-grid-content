@@ -2961,7 +2961,7 @@ void ServerInterface::getFileInfoList(T::RequestMessage& request,T::ResponseMess
       return;
     }
 
-    uint maxRecords = 0;
+    int maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -3087,7 +3087,7 @@ void ServerInterface::getFileInfoListByProducerId(T::RequestMessage& request,T::
       return;
     }
 
-    uint maxRecords = 0;
+    int maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -3155,7 +3155,7 @@ void ServerInterface::getFileInfoListByProducerName(T::RequestMessage& request,T
       return;
     }
 
-    uint maxRecords = 0;
+    int maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -3223,7 +3223,7 @@ void ServerInterface::getFileInfoListByGenerationId(T::RequestMessage& request,T
       return;
     }
 
-    uint maxRecords = 0;
+    int maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -3291,7 +3291,7 @@ void ServerInterface::getFileInfoListByGenerationName(T::RequestMessage& request
       return;
     }
 
-    uint maxRecords = 0;
+    int maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -3359,7 +3359,7 @@ void ServerInterface::getFileInfoListBySourceId(T::RequestMessage& request,T::Re
       return;
     }
 
-    uint maxRecords = 0;
+    int maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -3726,7 +3726,7 @@ void ServerInterface::getEventInfoList(T::RequestMessage& request,T::ResponseMes
       return;
     }
 
-    uint maxRecords = 0;
+    int maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4290,7 +4290,7 @@ void ServerInterface::getContentList(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
-    uint maxRecords = 0;
+    int maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4527,7 +4527,7 @@ void ServerInterface::getContentListByProducerId(T::RequestMessage& request,T::R
       return;
     }
 
-    uint maxRecords = 0;
+    int maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4602,7 +4602,7 @@ void ServerInterface::getContentListByProducerName(T::RequestMessage& request,T:
       return;
     }
 
-    uint maxRecords = 0;
+    int maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4678,7 +4678,7 @@ void ServerInterface::getContentListByGenerationId(T::RequestMessage& request,T:
       return;
     }
 
-    uint maxRecords = 0;
+    int maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4762,7 +4762,7 @@ void ServerInterface::getContentListByGenerationName(T::RequestMessage& request,
       return;
     }
 
-    uint maxRecords = 0;
+    int maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4974,7 +4974,7 @@ void ServerInterface::getContentListBySourceId(T::RequestMessage& request,T::Res
       return;
     }
 
-    uint maxRecords = 0;
+    int maxRecords = 0;
     if (!request.getLineByKey("maxRecords",maxRecords))
     {
       response.addLine("result",Result::MISSING_PARAMETER);

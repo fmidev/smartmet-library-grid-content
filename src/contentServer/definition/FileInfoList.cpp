@@ -946,7 +946,7 @@ FileInfo* FileInfoList::getFileInfoByIndex(uint index)
 
 
 
-void FileInfoList::getFileInfoList(uint startFileId,uint maxRecords,FileInfoList& fileInfoList)
+void FileInfoList::getFileInfoList(uint startFileId,int maxRecords,FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -963,27 +963,50 @@ void FileInfoList::getFileInfoList(uint startFileId,uint maxRecords,FileInfoList
     }
 
     AutoReadLock lock(mModificationLockPtr);
-    uint startIdx = 0;
-    uint sz = getLength();
 
+    uint max = (uint)abs(maxRecords);
     FileInfo search;
     search.mFileId = startFileId;
-    int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
-    if (idx >= 0)
-      startIdx = C_UINT(idx);
+    int startIdx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
 
-    for (uint t=startIdx; t<sz; t++)
+    if (maxRecords >= 0)
     {
-      FileInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId)
-      {
-        if (fileInfoList.getReleaseObjects())
-          fileInfoList.addFileInfo(info->duplicate());
-        else
-          fileInfoList.addFileInfo(info);
+      if (startIdx < 0)
+        startIdx = 0;
 
-        if (fileInfoList.getLength() == maxRecords)
-          return;
+      for (uint t=startIdx; t<mLength; t++)
+      {
+        FileInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId)
+        {
+          if (fileInfoList.getReleaseObjects())
+            fileInfoList.addFileInfo(info->duplicate());
+          else
+            fileInfoList.addFileInfo(info);
+
+          if (fileInfoList.getLength() == max)
+            return;
+        }
+      }
+    }
+    else
+    {
+      if (startIdx < 0)
+        startIdx = mLength-1;
+
+      for (int t=startIdx; t>=0; t--)
+      {
+        FileInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId <= startFileId)
+        {
+          if (fileInfoList.getReleaseObjects())
+            fileInfoList.addFileInfo(info->duplicate());
+          else
+            fileInfoList.addFileInfo(info);
+
+          if (fileInfoList.getLength() == max)
+            return;
+        }
       }
     }
   }
@@ -1032,7 +1055,7 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,FileInfoList& fil
 
 
 
-void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList)
+void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,int maxRecords,FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1049,27 +1072,50 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,
     }
 
     AutoReadLock lock(mModificationLockPtr);
-    uint startIdx = 0;
-    uint sz = getLength();
 
+    uint max = (uint)abs(maxRecords);
     FileInfo search;
     search.mFileId = startFileId;
-    int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
-    if (idx >= 0)
-      startIdx = C_UINT(idx);
+    int startIdx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
 
-    for (uint t=startIdx; t<sz; t++)
+    if (maxRecords >= 0)
     {
-      FileInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId  &&  info->mProducerId == producerId)
-      {
-        if (fileInfoList.getReleaseObjects())
-          fileInfoList.addFileInfo(info->duplicate());
-        else
-          fileInfoList.addFileInfo(info);
+      if (startIdx < 0)
+        startIdx = 0;
 
-        if (fileInfoList.getLength() == maxRecords)
-          return;
+      for (uint t=startIdx; t<mLength; t++)
+      {
+        FileInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId  &&  info->mProducerId == producerId)
+        {
+          if (fileInfoList.getReleaseObjects())
+            fileInfoList.addFileInfo(info->duplicate());
+          else
+            fileInfoList.addFileInfo(info);
+
+          if (fileInfoList.getLength() == max)
+            return;
+        }
+      }
+    }
+    else
+    {
+      if (startIdx < 0)
+        startIdx = mLength-1;
+
+      for (int t=startIdx; t>=0; t--)
+      {
+        FileInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId <= startFileId  &&  info->mProducerId == producerId)
+        {
+          if (fileInfoList.getReleaseObjects())
+            fileInfoList.addFileInfo(info->duplicate());
+          else
+            fileInfoList.addFileInfo(info);
+
+          if (fileInfoList.getLength() == max)
+            return;
+        }
       }
     }
   }
@@ -1184,7 +1230,7 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,FileInfoList&
 
 
 
-void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList)
+void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFileId,int maxRecords,FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1201,29 +1247,53 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFil
     }
 
     AutoReadLock lock(mModificationLockPtr);
-    uint startIdx = 0;
-    uint sz = getLength();
 
+    uint max = (uint)abs(maxRecords);
     FileInfo search;
     search.mFileId = startFileId;
-    int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
-    if (idx >= 0)
-      startIdx = C_UINT(idx);
+    int startIdx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
 
-    for (uint t=startIdx; t<sz; t++)
+    if (maxRecords >= 0)
     {
-      FileInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId  &&  info->mGenerationId == generationId)
-      {
-        if (fileInfoList.getReleaseObjects())
-          fileInfoList.addFileInfo(info->duplicate());
-        else
-          fileInfoList.addFileInfo(info);
+      if (startIdx < 0)
+        startIdx = 0;
 
-        if (fileInfoList.getLength() == maxRecords)
-          return;
+      for (uint t=startIdx; t<mLength; t++)
+      {
+        FileInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId  &&  info->mGenerationId == generationId)
+        {
+          if (fileInfoList.getReleaseObjects())
+            fileInfoList.addFileInfo(info->duplicate());
+          else
+            fileInfoList.addFileInfo(info);
+
+          if (fileInfoList.getLength() == max)
+            return;
+        }
       }
     }
+    else
+    {
+      if (startIdx < 0)
+        startIdx = mLength-1;
+
+      for (int t=startIdx; t>=0; t--)
+      {
+        FileInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId <= startFileId  &&  info->mGenerationId == generationId)
+        {
+          if (fileInfoList.getReleaseObjects())
+            fileInfoList.addFileInfo(info->duplicate());
+          else
+            fileInfoList.addFileInfo(info);
+
+          if (fileInfoList.getLength() == max)
+            return;
+        }
+      }
+    }
+
   }
   catch (...)
   {
@@ -1270,7 +1340,7 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,FileInfoList& fileInf
 
 
 
-void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList)
+void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,int maxRecords,FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1287,27 +1357,50 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,uint
     }
 
     AutoReadLock lock(mModificationLockPtr);
-    uint startIdx = 0;
-    uint sz = getLength();
 
+    uint max = (uint)abs(maxRecords);
     FileInfo search;
     search.mFileId = startFileId;
-    int idx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
-    if (idx >= 0)
-      startIdx = C_UINT(idx);
+    int startIdx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
 
-    for (uint t=startIdx; t<sz; t++)
+    if (maxRecords >= 0)
     {
-      FileInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId  &&  info->mSourceId == sourceId)
-      {
-        if (fileInfoList.getReleaseObjects())
-          fileInfoList.addFileInfo(info->duplicate());
-        else
-          fileInfoList.addFileInfo(info);
+      if (startIdx < 0)
+        startIdx = 0;
 
-        if (fileInfoList.getLength() == maxRecords)
-          return;
+      for (uint t=startIdx; t<mLength; t++)
+      {
+        FileInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId  &&  info->mSourceId == sourceId)
+        {
+          if (fileInfoList.getReleaseObjects())
+            fileInfoList.addFileInfo(info->duplicate());
+          else
+            fileInfoList.addFileInfo(info);
+
+          if (fileInfoList.getLength() == max)
+            return;
+        }
+      }
+    }
+    else
+    {
+      if (startIdx < 0)
+        startIdx = mLength-1;
+
+      for (int t=startIdx; t>=0; t--)
+      {
+        FileInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId <= startFileId  &&  info->mSourceId == sourceId)
+        {
+          if (fileInfoList.getReleaseObjects())
+            fileInfoList.addFileInfo(info->duplicate());
+          else
+            fileInfoList.addFileInfo(info);
+
+          if (fileInfoList.getLength() == max)
+            return;
+        }
       }
     }
   }

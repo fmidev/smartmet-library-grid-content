@@ -190,7 +190,7 @@ void ContentSync::readSourceFiles(ServiceInterface *sourceInterface)
     mSourceFileList.clear();
     uint len = 1;
     uint startFileId = 0;
-    uint maxRecords = 10000;
+    int maxRecords = 10000;
     while (len > 0)
     {
       T::FileInfoList fileList;
@@ -232,7 +232,7 @@ void ContentSync::readSourceContent(ServiceInterface *sourceInterface)
     uint len = 1;
     uint startFileId = 0;
     uint startMessageIndex = 0;
-    uint maxRecords = 10000;
+    int maxRecords = 10000;
 
     while (len > 0)
     {
@@ -499,7 +499,7 @@ void ContentSync::readTargetFiles(ServiceInterface *targetInterface)
     mTargetFileList.clear();
     uint len = 1;
     uint startFileId = 0;
-    uint maxRecords = 10000;
+    int maxRecords = 10000;
 
     while (len > 0)
     {
@@ -543,7 +543,7 @@ void ContentSync::readTargetContent(ServiceInterface *targetInterface)
     uint len = 1;
     uint startFileId = 0;
     uint startMessageIndex = 0;
-    uint maxRecords = 10000;
+    int maxRecords = 10000;
 
     while (len > 0)
     {

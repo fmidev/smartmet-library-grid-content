@@ -251,6 +251,31 @@ int ServiceInterface::addProducerInfo(T::SessionId sessionId,T::ProducerInfo& pr
 
 
 
+int ServiceInterface::setProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _setProducerInfo(sessionId,producerInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,producerInfo.getCsv().c_str(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int ServiceInterface::deleteProducerInfoById(T::SessionId sessionId,uint producerId)
 {
   FUNCTION_TRACE
@@ -561,6 +586,31 @@ int ServiceInterface::addGenerationInfo(T::SessionId sessionId,T::GenerationInfo
 
     unsigned long long timeStart = getTime();
     int result = _addGenerationInfo(sessionId,generationInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,generationInfo.getCsv().c_str(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceInterface::setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _setGenerationInfo(sessionId,generationInfo);
     unsigned long requestTime = getTime() - timeStart;
 
     PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,generationInfo.getCsv().c_str(),result,C_DOUBLE(requestTime) / 1000000);
@@ -1051,6 +1101,31 @@ int ServiceInterface::addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 
 
 
+int ServiceInterface::setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _setFileInfo(sessionId,fileInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,fileInfo.getCsv().c_str(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int ServiceInterface::addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -1426,7 +1501,7 @@ int ServiceInterface::getFileInfoByName(T::SessionId sessionId,const std::string
 
 
 
-int ServiceInterface::getFileInfoList(T::SessionId sessionId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::getFileInfoList(T::SessionId sessionId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1476,7 +1551,7 @@ int ServiceInterface::getFileInfoListByFileIdList(T::SessionId sessionId,std::ve
 
 
 
-int ServiceInterface::getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1501,7 +1576,7 @@ int ServiceInterface::getFileInfoListByProducerId(T::SessionId sessionId,uint pr
 
 
 
-int ServiceInterface::getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1526,7 +1601,7 @@ int ServiceInterface::getFileInfoListByProducerName(T::SessionId sessionId,const
 
 
 
-int ServiceInterface::getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1551,7 +1626,7 @@ int ServiceInterface::getFileInfoListByGenerationId(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1576,7 +1651,7 @@ int ServiceInterface::getFileInfoListByGenerationName(T::SessionId sessionId,con
 
 
 
-int ServiceInterface::getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1753,7 +1828,7 @@ int ServiceInterface::getLastEventInfo(T::SessionId sessionId,uint requestingSer
 
 
 
-int ServiceInterface::getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,uint maxRecords,T::EventInfoList& eventInfoList)
+int ServiceInterface::getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1814,6 +1889,31 @@ int ServiceInterface::addContentInfo(T::SessionId sessionId,T::ContentInfo& cont
 
     unsigned long long timeStart = getTime();
     int result = _addContentInfo(sessionId,contentInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,contentInfo.getCsv().c_str(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceInterface::setContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _setContentInfo(sessionId,contentInfo);
     unsigned long requestTime = getTime() - timeStart;
 
     PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,contentInfo.getCsv().c_str(),result,C_DOUBLE(requestTime) / 1000000);
@@ -2079,7 +2179,7 @@ int ServiceInterface::getContentInfo(T::SessionId sessionId,uint fileId,uint mes
 
 
 
-int ServiceInterface::getContentList(T::SessionId sessionId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentList(T::SessionId sessionId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2179,7 +2279,7 @@ int ServiceInterface::getContentListByFileName(T::SessionId sessionId,const std:
 
 
 
-int ServiceInterface::getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2204,7 +2304,7 @@ int ServiceInterface::getContentListByProducerId(T::SessionId sessionId,uint pro
 
 
 
-int ServiceInterface::getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2229,7 +2329,7 @@ int ServiceInterface::getContentListByProducerName(T::SessionId sessionId,const 
 
 
 
-int ServiceInterface::getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2254,7 +2354,7 @@ int ServiceInterface::getContentListBySourceId(T::SessionId sessionId,uint sourc
 
 
 
-int ServiceInterface::getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2279,7 +2379,7 @@ int ServiceInterface::getContentListByGenerationId(T::SessionId sessionId,uint g
 
 
 
-int ServiceInterface::getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3056,6 +3156,15 @@ int ServiceInterface::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo& p
 
 
 
+int ServiceInterface::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
 int ServiceInterface::_deleteProducerInfoById(T::SessionId sessionId,uint producerId)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -3165,6 +3274,15 @@ int ServiceInterface::_getProducerParameterListByProducerId(T::SessionId session
 
 
 int ServiceInterface::_addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3344,6 +3462,15 @@ int ServiceInterface::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 
 
 
+int ServiceInterface::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
 int ServiceInterface::_addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -3485,7 +3612,7 @@ int ServiceInterface::_getFileInfoByName(T::SessionId sessionId,const std::strin
 
 
 
-int ServiceInterface::_getFileInfoList(T::SessionId sessionId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::_getFileInfoList(T::SessionId sessionId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3503,7 +3630,7 @@ int ServiceInterface::_getFileInfoListByFileIdList(T::SessionId sessionId,std::v
 
 
 
-int ServiceInterface::_getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::_getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3512,7 +3639,7 @@ int ServiceInterface::_getFileInfoListByProducerId(T::SessionId sessionId,uint p
 
 
 
-int ServiceInterface::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3521,7 +3648,7 @@ int ServiceInterface::_getFileInfoListByProducerName(T::SessionId sessionId,cons
 
 
 
-int ServiceInterface::_getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::_getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3530,7 +3657,7 @@ int ServiceInterface::_getFileInfoListByGenerationId(T::SessionId sessionId,uint
 
 
 
-int ServiceInterface::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3539,7 +3666,7 @@ int ServiceInterface::_getFileInfoListByGenerationName(T::SessionId sessionId,co
 
 
 
-int ServiceInterface::_getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::_getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3602,7 +3729,7 @@ int ServiceInterface::_getLastEventInfo(T::SessionId sessionId,uint requestingSe
 
 
 
-int ServiceInterface::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,uint maxRecords,T::EventInfoList& eventInfoList)
+int ServiceInterface::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3621,6 +3748,15 @@ int ServiceInterface::_getEventInfoCount(T::SessionId sessionId,uint& count)
 
 
 int ServiceInterface::_addContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_setContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3719,7 +3855,7 @@ int ServiceInterface::_getContentInfo(T::SessionId sessionId,uint fileId,uint me
 
 
 
-int ServiceInterface::_getContentList(T::SessionId sessionId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentList(T::SessionId sessionId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3755,7 +3891,7 @@ int ServiceInterface::_getContentListByFileName(T::SessionId sessionId,const std
 
 
 
-int ServiceInterface::_getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3764,7 +3900,7 @@ int ServiceInterface::_getContentListByProducerId(T::SessionId sessionId,uint pr
 
 
 
-int ServiceInterface::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3773,7 +3909,7 @@ int ServiceInterface::_getContentListByProducerName(T::SessionId sessionId,const
 
 
 
-int ServiceInterface::_getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3782,7 +3918,7 @@ int ServiceInterface::_getContentListBySourceId(T::SessionId sessionId,uint sour
 
 
 
-int ServiceInterface::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3791,7 +3927,7 @@ int ServiceInterface::_getContentListByGenerationId(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }

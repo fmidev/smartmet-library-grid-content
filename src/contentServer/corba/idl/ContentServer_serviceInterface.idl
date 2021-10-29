@@ -69,13 +69,13 @@ interface ServiceInterface
   long  deleteFileInfoListByFileIdList(in long long sessionId,in CorbaULongList fileIdList);
   long  getFileInfoById(in long long sessionId,in unsigned long fileId,out CorbaFileInfo fileInfo);
   long  getFileInfoByName(in long long sessionId,in string filename,out CorbaFileInfo fileInfo);
-  long  getFileInfoList(in long long sessionId,in unsigned long startFileId,in unsigned long maxRecords,out CorbaFileInfoList fileInfoList);
+  long  getFileInfoList(in long long sessionId,in unsigned long startFileId,in long maxRecords,out CorbaFileInfoList fileInfoList);
   long  getFileInfoListByFileIdList(in long long sessionId,in CorbaULongList fileIdList,out CorbaFileInfoList fileInfoList);
-  long  getFileInfoListByProducerId(in long long sessionId,in unsigned long producerId,in unsigned long startFileId,in unsigned long maxRecords,out CorbaFileInfoList fileInfoList);
-  long  getFileInfoListByProducerName(in long long sessionId,in string producerName,in unsigned long startFileId,in unsigned long maxRecords,out CorbaFileInfoList fileInfoList);
-  long  getFileInfoListByGenerationId(in long long sessionId,in unsigned long generationId,in unsigned long startFileId,in unsigned long maxRecords,out CorbaFileInfoList fileInfoList);
-  long  getFileInfoListByGenerationName(in long long sessionId,in string generationName,in unsigned long startFileId,in unsigned long maxRecords,out CorbaFileInfoList fileInfoList);
-  long  getFileInfoListBySourceId(in long long sessionId,in unsigned long sourceId,in unsigned long startFileId,in unsigned long maxRecords,out CorbaFileInfoList fileInfoList);
+  long  getFileInfoListByProducerId(in long long sessionId,in unsigned long producerId,in unsigned long startFileId,in long maxRecords,out CorbaFileInfoList fileInfoList);
+  long  getFileInfoListByProducerName(in long long sessionId,in string producerName,in unsigned long startFileId,in long maxRecords,out CorbaFileInfoList fileInfoList);
+  long  getFileInfoListByGenerationId(in long long sessionId,in unsigned long generationId,in unsigned long startFileId,in long maxRecords,out CorbaFileInfoList fileInfoList);
+  long  getFileInfoListByGenerationName(in long long sessionId,in string generationName,in unsigned long startFileId,in long maxRecords,out CorbaFileInfoList fileInfoList);
+  long  getFileInfoListBySourceId(in long long sessionId,in unsigned long sourceId,in unsigned long startFileId,in long maxRecords,out CorbaFileInfoList fileInfoList);
   long  getFileInfoCount(in long long sessionId,out unsigned long count);
   long  getFileInfoCountByProducerId(in long long sessionId,in unsigned long producerId,out unsigned long count);
   long  getFileInfoCountByGenerationId(in long long sessionId,in unsigned long generationId,out unsigned long count);
@@ -83,7 +83,7 @@ interface ServiceInterface
   
   long  addEventInfo(in long long sessionId,inout CorbaEventInfo eventInfo);
   long  getLastEventInfo(in long long sessionId,in unsigned long requestingServerId,out CorbaEventInfo eventInfo);
-  long  getEventInfoList(in long long sessionId,in unsigned long requestingServerId,in unsigned long long startEventId,in unsigned long maxRecords,out CorbaEventInfoList eventInfoList);
+  long  getEventInfoList(in long long sessionId,in unsigned long requestingServerId,in unsigned long long startEventId,in long maxRecords,out CorbaEventInfoList eventInfoList);
   long  getEventInfoCount(in long long sessionId,out unsigned long count);
 
   long  addContentInfo(in long long sessionId,inout CorbaContentInfo contentInfo);
@@ -98,17 +98,17 @@ interface ServiceInterface
   long  deleteContentListBySourceId(in long long sessionId,in unsigned long sourceId);
 
   long  getContentInfo(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,out CorbaContentInfo contentInfo);
-  long  getContentList(in long long sessionId,in unsigned long startFileId,in unsigned long startMessageIndex,in unsigned long maxRecords,out CorbaContentInfoList contentInfoList);
+  long  getContentList(in long long sessionId,in unsigned long startFileId,in unsigned long startMessageIndex,in long maxRecords,out CorbaContentInfoList contentInfoList);
   long  getContentListByFileId(in long long sessionId,in unsigned long fileId,out CorbaContentInfoList contentInfoList);
   long  getContentListByFileIdList(in long long sessionId,in CorbaULongList fileIdList,out CorbaContentInfoList contentInfoList);
   long  getContentListByFileName(in long long sessionId,in string filename,out CorbaContentInfoList contentInfoList);
-  long  getContentListByProducerId(in long long sessionId,in unsigned long producerId,in unsigned long startFileId,in unsigned long startMessageIndex,in unsigned long maxRecords,out CorbaContentInfoList contentInfoList);
-  long  getContentListByProducerName(in long long sessionId,in string producerName,in unsigned long startFileId,in unsigned long startMessageIndex,in unsigned long maxRecords,out CorbaContentInfoList contentInfoList);
-  long  getContentListByGenerationId(in long long sessionId,in unsigned long generationId,in unsigned long startFileId,in unsigned long startMessageIndex,in unsigned long maxRecords,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
-  long  getContentListByGenerationName(in long long sessionId,in string generationName,in unsigned long startFileId,in unsigned long startMessageIndex,in unsigned long maxRecords,out CorbaContentInfoList contentInfoList);
+  long  getContentListByProducerId(in long long sessionId,in unsigned long producerId,in unsigned long startFileId,in unsigned long startMessageIndex,in long maxRecords,out CorbaContentInfoList contentInfoList);
+  long  getContentListByProducerName(in long long sessionId,in string producerName,in unsigned long startFileId,in unsigned long startMessageIndex,in long maxRecords,out CorbaContentInfoList contentInfoList);
+  long  getContentListByGenerationId(in long long sessionId,in unsigned long generationId,in unsigned long startFileId,in unsigned long startMessageIndex,in long maxRecords,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
+  long  getContentListByGenerationName(in long long sessionId,in string generationName,in unsigned long startFileId,in unsigned long startMessageIndex,in long maxRecords,out CorbaContentInfoList contentInfoList);
   long  getContentListByGenerationIdAndTimeRange(in long long sessionId,in unsigned long generationId,in unsigned long long startTime,in unsigned long long endTime,out CorbaContentInfoList contentInfoList);
   long  getContentListByGenerationNameAndTimeRange(in long long sessionId,in string generationName,in unsigned long long startTime,in unsigned long long endTime,out CorbaContentInfoList contentInfoList);
-  long  getContentListBySourceId(in long long sessionId,in unsigned long sourceId,in unsigned long startFileId,in unsigned long startMessageIndex,in unsigned long maxRecords,out CorbaContentInfoList contentInfoList);
+  long  getContentListBySourceId(in long long sessionId,in unsigned long sourceId,in unsigned long startFileId,in unsigned long startMessageIndex,in long maxRecords,out CorbaContentInfoList contentInfoList);
 
   long  getContentListByParameter(in long long sessionId,in octet parameterKeyType,in string parameterKey,in short parameterLevelId,in long minLevel,in long maxLevel,in short forecastType,in short forecastNumber,in long geometryId,in unsigned long long startTime,in unsigned long long endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);
   long  getContentListByParameterAndGenerationId(in long long sessionId,in unsigned long generationId,in octet parameterKeyType,in string parameterKey,in short parameterLevelId,in long minLevel,in long maxLevel,in short forecastType,in short forecastNumber,in long geometryId,in unsigned long long startTime,in unsigned long long endTime,in unsigned long requestFlags,out CorbaContentInfoList contentInfoList);

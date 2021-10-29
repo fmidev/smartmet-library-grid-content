@@ -48,13 +48,13 @@ class FileInfoList
     uint           getFileInfoCountByProducerId(uint producerId);
     uint           getFileInfoCountByGenerationId(uint generationId);
     uint           getFileInfoCountBySourceId(uint sourceId);
-    void           getFileInfoList(uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
+    void           getFileInfoList(uint startFileId,int maxRecords,FileInfoList& fileInfoList);
     void           getFileInfoListByProducerId(uint producerId,FileInfoList& fileInfoList);
-    void           getFileInfoListByProducerId(uint producerId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
+    void           getFileInfoListByProducerId(uint producerId,uint startFileId,int maxRecords,FileInfoList& fileInfoList);
     void           getFileInfoListByGenerationId(uint generationId,FileInfoList& fileInfoList);
-    void           getFileInfoListByGenerationId(uint generationId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
+    void           getFileInfoListByGenerationId(uint generationId,uint startFileId,int maxRecords,FileInfoList& fileInfoList);
     void           getFileInfoListBySourceId(uint sourceId,FileInfoList& fileInfoList);
-    void           getFileInfoListBySourceId(uint sourceId,uint startFileId,uint maxRecords,FileInfoList& fileInfoList);
+    void           getFileInfoListBySourceId(uint sourceId,uint startFileId,int maxRecords,FileInfoList& fileInfoList);
     std::size_t    getHash();
     std::size_t    getHashByProducerId(uint producerId);
     time_t         getLastFileDeletionTimeByGenerationId(uint generationId);

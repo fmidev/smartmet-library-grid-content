@@ -432,6 +432,40 @@ int MemoryImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInf
 
 
 
+int MemoryImplementation::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoWriteLock lock(&mModificationLock);
+
+    T::ProducerInfo *info = mProducerInfoList.getProducerInfoById(producerInfo.mProducerId);
+    if (info == nullptr)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    T::ProducerInfo *info2 = mProducerInfoList.getProducerInfoByName(producerInfo.mName);
+    if (info != nullptr && info2->mProducerId != producerInfo.mProducerId)
+      return Result::PRODUCER_NAME_ALREADY_REGISTERED;
+
+    *info = producerInfo;
+
+    addEvent(EventType::PRODUCER_UPDATED,producerInfo.mProducerId,0,0,0);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int MemoryImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint producerId)
 {
   FUNCTION_TRACE
@@ -1200,6 +1234,44 @@ int MemoryImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generatio
 
 
 
+int MemoryImplementation::_setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoWriteLock lock(&mModificationLock);
+
+    T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(generationInfo.mGenerationId);
+    if (info == nullptr)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    T::GenerationInfo *gInfo = mGenerationInfoList.getGenerationInfoByName(generationInfo.mName);
+    if (gInfo != nullptr)
+      return Result::GENERATION_NAME_ALREADY_REGISTERED;
+
+    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(generationInfo.mProducerId);
+    if (producerInfo == nullptr)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    *info = generationInfo;
+
+    addEvent(EventType::GENERATION_UPDATED,generationInfo.mGenerationId,0,0,0);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int MemoryImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint generationId)
 {
   FUNCTION_TRACE
@@ -1804,6 +1876,62 @@ int MemoryImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileI
 
       addEvent(EventType::FILE_ADDED,fileInfo.mFileId,fileInfo.mFileType,0,0);
     }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int MemoryImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoWriteLock lock(&mModificationLock);
+
+    T::FileInfo *fInfo = mFileInfoList.getFileInfoById(fileInfo.mFileId);
+    if (fInfo == nullptr)
+      return Result::UNKNOWN_FILE_ID;
+
+    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(fileInfo.mProducerId);
+    if (producerInfo == nullptr)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    T::GenerationInfo* generationInfo = mGenerationInfoList.getGenerationInfoById(fileInfo.mGenerationId);
+    if (generationInfo == nullptr)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    if (producerInfo->mProducerId != generationInfo->mProducerId)
+      return Result::PRODUCER_AND_GENERATION_DO_NOT_MATCH;
+
+    // ### Checking if the filename already exists in the database.
+
+    T::FileInfo *info = mFileInfoListByName.getFileInfoByName(fileInfo.mName);
+    if (info != nullptr  &&  info->mFileId != fileInfo.mFileId)
+      return Result::FILE_NAME_ALREADY_REGISTERED;
+
+    if (fInfo->mName != fileInfo.mName)
+    {
+      mFileInfoListByName.deleteFileInfoByName(fInfo->mName);
+      *fInfo = fileInfo;
+      mFileInfoListByName.addFileInfo(fInfo);
+    }
+    else
+    {
+      *fInfo = fileInfo;
+    }
+
+    addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,fileInfo.mFileType,0,0);
 
     return Result::OK;
   }
@@ -2500,7 +2628,7 @@ int MemoryImplementation::_getFileInfoByName(T::SessionId sessionId,const std::s
 
 
 
-int MemoryImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int MemoryImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2556,7 +2684,7 @@ int MemoryImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,st
 
 
 
-int MemoryImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int MemoryImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2585,7 +2713,7 @@ int MemoryImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,ui
 
 
 
-int MemoryImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int MemoryImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2614,7 +2742,7 @@ int MemoryImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
 
 
 
-int MemoryImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int MemoryImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2643,7 +2771,7 @@ int MemoryImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
 
 
 
-int MemoryImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int MemoryImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2671,7 +2799,7 @@ int MemoryImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
 
 
 
-int MemoryImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int MemoryImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2833,7 +2961,7 @@ int MemoryImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
 
 
 
-int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,uint maxRecords,T::EventInfoList& eventInfoList)
+int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2975,6 +3103,63 @@ int MemoryImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo&
     }
 
     addEvent(EventType::CONTENT_ADDED,contentInfo.mFileId,contentInfo.mMessageIndex,0,0);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int MemoryImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoWriteLock lock(&mModificationLock);
+
+    T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(contentInfo.mFileId,contentInfo.mMessageIndex);
+    if (cInfo == nullptr)
+      return Result::UNKNOWN_CONTENT;
+
+    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(contentInfo.mProducerId);
+    if (producerInfo == nullptr)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(contentInfo.mGenerationId);
+    if (generationInfo == nullptr)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(contentInfo.mFileId);
+    if (fileInfo == nullptr)
+      return Result::UNKNOWN_FILE_ID;
+
+    if (producerInfo->mProducerId != generationInfo->mProducerId)
+      return Result::PRODUCER_AND_GENERATION_DO_NOT_MATCH;
+
+    if (producerInfo->mProducerId != fileInfo->mProducerId)
+      return Result::PRODUCER_AND_FILE_DO_NOT_MATCH;
+
+    if (generationInfo->mGenerationId != fileInfo->mGenerationId)
+      return Result::GENERATION_AND_FILE_DO_NOT_MATCH;
+
+    for (int t=CONTENT_LIST_COUNT-1; t>0; t--)
+      mContentInfoList[t].deleteContentInfoByFileIdAndMessageIndex(contentInfo.mFileId,contentInfo.mMessageIndex);
+
+    for (int t=1; t<CONTENT_LIST_COUNT; t++)
+    {
+      mContentInfoList[t].addContentInfo(cInfo);
+    }
+
+    addEvent(EventType::CONTENT_UPDATED,contentInfo.mFileId,contentInfo.mMessageIndex,0,0);
 
     return Result::OK;
   }
@@ -3332,7 +3517,7 @@ int MemoryImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uin
 
 
 
-int MemoryImplementation::_getContentList(T::SessionId sessionId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentList(T::SessionId sessionId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3442,7 +3627,7 @@ int MemoryImplementation::_getContentListByFileName(T::SessionId sessionId,const
 
 
 
-int MemoryImplementation::_getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3471,7 +3656,7 @@ int MemoryImplementation::_getContentListByProducerId(T::SessionId sessionId,uin
 
 
 
-int MemoryImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3500,7 +3685,7 @@ int MemoryImplementation::_getContentListByProducerName(T::SessionId sessionId,c
 
 
 
-int MemoryImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3529,7 +3714,7 @@ int MemoryImplementation::_getContentListByGenerationId(T::SessionId sessionId,u
 
 
 
-int MemoryImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3616,7 +3801,7 @@ int MemoryImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
 
 
 
-int MemoryImplementation::_getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try

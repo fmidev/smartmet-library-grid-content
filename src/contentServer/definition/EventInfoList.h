@@ -28,7 +28,7 @@ class EventInfoList
     void            clear();
     EventInfo*      getFirstEvent();
     EventInfo*      getLastEvent();
-    void            getEventInfoList(T::EventId startEventId,uint maxRecords,T::EventInfoList& eventInfoList);
+    void            getEventInfoList(T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList);
     EventInfo*      getEventInfo(unsigned long long eventId);
     uint            getLength();
     uint            getMaxLength();

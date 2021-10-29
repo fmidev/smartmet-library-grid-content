@@ -4553,7 +4553,7 @@ bool ServiceImplementation::getPointValues(
     std::string function;
     std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
-
+/*
     if (conversionByFunction)
     {
       std::string f = toUpperString(function);
@@ -4569,7 +4569,7 @@ bool ServiceImplementation::getPointValues(
         conversionByFunction = false;
       }
     }
-
+*/
     time_t fTime = forecastTime;
 
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());

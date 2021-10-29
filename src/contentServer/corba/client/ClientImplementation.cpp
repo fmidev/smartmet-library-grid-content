@@ -1323,7 +1323,7 @@ int ClientImplementation::_getFileInfoByName(T::SessionId sessionId,const std::s
 
 
 
-int ClientImplementation::_getFileInfoList(T::SessionId sessionId, uint startFileId, uint maxRecords, T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoList(T::SessionId sessionId, uint startFileId, int maxRecords, T::FileInfoList& fileInfoList)
 {
   try
   {
@@ -1373,7 +1373,7 @@ int ClientImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,st
 
 
 
-int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId, uint producerId, uint startFileId, uint maxRecords, T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId, uint producerId, uint startFileId, int maxRecords, T::FileInfoList& fileInfoList)
 {
   try
   {
@@ -1397,7 +1397,7 @@ int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId, u
 
 
 
-int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   try
   {
@@ -1421,7 +1421,7 @@ int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
 
 
 
-int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId, uint generationId, uint startFileId, uint maxRecords, T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId, uint generationId, uint startFileId, int maxRecords, T::FileInfoList& fileInfoList)
 {
   try
   {
@@ -1445,7 +1445,7 @@ int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
 
 
 
-int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   try
   {
@@ -1469,7 +1469,7 @@ int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
 
 
 
-int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId, uint sourceId, uint startFileId, uint maxRecords, T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId, uint sourceId, uint startFileId, int maxRecords, T::FileInfoList& fileInfoList)
 {
   try
   {
@@ -1644,7 +1644,7 @@ int ClientImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
 
 
 
-int ClientImplementation::_getEventInfoList(T::SessionId sessionId, uint requestingServerId, T::EventId startEventId, uint maxRecords, T::EventInfoList& eventInfoList)
+int ClientImplementation::_getEventInfoList(T::SessionId sessionId, uint requestingServerId, T::EventId startEventId, int maxRecords, T::EventInfoList& eventInfoList)
 {
   try
   {
@@ -1923,7 +1923,7 @@ int ClientImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uin
 
 
 
-int ClientImplementation::_getContentList(T::SessionId sessionId, uint startFileId, uint startMessageIndex, uint maxRecords, T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentList(T::SessionId sessionId, uint startFileId, uint startMessageIndex, int maxRecords, T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -2020,7 +2020,7 @@ int ClientImplementation::_getContentListByFileName(T::SessionId sessionId,const
 
 
 
-int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId, uint producerId, uint startFileId, uint startMessageIndex, uint maxRecords, T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId, uint producerId, uint startFileId, uint startMessageIndex, int maxRecords, T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -2044,7 +2044,7 @@ int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId, ui
 
 
 
-int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -2071,7 +2071,7 @@ int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,c
 
 
 
-int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -2095,7 +2095,7 @@ int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,u
 
 
 
-int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -2167,7 +2167,7 @@ int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
 
 
 
-int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId, uint sourceId, uint startFileId, uint startMessageIndex, uint maxRecords, T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId, uint sourceId, uint startFileId, uint startMessageIndex, int maxRecords, T::ContentInfoList& contentInfoList)
 {
   try
   {

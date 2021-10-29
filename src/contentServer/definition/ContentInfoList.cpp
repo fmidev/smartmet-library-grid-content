@@ -551,7 +551,15 @@ ContentInfo* ContentInfoList::addContentInfo(ContentInfo *contentInfo)
       throw Fmi::Exception(BCP,"The 'contentInfo' parameter points to NULL!");
 
     if (contentInfo->mForecastTimeUTC == 0)
-      contentInfo->mForecastTimeUTC = utcTimeToTimeT(contentInfo->getForecastTime());
+    {
+      try
+      {
+        contentInfo->mForecastTimeUTC = utcTimeToTimeT(contentInfo->getForecastTime());
+      }
+      catch (...)
+      {
+      }
+    }
 
     AutoWriteLock lock(mModificationLockPtr);
 
@@ -636,7 +644,15 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
     {
       ContentInfo *cInfo = contentInfoList.getContentInfoByIndex(t);
       if (cInfo->mForecastTimeUTC == 0)
-        cInfo->mForecastTimeUTC = utcTimeToTimeT(cInfo->getForecastTime());
+      {
+        try
+        {
+          cInfo->mForecastTimeUTC = utcTimeToTimeT(cInfo->getForecastTime());
+        }
+        catch (...)
+        {
+        }
+      }
     }
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::none)
@@ -2272,7 +2288,7 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelIn
 
 
 
-void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2282,23 +2298,44 @@ void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    uint max = (uint)abs(maxRecords);
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
     {
       // If the records are not sorted according to fileId and messageIndex then the startFileId parameter
       // is used as the start index in the list.
 
-      for (uint t=startFileId; t<mLength; t++)
+      if (maxRecords >= 0)
       {
-        ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        for (uint t=startFileId; t<mLength; t++)
         {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
+          ContentInfo *info = mArray[t];
+          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+          {
+            if (contentInfoList.getReleaseObjects())
+              contentInfoList.addContentInfo(info->duplicate());
+            else
+              contentInfoList.addContentInfo(info);
 
-          if (contentInfoList.getLength() >= maxRecords)
-            return;
+            if (contentInfoList.getLength() >= max)
+              return;
+          }
+        }
+      }
+      else
+      {
+        for (int t=startFileId; t>=0; t--)
+        {
+          ContentInfo *info = mArray[t];
+          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+          {
+            if (contentInfoList.getReleaseObjects())
+              contentInfoList.addContentInfo(info->duplicate());
+            else
+              contentInfoList.addContentInfo(info);
+
+            if (contentInfoList.getLength() >= max)
+              return;
+          }
         }
       }
       return;
@@ -2310,26 +2347,54 @@ void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex
     contentInfo.mMessageIndex = startMessageIndex;
 
     int startIdx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
-    if (startIdx < 0)
-      startIdx = 0;
 
-    for (uint t=startIdx; t<mLength; t++)
+    if (maxRecords >= 0)
     {
-      ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-      {
-        if (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex))
-        {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
+      if (startIdx < 0)
+        startIdx = 0;
 
-          if (contentInfoList.getLength() >= maxRecords)
-            return;
+      for (uint t=startIdx; t<mLength; t++)
+      {
+        ContentInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        {
+          if (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex))
+          {
+            if (contentInfoList.getReleaseObjects())
+              contentInfoList.addContentInfo(info->duplicate());
+            else
+              contentInfoList.addContentInfo(info);
+
+            if (contentInfoList.getLength() >= max)
+              return;
+          }
         }
       }
     }
+    else
+    {
+      if (startIdx < 0)
+        startIdx = mLength-1;
+
+      for (int t=startIdx; t>=0; t--)
+      {
+        ContentInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        {
+          if (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex))
+          {
+            if (contentInfoList.getReleaseObjects())
+              contentInfoList.addContentInfo(info->duplicate());
+            else
+              contentInfoList.addContentInfo(info);
+
+            if (contentInfoList.getLength() >= max)
+              return;
+          }
+        }
+      }
+    }
+
   }
   catch (...)
   {
@@ -4337,7 +4402,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
 
 
 
-void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startFileId,uint startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4347,25 +4412,47 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startF
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    uint max = (uint)abs(maxRecords);
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
     {
       // If the records are not sorted according to fileId and messageIndex then the startFileId parameter
       // is used as the start index in the list.
 
-      for (uint t=startFileId; t<mLength; t++)
+      if (maxRecords >= 0)
       {
-        ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId)
+        for (uint t=startFileId; t<mLength; t++)
         {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
+          ContentInfo *info = mArray[t];
+          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId)
+          {
+            if (contentInfoList.getReleaseObjects())
+              contentInfoList.addContentInfo(info->duplicate());
+            else
+              contentInfoList.addContentInfo(info);
 
-          if (contentInfoList.getLength() >= maxRecords)
-            return;
+            if (contentInfoList.getLength() >= max)
+              return;
+          }
         }
       }
+      else
+      {
+        for (int t=startFileId; t>=0; t--)
+        {
+          ContentInfo *info = mArray[t];
+          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId)
+          {
+            if (contentInfoList.getReleaseObjects())
+              contentInfoList.addContentInfo(info->duplicate());
+            else
+              contentInfoList.addContentInfo(info);
+
+            if (contentInfoList.getLength() >= max)
+              return;
+          }
+        }
+      }
+
       return;
     }
 
@@ -4375,21 +4462,45 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startF
     contentInfo.mMessageIndex = startMessageIndex;
 
     int startIdx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
-    if (startIdx < 0)
-      startIdx = 0;
 
-    for (uint t=startIdx; t<mLength; t++)
+    if (maxRecords >= 0)
     {
-      ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
-      {
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(info->duplicate());
-        else
-          contentInfoList.addContentInfo(info);
+      if (startIdx < 0)
+        startIdx = 0;
 
-        if (contentInfoList.getLength() >= maxRecords)
-          return;
+      for (uint t=startIdx; t<mLength; t++)
+      {
+        ContentInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+        {
+          if (contentInfoList.getReleaseObjects())
+            contentInfoList.addContentInfo(info->duplicate());
+          else
+            contentInfoList.addContentInfo(info);
+
+          if (contentInfoList.getLength() >= max)
+            return;
+        }
+      }
+    }
+    else
+    {
+      if (startIdx < 0)
+        startIdx = mLength-1;
+
+      for (int t=startIdx; t>=0; t--)
+      {
+        ContentInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId && (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex)))
+        {
+          if (contentInfoList.getReleaseObjects())
+            contentInfoList.addContentInfo(info->duplicate());
+          else
+            contentInfoList.addContentInfo(info);
+
+          if (contentInfoList.getLength() >= max)
+            return;
+        }
       }
     }
   }
@@ -4470,7 +4581,7 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,ContentInfo
 
 
 
-void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint generationId,uint startFileId,uint startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4480,23 +4591,45 @@ void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint gene
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    uint max = (uint)abs(maxRecords);
+
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
     {
       // If the records are not sorted according to fileId and messageIndex then the startFileId parameter
       // is used as the start index in the list.
 
-      for (uint t=startFileId; t<mLength; t++)
+      if (maxRecords >= 0)
       {
-        ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId)
+        for (uint t=startFileId; t<mLength; t++)
         {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
+          ContentInfo *info = mArray[t];
+          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId)
+          {
+            if (contentInfoList.getReleaseObjects())
+              contentInfoList.addContentInfo(info->duplicate());
+            else
+              contentInfoList.addContentInfo(info);
 
-          if (contentInfoList.getLength() >= maxRecords)
-            return;
+            if (contentInfoList.getLength() >= max)
+              return;
+          }
+        }
+      }
+      else
+      {
+        for (int t=startFileId; t>=0; t--)
+        {
+          ContentInfo *info = mArray[t];
+          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId)
+          {
+            if (contentInfoList.getReleaseObjects())
+              contentInfoList.addContentInfo(info->duplicate());
+            else
+              contentInfoList.addContentInfo(info);
+
+            if (contentInfoList.getLength() >= max)
+              return;
+          }
         }
       }
       return;
@@ -4508,21 +4641,45 @@ void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint gene
     contentInfo.mMessageIndex = startMessageIndex;
 
     int startIdx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
-    if (startIdx < 0)
-      startIdx = 0;
 
-    for (uint t=startIdx; t<mLength; t++)
+    if (maxRecords >= 0)
     {
-      ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
-      {
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(info->duplicate());
-        else
-          contentInfoList.addContentInfo(info);
+      if (startIdx < 0)
+        startIdx = 0;
 
-        if (contentInfoList.getLength() >= maxRecords)
-          return;
+      for (uint t=startIdx; t<mLength; t++)
+      {
+        ContentInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+        {
+          if (contentInfoList.getReleaseObjects())
+            contentInfoList.addContentInfo(info->duplicate());
+          else
+            contentInfoList.addContentInfo(info);
+
+          if (contentInfoList.getLength() >= max)
+            return;
+        }
+      }
+    }
+    else
+    {
+      if (startIdx < 0)
+        startIdx = mLength-1;
+
+      for (int t=startIdx; t>=0; t--)
+      {
+        ContentInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId && (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex)))
+        {
+          if (contentInfoList.getReleaseObjects())
+            contentInfoList.addContentInfo(info->duplicate());
+          else
+            contentInfoList.addContentInfo(info);
+
+          if (contentInfoList.getLength() >= max)
+            return;
+        }
       }
     }
   }
@@ -4633,7 +4790,7 @@ std::size_t ContentInfoList::getHashByProducerId(uint producerId)
 
 
 
-void ContentInfoList::getContentInfoListByGenerationAndGeometryId(uint producerId,uint generationId,T::GeometryId geometryId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByGenerationAndGeometryId(uint producerId,uint generationId,T::GeometryId geometryId,uint startFileId,uint startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4643,23 +4800,44 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(uint producerI
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    uint max = (uint)abs(maxRecords);
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
     {
       // If the records are not sorted according to fileId and messageIndex then the startFileId parameter
       // is used as the start index in the list.
 
-      for (uint t=startFileId; t<mLength; t++)
+      if (maxRecords >= 0)
       {
-        ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)
+        for (uint t=startFileId; t<mLength; t++)
         {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
+          ContentInfo *info = mArray[t];
+          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)
+          {
+            if (contentInfoList.getReleaseObjects())
+              contentInfoList.addContentInfo(info->duplicate());
+            else
+              contentInfoList.addContentInfo(info);
 
-          if (contentInfoList.getLength() >= maxRecords)
-            return;
+            if (contentInfoList.getLength() >= max)
+              return;
+          }
+        }
+      }
+      else
+      {
+        for (int t=startFileId; t>=0; t--)
+        {
+          ContentInfo *info = mArray[t];
+          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)
+          {
+            if (contentInfoList.getReleaseObjects())
+              contentInfoList.addContentInfo(info->duplicate());
+            else
+              contentInfoList.addContentInfo(info);
+
+            if (contentInfoList.getLength() >= max)
+              return;
+          }
         }
       }
       return;
@@ -4671,21 +4849,45 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(uint producerI
     contentInfo.mMessageIndex = startMessageIndex;
 
     int startIdx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
-    if (startIdx < 0)
-      startIdx = 0;
 
-    for (uint t=startIdx; t<mLength; t++)
+    if (maxRecords >= 0)
     {
-      ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
-      {
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(info->duplicate());
-        else
-          contentInfoList.addContentInfo(info);
+      if (startIdx < 0)
+        startIdx = 0;
 
-        if (contentInfoList.getLength() >= maxRecords)
-          return;
+      for (uint t=startIdx; t<mLength; t++)
+      {
+        ContentInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+        {
+          if (contentInfoList.getReleaseObjects())
+            contentInfoList.addContentInfo(info->duplicate());
+          else
+            contentInfoList.addContentInfo(info);
+
+          if (contentInfoList.getLength() >= max)
+            return;
+        }
+      }
+    }
+    else
+    {
+      if (startIdx < 0)
+        startIdx = mLength-1;
+
+      for (int t=startIdx; t>=0; t--)
+      {
+        ContentInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId && (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex)))
+        {
+          if (contentInfoList.getReleaseObjects())
+            contentInfoList.addContentInfo(info->duplicate());
+          else
+            contentInfoList.addContentInfo(info);
+
+          if (contentInfoList.getLength() >= max)
+            return;
+        }
       }
     }
   }
@@ -4778,7 +4980,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint gene
 
 
 
-void ContentInfoList::getContentInfoListBySourceId(uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListBySourceId(uint sourceId,uint startFileId,uint startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4788,25 +4990,47 @@ void ContentInfoList::getContentInfoListBySourceId(uint sourceId,uint startFileI
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    uint max = (uint)abs(maxRecords);
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
     {
       // If the records are not sorted according to fileId and messageIndex then the startFileId parameter
       // is used as the start index in the list.
 
-      for (uint t=startFileId; t<mLength; t++)
+      if (maxRecords >= 0)
       {
-        ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mSourceId == sourceId)
+        for (uint t=startFileId; t<mLength; t++)
         {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
+          ContentInfo *info = mArray[t];
+          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mSourceId == sourceId)
+          {
+            if (contentInfoList.getReleaseObjects())
+              contentInfoList.addContentInfo(info->duplicate());
+            else
+              contentInfoList.addContentInfo(info);
 
-          if (contentInfoList.getLength() >= maxRecords)
-            return;
+            if (contentInfoList.getLength() >= max)
+              return;
+          }
         }
       }
+      else
+      {
+        for (int t=startFileId; t>=0; t--)
+        {
+          ContentInfo *info = mArray[t];
+          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mSourceId == sourceId)
+          {
+            if (contentInfoList.getReleaseObjects())
+              contentInfoList.addContentInfo(info->duplicate());
+            else
+              contentInfoList.addContentInfo(info);
+
+            if (contentInfoList.getLength() >= max)
+              return;
+          }
+        }
+      }
+      return;
     }
 
 
@@ -4816,21 +5040,45 @@ void ContentInfoList::getContentInfoListBySourceId(uint sourceId,uint startFileI
     contentInfo.mMessageIndex = startMessageIndex;
 
     int startIdx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
-    if (startIdx < 0)
-      startIdx = 0;
 
-    for (uint t=startIdx; t<mLength; t++)
+    if (maxRecords >= 0)
     {
-      ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mSourceId == sourceId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
-      {
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(info->duplicate());
-        else
-          contentInfoList.addContentInfo(info);
+      if (startIdx < 0)
+        startIdx = 0;
 
-        if (contentInfoList.getLength() >= maxRecords)
-          return;
+      for (uint t=startIdx; t<mLength; t++)
+      {
+        ContentInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mSourceId == sourceId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+        {
+          if (contentInfoList.getReleaseObjects())
+            contentInfoList.addContentInfo(info->duplicate());
+          else
+            contentInfoList.addContentInfo(info);
+
+          if (contentInfoList.getLength() >= max)
+            return;
+        }
+      }
+    }
+    else
+    {
+      if (startIdx < 0)
+        startIdx = mLength-1;
+
+      for (int t=startIdx; t>=0; t--)
+      {
+        ContentInfo *info = mArray[t];
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mSourceId == sourceId && (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex)))
+        {
+          if (contentInfoList.getReleaseObjects())
+            contentInfoList.addContentInfo(info->duplicate());
+          else
+            contentInfoList.addContentInfo(info);
+
+          if (contentInfoList.getLength() >= max)
+            return;
+        }
       }
     }
   }

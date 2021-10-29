@@ -382,7 +382,14 @@ void ContentInfo::setCsv(const char *csv)
       mGenerationId = toUInt32(field[6]);
       //mGroupFlags = toUInt32(field[7]);
       setForecastTime(field[8]);
-      mForecastTimeUTC = utcTimeToTimeT(getForecastTime());
+      try
+      {
+        mForecastTimeUTC = utcTimeToTimeT(getForecastTime());
+      }
+      catch (...)
+      {
+      }
+
       mFmiParameterId = toUInt32(field[9]);
       setFmiParameterName(field[10]);
       //mGribParameterId = toUInt32(field[11]);

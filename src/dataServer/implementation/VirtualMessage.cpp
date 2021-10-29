@@ -537,99 +537,6 @@ bool VirtualMessage::getGridOriginalCoordinatesByLatLonCoordinates(double lat,do
 
 
 
-/*! \brief The method returns the type of the grid layout.
-
-     \return   The layout of the grid (expressed as an enum value).
-*/
-/*
-T::GridLayout VirtualMessage::getGridLayout() const
-{
-  FUNCTION_TRACE
-  try
-  {
-    initMessagePtrs();
-    return mMessageList[0]->getGridLayout();
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-*/
-
-
-
-
-/*! \brief The method returns the number of columns used in the given original grid row.
-
-      \param row    The grid row index (= j-position).
-      \return       The number of columns in the given grid row.
-*/
-/*
-std::size_t VirtualMessage::getGridColumnCount(std::size_t row) const
-{
-  FUNCTION_TRACE
-  try
-  {
-    initMessagePtrs();
-    return mMessageList[0]->getGridColumnCount(row);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-*/
-
-
-
-
-/*! \brief The method returns the maximum number of the columns used in the original grid.
-    If the grid is irregular, this method returns the length of the longest row.
-
-       \return   The maximum number of the columns in the grid.
-*/
-/*
-std::size_t VirtualMessage::getGridColumnCount() const
-{
-  FUNCTION_TRACE
-  try
-  {
-    initMessagePtrs();
-    return mMessageList[0]->getGridColumnCount();
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-*/
-
-
-
-
-/*! \brief The method returns the number of rows used in the original grid.
-
-     \return   The number of the grid rows.
-*/
-/*
-std::size_t VirtualMessage::getGridRowCount() const
-{
-  FUNCTION_TRACE
-  try
-  {
-    initMessagePtrs();
-    return mMessageList[0]->getGridRowCount();
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-*/
-
-
-
 
 /*! \brief The method returns the number of original values defined in the original grid.
 
@@ -783,30 +690,6 @@ void VirtualMessage::getGridProjectionAttributes(std::string prefix,T::Attribute
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
-
-
-
-
-
-/*! \brief The method returns the grid definition string (=> Projection name).
-
-        \return   The projection used in the current grid (LatLon, Mercator, etc.)
-*/
-/*
-std::string VirtualMessage::getGridProjectionString() const
-{
-  FUNCTION_TRACE
-  try
-  {
-    initMessagePtrs();
-    return mMessageList[0]->getGridProjectionString();
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-*/
 
 
 
@@ -1222,24 +1105,6 @@ T::ParamLevelId VirtualMessage::getGridParameterLevelId() const
 
 
 
-/*
-std::string VirtualMessage::getGridParameterLevelIdString() const
-{
-  FUNCTION_TRACE
-  try
-  {
-    initMessagePtrs();
-    return mMessageList[0]->getGridParameterLevelIdString();
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-*/
-
-
-
 
 void VirtualMessage::getGridMinAndMaxValues(T::ParamValue& minValue,T::ParamValue& maxValue) const
 {
@@ -1378,24 +1243,6 @@ T::ParamValue VirtualMessage::getGridValueByLatLonCoordinate(double lat,double l
   }
 }
 
-
-
-
-/*
-T::ParamValue VirtualMessage::getGridValueByOriginalGridPoint(uint grid_i,uint grid_j) const
-{
-  FUNCTION_TRACE
-  try
-  {
-    initMessagePtrs();
-    return Message::getGridValueByOriginalGridPoint(grid_i,grid_j);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-*/
 
 
 

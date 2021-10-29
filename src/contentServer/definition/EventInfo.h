@@ -19,11 +19,13 @@ class EventType
     static const uint PRODUCER_ADDED                          = 10;
     static const uint PRODUCER_DELETED                        = 11;
     static const uint PRODUCER_LIST_DELETED_BY_SOURCE_ID      = 12;
+    static const uint PRODUCER_UPDATED                        = 13;
     static const uint GENERATION_ADDED                        = 20;
     static const uint GENERATION_DELETED                      = 21;
     static const uint GENERATION_STATUS_CHANGED               = 22;
     static const uint GENERATION_LIST_DELETED_BY_PRODUCER_ID  = 23;
     static const uint GENERATION_LIST_DELETED_BY_SOURCE_ID    = 24;
+    static const uint GENERATION_UPDATED                      = 25;
     static const uint FILE_ADDED                              = 30;
     static const uint FILE_DELETED                            = 31;
     static const uint FILE_UPDATED                            = 32;
@@ -38,6 +40,7 @@ class EventType
     static const uint CONTENT_LIST_DELETED_BY_GENERATION_ID   = 45;
     static const uint CONTENT_LIST_DELETED_BY_FILE_ID         = 46;
     static const uint CONTENT_LIST_DELETED_BY_SOURCE_ID       = 47;
+    static const uint CONTENT_UPDATED                         = 48;
     static const uint DELETE_VIRTUAL_CONTENT                  = 60;
     static const uint UPDATE_VIRTUAL_CONTENT                  = 61;
 };

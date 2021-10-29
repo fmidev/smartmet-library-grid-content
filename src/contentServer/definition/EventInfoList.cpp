@@ -373,7 +373,7 @@ EventInfo* EventInfoList::getEventInfo(unsigned long long eventId)
 
 
 
-void EventInfoList::getEventInfoList(T::EventId startEventId,uint maxRecords,T::EventInfoList& eventInfoList)
+void EventInfoList::getEventInfoList(T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
   FUNCTION_TRACE
   try
@@ -399,7 +399,7 @@ void EventInfoList::getEventInfoList(T::EventId startEventId,uint maxRecords,T::
       if (it->mEventId >= startEventId)
       {
         eventInfoList.addEventInfo(it->duplicate());
-        if (eventInfoList.getLength() == maxRecords)
+        if (eventInfoList.getLength() == (uint)maxRecords)
           return;
       }
 

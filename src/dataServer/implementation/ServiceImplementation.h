@@ -128,9 +128,11 @@ class ServiceImplementation : public ServiceInterface
      virtual void   event_contentServerReload(T::EventInfo& eventInfo);
      virtual void   event_producerAdded(T::EventInfo& eventInfo);
      virtual void   event_producerDeleted(T::EventInfo& eventInfo);
+     virtual void   event_producerUpdated(T::EventInfo& eventInfo);
      virtual void   event_producerListDeletedBySourceId(T::EventInfo& eventInfo);
      virtual void   event_generationAdded(T::EventInfo& eventInfo);
      virtual void   event_generationDeleted(T::EventInfo& eventInfo);
+     virtual void   event_generationUpdated(T::EventInfo& eventInfo);
      virtual void   event_generationStatusChanged(T::EventInfo& eventInfo);
      virtual void   event_generationListDeletedByProducerId(T::EventInfo& eventInfo);
      virtual void   event_generationListDeletedBySourceId(T::EventInfo& eventInfo);
@@ -146,6 +148,7 @@ class ServiceImplementation : public ServiceInterface
      virtual void   event_contentListDeletedBySourceId(T::EventInfo& eventInfo);
      virtual void   event_contentAdded(T::EventInfo& eventInfo);
      virtual void   event_contentDeleted(T::EventInfo& eventInfo);
+     virtual void   event_contentUpdated(T::EventInfo& eventInfo);
      virtual void   event_deleteVirtualContent(T::EventInfo& eventInfo);
      virtual void   event_updateVirtualContent(T::EventInfo& eventInfo);
 

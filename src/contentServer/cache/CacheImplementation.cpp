@@ -415,6 +415,28 @@ int CacheImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
 
 
 
+int CacheImplementation::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == nullptr)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->setProducerInfo(sessionId,producerInfo);
+    processEvents(false);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint producerId)
 {
   FUNCTION_TRACE
@@ -1261,6 +1283,28 @@ int CacheImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
 
 
 
+int CacheImplementation::_setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == nullptr)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->setGenerationInfo(sessionId,generationInfo);
+    processEvents(false);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint generationId)
 {
   FUNCTION_TRACE
@@ -1939,6 +1983,28 @@ int CacheImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
 
 
 
+int CacheImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == nullptr)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->setFileInfo(sessionId,fileInfo);
+    processEvents(false);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -2282,7 +2348,7 @@ int CacheImplementation::_getFileInfoByName(T::SessionId sessionId,const std::st
 
 
 
-int CacheImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int CacheImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2357,7 +2423,7 @@ int CacheImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
 
 
 
-int CacheImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int CacheImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2404,7 +2470,7 @@ int CacheImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uin
 
 
 
-int CacheImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int CacheImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2453,7 +2519,7 @@ int CacheImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,c
 
 
 
-int CacheImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int CacheImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2498,7 +2564,7 @@ int CacheImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,u
 
 
 
-int CacheImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int CacheImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2547,7 +2613,7 @@ int CacheImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
 
 
 
-int CacheImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int CacheImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2805,7 +2871,7 @@ int CacheImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
 
 
 
-int CacheImplementation::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,uint maxRecords,T::EventInfoList& eventInfoList)
+int CacheImplementation::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2872,6 +2938,28 @@ int CacheImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->addContentInfo(sessionId,contentInfo);
+    processEvents(false);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == nullptr)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->setContentInfo(sessionId,contentInfo);
     processEvents(false);
     return result;
   }
@@ -3133,7 +3221,7 @@ int CacheImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint
 
 
 
-int CacheImplementation::_getContentList(T::SessionId sessionId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentList(T::SessionId sessionId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3309,7 +3397,7 @@ int CacheImplementation::_getContentListByFileName(T::SessionId sessionId,const 
 
 
 
-int CacheImplementation::_getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3354,7 +3442,7 @@ int CacheImplementation::_getContentListByProducerId(T::SessionId sessionId,uint
 
 
 
-int CacheImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3402,7 +3490,7 @@ int CacheImplementation::_getContentListByProducerName(T::SessionId sessionId,co
 
 
 
-int CacheImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3458,7 +3546,7 @@ int CacheImplementation::_getContentListByGenerationId(T::SessionId sessionId,ui
 
 
 
-int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3603,7 +3691,7 @@ int CacheImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
 
 
 
-int CacheImplementation::_getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int CacheImplementation::_getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5015,6 +5103,45 @@ void CacheImplementation::event_producerDeleted(T::EventInfo& eventInfo)
 
 
 
+void CacheImplementation::event_producerUpdated(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+
+    T::ProducerInfo *info = mProducerInfoList.getProducerInfoById(eventInfo.mId1);
+    if (info == nullptr)
+      return; // No such producer
+
+    if (!mContentSwapEnabled)
+    {
+      auto ssp = mSearchStructureSptr.load();
+      if (ssp)
+      {
+        AutoReadLock readLock(&mSearchModificationLock);
+        info = ssp->mProducerInfoList.getProducerInfoById(eventInfo.mId1);
+        if (info == nullptr)
+          return; // No such producer
+      }
+    }
+
+    T::ProducerInfo producerInfo;
+    if (mContentStorage->getProducerInfoById(mSessionId,eventInfo.mId1,producerInfo) == Result::OK)
+    {
+      *info = producerInfo;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void CacheImplementation::event_producerListDeletedBySourceId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5114,6 +5241,45 @@ void CacheImplementation::event_generationDeleted(T::EventInfo& eventInfo)
         mFileDeleteCounter += ssp->mFileInfoList.markDeletedByGenerationId(eventInfo.mId1);
         mGenerationDeleteCounter += ssp->mGenerationInfoList.markDeletedById(eventInfo.mId1);
       }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void CacheImplementation::event_generationUpdated(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+
+    T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(eventInfo.mId1);
+    if (info == nullptr)
+      return; // No such generation
+
+    if (!mContentSwapEnabled)
+    {
+      auto ssp = mSearchStructureSptr.load();
+      if (ssp)
+      {
+        AutoReadLock readLock(&mSearchModificationLock);
+        info = ssp->mGenerationInfoList.getGenerationInfoById(eventInfo.mId1);
+        if (info == nullptr)
+          return; // No such generation
+      }
+    }
+
+    T::GenerationInfo generationInfo;
+    if (mContentStorage->getGenerationInfoById(mSessionId,eventInfo.mId1,generationInfo) == Result::OK)
+    {
+      *info = generationInfo;
     }
   }
   catch (...)
@@ -5721,6 +5887,39 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
 
 
 
+void CacheImplementation::event_contentUpdated(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    {
+      AutoWriteLock lock(&mModificationLock);
+
+      mContentInfoList.deleteContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
+
+      if (!mContentSwapEnabled)
+      {
+        auto ssp = mSearchStructureSptr.load();
+        if (ssp)
+        {
+          AutoReadLock readLock(&mSearchModificationLock);
+          mContentDeleteCounter += ssp->mContentInfoList[0].markDeletedByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
+        }
+      }
+    }
+
+    event_contentAdded(eventInfo);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void CacheImplementation::event_contentDeleted(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5839,6 +6038,10 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
         event_producerDeleted(eventInfo);
         break;
 
+      case EventType::PRODUCER_UPDATED:
+        event_producerUpdated(eventInfo);
+        break;
+
       case EventType::PRODUCER_LIST_DELETED_BY_SOURCE_ID:
         event_producerListDeletedBySourceId(eventInfo);
         break;
@@ -5849,6 +6052,10 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
 
       case EventType::GENERATION_DELETED:
         event_generationDeleted(eventInfo);
+        break;
+
+      case EventType::GENERATION_UPDATED:
+        event_generationUpdated(eventInfo);
         break;
 
       case EventType::GENERATION_STATUS_CHANGED:
@@ -5909,6 +6116,10 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
 
       case EventType::CONTENT_DELETED:
         event_contentDeleted(eventInfo);
+        break;
+
+      case EventType::CONTENT_UPDATED:
+        event_contentUpdated(eventInfo);
         break;
 
       case EventType::DELETE_VIRTUAL_CONTENT:

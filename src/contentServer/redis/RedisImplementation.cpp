@@ -124,7 +124,12 @@ void RedisImplementation::lock(const char *function,uint line,ulonglong& key,uin
   {
     key = 0;
     if (!mDatabaseLockEnabled)
+    {
+      // Thread level locking
+      key = 100;
+      mThreadLock.lock();
       return;
+    }
 
     AutoThreadLock lock(&mThreadLock);
 
@@ -207,7 +212,11 @@ void RedisImplementation::unlock(ulonglong key)
   try
   {
     if (!mDatabaseLockEnabled)
+    {
+      // Thread level locking
+      mThreadLock.unlock();
       return;
+    }
 
     AutoThreadLock lock(&mThreadLock);
 
@@ -699,6 +708,59 @@ int RedisImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
     freeReplyObject(reply);
 
     addEvent(EventType::PRODUCER_ADDED,producerInfo.mProducerId,0,0,0);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::ProducerInfoList producerInfoList;
+    getProducerList(producerInfoList);
+
+    T::ProducerInfo *info = producerInfoList.getProducerInfoByName(producerInfo.mName);
+    if (info != nullptr  &&  info->mProducerId != producerInfo.mProducerId)
+      return Result::PRODUCER_NAME_ALREADY_REGISTERED;
+
+
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sproducers %u %u",mTablePrefix.c_str(),producerInfo.mProducerId,producerInfo.mProducerId));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    freeReplyObject(reply);
+
+    reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %sproducers %u %s",mTablePrefix.c_str(),producerInfo.mProducerId,producerInfo.getCsv().c_str()));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    freeReplyObject(reply);
+
+    addEvent(EventType::PRODUCER_UPDATED,producerInfo.mProducerId,0,0,0);
 
     return Result::OK;
   }
@@ -1493,6 +1555,62 @@ int RedisImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
 
 
 
+int RedisImplementation::_setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::ProducerInfo producerInfo;
+    if (getProducerById(generationInfo.mProducerId,producerInfo) != Result::OK)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    T::GenerationInfoList generationInfoList;
+    getGenerationList(generationInfoList);
+
+    T::GenerationInfo *info = generationInfoList.getGenerationInfoByName(generationInfo.mName);
+    if (info != nullptr &&  info->mGenerationId != generationInfo.mGenerationId)
+      return Result::GENERATION_NAME_ALREADY_REGISTERED;
+
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgenerations %u %u",mTablePrefix.c_str(),generationInfo.mGenerationId,generationInfo.mGenerationId));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    freeReplyObject(reply);
+
+    reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %sgenerations %u %s",mTablePrefix.c_str(),generationInfo.mGenerationId,generationInfo.getCsv().c_str()));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    freeReplyObject(reply);
+
+    addEvent(EventType::GENERATION_UPDATED,generationInfo.mGenerationId,0,0,0);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int RedisImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint generationId)
 {
   FUNCTION_TRACE
@@ -2208,6 +2326,87 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
 
       addEvent(EventType::FILE_ADDED,fileInfo.mFileId,fileInfo.mFileType,0,0);
     }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::ProducerInfo producerInfo;
+    if (getProducerById(fileInfo.mProducerId,producerInfo) != Result::OK)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationById(fileInfo.mGenerationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    if (producerInfo.mProducerId != generationInfo.mProducerId)
+      return Result::PRODUCER_AND_GENERATION_DO_NOT_MATCH;
+
+    // ### Checking if the filename already exists in the database.
+
+    T::FileInfo fInfo;
+    if (getFileById(fileInfo.mFileId,fInfo) != Result::OK)
+      return Result::UNKNOWN_FILE_ID;
+
+    uint fileId = getFileId(fileInfo.mName);
+    if (fileId > 0)
+    {
+      if (fileId != fileInfo.mFileId)
+        return Result::FILE_NAME_ALREADY_REGISTERED;
+
+      if (fileInfo.mName != fInfo.mName)
+      {
+        // The filename exists, but the actual FileInfo record does not.
+        deleteFilename(fInfo.mName);
+        addFilename(fileInfo.mName,fileInfo.mFileId);
+      }
+    }
+
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sfiles %u %u",mTablePrefix.c_str(),fileInfo.mFileId,fileInfo.mFileId));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    freeReplyObject(reply);
+
+
+    // ### Adding the file information into the database.
+
+    reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %sfiles %u %s",mTablePrefix.c_str(),fileInfo.mFileId,fileInfo.getCsv().c_str()));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    freeReplyObject(reply);
+
+      // ### Adding an event to the event list.
+
+    addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,fileInfo.mFileType,0,0);
 
     return Result::OK;
   }
@@ -2964,7 +3163,7 @@ int RedisImplementation::_getFileInfoByName(T::SessionId sessionId,const std::st
 
 
 
-int RedisImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int RedisImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3027,7 +3226,7 @@ int RedisImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
 
 
 
-int RedisImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int RedisImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3058,7 +3257,7 @@ int RedisImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uin
 
 
 
-int RedisImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int RedisImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3089,7 +3288,7 @@ int RedisImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,c
 
 
 
-int RedisImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int RedisImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3120,7 +3319,7 @@ int RedisImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,u
 
 
 
-int RedisImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int RedisImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3150,7 +3349,7 @@ int RedisImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
 
 
 
-int RedisImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int RedisImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3368,7 +3567,7 @@ int RedisImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
   FUNCTION_TRACE
   try
   {
-    //RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
 
     eventInfo.mServerTime = mStartTime;
 
@@ -3432,7 +3631,7 @@ int RedisImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
 
 
 
-int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,uint maxRecords,T::EventInfoList& eventInfoList)
+int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3610,6 +3809,75 @@ int RedisImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
     freeReplyObject(reply);
 
     addEvent(EventType::CONTENT_ADDED,contentInfo.mFileId,contentInfo.mMessageIndex,0,0);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::ProducerInfo producerInfo;
+    if (getProducerById(contentInfo.mProducerId,producerInfo) != Result::OK)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationById(contentInfo.mGenerationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    T::FileInfo fileInfo;
+    if (getFileById(contentInfo.mFileId,fileInfo) != Result::OK)
+      return Result::UNKNOWN_FILE_ID;
+
+    if (producerInfo.mProducerId != generationInfo.mProducerId)
+      return Result::PRODUCER_AND_GENERATION_DO_NOT_MATCH;
+
+    if (producerInfo.mProducerId != fileInfo.mProducerId)
+      return Result::PRODUCER_AND_FILE_DO_NOT_MATCH;
+
+    if (generationInfo.mGenerationId != fileInfo.mGenerationId)
+      return Result::GENERATION_AND_FILE_DO_NOT_MATCH;
+
+
+    unsigned long long id = getContentKey(contentInfo.mFileId,contentInfo.mMessageIndex);
+
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),id,id));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    freeReplyObject(reply);
+
+    reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,contentInfo.getCsv().c_str()));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    freeReplyObject(reply);
+
+    addEvent(EventType::CONTENT_UPDATED,contentInfo.mFileId,contentInfo.mMessageIndex,0,0);
 
     return Result::OK;
   }
@@ -3997,7 +4265,7 @@ int RedisImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint
 
 
 
-int RedisImplementation::_getContentList(T::SessionId sessionId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentList(T::SessionId sessionId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4115,7 +4383,7 @@ int RedisImplementation::_getContentListByFileName(T::SessionId sessionId,const 
 
 
 
-int RedisImplementation::_getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4146,7 +4414,7 @@ int RedisImplementation::_getContentListByProducerId(T::SessionId sessionId,uint
 
 
 
-int RedisImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4177,7 +4445,7 @@ int RedisImplementation::_getContentListByProducerName(T::SessionId sessionId,co
 
 
 
-int RedisImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4209,7 +4477,7 @@ int RedisImplementation::_getContentListByGenerationId(T::SessionId sessionId,ui
 
 
 
-int RedisImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4302,7 +4570,7 @@ int RedisImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
 
 
 
-int RedisImplementation::_getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5784,7 +6052,7 @@ int RedisImplementation::getFileById(uint fileId,T::FileInfo& fileInfo)
 
 
 
-int RedisImplementation::getFileList(uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int RedisImplementation::getFileList(uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5827,7 +6095,7 @@ int RedisImplementation::getFileList(uint startFileId,uint maxRecords,T::FileInf
 
 
 
-int RedisImplementation::getFileListByGenerationId(uint generationId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int RedisImplementation::getFileListByGenerationId(uint generationId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5837,6 +6105,7 @@ int RedisImplementation::getFileListByGenerationId(uint generationId,uint startF
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    uint max = (uint)abs(maxRecords);
     uint prevFileId = 0xFFFFFFFF;
 
     while (startFileId != prevFileId)
@@ -5871,7 +6140,7 @@ int RedisImplementation::getFileListByGenerationId(uint generationId,uint startF
             else
               delete fileInfo;
 
-            if (fileInfoList.getLength() == maxRecords)
+            if (fileInfoList.getLength() == max)
             {
               freeReplyObject(reply);
               return Result::OK;
@@ -5902,7 +6171,7 @@ int RedisImplementation::getFileListByGenerationId(uint generationId,uint startF
 
 
 
-int RedisImplementation::getFileListByGenerationIdList(std::set<uint>& generationIdList,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int RedisImplementation::getFileListByGenerationIdList(std::set<uint>& generationIdList,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5912,6 +6181,7 @@ int RedisImplementation::getFileListByGenerationIdList(std::set<uint>& generatio
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    uint max = (uint)abs(maxRecords);
     uint prevFileId = 0xFFFFFFFF;
 
     while (startFileId != prevFileId)
@@ -5946,7 +6216,7 @@ int RedisImplementation::getFileListByGenerationIdList(std::set<uint>& generatio
             else
               delete fileInfo;
 
-            if (fileInfoList.getLength() == maxRecords)
+            if (fileInfoList.getLength() == max)
             {
               freeReplyObject(reply);
               return Result::OK;
@@ -6043,7 +6313,7 @@ int RedisImplementation::deleteFileListBySourceId(uint sourceId,bool deleteConte
 
 
 
-int RedisImplementation::getFileListByProducerId(uint producerId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int RedisImplementation::getFileListByProducerId(uint producerId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -6053,6 +6323,7 @@ int RedisImplementation::getFileListByProducerId(uint producerId,uint startFileI
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    uint max = (uint)abs(maxRecords);
     uint prevFileId = 0xFFFFFFFF;
 
     while (startFileId != prevFileId)
@@ -6086,7 +6357,7 @@ int RedisImplementation::getFileListByProducerId(uint producerId,uint startFileI
             else
               delete fileInfo;
 
-            if (fileInfoList.getLength() == maxRecords)
+            if (fileInfoList.getLength() == max)
             {
               freeReplyObject(reply);
               return Result::OK;
@@ -6117,7 +6388,7 @@ int RedisImplementation::getFileListByProducerId(uint producerId,uint startFileI
 
 
 
-int RedisImplementation::getFileListBySourceId(uint sourceId,uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int RedisImplementation::getFileListBySourceId(uint sourceId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -6127,6 +6398,7 @@ int RedisImplementation::getFileListBySourceId(uint sourceId,uint startFileId,ui
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    uint max = (uint)abs(maxRecords);
     uint prevFileId = 0xFFFFFFFF;
 
     while (startFileId != prevFileId)
@@ -6160,7 +6432,7 @@ int RedisImplementation::getFileListBySourceId(uint sourceId,uint startFileId,ui
             else
               delete fileInfo;
 
-            if (fileInfoList.getLength() == maxRecords)
+            if (fileInfoList.getLength() == max)
             {
               freeReplyObject(reply);
               return Result::OK;
@@ -6191,7 +6463,7 @@ int RedisImplementation::getFileListBySourceId(uint sourceId,uint startFileId,ui
 
 
 
-int RedisImplementation::getVirtualFiles(uint startFileId,uint maxRecords,T::FileInfoList& fileInfoList)
+int RedisImplementation::getVirtualFiles(uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -6201,6 +6473,7 @@ int RedisImplementation::getVirtualFiles(uint startFileId,uint maxRecords,T::Fil
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    uint max = (uint)abs(maxRecords);
     uint prevFileId = 0xFFFFFFFF;
 
     while (startFileId != prevFileId)
@@ -6234,7 +6507,7 @@ int RedisImplementation::getVirtualFiles(uint startFileId,uint maxRecords,T::Fil
             else
               delete fileInfo;
 
-            if (fileInfoList.getLength() == maxRecords)
+            if (fileInfoList.getLength() == max)
             {
               freeReplyObject(reply);
               return Result::OK;
@@ -6585,7 +6858,7 @@ int RedisImplementation::getContent(uint fileId,uint messageIndex,T::ContentInfo
 
 
 
-int RedisImplementation::getContent(uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int RedisImplementation::getContent(uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -6595,9 +6868,10 @@ int RedisImplementation::getContent(uint startFileId,uint startMessageIndex,uint
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    uint max = (uint)abs(maxRecords);
     unsigned long long startId = getContentKey(startFileId,startMessageIndex);
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 %u",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF,maxRecords));
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 %u",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF,max));
     if (reply == nullptr)
     {
       closeConnection();
@@ -6700,7 +6974,7 @@ int RedisImplementation::getGenerationTimeAndGeometryList(std::set<std::string>&
 
 
 
-int RedisImplementation::getContentByGenerationId(uint generationId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int RedisImplementation::getContentByGenerationId(uint generationId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -6710,6 +6984,7 @@ int RedisImplementation::getContentByGenerationId(uint generationId,uint startFi
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    uint max = (uint)abs(maxRecords);
     unsigned long long startId = getContentKey(startFileId,startMessageIndex);
     unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
 
@@ -6747,7 +7022,7 @@ int RedisImplementation::getContentByGenerationId(uint generationId,uint startFi
             else
               delete contentInfo;
 
-            if (contentInfoList.getLength() == maxRecords)
+            if (contentInfoList.getLength() == max)
             {
               freeReplyObject(reply);
               return Result::OK;
@@ -6779,7 +7054,7 @@ int RedisImplementation::getContentByGenerationId(uint generationId,uint startFi
 
 
 
-int RedisImplementation::getContentByGenerationIdList(std::set<uint>& generationIdList,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int RedisImplementation::getContentByGenerationIdList(std::set<uint>& generationIdList,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -6789,6 +7064,7 @@ int RedisImplementation::getContentByGenerationIdList(std::set<uint>& generation
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    uint max = (uint)abs(maxRecords);
     unsigned long long startId = getContentKey(startFileId,startMessageIndex);
     unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
 
@@ -6826,7 +7102,7 @@ int RedisImplementation::getContentByGenerationIdList(std::set<uint>& generation
             else
               delete contentInfo;
 
-            if (contentInfoList.getLength() == maxRecords)
+            if (contentInfoList.getLength() == max)
             {
               freeReplyObject(reply);
               return Result::OK;
@@ -6931,7 +7207,7 @@ int RedisImplementation::getContentByRequestCounterKey(ulonglong key,T::ContentI
 
 
 
-int RedisImplementation::getVirtualContent(uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int RedisImplementation::getVirtualContent(uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -6941,6 +7217,7 @@ int RedisImplementation::getVirtualContent(uint startFileId,uint startMessageInd
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    uint max = (uint)abs(maxRecords);
     unsigned long long startId = getContentKey(startFileId,startMessageIndex);
     unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
 
@@ -6978,7 +7255,7 @@ int RedisImplementation::getVirtualContent(uint startFileId,uint startMessageInd
             else
               delete contentInfo;
 
-            if (contentInfoList.getLength() == maxRecords)
+            if (contentInfoList.getLength() == max)
             {
               freeReplyObject(reply);
               return Result::OK;
@@ -7494,7 +7771,7 @@ int RedisImplementation::getContentByForecastTimeList(std::vector<T::ForecastTim
 
 
 
-int RedisImplementation::getContentByProducerId(uint producerId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int RedisImplementation::getContentByProducerId(uint producerId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -7504,6 +7781,7 @@ int RedisImplementation::getContentByProducerId(uint producerId,uint startFileId
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    uint max = (uint)abs(maxRecords);
     unsigned long long startId = getContentKey(startFileId,startMessageIndex);
     unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
 
@@ -7541,7 +7819,7 @@ int RedisImplementation::getContentByProducerId(uint producerId,uint startFileId
             else
               delete contentInfo;
 
-            if (contentInfoList.getLength() == maxRecords)
+            if (contentInfoList.getLength() == max)
             {
               freeReplyObject(reply);
               return Result::OK;
@@ -7573,7 +7851,7 @@ int RedisImplementation::getContentByProducerId(uint producerId,uint startFileId
 
 
 
-int RedisImplementation::getContentBySourceId(uint sourceId,uint startFileId,uint startMessageIndex,uint maxRecords,T::ContentInfoList& contentInfoList)
+int RedisImplementation::getContentBySourceId(uint sourceId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -7583,6 +7861,7 @@ int RedisImplementation::getContentBySourceId(uint sourceId,uint startFileId,uin
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    uint max = (uint)abs(maxRecords);
     unsigned long long startId = getContentKey(startFileId,startMessageIndex);
     unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
 
@@ -7620,7 +7899,7 @@ int RedisImplementation::getContentBySourceId(uint sourceId,uint startFileId,uin
             else
               delete contentInfo;
 
-            if (contentInfoList.getLength() == maxRecords)
+            if (contentInfoList.getLength() == max)
             {
               freeReplyObject(reply);
               return Result::OK;

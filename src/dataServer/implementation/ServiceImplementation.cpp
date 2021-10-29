@@ -4397,6 +4397,22 @@ void ServiceImplementation::event_producerDeleted(T::EventInfo& eventInfo)
 
 
 
+void ServiceImplementation::event_producerUpdated(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ServiceImplementation::event_producerListDeletedBySourceId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -4436,6 +4452,22 @@ void ServiceImplementation::event_generationDeleted(T::EventInfo& eventInfo)
   try
   {
     mGridFileManager.deleteFilesByGenerationId(eventInfo.mId1);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::event_generationUpdated(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
   }
   catch (...)
   {
@@ -4850,6 +4882,22 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
 
 
 
+void ServiceImplementation::event_contentUpdated(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ServiceImplementation::event_contentDeleted(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -4947,6 +4995,10 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *n
         event_producerDeleted(eventInfo);
         break;
 
+      case ContentServer::EventType::PRODUCER_UPDATED:
+        event_producerUpdated(eventInfo);
+        break;
+
       case ContentServer::EventType::PRODUCER_LIST_DELETED_BY_SOURCE_ID:
         event_producerListDeletedBySourceId(eventInfo);
         break;
@@ -4957,6 +5009,10 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *n
 
       case ContentServer::EventType::GENERATION_DELETED:
         event_generationDeleted(eventInfo);
+        break;
+
+      case ContentServer::EventType::GENERATION_UPDATED:
+        event_generationUpdated(eventInfo);
         break;
 
       case ContentServer::EventType::GENERATION_STATUS_CHANGED:
@@ -5017,6 +5073,10 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *n
 
       case ContentServer::EventType::CONTENT_DELETED:
         event_contentDeleted(eventInfo);
+        break;
+
+      case ContentServer::EventType::CONTENT_UPDATED:
+        event_contentUpdated(eventInfo);
         break;
 
       case ContentServer::EventType::DELETE_VIRTUAL_CONTENT:
