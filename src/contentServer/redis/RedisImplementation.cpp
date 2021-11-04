@@ -378,7 +378,7 @@ int RedisImplementation::openConnection()
     if (context == NULL)
       return Result::PERMANENT_STORAGE_ERROR;
 
-    while (true)
+    while (!mShutdownRequested)
     {
       redisReply *reply = static_cast<redisReply*>(redisCommand(context,"PING"));
       if (reply != nullptr)
@@ -397,6 +397,7 @@ int RedisImplementation::openConnection()
       sleep(1);
     }
 
+    return Result::PERMANENT_STORAGE_ERROR;
   }
   catch (...)
   {

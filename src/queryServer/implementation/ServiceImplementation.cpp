@@ -73,6 +73,10 @@ ServiceImplementation::ServiceImplementation()
     mProducerMap_updateTime = 0;
     mShutdownRequested = false;
     mContentServerStartTime = 0;
+    mContentCache_maxRecords = 10000;
+    mContentCache_records = 0;
+    mContentSearchCache_maxRecords = 500000;
+    mContentSearchCache_records = 0;
 
     GRID::Operation::getOperatorNames(mOperationNames);
   }
@@ -2765,8 +2769,11 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
       contentInfoList = cList;
       AutoWriteLock lock(&mContentSearchCache_modificationLock);
-      if (mContentSearchCache.size() > 1000000)
+      if (mContentSearchCache_records >= mContentSearchCache_maxRecords)
+      {
         mContentSearchCache.clear();
+        mContentSearchCache_records = 0;
+      }
 
       auto rr = mContentSearchCache.find(hash2);
       if (rr == mContentSearchCache.end())
@@ -2776,6 +2783,8 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
         rc.producerHash = producerHash;
         rc.generationId = generationId;
         mContentSearchCache.insert(std::pair<std::size_t,ContentSearchCacheEntry>(hash2,rc));
+        mContentSearchCache_records += cList->getLength();
+        //printf("SEARCH CACHE %ld %ld  GEN %ld  CONT %ld %ld  PARAM %ld\n",mContentSearchCache.size(),mContentSearchCache_records,mProducerGenerationListCache.size(),mContentCache.size(),mContentCache_records,mParameterMappingCache.size());
       }
       else
       {
@@ -2788,11 +2797,17 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     if (entry == &rec)
     {
       AutoWriteLock lock(&mContentCache_modificationLock);
-      if (mContentCache.size() > 10000)
+      if (mContentCache_records > mContentCache_maxRecords)
+      {
         mContentCache.clear();
+        mContentCache_records = 0;
+      }
 
       if (mContentCache.find(hash) == mContentCache.end())
+      {
         mContentCache.insert(std::pair<std::size_t,ContentCacheEntry>(hash,rec));
+        mContentCache_records += rec.contentInfoList.getLength();
+      }
     }
 
     return Result::OK;

@@ -41,7 +41,6 @@ class ServiceImplementation : public ServiceInterface
      virtual void   addVirtualContentFactory(VirtualContentFactory *factory);
      virtual void   setVirtualContentEnabled(bool enabled);
      virtual void   setMemoryMapCheckEnabled(bool enabled);
-     virtual void   setPointCacheEnabled(bool enabled,uint hitsRequired,uint timePeriod);
      virtual void   setPreload(bool preloadEnabled,bool preloadMemoryLock,const std::string& preloadFile);
 
      virtual void   eventProcessingThread();
@@ -177,9 +176,6 @@ class ServiceImplementation : public ServiceInterface
      std::string          mServerIor;
      std::string          mDataDir;
      bool                 mPreloadMemoryLock;
-     bool                 mPointCacheEnabled;
-     uint                 mPointCacheHitsRequired;
-     uint                 mPointCacheTimePeriod;
      pthread_t            mEventProcessingThread;
      time_t               mContentServerStartTime;
      GridFileManager      mGridFileManager;
@@ -187,7 +183,6 @@ class ServiceImplementation : public ServiceInterface
      time_t               mPreloadFile_modificationTime;
      PreloadList          mPreloadList;
      PreloadDefList       mPreloadDefList;
-     time_t               mLastCacheCheck;
      std::vector<uint>    mFileAdditionList;
      ThreadLock           mThreadLock;
 

@@ -385,31 +385,6 @@ GRID::GridFile_sptr GridFileManager::getFileByIdNoMapping(uint fileId)
 
 
 
-void GridFileManager::clearCachedValues(uint hitsRequired,uint timePeriod)
-{
-  FUNCTION_TRACE
-  try
-  {
-    AutoWriteLock lock(&mModificationLock);
-
-    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
-    {
-      if (it->second->isMemoryMapped())
-      {
-        it->second->clearCachedValues(hitsRequired,timePeriod);
-      }
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 std::size_t GridFileManager::getFileCount()
 {
   FUNCTION_TRACE
@@ -446,26 +421,6 @@ void GridFileManager::print(std::ostream& stream,uint level,uint optionFlags)
   }
 }
 
-
-
-
-
-void GridFileManager::setPointCacheEnabled(bool enabled)
-{
-  FUNCTION_TRACE
-  try
-  {
-    AutoReadLock lock(&mModificationLock);
-    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
-    {
-      it->second->setPointCacheEnabled(enabled);
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
 
 
 

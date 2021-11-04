@@ -76,10 +76,6 @@ ServiceImplementation::ServiceImplementation()
     mContentServerStartTime = 0;
     mLastVirtualFileRegistration = 0;
     mContentPreloadEnabled = true;
-    mLastCacheCheck = time(0);
-    mPointCacheEnabled = false;
-    mPointCacheHitsRequired = 20;
-    mPointCacheTimePeriod = 1200;
     mPreloadFile_modificationTime = 0;
     mPreloadMemoryLock = false;
     mMemoryMapCheckEnabled = false;
@@ -196,26 +192,6 @@ void ServiceImplementation::setPreload(bool preloadEnabled,bool preloadMemoryLoc
   }
 }
 
-
-
-
-
-void ServiceImplementation::setPointCacheEnabled(bool enabled,uint hitsRequired,uint timePeriod)
-{
-  FUNCTION_TRACE
-  try
-  {
-    mPointCacheEnabled = enabled;
-    mPointCacheHitsRequired = hitsRequired;
-    mPointCacheTimePeriod = timePeriod;
-
-    mGridFileManager.setPointCacheEnabled(mPointCacheEnabled);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
 
 
 
@@ -4138,8 +4114,6 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
     {
       gridFile = new GRID::PhysicalGridFile();
       gridFile->setFileName(filename);
-      gridFile->setPointCacheEnabled(mPointCacheEnabled);
-
       gridFile->setFileId(fileInfo.mFileId);
       gridFile->setProducerId(fileInfo.mProducerId);
       gridFile->setGenerationId(fileInfo.mGenerationId);
@@ -5266,12 +5240,6 @@ void ServiceImplementation::processEvents()
         if (mShutdownRequested)
           return;
       }
-    }
-
-    if ((mLastCacheCheck + 120) < time(0))
-    {
-      mGridFileManager.clearCachedValues(mPointCacheHitsRequired,mPointCacheTimePeriod);
-      mLastCacheCheck = time(0);
     }
   }
   catch (...)

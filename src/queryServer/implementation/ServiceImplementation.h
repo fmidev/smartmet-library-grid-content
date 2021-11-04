@@ -608,9 +608,13 @@ class ServiceImplementation : public ServiceInterface
 
      ContentCache               mContentCache;
      ModificationLock           mContentCache_modificationLock;
+     std::size_t                mContentCache_records;
+     std::size_t                mContentCache_maxRecords;
 
      ContentSearchCache         mContentSearchCache;
      ModificationLock           mContentSearchCache_modificationLock;
+     std::size_t                mContentSearchCache_records;
+     std::size_t                mContentSearchCache_maxRecords;
 
      pthread_t                  mThread;
      bool                       mShutdownRequested;

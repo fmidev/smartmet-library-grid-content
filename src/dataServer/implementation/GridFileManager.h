@@ -24,7 +24,6 @@ class GridFileManager
     void                addFile(GRID::GridFile *gridFile);
     void                addFileUser(uint fileId,uint userFileId);
     void                clear();
-    void                clearCachedValues(uint hitsRequired,uint timePeriod);
     void                deleteFile(GRID::GridFile *gridFile);
     void                deleteFileById(uint fileId);
     void                deleteFileByIndex(std::size_t fileIndex);
@@ -38,7 +37,6 @@ class GridFileManager
     std::size_t         getFileCount();
     void                getVirtualFiles(std::set<uint>& idList);
     void                print(std::ostream& stream,uint level,uint optionFlags);
-    void                setPointCacheEnabled(bool enabled);
 
   protected:
 
