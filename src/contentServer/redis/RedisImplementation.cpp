@@ -7330,6 +7330,15 @@ int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyTyp
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+    else
     if (fmiId == 0)
       return Result::OK;
 
@@ -7416,9 +7425,17 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+    else
     if (fmiId == 0)
       return Result::OK;
-
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -7512,6 +7529,15 @@ int RedisImplementation::getContentByParameterIdAndGeneration(uint generationId,
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+    else
     if (fmiId == 0)
       return Result::OK;
 
@@ -7612,9 +7638,17 @@ int RedisImplementation::getContentByParameterIdAndProducer(uint producerId,T::P
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+    else
     if (fmiId == 0)
       return Result::OK;
-
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;

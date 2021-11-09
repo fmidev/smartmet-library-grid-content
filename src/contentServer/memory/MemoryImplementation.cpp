@@ -707,6 +707,15 @@ int MemoryImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+    else
     if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
@@ -3873,6 +3882,15 @@ int MemoryImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+    else
     if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
@@ -3941,6 +3959,15 @@ int MemoryImplementation::_getContentListByParameterAndGenerationId(T::SessionId
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+    else
     if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
@@ -4009,6 +4036,15 @@ int MemoryImplementation::_getContentListByParameterAndGenerationName(T::Session
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+    else
     if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
@@ -4077,6 +4113,15 @@ int MemoryImplementation::_getContentListByParameterAndProducerId(T::SessionId s
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+    else
     if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
@@ -4154,6 +4199,15 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+    else
     if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
@@ -4229,6 +4283,15 @@ int MemoryImplementation::_getContentListByParameterAndProducerName(T::SessionId
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+    else
     if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 

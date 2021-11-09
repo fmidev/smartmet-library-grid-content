@@ -692,6 +692,15 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+    else
     if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
@@ -926,6 +935,8 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
 
           case T::ParamKeyTypeValue::FMI_NAME:
             sourceParamKey = contentInfo->getFmiParameterName();
+            if (sourceParamKey.empty())
+              sourceParamKey = "FMI-" + toString(contentInfo->mFmiParameterId);
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
@@ -973,6 +984,8 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
 
           case T::ParamKeyTypeValue::FMI_NAME:
             targetParamKey = contentInfo->getFmiParameterName();
+            if (targetParamKey.empty())
+              targetParamKey = "FMI-" + toString(contentInfo->mFmiParameterId);
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
@@ -1121,6 +1134,8 @@ int CacheImplementation::_getProducerParameterListByProducerId(T::SessionId sess
 
           case T::ParamKeyTypeValue::FMI_NAME:
             sourceParamKey = contentInfo->getFmiParameterName();
+            if (sourceParamKey.empty())
+              sourceParamKey = "FMI-" + toString(contentInfo->mFmiParameterId);
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
@@ -1168,6 +1183,8 @@ int CacheImplementation::_getProducerParameterListByProducerId(T::SessionId sess
 
           case T::ParamKeyTypeValue::FMI_NAME:
             targetParamKey = contentInfo->getFmiParameterName();
+            if (targetParamKey.empty())
+              targetParamKey = "FMI-" + toString(contentInfo->mFmiParameterId);
             break;
 
           case T::ParamKeyTypeValue::GRIB_ID:
@@ -3794,6 +3811,15 @@ int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+    else
     if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
@@ -3839,6 +3865,7 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
+
     contentInfoList.clear();
 
     T::FmiParamId fmiId = 0;
@@ -3876,6 +3903,15 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+    else
     if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
@@ -3958,7 +3994,15 @@ int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionI
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
-
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+    else
     if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
@@ -4043,6 +4087,15 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+    else
     if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
@@ -4124,6 +4177,15 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+    else
     if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
@@ -4214,7 +4276,15 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
         return Result::UNKNOWN_PARAMETER_KEY_TYPE;
     }
 
-
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+    else
+    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+    else
     if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 

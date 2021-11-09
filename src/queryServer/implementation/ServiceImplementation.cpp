@@ -2628,6 +2628,13 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 {
   try
   {
+    uint fmiId = 0;
+    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+    {
+      parameterKeyType = T::ParamKeyTypeValue::FMI_ID;
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    }
+
     std::size_t hash = 0;
     boost::hash_combine(hash,producerId);
     boost::hash_combine(hash,generationId);
@@ -2700,12 +2707,10 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
           {
             case T::ParamKeyTypeValue::FMI_ID:
               break;
+
             case T::ParamKeyTypeValue::FMI_NAME:
               rec.contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
               break;
-            //case T::ParamKeyTypeValue::GRIB_ID:
-            //  rec.contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time);
-            //  break;
           }
         }
       }
@@ -2729,12 +2734,10 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
         {
           case T::ParamKeyTypeValue::FMI_ID:
             break;
+
           case T::ParamKeyTypeValue::FMI_NAME:
             entry->contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
             break;
-          //case T::ParamKeyTypeValue::GRIB_ID:
-          //  entry->contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time);
-          //  break;
         }
       }
     }
@@ -2745,25 +2748,23 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       AutoReadLock readLock(&mContentCache_modificationLock);
       switch (parameterKeyType)
       {
+        case T::ParamKeyTypeValue::FMI_ID:
+        {
+          if (fmiId == 0)
+            fmiId = toUInt32(parameterKey);
+
+          entry->contentInfoList.getContentInfoListByFmiParameterIdAndGenerationId2(producerId,generationId,fmiId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
+          if (cList->getLength() == 0)
+            entry->contentInfoList.getContentInfoListByFmiParameterIdAndGenerationId(producerId,generationId,fmiId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
+        }
+        break;
+
         case T::ParamKeyTypeValue::FMI_NAME:
         {
           entry->contentInfoList.getContentInfoListByFmiParameterNameAndGenerationId2(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
           if (cList->getLength() == 0)
             entry->contentInfoList.getContentInfoListByFmiParameterNameAndGenerationId(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
         }
-        break;
-/*
-        case T::ParamKeyTypeValue::GRIB_ID:
-        {
-          T::ContentInfo *cInfo = entry->contentInfoList.getContentInfoByGribParameterIdAndGenerationId(producerId,generationId,toUInt32(parameterKey),parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
-          if (cInfo != nullptr)
-          {
-            contentInfoList->addContentInfo(cInfo->duplicate());
-            return Result::OK;
-          }
-          entry->contentInfoList.getContentInfoListByGribParameterIdAndGenerationId(producerId,generationId,toUInt32(parameterKey),parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
-        }
-*/
         break;
       }
 
@@ -6180,23 +6181,19 @@ void ServiceImplementation::getGridValues(
           {
             getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, true, mappings);
           }
-/*
-          if (mappings->size() == 0 &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+
+          if (mappings->size() == 0 &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
           {
             ParameterMapping mp;
             mp.mProducerName = producerInfo.mName;
             mp.mParameterName = parameterKey;
-            mp.mParameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
-            mp.mParameterKey = parameterKey;
+            mp.mParameterKeyType = T::ParamKeyTypeValue::FMI_ID;
+            mp.mParameterKey = parameterKey.c_str() + 4;
             mp.mGeometryId = producerGeometryId;
             mp.mParameterLevelId = paramLevelId;
             mp.mParameterLevel = paramLevel;
-            if (paramLevelId <= 0 &&  paramLevel < 0)
-              mp.mParameterLevelIdType = T::ParamLevelIdTypeValue::IGNORE;
-
             mappings->emplace_back(mp);
           }
-*/
 
           if (mappings->size() == 0)
             PRINT_DATA(mDebugLog, "    - No parameter mappings '%s:%s:%d:%d:%d' found!\n", producerInfo.mName.c_str(), parameterKey.c_str(), producerGeometryId, paramLevelId, paramLevel);
