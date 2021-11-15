@@ -3437,10 +3437,8 @@ int RedisImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,ui
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::FileInfo fileInfo;
-        fileInfo.setCsv(reply->element[t]->str);
-
-        if (fileInfo.mProducerId == producerId)
+        uint pId = getCsvInt64Field(reply->element[t]->str,3);
+        if (pId == producerId)
           count++;
       }
     }
@@ -3477,10 +3475,8 @@ int RedisImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::FileInfo fileInfo;
-        fileInfo.setCsv(reply->element[t]->str);
-
-        if (fileInfo.mGenerationId == generationId)
+        uint gId = getCsvInt64Field(reply->element[t]->str,4);
+        if (gId == generationId)
           count++;
       }
     }
@@ -3517,10 +3513,8 @@ int RedisImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uint
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::FileInfo fileInfo;
-        fileInfo.setCsv(reply->element[t]->str);
-
-        if (fileInfo.mSourceId == sourceId)
+        uint sId = getCsvInt64Field(reply->element[t]->str,7);
+        if (sId == sourceId)
           count++;
       }
     }
@@ -5441,12 +5435,9 @@ int RedisImplementation::getProducerByName(std::string producerName,T::ProducerI
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::ProducerInfo info;
-        info.setCsv(reply->element[t]->str);
-
-        if (strcasecmp(producerName.c_str(),info.mName.c_str()) == 0)
+        if (getCsvCaseCompare(reply->element[t]->str,1,producerName.c_str()) == 0)
         {
-          producerInfo = info;
+          producerInfo.setCsv(reply->element[t]->str);
           freeReplyObject(reply);
           return Result::OK;
         }
@@ -5527,12 +5518,13 @@ int RedisImplementation::getProducerListBySourceId(uint sourceId,T::ProducerInfo
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::ProducerInfo *producerInfo = new T::ProducerInfo();
-        producerInfo->setCsv(reply->element[t]->str);
-        if (producerInfo->mSourceId == sourceId)
+        uint sId = getCsvInt64Field(reply->element[t]->str,5);
+        if (sId == sourceId)
+        {
+          T::ProducerInfo *producerInfo = new T::ProducerInfo();
+          producerInfo->setCsv(reply->element[t]->str);
           producerInfoList.addProducerInfo(producerInfo);
-        else
-          delete producerInfo;
+        }
       }
     }
     freeReplyObject(reply);
@@ -5606,12 +5598,9 @@ int RedisImplementation::getGenerationByName(std::string generationName,T::Gener
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::GenerationInfo info;
-        info.setCsv(reply->element[t]->str);
-
-        if (strcasecmp(generationName.c_str(),info.mName.c_str()) == 0)
+        if (getCsvCaseCompare(reply->element[t]->str,3,generationName.c_str()) == 0)
         {
-          generationInfo = info;
+          generationInfo.setCsv(reply->element[t]->str);
           freeReplyObject(reply);
           return Result::OK;
         }
@@ -5754,12 +5743,13 @@ int RedisImplementation::getGenerationListByProducerId(uint producerId,T::Genera
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::GenerationInfo *generationInfo = new T::GenerationInfo();
-        generationInfo->setCsv(reply->element[t]->str);
-        if (generationInfo->mProducerId == producerId)
+        uint prodId = getCsvInt64Field(reply->element[t]->str,2);
+        if (prodId == producerId)
+        {
+          T::GenerationInfo *generationInfo = new T::GenerationInfo();
+          generationInfo->setCsv(reply->element[t]->str);
           generationInfoList.addGenerationInfo(generationInfo);
-        else
-          delete generationInfo;
+        }
       }
     }
     freeReplyObject(reply);
@@ -5797,12 +5787,13 @@ int RedisImplementation::getGenerationListBySourceId(uint sourceId,T::Generation
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::GenerationInfo *generationInfo = new T::GenerationInfo();
-        generationInfo->setCsv(reply->element[t]->str);
-        if (generationInfo->mSourceId == sourceId)
+        uint sId = getCsvInt64Field(reply->element[t]->str,8);
+        if (sId == sourceId)
+        {
+          T::GenerationInfo *generationInfo = new T::GenerationInfo();
+          generationInfo->setCsv(reply->element[t]->str);
           generationInfoList.addGenerationInfo(generationInfo);
-        else
-          delete generationInfo;
+        }
       }
     }
     freeReplyObject(reply);
@@ -5958,7 +5949,7 @@ int RedisImplementation::deleteFileListByGenerationId(uint generationId,bool del
       deleteContentByGenerationId(generationId);
 
     T::FileInfoList fileInfoList;
-    getFileListByGenerationId(generationId,0,0xFFFFFFFF,fileInfoList);
+    getFileListByGenerationId(generationId,0,1000000000,fileInfoList);
     uint len = fileInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -5991,7 +5982,7 @@ int RedisImplementation::deleteFileListByGenerationIdList(std::set<uint>& genera
       deleteContentByGenerationIdList(generationIdList);
 
     T::FileInfoList fileInfoList;
-    getFileListByGenerationIdList(generationIdList,0,0xFFFFFFFF,fileInfoList);
+    getFileListByGenerationIdList(generationIdList,0,1000000000,fileInfoList);
     uint len = fileInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -6074,13 +6065,13 @@ int RedisImplementation::getFileList(uint startFileId,int maxRecords,T::FileInfo
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::FileInfo *fileInfo = new T::FileInfo();
-        fileInfo->setCsv(reply->element[t]->str);
-
-        if (fileInfo->mFileId >= startFileId)
+        uint fileId = getCsvInt64Field(reply->element[t]->str,0);
+        if (fileId >= startFileId)
+        {
+          T::FileInfo *fileInfo = new T::FileInfo();
+          fileInfo->setCsv(reply->element[t]->str);
           fileInfoList.addFileInfo(fileInfo);
-        else
-          delete fileInfo;
+        }
       }
     }
     freeReplyObject(reply);
@@ -6130,26 +6121,23 @@ int RedisImplementation::getFileListByGenerationId(uint generationId,uint startF
 
         for (uint t = 0; t < reply->elements; t++)
         {
-          T::FileInfo *fileInfo = new T::FileInfo();
-          fileInfo->setCsv(reply->element[t]->str);
-
-          if (fileInfo->mFileId >= startFileId)
+          uint fileId = getCsvInt64Field(reply->element[t]->str,0);
+          if (fileId >= startFileId)
           {
-            startFileId = fileInfo->mFileId + 1;
-            if (fileInfo->mGenerationId == generationId)
-              fileInfoList.addFileInfo(fileInfo);
-            else
-              delete fileInfo;
-
-            if (fileInfoList.getLength() == max)
+            startFileId = fileId + 1;
+            uint genId = getCsvInt64Field(reply->element[t]->str,4);
+            if (genId == generationId)
             {
-              freeReplyObject(reply);
-              return Result::OK;
+              T::FileInfo *fileInfo = new T::FileInfo();
+              fileInfo->setCsv(reply->element[t]->str);
+              fileInfoList.addFileInfo(fileInfo);
+
+              if (fileInfoList.getLength() == max)
+              {
+                freeReplyObject(reply);
+                return Result::OK;
+              }
             }
-          }
-          else
-          {
-            delete fileInfo;
           }
         }
         freeReplyObject(reply);
@@ -6206,26 +6194,23 @@ int RedisImplementation::getFileListByGenerationIdList(std::set<uint>& generatio
 
         for (uint t = 0; t < reply->elements; t++)
         {
-          T::FileInfo *fileInfo = new T::FileInfo();
-          fileInfo->setCsv(reply->element[t]->str);
-
-          if (fileInfo->mFileId >= startFileId)
+          uint fileId = getCsvInt64Field(reply->element[t]->str,0);
+          if (fileId >= startFileId)
           {
-            startFileId = fileInfo->mFileId + 1;
-            if (generationIdList.find(fileInfo->mGenerationId) != generationIdList.end())
-              fileInfoList.addFileInfo(fileInfo);
-            else
-              delete fileInfo;
+            startFileId = fileId + 1;
 
-            if (fileInfoList.getLength() == max)
+            uint genId = getCsvInt64Field(reply->element[t]->str,4);
+            if (generationIdList.find(genId) != generationIdList.end())
             {
-              freeReplyObject(reply);
-              return Result::OK;
+              T::FileInfo *fileInfo = new T::FileInfo();
+              fileInfo->setCsv(reply->element[t]->str);
+              fileInfoList.addFileInfo(fileInfo);
+              if (fileInfoList.getLength() == max)
+              {
+                freeReplyObject(reply);
+                return Result::OK;
+              }
             }
-          }
-          else
-          {
-            delete fileInfo;
           }
         }
         freeReplyObject(reply);
@@ -6260,7 +6245,7 @@ int RedisImplementation::deleteFileListByProducerId(uint producerId,bool deleteC
       deleteContentByProducerId(producerId);
 
     T::FileInfoList fileInfoList;
-    getFileListByProducerId(producerId,0,0xFFFFFFFF,fileInfoList);
+    getFileListByProducerId(producerId,0,1000000000,fileInfoList);
     uint len = fileInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -6293,7 +6278,7 @@ int RedisImplementation::deleteFileListBySourceId(uint sourceId,bool deleteConte
       deleteContentBySourceId(sourceId);
 
     T::FileInfoList fileInfoList;
-    getFileListBySourceId(sourceId,0,0xFFFFFFFF,fileInfoList);
+    getFileListBySourceId(sourceId,0,1000000000,fileInfoList);
     uint len = fileInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -6348,25 +6333,24 @@ int RedisImplementation::getFileListByProducerId(uint producerId,uint startFileI
 
         for (uint t = 0; t < reply->elements; t++)
         {
-          T::FileInfo *fileInfo = new T::FileInfo();
-          fileInfo->setCsv(reply->element[t]->str);
-          if (fileInfo->mFileId >= startFileId)
+          uint fileId = getCsvInt64Field(reply->element[t]->str,0);
+          if (fileId >= startFileId)
           {
-            startFileId = fileInfo->mFileId + 1;
-            if (fileInfo->mProducerId == producerId)
-              fileInfoList.addFileInfo(fileInfo);
-            else
-              delete fileInfo;
+            startFileId = fileId + 1;
 
-            if (fileInfoList.getLength() == max)
+            uint prodId = getCsvInt64Field(reply->element[t]->str,3);
+            if (prodId == producerId)
             {
-              freeReplyObject(reply);
-              return Result::OK;
+              T::FileInfo *fileInfo = new T::FileInfo();
+              fileInfo->setCsv(reply->element[t]->str);
+              fileInfoList.addFileInfo(fileInfo);
+
+              if (fileInfoList.getLength() == max)
+              {
+                freeReplyObject(reply);
+                return Result::OK;
+              }
             }
-          }
-          else
-          {
-            delete fileInfo;
           }
         }
         freeReplyObject(reply);
@@ -6423,25 +6407,24 @@ int RedisImplementation::getFileListBySourceId(uint sourceId,uint startFileId,in
 
         for (uint t = 0; t < reply->elements; t++)
         {
-          T::FileInfo *fileInfo = new T::FileInfo();
-          fileInfo->setCsv(reply->element[t]->str);
-          if (fileInfo->mFileId >= startFileId)
+          uint fileId = getCsvInt64Field(reply->element[t]->str,0);
+          if (fileId >= startFileId)
           {
-            startFileId = fileInfo->mFileId + 1;
-            if (fileInfo->mSourceId == sourceId)
-              fileInfoList.addFileInfo(fileInfo);
-            else
-              delete fileInfo;
+            startFileId = fileId + 1;
 
-            if (fileInfoList.getLength() == max)
+            uint sId = getCsvInt64Field(reply->element[t]->str,7);
+            if (sId == sourceId)
             {
-              freeReplyObject(reply);
-              return Result::OK;
+              T::FileInfo *fileInfo = new T::FileInfo();
+              fileInfo->setCsv(reply->element[t]->str);
+              fileInfoList.addFileInfo(fileInfo);
+
+              if (fileInfoList.getLength() == max)
+              {
+                freeReplyObject(reply);
+                return Result::OK;
+              }
             }
-          }
-          else
-          {
-            delete fileInfo;
           }
         }
         freeReplyObject(reply);
@@ -6498,25 +6481,26 @@ int RedisImplementation::getVirtualFiles(uint startFileId,int maxRecords,T::File
 
         for (uint t = 0; t < reply->elements; t++)
         {
-          T::FileInfo *fileInfo = new T::FileInfo();
-          fileInfo->setCsv(reply->element[t]->str);
-          if (fileInfo->mFileId >= startFileId)
+          uint fileId = getCsvInt64Field(reply->element[t]->str,0);
+          if (fileId >= startFileId)
           {
-            startFileId = fileInfo->mFileId + 1;
-            if (fileInfo->mFileType == T::FileTypeValue::Virtual || (fileInfo->mFlags & T::FileInfo::Flags::VirtualContent) != 0)
-              fileInfoList.addFileInfo(fileInfo);
-            else
-              delete fileInfo;
+            startFileId = fileId + 1;
 
-            if (fileInfoList.getLength() == max)
+            uint type = getCsvInt64Field(reply->element[t]->str,1);
+            uint flags = getCsvInt64Field(reply->element[t]->str,6);
+
+            if (type == T::FileTypeValue::Virtual || (flags & T::FileInfo::Flags::VirtualContent) != 0)
             {
-              freeReplyObject(reply);
-              return Result::OK;
+              T::FileInfo *fileInfo = new T::FileInfo();
+              fileInfo->setCsv(reply->element[t]->str);
+              fileInfoList.addFileInfo(fileInfo);
+
+              if (fileInfoList.getLength() == max)
+              {
+                freeReplyObject(reply);
+                return Result::OK;
+              }
             }
-          }
-          else
-          {
-            delete fileInfo;
           }
         }
         freeReplyObject(reply);
@@ -6551,7 +6535,7 @@ int RedisImplementation::deleteVirtualFiles(bool deleteContent)
       removeVirtualContent();
 
     T::FileInfoList fileInfoList;
-    getVirtualFiles(0,0xFFFFFFFF,fileInfoList);
+    getVirtualFiles(0,1000000000,fileInfoList);
     uint len = fileInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -6641,7 +6625,7 @@ int RedisImplementation::deleteContentByProducerId(uint producerId)
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     T::ContentInfoList contentInfoList;
-    getContentByProducerId(producerId,0,0,0xFFFFFFFF,contentInfoList);
+    getContentByProducerId(producerId,0,0,1000000000,contentInfoList);
     uint len = contentInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -6670,7 +6654,7 @@ int RedisImplementation::deleteContentByGenerationId(uint generationId)
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     T::ContentInfoList contentInfoList;
-    getContentByGenerationId(generationId,0,0,0xFFFFFFFF,contentInfoList);
+    getContentByGenerationId(generationId,0,0,1000000000,contentInfoList);
     uint len = contentInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -6728,7 +6712,7 @@ int RedisImplementation::deleteContentBySourceId(uint sourceId)
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     T::ContentInfoList contentInfoList;
-    getContentBySourceId(sourceId,0,0,0xFFFFFFFF,contentInfoList);
+    getContentBySourceId(sourceId,0,0,1000000000,contentInfoList);
     uint len = contentInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -6757,7 +6741,7 @@ int RedisImplementation::removeVirtualContent()
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     T::ContentInfoList contentInfoList;
-    getVirtualContent(0,0,0xFFFFFFFF,contentInfoList);
+    getVirtualContent(0,0,1000000000,contentInfoList);
     uint len = contentInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -6836,11 +6820,13 @@ int RedisImplementation::getContent(uint fileId,uint messageIndex,T::ContentInfo
 
     if (reply->type == REDIS_REPLY_ARRAY  &&  reply->elements > 0)
     {
-      for (uint t=0; t< reply->elements; t++)
+      for (uint t=0; t<reply->elements; t++)
       {
-        contentInfo.setCsv(reply->element[t]->str);
-        if (contentInfo.mFileId == fileId  &&  contentInfo.mMessageIndex == messageIndex)
+        uint fId = getCsvInt64Field(reply->element[t]->str,0);
+        uint mIndex = getCsvInt64Field(reply->element[t]->str,1);
+        if (fId == fileId  &&  mIndex == messageIndex)
         {
+          contentInfo.setCsv(reply->element[t]->str);
           freeReplyObject(reply);
           return Result::OK;
         }
@@ -6883,13 +6869,15 @@ int RedisImplementation::getContent(uint startFileId,uint startMessageIndex,int 
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::ContentInfo *contentInfo = new T::ContentInfo();
-        contentInfo->setCsv(reply->element[t]->str);
+        uint fileId = getCsvInt64Field(reply->element[t]->str,0);
+        uint messageIndex = getCsvInt64Field(reply->element[t]->str,1);
 
-        if (contentInfo->mFileId > startFileId  ||  (contentInfo->mFileId == startFileId   &&  contentInfo->mMessageIndex >= startMessageIndex))
+        if (fileId > startFileId  ||  (fileId == startFileId   &&  messageIndex >= startMessageIndex))
+        {
+          T::ContentInfo *contentInfo = new T::ContentInfo();
+          contentInfo->setCsv(reply->element[t]->str);
           contentInfoList.addContentInfo(contentInfo);
-        else
-          delete contentInfo;
+        }
       }
     }
     freeReplyObject(reply);
@@ -7010,28 +6998,29 @@ int RedisImplementation::getContentByGenerationId(uint generationId,uint startFi
       {
         for (uint t = 0; t < reply->elements; t++)
         {
-          T::ContentInfo *contentInfo = new T::ContentInfo();
-          contentInfo->setCsv(reply->element[t]->str);
+          uint fileId = getCsvInt64Field(reply->element[t]->str,0);
+          uint messageIndex = getCsvInt64Field(reply->element[t]->str,1);
 
-          if (contentInfo->mFileId > startFileId  ||  (contentInfo->mFileId == startFileId   &&  contentInfo->mMessageIndex >= startMessageIndex))
+          if (fileId > startFileId  ||  (fileId == startFileId   &&  messageIndex >= startMessageIndex))
           {
-            startFileId = contentInfo->mFileId;
-            startMessageIndex = contentInfo->mMessageIndex + 1;
+            startFileId = fileId;
+            startMessageIndex = messageIndex + 1;
 
-            if (contentInfo->mGenerationId == generationId)
-              contentInfoList.addContentInfo(contentInfo);
-            else
-              delete contentInfo;
+            uint genId = getCsvInt64Field(reply->element[t]->str,6);
 
-            if (contentInfoList.getLength() == max)
+            if (genId == generationId)
             {
-              freeReplyObject(reply);
-              return Result::OK;
+              T::ContentInfo *contentInfo = new T::ContentInfo();
+              contentInfo->setCsv(reply->element[t]->str);
+
+              contentInfoList.addContentInfo(contentInfo);
+
+              if (contentInfoList.getLength() == max)
+              {
+                freeReplyObject(reply);
+                return Result::OK;
+              }
             }
-          }
-          else
-          {
-            delete contentInfo;
           }
         }
         freeReplyObject(reply);
@@ -7090,28 +7079,29 @@ int RedisImplementation::getContentByGenerationIdList(std::set<uint>& generation
       {
         for (uint t = 0; t < reply->elements; t++)
         {
-          T::ContentInfo *contentInfo = new T::ContentInfo();
-          contentInfo->setCsv(reply->element[t]->str);
+          uint fileId = getCsvInt64Field(reply->element[t]->str,0);
+          uint messageIndex = getCsvInt64Field(reply->element[t]->str,1);
 
-          if (contentInfo->mFileId > startFileId  ||  (contentInfo->mFileId == startFileId   &&  contentInfo->mMessageIndex >= startMessageIndex))
+          if (fileId > startFileId  ||  (fileId == startFileId   &&  messageIndex >= startMessageIndex))
           {
-            startFileId = contentInfo->mFileId;
-            startMessageIndex = contentInfo->mMessageIndex + 1;
+            startFileId = fileId;
+            startMessageIndex = messageIndex + 1;
 
-            if (generationIdList.find(contentInfo->mGenerationId) != generationIdList.end())
-              contentInfoList.addContentInfo(contentInfo);
-            else
-              delete contentInfo;
+            uint genId = getCsvInt64Field(reply->element[t]->str,6);
 
-            if (contentInfoList.getLength() == max)
+            if (generationIdList.find(genId) != generationIdList.end())
             {
-              freeReplyObject(reply);
-              return Result::OK;
+              T::ContentInfo *contentInfo = new T::ContentInfo();
+              contentInfo->setCsv(reply->element[t]->str);
+
+              contentInfoList.addContentInfo(contentInfo);
+
+              if (contentInfoList.getLength() == max)
+              {
+                freeReplyObject(reply);
+                return Result::OK;
+              }
             }
-          }
-          else
-          {
-            delete contentInfo;
           }
         }
         freeReplyObject(reply);
@@ -7243,28 +7233,29 @@ int RedisImplementation::getVirtualContent(uint startFileId,uint startMessageInd
       {
         for (uint t = 0; t < reply->elements; t++)
         {
-          T::ContentInfo *contentInfo = new T::ContentInfo();
-          contentInfo->setCsv(reply->element[t]->str);
+          uint fileId = getCsvInt64Field(reply->element[t]->str,0);
+          uint messageIndex = getCsvInt64Field(reply->element[t]->str,1);
 
-          if (contentInfo->mFileId > startFileId  ||  (contentInfo->mFileId == startFileId   &&  contentInfo->mMessageIndex >= startMessageIndex))
+          if (fileId > startFileId  ||  (fileId == startFileId   &&  messageIndex >= startMessageIndex))
           {
-            startFileId = contentInfo->mFileId;
-            startMessageIndex = contentInfo->mMessageIndex + 1;
+            startFileId = fileId;
+            startMessageIndex = messageIndex + 1;
 
-            if (contentInfo->mFileType == T::FileTypeValue::Virtual ||  (contentInfo->mFlags & T::ContentInfo::Flags::VirtualContent) != 0)
-              contentInfoList.addContentInfo(contentInfo);
-            else
-              delete contentInfo;
+            uint type = getCsvInt64Field(reply->element[t]->str,2);
+            uint flags = getCsvInt64Field(reply->element[t]->str,25);
 
-            if (contentInfoList.getLength() == max)
+            if (type == T::FileTypeValue::Virtual ||  (flags & T::ContentInfo::Flags::VirtualContent) != 0)
             {
-              freeReplyObject(reply);
-              return Result::OK;
+              T::ContentInfo *contentInfo = new T::ContentInfo();
+              contentInfo->setCsv(reply->element[t]->str);
+              contentInfoList.addContentInfo(contentInfo);
+
+              if (contentInfoList.getLength() == max)
+              {
+                freeReplyObject(reply);
+                return Result::OK;
+              }
             }
-          }
-          else
-          {
-            delete contentInfo;
           }
         }
         freeReplyObject(reply);
@@ -7356,17 +7347,13 @@ int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyTyp
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
-        info->setCsv(reply->element[t]->str);
-
-        if (info->mFmiParameterId == fmiId)
+        uint id = getCsvInt64Field(reply->element[t]->str,9);
+        if (id == fmiId)
         {
+          T::ContentInfo *info = new T::ContentInfo();
+          info->setCsv(reply->element[t]->str);
           contentInfoList.addContentInfo(info);
-          info = nullptr;
         }
-
-        if (info != nullptr)
-          delete info;
       }
     }
 
@@ -7841,28 +7828,29 @@ int RedisImplementation::getContentByProducerId(uint producerId,uint startFileId
       {
         for (uint t = 0; t < reply->elements; t++)
         {
-          T::ContentInfo *contentInfo = new T::ContentInfo();
-          contentInfo->setCsv(reply->element[t]->str);
+          uint fileId = getCsvInt64Field(reply->element[t]->str,0);
+          uint messageIndex = getCsvInt64Field(reply->element[t]->str,1);
 
-          if (contentInfo->mFileId > startFileId  ||  (contentInfo->mFileId == startFileId   &&  contentInfo->mMessageIndex >= startMessageIndex))
+          if (fileId > startFileId  ||  (fileId == startFileId   &&  messageIndex >= startMessageIndex))
           {
-            startFileId = contentInfo->mFileId;
-            startMessageIndex = contentInfo->mMessageIndex + 1;
+            startFileId = fileId;
+            startMessageIndex = messageIndex + 1;
 
-            if (contentInfo->mProducerId == producerId)
-              contentInfoList.addContentInfo(contentInfo);
-            else
-              delete contentInfo;
+            uint prodId = getCsvInt64Field(reply->element[t]->str,5);
 
-            if (contentInfoList.getLength() == max)
+            if (producerId == prodId)
             {
-              freeReplyObject(reply);
-              return Result::OK;
+              T::ContentInfo *contentInfo = new T::ContentInfo();
+              contentInfo->setCsv(reply->element[t]->str);
+
+              contentInfoList.addContentInfo(contentInfo);
+
+              if (contentInfoList.getLength() == max)
+              {
+                freeReplyObject(reply);
+                return Result::OK;
+              }
             }
-          }
-          else
-          {
-            delete contentInfo;
           }
         }
         freeReplyObject(reply);
@@ -7921,28 +7909,27 @@ int RedisImplementation::getContentBySourceId(uint sourceId,uint startFileId,uin
       {
         for (uint t = 0; t < reply->elements; t++)
         {
-          T::ContentInfo *contentInfo = new T::ContentInfo();
-          contentInfo->setCsv(reply->element[t]->str);
+          uint fileId = getCsvInt64Field(reply->element[t]->str,0);
+          uint messageIndex = getCsvInt64Field(reply->element[t]->str,1);
 
-          if (contentInfo->mFileId > startFileId  ||  (contentInfo->mFileId == startFileId   &&  contentInfo->mMessageIndex >= startMessageIndex))
+          if (fileId > startFileId  ||  (fileId == startFileId   &&  messageIndex >= startMessageIndex))
           {
-            startFileId = contentInfo->mFileId;
-            startMessageIndex = contentInfo->mMessageIndex + 1;
+            startFileId = fileId;
+            startMessageIndex = messageIndex + 1;
 
-            if (contentInfo->mSourceId == sourceId)
-              contentInfoList.addContentInfo(contentInfo);
-            else
-              delete contentInfo;
-
-            if (contentInfoList.getLength() == max)
+            uint sId = getCsvInt64Field(reply->element[t]->str,26);
+            if (sId == sourceId)
             {
-              freeReplyObject(reply);
-              return Result::OK;
+              T::ContentInfo *contentInfo = new T::ContentInfo();
+              contentInfo->setCsv(reply->element[t]->str);
+              contentInfoList.addContentInfo(contentInfo);
+
+              if (contentInfoList.getLength() == max)
+              {
+                freeReplyObject(reply);
+                return Result::OK;
+              }
             }
-          }
-          else
-          {
-            delete contentInfo;
           }
         }
         freeReplyObject(reply);
@@ -7990,13 +7977,13 @@ int RedisImplementation::getContentByFileId(uint fileId,T::ContentInfoList& cont
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::ContentInfo *contentInfo = new T::ContentInfo();
-        contentInfo->setCsv(reply->element[t]->str);
-
-        if (contentInfo->mFileId == fileId)
+        uint fId = getCsvInt64Field(reply->element[t]->str,0);
+        if (fId == fileId)
+        {
+          T::ContentInfo *contentInfo = new T::ContentInfo();
+          contentInfo->setCsv(reply->element[t]->str);
           contentInfoList.addContentInfo(contentInfo);
-        else
-          delete contentInfo;
+        }
       }
       freeReplyObject(reply);
     }
