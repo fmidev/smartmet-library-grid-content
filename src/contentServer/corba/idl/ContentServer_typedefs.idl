@@ -119,6 +119,7 @@ struct CorbaGenerationInfo
   unsigned long      flags;
   unsigned long      sourceId;
   long long          deletionTime;
+  long long          modificationTime;
 };
 
 typedef sequence<CorbaGenerationInfo> CorbaGenerationInfoList;

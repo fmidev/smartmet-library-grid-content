@@ -39,6 +39,7 @@ class GenerationInfo
     uint             mFlags;
     uint             mSourceId;
     time_t           mDeletionTime;
+    time_t           mModificationTime;
 
     class Status
     {

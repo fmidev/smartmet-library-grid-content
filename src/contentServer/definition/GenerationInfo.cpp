@@ -20,6 +20,7 @@ GenerationInfo::GenerationInfo()
     mFlags = 0;
     mSourceId = 0;
     mDeletionTime = 0;
+    mModificationTime = 0;
   }
   catch (...)
   {
@@ -45,6 +46,7 @@ GenerationInfo::GenerationInfo(const GenerationInfo& generationInfo)
     mFlags = generationInfo.mFlags;
     mSourceId = generationInfo.mSourceId;
     mDeletionTime = generationInfo.mDeletionTime;
+    mModificationTime = generationInfo.mModificationTime;
   }
   catch (...)
   {
@@ -67,6 +69,7 @@ GenerationInfo::GenerationInfo(const char *csv)
     mFlags = 0;
     mSourceId = 0;
     mDeletionTime = 0;
+    mModificationTime = 0;
     setCsv(csv);
   }
   catch (...)
@@ -130,7 +133,7 @@ std::string GenerationInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%u;%s;%s;%s;%u;%u;%u;%ld",
+    sprintf(st,"%u;%u;%u;%s;%s;%s;%u;%u;%u;%ld;%ld",
         mGenerationId,
         mGenerationType,
         mProducerId,
@@ -140,7 +143,8 @@ std::string GenerationInfo::getCsv()
         mStatus,
         mFlags,
         mSourceId,
-        mDeletionTime);
+        mDeletionTime,
+        mModificationTime);
 
     return std::string(st);
   }
@@ -158,7 +162,7 @@ std::string GenerationInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "generationId;generationType;producerId;name;description;analysisTime;status;flags;sourceId;deletionTimeT";
+    std::string header = "generationId;generationType;producerId;name;description;analysisTime;status;flags;sourceId;deletionTimeT;mModificationTimeT";
     return header;
   }
   catch (...)
@@ -210,6 +214,8 @@ void GenerationInfo::setCsv(const char *csv)
       mSourceId = toInt64(field[8]);
       if (c >= 9)
         mDeletionTime = toInt64(field[9]);
+      if (c >= 10)
+        mModificationTime = toInt64(field[10]);
     }
   }
   catch (...)
@@ -306,16 +312,17 @@ void GenerationInfo::print(std::ostream& stream,uint level,uint optionFlags)
   try
   {
     stream << space(level) << "GenerationInfo\n";
-    stream << space(level) << "- mGenerationId   = " << mGenerationId << "\n";
-    stream << space(level) << "- mGenerationType = " << mGenerationType << "\n";
-    stream << space(level) << "- mProducerId     = " << mProducerId << "\n";
-    stream << space(level) << "- mName           = " << mName << "\n";
-    stream << space(level) << "- mDescription    = " << mDescription << "\n";
-    stream << space(level) << "- mAnalysisTime   = " << mAnalysisTime << "\n";
-    stream << space(level) << "- mStatus         = " << C_INT(mStatus) << "\n";
-    stream << space(level) << "- mFlags          = " << mFlags << "\n";
-    stream << space(level) << "- mSourceId       = " << mSourceId << "\n";
-    stream << space(level) << "- mDeletionTime   = " << utcTimeFromTimeT(mDeletionTime) << "\n";
+    stream << space(level) << "- mGenerationId    = " << mGenerationId << "\n";
+    stream << space(level) << "- mGenerationType  = " << mGenerationType << "\n";
+    stream << space(level) << "- mProducerId      = " << mProducerId << "\n";
+    stream << space(level) << "- mName            = " << mName << "\n";
+    stream << space(level) << "- mDescription     = " << mDescription << "\n";
+    stream << space(level) << "- mAnalysisTime    = " << mAnalysisTime << "\n";
+    stream << space(level) << "- mStatus          = " << C_INT(mStatus) << "\n";
+    stream << space(level) << "- mFlags           = " << mFlags << "\n";
+    stream << space(level) << "- mSourceId        = " << mSourceId << "\n";
+    stream << space(level) << "- mDeletionTime    = " << utcTimeFromTimeT(mDeletionTime) << "\n";
+    stream << space(level) << "- mModifcationTime = " << utcTimeFromTimeT(mModificationTime) << "\n";
   }
   catch (...)
   {

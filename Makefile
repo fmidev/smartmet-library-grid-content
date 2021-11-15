@@ -231,13 +231,16 @@ clean: delete_stubs
 	rm -f src/*~ src/*/*~ src/*/*/*~
 	rm -rf obj
 	rm -rf $(LIBFILE)
+	
+clean-install: 
+	rm -rf $(includedir)/$(INCDIR)/*
+	rm -f $(libdir)/$(LIBFILE)
 
 format:
 	clang-format -i -style=file $(SUBNAME)/*.h $(SUBNAME)/*.cpp test/*.cpp
 
 install:
 	@mkdir -p $(includedir)/$(INCDIR)
-	@rm -rf $(includedir)/$(INCDIR)/*
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/cache
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/definition
@@ -344,14 +347,18 @@ ifneq ($(CORBA), disabled)
 endif
 
 create_stubs:
+ifneq ($(CORBA), disabled)
 	cd src/contentServer/corba/stubs; $(MAKE) all;
 	cd src/dataServer/corba/stubs; $(MAKE) all;
 	cd src/queryServer/corba/stubs; $(MAKE) all;
+endif
 
 delete_stubs:
+ifneq ($(CORBA), disabled)
 	cd src/contentServer/corba/stubs; $(MAKE) clean;
 	cd src/dataServer/corba/stubs; $(MAKE) clean;
 	cd src/queryServer/corba/stubs; $(MAKE) clean;
+endif
 
 
 rpm: clean $(SPEC).spec

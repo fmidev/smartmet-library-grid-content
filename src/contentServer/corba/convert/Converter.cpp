@@ -371,6 +371,7 @@ void Converter::convert(T::GenerationInfo& source,ContentServer::Corba::CorbaGen
     target.flags = source.mFlags;
     target.sourceId = source.mSourceId;
     target.deletionTime = source.mDeletionTime;
+    target.modificationTime = source.mModificationTime;
   }
   catch (...)
   {
@@ -396,6 +397,7 @@ void Converter::convert(const ContentServer::Corba::CorbaGenerationInfo& source,
     target.mFlags = source.flags;
     target.mSourceId = source.sourceId;
     target.mDeletionTime = source.deletionTime;
+    target.mModificationTime = source.modificationTime;
   }
   catch (...)
   {
