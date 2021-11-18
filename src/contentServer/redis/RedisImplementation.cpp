@@ -2811,12 +2811,13 @@ int RedisImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    /*
     T::ProducerInfo producerInfo;
     if (getProducerById(producerId,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
+     */
 
-
-    int result = deleteFileListByProducerId(producerInfo.mProducerId,true);
+    int result = deleteFileListByProducerId(producerId,true);
 
     if (result == Result::OK)
       addEvent(EventType::FILE_LIST_DELETED_BY_PRODUCER_ID,producerId,0,0,0);
@@ -2881,12 +2882,13 @@ int RedisImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    /*
     T::GenerationInfo generationInfo;
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
+     */
 
-
-    int result = deleteFileListByGenerationId(generationInfo.mGenerationId,true);
+    int result = deleteFileListByGenerationId(generationId,true);
 
     if (result == Result::OK)
       addEvent(EventType::FILE_LIST_DELETED_BY_GENERATION_ID,generationId,0,0,0);
@@ -4008,10 +4010,11 @@ int RedisImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    /*
     T::FileInfo fileInfo;
     if (getFileById(fileId,fileInfo) != Result::OK)
       return Result::UNKNOWN_FILE_ID;
-
+     */
 
     int result = deleteContentByFileId(fileId);
 
@@ -4078,10 +4081,11 @@ int RedisImplementation::_deleteContentListByProducerId(T::SessionId sessionId,u
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    /*
     T::ProducerInfo producerInfo;
     if (getProducerById(producerId,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
-
+     */
 
     int result = deleteContentByProducerId(producerId);
 
@@ -4147,10 +4151,11 @@ int RedisImplementation::_deleteContentListByGenerationId(T::SessionId sessionId
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    /*
     T::GenerationInfo generationInfo;
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
-
+     */
 
     int result = deleteContentByGenerationId(generationId);
 
@@ -6683,7 +6688,7 @@ int RedisImplementation::deleteContentByGenerationIdList(std::set<uint>& generat
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     T::ContentInfoList contentInfoList;
-    getContentByGenerationIdList(generationIdList,0,0,0xFFFFFFFF,contentInfoList);
+    getContentByGenerationIdList(generationIdList,0,0,1000000000,contentInfoList);
     uint len = contentInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
