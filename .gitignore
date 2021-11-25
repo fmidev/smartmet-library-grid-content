@@ -16,3 +16,4 @@ src/queryServer/corba/stubs/QueryServer_serviceInterface_SK.h
 src/queryServer/corba/stubs/QueryServer_serviceInterface_i.cc
 src/queryServer/corba/stubs/QueryServer_typedefs_SK.cpp
 src/queryServer/corba/stubs/QueryServer_typedefs_SK.h
+/smartmet-library-grid-content.tar.gz
