@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 21.11.15
+Version: 21.12.2
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -20,19 +20,19 @@ BuildRequires: lua-devel
 BuildRequires: make
 BuildRequires: omniORB-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 21.9.24
-BuildRequires: smartmet-library-grid-files-devel >= 21.11.15
-BuildRequires: smartmet-library-macgyver-devel >= 21.10.4
-BuildRequires: smartmet-library-spine-devel >= 21.11.10
+BuildRequires: smartmet-library-gis-devel >= 21.12.1
+BuildRequires: smartmet-library-grid-files-devel >= 21.12.2
+BuildRequires: smartmet-library-macgyver-devel >= 21.12.1
+BuildRequires: smartmet-library-spine-devel >= 21.12.2
 Requires: boost169-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
-Requires: smartmet-library-gis >= 21.9.24
-Requires: smartmet-library-grid-files >= 21.11.15
-Requires: smartmet-library-macgyver >= 21.10.4
-Requires: smartmet-library-spine >= 21.11.10
+Requires: smartmet-library-gis >= 21.12.1
+Requires: smartmet-library-grid-files >= 21.12.2
+Requires: smartmet-library-macgyver >= 21.12.1
+Requires: smartmet-library-spine >= 21.12.2
 Provides: %{SPECNAME}
 
 %description
@@ -65,10 +65,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 21.10.4
-Requires: smartmet-library-gis-devel >= 21.9.24
-Requires: smartmet-library-spine-devel >= 21.11.10
-Requires: smartmet-library-grid-files-devel >= 21.11.15
+Requires: smartmet-library-macgyver-devel >= 21.12.1
+Requires: smartmet-library-gis-devel >= 21.12.1
+Requires: smartmet-library-spine-devel >= 21.12.2
+Requires: smartmet-library-grid-files-devel >= 21.12.2
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
