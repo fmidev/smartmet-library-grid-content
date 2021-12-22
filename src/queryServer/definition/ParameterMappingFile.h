@@ -30,6 +30,7 @@ class ParameterMappingFile
     virtual void          getMappings(const std::string& producerName,const std::string& parameterName,T::GeometryId geometryId,bool onlySearchEnabled,ParameterMapping_vec& mappings);
     virtual void          getMappings(const std::string& producerName,const std::string& parameterName,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings);
     virtual void          getMappings(const std::string& producerName,const std::string& parameterName,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings);
+    virtual void          getMappingsByParamKey(const std::string& producerName,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamLevel level,ParameterMapping_vec& mappings);
     uint                  getNumberOfMappings();
     void                  print(std::ostream& stream,uint level,uint optionFlags);
 
@@ -40,6 +41,7 @@ class ParameterMappingFile
     std::string           mFilename;
     time_t                mLastModified;
     MappingSearch_sptr    mMappingSearch;
+    MappingSearch_sptr    mMappingReverseSearch;
     ModificationLock      mModificationLock;
     ThreadLock            mFileReadLock;
 };

@@ -366,6 +366,49 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 
 
 
+void ParameterMappingFile::getMappingsByParamKey(const std::string& producerName,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamLevel level,ParameterMapping_vec& mappings)
+{
+  try
+  {
+    if (!mMappingSearch)
+      return;
+
+    AutoReadLock lock(&mModificationLock);
+
+    std::string key = toLowerString(producerName + ":" + parameterKey);
+
+    auto s = mMappingReverseSearch->find(key);
+    if (s != mMappingReverseSearch->end())
+    {
+      for (auto it = s->second.begin(); it != s->second.end(); ++it)
+      {
+        if (!it->mIgnore)
+        {
+          if (parameterKeyType <= 0 || it->mParameterKeyType == parameterKeyType)
+          {
+            if (geometryId <= 0 || it->mGeometryId == geometryId)
+            {
+              if (levelId <= 0 || it->mParameterLevelId == levelId)
+              {
+                if (levelId <= 0 || level < 0  || it->mParameterLevel == level)
+                {
+                  mappings.emplace_back(*it);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
 void ParameterMappingFile::loadFile()
 {
   try
@@ -385,6 +428,7 @@ void ParameterMappingFile::loadFile()
     }
 
     MappingSearch *msearch = new MappingSearch();
+    MappingSearch *mreverseSearch = new MappingSearch();
 
     char st[1000];
 
@@ -482,8 +526,21 @@ void ParameterMappingFile::loadFile()
           else
           {
             ParameterMapping_vec vec;
-            vec.emplace_back(rec);
+            vec.push_back(rec);
             msearch->insert(std::pair<std::string,ParameterMapping_vec>(key,vec));
+          }
+
+          std::string rkey = toLowerString(rec.mProducerName + ":" + rec.mParameterKey);
+          auto ss = mreverseSearch->find(rkey);
+          if (ss != mreverseSearch->end())
+          {
+            ss->second.emplace_back(rec);
+          }
+          else
+          {
+            ParameterMapping_vec vec;
+            vec.push_back(rec);
+            mreverseSearch->insert(std::pair<std::string,ParameterMapping_vec>(rkey,vec));
           }
         }
       }
@@ -492,6 +549,7 @@ void ParameterMappingFile::loadFile()
 
     AutoWriteLock lock(&mModificationLock);
     mMappingSearch.reset(msearch);
+    mMappingReverseSearch.reset(mreverseSearch);
 
     mLastModified = modTime;
   }
