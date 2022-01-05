@@ -1282,6 +1282,7 @@ std::size_t GenerationInfoList::getHash()
       if (info != nullptr && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
       {
         boost::hash_combine(hash,info->mGenerationId);
+        boost::hash_combine(hash,info->mStatus);
       }
     }
     return hash;
@@ -1329,6 +1330,7 @@ std::size_t GenerationInfoList::getHashByProducerId(uint producerId)
         if (info->mProducerId == producerId && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
         {
           boost::hash_combine(hash,info->mGenerationId);
+          boost::hash_combine(hash,info->mStatus);
         }
         else
         {

@@ -4577,7 +4577,7 @@ int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
       auto it = mContentTimeCache.find(generationId);
       if (it == mContentTimeCache.end())
       {
-        ssp->mContentInfoList[0].getForecastTimeListByGenerationId(generationInfo->mProducerId,generationId,contentTimeList);
+        ssp->mContentInfoList[1].getForecastTimeListByGenerationId(generationInfo->mProducerId,generationId,contentTimeList);
         mContentTimeCache.insert(std::pair<uint,std::set<std::string>>(generationId,contentTimeList));
       }
       else
@@ -4594,7 +4594,7 @@ int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
       auto it = mContentTimeCache.find(generationId);
       if (it == mContentTimeCache.end())
       {
-        ssp->mContentInfoList[0].getForecastTimeListByGenerationId(generationInfo->mProducerId,generationId,contentTimeList);
+        ssp->mContentInfoList[1].getForecastTimeListByGenerationId(generationInfo->mProducerId,generationId,contentTimeList);
         mContentTimeCache.insert(std::pair<uint,std::set<std::string>>(generationId,contentTimeList));
       }
       else
@@ -4688,11 +4688,11 @@ int CacheImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,
     if (!mContentSwapEnabled)
     {
       AutoReadLock readLock(&mSearchModificationLock);
-      ssp->mContentInfoList[0].getForecastTimeListByProducerId(producerId,contentTimeList);
+      ssp->mContentInfoList[1].getForecastTimeListByProducerId(producerId,contentTimeList);
     }
     else
     {
-      ssp->mContentInfoList[0].getForecastTimeListByProducerId(producerId,contentTimeList);
+      ssp->mContentInfoList[1].getForecastTimeListByProducerId(producerId,contentTimeList);
     }
     return Result::OK;
   }

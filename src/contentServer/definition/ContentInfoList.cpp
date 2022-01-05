@@ -5925,10 +5925,7 @@ void ContentInfoList::getForecastTimeListByGenerationId(uint producerId,uint gen
         {
           if (info->mGenerationId == generationId)
           {
-            //if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
-            {
-              forecastTimeList.insert(info->getForecastTime());
-            }
+            forecastTimeList.insert(info->getForecastTime());
           }
           else
           {
@@ -6023,16 +6020,36 @@ void ContentInfoList::getForecastTimeListByProducerId(uint producerId,std::set<s
       return;
 
     AutoReadLock lock(mModificationLockPtr);
-    for (uint t=0; t<mLength; t++)
+
+    ContentInfo searchInfo;
+    searchInfo.mProducerId = producerId;
+
+    int idx = 0;
+    bool sorted = false;
+    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
+    {
+      sorted = true;
+    }
+
+    if (sorted)
+      idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
+
+    for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
       if (info != nullptr)
       {
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId)
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          //if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
+          if (info->mProducerId == producerId)
           {
             forecastTimeList.insert(info->getForecastTime());
+          }
+          else
+          {
+            if (sorted && t > (uint)idx)
+              return;
           }
         }
       }
