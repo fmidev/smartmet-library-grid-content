@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 21.12.7
+Version: 22.1.5
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -20,19 +20,19 @@ BuildRequires: lua-devel
 BuildRequires: make
 BuildRequires: omniORB-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 21.12.1
-BuildRequires: smartmet-library-grid-files-devel >= 21.12.2
-BuildRequires: smartmet-library-macgyver-devel >= 21.12.1
-BuildRequires: smartmet-library-spine-devel >= 21.12.2
+BuildRequires: smartmet-library-gis-devel >= 21.12.7
+BuildRequires: smartmet-library-grid-files-devel >= 22.1.5
+BuildRequires: smartmet-library-macgyver-devel >= 22.1.4
+BuildRequires: smartmet-library-spine-devel >= 22.1.5
 Requires: boost169-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
-Requires: smartmet-library-gis >= 21.12.1
-Requires: smartmet-library-grid-files >= 21.12.2
-Requires: smartmet-library-macgyver >= 21.12.1
-Requires: smartmet-library-spine >= 21.12.2
+Requires: smartmet-library-gis >= 21.12.7
+Requires: smartmet-library-grid-files >= 22.1.5
+Requires: smartmet-library-macgyver >= 22.1.4
+Requires: smartmet-library-spine >= 22.1.5
 Provides: %{SPECNAME}
 
 %description
@@ -65,10 +65,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 21.12.1
-Requires: smartmet-library-gis-devel >= 21.12.1
-Requires: smartmet-library-spine-devel >= 21.12.2
-Requires: smartmet-library-grid-files-devel >= 21.12.2
+Requires: smartmet-library-macgyver-devel >= 22.1.4
+Requires: smartmet-library-gis-devel >= 21.12.7
+Requires: smartmet-library-spine-devel >= 22.1.5
+Requires: smartmet-library-grid-files-devel >= 22.1.5
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -78,6 +78,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Jan  5 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.1.5-1.fmi
+- Improved parameter mappings
 * Tue Dec  7 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.12.7-1.fmi
 - Update to postgresql 13 and gdal 3.3
 * Thu Nov 18 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.11.18-1.fmi
