@@ -540,6 +540,19 @@ class ServiceImplementation : public ServiceInterface
 
      ulonglong      getProducerHash(uint producerId);
 
+     time_t         getConentList(
+                      T::ProducerInfo& producerInfo,
+                      T::GeometryId producerGeometryId,
+                      uint generationId,
+                      ParameterMapping& pInfo,
+                      time_t forecastTime,
+                      T::ParamLevelId paramLevelId,
+                      T::ParamLevel paramLevel,
+                      T::ForecastType forecastType,
+                      T::ForecastNumber forecastNumber,
+                      uint parameterFlags,
+                      std::shared_ptr<T::ContentInfoList>& contentList);
+
      int            getContentListByParameterGenerationIdAndForecastTime(
                        T::SessionId sessionId,
                        uint producerId,

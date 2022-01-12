@@ -244,11 +244,30 @@ char* ContentInfo::getForecastTime()
 
 
 
+void ContentInfo::setForecastTime(time_t ftime)
+{
+  try
+  {
+    mForecastTimeUTC = ftime;
+    std::string tmp = utcTimeFromTimeT(ftime);
+    mForecastTime = stringFactory.create(tmp.c_str());
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ContentInfo::setForecastTime(const char *ftime)
 {
   try
   {
     mForecastTime = stringFactory.create(ftime);
+    mForecastTimeUTC = utcTimeToTimeT(ftime);
   }
   catch (...)
   {
@@ -265,6 +284,7 @@ void ContentInfo::setForecastTime(const std::string& ftime)
   try
   {
     setForecastTime(ftime.c_str());
+    mForecastTimeUTC = utcTimeToTimeT(ftime);
   }
   catch (...)
   {

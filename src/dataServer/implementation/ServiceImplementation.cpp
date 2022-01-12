@@ -4150,6 +4150,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
         mInfo.mFmiParameterName = stringFactory.create(info->getFmiParameterName());
         mInfo.mFmiParameterLevelId = info->mFmiParameterLevelId;
         mInfo.mParameterLevel = info->mParameterLevel;
+        mInfo.mForecastTime = info->mForecastTimeUTC;
         mInfo.mForecastType = info->mForecastType;
         mInfo.mForecastNumber = info->mForecastNumber;
         mInfo.mGeometryId = info->mGeometryId;
@@ -4810,6 +4811,7 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
         mInfo.mFmiParameterName = stringFactory.create(contentInfo.getFmiParameterName());
         mInfo.mFmiParameterLevelId = contentInfo.mFmiParameterLevelId;
         mInfo.mParameterLevel = contentInfo.mParameterLevel;
+        mInfo.mForecastTime = contentInfo.mForecastTimeUTC;
         mInfo.mForecastType = contentInfo.mForecastType;
         mInfo.mForecastNumber = contentInfo.mForecastNumber;
         mInfo.mGeometryId = contentInfo.mGeometryId;

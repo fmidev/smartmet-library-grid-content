@@ -24,6 +24,7 @@ class ContentInfo
     ulonglong          getRequestCounterKey();
 
     char*              getForecastTime();
+    void               setForecastTime(time_t ftime);
     void               setForecastTime(const char *ftime);
     void               setForecastTime(const std::string& ftime);
 

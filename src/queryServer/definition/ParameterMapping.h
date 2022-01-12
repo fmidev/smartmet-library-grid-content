@@ -44,7 +44,8 @@ class ParameterMapping
     {
       public:
         static const uint       climatology = 1 << 0;
-        static const uint       bias = 1 << 1;
+        static const uint       global = 1 << 1;
+        static const uint       bias = 1 << 2;
     };
 };
 
