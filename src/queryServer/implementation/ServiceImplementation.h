@@ -540,7 +540,7 @@ class ServiceImplementation : public ServiceInterface
 
      ulonglong      getProducerHash(uint producerId);
 
-     time_t         getConentList(
+     time_t         getContentList(
                       T::ProducerInfo& producerInfo,
                       T::GeometryId producerGeometryId,
                       uint generationId,

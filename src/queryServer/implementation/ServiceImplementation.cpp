@@ -2868,7 +2868,7 @@ bool ServiceImplementation::getSpecialValues(
     }
 */
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    time_t fTime = ServiceImplementation::getConentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
+    time_t fTime = ServiceImplementation::getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
     PRINT_DATA(mDebugLog, "         + Found %u content records (fTime = %ld)\n", contentList->getLength(),fTime);
@@ -3147,7 +3147,7 @@ bool ServiceImplementation::getValueVectors(
     }
 */
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    time_t fTime = ServiceImplementation::getConentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
+    time_t fTime = ServiceImplementation::getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
     PRINT_DATA(mDebugLog, "         + Found %u content records (fTime = %ld)\n", contentList->getLength(),fTime);
@@ -4536,7 +4536,7 @@ bool ServiceImplementation::getPointValuesByHeight(
 
 
 
-time_t ServiceImplementation::getConentList(
+time_t ServiceImplementation::getContentList(
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     uint generationId,
@@ -4681,7 +4681,7 @@ bool ServiceImplementation::getPointValues(
     }
 */
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    time_t fTime = ServiceImplementation::getConentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
+    time_t fTime = ServiceImplementation::getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
     PRINT_DATA(mDebugLog, "         + Found %u content records (fTime = %ld)\n", contentList->getLength(),fTime);
@@ -4955,7 +4955,7 @@ bool ServiceImplementation::getCircleValues(
     }
 */
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    time_t fTime = ServiceImplementation::getConentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
+    time_t fTime = ServiceImplementation::getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
@@ -5220,7 +5220,7 @@ bool ServiceImplementation::getPolygonValues(
     }
 */
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    time_t fTime = ServiceImplementation::getConentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
+    time_t fTime = ServiceImplementation::getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
@@ -5503,7 +5503,7 @@ bool ServiceImplementation::getIsolineValues(
     }
 */
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    time_t fTime = ServiceImplementation::getConentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
+    time_t fTime = ServiceImplementation::getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
@@ -5846,7 +5846,7 @@ bool ServiceImplementation::getIsobandValues(
     */
 
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    time_t fTime = ServiceImplementation::getConentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
+    time_t fTime = ServiceImplementation::getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
