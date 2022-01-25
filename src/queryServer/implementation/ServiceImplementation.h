@@ -128,6 +128,7 @@ class ServiceImplementation : public ServiceInterface
                        const std::string& analysisTime,
                        ulonglong generationFlags,
                        bool reverseGenerations,
+                       bool acceptNotReadyGenerations,
                        const std::string& parameterKey,
                        std::size_t parameterHash,
                        T::ParamLevelId paramLevelId,
@@ -159,6 +160,7 @@ class ServiceImplementation : public ServiceInterface
                        uint producerId,
                        const std::string& analysisTime,
                        ulonglong generationFlags,
+                       bool acceptNotReadyGenerations,
                        const std::string& parameterKey,
                        std::size_t parameterHash,
                        T::ParamLevelId paramLevelId,
@@ -569,10 +571,11 @@ class ServiceImplementation : public ServiceInterface
                        time_t forecastTime,
                        std::shared_ptr<T::ContentInfoList>& contentInfoList);
 
-     CacheEntry_sptr getGenerationInfoListByProducerId(uint producerId);
+     CacheEntry_sptr getGenerationInfoListByProducerId(uint producerId,bool acceptNotReadyGenerations);
+
+     void            getGenerationTimeRangeByGenerationId(uint generationId,time_t& startTime,time_t& endTime);
 
      bool            isValidGeometry(int geometryId,std::vector<std::vector<T::Coordinate>>& polygonPath);
-
 
 
   private:
@@ -628,6 +631,7 @@ class ServiceImplementation : public ServiceInterface
      ModificationLock           mContentSearchCache_modificationLock;
      std::size_t                mContentSearchCache_records;
      std::size_t                mContentSearchCache_maxRecords;
+
 
      pthread_t                  mThread;
      bool                       mShutdownRequested;

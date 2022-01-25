@@ -212,6 +212,22 @@ void ResponseMessage::addLine(const char *key,unsigned long long line)
 
 
 
+void ResponseMessage::addLine(const char *key,time_t line)
+{
+  try
+  {
+    mLines.emplace_back(std::string(key) + "=" + std::to_string(line));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ResponseMessage::addLine(const char *key,int line)
 {
   try

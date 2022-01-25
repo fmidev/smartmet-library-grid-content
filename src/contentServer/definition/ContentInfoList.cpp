@@ -5946,6 +5946,125 @@ void ContentInfoList::getForecastTimeListByGenerationId(uint producerId,uint gen
 
 
 
+void ContentInfoList::getForecastTimeListByGenerationId(uint producerId,uint generationId,std::set<time_t>& forecastTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    forecastTimeList.clear();
+
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
+    AutoReadLock lock(mModificationLockPtr);
+
+    ContentInfo searchInfo;
+    searchInfo.mProducerId = producerId;
+    searchInfo.mGenerationId = generationId;
+
+    int idx = 0;
+    bool sorted = false;
+    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
+    {
+      sorted = true;
+    }
+
+    if (sorted)
+      idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
+
+
+    for (uint t=(uint)idx; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        {
+          if (info->mGenerationId == generationId)
+          {
+            forecastTimeList.insert(info->mForecastTimeUTC);
+          }
+          else
+          {
+            if (sorted && t > (uint)idx)
+              return;
+          }
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getForecastTimeRangeByGenerationId(uint producerId,uint generationId,time_t& startTime,time_t& endTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
+    AutoReadLock lock(mModificationLockPtr);
+
+    ContentInfo searchInfo;
+    searchInfo.mProducerId = producerId;
+    searchInfo.mGenerationId = generationId;
+
+    int idx = 0;
+    bool sorted = false;
+    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
+    {
+      sorted = true;
+    }
+
+    if (sorted)
+      idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
+
+    startTime = 0;
+    endTime = 0;
+
+    for (uint t=(uint)idx; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        {
+          if (info->mGenerationId == generationId)
+          {
+            if (startTime == 0 || info->mForecastTimeUTC < startTime)
+              startTime = info->mForecastTimeUTC;
+
+            if (endTime == 0 || info->mForecastTimeUTC > endTime)
+              endTime = info->mForecastTimeUTC;
+          }
+          else
+          {
+            if (sorted && t > (uint)idx)
+              return;
+          }
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 void ContentInfoList::getForecastTimeListByGenerationAndGeometry(uint producerId,uint generationId,T::GeometryId geometryId,std::set<std::string>& forecastTimeList)
 {
   FUNCTION_TRACE
@@ -6009,6 +6128,69 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(uint producerId
 
 
 
+void ContentInfoList::getForecastTimeListByGenerationAndGeometry(uint producerId,uint generationId,T::GeometryId geometryId,std::set<time_t>& forecastTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    forecastTimeList.clear();
+
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
+    AutoReadLock lock(mModificationLockPtr);
+
+    ContentInfo searchInfo;
+    searchInfo.mProducerId = producerId;
+    searchInfo.mGenerationId = generationId;
+
+    int idx = 0;
+    bool sorted = false;
+    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
+    {
+      sorted = true;
+    }
+
+    if (sorted)
+      idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
+
+    for (uint t=(uint)idx; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        {
+          if (info->mGenerationId == generationId)
+          {
+            if (info->mGeometryId == geometryId)
+            {
+              //if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
+              {
+                forecastTimeList.insert(info->mForecastTimeUTC);
+              }
+            }
+          }
+          else
+          {
+            if (sorted && t > (uint)idx)
+              return;
+          }
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ContentInfoList::getForecastTimeListByProducerId(uint producerId,std::set<std::string>& forecastTimeList)
 {
   FUNCTION_TRACE
@@ -6045,6 +6227,62 @@ void ContentInfoList::getForecastTimeListByProducerId(uint producerId,std::set<s
           if (info->mProducerId == producerId)
           {
             forecastTimeList.insert(info->getForecastTime());
+          }
+          else
+          {
+            if (sorted && t > (uint)idx)
+              return;
+          }
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getForecastTimeListByProducerId(uint producerId,std::set<time_t>& forecastTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    forecastTimeList.clear();
+
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
+    AutoReadLock lock(mModificationLockPtr);
+
+    ContentInfo searchInfo;
+    searchInfo.mProducerId = producerId;
+
+    int idx = 0;
+    bool sorted = false;
+    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
+    {
+      sorted = true;
+    }
+
+    if (sorted)
+      idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
+
+    for (uint t=(uint)idx; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        {
+          if (info->mProducerId == producerId)
+          {
+            forecastTimeList.insert(info->mForecastTimeUTC);
           }
           else
           {

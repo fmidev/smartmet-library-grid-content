@@ -125,6 +125,7 @@ interface ServiceInterface
   long  getContentTimeListByGenerationId(in long long sessionId,in unsigned long generationId,out CorbaStringList contentTimeList);
   long  getContentTimeListByGenerationAndGeometryId(in long long sessionId,in unsigned long generationId,in long geometryId,out CorbaStringList contentTimeList);
   long  getContentTimeListByProducerId(in long long sessionId,in unsigned long producerId,out CorbaStringList contentTimeList);
+  long  getContentTimeRangeByGenerationId(in long long sessionId,in unsigned long generationId,out long long startTime,out long long endTime);
 
   long  getContentCount(in long long sessionId,out unsigned long count);
   long  getHashByProducerId(in long long sessionId,in unsigned long producerId,out unsigned long long hash);

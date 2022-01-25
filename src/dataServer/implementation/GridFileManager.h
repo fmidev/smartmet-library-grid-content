@@ -30,6 +30,7 @@ class GridFileManager
     void                deleteFilesByProducerId(uint producerId);
     void                deleteFilesByGenerationId(uint generationId);
     void                deleteFilesBySourceId(uint sourceId);
+    void                deleteFilesByAccessTime(time_t accessTime);
     void                deleteFilesByCheckTime(time_t checkTime);
     void                deleteVirtualFiles();
     GRID::GridFile_sptr getFileById(uint fileId);

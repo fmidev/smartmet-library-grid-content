@@ -25,6 +25,7 @@ class ResponseMessage
      void           addLine(int line);
      void           addLine(const char *key,const char *line);
      void           addLine(const char *key,const std::string& line);
+     void           addLine(const char *key,time_t line);
      void           addLine(const char *key,unsigned long long line);
      void           addLine(const char *key,uint line);
      void           addLine(const char *key,int line);

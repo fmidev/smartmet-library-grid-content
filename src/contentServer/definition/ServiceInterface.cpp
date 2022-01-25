@@ -2978,6 +2978,31 @@ int ServiceInterface::getContentTimeListByProducerId(T::SessionId sessionId,uint
 
 
 
+int ServiceInterface::getContentTimeRangeByGenerationId(T::SessionId sessionId,uint generationId,time_t& startTime,time_t& endTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _getContentTimeRangeByGenerationId(sessionId,generationId,startTime,endTime);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%lu,%lu);result %d;time %f;",__FUNCTION__,sessionId,generationId,startTime,endTime,result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getGenerationIdGeometryIdAndForecastTimeList(T::SessionId sessionId,std::set<std::string>& list)
 {
   FUNCTION_TRACE
@@ -4205,6 +4230,15 @@ int ServiceInterface::_getContentTimeListByGenerationAndGeometryId(T::SessionId 
 
 
 int ServiceInterface::_getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_getContentTimeRangeByGenerationId(T::SessionId sessionId,uint generationId,time_t& startTime,time_t& endTime)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }

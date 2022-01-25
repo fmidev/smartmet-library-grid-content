@@ -178,6 +178,7 @@ class ServiceInterface
      virtual int    getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList);
      virtual int    getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList);
      virtual int    getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList);
+     virtual int    getContentTimeRangeByGenerationId(T::SessionId sessionId,uint generationId,time_t& startTime,time_t& endTime);
 
      virtual int    getContentCount(T::SessionId sessionId,uint& count);
      virtual int    getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash);
@@ -311,6 +312,7 @@ class ServiceInterface
      virtual int    _getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList);
      virtual int    _getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList);
      virtual int    _getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList);
+     virtual int    _getContentTimeRangeByGenerationId(T::SessionId sessionId,uint generationId,time_t& startTime,time_t& endTime);
 
      virtual int    _getContentCount(T::SessionId sessionId,uint& count);
      virtual int    _getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash);

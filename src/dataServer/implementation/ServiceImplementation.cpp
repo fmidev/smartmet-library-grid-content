@@ -79,6 +79,10 @@ ServiceImplementation::ServiceImplementation()
     mPreloadFile_modificationTime = 0;
     mPreloadMemoryLock = false;
     mMemoryMapCheckEnabled = false;
+    mFileCleanup_age = 60;
+    mFileCleanup_checkInterval = 60;
+    mFileCleanup_time = 0;
+
   }
   catch (...)
   {
@@ -196,6 +200,24 @@ void ServiceImplementation::setPreload(bool preloadEnabled,bool preloadMemoryLoc
 
 
 
+void ServiceImplementation::setCleanup(time_t age,time_t checkInterval)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mFileCleanup_age = age;
+    mFileCleanup_checkInterval = checkInterval;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ServiceImplementation::setMemoryMapCheckEnabled(bool enabled)
 {
   FUNCTION_TRACE
@@ -302,6 +324,7 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
         }
         else
         {
+          gridFile->setAccessTime(time(nullptr));
           return gridFile;
         }
       }
@@ -331,6 +354,7 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
 
         addFile(fileInfo,contentList);
         gridFile = mGridFileManager.getFileById(fileId);
+        gridFile->setAccessTime(time(nullptr));
       }
     }
     return gridFile;
@@ -4184,6 +4208,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
       return;
     }
 
+    gridFile->setAccessTime(checkTime);
     gridFile->setCheckTime(checkTime);
 
     if (mVirtualContentEnabled)
@@ -5150,6 +5175,14 @@ void ServiceImplementation::processEvents()
       return;
 
     mLuaFileCollection.checkUpdates(false);
+
+    time_t currentTime = time(nullptr);
+    if (mFileCleanup_checkInterval > 0  && (currentTime - mFileCleanup_time) > mFileCleanup_checkInterval)
+    {
+      mFileCleanup_time = currentTime;
+      mGridFileManager.deleteFilesByAccessTime(currentTime - mFileCleanup_age);
+    }
+
 
     if (mFullUpdateRequired)
     {

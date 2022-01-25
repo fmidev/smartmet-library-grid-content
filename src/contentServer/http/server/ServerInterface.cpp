@@ -657,6 +657,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getContentTimeRangeByGenerationId") == 0)
+    {
+      getContentTimeRangeByGenerationId(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"getContentTimeListByGenerationAndGeometryId") == 0)
     {
       getContentTimeListByGenerationAndGeometryId(request,response);
@@ -6020,6 +6026,54 @@ void ServerInterface::getContentTimeListByGenerationId(T::RequestMessage& reques
       {
         response.addLine("contentTime",*it);
       }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ServerInterface::getContentTimeRangeByGenerationId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint generationId = 0;
+    if (!request.getLineByKey("generationId",generationId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+
+    time_t startTime = 0;
+    time_t endTime = 0;
+
+    int result = mService->getContentTimeRangeByGenerationId(sessionId,generationId,startTime,endTime);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      response.addLine("startTime",startTime);
+      response.addLine("endTime",endTime);
     }
     else
     {

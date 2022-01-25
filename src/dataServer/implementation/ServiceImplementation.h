@@ -42,6 +42,7 @@ class ServiceImplementation : public ServiceInterface
      virtual void   setVirtualContentEnabled(bool enabled);
      virtual void   setMemoryMapCheckEnabled(bool enabled);
      virtual void   setPreload(bool preloadEnabled,bool preloadMemoryLock,const std::string& preloadFile);
+     virtual void   setCleanup(time_t age,time_t checkInterval);
 
      virtual void   eventProcessingThread();
 
@@ -192,6 +193,9 @@ class ServiceImplementation : public ServiceInterface
      Functions::FunctionCollection    mFunctionCollection;
      VirtualGridFilePtr_map           mGridFileMap;
      time_t                           mLastVirtualFileRegistration;
+     time_t                           mFileCleanup_age;
+     time_t                           mFileCleanup_checkInterval;
+     time_t                           mFileCleanup_time;
 };
 
 

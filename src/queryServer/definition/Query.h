@@ -66,6 +66,7 @@ class Query
         static const uint GeometryHitNotRequired          = 1 << 5;
         static const uint SameAnalysisTime                = 1 << 6;
         static const uint AnalysisTimeMatchRequired       = 1 << 7;
+        static const uint AcceptNotReadyGenerations       = 1 << 8;
     };
 
 };

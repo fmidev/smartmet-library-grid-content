@@ -128,8 +128,13 @@ class ContentInfoList
     void                getForecastTimeList(std::set<std::string>& forecastTimeList);
     void                getForecastTimeList(std::set<time_t>& forecastTimeList);
     void                getForecastTimeListByGenerationId(uint producerId,uint generationId,std::set<std::string>& forecastTimeList);
+    void                getForecastTimeListByGenerationId(uint producerId,uint generationId,std::set<time_t>& forecastTimeList);
     void                getForecastTimeListByGenerationAndGeometry(uint producerId,uint generationId,T::GeometryId geometryId,std::set<std::string>& forecastTimeList);
+    void                getForecastTimeListByGenerationAndGeometry(uint producerId,uint generationId,T::GeometryId geometryId,std::set<time_t>& forecastTimeList);
     void                getForecastTimeListByProducerId(uint producerId,std::set<std::string>& forecastTimeList);
+    void                getForecastTimeListByProducerId(uint producerId,std::set<time_t>& forecastTimeList);
+    void                getForecastTimeRangeByGenerationId(uint producerId,uint generationId,time_t& startTime,time_t& endTime);
+
     void                getFmiParamLevelIdListByFmiParameterId(T::FmiParamId fmiParameterId,std::vector<T::ParamLevelId>& paramLevelIdList);
     void                getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId,std::set<T::ParamLevel>& paramLevelList);
     void                getParamLevelInfoListByFmiParameterId(T::FmiParamId fmiParameterId,ParameterLevelInfoList& parameterLevelInfoList);

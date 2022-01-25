@@ -70,6 +70,7 @@ CacheImplementation::CacheImplementation()
 
     mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
     mContentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
+    mGenerationInfoList.setComparisonMethod(T::GenerationInfo::ComparisonMethod::generationId);
 
     mProducerInfoList.setLockingEnabled(true);
     mGenerationInfoList.setLockingEnabled(true);
@@ -4614,6 +4615,73 @@ int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
 
 
 
+int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessionId,uint generationId,time_t& startTime,time_t& endTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
+    if (mUpdateInProgress)
+      return mContentStorage->getContentTimeRangeByGenerationId(sessionId,generationId,startTime,endTime);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    auto ssp = mSearchStructureSptr.load();
+    if (!ssp)
+      return Result::DATA_NOT_FOUND;
+
+    if (!mContentSwapEnabled)
+    {
+      AutoReadLock readLock(&mSearchModificationLock);
+      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(generationId);
+      if (generationInfo == nullptr)
+        return Result::UNKNOWN_GENERATION_ID;
+
+      auto it = mContentTimeRangeCache.find(generationId);
+      if (it == mContentTimeRangeCache.end())
+      {
+        ssp->mContentInfoList[1].getForecastTimeRangeByGenerationId(generationInfo->mProducerId,generationId,startTime,endTime);
+        mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
+      }
+      else
+      {
+        startTime = it->second.first;
+        endTime = it->second.second;
+      }
+    }
+    else
+    {
+      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(generationId);
+      if (generationInfo == nullptr)
+        return Result::UNKNOWN_GENERATION_ID;
+
+      auto it = mContentTimeRangeCache.find(generationId);
+      if (it == mContentTimeRangeCache.end())
+      {
+        ssp->mContentInfoList[1].getForecastTimeRangeByGenerationId(generationInfo->mProducerId,generationId,startTime,endTime);
+        mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
+      }
+      else
+      {
+        startTime = it->second.first;
+        endTime = it->second.second;
+      }
+    }
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
@@ -4925,6 +4993,8 @@ void CacheImplementation::readGenerationList()
       exception.addParameter("ServiceResult",getResultString(result));
       throw exception;
     }
+
+    mGenerationInfoList.setComparisonMethod(T::GenerationInfo::ComparisonMethod::generationId);
   }
   catch (...)
   {
@@ -6497,6 +6567,7 @@ void CacheImplementation::updateContent()
         for (int t=1; t<CONTENT_LIST_COUNT; t++)
           ssp->mContentInfoList[t].setReleaseObjects(false);
 
+        ssp->mGenerationInfoList.setComparisonMethod(T::GenerationInfo::ComparisonMethod::generationId);
         ssp->mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::fileId);
         ssp->mFileInfoListByName.setComparisonMethod(T::FileInfo::ComparisonMethod::fileName);
         ssp->mContentInfoList[0].setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);

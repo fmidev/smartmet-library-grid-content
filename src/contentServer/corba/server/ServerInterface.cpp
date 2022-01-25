@@ -2835,6 +2835,38 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getContentTimeRangeByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::LongLong& startTime, ::CORBA::LongLong& endTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    time_t sStartTime = 0;
+    time_t sEndTime = 0;
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getContentTimeRangeByGenerationId(sessionId,generationId,sStartTime,sEndTime);
+
+    if (result == 0)
+    {
+      startTime = sStartTime;
+      endTime = sEndTime;
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
 ::CORBA::Long ServerInterface::getContentTimeListByGenerationAndGeometryId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList)
 {
   FUNCTION_TRACE

@@ -167,6 +167,22 @@ void RequestMessage::addLine(const char *key,const std::string& line)
 
 
 
+void RequestMessage::addLine(const char *key,time_t line)
+{
+  try
+  {
+    mLines.emplace_back(std::string(key) + "=" + std::to_string(line));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void RequestMessage::addLine(const char *key,unsigned long long line)
 {
   try

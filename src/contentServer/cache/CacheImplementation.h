@@ -17,6 +17,7 @@ namespace ContentServer
 #define CONTENT_LIST_COUNT 2
 
 typedef std::map<uint,std::set<std::string>> ContentTimeCache;
+typedef std::map<uint,std::pair<time_t,time_t>> ContentTimeRangeCache;
 
 
 class SearchStructure
@@ -165,6 +166,7 @@ class CacheImplementation : public ServiceInterface
     virtual int     _getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList);
     virtual int     _getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList);
     virtual int     _getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList);
+    virtual int     _getContentTimeRangeByGenerationId(T::SessionId sessionId,uint generationId,time_t& startTime,time_t& endTime);
 
     virtual int     _getContentCount(T::SessionId sessionId,uint& count);
     virtual int     _getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash);
@@ -248,6 +250,7 @@ class CacheImplementation : public ServiceInterface
     uint                   mFileCount;
     uint                   mContentCount;
     ContentTimeCache       mContentTimeCache;
+    ContentTimeRangeCache  mContentTimeRangeCache;
     SearchStructure_sptr   mSearchStructureSptr;
     time_t                 mContentUpdateTime;
     uint                   mContentUpdateInterval;
