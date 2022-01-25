@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 22.1.21
+Version: 22.1.25
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -20,19 +20,19 @@ BuildRequires: lua-devel
 BuildRequires: make
 BuildRequires: omniORB-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 21.1.21
-BuildRequires: smartmet-library-grid-files-devel >= 21.1.21
-BuildRequires: smartmet-library-macgyver-devel >= 21.1.21
-BuildRequires: smartmet-library-spine-devel >= 21.1.21
+BuildRequires: smartmet-library-gis-devel >= 22.1.24
+BuildRequires: smartmet-library-grid-files-devel >= 22.1.25
+BuildRequires: smartmet-library-macgyver-devel >= 22.1.21
+BuildRequires: smartmet-library-spine-devel >= 22.1.21
 Requires: boost169-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
-Requires: smartmet-library-gis >= 21.1.21
-Requires: smartmet-library-grid-files >= 21.1.21
-Requires: smartmet-library-macgyver >= 21.1.21
-Requires: smartmet-library-spine >= 21.1.21
+Requires: smartmet-library-gis >= 22.1.24
+Requires: smartmet-library-grid-files >= 22.1.25
+Requires: smartmet-library-macgyver >= 22.1.21
+Requires: smartmet-library-spine >= 22.1.21
 Provides: %{SPECNAME}
 
 %description
@@ -65,10 +65,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 21.1.21
-Requires: smartmet-library-gis-devel >= 21.1.21
-Requires: smartmet-library-spine-devel >= 21.1.21
-Requires: smartmet-library-grid-files-devel >= 21.1.21
+Requires: smartmet-library-macgyver-devel >= 22.1.21
+Requires: smartmet-library-gis-devel >= 22.1.24
+Requires: smartmet-library-spine-devel >= 22.1.21
+Requires: smartmet-library-grid-files-devel >= 22.1.25
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -78,9 +78,10 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Jan 25 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.1.25-1.fmi
+- New service methods for generation handling
 * Fri Jan 21 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.1.21-1.fmi
 - Repackage due to upgrade of packages from PGDG repo: gdal-3.4, geos-3.10, proj-8.2
-
 * Thu Jan 13 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.1.13-1.fmi
 - Improved climatological parameter handling
 * Wed Jan  5 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.1.5-1.fmi
