@@ -25,6 +25,7 @@ class SearchStructure
   public:
     T::ProducerInfoList    mProducerInfoList;
     T::GenerationInfoList  mGenerationInfoList;
+    T::GeometryInfoList    mGeometryInfoList;
     T::FileInfoList        mFileInfoList;
     T::FileInfoList        mFileInfoListByName;
     T::ContentInfoList     mContentInfoList[CONTENT_LIST_COUNT];
@@ -92,6 +93,20 @@ class CacheImplementation : public ServiceInterface
     virtual int     _setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo);
     virtual int     _setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,uchar status);
     virtual int     _setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status);
+
+    virtual int     _addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo);
+    virtual int     _deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId);
+    virtual int     _deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId);
+    virtual int     _deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId);
+    virtual int     _deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId);
+    virtual int     _getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo);
+    virtual int     _getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList);
+    virtual int     _getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList);
+    virtual int     _getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList);
+    virtual int     _getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList);
+    virtual int     _getGeometryInfoCount(T::SessionId sessionId,uint& count);
+    virtual int     _setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo);
+    virtual int     _setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status);
 
     virtual int     _addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo);
     virtual int     _addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList);
@@ -184,25 +199,38 @@ class CacheImplementation : public ServiceInterface
     virtual void    readFileList();
     virtual void    readProducerList();
     virtual void    readGenerationList();
+    virtual void    readGeometryList();
 
     virtual void    event_clear(T::EventInfo& eventInfo);
     virtual void    event_contentServerReload(T::EventInfo& eventInfo);
+
     virtual void    event_producerAdded(T::EventInfo& eventInfo);
     virtual void    event_producerDeleted(T::EventInfo& eventInfo);
     virtual void    event_producerUpdated(T::EventInfo& eventInfo);
     virtual void    event_producerListDeletedBySourceId(T::EventInfo& eventInfo);
+
     virtual void    event_generationAdded(T::EventInfo& eventInfo);
     virtual void    event_generationDeleted(T::EventInfo& eventInfo);
     virtual void    event_generationStatusChanged(T::EventInfo& eventInfo);
     virtual void    event_generationUpdated(T::EventInfo& eventInfo);
     virtual void    event_generationListDeletedByProducerId(T::EventInfo& eventInfo);
     virtual void    event_generationListDeletedBySourceId(T::EventInfo& eventInfo);
+
+    virtual void    event_geometryAdded(T::EventInfo& eventInfo);
+    virtual void    event_geometryDeleted(T::EventInfo& eventInfo);
+    virtual void    event_geometryStatusChanged(T::EventInfo& eventInfo);
+    virtual void    event_geometryUpdated(T::EventInfo& eventInfo);
+    virtual void    event_geometryListDeletedByProducerId(T::EventInfo& eventInfo);
+    virtual void    event_geometryListDeletedByGenerationId(T::EventInfo& eventInfo);
+    virtual void    event_geometryListDeletedBySourceId(T::EventInfo& eventInfo);
+
     virtual void    event_fileAdded(T::EventInfo& eventInfo);
     virtual void    event_fileDeleted(T::EventInfo& eventInfo);
     virtual void    event_fileUpdated(T::EventInfo& eventInfo);
     virtual void    event_fileListDeletedByProducerId(T::EventInfo& eventInfo);
     virtual void    event_fileListDeletedByGenerationId(T::EventInfo& eventInfo);
     virtual void    event_fileListDeletedBySourceId(T::EventInfo& eventInfo);
+
     virtual void    event_contentListDeletedByFileId(T::EventInfo& eventInfo);
     virtual void    event_contentListDeletedByProducerId(T::EventInfo& eventInfo);
     virtual void    event_contentListDeletedByGenerationId(T::EventInfo& eventInfo);
@@ -210,6 +238,7 @@ class CacheImplementation : public ServiceInterface
     virtual void    event_contentAdded(T::EventInfo& eventInfo);
     virtual void    event_contentDeleted(T::EventInfo& eventInfo);
     virtual void    event_contentUpdated(T::EventInfo& eventInfo);
+
     virtual void    event_deleteVirtualContent(T::EventInfo& eventInfo);
     virtual void    event_updateVirtualContent(T::EventInfo& eventInfo);
 
@@ -230,6 +259,7 @@ class CacheImplementation : public ServiceInterface
     T::FileInfoList        mFileInfoList;
     T::ProducerInfoList    mProducerInfoList;
     T::GenerationInfoList  mGenerationInfoList;
+    T::GeometryInfoList    mGeometryInfoList;
     T::ContentInfoList     mContentInfoList;
     T::EventInfoList       mEventInfoList;
     time_t                 mStartTime;
@@ -245,8 +275,10 @@ class CacheImplementation : public ServiceInterface
     uint                   mContentDeleteCounter;
     uint                   mProducerDeleteCounter;
     uint                   mGenerationDeleteCounter;
+    uint                   mGeometryDeleteCounter;
     uint                   mProducerCount;
     uint                   mGenerationCount;
+    uint                   mGeometryCount;
     uint                   mFileCount;
     uint                   mContentCount;
     ContentTimeCache       mContentTimeCache;

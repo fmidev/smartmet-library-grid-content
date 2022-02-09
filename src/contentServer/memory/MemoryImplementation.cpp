@@ -60,6 +60,7 @@ MemoryImplementation::MemoryImplementation()
 
     mProducerCount = 1000000000;
     mGenerationCount = 1000000000;
+    mGeometryCount = 1000000000;
     mFileCount = 1000000000;
     mContentCount = 1000000000;
 
@@ -70,6 +71,7 @@ MemoryImplementation::MemoryImplementation()
 
     mProducerInfoList.setLockingEnabled(true);
     mGenerationInfoList.setLockingEnabled(true);
+    mGeometryInfoList.setLockingEnabled(true);
     mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
     mFileInfoList.setLockingEnabled(true);
 
@@ -88,6 +90,7 @@ MemoryImplementation::MemoryImplementation()
 
     mProducerStorage_modificationTime = 0;
     mGenerationStorage_modificationTime = 0;
+    mGeometryStorage_modificationTime = 0;
     mFileStorage_modificationTime = 0;
     mContentStorage_modificationTime = 0;
   }
@@ -140,6 +143,7 @@ void MemoryImplementation::init(bool contentLoadEnabled,bool contentSaveEnabled,
 
     readProducerList();
     readGenerationList();
+    readGeometryList();
     readFileList();
 
     mFileInfoListByName = mFileInfoList;
@@ -247,11 +251,14 @@ void MemoryImplementation::syncProcessingThread()
         sprintf(filename,"%s/generations.csv",mContentDir.c_str());
         time_t t2 = getFileModificationTime(filename);
 
-        sprintf(filename,"%s/files.csv",mContentDir.c_str());
+        sprintf(filename,"%s/geometries.csv",mContentDir.c_str());
         time_t t3 = getFileModificationTime(filename);
 
-        sprintf(filename,"%s/content.csv",mContentDir.c_str());
+        sprintf(filename,"%s/files.csv",mContentDir.c_str());
         time_t t4 = getFileModificationTime(filename);
+
+        sprintf(filename,"%s/content.csv",mContentDir.c_str());
+        time_t t5 = getFileModificationTime(filename);
 
         time_t max = t1;
         if (t2 > max)
@@ -263,10 +270,18 @@ void MemoryImplementation::syncProcessingThread()
         if (t4 > max)
           max = t4;
 
-        if (max < tt && (mProducerStorage_modificationTime != t1 || mGenerationStorage_modificationTime != t2 || mFileStorage_modificationTime != t3 || mContentStorage_modificationTime != t4))
+        if (t5 > max)
+          max = t5;
+
+        if (max < tt && (mProducerStorage_modificationTime != t1 ||
+                         mGenerationStorage_modificationTime != t2 ||
+                         mGeometryStorage_modificationTime != t3 ||
+                         mFileStorage_modificationTime != t4 ||
+                         mContentStorage_modificationTime != t5))
         {
           while (!syncProducerList()) sleep(10);
           while (!syncGenerationList()) sleep(10);
+          while (!syncGeometryList()) sleep(10);
           while (!syncFileList()) sleep(10);
           while (!syncContentList()) sleep(10);
         }
@@ -320,6 +335,7 @@ int MemoryImplementation::_clear(T::SessionId sessionId)
     mFileInfoList.clear();
     mProducerInfoList.clear();
     mGenerationInfoList.clear();
+    mGeometryInfoList.clear();
     mEventInfoList.clear();
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -351,6 +367,7 @@ int MemoryImplementation::_reload(T::SessionId sessionId)
     mFileInfoList.clear();
     mProducerInfoList.clear();
     mGenerationInfoList.clear();
+    mGeometryInfoList.clear();
     mEventInfoList.clear();
 
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
@@ -358,6 +375,7 @@ int MemoryImplementation::_reload(T::SessionId sessionId)
 
     readProducerList();
     readGenerationList();
+    readGeometryList();
     readFileList();
 
     mFileInfoListByName = mFileInfoList;
@@ -486,6 +504,7 @@ int MemoryImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint pr
     mFileInfoListByName.deleteFileInfoByProducerId(producerId);
     mFileInfoList.deleteFileInfoByProducerId(producerId);
 
+    mGeometryInfoList.deleteGeometryInfoListByProducerId(producerId);
     mGenerationInfoList.deleteGenerationInfoListByProducerId(producerId);
 
     mProducerInfoList.deleteProducerInfoById(producerId);
@@ -524,6 +543,7 @@ int MemoryImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const
     mFileInfoListByName.deleteFileInfoByProducerId(info->mProducerId);
     mFileInfoList.deleteFileInfoByProducerId(info->mProducerId);
 
+    mGeometryInfoList.deleteGeometryInfoListByProducerId(info->mProducerId);
     mGenerationInfoList.deleteGenerationInfoListByProducerId(info->mProducerId);
 
     mProducerInfoList.deleteProducerInfoById(info->mProducerId);
@@ -558,6 +578,7 @@ int MemoryImplementation::_deleteProducerInfoListBySourceId(T::SessionId session
     mFileInfoListByName.deleteFileInfoBySourceId(sourceId);
     mFileInfoList.deleteFileInfoBySourceId(sourceId);
 
+    mGeometryInfoList.deleteGeometryInfoListBySourceId(sourceId);
     mGenerationInfoList.deleteGenerationInfoListBySourceId(sourceId);
 
     mProducerInfoList.deleteProducerInfoListBySourceId(sourceId);
@@ -1301,6 +1322,8 @@ int MemoryImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint 
     mFileInfoListByName.deleteFileInfoByGenerationId(info->mGenerationId);
     mFileInfoList.deleteFileInfoByGenerationId(info->mGenerationId);
 
+    mGeometryInfoList.deleteGeometryInfoListByGenerationId(info->mGenerationId);
+
     mGenerationInfoList.deleteGenerationInfoById(info->mGenerationId);
 
     addEvent(EventType::GENERATION_DELETED,info->mGenerationId,0,0,0);
@@ -1337,6 +1360,8 @@ int MemoryImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,con
     mFileInfoListByName.deleteFileInfoByGenerationId(info->mGenerationId);
     mFileInfoList.deleteFileInfoByGenerationId(info->mGenerationId);
 
+    mGeometryInfoList.deleteGeometryInfoListByGenerationId(info->mGenerationId);
+
     mGenerationInfoList.deleteGenerationInfoById(info->mGenerationId);
 
     addEvent(EventType::GENERATION_DELETED,info->mGenerationId,0,0,0);
@@ -1368,6 +1393,8 @@ int MemoryImplementation::_deleteGenerationInfoListByIdList(T::SessionId session
 
     mFileInfoListByName.deleteFileInfoByGenerationIdList(generationIdList);
     mFileInfoList.deleteFileInfoByGenerationIdList(generationIdList);
+
+    mGeometryInfoList.deleteGeometryInfoListByGenerationIdList(generationIdList);
 
     for (auto it = generationIdList.begin(); it != generationIdList.end(); ++it)
     {
@@ -1408,6 +1435,7 @@ int MemoryImplementation::_deleteGenerationInfoListByProducerId(T::SessionId ses
     mFileInfoListByName.deleteFileInfoByProducerId(producerInfo->mProducerId);
     mFileInfoList.deleteFileInfoByProducerId(producerInfo->mProducerId);
 
+    mGeometryInfoList.deleteGeometryInfoListByProducerId(producerInfo->mProducerId);
     mGenerationInfoList.deleteGenerationInfoListByProducerId(producerInfo->mProducerId);
 
     addEvent(EventType::GENERATION_LIST_DELETED_BY_PRODUCER_ID,producerInfo->mProducerId,0,0,0);
@@ -1445,7 +1473,7 @@ int MemoryImplementation::_deleteGenerationInfoListByProducerName(T::SessionId s
     mFileInfoListByName.deleteFileInfoByProducerId(producerInfo->mProducerId);
     mFileInfoList.deleteFileInfoByProducerId(producerInfo->mProducerId);
 
-    mGenerationInfoList.deleteGenerationInfoListByProducerId(producerInfo->mProducerId);
+    mGeometryInfoList.deleteGeometryInfoListByProducerId(producerInfo->mProducerId);
 
     mGenerationInfoList.deleteGenerationInfoListByProducerId(producerInfo->mProducerId);
 
@@ -1479,6 +1507,7 @@ int MemoryImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessi
     mFileInfoListByName.deleteFileInfoBySourceId(sourceId);
     mFileInfoList.deleteFileInfoBySourceId(sourceId);
 
+    mGeometryInfoList.deleteGeometryInfoListBySourceId(sourceId);
     mGenerationInfoList.deleteGenerationInfoListBySourceId(sourceId);
 
     addEvent(EventType::GENERATION_LIST_DELETED_BY_SOURCE_ID,sourceId,0,0,0);
@@ -1830,6 +1859,380 @@ int MemoryImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,
   }
 }
 
+
+
+
+
+int MemoryImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoWriteLock lock(&mModificationLock);
+
+    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(geometryInfo.mProducerId);
+    if (producerInfo == nullptr)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(geometryInfo.mGenerationId);
+    if (generationInfo != nullptr)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoById(geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId);
+    if (info != nullptr)
+      return Result::GEOMETRY_ALREADY_REGISTERED;
+
+    mGeometryInfoList.addGeometryInfo(geometryInfo.duplicate());
+
+    addEvent(EventType::GEOMETRY_ADDED,geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId,0);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int MemoryImplementation::_deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoWriteLock lock(&mModificationLock);
+
+    T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoById(generationId,geometryId,levelId);
+    if (info == nullptr)
+      return Result::UNKNOWN_GEOMETRY;
+
+    mGeometryInfoList.deleteGeometryInfoById(generationId,geometryId,levelId);
+
+    addEvent(EventType::GEOMETRY_DELETED,generationId,geometryId,levelId,0);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int MemoryImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoWriteLock lock(&mModificationLock);
+
+    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
+    if (generationInfo == nullptr)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    mGeometryInfoList.deleteGeometryInfoListByGenerationId(generationId);
+
+    addEvent(EventType::GEOMETRY_LIST_DELETED_BY_GENERATION_ID,generationId,0,0,0);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int MemoryImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoWriteLock lock(&mModificationLock);
+
+    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
+    if (producerInfo == nullptr)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    mGeometryInfoList.deleteGeometryInfoListByProducerId(producerId);
+
+    addEvent(EventType::GEOMETRY_LIST_DELETED_BY_PRODUCER_ID,producerId,0,0,0);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int MemoryImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoWriteLock lock(&mModificationLock);
+
+    mGeometryInfoList.deleteGeometryInfoListBySourceId(sourceId);
+
+    addEvent(EventType::GEOMETRY_LIST_DELETED_BY_SOURCE_ID,sourceId,0,0,0);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int MemoryImplementation::_getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoReadLock lock(&mModificationLock);
+
+    T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoById(generationId,geometryId,levelId);
+    if (info == nullptr)
+      return Result::DATA_NOT_FOUND;
+
+    geometryInfo = *info;
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int MemoryImplementation::_getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoReadLock lock(&mModificationLock);
+
+    geometryInfoList.clear();
+
+    geometryInfoList = mGeometryInfoList;
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int MemoryImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoReadLock lock(&mModificationLock);
+
+    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
+    if (generationInfo == nullptr)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    geometryInfoList.clear();
+
+    mGeometryInfoList.getGeometryInfoListByGenerationId(generationId,geometryInfoList);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int MemoryImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoReadLock lock(&mModificationLock);
+
+    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
+    if (producerInfo == nullptr)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    geometryInfoList.clear();
+
+    mGeometryInfoList.getGeometryInfoListByProducerId(producerId,geometryInfoList);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int MemoryImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoReadLock lock(&mModificationLock);
+
+    geometryInfoList.clear();
+
+    mGeometryInfoList.getGeometryInfoListBySourceId(sourceId,geometryInfoList);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int MemoryImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    count = mGeometryInfoList.getLength();
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int MemoryImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoWriteLock lock(&mModificationLock);
+
+    T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoById(geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId);
+    if (info == nullptr)
+      return Result::UNKNOWN_GEOMETRY;
+
+    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(geometryInfo.mProducerId);
+    if (producerInfo == nullptr)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(geometryInfo.mGenerationId);
+    if (generationInfo == nullptr)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    *info = geometryInfo;
+
+    addEvent(EventType::GEOMETRY_UPDATED,geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId,0);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int MemoryImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoWriteLock lock(&mModificationLock);
+
+    T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoById(generationId,geometryId,levelId);
+    if (info == nullptr)
+      return Result::UNKNOWN_GEOMETRY;
+
+    if (info->mStatus != status)
+    {
+      info->mStatus = status;
+      addEvent(EventType::GEOMETRY_STATUS_CHANGED,generationId,geometryId,levelId,status);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
 
 
 
@@ -4896,6 +5299,52 @@ void MemoryImplementation::readGenerationList()
 
 
 
+void MemoryImplementation::readGeometryList()
+{
+  FUNCTION_TRACE
+  try
+  {
+    mGenerationInfoList.clear();
+
+    if (!mContentLoadEnabled)
+      return;
+
+    char filename[200];
+
+    sprintf(filename,"%s/geometries.csv",mContentDir.c_str());
+    FILE *file = fopen(filename,"re");
+    if (file == nullptr)
+      return;
+
+    char st[1000];
+
+    while (!feof(file))
+    {
+      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      {
+        char *p = strstr(st,"\n");
+        if (p != nullptr)
+          *p = '\0';
+
+        T::GeometryInfo *rec = new T::GeometryInfo();
+        rec->setCsv(st);
+
+        mGeometryInfoList.addGeometryInfo(rec);
+      }
+    }
+    fclose(file);
+    mGeometryStorage_modificationTime = getFileModificationTime(filename);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void MemoryImplementation::readFileList()
 {
   FUNCTION_TRACE
@@ -5010,6 +5459,12 @@ void MemoryImplementation::saveData()
           mGenerationInfoList.writeToFile(filename);
         }
 
+        if (mGeometryCount != mGeometryInfoList.getLength())
+        {
+          std::string filename = mContentDir + "/geometries.csv";
+          mGeometryInfoList.writeToFile(filename);
+        }
+
         if (mFileCount != mFileInfoList.getLength())
           mFileInfoList.writeToFile(mContentDir + "/files.csv");
 
@@ -5018,7 +5473,8 @@ void MemoryImplementation::saveData()
 
         mProducerCount = mProducerInfoList.getLength();
         mGenerationCount = mGenerationInfoList.getLength();
-        mFileCount= mFileInfoList.getLength();
+        mGeometryCount = mGeometryInfoList.getLength();
+        mFileCount = mFileInfoList.getLength();
         mContentCount = mContentInfoList[0].getLength();
       }
     }
@@ -5229,6 +5685,99 @@ bool MemoryImplementation::syncGenerationList()
     }
 
     mGenerationStorage_modificationTime = getFileModificationTime(filename);
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+bool MemoryImplementation::syncGeometryList()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mContentSyncEnabled)
+      return true;
+
+    AutoWriteLock lock(&mModificationLock);
+
+    uint len = mGeometryInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoByIndex(t);
+      info->mFlags = info->mFlags & 0x7FFFFFFF;
+    }
+
+    char filename[200];
+    sprintf(filename,"%s/geometries.csv",mContentDir.c_str());
+    FILE *file = fopen(filename,"re");
+    if (file == nullptr)
+      return true;
+
+    char st[1000];
+
+    while (!feof(file))
+    {
+      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      {
+        char *p = strstr(st,"\n");
+        if (p != nullptr)
+          *p = '\0';
+
+        T::GeometryInfo *rec = new T::GeometryInfo();
+        rec->setCsv(st);
+
+        T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoById(rec->mGenerationId,rec->mGeometryId,rec->mLevelId);
+        if (info != nullptr)
+        {
+          info->mFlags = info->mFlags | 0x80000000;
+          delete rec;
+        }
+        else
+        {
+          T::GenerationInfo *gInfo = mGenerationInfoList.getGenerationInfoById(rec->mGenerationId);
+          if (gInfo != nullptr)
+          {
+            rec->mFlags = rec->mFlags | 0x80000000;
+            mGeometryInfoList.addGeometryInfo(rec);
+            addEvent(EventType::GEOMETRY_ADDED,rec->mGenerationId,rec->mGeometryId,0,0);
+          }
+          else
+          {
+            // Invalid producer
+            delete rec;
+          }
+        }
+      }
+    }
+    fclose(file);
+
+    std::vector<T::GeometryInfo> idList;
+    mGeometryInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoByIndex(t);
+      if ((info->mFlags &  0x80000000) == 0)
+      {
+        // The generation is not in the csv-file anymore. We should delete it.
+        idList.emplace_back(*info);
+      }
+      info->mFlags = info->mFlags & 0x7FFFFFFF;
+    }
+
+    for (auto it = idList.begin(); it != idList.end(); ++it)
+    {
+      mGeometryInfoList.deleteGeometryInfoById(it->mGenerationId,it->mGeometryId,it->mLevelId);
+      addEvent(EventType::GEOMETRY_DELETED,it->mGenerationId,it->mGeometryId,it->mLevelId,0);
+    }
+
+    mGeometryStorage_modificationTime = getFileModificationTime(filename);
     return true;
   }
   catch (...)
@@ -5485,11 +6034,6 @@ bool MemoryImplementation::syncContentList()
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
-
-
-
-
-
 
 
 

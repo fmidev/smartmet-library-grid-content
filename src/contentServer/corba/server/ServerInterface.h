@@ -42,6 +42,7 @@ class ServerInterface : public POA_SmartMet::ContentServer::Corba::ServiceInterf
     ::CORBA::Long getProducerNameAndGeometryList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaStringList_out list);
     ::CORBA::Long getProducerParameterList(::CORBA::LongLong sessionId, ::CORBA::Octet sourceParameterKeyType, ::CORBA::Octet targetParameterKeyType, SmartMet::ContentServer::Corba::CorbaStringList_out list);
     ::CORBA::Long getProducerParameterListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::Octet sourceParameterKeyType, ::CORBA::Octet targetParameterKeyType, SmartMet::ContentServer::Corba::CorbaStringList_out list);
+    ::CORBA::Long setProducerInfo(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaProducerInfo& producerInfo);
     ::CORBA::Long addGenerationInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaGenerationInfo& generationInfo);
     ::CORBA::Long deleteGenerationInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId);
     ::CORBA::Long deleteGenerationInfoByName(::CORBA::LongLong sessionId, const char* generationName);
@@ -60,8 +61,22 @@ class ServerInterface : public POA_SmartMet::ContentServer::Corba::ServiceInterf
     ::CORBA::Long getLastGenerationInfoByProducerIdAndStatus(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::Octet generationStatus, SmartMet::ContentServer::Corba::CorbaGenerationInfo_out generationInfo);
     ::CORBA::Long getLastGenerationInfoByProducerNameAndStatus(::CORBA::LongLong sessionId, const char* producerName, ::CORBA::Octet generationStatus, SmartMet::ContentServer::Corba::CorbaGenerationInfo_out generationInfo);
     ::CORBA::Long getGenerationInfoCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count);
+    ::CORBA::Long setGenerationInfo(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaGenerationInfo& generationInfo);
     ::CORBA::Long setGenerationInfoStatusById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Octet status);
     ::CORBA::Long setGenerationInfoStatusByName(::CORBA::LongLong sessionId, const char* generationName, ::CORBA::Octet status);
+    ::CORBA::Long addGeometryInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaGeometryInfo& geometryInfo);
+    ::CORBA::Long deleteGeometryInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, ::CORBA::Short levelId);
+    ::CORBA::Long deleteGeometryInfoListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId);
+    ::CORBA::Long deleteGeometryInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId);
+    ::CORBA::Long deleteGeometryInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId);
+    ::CORBA::Long getGeometryInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, ::CORBA::Short levelId, SmartMet::ContentServer::Corba::CorbaGeometryInfo& geometryInfo);
+    ::CORBA::Long getGeometryInfoList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaGeometryInfoList_out geometryInfoList);
+    ::CORBA::Long getGeometryInfoListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, SmartMet::ContentServer::Corba::CorbaGeometryInfoList_out geometryInfoList);
+    ::CORBA::Long getGeometryInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, SmartMet::ContentServer::Corba::CorbaGeometryInfoList_out geometryInfoList);
+    ::CORBA::Long getGeometryInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, SmartMet::ContentServer::Corba::CorbaGeometryInfoList_out geometryInfoList);
+    ::CORBA::Long getGeometryInfoCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count);
+    ::CORBA::Long setGeometryInfo(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaGeometryInfo& geometryInfo);
+    ::CORBA::Long setGeometryInfoStatusById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, ::CORBA::Short levelId, ::CORBA::Octet status);
     ::CORBA::Long addFileInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaFileInfo& fileInfo);
     ::CORBA::Long addFileInfoWithContentList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaFileInfo& fileInfo, SmartMet::ContentServer::Corba::CorbaContentInfoList& contentInfoList);
     ::CORBA::Long addFileInfoListWithContent(::CORBA::LongLong sessionId, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaFileContentList& fileContentList);
@@ -88,6 +103,7 @@ class ServerInterface : public POA_SmartMet::ContentServer::Corba::ServiceInterf
     ::CORBA::Long getFileInfoCountByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::ULong& count);
     ::CORBA::Long getFileInfoCountByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::ULong& count);
     ::CORBA::Long getFileInfoCountBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, ::CORBA::ULong& count);
+    ::CORBA::Long setFileInfo(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaFileInfo& fileInfo);
     ::CORBA::Long addEventInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaEventInfo& eventInfo);
     ::CORBA::Long getLastEventInfo(::CORBA::LongLong sessionId, ::CORBA::ULong requestingServerId, SmartMet::ContentServer::Corba::CorbaEventInfo_out eventInfo);
     ::CORBA::Long getEventInfoList(::CORBA::LongLong sessionId, ::CORBA::ULong requestingServerId, ::CORBA::ULongLong startEventId, ::CORBA::Long maxRecords, SmartMet::ContentServer::Corba::CorbaEventInfoList_out eventInfoList);
@@ -129,6 +145,7 @@ class ServerInterface : public POA_SmartMet::ContentServer::Corba::ServiceInterf
     ::CORBA::Long getContentTimeListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList);
     ::CORBA::Long getContentTimeRangeByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::LongLong& startTime, ::CORBA::LongLong& endTime);
     ::CORBA::Long getContentCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count);
+    ::CORBA::Long setContentInfo(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaContentInfo& contentInfo);
     ::CORBA::Long getHashByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::ULongLong& hash);
     ::CORBA::Long getLevelInfoList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaLevelInfoList_out levelInfoList);
     ::CORBA::Long deleteVirtualContent(::CORBA::LongLong sessionId);

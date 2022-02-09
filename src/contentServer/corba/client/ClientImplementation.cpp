@@ -552,6 +552,28 @@ int ClientImplementation::_getProducerParameterListByProducerId(T::SessionId ses
 
 
 
+int ClientImplementation::_setProducerInfo(T::SessionId sessionId, T::ProducerInfo& producerInfo)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaProducerInfo_var corbaProducerInfo = new ContentServer::Corba::CorbaProducerInfo();
+    ContentServer::Corba::Converter::convert(producerInfo, corbaProducerInfo);
+
+    int result = mService->setProducerInfo(sessionId, corbaProducerInfo);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
 int ClientImplementation::_addGenerationInfo(T::SessionId sessionId, T::GenerationInfo& generationInfo)
 {
   try
@@ -957,6 +979,28 @@ int ClientImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& c
 
 
 
+int ClientImplementation::_setGenerationInfo(T::SessionId sessionId, T::GenerationInfo& generationInfo)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaGenerationInfo_var corbaGenerationInfo = new ContentServer::Corba::CorbaGenerationInfo();
+    ContentServer::Corba::Converter::convert(generationInfo, corbaGenerationInfo);
+
+    int result = mService->setGenerationInfo(sessionId, corbaGenerationInfo);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
 int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,uchar status)
 {
   try
@@ -984,6 +1028,296 @@ int ClientImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
     int result = mService->setGenerationInfoStatusByName(sessionId, generationName.c_str(),  (CORBA::Octet)status);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaGeometryInfo_var corbaGeometryInfo = new ContentServer::Corba::CorbaGeometryInfo();
+    ContentServer::Corba::Converter::convert(geometryInfo, corbaGeometryInfo);
+
+    int result = mService->addGeometryInfo(sessionId, corbaGeometryInfo);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaGeometryInfo, geometryInfo);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    int result = mService->deleteGeometryInfoById(sessionId,generationId,geometryId,levelId);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    int result = mService->deleteGeometryInfoListByGenerationId(sessionId,generationId);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    int result = mService->deleteGeometryInfoListByProducerId(sessionId,producerId);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    int result = mService->deleteGeometryInfoListBySourceId(sessionId,sourceId);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaGeometryInfo_var corbaGeometryInfo;
+
+    int result = mService->getGeometryInfoById(sessionId, generationId, geometryId, levelId, corbaGeometryInfo);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaGeometryInfo, geometryInfo);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaGeometryInfoList_var corbaGeometryInfoList;
+
+    int result = mService->getGeometryInfoList(sessionId,corbaGeometryInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaGeometryInfoList, geometryInfoList);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaGeometryInfoList_var corbaGeometryInfoList;
+
+    int result = mService->getGeometryInfoListByGenerationId(sessionId,generationId,corbaGeometryInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaGeometryInfoList, geometryInfoList);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaGeometryInfoList_var corbaGeometryInfoList;
+
+    int result = mService->getGeometryInfoListByProducerId(sessionId,producerId,corbaGeometryInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaGeometryInfoList, geometryInfoList);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaGeometryInfoList_var corbaGeometryInfoList;
+
+    int result = mService->getGeometryInfoListBySourceId(sessionId,sourceId,corbaGeometryInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaGeometryInfoList, geometryInfoList);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ::CORBA::ULong corbaCount = 0;
+
+    int result = mService->getGeometryInfoCount(sessionId, corbaCount);
+
+    if (result == 0)
+      count = corbaCount;
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+
+
+
+
+int ClientImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaGeometryInfo_var corbaGeometryInfo = new ContentServer::Corba::CorbaGeometryInfo();
+    ContentServer::Corba::Converter::convert(geometryInfo, corbaGeometryInfo);
+
+    int result = mService->setGeometryInfo(sessionId, corbaGeometryInfo);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    int result = mService->setGeometryInfoStatusById(sessionId, generationId, geometryId, levelId, status);
 
     mLastAccessTime = time(nullptr);
     return result;
@@ -1578,6 +1912,28 @@ int ClientImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uin
 
     if (result == 0)
       count = corbaCount;
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_setFileInfo(T::SessionId sessionId, T::FileInfo& fileInfo)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaFileInfo_var corbaFileInfo = new ContentServer::Corba::CorbaFileInfo();
+    ContentServer::Corba::Converter::convert(fileInfo, corbaFileInfo);
+
+    int result = mService->setFileInfo(sessionId, corbaFileInfo);
 
     mLastAccessTime = time(nullptr);
     return result;
@@ -2540,6 +2896,28 @@ int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 
     if (result == 0)
       count = corbaCount;
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_setContentInfo(T::SessionId sessionId, T::ContentInfo& contentInfo)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaContentInfo_var corbaContentInfo = new ContentServer::Corba::CorbaContentInfo();
+    ContentServer::Corba::Converter::convert(contentInfo, corbaContentInfo);
+
+    int result = mService->setContentInfo(sessionId, corbaContentInfo);
 
     mLastAccessTime = time(nullptr);
     return result;

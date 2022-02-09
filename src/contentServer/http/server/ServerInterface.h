@@ -40,6 +40,7 @@ class ServerInterface
     virtual void getProducerNameAndGeometryList(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getProducerParameterList(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getProducerParameterListByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void setProducerInfo(T::RequestMessage& request,T::ResponseMessage& response);
 
     virtual void addGenerationInfo(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteGenerationInfoById(T::RequestMessage& request,T::ResponseMessage& response);
@@ -61,6 +62,21 @@ class ServerInterface
     virtual void getGenerationInfoCount(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void setGenerationInfoStatusById(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void setGenerationInfoStatusByName(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void setGenerationInfo(T::RequestMessage& request,T::ResponseMessage& response);
+
+    virtual void addGeometryInfo(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void deleteGeometryInfoById(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void deleteGeometryInfoListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void deleteGeometryInfoListByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void deleteGeometryInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getGeometryInfoById(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getGeometryInfoList(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getGeometryInfoListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getGeometryInfoListByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getGeometryInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getGeometryInfoCount(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void setGeometryInfo(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void setGeometryInfoStatusById(T::RequestMessage& request,T::ResponseMessage& response);
 
     virtual void addFileInfo(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void addFileInfoWithContentList(T::RequestMessage& request,T::ResponseMessage& response);
@@ -88,6 +104,7 @@ class ServerInterface
     virtual void getFileInfoCountByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getFileInfoCountByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getFileInfoCountBySourceId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void setFileInfo(T::RequestMessage& request,T::ResponseMessage& response);
 
     virtual void addEventInfo(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getLastEventInfo(T::RequestMessage& request,T::ResponseMessage& response);
@@ -132,6 +149,7 @@ class ServerInterface
     virtual void getContentTimeListByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentTimeRangeByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentCount(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void setContentInfo(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getHashByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
 
     virtual void getLevelInfoList(T::RequestMessage& request,T::ResponseMessage& response);

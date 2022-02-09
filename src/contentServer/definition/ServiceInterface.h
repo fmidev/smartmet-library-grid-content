@@ -12,6 +12,8 @@
 #include "ProducerInfoList.h"
 #include "GenerationInfo.h"
 #include "GenerationInfoList.h"
+#include "GeometryInfo.h"
+#include "GeometryInfoList.h"
 #include "ServiceResults.h"
 #include "RequestFlags.h"
 
@@ -95,6 +97,20 @@ class ServiceInterface
      virtual int    setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo);
      virtual int    setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,uchar status);
      virtual int    setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status);
+
+     virtual int    addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo);
+     virtual int    deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId);
+     virtual int    deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId);
+     virtual int    deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId);
+     virtual int    deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId);
+     virtual int    getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo);
+     virtual int    getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList);
+     virtual int    getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList);
+     virtual int    getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList);
+     virtual int    getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList);
+     virtual int    getGeometryInfoCount(T::SessionId sessionId,uint& count);
+     virtual int    setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo);
+     virtual int    setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status);
 
      virtual int    addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo);
      virtual int    addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList);
@@ -229,6 +245,20 @@ class ServiceInterface
      virtual int    _setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo);
      virtual int    _setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,uchar status);
      virtual int    _setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status);
+
+     virtual int    _addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo);
+     virtual int    _deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId);
+     virtual int    _deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId);
+     virtual int    _deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId);
+     virtual int    _deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId);
+     virtual int    _getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo);
+     virtual int    _getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList);
+     virtual int    _getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList);
+     virtual int    _getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList);
+     virtual int    _getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList);
+     virtual int    _getGeometryInfoCount(T::SessionId sessionId,uint& count);
+     virtual int    _setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo);
+     virtual int    _setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status);
 
      virtual int    _addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo);
      virtual int    _addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList);

@@ -58,15 +58,17 @@ CacheImplementation::CacheImplementation()
     mLastProcessedEventId = 0;
     mProducerCount = 0xFFFFFFFF;
     mGenerationCount = 0xFFFFFFFF;
+    mGeometryCount = 0xFFFFFFFF;
     mFileCount = 0xFFFFFFFF;
     mContentCount = 0xFFFFFFFF;
     mSaveEnabled = false;
     mSaveDir = "/tmp";
     mReloadActivated = false;
-    mFileDeleteCounter = 0;
-    mContentDeleteCounter = 0;
     mProducerDeleteCounter = 0;
     mGenerationDeleteCounter = 0;
+    mGeometryDeleteCounter = 0;
+    mFileDeleteCounter = 0;
+    mContentDeleteCounter = 0;
 
     mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
     mContentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
@@ -136,6 +138,7 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
 
       readProducerList();
       readGenerationList();
+      readGeometryList();
       readFileList();
 
       mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
@@ -366,11 +369,13 @@ void CacheImplementation::reloadData()
 
       mProducerCount = 0xFFFFFFFF;
       mGenerationCount = 0xFFFFFFFF;
+      mGeometryCount = 0xFFFFFFFF;
       mFileCount = 0xFFFFFFFF;
       mContentCount = 0xFFFFFFFF;
 
       readProducerList();
       readGenerationList();
+      readGeometryList();
       readFileList();
 
       mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
@@ -1697,11 +1702,7 @@ int CacheImplementation::_getGenerationInfoListByProducerId(T::SessionId session
     auto ssp = mSearchStructureSptr.load();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
-/*
-    T::ProducerInfo *producerInfo = ssp->mProducerInfoList.getProducerInfoById(producerId);
-    if (producerInfo == nullptr)
-      return Result::UNKNOWN_PRODUCER_ID;
-*/
+
     generationInfoList.clear();
 
     if (!mContentSwapEnabled)
@@ -1966,6 +1967,406 @@ int CacheImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,c
       return Result::NO_PERMANENT_STORAGE_DEFINED;
 
     int result = mContentStorage->setGenerationInfoStatusByName(sessionId,generationName,status);
+    processEvents(false);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == nullptr)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->addGeometryInfo(sessionId,geometryInfo);
+    processEvents(false);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int CacheImplementation::_deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == nullptr)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->deleteGeometryInfoById(sessionId,generationId,geometryId,levelId);
+    processEvents(false);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == nullptr)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->deleteGeometryInfoListByGenerationId(sessionId,generationId);
+    processEvents(false);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == nullptr)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->deleteGeometryInfoListByProducerId(sessionId,producerId);
+    processEvents(false);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == nullptr)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->deleteGeometryInfoListBySourceId(sessionId,sourceId);
+    processEvents(false);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
+    if (mUpdateInProgress)
+      return mContentStorage->getGeometryInfoById(sessionId,generationId,geometryId,levelId,geometryInfo);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    auto ssp = mSearchStructureSptr.load();
+    if (!ssp)
+      return Result::DATA_NOT_FOUND;
+
+    if (!mContentSwapEnabled)
+    {
+      AutoReadLock readLock(&mSearchModificationLock);
+      if (!ssp->mGeometryInfoList.getGeometryInfoById(generationId,geometryId,levelId,geometryInfo))
+        return Result::DATA_NOT_FOUND;
+    }
+    else
+    {
+      if (!ssp->mGeometryInfoList.getGeometryInfoById(generationId,geometryId,levelId,geometryInfo))
+        return Result::DATA_NOT_FOUND;
+    }
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int CacheImplementation::_getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
+    if (mUpdateInProgress)
+      return mContentStorage->getGeometryInfoList(sessionId,geometryInfoList);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    auto ssp = mSearchStructureSptr.load();
+    if (!ssp)
+      return Result::DATA_NOT_FOUND;
+
+    geometryInfoList.clear();
+
+    if (!mContentSwapEnabled)
+    {
+      AutoReadLock readLock(&mSearchModificationLock);
+      geometryInfoList = ssp->mGeometryInfoList;
+    }
+    else
+    {
+      geometryInfoList = ssp->mGeometryInfoList;
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
+    if (mUpdateInProgress)
+      return mContentStorage->getGeometryInfoListByGenerationId(sessionId,generationId,geometryInfoList);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    auto ssp = mSearchStructureSptr.load();
+    if (!ssp)
+      return Result::DATA_NOT_FOUND;
+
+    geometryInfoList.clear();
+
+    if (!mContentSwapEnabled)
+    {
+      AutoReadLock readLock(&mSearchModificationLock);
+      ssp->mGeometryInfoList.getGeometryInfoListByGenerationId(generationId,geometryInfoList);
+    }
+    else
+    {
+      ssp->mGeometryInfoList.getGeometryInfoListByGenerationId(generationId,geometryInfoList);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int CacheImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
+    if (mUpdateInProgress)
+      return mContentStorage->getGeometryInfoListByProducerId(sessionId,producerId,geometryInfoList);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    auto ssp = mSearchStructureSptr.load();
+    if (!ssp)
+      return Result::DATA_NOT_FOUND;
+
+    geometryInfoList.clear();
+
+    if (!mContentSwapEnabled)
+    {
+      AutoReadLock readLock(&mSearchModificationLock);
+      ssp->mGeometryInfoList.getGeometryInfoListByProducerId(producerId,geometryInfoList);
+    }
+    else
+    {
+      ssp->mGeometryInfoList.getGeometryInfoListByProducerId(producerId,geometryInfoList);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
+    if (mUpdateInProgress)
+      return mContentStorage->getGeometryInfoListBySourceId(sessionId,sourceId,geometryInfoList);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    auto ssp = mSearchStructureSptr.load();
+    if (!ssp)
+      return Result::DATA_NOT_FOUND;
+
+    geometryInfoList.clear();
+
+    if (!mContentSwapEnabled)
+    {
+      AutoReadLock readLock(&mSearchModificationLock);
+      ssp->mGeometryInfoList.getGeometryInfoListBySourceId(sourceId,geometryInfoList);
+    }
+    else
+    {
+      ssp->mGeometryInfoList.getGeometryInfoListBySourceId(sourceId,geometryInfoList);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
+    if (mUpdateInProgress)
+      return mContentStorage->getGeometryInfoCount(sessionId,count);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    auto ssp = mSearchStructureSptr.load();
+    if (!ssp)
+      return Result::DATA_NOT_FOUND;
+
+    if (!mContentSwapEnabled)
+    {
+      AutoReadLock readLock(&mSearchModificationLock);
+      count = ssp->mGeometryInfoList.getLength();
+    }
+    else
+    {
+      count = ssp->mGeometryInfoList.getLength();
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == nullptr)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->setGeometryInfo(sessionId,geometryInfo);
+    processEvents(false);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage == nullptr)
+      return Result::NO_PERMANENT_STORAGE_DEFINED;
+
+    int result = mContentStorage->setGeometryInfoStatusById(sessionId,generationId,geometryId,levelId,status);
     processEvents(false);
     return result;
   }
@@ -5005,6 +5406,37 @@ void CacheImplementation::readGenerationList()
 
 
 
+void CacheImplementation::readGeometryList()
+{
+  FUNCTION_TRACE
+  try
+  {
+    PRINT_DATA(mDebugLog,"* Reading the generation list\n");
+
+    if (mContentStorage == nullptr)
+      return;
+
+    mGeometryInfoList.clear();
+
+    int result = mContentStorage->getGeometryInfoList(mSessionId,mGeometryInfoList);
+    if (result != 0)
+    {
+      Fmi::Exception exception(BCP,"Cannot read the geometry list from the content storage!");
+      exception.addParameter("ServiceResult",getResultString(result));
+      throw exception;
+    }
+
+    mGeometryInfoList.setComparisonMethod(T::GeometryInfo::ComparisonMethod::generationId);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 void CacheImplementation::readFileList()
 {
   FUNCTION_TRACE
@@ -5217,6 +5649,7 @@ void CacheImplementation::event_producerDeleted(T::EventInfo& eventInfo)
 
     mContentDeleteCounter += mContentInfoList.markDeletedByProducerId(eventInfo.mId1);
     mFileDeleteCounter += mFileInfoList.markDeletedByProducerId(eventInfo.mId1);
+    mGeometryDeleteCounter += mGeometryInfoList.markDeletedByProducerId(eventInfo.mId1);
     mGenerationDeleteCounter += mGenerationInfoList.markDeletedByProducerId(eventInfo.mId1);
     mProducerDeleteCounter += mProducerInfoList.markDeletedById(eventInfo.mId1);
 
@@ -5228,6 +5661,7 @@ void CacheImplementation::event_producerDeleted(T::EventInfo& eventInfo)
         AutoReadLock readLock(&mSearchModificationLock);
         mContentDeleteCounter += ssp->mContentInfoList[0].markDeletedByProducerId(eventInfo.mId1);
         mFileDeleteCounter += ssp->mFileInfoList.markDeletedByProducerId(eventInfo.mId1);
+        mGeometryDeleteCounter += ssp->mGeometryInfoList.markDeletedByProducerId(eventInfo.mId1);
         mGenerationDeleteCounter += ssp->mGenerationInfoList.markDeletedByProducerId(eventInfo.mId1);
         mProducerDeleteCounter += ssp->mProducerInfoList.markDeletedById(eventInfo.mId1);
       }
@@ -5291,6 +5725,7 @@ void CacheImplementation::event_producerListDeletedBySourceId(T::EventInfo& even
 
     mContentDeleteCounter += mContentInfoList.markDeletedBySourceId(eventInfo.mId1);
     mFileDeleteCounter += mFileInfoList.markDeletedBySourceId(eventInfo.mId1);
+    mGeometryDeleteCounter += mGeometryInfoList.markDeletedBySourceId(eventInfo.mId1);
     mGenerationDeleteCounter += mGenerationInfoList.markDeletedBySourceId(eventInfo.mId1);
     mProducerDeleteCounter += mProducerInfoList.markDeletedBySourceId(eventInfo.mId1);
 
@@ -5302,6 +5737,7 @@ void CacheImplementation::event_producerListDeletedBySourceId(T::EventInfo& even
         AutoReadLock readLock(&mSearchModificationLock);
         mContentDeleteCounter += ssp->mContentInfoList[0].markDeletedBySourceId(eventInfo.mId1);
         mFileDeleteCounter += ssp->mFileInfoList.markDeletedBySourceId(eventInfo.mId1);
+        mGeometryDeleteCounter += ssp->mGeometryInfoList.markDeletedBySourceId(eventInfo.mId1);
         mGenerationDeleteCounter += ssp->mGenerationInfoList.markDeletedBySourceId(eventInfo.mId1);
         mProducerDeleteCounter += ssp->mProducerInfoList.markDeletedBySourceId(eventInfo.mId1);
       }
@@ -5369,6 +5805,7 @@ void CacheImplementation::event_generationDeleted(T::EventInfo& eventInfo)
 
     mContentDeleteCounter += mContentInfoList.markDeletedByGenerationId(eventInfo.mId1);
     mFileDeleteCounter += mFileInfoList.markDeletedByGenerationId(eventInfo.mId1);
+    mGeometryDeleteCounter += mGeometryInfoList.markDeletedByGenerationId(eventInfo.mId1);
     mGenerationDeleteCounter += mGenerationInfoList.deleteGenerationInfoById(eventInfo.mId1);
 
     if (!mContentSwapEnabled)
@@ -5379,6 +5816,7 @@ void CacheImplementation::event_generationDeleted(T::EventInfo& eventInfo)
         AutoReadLock readLock(&mSearchModificationLock);
         mContentDeleteCounter += ssp->mContentInfoList[0].markDeletedByGenerationId(eventInfo.mId1);
         mFileDeleteCounter += ssp->mFileInfoList.markDeletedByGenerationId(eventInfo.mId1);
+        mGeometryDeleteCounter += ssp->mGeometryInfoList.markDeletedByGenerationId(eventInfo.mId1);
         mGenerationDeleteCounter += ssp->mGenerationInfoList.markDeletedById(eventInfo.mId1);
       }
     }
@@ -5472,6 +5910,7 @@ void CacheImplementation::event_generationListDeletedByProducerId(T::EventInfo& 
 
     mContentDeleteCounter += mContentInfoList.deleteContentInfoByProducerId(eventInfo.mId1);
     mFileDeleteCounter += mFileInfoList.deleteFileInfoByProducerId(eventInfo.mId1);
+    mGeometryDeleteCounter += mGeometryInfoList.deleteGeometryInfoListByProducerId(eventInfo.mId1);
     mGenerationDeleteCounter += mGenerationInfoList.deleteGenerationInfoListByProducerId(eventInfo.mId1);
 
     if (!mContentSwapEnabled)
@@ -5482,6 +5921,7 @@ void CacheImplementation::event_generationListDeletedByProducerId(T::EventInfo& 
         AutoReadLock readLock(&mSearchModificationLock);
         mContentDeleteCounter += ssp->mContentInfoList[0].markDeletedByProducerId(eventInfo.mId1);
         mFileDeleteCounter += ssp->mFileInfoList.markDeletedByProducerId(eventInfo.mId1);
+        mGeometryDeleteCounter += ssp->mGeometryInfoList.markDeletedByProducerId(eventInfo.mId1);
         mGenerationDeleteCounter += ssp->mGenerationInfoList.markDeletedByProducerId(eventInfo.mId1);
       }
     }
@@ -5505,6 +5945,7 @@ void CacheImplementation::event_generationListDeletedBySourceId(T::EventInfo& ev
 
     mContentDeleteCounter += mContentInfoList.markDeletedBySourceId(eventInfo.mId1);
     mFileDeleteCounter += mFileInfoList.markDeletedBySourceId(eventInfo.mId1);
+    mGeometryDeleteCounter += mGeometryInfoList.markDeletedBySourceId(eventInfo.mId1);
     mGenerationDeleteCounter += mGenerationInfoList.markDeletedBySourceId(eventInfo.mId1);
 
     if (!mContentSwapEnabled)
@@ -5515,7 +5956,244 @@ void CacheImplementation::event_generationListDeletedBySourceId(T::EventInfo& ev
         AutoReadLock readLock(&mSearchModificationLock);
         mContentDeleteCounter += ssp->mContentInfoList[0].markDeletedBySourceId(eventInfo.mId1);
         mFileDeleteCounter += ssp->mFileInfoList.markDeletedBySourceId(eventInfo.mId1);
+        mGeometryDeleteCounter += ssp->mGeometryInfoList.markDeletedBySourceId(eventInfo.mId1);
         mGenerationDeleteCounter += ssp->mGenerationInfoList.markDeletedBySourceId(eventInfo.mId1);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void CacheImplementation::event_geometryAdded(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+
+    T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoById(eventInfo.mId1,eventInfo.mId2,eventInfo.mId3);
+    if (info != nullptr)
+      return; // Already in the cache
+
+    if (!mContentSwapEnabled)
+    {
+      auto ssp = mSearchStructureSptr.load();
+      if (ssp)
+      {
+        AutoReadLock readLock(&mSearchModificationLock);
+        T::GeometryInfo *info = ssp->mGeometryInfoList.getGeometryInfoById(eventInfo.mId1,eventInfo.mId2,eventInfo.mId3);
+        if (info != nullptr)
+          return; // Already in the cache
+      }
+    }
+
+    T::GeometryInfo geometryInfo;
+    if (mContentStorage->getGeometryInfoById(mSessionId,eventInfo.mId1,eventInfo.mId2,eventInfo.mId3,geometryInfo) == Result::OK)
+    {
+      mGeometryInfoList.addGeometryInfo(geometryInfo.duplicate());
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void CacheImplementation::event_geometryDeleted(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+
+    // mContentDeleteCounter += mContentInfoList.markDeletedByGenerationAndGeometryId(eventInfo.mId1,eventInfo.mId2);
+    // mFileDeleteCounter += mFileInfoList.markDeletedByGenerationAndGeometryId(eventInfo.mId1,eventInfo.mId2);
+    mGeometryDeleteCounter += mGeometryInfoList.deleteGeometryInfoById(eventInfo.mId1,eventInfo.mId2,eventInfo.mId3);
+
+    if (!mContentSwapEnabled)
+    {
+      auto ssp = mSearchStructureSptr.load();
+      if (ssp)
+      {
+        AutoReadLock readLock(&mSearchModificationLock);
+        //mContentDeleteCounter += ssp->mContentInfoList[0].markDeletedByGenerationAndGeometrtId(eventInfo.mId1,eventInfo.mId2);
+        //mFileDeleteCounter += ssp->mFileInfoList.markDeletedByGenerationAndGeometryId(eventInfo.mId1,eventInfo.mId2);
+        mGeometryDeleteCounter += ssp->mGeometryInfoList.markDeletedById(eventInfo.mId1,eventInfo.mId2,eventInfo.mId3);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void CacheImplementation::event_geometryStatusChanged(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoById(eventInfo.mId1,eventInfo.mId2,eventInfo.mId3);
+    if (info != nullptr)
+      info->mStatus = eventInfo.mFlags;
+
+    if (!mContentSwapEnabled)
+    {
+      auto ssp = mSearchStructureSptr.load();
+      if (ssp)
+      {
+        AutoReadLock readLock(&mSearchModificationLock);
+        T::GeometryInfo *info = ssp->mGeometryInfoList.getGeometryInfoById(eventInfo.mId1,eventInfo.mId2,eventInfo.mId3);
+        if (info != nullptr)
+          info->mStatus = eventInfo.mFlags;
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void CacheImplementation::event_geometryUpdated(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+
+    T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoById(eventInfo.mId1,eventInfo.mId2,eventInfo.mId3);
+    if (info == nullptr)
+      return; // No such generation
+
+    if (!mContentSwapEnabled)
+    {
+      auto ssp = mSearchStructureSptr.load();
+      if (ssp)
+      {
+        AutoReadLock readLock(&mSearchModificationLock);
+        info = ssp->mGeometryInfoList.getGeometryInfoById(eventInfo.mId1,eventInfo.mId2,eventInfo.mId3);
+        if (info == nullptr)
+          return; // No such generation
+      }
+    }
+
+    T::GeometryInfo geometryInfo;
+    if (mContentStorage->getGeometryInfoById(mSessionId,eventInfo.mId1,eventInfo.mId2,eventInfo.mId3,geometryInfo) == Result::OK)
+    {
+      *info = geometryInfo;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void CacheImplementation::event_geometryListDeletedByProducerId(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+
+    //mContentDeleteCounter += mContentInfoList.deleteContentInfoByProducerId(eventInfo.mId1);
+    //mFileDeleteCounter += mFileInfoList.deleteFileInfoByProducerId(eventInfo.mId1);
+    mGeometryDeleteCounter += mGeometryInfoList.deleteGeometryInfoListByProducerId(eventInfo.mId1);
+
+    if (!mContentSwapEnabled)
+    {
+      auto ssp = mSearchStructureSptr.load();
+      if (ssp)
+      {
+        AutoReadLock readLock(&mSearchModificationLock);
+        //mContentDeleteCounter += ssp->mContentInfoList[0].markDeletedByProducerId(eventInfo.mId1);
+        //mFileDeleteCounter += ssp->mFileInfoList.markDeletedByProducerId(eventInfo.mId1);
+        mGeometryDeleteCounter += ssp->mGeometryInfoList.markDeletedByProducerId(eventInfo.mId1);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void CacheImplementation::event_geometryListDeletedByGenerationId(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+
+    //mContentDeleteCounter += mContentInfoList.deleteContentInfoByProducerId(eventInfo.mId1);
+    //mFileDeleteCounter += mFileInfoList.deleteFileInfoByProducerId(eventInfo.mId1);
+    mGeometryDeleteCounter += mGeometryInfoList.deleteGeometryInfoListByGenerationId(eventInfo.mId1);
+
+    if (!mContentSwapEnabled)
+    {
+      auto ssp = mSearchStructureSptr.load();
+      if (ssp)
+      {
+        AutoReadLock readLock(&mSearchModificationLock);
+        //mContentDeleteCounter += ssp->mContentInfoList[0].markDeletedByProducerId(eventInfo.mId1);
+        //mFileDeleteCounter += ssp->mFileInfoList.markDeletedByProducerId(eventInfo.mId1);
+        mGeometryDeleteCounter += ssp->mGeometryInfoList.markDeletedByGenerationId(eventInfo.mId1);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void CacheImplementation::event_geometryListDeletedBySourceId(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+
+    //mContentDeleteCounter += mContentInfoList.deleteContentInfoByProducerId(eventInfo.mId1);
+    //mFileDeleteCounter += mFileInfoList.deleteFileInfoByProducerId(eventInfo.mId1);
+    mGeometryDeleteCounter += mGeometryInfoList.deleteGeometryInfoListBySourceId(eventInfo.mId1);
+
+    if (!mContentSwapEnabled)
+    {
+      auto ssp = mSearchStructureSptr.load();
+      if (ssp)
+      {
+        AutoReadLock readLock(&mSearchModificationLock);
+        //mContentDeleteCounter += ssp->mContentInfoList[0].markDeletedByProducerId(eventInfo.mId1);
+        //mFileDeleteCounter += ssp->mFileInfoList.markDeletedByProducerId(eventInfo.mId1);
+        mGeometryDeleteCounter += ssp->mGeometryInfoList.markDeletedBySourceId(eventInfo.mId1);
       }
     }
   }
@@ -6210,6 +6888,34 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
         event_generationListDeletedBySourceId(eventInfo);
         break;
 
+      case EventType::GEOMETRY_ADDED:
+        event_geometryAdded(eventInfo);
+        break;
+
+      case EventType::GEOMETRY_DELETED:
+        event_geometryDeleted(eventInfo);
+        break;
+
+      case EventType::GEOMETRY_UPDATED:
+        event_geometryUpdated(eventInfo);
+        break;
+
+      case EventType::GEOMETRY_STATUS_CHANGED:
+        event_geometryStatusChanged(eventInfo);
+        break;
+
+      case EventType::GEOMETRY_LIST_DELETED_BY_PRODUCER_ID:
+        event_geometryListDeletedByProducerId(eventInfo);
+        break;
+
+      case EventType::GEOMETRY_LIST_DELETED_BY_GENERATION_ID:
+        event_geometryListDeletedByGenerationId(eventInfo);
+        break;
+
+      case EventType::GEOMETRY_LIST_DELETED_BY_SOURCE_ID:
+        event_geometryListDeletedBySourceId(eventInfo);
+        break;
+
       case EventType::FILE_ADDED:
         event_fileAdded(eventInfo);
         break;
@@ -6438,6 +7144,12 @@ void CacheImplementation::saveData()
         mGenerationInfoList.writeToFile(filename);
       }
 
+      if (mGeometryCount != mGeometryInfoList.getLength())
+      {
+        std::string filename = mSaveDir + "/geometries.csv";
+        mGeometryInfoList.writeToFile(filename);
+      }
+
       if (mFileCount != mFileInfoList.getLength())
         mFileInfoList.writeToFile(mSaveDir + "/files.csv");
 
@@ -6483,6 +7195,7 @@ void CacheImplementation::updateContent()
       {
         if (ssp->mProducerInfoList.getHash() == mProducerInfoList.getHash() &&
             ssp->mGenerationInfoList.getHash() == mGenerationInfoList.getHash() &&
+            ssp->mGeometryInfoList.getHash() == mGeometryInfoList.getHash() &&
             ssp->mFileInfoList.getHash() == mFileInfoList.getHash() &&
             ssp->mContentInfoList[0].getHash() == mContentInfoList.getHash())
         {
@@ -6500,6 +7213,7 @@ void CacheImplementation::updateContent()
 
       nptr->mProducerInfoList = mProducerInfoList;
       nptr->mGenerationInfoList = mGenerationInfoList;
+      nptr->mGeometryInfoList = mGeometryInfoList;
       nptr->mFileInfoList = mFileInfoList;
       nptr->mFileInfoListByName.setReleaseObjects(false);
       nptr->mFileInfoListByName = nptr->mFileInfoList;
@@ -6525,11 +7239,13 @@ void CacheImplementation::updateContent()
         if (producerInfo != nullptr)
         {
           std::size_t generationHash = nptr->mGenerationInfoList.getHashByProducerId(producerInfo->mProducerId);
+          std::size_t geometryHash = nptr->mGeometryInfoList.getHashByProducerId(producerInfo->mProducerId);
           std::size_t fileHash = nptr->mFileInfoList.getHashByProducerId(producerInfo->mProducerId);
           std::size_t contentHash = nptr->mContentInfoList[0].getHashByProducerId(producerInfo->mProducerId);
 
           std::size_t h = 0;
           boost::hash_combine(h,generationHash);
+          boost::hash_combine(h,geometryHash);
           boost::hash_combine(h,fileHash);
           boost::hash_combine(h,contentHash);
 
@@ -6567,6 +7283,7 @@ void CacheImplementation::updateContent()
         for (int t=1; t<CONTENT_LIST_COUNT; t++)
           ssp->mContentInfoList[t].setReleaseObjects(false);
 
+        ssp->mGeometryInfoList.setComparisonMethod(T::GeometryInfo::ComparisonMethod::generationId);
         ssp->mGenerationInfoList.setComparisonMethod(T::GenerationInfo::ComparisonMethod::generationId);
         ssp->mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::fileId);
         ssp->mFileInfoListByName.setComparisonMethod(T::FileInfo::ComparisonMethod::fileName);
@@ -6590,6 +7307,7 @@ void CacheImplementation::updateContent()
 
       ssp->mProducerInfoList.setLockingEnabled(true);
       ssp->mGenerationInfoList.setLockingEnabled(true);
+      ssp->mGeometryInfoList.setLockingEnabled(true);
       ssp->mFileInfoList.setLockingEnabled(true);
       ssp->mFileInfoListByName.setLockingEnabled(true);
 
@@ -6628,6 +7346,15 @@ void CacheImplementation::updateContent()
         PRINT_DATA(mDebugLog, "     => Generations %u\n",ssp->mGenerationInfoList.getLength());
       }
 
+      if (mGeometryDeleteCounter > 0)
+      {
+        PRINT_DATA(mDebugLog, "  -- Delete geometry records (%u)\n",mGeometryDeleteCounter);
+        mGeometryInfoList.deleteMarkedGeometries();
+        ssp->mGeometryInfoList.deleteMarkedGeometries();
+        mGeometryDeleteCounter = 0;
+        PRINT_DATA(mDebugLog, "     => Geometries %u\n",ssp->mGeometryInfoList.getLength());
+      }
+
       if (mProducerDeleteCounter > 0)
       {
         PRINT_DATA(mDebugLog, "  -- Delete producer records (%u)\n",mProducerDeleteCounter);
@@ -6654,6 +7381,22 @@ void CacheImplementation::updateContent()
         PRINT_DATA(mDebugLog, "     => Producers %u\n",ssp->mProducerInfoList.getLength());
       }
 
+
+      if (mGeometryInfoList.getLength() > 0)
+      {
+        // Adding geometry information into the search structure
+
+        PRINT_DATA(mDebugLog, "  -- Add geometries %u\n",mGeometryInfoList.getLength());
+        uint len = mGeometryInfoList.getLength();
+        for (uint t=0; t<len; t++)
+        {
+          T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoByIndex(t);
+          if (info != NULL)
+            ssp->mGeometryInfoList.addGeometryInfo(info->duplicate());
+        }
+        mGeometryInfoList.clear();
+        PRINT_DATA(mDebugLog, "     => Geometries %u\n",ssp->mGeometryInfoList.getLength());
+      }
 
       if (mGenerationInfoList.getLength() > 0)
       {
@@ -6710,6 +7453,7 @@ void CacheImplementation::updateContent()
 
       ssp->mProducerInfoList.setLockingEnabled(false);
       ssp->mGenerationInfoList.setLockingEnabled(false);
+      ssp->mGeometryInfoList.setLockingEnabled(false);
       ssp->mFileInfoList.setLockingEnabled(false);
       ssp->mFileInfoListByName.setLockingEnabled(false);
 

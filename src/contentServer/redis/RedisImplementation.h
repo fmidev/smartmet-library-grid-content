@@ -68,6 +68,20 @@ class RedisImplementation : public ServiceInterface
      virtual int    _setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,uchar status);
      virtual int    _setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status);
 
+     virtual int    _addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo);
+     virtual int    _deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId);
+     virtual int    _deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId);
+     virtual int    _deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId);
+     virtual int    _deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId);
+     virtual int    _getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo);
+     virtual int    _getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList);
+     virtual int    _getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList);
+     virtual int    _getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList);
+     virtual int    _getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList);
+     virtual int    _getGeometryInfoCount(T::SessionId sessionId,uint& count);
+     virtual int    _setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo);
+     virtual int    _setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status);
+
      virtual int    _addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo);
      virtual int    _addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList);
      virtual int    _addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList);
@@ -160,22 +174,34 @@ class RedisImplementation : public ServiceInterface
 
      T::EventId     addEvent(uint eventType,uint id1,uint id2,uint id3,unsigned long long flags);
 
-     int            deleteProducerById(uint producerId,bool deleteGenerations,bool deleteFiles,bool deleteContent);
-     int            deleteProducerListBySourceId(uint sourceId,bool deleteGenerations,bool deleteFiles,bool deleteContent);
+     int            deleteProducerById(uint producerId,bool deleteGenerations,bool deleteGeometries,bool deleteFiles,bool deleteContent);
+     int            deleteProducerListBySourceId(uint sourceId,bool deleteGenerations,bool deleteGeometries,bool deleteFiles,bool deleteContent);
      int            getProducerById(uint producerId,T::ProducerInfo& producerInfo);
      int            getProducerByName(std::string producerName,T::ProducerInfo& producerInfo);
      int            getProducerList(T::ProducerInfoList& producerInfoList);
      int            getProducerListBySourceId(uint sourceId,T::ProducerInfoList& producerInfoList);
 
-     int            deleteGenerationById(uint generationId,bool deleteFiles,bool deleteContent);
-     int            deleteGenerationListByProducerId(uint producerId,bool deleteFiles,bool deleteContent);
-     int            deleteGenerationListBySourceId(uint sourceId,bool deleteFiles,bool deleteContent);
+     int            deleteGenerationById(uint generationId,bool deleteGeometries,bool deleteFiles,bool deleteContent);
+     int            deleteGenerationListByProducerId(uint producerId,bool deleteGeometries,bool deleteFiles,bool deleteContent);
+     int            deleteGenerationListBySourceId(uint sourceId,bool deleteGeometries,bool deleteFiles,bool deleteContent);
      int            getGenerationById(uint generationId,T::GenerationInfo& generationInfo);
      int            getGenerationByName(std::string generationName,T::GenerationInfo& generationInfo);
      int            getGenerationList(T::GenerationInfoList& generationInfoList);
      int            getGenerationListByProducerId(uint producerId,T::GenerationInfoList& generationInfoList);
      int            getGenerationListByGeometryId(T::GeometryId geometryId,T::GenerationInfoList& generationInfoList);
      int            getGenerationListBySourceId(uint sourceId,T::GenerationInfoList& generationInfoList);
+
+     int            deleteGeometryById(uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,bool deleteFiles,bool deleteContent);
+     int            deleteGeometryListByGenerationId(uint generationId,bool deleteFiles,bool deleteContent);
+     int            deleteGeometryListByProducerId(uint producerId,bool deleteFiles,bool deleteContent);
+     int            deleteGeometryListBySourceId(uint sourceId,bool deleteFiles,bool deleteContent);
+     int            getGeometryById(uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo);
+     int            getGeometryList(T::GeometryInfoList& geometryInfoList);
+     int            getGeometryListByProducerId(uint producerId,T::GeometryInfoList& geometryInfoList);
+     int            getGeometryListByGenerationId(uint generationId,T::GeometryInfoList& geometryInfoList);
+     int            getGeometryListByGenerationIdList(std::set<uint>& generationIdList,T::GeometryInfoList& geometryInfoList);
+     int            getGeometryListBySourceId(uint sourceId,T::GeometryInfoList& geometryInfoList);
+     int            deleteGeometryListByGenerationIdList(std::set<uint>& generationIdList,bool deleteFiles,bool deleteContent);
 
      int            deleteFileById(uint fileId,bool deleteContent);
      int            deleteFileListByGenerationId(uint generationId,bool deleteContent);
@@ -196,6 +222,7 @@ class RedisImplementation : public ServiceInterface
      int            deleteContent(uint fileId,uint messageIndex);
      int            deleteContentByFileId(uint fileId);
      int            deleteContentByGenerationId(uint generationId);
+     int            deleteContentByGeometry(uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId);
      int            deleteContentByGenerationIdList(std::set<uint>& generationIdList);
      int            deleteContentByProducerId(uint producerId);
      int            deleteContentBySourceId(uint sourceId);

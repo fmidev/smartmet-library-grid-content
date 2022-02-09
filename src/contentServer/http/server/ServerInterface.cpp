@@ -291,6 +291,84 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"addGeometryInfo") == 0)
+    {
+      addGeometryInfo(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"deleteGeometryInfoById") == 0)
+    {
+      deleteGeometryInfoById(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"deleteGeometryInfoListByGenerationId") == 0)
+    {
+      deleteGeometryInfoListByGenerationId(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"deleteGeometryInfoListByProducerId") == 0)
+    {
+      deleteGeometryInfoListByProducerId(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"deleteGeometryInfoListBySourceId") == 0)
+    {
+      deleteGeometryInfoListBySourceId(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getGeometryInfoById") == 0)
+    {
+      getGeometryInfoById(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getGeometryInfoList") == 0)
+    {
+      getGeometryInfoList(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getGeometryInfoListByGenerationId") == 0)
+    {
+      getGeometryInfoListByGenerationId(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getGeometryInfoListByProducerId") == 0)
+    {
+      getGeometryInfoListByProducerId(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getGeometryInfoListBySourceId") == 0)
+    {
+      getGeometryInfoListBySourceId(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getGeometryInfoCount") == 0)
+    {
+      getGeometryInfoCount(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"setGeometryInfo") == 0)
+    {
+      setGeometryInfo(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"setGeometryInfoStatusById") == 0)
+    {
+      setGeometryInfoStatusById(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"addFileInfo") == 0)
     {
       addFileInfo(request,response);
@@ -1380,6 +1458,45 @@ void ServerInterface::getProducerParameterListByProducerId(T::RequestMessage& re
 
 
 
+void ServerInterface::setProducerInfo(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    std::string csv;
+    if (!request.getLineByKey("producerInfo",csv))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: producerInfo");
+      return;
+    }
+
+    T::ProducerInfo producerInfo(csv.c_str());
+
+    int result = mService->setProducerInfo(sessionId,producerInfo);
+
+    response.addLine("result",result);
+    if (result != Result::OK)
+      response.addLine("resultString",getResultString(result));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ServerInterface::addGenerationInfo(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
@@ -2184,6 +2301,45 @@ void ServerInterface::getGenerationInfoCount(T::RequestMessage& request,T::Respo
 
 
 
+void ServerInterface::setGenerationInfo(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    std::string csv;
+    if (!request.getLineByKey("generationInfo",csv))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationInfo");
+      return;
+    }
+
+    T::GenerationInfo generationInfo(csv.c_str());
+
+    int result = mService->setGenerationInfo(sessionId,generationInfo);
+
+    response.addLine("result",result);
+    if (result != Result::OK)
+      response.addLine("resultString",getResultString(result));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ServerInterface::setGenerationInfoStatusById(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
@@ -2260,6 +2416,609 @@ void ServerInterface::setGenerationInfoStatusByName(T::RequestMessage& request,T
     }
 
     int result = mService->setGenerationInfoStatusByName(sessionId,generationName,status);
+
+    response.addLine("result",result);
+
+    if (result != Result::OK)
+      response.addLine("resultString",getResultString(result));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void ServerInterface::addGeometryInfo(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    std::string csv;
+    if (!request.getLineByKey("geometryInfo",csv))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: geometryInfo");
+      return;
+    }
+
+    T::GeometryInfo geometryInfo(csv.c_str());
+
+    int result = mService->addGeometryInfo(sessionId,geometryInfo);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      response.addLine("geometryInfoHeader",geometryInfo.getCsvHeader());
+      response.addLine("fgeometryInfo",geometryInfo.getCsv());
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void ServerInterface::deleteGeometryInfoById(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint generationId = 0;
+    if (!request.getLineByKey("generationId",generationId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    T::GeometryId geometryId = 0;
+    if (!request.getLineByKey("geometryId",geometryId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: geometryId");
+      return;
+    }
+
+    T::ParamLevelId levelId = 0;
+    if (!request.getLineByKey("levelId",levelId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: levelId");
+      return;
+    }
+
+    int result = mService->deleteGeometryInfoById(sessionId,generationId,geometryId,levelId);
+
+    response.addLine("result",result);
+
+    if (result != Result::OK)
+      response.addLine("resultString",getResultString(result));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void ServerInterface::deleteGeometryInfoListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint generationId = 0;
+    if (!request.getLineByKey("generationId",generationId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    int result = mService->deleteGeometryInfoListByGenerationId(sessionId,generationId);
+
+    response.addLine("result",result);
+
+    if (result != Result::OK)
+      response.addLine("resultString",getResultString(result));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ServerInterface::deleteGeometryInfoListByProducerId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint producerId = 0;
+    if (!request.getLineByKey("producerId",producerId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: producerId");
+      return;
+    }
+
+    int result = mService->deleteGeometryInfoListByProducerId(sessionId,producerId);
+
+    response.addLine("result",result);
+
+    if (result != Result::OK)
+      response.addLine("resultString",getResultString(result));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void ServerInterface::deleteGeometryInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint sourceId = 0;
+    if (!request.getLineByKey("sourceId",sourceId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    int result = mService->deleteGeometryInfoListBySourceId(sessionId,sourceId);
+
+    response.addLine("result",result);
+
+    if (result != Result::OK)
+      response.addLine("resultString",getResultString(result));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+void ServerInterface::getGeometryInfoById(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint generationId = 0;
+    if (!request.getLineByKey("generationId",generationId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    T::GeometryId geometryId = 0;
+    if (!request.getLineByKey("geometryId",geometryId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: geometryId");
+      return;
+    }
+
+    T::ParamLevelId levelId = 0;
+    if (!request.getLineByKey("levelId",levelId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: levelId");
+      return;
+    }
+
+    T::GeometryInfo geometryInfo;
+
+    int result = mService->getGeometryInfoById(sessionId,generationId,geometryId,levelId,geometryInfo);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      response.addLine("geometryInfoHeader",geometryInfo.getCsvHeader());
+      response.addLine("geometryInfo",geometryInfo.getCsv());
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void ServerInterface::getGeometryInfoList(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    T::GeometryInfoList geometryInfoList;
+
+    int result = mService->getGeometryInfoList(sessionId,geometryInfoList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      uint len = geometryInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::GeometryInfo *info = geometryInfoList.getGeometryInfoByIndex(t);
+        if (t == 0)
+          response.addLine("geometryInfoHeader",info->getCsvHeader());
+        response.addLine("geometryInfo",info->getCsv());
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ServerInterface::getGeometryInfoListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint generationId = 0;
+    if (!request.getLineByKey("generationId",generationId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    T::GeometryInfoList geometryInfoList;
+
+    int result = mService->getGeometryInfoListByGenerationId(sessionId,generationId,geometryInfoList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      uint len = geometryInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::GeometryInfo *info = geometryInfoList.getGeometryInfoByIndex(t);
+        if (t == 0)
+          response.addLine("geometryInfoHeader",info->getCsvHeader());
+        response.addLine("geometryInfo",info->getCsv());
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void ServerInterface::getGeometryInfoListByProducerId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint producerId = 0;
+    if (!request.getLineByKey("producerId",producerId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: producerId");
+      return;
+    }
+
+    T::GeometryInfoList geometryInfoList;
+
+    int result = mService->getGeometryInfoListByProducerId(sessionId,producerId,geometryInfoList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      uint len = geometryInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::GeometryInfo *info = geometryInfoList.getGeometryInfoByIndex(t);
+        if (t == 0)
+          response.addLine("geometryInfoHeader",info->getCsvHeader());
+        response.addLine("geometryInfo",info->getCsv());
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void ServerInterface::getGeometryInfoListBySourceId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint sourceId = 0;
+    if (!request.getLineByKey("sourceId",sourceId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    T::GeometryInfoList geometryInfoList;
+
+    int result = mService->getGeometryInfoListBySourceId(sessionId,sourceId,geometryInfoList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      uint len = geometryInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::GeometryInfo *info = geometryInfoList.getGeometryInfoByIndex(t);
+        if (t == 0)
+          response.addLine("geometryInfoHeader",info->getCsvHeader());
+        response.addLine("geometryInfo",info->getCsv());
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void ServerInterface::getGeometryInfoCount(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint count = 0;
+
+    int result = mService->getGeometryInfoCount(sessionId,count);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      response.addLine("count",count);
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void ServerInterface::setGeometryInfo(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    std::string csv;
+    if (!request.getLineByKey("geometryInfo",csv))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: geometryInfo");
+      return;
+    }
+
+    T::GeometryInfo geometryInfo(csv.c_str());
+
+    int result = mService->setGeometryInfo(sessionId,geometryInfo);
+
+    response.addLine("result",result);
+    if (result != Result::OK)
+      response.addLine("resultString",getResultString(result));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void ServerInterface::setGeometryInfoStatusById(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint generationId = 0;
+    if (!request.getLineByKey("generationId",generationId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    T::GeometryId geometryId = 0;
+    if (!request.getLineByKey("geometryId",geometryId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: geometryId");
+      return;
+    }
+
+    T::ParamLevelId levelId = 0;
+    if (!request.getLineByKey("levelId",levelId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: levelId");
+      return;
+    }
+
+
+    uint status = 0;
+    if (!request.getLineByKey("status",status))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: status");
+      return;
+    }
+
+    int result = mService->setGeometryInfoStatusById(sessionId,generationId,geometryId,levelId,status);
 
     response.addLine("result",result);
 
@@ -2501,7 +3260,6 @@ void ServerInterface::deleteFileInfoById(T::RequestMessage& request,T::ResponseM
     int result = mService->deleteFileInfoById(sessionId,fileId);
 
     response.addLine("result",result);
-
     if (result != Result::OK)
       response.addLine("resultString",getResultString(result));
   }
@@ -3612,6 +4370,43 @@ void ServerInterface::getFileInfoCountBySourceId(T::RequestMessage& request,T::R
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
+
+
+
+
+void ServerInterface::setFileInfo(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    std::string csv;
+    if (!request.getLineByKey("fileInfo",csv))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: fileInfo");
+      return;
+    }
+
+    T::FileInfo fileInfo(csv.c_str());
+
+    int result = mService->setFileInfo(sessionId,fileInfo);
+    if (result != Result::OK)
+      response.addLine("resultString",getResultString(result));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
 
 
 
@@ -6221,6 +7016,46 @@ void ServerInterface::getContentCount(T::RequestMessage& request,T::ResponseMess
     {
       response.addLine("resultString",getResultString(result));
     }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ServerInterface::setContentInfo(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    std::string csv;
+    if (!request.getLineByKey("contentInfo",csv))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: contentInfo");
+      return;
+    }
+
+    T::ContentInfo contentInfo(csv.c_str());
+
+    int result = mService->setContentInfo(sessionId,contentInfo);
+
+    response.addLine("result",result);
+
+    if (result != Result::OK)
+      response.addLine("resultString",getResultString(result));
   }
   catch (...)
   {

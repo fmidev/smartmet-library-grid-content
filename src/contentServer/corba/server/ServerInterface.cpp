@@ -141,6 +141,33 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::setProducerInfo(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaProducerInfo& producerInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    T::ProducerInfo sProducerInfo;
+    ContentServer::Corba::Converter::convert(producerInfo,sProducerInfo);
+
+    return mService->setProducerInfo(sessionId,sProducerInfo);
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+
+
 ::CORBA::Long ServerInterface::deleteProducerInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong producerId)
 {
   FUNCTION_TRACE
@@ -501,6 +528,31 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       ContentServer::Corba::Converter::convert(sGenerationInfo,generationInfo);
 
     return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::setGenerationInfo(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaGenerationInfo& generationInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    T::GenerationInfo sGenerationInfo;
+    ContentServer::Corba::Converter::convert(generationInfo,sGenerationInfo);
+
+    return mService->setGenerationInfo(sessionId,sGenerationInfo);
   }
   catch (...)
   {
@@ -1036,6 +1088,352 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::addGeometryInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaGeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    T::GeometryInfo sGeometryInfo;
+    ContentServer::Corba::Converter::convert(geometryInfo,sGeometryInfo);
+
+    int result = mService->addGeometryInfo(sessionId,sGeometryInfo);
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sGeometryInfo,geometryInfo);
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::deleteGeometryInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, ::CORBA::Short levelId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    return mService->deleteGeometryInfoById(sessionId,generationId,geometryId,levelId);
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::deleteGeometryInfoListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    return mService->deleteGeometryInfoListByGenerationId(sessionId,generationId);
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::deleteGeometryInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    return mService->deleteGeometryInfoListByProducerId(sessionId,producerId);
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::deleteGeometryInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    return mService->deleteGeometryInfoListBySourceId(sessionId,sourceId);
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getGeometryInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, ::CORBA::Short levelId, SmartMet::ContentServer::Corba::CorbaGeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::GeometryInfo sGeometryInfo;
+//    ContentServer::Corba::CorbaGeometryInfo *corbaGeometryInfo = new ContentServer::Corba::CorbaGeometryInfo();
+//    geometryInfo = corbaGeometryInfo;
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getGeometryInfoById(sessionId,generationId,geometryId,levelId,sGeometryInfo);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sGeometryInfo,geometryInfo);
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getGeometryInfoList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaGeometryInfoList_out geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::GeometryInfoList sGeometryInfoList;
+    ContentServer::Corba::CorbaGeometryInfoList *corbaGeometryInfoList = new ContentServer::Corba::CorbaGeometryInfoList();
+    geometryInfoList = corbaGeometryInfoList;
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getGeometryInfoList(sessionId,sGeometryInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sGeometryInfoList,*corbaGeometryInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getGeometryInfoListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, SmartMet::ContentServer::Corba::CorbaGeometryInfoList_out geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::GeometryInfoList sGeometryInfoList;
+    ContentServer::Corba::CorbaGeometryInfoList *corbaGeometryInfoList = new ContentServer::Corba::CorbaGeometryInfoList();
+    geometryInfoList = corbaGeometryInfoList;
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getGeometryInfoListByGenerationId(sessionId,generationId,sGeometryInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sGeometryInfoList,*corbaGeometryInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+::CORBA::Long ServerInterface::getGeometryInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, SmartMet::ContentServer::Corba::CorbaGeometryInfoList_out geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::GeometryInfoList sGeometryInfoList;
+    ContentServer::Corba::CorbaGeometryInfoList *corbaGeometryInfoList = new ContentServer::Corba::CorbaGeometryInfoList();
+    geometryInfoList = corbaGeometryInfoList;
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getGeometryInfoListByProducerId(sessionId,producerId,sGeometryInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sGeometryInfoList,*corbaGeometryInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+::CORBA::Long ServerInterface::getGeometryInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, SmartMet::ContentServer::Corba::CorbaGeometryInfoList_out geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::GeometryInfoList sGeometryInfoList;
+    ContentServer::Corba::CorbaGeometryInfoList *corbaGeometryInfoList = new ContentServer::Corba::CorbaGeometryInfoList();
+    geometryInfoList = corbaGeometryInfoList;
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getGeometryInfoListBySourceId(sessionId,sourceId,sGeometryInfoList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sGeometryInfoList,*corbaGeometryInfoList);
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+::CORBA::Long ServerInterface::getGeometryInfoCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    count = 0;
+    uint sCount = 0;
+
+    int result = mService->getGeometryInfoCount(sessionId,sCount);
+
+    if (result == 0)
+      count = static_cast<::CORBA::ULong>(sCount);
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::setGeometryInfo(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaGeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    T::GeometryInfo sGeometryInfo;
+    ContentServer::Corba::Converter::convert(geometryInfo,sGeometryInfo);
+
+    return mService->setGeometryInfo(sessionId,sGeometryInfo);
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::setGeometryInfoStatusById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, ::CORBA::Short levelId, ::CORBA::Octet status)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    return mService->setGeometryInfoStatusById(sessionId,generationId,geometryId,levelId,status);
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::addFileInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaFileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -1052,6 +1450,31 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       ContentServer::Corba::Converter::convert(sFileInfo,fileInfo);
 
     return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::setFileInfo(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaFileInfo& fileInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    T::FileInfo sFileInfo;
+    ContentServer::Corba::Converter::convert(fileInfo,sFileInfo);
+
+    return mService->setFileInfo(sessionId,sFileInfo);
   }
   catch (...)
   {
@@ -1902,6 +2325,31 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       ContentServer::Corba::Converter::convert(sContentInfo,contentInfo);
 
     return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::setContentInfo(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaContentInfo& contentInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    T::ContentInfo sContentInfo;
+    ContentServer::Corba::Converter::convert(contentInfo,sContentInfo);
+
+    return mService->setContentInfo(sessionId,sContentInfo);
   }
   catch (...)
   {

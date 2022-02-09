@@ -26,6 +26,8 @@ typedef std::vector<std::pair<std::string,int>>               LevelHeightCache;
 typedef std::shared_ptr<ParameterMapping_vec>                 ParameterMapping_vec_sptr;
 typedef boost::unordered_map<size_t,ParameterMapping_vec_sptr>  ParameterMappingCache;
 typedef std::shared_ptr<std::vector<std::string>>             StringVector_sptr;
+typedef std::unordered_map<std::string,Producer_vec>          Altenative_map;
+
 
 class CacheEntry
 {
@@ -151,7 +153,8 @@ class ServiceImplementation : public ServiceInterface
                        double radius,
                        short& precision,
                        ParameterValues& valueList,
-                       T::Coordinate_vec& coordinates);
+                       T::Coordinate_vec& coordinates,
+                       std::string& producerStr);
 
      void           getGridValues(
                        uchar queryType,
@@ -186,7 +189,8 @@ class ServiceImplementation : public ServiceInterface
                        uint maxValues,
                        short& precision,
                        ParameterValues_sptr_vec& valueList,
-                       T::Coordinate_vec& coordinates);
+                       T::Coordinate_vec& coordinates,
+                       std::string& producerStr);
 
      void           getParameterStringInfo(
                        const std::string& param,
@@ -598,6 +602,7 @@ class ServiceImplementation : public ServiceInterface
 
      Producer_vec               mProducerList;
      ModificationLock           mProducerList_modificationLock;
+     Altenative_map             mProducerConcatMap;
 
      Producer_map_sptr          mProducerMap;
      ModificationLock           mProducerMap_modificationLock;

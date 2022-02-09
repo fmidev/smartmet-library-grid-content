@@ -41,6 +41,8 @@ enum Result
   UNKNOWN_GENERATION_ID                       = -1061,
   UNKNOWN_GENERATION_NAME                     = -1062,
   GENERATION_AND_FILE_DO_NOT_MATCH            = -1063,
+  UNKNOWN_GEOMETRY                            = -1070,
+  GEOMETRY_ALREADY_REGISTERED                 = -1071,
   UNKNOWN_PARAMETER_NAME                      = -1080,
   UNKNOWN_PARAMETER_KEY_TYPE                  = -1081,
   CONTENT_ALREADY_EXISTS                      = -1100,

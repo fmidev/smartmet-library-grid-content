@@ -108,6 +108,12 @@ std::string getResultString(int resultCode)
       case Result::UNKNOWN_GENERATION_NAME:
         return std::string("Unknown generation name!");
 
+      case Result::UNKNOWN_GEOMETRY:
+        return std::string("Unknown geometry!");
+
+      case Result::GEOMETRY_ALREADY_REGISTERED:
+        return std::string("The geometry was already registered!");
+
       case Result::UNKNOWN_PARAMETER_NAME:
         return std::string("Unknown parameter name!");
 

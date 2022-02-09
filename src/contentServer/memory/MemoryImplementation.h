@@ -69,6 +69,20 @@ class MemoryImplementation : public ServiceInterface
      virtual int    _setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,uchar status);
      virtual int    _setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status);
 
+     virtual int    _addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo);
+     virtual int    _deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId);
+     virtual int    _deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId);
+     virtual int    _deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId);
+     virtual int    _deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId);
+     virtual int    _getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo);
+     virtual int    _getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList);
+     virtual int    _getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList);
+     virtual int    _getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList);
+     virtual int    _getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList);
+     virtual int    _getGeometryInfoCount(T::SessionId sessionId,uint& count);
+     virtual int    _setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo);
+     virtual int    _setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status);
+
      virtual int    _addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo);
      virtual int    _addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList);
      virtual int    _addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList);
@@ -162,9 +176,11 @@ class MemoryImplementation : public ServiceInterface
      virtual void   readFileList();
      virtual void   readProducerList();
      virtual void   readGenerationList();
+     virtual void   readGeometryList();
 
      virtual bool   syncProducerList();
      virtual bool   syncGenerationList();
+     virtual bool   syncGeometryList();
      virtual bool   syncFileList();
      virtual bool   syncContentList();
 
@@ -177,6 +193,7 @@ class MemoryImplementation : public ServiceInterface
      T::FileInfoList        mFileInfoListByName;
      T::ProducerInfoList    mProducerInfoList;
      T::GenerationInfoList  mGenerationInfoList;
+     T::GeometryInfoList    mGeometryInfoList;
      T::EventInfoList       mEventInfoList;
      T::ContentInfoList     mContentInfoList[CONTENT_LIST_COUNT];
 
@@ -195,6 +212,7 @@ class MemoryImplementation : public ServiceInterface
 
      uint                   mProducerCount;
      uint                   mGenerationCount;
+     uint                   mGeometryCount;
      uint                   mFileCount;
      uint                   mContentCount;
 
@@ -205,6 +223,7 @@ class MemoryImplementation : public ServiceInterface
 
      time_t                 mProducerStorage_modificationTime;
      time_t                 mGenerationStorage_modificationTime;
+     time_t                 mGeometryStorage_modificationTime;
      time_t                 mFileStorage_modificationTime;
      time_t                 mContentStorage_modificationTime;
 };
