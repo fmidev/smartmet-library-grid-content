@@ -32,6 +32,7 @@ interface ServiceInterface
   long  getProducerNameAndGeometryList(in long long sessionId,out CorbaStringList list);
   long  getProducerParameterList(in long long sessionId,in octet sourceParameterKeyType,in octet targetParameterKeyType,out CorbaStringList list);
   long  getProducerParameterListByProducerId(in long long sessionId,in unsigned long producerId,in octet sourceParameterKeyType,in octet targetParameterKeyType,out CorbaStringList list);
+  long  setProducerInfo(in long long sessionId,in CorbaProducerInfo producerInfo);
 
   long  addGenerationInfo(in long long sessionId,inout CorbaGenerationInfo generationInfo);
   long  deleteGenerationInfoById(in long long sessionId,in unsigned long generationId);
@@ -51,8 +52,23 @@ interface ServiceInterface
   long  getLastGenerationInfoByProducerIdAndStatus(in long long sessionId,in unsigned long producerId,in octet generationStatus,out CorbaGenerationInfo generationInfo);
   long  getLastGenerationInfoByProducerNameAndStatus(in long long sessionId,in string producerName,in octet generationStatus,out CorbaGenerationInfo generationInfo);
   long  getGenerationInfoCount(in long long sessionId,out unsigned long count);
+  long  setGenerationInfo(in long long sessionId,in CorbaGenerationInfo generationInfo);
   long  setGenerationInfoStatusById(in long long sessionId,in unsigned long generationId,in octet status);
   long  setGenerationInfoStatusByName(in long long sessionId,in string generationName,in octet status);
+
+  long  addGeometryInfo(in long long sessionId,inout CorbaGeometryInfo geometryInfo);
+  long  deleteGeometryInfoById(in long long sessionId,in unsigned long generationId,in long geometryId,in short levelId);
+  long  deleteGeometryInfoListByGenerationId(in long long sessionId,in unsigned long generationId);
+  long  deleteGeometryInfoListByProducerId(in long long sessionId,in unsigned long producerId);
+  long  deleteGeometryInfoListBySourceId(in long long sessionId,in unsigned long sourceId);
+  long  getGeometryInfoById(in long long sessionId,in unsigned long generationId,in long geometryId,in short levelId,out CorbaGeometryInfo geometryInfo);
+  long  getGeometryInfoList(in long long sessionId,out CorbaGeometryInfoList geometryInfoList);
+  long  getGeometryInfoListByGenerationId(in long long sessionId,in unsigned long generationId,out CorbaGeometryInfoList geometryInfoList);
+  long  getGeometryInfoListByProducerId(in long long sessionId,in unsigned long producerId,out CorbaGeometryInfoList geometryInfoList);
+  long  getGeometryInfoListBySourceId(in long long sessionId,in unsigned long sourceId,out CorbaGeometryInfoList geometryInfoList);
+  long  getGeometryInfoCount(in long long sessionId,out unsigned long count);
+  long  setGeometryInfo(in long long sessionId,in CorbaGeometryInfo geometryInfo);
+  long  setGeometryInfoStatusById(in long long sessionId,in unsigned long generationId,in long geometryId,in short levelId,in octet status);
 
   long  addFileInfo(in long long sessionId,inout CorbaFileInfo fileInfo);
   long  addFileInfoWithContentList(in long long sessionId,inout CorbaFileInfo fileInfo,inout CorbaContentInfoList contentInfoList);
@@ -80,6 +96,7 @@ interface ServiceInterface
   long  getFileInfoCountByProducerId(in long long sessionId,in unsigned long producerId,out unsigned long count);
   long  getFileInfoCountByGenerationId(in long long sessionId,in unsigned long generationId,out unsigned long count);
   long  getFileInfoCountBySourceId(in long long sessionId,in unsigned long sourceId,out unsigned long count);
+  long  setFileInfo(in long long sessionId,in CorbaFileInfo fileInfo);
   
   long  addEventInfo(in long long sessionId,inout CorbaEventInfo eventInfo);
   long  getLastEventInfo(in long long sessionId,in unsigned long requestingServerId,out CorbaEventInfo eventInfo);
@@ -128,6 +145,8 @@ interface ServiceInterface
   long  getContentTimeRangeByGenerationId(in long long sessionId,in unsigned long generationId,out long long startTime,out long long endTime);
 
   long  getContentCount(in long long sessionId,out unsigned long count);
+  long  setContentInfo(in long long sessionId,in CorbaContentInfo contentInfo);
+
   long  getHashByProducerId(in long long sessionId,in unsigned long producerId,out unsigned long long hash);
 
   long  getLevelInfoList(in long long sessionId,out CorbaLevelInfoList levelInfoList);

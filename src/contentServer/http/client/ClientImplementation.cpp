@@ -558,6 +558,34 @@ int ClientImplementation::_getProducerParameterListByProducerId(T::SessionId ses
 
 
 
+int ClientImplementation::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","setProducerInfo");
+    request.addLine("sessionId",sessionId);
+    request.addLine("producerInfo",producerInfo.getCsv());
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
   try
@@ -1142,6 +1170,34 @@ int ClientImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& c
 
 
 
+int ClientImplementation::_setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","setGenerationInfo");
+    request.addLine("sessionId",sessionId);
+    request.addLine("generationInfo",generationInfo.getCsv());
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,uchar status)
 {
   try
@@ -1196,6 +1252,413 @@ int ClientImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,
   }
 }
 
+
+
+
+
+int ClientImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","addGeometryInfo");
+    request.addLine("sessionId",sessionId);
+    request.addLine("geometryInfo",geometryInfo.getCsv());
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+      geometryInfo.setCsv(response.getLineByKey("geometryInfo"));
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","deleteGeometryInfoById");
+    request.addLine("sessionId",sessionId);
+    request.addLine("geometryId",geometryId);
+    request.addLine("levelId",levelId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int ClientImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","deleteGeometryInfoListByGenerationId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("generationId",generationId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int ClientImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","deleteGeometryInfoListByProducerId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("producerId",producerId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int ClientImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","deleteGeometryInfoListBySourceId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("sourceId",sourceId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int ClientImplementation::_getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getGeometryInfoById");
+    request.addLine("sessionId",sessionId);
+    request.addLine("geometryId",geometryId);
+    request.addLine("levelId",levelId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+      geometryInfo.setCsv(response.getLineByKey("geometryInfo"));
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int ClientImplementation::_getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getGeometryInfoList");
+    request.addLine("sessionId",sessionId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      string_vec lines;
+      uint len = response.getLinesByKey("geometryInfo",lines);
+      for (uint t=0; t<len; t++)
+      {
+        T::GeometryInfo *info = new T::GeometryInfo();
+        info->setCsv(lines[t]);
+        geometryInfoList.addGeometryInfo(info);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int ClientImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getGeometryInfoListByGenerationId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("generationId",generationId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      string_vec lines;
+      uint len = response.getLinesByKey("geometryInfo",lines);
+      for (uint t=0; t<len; t++)
+      {
+        T::GeometryInfo *info = new T::GeometryInfo();
+        info->setCsv(lines[t]);
+        geometryInfoList.addGeometryInfo(info);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int ClientImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getGeometryInfoListByProducerId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("producerId",sessionId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      string_vec lines;
+      uint len = response.getLinesByKey("geometryInfo",lines);
+      for (uint t=0; t<len; t++)
+      {
+        T::GeometryInfo *info = new T::GeometryInfo();
+        info->setCsv(lines[t]);
+        geometryInfoList.addGeometryInfo(info);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int ClientImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getGeometryInfoListBySourceId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("sourceId",sourceId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      string_vec lines;
+      uint len = response.getLinesByKey("geometryInfo",lines);
+      for (uint t=0; t<len; t++)
+      {
+        T::GeometryInfo *info = new T::GeometryInfo();
+        info->setCsv(lines[t]);
+        geometryInfoList.addGeometryInfo(info);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int ClientImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& count)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getGeometryInfoCount");
+    request.addLine("sessionId",sessionId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+      count = response.getLineValueByKey("count");
+    else
+      count = 0;
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int ClientImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","setGeometryInfo");
+    request.addLine("sessionId",sessionId);
+    request.addLine("geometryInfo",geometryInfo.getCsv());
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int ClientImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","setGeometryInfoStatusById");
+    request.addLine("sessionId",sessionId);
+    request.addLine("generationId",generationId);
+    request.addLine("geometryId",geometryId);
+    request.addLine("levelId",levelId);
+    request.addLine("status",status);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
 
 
 
@@ -2082,6 +2545,34 @@ int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint
         fileInfoList.addFileInfo(info);
       }
     }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","setFileInfo");
+    request.addLine("sessionId",sessionId);
+    request.addLine("fileInfo",fileInfo.getCsv());
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
 
     return result;
   }
@@ -3559,6 +4050,34 @@ int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
       count = response.getLineValueByKey("count");
     else
       count = 0;
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","setContent");
+    request.addLine("sessionId",sessionId);
+    request.addLine("contentInfo",contentInfo.getCsv());
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
 
     return result;
   }

@@ -1076,6 +1076,327 @@ int ServiceInterface::setGenerationInfoStatusByName(T::SessionId sessionId,const
 
 
 
+int ServiceInterface::addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _addGeometryInfo(sessionId,geometryInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,geometryInfo.getCsv().c_str(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceInterface::deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _deleteGeometryInfoById(sessionId,generationId,geometryId,levelId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%d,%d);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,levelId,result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceInterface::deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _deleteGeometryInfoListByGenerationId(sessionId,generationId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,generationId,result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceInterface::deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _deleteGeometryInfoListByProducerId(sessionId,producerId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,producerId,result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceInterface::deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _deleteGeometryInfoListBySourceId(sessionId,sourceId);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,sourceId,result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _getGeometryInfoById(sessionId,generationId,geometryId,levelId,geometryInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%d,%d);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,levelId,result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _getGeometryInfoList(sessionId,geometryInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,geometryInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,geometryInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int ServiceInterface::getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _getGeometryInfoListByGenerationId(sessionId,generationId,geometryInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,geometryInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int ServiceInterface::getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _getGeometryInfoListByProducerId(sessionId,producerId,geometryInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,geometryInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerId,geometryInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int ServiceInterface::getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _getGeometryInfoListBySourceId(sessionId,sourceId,geometryInfoList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,geometryInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,sourceId,geometryInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getGeometryInfoCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _getGeometryInfoCount(sessionId,count);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,count,result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceInterface::setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _setGeometryInfo(sessionId,geometryInfo);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,geometryInfo.getCsv().c_str(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int ServiceInterface::setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _setGeometryInfoStatusById(sessionId,generationId,geometryId,levelId,status);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%d,%d,%u);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,levelId,status,result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int ServiceInterface::addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -3470,6 +3791,122 @@ int ServiceInterface::_setGenerationInfoStatusById(T::SessionId sessionId,uint g
 
 
 int ServiceInterface::_setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_getGeometryInfoCount(T::SessionId sessionId,uint& count)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+int ServiceInterface::_setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }

@@ -42,6 +42,7 @@ class ClientImplementation : public ContentServer::ServiceInterface
      virtual int    _getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list);
      virtual int    _getProducerParameterList(T::SessionId sessionId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list);
      virtual int    _getProducerParameterListByProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list);
+     virtual int    _setProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo);
 
      virtual int    _addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo);
      virtual int    _deleteGenerationInfoById(T::SessionId sessionId,uint generationId);
@@ -61,8 +62,23 @@ class ClientImplementation : public ContentServer::ServiceInterface
      virtual int    _getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,uint producerId,uchar generationStatus,T::GenerationInfo& generationInfo);
      virtual int    _getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,const std::string& producerName,uchar generationStatus,T::GenerationInfo& generationInfo);
      virtual int    _getGenerationInfoCount(T::SessionId sessionId,uint& count);
+     virtual int    _setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo);
      virtual int    _setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,uchar status);
      virtual int    _setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status);
+
+     virtual int    _addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo);
+     virtual int    _deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId);
+     virtual int    _deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId);
+     virtual int    _deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId);
+     virtual int    _deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId);
+     virtual int    _getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo);
+     virtual int    _getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList);
+     virtual int    _getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList);
+     virtual int    _getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList);
+     virtual int    _getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList);
+     virtual int    _getGeometryInfoCount(T::SessionId sessionId,uint& count);
+     virtual int    _setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo);
+     virtual int    _setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status);
 
      virtual int    _addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo);
      virtual int    _addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList);
@@ -90,6 +106,7 @@ class ClientImplementation : public ContentServer::ServiceInterface
      virtual int    _getFileInfoCountByProducerId(T::SessionId sessionId,uint producerId,uint& count);
      virtual int    _getFileInfoCountByGenerationId(T::SessionId sessionId,uint generationId,uint& count);
      virtual int    _getFileInfoCountBySourceId(T::SessionId sessionId,uint sourceId,uint& count);
+     virtual int    _setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo);
 
      virtual int    _addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo);
      virtual int    _getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo);
@@ -134,8 +151,9 @@ class ClientImplementation : public ContentServer::ServiceInterface
      virtual int    _getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList);
      virtual int    _getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList);
      virtual int    _getContentTimeRangeByGenerationId(T::SessionId sessionId,uint generationId,time_t& startTime,time_t& endTime);
-
      virtual int    _getContentCount(T::SessionId sessionId,uint& count);
+     virtual int    _setContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo);
+
      virtual int    _getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash);
 
      virtual int    _getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList);

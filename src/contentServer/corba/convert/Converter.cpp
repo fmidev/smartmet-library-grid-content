@@ -457,6 +457,105 @@ void Converter::convert(const ContentServer::Corba::CorbaGenerationInfoList& sou
 
 
 
+void Converter::convert(T::GeometryInfo& source,ContentServer::Corba::CorbaGeometryInfo& target)
+{
+  try
+  {
+    target.generationId = source.mGenerationId;
+    target.geometryId = source.mGeometryId;
+    target.levelId = source.mLevelId;
+    target.producerId = source.mProducerId;
+    target.flags = source.mFlags;
+    target.sourceId = source.mSourceId;
+    target.deletionTime = source.mDeletionTime;
+    target.modificationTime = source.mModificationTime;
+    target.status = (CORBA::Octet)source.mStatus;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const ContentServer::Corba::CorbaGeometryInfo& source,T::GeometryInfo& target)
+{
+  try
+  {
+    target.mGenerationId = source.generationId;
+    target.mGeometryId = source.geometryId;
+    target.mLevelId = source.levelId;
+    target.mProducerId = source.producerId;
+    target.mFlags = source.flags;
+    target.mSourceId = source.sourceId;
+    target.mDeletionTime = source.deletionTime;
+    target.mModificationTime = source.modificationTime;
+    target.mStatus = source.status;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+
+
+
+
+void Converter::convert(T::GeometryInfoList& source,ContentServer::Corba::CorbaGeometryInfoList& target)
+{
+  try
+  {
+    uint len = source.getLength();
+    target.length(len);
+    for (uint t=0; t<len; t++)
+    {
+      T::GeometryInfo *info = source.getGeometryInfoByIndex(t);
+      ContentServer::Corba::CorbaGeometryInfo corbaObject;
+      convert(*info,corbaObject);
+      target[t] = corbaObject;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const ContentServer::Corba::CorbaGeometryInfoList& source,T::GeometryInfoList& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      ContentServer::Corba::CorbaGeometryInfo corbaObject = source[t];
+      T::GeometryInfo *info = new T::GeometryInfo();
+      convert(corbaObject,*info);
+      target.addGeometryInfo(info);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 void Converter::convert(T::EventInfo& source,ContentServer::Corba::CorbaEventInfo& target)
 {
   try

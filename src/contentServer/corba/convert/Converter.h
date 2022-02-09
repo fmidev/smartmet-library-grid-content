@@ -11,6 +11,8 @@
 #include "../../definition/ProducerInfoList.h"
 #include "../../definition/GenerationInfo.h"
 #include "../../definition/GenerationInfoList.h"
+#include "../../definition/GeometryInfo.h"
+#include "../../definition/GeometryInfoList.h"
 #include "../../definition/ForecastTime.h"
 
 #include "../stubs/ContentServer_serviceInterface_SK.h"
@@ -56,6 +58,12 @@ class Converter
 
     static void   convert(T::GenerationInfoList& source,ContentServer::Corba::CorbaGenerationInfoList& target);
     static void   convert(const ContentServer::Corba::CorbaGenerationInfoList& source,T::GenerationInfoList& target);
+
+    static void   convert(T::GeometryInfo& source,ContentServer::Corba::CorbaGeometryInfo& target);
+    static void   convert(const ContentServer::Corba::CorbaGeometryInfo& source,T::GeometryInfo& target);
+
+    static void   convert(T::GeometryInfoList& source,ContentServer::Corba::CorbaGeometryInfoList& target);
+    static void   convert(const ContentServer::Corba::CorbaGeometryInfoList& source,T::GeometryInfoList& target);
 
     static void   convert(T::EventInfo& source,ContentServer::Corba::CorbaEventInfo& target);
     static void   convert(const ContentServer::Corba::CorbaEventInfo& source,T::EventInfo& target);

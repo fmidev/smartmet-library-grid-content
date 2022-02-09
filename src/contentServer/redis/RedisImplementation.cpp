@@ -73,6 +73,16 @@ unsigned long long getContentKey(uint fileId,uint messageIndex)
 
 
 
+unsigned long long getGeometryKey(uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+{
+  unsigned long long key = generationId;
+  unsigned long long g = geometryId;
+  key = (key << 32) + (g << 8) + levelId;
+  return key;
+}
+
+
+
 
 RedisImplementation::RedisImplementation()
 {
@@ -534,6 +544,14 @@ int RedisImplementation::_clear(T::SessionId sessionId)
 
     freeReplyObject(reply);
 
+    reply = static_cast<redisReply*>(redisCommand(mContext,"DEL %sgeometries",mTablePrefix.c_str()));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    freeReplyObject(reply);
     reply = static_cast<redisReply*>(redisCommand(mContext,"DEL %sfileCounter",mTablePrefix.c_str()));
     if (reply == nullptr)
     {
@@ -793,7 +811,7 @@ int RedisImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint pro
       return Result::UNKNOWN_PRODUCER_ID;
 
 
-    int result = deleteProducerById(producerInfo.mProducerId,true,true,true);
+    int result = deleteProducerById(producerInfo.mProducerId,true,true,true,true);
 
     if (result == Result::OK)
       addEvent(EventType::PRODUCER_DELETED,producerId,0,0,0);
@@ -828,7 +846,7 @@ int RedisImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const 
       return Result::UNKNOWN_PRODUCER_NAME;
 
 
-    int result = deleteProducerById(producerInfo.mProducerId,true,true,true);
+    int result = deleteProducerById(producerInfo.mProducerId,true,true,true,true);
 
     if (result == Result::OK)
       addEvent(EventType::PRODUCER_DELETED,producerInfo.mProducerId,0,0,0);
@@ -861,9 +879,10 @@ int RedisImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionI
 
     deleteContentBySourceId(sourceId);
     deleteFileListBySourceId(sourceId,false);
-    deleteGenerationListBySourceId(sourceId,false,false);
+    deleteGeometryListBySourceId(sourceId,false,false);
+    deleteGenerationListBySourceId(sourceId,false,false,false);
 
-    int result = deleteProducerListBySourceId(sourceId,false,false,false);
+    int result = deleteProducerListBySourceId(sourceId,false,false,false,false);
 
     if (result == Result::OK)
       addEvent(EventType::PRODUCER_LIST_DELETED_BY_SOURCE_ID,sourceId,0,0,0);
@@ -1632,8 +1651,9 @@ int RedisImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint g
 
     deleteContentByGenerationId(generationInfo.mGenerationId);
     deleteFileListByGenerationId(generationInfo.mGenerationId,false);
+    deleteGeometryListByGenerationId(generationInfo.mGenerationId,false,false);
 
-    int result = deleteGenerationById(generationInfo.mGenerationId,false,false);
+    int result = deleteGenerationById(generationInfo.mGenerationId,false,false,false);
 
     if (result == Result::OK)
       addEvent(EventType::GENERATION_DELETED,generationId,0,0,0);
@@ -1670,8 +1690,9 @@ int RedisImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,cons
 
     deleteContentByGenerationId(generationInfo.mGenerationId);
     deleteFileListByGenerationId(generationInfo.mGenerationId,false);
+    deleteGeometryListByGenerationId(generationInfo.mGenerationId,false,false);
 
-    int result = deleteGenerationById(generationInfo.mGenerationId,false,false);
+    int result = deleteGenerationById(generationInfo.mGenerationId,false,false,false);
 
     if (result == Result::OK)
       addEvent(EventType::GENERATION_DELETED,generationInfo.mGenerationId,0,0,0);
@@ -1704,10 +1725,11 @@ int RedisImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionI
 
     deleteContentByGenerationIdList(generationIdList);
     deleteFileListByGenerationIdList(generationIdList,false);
+    deleteGeometryListByGenerationIdList(generationIdList,false,false);
 
     for (auto it = generationIdList.begin(); it != generationIdList.end(); ++it)
     {
-      deleteGenerationById(*it,false,false);
+      deleteGenerationById(*it,false,false,false);
       addEvent(EventType::GENERATION_DELETED,*it,0,0,0);
     }
 
@@ -1743,8 +1765,9 @@ int RedisImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sess
 
     deleteContentByProducerId(producerInfo.mProducerId);
     deleteFileListByProducerId(producerInfo.mProducerId,false);
+    deleteGeometryListByProducerId(producerInfo.mProducerId,false,false);
 
-    int result = deleteGenerationListByProducerId(producerId,false,false);
+    int result = deleteGenerationListByProducerId(producerId,false,false,false);
 
     if (result == Result::OK)
       addEvent(EventType::GENERATION_LIST_DELETED_BY_PRODUCER_ID,producerId,0,0,0);
@@ -1781,8 +1804,9 @@ int RedisImplementation::_deleteGenerationInfoListByProducerName(T::SessionId se
 
     deleteContentByProducerId(producerInfo.mProducerId);
     deleteFileListByProducerId(producerInfo.mProducerId,false);
+    deleteGeometryListByProducerId(producerInfo.mProducerId,false,false);
 
-    int result = deleteGenerationListByProducerId(producerInfo.mProducerId,false,false);
+    int result = deleteGenerationListByProducerId(producerInfo.mProducerId,false,false,false);
 
     if (result == Result::OK)
       addEvent(EventType::GENERATION_LIST_DELETED_BY_PRODUCER_ID,producerInfo.mProducerId,0,0,0);
@@ -1815,8 +1839,9 @@ int RedisImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessio
 
     deleteContentBySourceId(sourceId);
     deleteFileListBySourceId(sourceId,false);
+    deleteGeometryListBySourceId(sourceId,false,false);
 
-    int result = deleteGenerationListBySourceId(sourceId,false,false);
+    int result = deleteGenerationListBySourceId(sourceId,false,false,false);
 
     if (result == Result::OK)
       addEvent(EventType::GENERATION_LIST_DELETED_BY_SOURCE_ID,sourceId,0,0,0);
@@ -2238,6 +2263,471 @@ int RedisImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,c
   }
 }
 
+
+
+
+
+int RedisImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::ProducerInfo producerInfo;
+    if (getProducerById(geometryInfo.mProducerId,producerInfo) != Result::OK)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationById(geometryInfo.mGenerationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    if (producerInfo.mProducerId != generationInfo.mProducerId)
+      return Result::PRODUCER_AND_GENERATION_DO_NOT_MATCH;
+
+
+    unsigned long long id = getGeometryKey(geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId);
+
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %sgeometries %llu %s",mTablePrefix.c_str(),id,geometryInfo.getCsv().c_str()));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    freeReplyObject(reply);
+
+    addEvent(EventType::GEOMETRY_ADDED,geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId,0);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int RedisImplementation::_deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::GeometryInfo geometryInfo;
+    if (getGeometryById(generationId,geometryId,levelId,geometryInfo) != Result::OK)
+      return Result::UNKNOWN_GEOMETRY;
+
+    int result = deleteGeometryById(generationId,geometryId,levelId,true,true);
+
+    if (result == Result::OK)
+      addEvent(EventType::GEOMETRY_DELETED,generationId,geometryId,levelId,0);
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationById(generationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    //deleteContentByGenerationId(generationId);
+    //deleteFileListByGenerationId(generationId,false);
+
+    int result = deleteGeometryListByGenerationId(generationId,false,false);
+
+    if (result == Result::OK)
+      addEvent(EventType::GEOMETRY_LIST_DELETED_BY_GENERATION_ID,generationId,0,0,0);
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::ProducerInfo producerInfo;
+    if (getProducerById(producerId,producerInfo) != Result::OK)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    //deleteContentByProducerId(producerId);
+    //deleteFileListByProducerId(producerId,false);
+
+    int result = deleteGeometryListByProducerId(producerId,false,false);
+
+    if (result == Result::OK)
+      addEvent(EventType::GEOMETRY_LIST_DELETED_BY_PRODUCER_ID,producerId,0,0,0);
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int RedisImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    //deleteContentBySourceId(sourceId);
+    //deleteFileListBySourceId(sourceId,false);
+
+    int result = deleteGeometryListBySourceId(sourceId,false,false);
+
+    if (result == Result::OK)
+      addEvent(EventType::GEOMETRY_LIST_DELETED_BY_SOURCE_ID,sourceId,0,0,0);
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int RedisImplementation::_getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    return getGeometryById(generationId,geometryId,levelId,geometryInfo);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int RedisImplementation::_getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    geometryInfoList.clear();
+
+    return getGeometryList(geometryInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    geometryInfoList.clear();
+
+    return getGeometryListByGenerationId(generationId,geometryInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int RedisImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    geometryInfoList.clear();
+
+    return getGeometryListByProducerId(producerId,geometryInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int RedisImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    geometryInfoList.clear();
+
+    return getGeometryListBySourceId(sourceId,geometryInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int RedisImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    count = 0;
+
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZCOUNT %sgeometries 0 %llu",mTablePrefix.c_str(),0xFFFFFFFFFFFFFFFF));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->str != nullptr)
+      count = toInt64(reply->str);
+    else
+      count = reply->integer;
+
+    freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int RedisImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::ProducerInfo producerInfo;
+    if (getProducerById(geometryInfo.mProducerId,producerInfo) != Result::OK)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationById(geometryInfo.mGenerationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    if (producerInfo.mProducerId != generationInfo.mProducerId)
+      return Result::PRODUCER_AND_GENERATION_DO_NOT_MATCH;
+
+    unsigned long long id = getGeometryKey(geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId);
+
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgeometries %llu %llu",mTablePrefix.c_str(),id,id));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    freeReplyObject(reply);
+
+    reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %sgeometries %llu %s",mTablePrefix.c_str(),id,geometryInfo.getCsv().c_str()));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    freeReplyObject(reply);
+
+    addEvent(EventType::GEOMETRY_UPDATED,geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId,0);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int RedisImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
+{
+  FUNCTION_TRACE
+  try
+  {
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::GeometryInfo geometryInfo;
+    if (getGeometryById(generationId,geometryId,levelId,geometryInfo) != Result::OK)
+      return Result::UNKNOWN_GEOMETRY;
+
+    geometryInfo.mStatus = status;
+
+    unsigned long long id = getGeometryKey(geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId);
+
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgeometries %llu %llu",mTablePrefix.c_str(),id,id));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    freeReplyObject(reply);
+
+    reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %sgeometries %llu %s",mTablePrefix.c_str(),id,geometryInfo.getCsv().c_str()));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    freeReplyObject(reply);
+
+    addEvent(EventType::GEOMETRY_STATUS_CHANGED,generationId,geometryId,levelId,status);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
 
 
 
@@ -5347,7 +5837,7 @@ int RedisImplementation::_updateVirtualContent(T::SessionId sessionId)
 
 
 
-int RedisImplementation::deleteProducerById(uint producerId,bool deleteGenerations,bool deleteFiles,bool deleteContent)
+int RedisImplementation::deleteProducerById(uint producerId,bool deleteGenerations,bool deleteGeometries,bool deleteFiles,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -5361,8 +5851,11 @@ int RedisImplementation::deleteProducerById(uint producerId,bool deleteGeneratio
     if (deleteFiles)
       deleteFileListByProducerId(producerId,false);
 
+    if (deleteGeometries)
+      deleteGeometryListByProducerId(producerId,false,false);
+
     if (deleteGenerations)
-      deleteGenerationListByProducerId(producerId,false,false);
+      deleteGenerationListByProducerId(producerId,false,false,false);
 
     redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sproducers %u %u",mTablePrefix.c_str(),producerId,producerId));
     if (reply == nullptr)
@@ -5385,7 +5878,7 @@ int RedisImplementation::deleteProducerById(uint producerId,bool deleteGeneratio
 
 
 
-int RedisImplementation::deleteProducerListBySourceId(uint sourceId,bool deleteGenerations,bool deleteFiles,bool deleteContent)
+int RedisImplementation::deleteProducerListBySourceId(uint sourceId,bool deleteGenerations,bool deleteGeometries,bool deleteFiles,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -5400,7 +5893,7 @@ int RedisImplementation::deleteProducerListBySourceId(uint sourceId,bool deleteG
     for (uint t=0; t<len; t++)
     {
       T::ProducerInfo *producerInfo = producerInfoList.getProducerInfoByIndex(t);
-      deleteProducerById(producerInfo->mProducerId,deleteGenerations,deleteFiles,deleteContent);
+      deleteProducerById(producerInfo->mProducerId,deleteGenerations,deleteGeometries,deleteFiles,deleteContent);
     }
 
     return Result::OK;
@@ -5847,7 +6340,7 @@ int RedisImplementation::getGenerationListBySourceId(uint sourceId,T::Generation
 
 
 
-int RedisImplementation::deleteGenerationById(uint generationId,bool deleteFiles,bool deleteContent)
+int RedisImplementation::deleteGenerationById(uint generationId,bool deleteGeometries,bool deleteFiles,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -5860,6 +6353,9 @@ int RedisImplementation::deleteGenerationById(uint generationId,bool deleteFiles
 
     if (deleteFiles)
       deleteFileListByGenerationId(generationId,false);
+
+    if (deleteGeometries)
+      deleteGeometryListByGenerationId(generationId,false,false);
 
     redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgenerations %u %u",mTablePrefix.c_str(),generationId,generationId));
     if (reply == nullptr)
@@ -5882,7 +6378,7 @@ int RedisImplementation::deleteGenerationById(uint generationId,bool deleteFiles
 
 
 
-int RedisImplementation::deleteGenerationListByProducerId(uint producerId,bool deleteFiles,bool deleteContent)
+int RedisImplementation::deleteGenerationListByProducerId(uint producerId,bool deleteGeometries,bool deleteFiles,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -5897,7 +6393,7 @@ int RedisImplementation::deleteGenerationListByProducerId(uint producerId,bool d
     for (uint t=0; t<len; t++)
     {
       T::GenerationInfo *generationInfo = generationInfoList.getGenerationInfoByIndex(t);
-      deleteGenerationById(generationInfo->mGenerationId,deleteFiles,deleteContent);
+      deleteGenerationById(generationInfo->mGenerationId,deleteGeometries,deleteFiles,deleteContent);
     }
 
     return Result::OK;
@@ -5912,7 +6408,7 @@ int RedisImplementation::deleteGenerationListByProducerId(uint producerId,bool d
 
 
 
-int RedisImplementation::deleteGenerationListBySourceId(uint sourceId,bool deleteFiles,bool deleteContent)
+int RedisImplementation::deleteGenerationListBySourceId(uint sourceId,bool deleteGeometries,bool deleteFiles,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -5927,7 +6423,7 @@ int RedisImplementation::deleteGenerationListBySourceId(uint sourceId,bool delet
     for (uint t=0; t<len; t++)
     {
       T::GenerationInfo *generationInfo = generationInfoList.getGenerationInfoByIndex(t);
-      deleteGenerationById(generationInfo->mGenerationId,deleteFiles,deleteContent);
+      deleteGenerationById(generationInfo->mGenerationId,deleteGeometries,deleteFiles,deleteContent);
     }
 
     return Result::OK;
@@ -6002,7 +6498,6 @@ int RedisImplementation::deleteFileListByGenerationId(uint generationId,bool del
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
-
 
 
 
@@ -6336,6 +6831,10 @@ int RedisImplementation::deleteFileListBySourceId(uint sourceId,bool deleteConte
 
 
 
+
+
+
+
 int RedisImplementation::getFileListByProducerId(uint producerId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -6593,6 +7092,454 @@ int RedisImplementation::deleteVirtualFiles(bool deleteContent)
 
 
 
+int RedisImplementation::deleteGeometryById(uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,bool deleteFiles,bool deleteContent)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    unsigned long long id = getGeometryKey(generationId,geometryId,levelId);
+
+    if (deleteContent)
+      deleteContentByGeometry(generationId,geometryId,levelId);
+
+    // ### Cannot delete files if files contain multiple geometries
+    //if (deleteFiles)
+    //  deleteFileListByGeneationAndGeometryId(generationId,geometryId);
+
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgeometries %llu %llu",mTablePrefix.c_str(),id,id));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    freeReplyObject(reply);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int RedisImplementation::deleteGeometryListByGenerationId(uint generationId,bool deleteFiles,bool deleteContent)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    if (deleteContent)
+      deleteContentByGenerationId(generationId);
+
+    // ### Cannot delete files if files contain multiple geometries
+    //if (deleteFiles)
+    //  deleteFileListByGenerationId(generationId,false);
+
+    T::GeometryInfoList geometryInfoList;
+    getGeometryListByGenerationId(generationId,geometryInfoList);
+    uint len = geometryInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::GeometryInfo *geometryInfo = geometryInfoList.getGeometryInfoByIndex(t);
+      deleteGeometryById(geometryInfo->mGenerationId,geometryInfo->mGeometryId,geometryInfo->mLevelId,false,false);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::deleteGeometryListByProducerId(uint producerId,bool deleteFiles,bool deleteContent)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    if (deleteContent)
+      deleteContentByProducerId(producerId);
+
+    // ### Cannot delete files if files contain multiple geometries
+    //if (deleteFiles)
+    //  deleteFileListByProducerId(producerId,false);
+
+    T::GeometryInfoList geometryInfoList;
+    getGeometryListByProducerId(producerId,geometryInfoList);
+    uint len = geometryInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::GeometryInfo *geometryInfo = geometryInfoList.getGeometryInfoByIndex(t);
+      deleteGeometryById(geometryInfo->mGenerationId,geometryInfo->mGeometryId,geometryInfo->mLevelId,false,false);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::deleteGeometryListBySourceId(uint sourceId,bool deleteFiles,bool deleteContent)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    if (deleteContent)
+      deleteContentBySourceId(sourceId);
+
+    // ### Cannot delete files if files contain multiple geometries
+    //if (deleteFiles)
+    //  deleteFileListBySourceId(sourceId,false);
+
+    T::GeometryInfoList geometryInfoList;
+    getGeometryListBySourceId(sourceId,geometryInfoList);
+    uint len = geometryInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::GeometryInfo *geometryInfo = geometryInfoList.getGeometryInfoByIndex(t);
+      deleteGeometryById(geometryInfo->mGenerationId,geometryInfo->mGeometryId,geometryInfo->mLevelId,false,false);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::deleteGeometryListByGenerationIdList(std::set<uint>& generationIdList,bool deleteFiles,bool deleteContent)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::GeometryInfoList geometryInfoList;
+    getGeometryListByGenerationIdList(generationIdList,geometryInfoList);
+    uint len = geometryInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::GeometryInfo *geometryInfo = geometryInfoList.getGeometryInfoByIndex(t);
+      deleteGeometryById(geometryInfo->mGenerationId,geometryInfo->mGeometryId,geometryInfo->mLevelId,deleteFiles,deleteContent);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::getGeometryById(uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    unsigned long long id = getGeometryKey(generationId,geometryId,levelId);
+
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgeometries %llu %llu",mTablePrefix.c_str(),id,id));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->type == REDIS_REPLY_ARRAY  &&  reply->elements > 0)
+    {
+      for (uint t=0; t<reply->elements; t++)
+      {
+        uint fGeneration = getCsvInt64Field(reply->element[t]->str,0);
+        T::GeometryId fGeom = getCsvInt64Field(reply->element[t]->str,1);
+        T::ParamLevelId fLevelId = getCsvInt64Field(reply->element[t]->str,2);
+        if (fGeneration == generationId  &&  fGeom == geometryId && fLevelId == levelId)
+        {
+          geometryInfo.setCsv(reply->element[t]->str);
+          freeReplyObject(reply);
+          return Result::OK;
+        }
+      }
+    }
+    freeReplyObject(reply);
+    return Result::DATA_NOT_FOUND;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int RedisImplementation::getGeometryList(T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    geometryInfoList.clear();
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    unsigned long long startId = 0;
+    unsigned long long endId = 0xFFFFFFFFFFFFFFFF;
+
+
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgeometries %llu %llu",mTablePrefix.c_str(),startId,endId));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->type == REDIS_REPLY_ARRAY)
+    {
+      for (uint t = 0; t < reply->elements; t++)
+      {
+        T::GeometryInfo *geometryInfo = new T::GeometryInfo();
+        geometryInfo->setCsv(reply->element[t]->str);
+        geometryInfoList.addGeometryInfo(geometryInfo);
+      }
+    }
+    freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int RedisImplementation::getGeometryListByProducerId(uint producerId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    geometryInfoList.clear();
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    unsigned long long startId = 0;
+    unsigned long long endId = 0xFFFFFFFFFFFFFFFF;
+
+
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgeometries %llu %llu",mTablePrefix.c_str(),startId,endId));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->type == REDIS_REPLY_ARRAY)
+    {
+      for (uint t = 0; t < reply->elements; t++)
+      {
+        uint prodId = getCsvInt64Field(reply->element[t]->str,3);
+
+        if (prodId == producerId)
+        {
+          T::GeometryInfo *geometryInfo = new T::GeometryInfo();
+          geometryInfo->setCsv(reply->element[t]->str);
+          geometryInfoList.addGeometryInfo(geometryInfo);
+        }
+      }
+    }
+    freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::getGeometryListByGenerationId(uint generationId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    geometryInfoList.clear();
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    unsigned long long startId = getGeometryKey(generationId,0,0);
+    unsigned long long endId = getGeometryKey(generationId,0x00FFFFFF,0xFF);
+
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgeometries %llu %llu",mTablePrefix.c_str(),startId,endId));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->type == REDIS_REPLY_ARRAY)
+    {
+      for (uint t = 0; t < reply->elements; t++)
+      {
+        uint genId = getCsvInt64Field(reply->element[t]->str,0);
+        if (genId == generationId)
+        {
+          T::GeometryInfo *geometryInfo = new T::GeometryInfo();
+          geometryInfo->setCsv(reply->element[t]->str);
+          geometryInfoList.addGeometryInfo(geometryInfo);
+        }
+      }
+    }
+    freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int RedisImplementation::getGeometryListBySourceId(uint sourceId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    geometryInfoList.clear();
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    unsigned long long startId = 0;
+    unsigned long long endId = 0xFFFFFFFFFFFFFFFF;
+
+
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgeometries %llu %llu",mTablePrefix.c_str(),startId,endId));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->type == REDIS_REPLY_ARRAY)
+    {
+      for (uint t = 0; t < reply->elements; t++)
+      {
+        uint sId = getCsvInt64Field(reply->element[t]->str,4);
+
+        if (sId == sourceId)
+        {
+          T::GeometryInfo *geometryInfo = new T::GeometryInfo();
+          geometryInfo->setCsv(reply->element[t]->str);
+          geometryInfoList.addGeometryInfo(geometryInfo);
+        }
+      }
+    }
+    freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::getGeometryListByGenerationIdList(std::set<uint>& generationIdList,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    geometryInfoList.clear();
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    unsigned long long startId = 0;
+    unsigned long long endId = 0xFFFFFFFFFFFFFFFF;
+
+
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgeometries %llu %llu",mTablePrefix.c_str(),startId,endId));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    if (reply->type == REDIS_REPLY_ARRAY)
+    {
+      for (uint t = 0; t < reply->elements; t++)
+      {
+        uint genId = getCsvInt64Field(reply->element[t]->str,0);
+        if (generationIdList.find(genId) != generationIdList.end())
+        {
+          T::GeometryInfo *geometryInfo = new T::GeometryInfo();
+          geometryInfo->setCsv(reply->element[t]->str);
+          geometryInfoList.addGeometryInfo(geometryInfo);
+        }
+      }
+    }
+    freeReplyObject(reply);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int RedisImplementation::deleteContent(uint fileId,uint messageIndex)
 {
   FUNCTION_TRACE
@@ -6697,6 +7644,36 @@ int RedisImplementation::deleteContentByGenerationId(uint generationId)
     {
       T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
       deleteContent(contentInfo->mFileId,contentInfo->mMessageIndex);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::deleteContentByGeometry(uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::ContentInfoList contentInfoList;
+    getContentByGenerationId(generationId,0,0,1000000000,contentInfoList);
+    uint len = contentInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
+      if (contentInfo->mGeometryId == geometryId  &&  contentInfo->mFmiParameterLevelId == levelId)
+        deleteContent(contentInfo->mFileId,contentInfo->mMessageIndex);
     }
 
     return Result::OK;

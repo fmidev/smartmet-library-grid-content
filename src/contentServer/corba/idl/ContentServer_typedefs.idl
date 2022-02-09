@@ -107,6 +107,24 @@ typedef sequence<CorbaEventInfo> CorbaEventInfoList;
 
 
 
+struct CorbaGeometryInfo
+{
+  unsigned long      generationId;
+  long               geometryId;
+  short              levelId;
+  unsigned long      producerId;
+  unsigned long      flags;
+  unsigned long      sourceId;
+  long long          modificationTime;
+  long long          deletionTime;
+  octet              status;
+};
+
+typedef sequence<CorbaGeometryInfo> CorbaGeometryInfoList;
+
+
+
+
 struct CorbaGenerationInfo
 {
   unsigned long      generationId;
