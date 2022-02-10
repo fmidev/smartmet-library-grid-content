@@ -2279,7 +2279,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
               //printf("SEARCH RESULT %s %u %u %u %u\n",producerStr.c_str(),producerId,valueList->mValueList.getLength(),parameterFlags,valueList->mFlags);
               bool concat = false;
-              if (producerId == 0 && (valueList->mValueList.getLength() == 0 && (valueList->mFlags & ParameterValues::Flags::DataAvailable) == 0))
+              if (producerId == 0 && producersPtr->size() > 1 && (valueList->mValueList.getLength() == 0 && (valueList->mFlags & ParameterValues::Flags::DataAvailable) == 0))
               {
                 //printf("CONCAT SEARCH %s\n",producerStr.c_str());
                 auto vec = mProducerConcatMap.find(producerStr);
@@ -2301,8 +2301,16 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
                   tmpGeomIdList.clear();
                   producersPtr = p1;
                   geomIdListPtr = p2;
-                  //if (valueList->mValueList.getLength() > 0 || ((parameterFlags & QueryParameter::Flags::NoReturnValues) != 0  &&  (valueList->mFlags & ParameterValues::Flags::DataAvailable) != 0))
-                    concat = true;
+                  /*
+                  if ((qParam->mLocationType == QueryParameter::LocationType::Polygon || qParam->mLocationType == QueryParameter::LocationType::Circle || qParam->mLocationType == QueryParameter::LocationType::Path) &&
+                      (valueList->mValueList.getLength() > 0 || ((parameterFlags & QueryParameter::Flags::NoReturnValues) != 0  &&  (valueList->mFlags & ParameterValues::Flags::DataAvailable) != 0)))
+                  {
+                    producerId = valueList->mProducerId;
+                    globalGeometryId = valueList->mGeometryId;
+                  }
+                  */
+
+                  concat = true;
                 }
               }
 
@@ -6331,14 +6339,31 @@ void ServiceImplementation::getGridValues(
 
       PRINT_DATA(mDebugLog, "  - Producer and Geometry : %s:%d\n", producerName.c_str(), producerGeometryId);
 
-      // Checking if the current geometry can be found from the acceptable geometry list
-
       if (geometryIdList.find(producerGeometryId) != geometryIdList.end())
       {
+        bool producerOk = true;
+        if (producers.size() > 1 && (locationType == QueryParameter::LocationType::Polygon || locationType == QueryParameter::LocationType::Circle || locationType == QueryParameter::LocationType::Path))
+        {
+          // We do not accept data concatenation if the data is requested from an area and
+          // if geometries are different.
+
+          std::string pStr = toUpperString(producerName) + ":" + std::to_string(producerGeometryId);
+
+          auto rec = mProducerConcatMap.find(pStr);
+          if (rec != mProducerConcatMap.end()  &&  rec->second.size() > 0)
+          {
+            for (auto gg = rec->second.begin(); gg != rec->second.end() && producerOk; ++gg)
+            {
+              if (producerGeometryId != gg->second)
+                producerOk = false;
+            }
+          }
+        }
+
         // The current producer supports a geometry where the current areaCoordinates can be found.
 
         T::ProducerInfo producerInfo;
-        if (getProducerInfoByName(producerName, producerInfo) && (producerId == 0 || producerInfo.mProducerId == producerId))
+        if (producerOk &&  getProducerInfoByName(producerName, producerInfo) && (producerId == 0 || producerInfo.mProducerId == producerId))
         {
           PRINT_DATA(mDebugLog, "  - The producer and the geometry are acceptable!\n");
 
@@ -6998,7 +7023,14 @@ void ServiceImplementation::getGridValues(
         }
         else
         {
-          PRINT_DATA(mDebugLog, "  - Not a valid producer '%s'!\n", producerName.c_str());
+          if (!producerOk)
+          {
+            PRINT_DATA(mDebugLog, "  - Not a valid producer for area search '%s'!\n", producerName.c_str());
+          }
+          else
+          {
+            PRINT_DATA(mDebugLog, "  - Not a valid producer '%s'!\n", producerName.c_str());
+          }
         }
       }
       else
@@ -7133,8 +7165,27 @@ void ServiceImplementation::getGridValues(
       {
         // The current producer supports a geometry where the current areaCoordinates can be found.
 
+        bool producerOk = true;
+        if (producers.size() > 1 && (locationType == QueryParameter::LocationType::Polygon || locationType == QueryParameter::LocationType::Circle || locationType == QueryParameter::LocationType::Path))
+        {
+          // We do not accept data concatenation if the data is requested from an area and
+          // if geometries are different.
+
+          std::string pStr = toUpperString(producerName) + ":" + std::to_string(producerGeometryId);
+
+          auto rec = mProducerConcatMap.find(pStr);
+          if (rec != mProducerConcatMap.end()  &&  rec->second.size() > 0)
+          {
+            for (auto gg = rec->second.begin(); gg != rec->second.end() && producerOk; ++gg)
+            {
+              if (producerGeometryId != gg->second)
+                producerOk = false;
+            }
+          }
+        }
+
         T::ProducerInfo producerInfo;
-        if (getProducerInfoByName(producerName, producerInfo) && (producerId == 0 || producerInfo.mProducerId == producerId))
+        if (producerOk &&  getProducerInfoByName(producerName, producerInfo) && (producerId == 0 || producerInfo.mProducerId == producerId))
         {
           PRINT_DATA(mDebugLog, "  - The producer and the geometry are acceptable!\n");
 
@@ -7394,55 +7445,22 @@ void ServiceImplementation::getGridValues(
                       }
                     }
 
-                    auto vec = mProducerConcatMap.find(producerStr);
-                    if (vec != mProducerConcatMap.end()  &&  vec->second.size() > 0)
+                    if (producers.size() > 1)
                     {
-                      printf("CONCAT SEARCH %s\n",vec->second[0].first.c_str());
-                      std::set<T::GeometryId> tmpGeomIdList;
-                      for (auto gg = vec->second.begin(); gg != vec->second.end(); ++gg)
-                        tmpGeomIdList.insert(gg->second);
+                      auto rec = mProducerConcatMap.find(producerStr);
+                      if (rec != mProducerConcatMap.end()  &&  rec->second.size() > 0)
+                      {
+                        // printf("CONCAT SEARCH %s\n",rec->second[0].first.c_str());
+                        std::set<T::GeometryId> tmpGeomIdList;
 
-                      getGridValues(queryType,vec->second, tmpGeomIdList, producerId, analysisTime, generationFlags, acceptNotReadyGenerations, parameterKey, parameterHash, paramLevelId, paramLevel, forecastType,
-                          forecastNumber,queryFlags,parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, a_lastTime+1,endTime, timesteps, timestepSizeInMinutes, locationType,
-                          coordinateType, areaCoordinates, contourLowValues, contourHighValues, queryAttributeList,radius,maxValues,precision,valueList,coordinates,producerStr);
+                        for (auto gg = rec->second.begin(); gg != rec->second.end(); ++gg)
+                          tmpGeomIdList.insert(gg->second);
+
+                        getGridValues(queryType,rec->second, tmpGeomIdList, producerId, analysisTime, generationFlags, acceptNotReadyGenerations, parameterKey, parameterHash, paramLevelId, paramLevel, forecastType,
+                            forecastNumber,queryFlags,parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, a_lastTime+1,endTime, timesteps, timestepSizeInMinutes, locationType,
+                            coordinateType, areaCoordinates, contourLowValues, contourHighValues, queryAttributeList,radius,maxValues,precision,valueList,coordinates,producerStr);
+                      }
                     }
-                    /*
-                    void ServiceImplementation::getGridValues(
-                        uchar queryType,
-                        Producer_vec& producers,
-                        std::set<T::GeometryId>& geometryIdList,
-                        uint producerId,
-                        const std::string& analysisTime,
-                        ulonglong generationFlags,
-                        bool acceptNotReadyGenerations,
-                        const std::string& parameterKey,
-                        std::size_t parameterHash,
-                        T::ParamLevelId paramLevelId,
-                        T::ParamLevel paramLevel,
-                        T::ForecastType forecastType,
-                        T::ForecastNumber forecastNumber,
-                        uint queryFlags,
-                        uint parameterFlags,
-                        short areaInterpolationMethod,
-                        short timeInterpolationMethod,
-                        short levelInterpolationMethod,
-                        time_t startTime,
-                        time_t endTime,
-                        uint timesteps,
-                        uint timestepSizeInMinutes,
-                        uchar locationType,
-                        uchar coordinateType,
-                        T::AreaCoordinates& areaCoordinates,
-                        T::ParamValue_vec& contourLowValues,
-                        T::ParamValue_vec& contourHighValues,
-                        T::AttributeList& queryAttributeList,
-                        double radius,
-                        uint maxValues,
-                        short& precision,
-                        ParameterValues_sptr_vec& valueList,
-                        T::Coordinate_vec& coordinates,
-                        std::string& producerStr)
-*/
                     return;
                   }
                 }
@@ -7460,7 +7478,14 @@ void ServiceImplementation::getGridValues(
         }
         else
         {
-          PRINT_DATA(mDebugLog, "  - Not a valid producer '%s'!\n", producerName.c_str());
+          if (!producerOk)
+          {
+            PRINT_DATA(mDebugLog, "  - Not a valid producer for area search '%s'!\n", producerName.c_str());
+          }
+          else
+          {
+            PRINT_DATA(mDebugLog, "  - Not a valid producer '%s'!\n", producerName.c_str());
+          }
         }
       }
       else
