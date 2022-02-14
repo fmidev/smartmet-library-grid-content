@@ -7096,6 +7096,8 @@ void ServiceImplementation::getGridValues(
       for (auto it = producers.begin(); it != producers.end(); ++it)
         PRINT_DATA(mDebugLog, "    * %s:%d\n", it->first.c_str(), it->second);
       PRINT_DATA(mDebugLog, "  - geometryIdList           : %lu items\n", geometryIdList.size());
+      for (auto it = geometryIdList.begin(); it != geometryIdList.end(); ++it)
+        PRINT_DATA(mDebugLog, "    * %d\n",* it);
       PRINT_DATA(mDebugLog, "  - producerId               : %u\n", producerId);
       PRINT_DATA(mDebugLog, "  - analysisTime             : %s\n", analysisTime.c_str());
       PRINT_DATA(mDebugLog, "  - generationFlags          : %llu\n", generationFlags);
@@ -7445,6 +7447,8 @@ void ServiceImplementation::getGridValues(
                       }
                     }
 
+                    PRINT_DATA(mDebugLog, "    - Value list size = %ld\n\n",valueList.size());
+
                     if (producers.size() > 1)
                     {
                       auto rec = mProducerConcatMap.find(producerStr);
@@ -7456,7 +7460,7 @@ void ServiceImplementation::getGridValues(
                         for (auto gg = rec->second.begin(); gg != rec->second.end(); ++gg)
                           tmpGeomIdList.insert(gg->second);
 
-                        getGridValues(queryType,rec->second, tmpGeomIdList, producerId, analysisTime, generationFlags, acceptNotReadyGenerations, parameterKey, parameterHash, paramLevelId, paramLevel, forecastType,
+                        getGridValues(queryType,rec->second, tmpGeomIdList, 0, analysisTime, generationFlags, acceptNotReadyGenerations, parameterKey, parameterHash, paramLevelId, paramLevel, forecastType,
                             forecastNumber,queryFlags,parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, a_lastTime+1,endTime, timesteps, timestepSizeInMinutes, locationType,
                             coordinateType, areaCoordinates, contourLowValues, contourHighValues, queryAttributeList,radius,maxValues,precision,valueList,coordinates,producerStr);
                       }
