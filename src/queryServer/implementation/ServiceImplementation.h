@@ -83,7 +83,8 @@ class ServiceImplementation : public ServiceInterface
                        string_vec& aliasFiles,
                        const std::string& producerFile,
                        string_vec& producerAliasFiles,
-                       string_vec& luaFileNames);
+                       string_vec& luaFileNames,
+                       bool checkGeometryStatus);
 
      virtual void   shutdown();
      virtual void   setDem(boost::shared_ptr<Fmi::DEM> dem);
@@ -579,7 +580,8 @@ class ServiceImplementation : public ServiceInterface
 
      void            getGenerationTimeRangeByGenerationId(uint generationId,time_t& startTime,time_t& endTime);
 
-     bool            isValidGeometry(int geometryId,std::vector<std::vector<T::Coordinate>>& polygonPath);
+     bool            isGeometryReady(uint generationId,int geometryId,T::ParamLevelId levelId);
+     bool            isGeometryValid(int geometryId,std::vector<std::vector<T::Coordinate>>& polygonPath);
 
 
   private:
@@ -640,11 +642,13 @@ class ServiceImplementation : public ServiceInterface
 
      pthread_t                  mThread;
      bool                       mShutdownRequested;
+     bool                       mCheckGeometryStatus;
 
      std::map<std::string,uint>        mOperationNames;
      Functions::FunctionCollection     mFunctionCollection;
      boost::shared_ptr<Fmi::LandCover> mLandCover;
      boost::shared_ptr<Fmi::DEM>       mDem;
+     std::set<ulonglong>               mReadyGeometryList;
 
      ProducerGenarationListCache       mProducerGenerationListCache;
      ModificationLock                  mProducerGenerationListCacheModificationLock;

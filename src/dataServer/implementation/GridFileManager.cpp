@@ -301,6 +301,33 @@ void GridFileManager::deleteFilesByCheckTime(time_t checkTime)
 
 
 
+void GridFileManager::deleteFilesByDeletionTime(time_t deletionTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+
+    std::vector<uint> idList;
+
+    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
+    {
+      if (it->second->getDeletionTime() != 0  &&  it->second->getDeletionTime() < deletionTime  &&  !it->second->isVirtual())
+        idList.emplace_back(it->first);
+    }
+
+    deleteFilesNoLock(idList,true);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void GridFileManager::deleteVirtualFiles()
 {
   FUNCTION_TRACE

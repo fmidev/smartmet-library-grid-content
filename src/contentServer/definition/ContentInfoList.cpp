@@ -2474,6 +2474,76 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint producerId,uint 
 
 
 
+void ContentInfoList::getContentParamKeyListByGenerationAndGeometryId(uint producerId,uint generationId,T::GeometryId geometeryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    paramKeyList.clear();
+
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
+
+    AutoReadLock lock(mModificationLockPtr);
+    time_t timeLimit = time(nullptr) + 120;
+
+    ContentInfo searchInfo;
+    searchInfo.mProducerId = producerId;
+    searchInfo.mGenerationId = generationId;
+
+    int idx = 0;
+    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time)
+      idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
+
+    for (uint t=idx; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&
+          info->mGenerationId == generationId && info->mGeometryId == geometeryId  &&
+          (info->mDeletionTime == 0 || info->mDeletionTime > timeLimit))
+      {
+        switch (parameterKeyType)
+        {
+          case T::ParamKeyTypeValue::FMI_ID:
+            if (info->mFmiParameterId > 0)
+              paramKeyList.insert(std::to_string(info->mFmiParameterId));
+            break;
+
+          case T::ParamKeyTypeValue::FMI_NAME:
+            if (info->getFmiParameterName()[0] != '\0')
+            {
+              paramKeyList.insert(info->getFmiParameterName());
+            }
+            else
+            if (info->mFmiParameterId > 0)
+            {
+              std::string id = "FMI-" + std::to_string(info->mFmiParameterId);
+              paramKeyList.insert(id);
+            }
+            break;
+
+          default:
+            return;
+        }
+      }
+      if ((mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time ||
+          mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time) &&
+          info != nullptr && (info->mProducerId > producerId || (info->mProducerId == producerId && info->mGenerationId > generationId)))
+        return;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ContentInfoList::getContentGeometryIdListByGenerationId(uint producerId,uint generationId,std::set<T::GeometryId>& geometryIdList)
 {
   FUNCTION_TRACE

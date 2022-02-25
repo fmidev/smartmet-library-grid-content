@@ -123,6 +123,7 @@ class ContentInfoList
     void                getContentGeometryIdList(std::set<T::GeometryId>& geometryIdList);
     void                getContentGeometryIdListByGenerationId(uint producerId,uint generationId,std::set<T::GeometryId>& geometryIdList);
     void                getContentParamKeyListByGenerationId(uint producerId,uint generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList);
+    void                getContentParamKeyListByGenerationAndGeometryId(uint producerId,uint generationId,T::GeometryId geometeryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList);
     void                getGenerationIdListByGeometryId(T::GeometryId geometryId,std::set<uint>& generationIdList);
 
     void                getForecastTimeList(std::set<std::string>& forecastTimeList);

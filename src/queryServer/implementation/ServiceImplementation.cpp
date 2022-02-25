@@ -77,6 +77,7 @@ ServiceImplementation::ServiceImplementation()
     mContentCache_records = 0;
     mContentSearchCache_maxRecords = 500000;
     mContentSearchCache_records = 0;
+    mCheckGeometryStatus = false;
 
     GRID::Operation::getOperatorNames(mOperationNames);
   }
@@ -115,13 +116,16 @@ void ServiceImplementation::init(
     string_vec& aliasFiles,
     const std::string& producerFile,
     string_vec& producerAliasFiles,
-    string_vec& luaFiles)
+    string_vec& luaFiles,
+    bool checkGeometryStatus)
 {
   FUNCTION_TRACE
   try
   {
     mContentServerPtr = contentServerPtr;
     mDataServerPtr = dataServerPtr;
+
+    mCheckGeometryStatus = checkGeometryStatus;
 
     mGridConfigFile = gridConfigFile;
     SmartMet::Identification::gridDef.init(mGridConfigFile.c_str());
@@ -1130,7 +1134,7 @@ bool ServiceImplementation::getAlias(const std::string& name, std::string& alias
 
 
 
-bool ServiceImplementation::isValidGeometry(int geometryId,std::vector<std::vector<T::Coordinate>>& polygonPath)
+bool ServiceImplementation::isGeometryValid(int geometryId,std::vector<std::vector<T::Coordinate>>& polygonPath)
 {
   try
   {
@@ -1145,6 +1149,45 @@ bool ServiceImplementation::isValidGeometry(int geometryId,std::vector<std::vect
       }
     }
     return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+bool ServiceImplementation::isGeometryReady(uint generationId,int geometryId,T::ParamLevelId levelId)
+{
+  try
+  {
+    if (!mCheckGeometryStatus)
+      return true;
+
+    ulonglong key = ((ulonglong)generationId << 32) + ((ulonglong)geometryId << 8) + levelId;
+
+    {
+      AutoReadLock readLock(&mGenerationInfoList_modificationLock);
+      if (mReadyGeometryList.find(key) != mReadyGeometryList.end())
+        return true;
+    }
+
+    T::GeometryInfo geometryInfo;
+    int result = mContentServerPtr->getGeometryInfoById(0,generationId,geometryId,levelId,geometryInfo);
+    if (result == 0  &&  geometryInfo.mStatus == T::GeometryInfo::Status::Ready)
+    {
+      AutoWriteLock writeLock(&mGenerationInfoList_modificationLock);
+      if (mReadyGeometryList.size() > 100000)
+        mReadyGeometryList.clear();
+
+      mReadyGeometryList.insert(key);
+      return true;
+    }
+
+    return false;
   }
   catch (...)
   {
@@ -1812,7 +1855,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
           std::size_t paramHash = 0;
           boost::hash_combine(paramHash,paramName);
 
-          if (qParam->mAlternativeParamId != 0  &&  geometryId > 0 && !isValidGeometry(geometryId,query.mAreaCoordinates))
+          if (qParam->mAlternativeParamId != 0  &&  geometryId > 0 && !isGeometryValid(geometryId,query.mAreaCoordinates))
           {
             useAlternative = true;
             //if (alternativeRequired.find(qParam->mAlternativeParamId) == alternativeRequired.end())
@@ -2140,7 +2183,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
         std::size_t paramHash = 0;
         boost::hash_combine(paramHash,paramName);
 
-        if (qParam->mAlternativeParamId != 0  &&  geometryId > 0 && !isValidGeometry(geometryId,query.mAreaCoordinates))
+        if (qParam->mAlternativeParamId != 0  &&  geometryId > 0 && !isGeometryValid(geometryId,query.mAreaCoordinates))
         {
           useAlternative = true;
           alternativeRequired.insert(qParam->mAlternativeParamId);
@@ -6369,7 +6412,7 @@ void ServiceImplementation::getGridValues(
 
           // Reading generations supported by the current producer.
 
-          auto cacheEntry = getGenerationInfoListByProducerId(producerInfo.mProducerId,acceptNotReadyGenerations);
+          auto cacheEntry = getGenerationInfoListByProducerId(producerInfo.mProducerId,true);
 
           uint gLen = cacheEntry->generationInfoList->getLength();
           if (gLen == 0)
@@ -6503,8 +6546,16 @@ void ServiceImplementation::getGridValues(
               if (generationInfo == nullptr || (generationInfo != nullptr && generationInfo->mDeletionTime > 0 && generationInfo->mDeletionTime < requiredAccessTime))
                 generationValid = false;
 
+              if (generationInfo != nullptr  &&  !acceptNotReadyGenerations)
+              {
+                // Checking if the geometry is ready.
+                if (!isGeometryReady(generationInfo->mGenerationId,producerGeometryId,0))
+                  generationValid = false;
+              }
+
               if (generationInfo != nullptr  &&  !climatologicalMappings  &&  producerId != 0)
               {
+                // Checking if the requested forecast time is outside of the generation's time range.
                 time_t startTime = 0;
                 time_t endTime = 0;
 
@@ -7088,6 +7139,12 @@ void ServiceImplementation::getGridValues(
   FUNCTION_TRACE
   try
   {
+
+    //printf("  - producers                : %lu items\n", producers.size());
+    //for (auto it = producers.begin(); it != producers.end(); ++it)
+    //  printf("    * %s:%d\n", it->first.c_str(), it->second);
+
+
     if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
     {
       PRINT_DATA(mDebugLog, "\nMETHOD getGridValues()\n");
@@ -7193,7 +7250,7 @@ void ServiceImplementation::getGridValues(
 
           // Reading generations supported by the current producer.
 
-          auto cacheEntry = getGenerationInfoListByProducerId(producerInfo.mProducerId,acceptNotReadyGenerations);
+          auto cacheEntry = getGenerationInfoListByProducerId(producerInfo.mProducerId,true);
           uint gLen = cacheEntry->generationInfoList->getLength();
 
           if (gLen > 0)
@@ -7454,11 +7511,16 @@ void ServiceImplementation::getGridValues(
                       auto rec = mProducerConcatMap.find(producerStr);
                       if (rec != mProducerConcatMap.end()  &&  rec->second.size() > 0)
                       {
-                        // printf("CONCAT SEARCH %s\n",rec->second[0].first.c_str());
+                        //printf("CONCAT SEARCH %s  %s\n",producerStr.c_str(),rec->second[0].first.c_str());
                         std::set<T::GeometryId> tmpGeomIdList;
 
                         for (auto gg = rec->second.begin(); gg != rec->second.end(); ++gg)
+                        {
+                          //printf("  ** SEARCH %ld %d\n",rec->second.size(),gg->second);
                           tmpGeomIdList.insert(gg->second);
+                        }
+
+                        producerStr = "";
 
                         getGridValues(queryType,rec->second, tmpGeomIdList, 0, analysisTime, generationFlags, acceptNotReadyGenerations, parameterKey, parameterHash, paramLevelId, paramLevel, forecastType,
                             forecastNumber,queryFlags,parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, a_lastTime+1,endTime, timesteps, timestepSizeInMinutes, locationType,
