@@ -3889,6 +3889,45 @@ int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId ses
 
 
 
+int ClientImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getContentParamKeyListByGenerationAndGeometryId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("generationId",generationId);
+    request.addLine("geometryId",geometryId);
+    request.addLine("parameterKeyType",(unsigned char)parameterKeyType);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      string_vec lines;
+      uint len = response.getLinesByKey("paramKey",lines);
+      for (uint t=0; t<len; t++)
+      {
+        paramKeyList.insert(lines[t]);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   try

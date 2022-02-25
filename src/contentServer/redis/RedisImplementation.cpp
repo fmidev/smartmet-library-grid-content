@@ -5489,6 +5489,39 @@ int RedisImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
 
 
 
+int RedisImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationById(generationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    paramKeyList.clear();
+
+    T::ContentInfoList contentInfoList;
+    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,10000000,contentInfoList);
+    contentInfoList.getContentParamKeyListByGenerationAndGeometryId(generationInfo.mProducerId,generationId,geometryId,parameterKeyType,paramKeyList);
+
+    return res;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
 int RedisImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE

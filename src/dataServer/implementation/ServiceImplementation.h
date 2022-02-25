@@ -196,6 +196,7 @@ class ServiceImplementation : public ServiceInterface
      time_t                           mFileCleanup_age;
      time_t                           mFileCleanup_checkInterval;
      time_t                           mFileCleanup_time;
+     time_t                           mDeletedFileCleanup_time;
 };
 
 

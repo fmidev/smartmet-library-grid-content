@@ -729,6 +729,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getContentParamKeyListByGenerationAndGeometryId") == 0)
+    {
+      getContentParamKeyListByGenerationAndGeometryId(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"getContentTimeListByGenerationId") == 0)
     {
       getContentTimeListByGenerationId(request,response);
@@ -6764,6 +6770,70 @@ void ServerInterface::getContentParamKeyListByGenerationId(T::RequestMessage& re
     std::set<std::string> paramKeyList;
 
     int result = mService->getContentParamKeyListByGenerationId(sessionId,generationId,parameterKeyType,paramKeyList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      for (auto it=paramKeyList.begin(); it!=paramKeyList.end(); ++it)
+      {
+        response.addLine("paramKey",*it);
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ServerInterface::getContentParamKeyListByGenerationAndGeometryId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint generationId = 0;
+    if (!request.getLineByKey("generationId",generationId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    uint geometryId = 0;
+    if (!request.getLineByKey("geometryId",geometryId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: geometryId");
+      return;
+    }
+
+    unsigned char parameterKeyType = 0;
+    if (!request.getLineByKey("parameterKeyType",parameterKeyType))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: parameterKeyType");
+      return;
+    }
+
+    std::set<std::string> paramKeyList;
+
+    int result = mService->getContentParamKeyListByGenerationAndGeometryId(sessionId,generationId,geometryId,parameterKeyType,paramKeyList);
 
     response.addLine("result",result);
     if (result == Result::OK)

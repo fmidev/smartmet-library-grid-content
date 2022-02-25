@@ -2785,6 +2785,30 @@ int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId ses
 
 
 
+int ClientImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaStringList_var corbaParamKeyList;
+
+    int result = mService->getContentParamKeyListByGenerationAndGeometryId(sessionId,generationId,geometryId,(unsigned char)parameterKeyType,corbaParamKeyList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaParamKeyList,paramKeyList);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
 int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
 {
   try

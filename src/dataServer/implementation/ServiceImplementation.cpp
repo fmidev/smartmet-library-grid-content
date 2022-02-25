@@ -82,7 +82,7 @@ ServiceImplementation::ServiceImplementation()
     mFileCleanup_age = 60;
     mFileCleanup_checkInterval = 60;
     mFileCleanup_time = 0;
-
+    mDeletedFileCleanup_time = 0;
   }
   catch (...)
   {
@@ -317,7 +317,7 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
         if (deletionTime == 0)
           return gridFile;
 
-        if ((time(nullptr) + 120) > deletionTime)
+        if ((time(nullptr) + 180) > deletionTime)
         {
           // The grid file will be deleted soon. We should not access it anymore.
           return nullptr;
@@ -334,14 +334,12 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
     // to the contentServer then we should try to add it to the grid storage.
 
     T::FileInfo fileInfo;
-    T::ContentInfoList contentList;
 
-    if (mContentServer->getFileInfoById(mServerSessionId,fileId,fileInfo) == 0 &&
-        mContentServer->getContentListByFileId(mServerSessionId,fileId,contentList) == 0)
+    if (mContentServer->getFileInfoById(mServerSessionId,fileId,fileInfo) == 0)
     {
       if (fileInfo.mDeletionTime != 0)
       {
-        if ((time(nullptr) + 120) > fileInfo.mDeletionTime)
+        if ((time(nullptr) + 180) > fileInfo.mDeletionTime)
         {
           // The grid file will be deleted soon. We should not access it anymore.
           return nullptr;
@@ -350,11 +348,13 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
 
       if (getFileSize(fileInfo.mName.c_str()) > 0)
       {
-        mContentServer->getContentListByFileId(mServerSessionId,fileId,contentList);
-
-        addFile(fileInfo,contentList);
-        gridFile = mGridFileManager.getFileById(fileId);
-        gridFile->setAccessTime(time(nullptr));
+        T::ContentInfoList contentList;
+        if (mContentServer->getContentListByFileId(mServerSessionId,fileId,contentList) == 0)
+        {
+          addFile(fileInfo,contentList);
+          gridFile = mGridFileManager.getFileById(fileId);
+          gridFile->setAccessTime(time(nullptr));
+        }
       }
     }
     return gridFile;
@@ -5181,6 +5181,12 @@ void ServiceImplementation::processEvents()
     {
       mFileCleanup_time = currentTime;
       mGridFileManager.deleteFilesByAccessTime(currentTime - mFileCleanup_age);
+    }
+
+    if ((currentTime - mDeletedFileCleanup_time) > 120)
+    {
+      mGridFileManager.deleteFilesByDeletionTime(currentTime-120);
+      mDeletedFileCleanup_time = currentTime;
     }
 
 

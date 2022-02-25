@@ -3224,6 +3224,32 @@ int ServiceInterface::getContentParamKeyListByGenerationId(T::SessionId sessionI
 
 
 
+
+int ServiceInterface::getContentParamKeyListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _getContentParamKeyListByGenerationAndGeometryId(sessionId,generationId,geometryId,parameterKeyType,paramKeyList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,paramKey[%lu]);result %d;time %f;",__FUNCTION__,sessionId,generationId,parameterKeyType,paramKeyList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
@@ -4640,6 +4666,15 @@ int ServiceInterface::_getContentParamListByGenerationId(T::SessionId sessionId,
 
 
 int ServiceInterface::_getContentParamKeyListByGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_getContentParamKeyListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
