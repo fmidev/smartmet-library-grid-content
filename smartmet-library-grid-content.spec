@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 22.2.14
+Version: 22.2.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -21,8 +21,8 @@ BuildRequires: make
 BuildRequires: omniORB-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 22.1.24
-BuildRequires: smartmet-library-grid-files-devel >= 22.2.9
-BuildRequires: smartmet-library-macgyver-devel >= 22.1.21
+BuildRequires: smartmet-library-grid-files-devel >= 22.2.28
+BuildRequires: smartmet-library-macgyver-devel >= 22.2.24
 BuildRequires: smartmet-library-spine-devel >= 22.2.10
 Requires: boost169-date-time
 Requires: hiredis-devel
@@ -30,8 +30,8 @@ Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
 Requires: smartmet-library-gis >= 22.1.24
-Requires: smartmet-library-grid-files >= 22.2.9
-Requires: smartmet-library-macgyver >= 22.1.21
+Requires: smartmet-library-grid-files >= 22.2.28
+Requires: smartmet-library-macgyver >= 22.2.24
 Requires: smartmet-library-spine >= 22.2.10
 Provides: %{SPECNAME}
 
@@ -65,10 +65,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 22.1.21
+Requires: smartmet-library-macgyver-devel >= 22.2.24
 Requires: smartmet-library-gis-devel >= 22.1.24
 Requires: smartmet-library-spine-devel >= 22.2.10
-Requires: smartmet-library-grid-files-devel >= 22.2.9
+Requires: smartmet-library-grid-files-devel >= 22.2.28
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -78,6 +78,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Feb 28 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.2.28-1.fmi
+- Added geometry status information
 * Mon Feb 14 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.2.14-1.fmi
 - Fixed FeelsLike calculation
 * Thu Feb 10 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.2.10-1.fmi
