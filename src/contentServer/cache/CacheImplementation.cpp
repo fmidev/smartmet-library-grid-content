@@ -5090,11 +5090,14 @@ int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
       if (generationInfo == nullptr)
         return Result::UNKNOWN_GENERATION_ID;
 
+      AutoReadLock cacheLock(&mCacheModificationLock);
       auto it = mContentTimeRangeCache.find(generationId);
       if (it == mContentTimeRangeCache.end())
       {
         ssp->mContentInfoList[1].getForecastTimeRangeByGenerationId(generationInfo->mProducerId,generationId,startTime,endTime);
+        mCacheModificationLock.writeLockWhenInsideReadLock();
         mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
+        mCacheModificationLock.writeUnlock();
       }
       else
       {
@@ -5108,11 +5111,14 @@ int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
       if (generationInfo == nullptr)
         return Result::UNKNOWN_GENERATION_ID;
 
+      AutoReadLock cacheLock(&mCacheModificationLock);
       auto it = mContentTimeRangeCache.find(generationId);
       if (it == mContentTimeRangeCache.end())
       {
         ssp->mContentInfoList[1].getForecastTimeRangeByGenerationId(generationInfo->mProducerId,generationId,startTime,endTime);
+        mCacheModificationLock.writeLockWhenInsideReadLock();
         mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
+        mCacheModificationLock.writeUnlock();
       }
       else
       {
