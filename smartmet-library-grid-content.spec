@@ -4,7 +4,7 @@
 Summary: grid file handling library
 Name: %{SPECNAME}
 Version: 22.3.1
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -78,6 +78,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Mar  1 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.3.1-2.fmi
+- Added cache cleaners
 * Tue Mar  1 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.3.1-1.fmi
 - Time cache thread safety fix
 * Mon Feb 28 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.2.28-1.fmi
