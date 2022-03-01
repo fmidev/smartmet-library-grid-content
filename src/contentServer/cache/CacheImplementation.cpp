@@ -5096,6 +5096,8 @@ int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
       {
         ssp->mContentInfoList[1].getForecastTimeRangeByGenerationId(generationInfo->mProducerId,generationId,startTime,endTime);
         mCacheModificationLock.writeLockWhenInsideReadLock();
+        if (mContentTimeRangeCache.size() > 100000)
+          mContentTimeRangeCache.clear();
         mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
         mCacheModificationLock.writeUnlock();
       }
@@ -5117,6 +5119,8 @@ int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
       {
         ssp->mContentInfoList[1].getForecastTimeRangeByGenerationId(generationInfo->mProducerId,generationId,startTime,endTime);
         mCacheModificationLock.writeLockWhenInsideReadLock();
+        if (mContentTimeRangeCache.size() > 100000)
+          mContentTimeRangeCache.clear();
         mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
         mCacheModificationLock.writeUnlock();
       }
