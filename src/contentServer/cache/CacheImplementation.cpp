@@ -5025,11 +5025,21 @@ int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
       if (generationInfo == nullptr)
         return Result::UNKNOWN_GENERATION_ID;
 
+      AutoReadLock cacheLock(&mCacheModificationLock);
       auto it = mContentTimeCache.find(generationId);
       if (it == mContentTimeCache.end())
       {
         ssp->mContentInfoList[1].getForecastTimeListByGenerationId(generationInfo->mProducerId,generationId,contentTimeList);
-        mContentTimeCache.insert(std::pair<uint,std::set<std::string>>(generationId,contentTimeList));
+
+        if (generationInfo->mStatus == T::GenerationInfo::Status::Ready)
+        {
+          mCacheModificationLock.writeLockWhenInsideReadLock();
+          if (mContentTimeCache.size() > 100000)
+            mContentTimeCache.clear();
+
+          mContentTimeCache.insert(std::pair<uint,std::set<std::string>>(generationId,contentTimeList));
+          mCacheModificationLock.writeUnlock();
+        }
       }
       else
       {
@@ -5042,11 +5052,21 @@ int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
       if (generationInfo == nullptr)
         return Result::UNKNOWN_GENERATION_ID;
 
+      AutoReadLock cacheLock(&mCacheModificationLock);
       auto it = mContentTimeCache.find(generationId);
       if (it == mContentTimeCache.end())
       {
         ssp->mContentInfoList[1].getForecastTimeListByGenerationId(generationInfo->mProducerId,generationId,contentTimeList);
-        mContentTimeCache.insert(std::pair<uint,std::set<std::string>>(generationId,contentTimeList));
+
+        if (generationInfo->mStatus == T::GenerationInfo::Status::Ready)
+        {
+          mCacheModificationLock.writeLockWhenInsideReadLock();
+          if (mContentTimeCache.size() > 100000)
+            mContentTimeCache.clear();
+
+          mContentTimeCache.insert(std::pair<uint,std::set<std::string>>(generationId,contentTimeList));
+          mCacheModificationLock.writeUnlock();
+        }
       }
       else
       {
@@ -5095,11 +5115,16 @@ int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
       if (it == mContentTimeRangeCache.end())
       {
         ssp->mContentInfoList[1].getForecastTimeRangeByGenerationId(generationInfo->mProducerId,generationId,startTime,endTime);
-        mCacheModificationLock.writeLockWhenInsideReadLock();
-        if (mContentTimeRangeCache.size() > 100000)
-          mContentTimeRangeCache.clear();
-        mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
-        mCacheModificationLock.writeUnlock();
+
+        if (generationInfo->mStatus == T::GenerationInfo::Status::Ready)
+        {
+          mCacheModificationLock.writeLockWhenInsideReadLock();
+          if (mContentTimeRangeCache.size() > 100000)
+            mContentTimeRangeCache.clear();
+
+          mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
+          mCacheModificationLock.writeUnlock();
+        }
       }
       else
       {
@@ -5118,11 +5143,16 @@ int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
       if (it == mContentTimeRangeCache.end())
       {
         ssp->mContentInfoList[1].getForecastTimeRangeByGenerationId(generationInfo->mProducerId,generationId,startTime,endTime);
-        mCacheModificationLock.writeLockWhenInsideReadLock();
-        if (mContentTimeRangeCache.size() > 100000)
-          mContentTimeRangeCache.clear();
-        mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
-        mCacheModificationLock.writeUnlock();
+
+        if (generationInfo->mStatus == T::GenerationInfo::Status::Ready)
+        {
+          mCacheModificationLock.writeLockWhenInsideReadLock();
+
+          if (mContentTimeRangeCache.size() > 100000)
+            mContentTimeRangeCache.clear();
+          mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
+          mCacheModificationLock.writeUnlock();
+        }
       }
       else
       {
@@ -5606,9 +5636,14 @@ void CacheImplementation::event_clear(T::EventInfo& eventInfo)
   {
     PRINT_DATA(mDebugLog,"*** Clear event : Deleting all cached information!\n");
 
+    {
+      AutoWriteLock cacheLock(&mCacheModificationLock);
+      mContentTimeCache.clear();
+      mContentTimeRangeCache.clear();
+    }
+
     AutoWriteLock lock(&mModificationLock);
 
-    mContentTimeCache.clear();
     mEventInfoList.clear();
 
     mFileInfoList.clear();
