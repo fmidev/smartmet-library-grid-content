@@ -4003,6 +4003,40 @@ int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId session
 
 
 
+int ClientImplementation::_getContentTimeRangeByProducerAndGenerationId(T::SessionId sessionId,uint producerId,uint generationId,time_t& startTime,time_t& endTime)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getContentTimeRangeByProducerAndGenerationId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("producerId",producerId);
+    request.addLine("generationId",generationId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      startTime = (time_t)response.getLineInt64ValueByKey("startTime");
+      endTime = (time_t)response.getLineInt64ValueByKey("endTime");
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessionId,uint generationId,time_t& startTime,time_t& endTime)
 {
   try

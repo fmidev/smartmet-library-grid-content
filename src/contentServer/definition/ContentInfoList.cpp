@@ -429,6 +429,8 @@ ContentInfoList::~ContentInfoList()
     }
 
     delete[] mArray;
+    mLength = 0;
+    mArray = nullptr;
   }
   catch (...)
   {

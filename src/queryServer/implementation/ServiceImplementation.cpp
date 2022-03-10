@@ -73,11 +73,13 @@ ServiceImplementation::ServiceImplementation()
     mProducerMap_updateTime = 0;
     mShutdownRequested = false;
     mContentServerStartTime = 0;
-    mContentCache_maxRecords = 10000;
+    mContentCache_maxRecords = 500000;
     mContentCache_records = 0;
     mContentSearchCache_maxRecords = 500000;
     mContentSearchCache_records = 0;
     mCheckGeometryStatus = false;
+    mActiveContentCache = 0;
+    mActiveContentSearchCache = 0;
 
     GRID::Operation::getOperatorNames(mOperationNames);
   }
@@ -266,14 +268,14 @@ bool ServiceImplementation::getProducerInfoByName(const std::string& name,T::Pro
 
 
 
-void ServiceImplementation::getGenerationTimeRangeByGenerationId(uint generationId,time_t& startTime,time_t& endTime)
+void ServiceImplementation::getGenerationTimeRangeByProducerAndGenerationId(uint producerId,uint generationId,time_t& startTime,time_t& endTime)
 {
   FUNCTION_TRACE
   try
   {
     startTime = 0;
     endTime = 0;
-    mContentServerPtr->getContentTimeRangeByGenerationId(0,generationId,startTime,endTime);
+    mContentServerPtr->getContentTimeRangeByProducerAndGenerationId(0,producerId,generationId,startTime,endTime);
   }
   catch (...)
   {
@@ -1929,7 +1931,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
             getGridValues(qParam->mType,tmpProducers, geomIdList, producerId, analysisTime, generationFlags, acceptNotReadyGenerations, paramName, paramHash, paramLevelId, paramLevel, forecastType,
                 forecastNumber, queryFlags, parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, startTime, endTime, query.mTimesteps,
                 query.mTimestepSizeInMinutes,qParam->mLocationType, query.mCoordinateType, query.mAreaCoordinates, qParam->mContourLowValues, qParam->mContourHighValues, query.mAttributeList,
-                query.mRadius, query.mMaxParameterValues, qParam->mPrecision, qParam->mValueList,qParam->mCoordinates,producerStr);
+                query.mRadius, query.mMaxParameterValues, qParam->mPrecision, qParam->mValueList,qParam->mCoordinates,producerStr,0);
 
             if (qParam->mValueList.size() > 0 /*|| ((parameterFlags & QueryParameter::Flags::NoReturnValues) != 0  &&  (qParam->mValueList[0].mFlags & ParameterValues::Flags::DataAvailable) != 0)*/)
             {
@@ -2819,52 +2821,55 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
     {
       AutoReadLock readLock(&mContentSearchCache_modificationLock);
-      auto it = mContentSearchCache.find(hash2);
-      if (it != mContentSearchCache.end()  &&  it->second.producerHash == producerHash)
+      auto it = mContentSearchCache[mActiveContentSearchCache].find(hash2);
+      if (it != mContentSearchCache[mActiveContentSearchCache].end()  &&  it->second.producerHash == producerHash)
       {
         contentInfoList = it->second.contentInfoList;
         return Result::OK;
       }
     }
 
-    ContentCacheEntry rec;
-    ContentCacheEntry *entry = &rec;
+    ContentCacheEntry_sptr entry;
+    bool newEntry = false;
 
     {
       AutoReadLock readLock(&mContentCache_modificationLock);
-      auto cc = mContentCache.find(hash);
+      auto cc = mContentCache[mActiveContentCache].find(hash);
       auto cc3 = cc;
 
-      if (cc != mContentCache.end())
+      if (cc != mContentCache[mActiveContentCache].end())
       {
-        entry = &cc->second;
+        entry = cc->second;
       }
       else
       {
-        cc3 = mContentCache.find(hash3);
-        if (cc3 != mContentCache.end())
+        cc3 = mContentCache[mActiveContentCache].find(hash3);
+        if (cc3 != mContentCache[mActiveContentCache].end())
         {
-          entry = &cc3->second;
+          entry = cc3->second;
           hash = hash3;
         }
         else
         {
           // No cache entry available
 
+          entry.reset(new ContentCacheEntry());
+          newEntry = true;
+
           time_t startTime = 0;
           time_t endTime = 0xFFFFFFFF;
 
-          mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,rec.contentInfoList);
+          mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,entry->contentInfoList);
 
           if (entry->contentInfoList.getLength() == 0)
           {
-            mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,0,1000000000,forecastType,forecastNumber,geometryId,startTime,endTime,0,rec.contentInfoList);
+            mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,0,1000000000,forecastType,forecastNumber,geometryId,startTime,endTime,0,entry->contentInfoList);
             if (entry->contentInfoList.getLength() == 0)
               hash = hash3;
           }
 
-          rec.generationId = generationId;
-          rec.producerHash = producerHash;
+          entry->generationId = generationId;
+          entry->producerHash = producerHash;
 
           switch (parameterKeyType)
           {
@@ -2872,16 +2877,17 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
               break;
 
             case T::ParamKeyTypeValue::FMI_NAME:
-              rec.contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
+              entry->contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
               break;
           }
         }
       }
     }
 
-    if (entry->producerHash != producerHash)
+    if (!newEntry && entry->producerHash != producerHash)
     {
       // Producer hash does not match
+      //printf("*** UPDATE \n");
       AutoWriteLock lock(&mContentCache_modificationLock);
       if (entry->producerHash != producerHash)
       {
@@ -2935,42 +2941,66 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       AutoWriteLock lock(&mContentSearchCache_modificationLock);
       if (mContentSearchCache_records >= mContentSearchCache_maxRecords)
       {
-        mContentSearchCache.clear();
+        //printf("CLEAR CONTENT SEARCH CACHE %u %ld %ld\n",mActiveContentSearchCache,mContentSearchCache_records,mContentSearchCache[mActiveContentSearchCache].size());
+        if (mActiveContentSearchCache == 0)
+        {
+          mContentSearchCache[1].clear();
+          mActiveContentSearchCache = 1;
+        }
+        else
+        {
+          mContentSearchCache[0].clear();
+          mActiveContentSearchCache = 0;
+        }
         mContentSearchCache_records = 0;
       }
 
-      auto rr = mContentSearchCache.find(hash2);
-      if (rr == mContentSearchCache.end())
+      auto rr = mContentSearchCache[mActiveContentSearchCache].find(hash2);
+      if (rr == mContentSearchCache[mActiveContentSearchCache].end())
       {
         ContentSearchCacheEntry rc;
         rc.contentInfoList = cList;
         rc.producerHash = producerHash;
         rc.generationId = generationId;
-        mContentSearchCache.insert(std::pair<std::size_t,ContentSearchCacheEntry>(hash2,rc));
+        //printf("INSERT CONTENT SEARCH %ld\n",mContentSearchCache.size());
+        mContentSearchCache[mActiveContentSearchCache].insert(std::pair<std::size_t,ContentSearchCacheEntry>(hash2,rc));
         mContentSearchCache_records += cList->getLength();
-        //printf("SEARCH CACHE %ld %ld  GEN %ld  CONT %ld %ld  PARAM %ld\n",mContentSearchCache.size(),mContentSearchCache_records,mProducerGenerationListCache.size(),mContentCache.size(),mContentCache_records,mParameterMappingCache.size());
+        //if ((mContentSearchCache[mActiveContentSearchCache].size() % 10) == 0)
+          //printf("INSERT CONTENT SEARCH %u %u %ld %ld\n",mActiveContentSearchCache,cList->getLength(),mContentSearchCache_records,mContentSearchCache[mActiveContentSearchCache].size());
       }
       else
       {
+        //printf("SET CONTENT SEARCH %ld\n",mContentSearchCache.size());
         rr->second.contentInfoList = cList;
         rr->second.producerHash = producerHash;
         rr->second.generationId = generationId;
       }
     }
 
-    if (entry == &rec)
+    if (newEntry)
     {
       AutoWriteLock lock(&mContentCache_modificationLock);
       if (mContentCache_records > mContentCache_maxRecords)
       {
-        mContentCache.clear();
+        //printf("CLEAR CONTENT CACHE\n");
+        if (mActiveContentCache == 0)
+        {
+          mContentCache[1].clear();
+          mActiveContentCache = 0;
+        }
+        else
+        {
+          mContentCache[0].clear();
+          mActiveContentCache = 1;
+        }
         mContentCache_records = 0;
       }
 
-      if (mContentCache.find(hash) == mContentCache.end())
+      if (mContentCache[mActiveContentCache].find(hash) == mContentCache[mActiveContentCache].end())
       {
-        mContentCache.insert(std::pair<std::size_t,ContentCacheEntry>(hash,rec));
-        mContentCache_records += rec.contentInfoList.getLength();
+        //printf("INSERT %ld\n",mContentCache.size());
+        mContentCache[mActiveContentCache].insert(std::pair<std::size_t,ContentCacheEntry_sptr>(hash,entry));
+        mContentCache_records += entry->contentInfoList.getLength();
       }
     }
 
@@ -2978,7 +3008,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
   }
   catch (...)
   {
-    mContentCache_modificationLock.writeUnlock();
+    //mContentCache_modificationLock.writeUnlock();
     throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
@@ -3031,7 +3061,7 @@ bool ServiceImplementation::getSpecialValues(
     }
 */
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    time_t fTime = ServiceImplementation::getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
+    time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
     PRINT_DATA(mDebugLog, "         + Found %u content records (fTime = %ld)\n", contentList->getLength(),fTime);
@@ -3310,7 +3340,7 @@ bool ServiceImplementation::getValueVectors(
     }
 */
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    time_t fTime = ServiceImplementation::getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
+    time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
     PRINT_DATA(mDebugLog, "         + Found %u content records (fTime = %ld)\n", contentList->getLength(),fTime);
@@ -4844,7 +4874,7 @@ bool ServiceImplementation::getPointValues(
     }
 */
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    time_t fTime = ServiceImplementation::getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
+    time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
     PRINT_DATA(mDebugLog, "         + Found %u content records (fTime = %ld)\n", contentList->getLength(),fTime);
@@ -5118,7 +5148,7 @@ bool ServiceImplementation::getCircleValues(
     }
 */
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    time_t fTime = ServiceImplementation::getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
+    time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
@@ -5383,7 +5413,7 @@ bool ServiceImplementation::getPolygonValues(
     }
 */
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    time_t fTime = ServiceImplementation::getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
+    time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
@@ -5666,7 +5696,7 @@ bool ServiceImplementation::getIsolineValues(
     }
 */
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    time_t fTime = ServiceImplementation::getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
+    time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
@@ -6009,7 +6039,7 @@ bool ServiceImplementation::getIsobandValues(
     */
 
     std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    time_t fTime = ServiceImplementation::getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
+    time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
@@ -6559,7 +6589,7 @@ void ServiceImplementation::getGridValues(
                 time_t startTime = 0;
                 time_t endTime = 0;
 
-                getGenerationTimeRangeByGenerationId(generationInfo->mGenerationId,startTime,endTime);
+                getGenerationTimeRangeByProducerAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,startTime,endTime);
                 if (forecastTime < startTime || forecastTime > endTime)
                   generationValid = false;
               }
@@ -7134,11 +7164,14 @@ void ServiceImplementation::getGridValues(
     short& precision,
     ParameterValues_sptr_vec& valueList,
     T::Coordinate_vec& coordinates,
-    std::string& producerStr)
+    std::string& producerStr,
+    uint recursionCounter)
 {
   FUNCTION_TRACE
   try
   {
+    if (recursionCounter > 5)
+      return;
 
     //printf("  - producers                : %lu items\n", producers.size());
     //for (auto it = producers.begin(); it != producers.end(); ++it)
@@ -7179,6 +7212,7 @@ void ServiceImplementation::getGridValues(
       PRINT_DATA(mDebugLog, "  - contourLowValues         : %lu values\n",contourLowValues.size());
       PRINT_DATA(mDebugLog, "  - contourHighValues        : %lu values\n",contourHighValues.size());
       PRINT_DATA(mDebugLog, "  - maxValues                : %u\n\n", maxValues);
+      PRINT_DATA(mDebugLog, "  - recursionCounter         : %u\n\n", recursionCounter);
     }
 
     if (queryType != QueryParameter::Type::GridFile  &&  areaCoordinates.size() == 0  &&  queryAttributeList.getAttributeValue("grid.geometryId") == nullptr  &&  queryAttributeList.getAttributeValue("grid.geometryString") == nullptr  &&  queryAttributeList.getAttributeValue("grid.urn") == nullptr  &&  queryAttributeList.getAttributeValue("grid.crs") == nullptr)
@@ -7524,7 +7558,7 @@ void ServiceImplementation::getGridValues(
 
                         getGridValues(queryType,rec->second, tmpGeomIdList, 0, analysisTime, generationFlags, acceptNotReadyGenerations, parameterKey, parameterHash, paramLevelId, paramLevel, forecastType,
                             forecastNumber,queryFlags,parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, a_lastTime+1,endTime, timesteps, timestepSizeInMinutes, locationType,
-                            coordinateType, areaCoordinates, contourLowValues, contourHighValues, queryAttributeList,radius,maxValues,precision,valueList,coordinates,producerStr);
+                            coordinateType, areaCoordinates, contourLowValues, contourHighValues, queryAttributeList,radius,maxValues,precision,valueList,coordinates,producerStr,recursionCounter+1);
                       }
                     }
                     return;
@@ -8351,12 +8385,32 @@ void ServiceImplementation::updateProcessing()
 
               {
                 AutoWriteLock lock(&mContentSearchCache_modificationLock);
-                mContentSearchCache.clear();
+                if (mActiveContentSearchCache == 0)
+                {
+                  mContentSearchCache[1].clear();
+                  mActiveContentSearchCache = 1;
+                }
+                else
+                {
+                  mContentSearchCache[0].clear();
+                  mActiveContentSearchCache = 0;
+                }
+                mContentSearchCache_records = 0;
               }
 
               {
                 AutoWriteLock lock(&mContentCache_modificationLock);
-                mContentCache.clear();
+                if (mActiveContentCache == 0)
+                {
+                  mContentCache[1].clear();
+                  mActiveContentCache = 1;
+                }
+                else
+                {
+                  mContentCache[0].clear();
+                  mActiveContentCache = 0;
+                }
+                mContentCache_records = 0;
               }
 
               {
