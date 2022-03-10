@@ -6907,6 +6907,62 @@ void ServerInterface::getContentTimeListByGenerationId(T::RequestMessage& reques
 
 
 
+void ServerInterface::getContentTimeRangeByProducerAndGenerationId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint producerId = 0;
+    if (!request.getLineByKey("producerId",producerId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: producerId");
+      return;
+    }
+
+
+    uint generationId = 0;
+    if (!request.getLineByKey("generationId",generationId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    time_t startTime = 0;
+    time_t endTime = 0;
+
+    int result = mService->getContentTimeRangeByProducerAndGenerationId(sessionId,producerId,generationId,startTime,endTime);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      response.addLine("startTime",startTime);
+      response.addLine("endTime",endTime);
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ServerInterface::getContentTimeRangeByGenerationId(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE

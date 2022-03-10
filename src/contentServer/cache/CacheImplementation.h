@@ -31,7 +31,8 @@ class SearchStructure
     T::ContentInfoList     mContentInfoList[CONTENT_LIST_COUNT];
 };
 
-using SearchStructure_sptr = boost::atomic_shared_ptr<SearchStructure>;
+//using SearchStructure_sptr = boost::atomic_shared_ptr<SearchStructure>;
+using SearchStructure_sptr = std::shared_ptr<SearchStructure>;
 
 
 
@@ -182,6 +183,7 @@ class CacheImplementation : public ServiceInterface
     virtual int     _getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList);
     virtual int     _getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList);
     virtual int     _getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList);
+    virtual int     _getContentTimeRangeByProducerAndGenerationId(T::SessionId sessionId,uint producerId,uint generationId,time_t& startTime,time_t& endTime);
     virtual int     _getContentTimeRangeByGenerationId(T::SessionId sessionId,uint generationId,time_t& startTime,time_t& endTime);
 
     virtual int     _getContentCount(T::SessionId sessionId,uint& count);
@@ -285,7 +287,8 @@ class CacheImplementation : public ServiceInterface
     uint                   mContentCount;
     ContentTimeCache       mContentTimeCache;
     ContentTimeRangeCache  mContentTimeRangeCache;
-    SearchStructure_sptr   mSearchStructureSptr;
+    uint                   mActiveSearchStructure;
+    SearchStructure_sptr   mSearchStructureSptr[2];
     time_t                 mContentUpdateTime;
     uint                   mContentUpdateInterval;
     bool                   mContentSwapEnabled;

@@ -144,6 +144,7 @@ class ServerInterface : public POA_SmartMet::ContentServer::Corba::ServiceInterf
     ::CORBA::Long getContentTimeListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList);
     ::CORBA::Long getContentTimeListByGenerationAndGeometryId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList);
     ::CORBA::Long getContentTimeListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList);
+    ::CORBA::Long getContentTimeRangeByProducerAndGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::ULong generationId, ::CORBA::LongLong& startTime, ::CORBA::LongLong& endTime);
     ::CORBA::Long getContentTimeRangeByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::LongLong& startTime, ::CORBA::LongLong& endTime);
     ::CORBA::Long getContentCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count);
     ::CORBA::Long setContentInfo(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaContentInfo& contentInfo);

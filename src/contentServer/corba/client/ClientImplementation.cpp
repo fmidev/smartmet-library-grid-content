@@ -2832,6 +2832,33 @@ int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId session
 
 
 
+int ClientImplementation::_getContentTimeRangeByProducerAndGenerationId(T::SessionId sessionId,uint producerId,uint generationId,time_t& startTime,time_t& endTime)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ::CORBA::LongLong corbaStartTime = 0;
+    ::CORBA::LongLong corbaEndTime = 0;
+
+    int result = mService->getContentTimeRangeByProducerAndGenerationId(sessionId,producerId,generationId,corbaStartTime,corbaEndTime);
+
+    if (result == 0)
+    {
+      startTime = (time_t)corbaStartTime;
+      endTime = (time_t)corbaEndTime;
+    }
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
 int ClientImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessionId,uint generationId,time_t& startTime,time_t& endTime)
 {
   try

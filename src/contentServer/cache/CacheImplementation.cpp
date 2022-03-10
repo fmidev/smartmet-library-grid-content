@@ -69,6 +69,7 @@ CacheImplementation::CacheImplementation()
     mGeometryDeleteCounter = 0;
     mFileDeleteCounter = 0;
     mContentDeleteCounter = 0;
+    mActiveSearchStructure = 0;
 
     mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
     mContentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
@@ -501,7 +502,7 @@ int CacheImplementation::_getProducerInfoById(T::SessionId sessionId,uint produc
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -564,7 +565,7 @@ int CacheImplementation::_getProducerInfoByName(T::SessionId sessionId,const std
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -605,7 +606,7 @@ int CacheImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -648,7 +649,7 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
 
     producerInfoList.clear();
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -754,7 +755,7 @@ int CacheImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,u
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -796,7 +797,7 @@ int CacheImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& coun
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -836,7 +837,7 @@ int CacheImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -897,7 +898,7 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1103,7 +1104,7 @@ int CacheImplementation::_getProducerParameterListByProducerId(T::SessionId sess
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1474,7 +1475,7 @@ int CacheImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1526,7 +1527,7 @@ int CacheImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1575,7 +1576,7 @@ int CacheImplementation::_getGenerationInfoById(T::SessionId sessionId,uint gene
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1616,7 +1617,7 @@ int CacheImplementation::_getGenerationInfoByName(T::SessionId sessionId,const s
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1657,7 +1658,7 @@ int CacheImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Genera
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1699,7 +1700,7 @@ int CacheImplementation::_getGenerationInfoListByProducerId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1741,7 +1742,7 @@ int CacheImplementation::_getGenerationInfoListByProducerName(T::SessionId sessi
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1791,7 +1792,7 @@ int CacheImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1832,7 +1833,7 @@ int CacheImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1871,7 +1872,7 @@ int CacheImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1910,7 +1911,7 @@ int CacheImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2103,7 +2104,7 @@ int CacheImplementation::_getGeometryInfoById(T::SessionId sessionId,uint genera
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2143,7 +2144,7 @@ int CacheImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geometry
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2185,7 +2186,7 @@ int CacheImplementation::_getGeometryInfoListByGenerationId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2226,7 +2227,7 @@ int CacheImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2268,7 +2269,7 @@ int CacheImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,u
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2310,7 +2311,7 @@ int CacheImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& coun
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2698,7 +2699,7 @@ int CacheImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2739,7 +2740,7 @@ int CacheImplementation::_getFileInfoByName(T::SessionId sessionId,const std::st
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2781,7 +2782,7 @@ int CacheImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2816,7 +2817,7 @@ int CacheImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2856,7 +2857,7 @@ int CacheImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uin
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2903,7 +2904,7 @@ int CacheImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,c
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2952,7 +2953,7 @@ int CacheImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,u
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 /*
@@ -2997,7 +2998,7 @@ int CacheImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3046,7 +3047,7 @@ int CacheImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3087,7 +3088,7 @@ int CacheImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3126,7 +3127,7 @@ int CacheImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,ui
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3164,7 +3165,7 @@ int CacheImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3203,7 +3204,7 @@ int CacheImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uint
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3604,7 +3605,7 @@ int CacheImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3654,7 +3655,7 @@ int CacheImplementation::_getContentList(T::SessionId sessionId,uint startFileId
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3695,7 +3696,7 @@ int CacheImplementation::_getContentListByFileId(T::SessionId sessionId,uint fil
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3736,7 +3737,7 @@ int CacheImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3781,7 +3782,7 @@ int CacheImplementation::_getContentListByFileName(T::SessionId sessionId,const 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3830,7 +3831,7 @@ int CacheImplementation::_getContentListByProducerId(T::SessionId sessionId,uint
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 /*
@@ -3875,7 +3876,7 @@ int CacheImplementation::_getContentListByProducerName(T::SessionId sessionId,co
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3923,7 +3924,7 @@ int CacheImplementation::_getContentListByGenerationId(T::SessionId sessionId,ui
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3979,7 +3980,7 @@ int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4025,7 +4026,7 @@ int CacheImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
     if (mUpdateInProgress)
       return mContentStorage->getContentListByGenerationIdAndTimeRange(sessionId,generationId,startTime,endTime,contentInfoList);
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4074,7 +4075,7 @@ int CacheImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4124,7 +4125,7 @@ int CacheImplementation::_getContentListBySourceId(T::SessionId sessionId,uint s
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4166,7 +4167,7 @@ int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4253,7 +4254,7 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4345,7 +4346,7 @@ int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4435,7 +4436,7 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4528,7 +4529,7 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4619,7 +4620,7 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4720,7 +4721,7 @@ int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
 
     contentInfoList.clear();
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4794,7 +4795,7 @@ int CacheImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4844,7 +4845,7 @@ int CacheImplementation::_getContentParamListByGenerationId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4914,7 +4915,7 @@ int CacheImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4963,7 +4964,7 @@ int CacheImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::Ses
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5012,7 +5013,7 @@ int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5085,6 +5086,93 @@ int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
 
 
 
+int CacheImplementation::_getContentTimeRangeByProducerAndGenerationId(T::SessionId sessionId,uint producerId,uint generationId,time_t& startTime,time_t& endTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
+    if (mUpdateInProgress)
+      return mContentStorage->getContentTimeRangeByGenerationId(sessionId,generationId,startTime,endTime);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
+    if (!ssp)
+      return Result::DATA_NOT_FOUND;
+
+    if (!mContentSwapEnabled)
+    {
+      AutoReadLock cacheLock(&mCacheModificationLock);
+      auto it = mContentTimeRangeCache.find(generationId);
+      if (it == mContentTimeRangeCache.end())
+      {
+        ssp->mContentInfoList[1].getForecastTimeRangeByGenerationId(producerId,generationId,startTime,endTime);
+
+        AutoReadLock readLock(&mSearchModificationLock);
+        T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(generationId);
+        if (generationInfo == nullptr)
+          return Result::UNKNOWN_GENERATION_ID;
+
+        if (generationInfo->mStatus == T::GenerationInfo::Status::Ready)
+        {
+          mCacheModificationLock.writeLockWhenInsideReadLock();
+          if (mContentTimeRangeCache.size() > 100000)
+            mContentTimeRangeCache.clear();
+
+          mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
+          mCacheModificationLock.writeUnlock();
+        }
+      }
+      else
+      {
+        startTime = it->second.first;
+        endTime = it->second.second;
+      }
+    }
+    else
+    {
+      AutoReadLock cacheLock(&mCacheModificationLock);
+      auto it = mContentTimeRangeCache.find(generationId);
+      if (it == mContentTimeRangeCache.end())
+      {
+        ssp->mContentInfoList[1].getForecastTimeRangeByGenerationId(producerId,generationId,startTime,endTime);
+
+        T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(generationId);
+        if (generationInfo == nullptr)
+          return Result::UNKNOWN_GENERATION_ID;
+
+        if (generationInfo->mStatus == T::GenerationInfo::Status::Ready)
+        {
+          mCacheModificationLock.writeLockWhenInsideReadLock();
+
+          if (mContentTimeRangeCache.size() > 100000)
+            mContentTimeRangeCache.clear();
+          mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
+          mCacheModificationLock.writeUnlock();
+        }
+      }
+      else
+      {
+        startTime = it->second.first;
+        endTime = it->second.second;
+      }
+    }
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessionId,uint generationId,time_t& startTime,time_t& endTime)
 {
   FUNCTION_TRACE
@@ -5099,7 +5187,7 @@ int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5134,11 +5222,11 @@ int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
     }
     else
     {
+      AutoReadLock cacheLock(&mCacheModificationLock);
       T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(generationId);
       if (generationInfo == nullptr)
         return Result::UNKNOWN_GENERATION_ID;
 
-      AutoReadLock cacheLock(&mCacheModificationLock);
       auto it = mContentTimeRangeCache.find(generationId);
       if (it == mContentTimeRangeCache.end())
       {
@@ -5186,7 +5274,7 @@ int CacheImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5237,7 +5325,7 @@ int CacheImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5278,7 +5366,7 @@ int CacheImplementation::_getContentCount(T::SessionId sessionId,uint& count)
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5317,7 +5405,7 @@ int CacheImplementation::_getHashByProducerId(T::SessionId sessionId,uint produc
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5364,7 +5452,7 @@ int CacheImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoLi
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5653,7 +5741,7 @@ void CacheImplementation::event_clear(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoWriteLock writeLock(&mSearchModificationLock);
@@ -5708,7 +5796,7 @@ void CacheImplementation::event_producerAdded(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -5749,7 +5837,7 @@ void CacheImplementation::event_producerDeleted(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -5784,7 +5872,7 @@ void CacheImplementation::event_producerUpdated(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -5825,7 +5913,7 @@ void CacheImplementation::event_producerListDeletedBySourceId(T::EventInfo& even
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -5860,7 +5948,7 @@ void CacheImplementation::event_generationAdded(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -5904,7 +5992,7 @@ void CacheImplementation::event_generationDeleted(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -5938,7 +6026,7 @@ void CacheImplementation::event_generationUpdated(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -5975,7 +6063,7 @@ void CacheImplementation::event_generationStatusChanged(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6009,7 +6097,7 @@ void CacheImplementation::event_generationListDeletedByProducerId(T::EventInfo& 
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6044,7 +6132,7 @@ void CacheImplementation::event_generationListDeletedBySourceId(T::EventInfo& ev
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6078,7 +6166,7 @@ void CacheImplementation::event_geometryAdded(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6116,7 +6204,7 @@ void CacheImplementation::event_geometryDeleted(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6146,7 +6234,7 @@ void CacheImplementation::event_geometryStatusChanged(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6178,7 +6266,7 @@ void CacheImplementation::event_geometryUpdated(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6216,7 +6304,7 @@ void CacheImplementation::event_geometryListDeletedByProducerId(T::EventInfo& ev
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6249,7 +6337,7 @@ void CacheImplementation::event_geometryListDeletedByGenerationId(T::EventInfo& 
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6281,7 +6369,7 @@ void CacheImplementation::event_geometryListDeletedBySourceId(T::EventInfo& even
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6445,7 +6533,7 @@ void CacheImplementation::event_fileDeleted(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6540,7 +6628,7 @@ void CacheImplementation::event_fileListDeletedByProducerId(T::EventInfo& eventI
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6571,7 +6659,7 @@ void CacheImplementation::event_fileListDeletedByGenerationId(T::EventInfo& even
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6603,7 +6691,7 @@ void CacheImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventInf
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6632,7 +6720,7 @@ void CacheImplementation::event_contentListDeletedByFileId(T::EventInfo& eventIn
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6660,7 +6748,7 @@ void CacheImplementation::event_contentListDeletedByProducerId(T::EventInfo& eve
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6688,7 +6776,7 @@ void CacheImplementation::event_contentListDeletedBySourceId(T::EventInfo& event
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6716,7 +6804,7 @@ void CacheImplementation::event_contentListDeletedByGenerationId(T::EventInfo& e
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6749,7 +6837,7 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6811,7 +6899,7 @@ void CacheImplementation::event_contentUpdated(T::EventInfo& eventInfo)
 
       if (!mContentSwapEnabled)
       {
-        auto ssp = mSearchStructureSptr.load();
+        auto ssp = mSearchStructureSptr[mActiveSearchStructure];
         if (ssp)
         {
           AutoReadLock readLock(&mSearchModificationLock);
@@ -6843,7 +6931,7 @@ void CacheImplementation::event_contentDeleted(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6874,7 +6962,7 @@ void CacheImplementation::event_deleteVirtualContent(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6906,7 +6994,7 @@ void CacheImplementation::event_updateVirtualContent(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructureSptr.load();
+      auto ssp = mSearchStructureSptr[mActiveSearchStructure];
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7279,7 +7367,7 @@ void CacheImplementation::updateContent()
     if (diff < mContentUpdateInterval)
       return;
 
-    auto ssp = mSearchStructureSptr.load();
+    auto ssp = mSearchStructureSptr[mActiveSearchStructure];
     if (mContentSwapEnabled)
     {
       // If the swapping is enabled then we create totally new search structure
@@ -7303,7 +7391,7 @@ void CacheImplementation::updateContent()
       }
       AutoReadLock lock(&mModificationLock);
 
-      auto nptr = boost::make_shared<SearchStructure>();
+      auto nptr = new SearchStructure();
 
       nptr->mProducerInfoList = mProducerInfoList;
       nptr->mGenerationInfoList = mGenerationInfoList;
@@ -7358,7 +7446,17 @@ void CacheImplementation::updateContent()
       }
   */
       PRINT_DATA(mDebugLog, "#### Cache switched #######\n");
-      mSearchStructureSptr.store(nptr);
+
+      if (mActiveSearchStructure == 0)
+      {
+        mSearchStructureSptr[1].reset(nptr);
+        mActiveSearchStructure = 1;
+      }
+      else
+      {
+        mSearchStructureSptr[0].reset(nptr);
+        mActiveSearchStructure = 0;
+      }
     }
     else
     {
@@ -7390,7 +7488,7 @@ void CacheImplementation::updateContent()
         ssp->mContentInfoList[5].setComparisonMethod(T::ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time);
         */
 
-        mSearchStructureSptr.store(ssp);
+        mSearchStructureSptr[0] = ssp;
       }
 
 

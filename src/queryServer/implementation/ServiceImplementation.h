@@ -46,7 +46,10 @@ class ContentCacheEntry
     ulonglong producerHash;
     uint generationId;
 };
-typedef std::unordered_map<std::size_t,ContentCacheEntry> ContentCache;
+
+typedef std::shared_ptr<ContentCacheEntry> ContentCacheEntry_sptr;
+
+typedef std::unordered_map<std::size_t,ContentCacheEntry_sptr> ContentCache;
 
 
 class ContentSearchCacheEntry
@@ -191,7 +194,8 @@ class ServiceImplementation : public ServiceInterface
                        short& precision,
                        ParameterValues_sptr_vec& valueList,
                        T::Coordinate_vec& coordinates,
-                       std::string& producerStr);
+                       std::string& producerStr,
+                       uint recursionCounter);
 
      void           getParameterStringInfo(
                        const std::string& param,
@@ -578,7 +582,7 @@ class ServiceImplementation : public ServiceInterface
 
      CacheEntry_sptr getGenerationInfoListByProducerId(uint producerId,bool acceptNotReadyGenerations);
 
-     void            getGenerationTimeRangeByGenerationId(uint generationId,time_t& startTime,time_t& endTime);
+     void            getGenerationTimeRangeByProducerAndGenerationId(uint producerId,uint generationId,time_t& startTime,time_t& endTime);
 
      bool            isGeometryReady(uint generationId,int geometryId,T::ParamLevelId levelId);
      bool            isGeometryValid(int geometryId,std::vector<std::vector<T::Coordinate>>& polygonPath);
@@ -629,12 +633,14 @@ class ServiceImplementation : public ServiceInterface
      ParameterMappingCache      mParameterMappingCache;
      ModificationLock           mParameterMappingCache_modificationLock;
 
-     ContentCache               mContentCache;
+     uint                       mActiveContentCache;
+     ContentCache               mContentCache[2];
      ModificationLock           mContentCache_modificationLock;
      std::size_t                mContentCache_records;
      std::size_t                mContentCache_maxRecords;
 
-     ContentSearchCache         mContentSearchCache;
+     uint                       mActiveContentSearchCache;
+     ContentSearchCache         mContentSearchCache[2];
      ModificationLock           mContentSearchCache_modificationLock;
      std::size_t                mContentSearchCache_records;
      std::size_t                mContentSearchCache_maxRecords;
