@@ -7392,6 +7392,10 @@ void CacheImplementation::updateContent()
       AutoReadLock lock(&mModificationLock);
 
       auto nptr = new SearchStructure();
+      if (mActiveSearchStructure == 0)
+        mSearchStructureSptr[1].reset(nptr);
+      else
+        mSearchStructureSptr[0].reset(nptr);
 
       nptr->mProducerInfoList = mProducerInfoList;
       nptr->mGenerationInfoList = mGenerationInfoList;
@@ -7448,15 +7452,9 @@ void CacheImplementation::updateContent()
       PRINT_DATA(mDebugLog, "#### Cache switched #######\n");
 
       if (mActiveSearchStructure == 0)
-      {
-        mSearchStructureSptr[1].reset(nptr);
         mActiveSearchStructure = 1;
-      }
       else
-      {
-        mSearchStructureSptr[0].reset(nptr);
         mActiveSearchStructure = 0;
-      }
     }
     else
     {
