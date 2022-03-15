@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 22.3.10
+Version: 22.3.15
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -21,7 +21,7 @@ BuildRequires: make
 BuildRequires: omniORB-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 22.1.24
-BuildRequires: smartmet-library-grid-files-devel >= 22.3.8
+BuildRequires: smartmet-library-grid-files-devel >= 22.3.15
 BuildRequires: smartmet-library-macgyver-devel >= 22.3.8
 BuildRequires: smartmet-library-spine-devel >= 22.3.8
 Requires: boost169-date-time
@@ -30,7 +30,7 @@ Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
 Requires: smartmet-library-gis >= 22.1.24
-Requires: smartmet-library-grid-files >= 22.3.8
+Requires: smartmet-library-grid-files >= 22.3.15
 Requires: smartmet-library-macgyver >= 22.3.8
 Requires: smartmet-library-spine >= 22.3.8
 Provides: %{SPECNAME}
@@ -68,7 +68,7 @@ Requires: %{SPECNAME}
 Requires: smartmet-library-macgyver-devel >= 22.3.8
 Requires: smartmet-library-gis-devel >= 22.1.24
 Requires: smartmet-library-spine-devel >= 22.3.8
-Requires: smartmet-library-grid-files-devel >= 22.3.8
+Requires: smartmet-library-grid-files-devel >= 22.3.15
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -78,6 +78,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Mar 15 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.3.15-1.fmi
+- Fixes to ModificationLock require recompile
 * Thu Mar 10 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.3.10-1.fmi
 - Fixed cache thread safety bug, improved cache speed
 * Mon Mar  7 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.3.7-1.fmi
