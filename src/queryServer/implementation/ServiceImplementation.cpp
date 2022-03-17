@@ -1548,7 +1548,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
         uint tCount = 0;
         for (auto tt = query.mForecastTimeList.begin(); tt != query.mForecastTimeList.end(); ++tt)
         {
-          auto pValues = std::shared_ptr<ParameterValues>(new ParameterValues());
+          std::shared_ptr<ParameterValues> pValues = std::make_shared<ParameterValues>();
           pValues->mForecastTimeUTC = *tt;
 
           std::vector<double> areaParameters;
@@ -2040,7 +2040,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
             // The forecast time was not found from the current parameter. Adding the forecast time
             // with an empty value list.
 
-            auto pValues = std::shared_ptr<ParameterValues>(new ParameterValues());
+            std::shared_ptr<ParameterValues> pValues = std::make_shared<ParameterValues>();
             pValues->mForecastTimeUTC = *tt;
 
             if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN)
@@ -2252,7 +2252,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
         for (auto fTime = forecastTimeList->rbegin(); fTime != forecastTimeList->rend(); ++fTime)
         {
-          auto valueList = std::shared_ptr<ParameterValues>(new ParameterValues());
+          std::shared_ptr<ParameterValues> valueList = std::make_shared<ParameterValues>();
           tmpValueList.emplace_back(valueList);
 
           try
@@ -2498,7 +2498,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
             // The forecast time was not found from the current parameter. Adding the forecast time
             // with an empty value list.
 
-            auto pValues = std::shared_ptr<ParameterValues>(new ParameterValues());
+            std::shared_ptr<ParameterValues> pValues = std::make_shared<ParameterValues>();
             pValues->mForecastTimeUTC = tt;
             //pValues->mForecastTime = utcTimeFromTimeT(tt);
 
@@ -2911,8 +2911,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       }
     }
 
-    std::shared_ptr<T::ContentInfoList> cList(new T::ContentInfoList());
-
+    std::shared_ptr<T::ContentInfoList> cList = std::make_shared<T::ContentInfoList>();
     {
       AutoReadLock readLock(&mContentCache_modificationLock);
       switch (parameterKeyType)
@@ -3060,7 +3059,7 @@ bool ServiceImplementation::getSpecialValues(
       throw exception;
     }
 */
-    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
+    std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
@@ -3339,7 +3338,7 @@ bool ServiceImplementation::getValueVectors(
       throw exception;
     }
 */
-    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
+    std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
@@ -3763,7 +3762,7 @@ bool ServiceImplementation::getGridFiles(
     T::ParamValue_vec valueVector;
     T::ParamValue_vec newValueVector;
 
-    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
+    std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, producerInfo.mHash, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.getKeyHash(),
         paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
 
@@ -4873,7 +4872,7 @@ bool ServiceImplementation::getPointValues(
       }
     }
 */
-    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
+    std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
@@ -5147,7 +5146,7 @@ bool ServiceImplementation::getCircleValues(
       throw exception;
     }
 */
-    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
+    std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
@@ -5412,7 +5411,7 @@ bool ServiceImplementation::getPolygonValues(
       throw exception;
     }
 */
-    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
+    std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
@@ -5695,7 +5694,7 @@ bool ServiceImplementation::getIsolineValues(
       throw exception;
     }
 */
-    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
+    std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
@@ -6038,7 +6037,7 @@ bool ServiceImplementation::getIsobandValues(
     }
     */
 
-    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
+    std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
 
@@ -7519,7 +7518,8 @@ void ServiceImplementation::getGridValues(
                     {
                       if (((forecastTime->first == startTime && !ignoreStartTimeValue) || (forecastTime->first > startTime && forecastTime->first <= endTime)))
                       {
-                        auto valList = std::shared_ptr<ParameterValues>(new ParameterValues());
+                        std::shared_ptr<ParameterValues> valList = std::make_shared<ParameterValues>();
+
                         getGridValues(queryType,producers2, geometryIdList2, producerInfo.mProducerId, forecastTime->second, 0, reverseGenerations, acceptNotReadyGenerations, parameterKey, parameterHash, paramLevelId, paramLevel,
                             forecastType, forecastNumber, queryFlags, parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, forecastTime->first, true,
                             locationType, coordinateType, areaCoordinates, contourLowValues, contourHighValues, queryAttributeList, radius, precision, *valList, coordinates,producerStr);
@@ -8117,7 +8117,8 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
         T::ParamLevelId levelId = contentInfo->mFmiParameterLevelId;
         T::ParamLevel level = contentInfo->mParameterLevel;
 
-        std::shared_ptr<T::ContentInfoList> cList(new T::ContentInfoList());
+        std::shared_ptr<T::ContentInfoList> cList = std::make_shared<T::ContentInfoList>();
+
         int result = getContentListByParameterGenerationIdAndForecastTime(0, contentInfo->mProducerId, 0, contentInfo->mGenerationId, paramKeyType, paramKey, 0xFFFFFFFF,
           levelId, level, -1, -1, contentInfo->mGeometryId, contentInfo->mForecastTimeUTC, cList);
 
@@ -8166,8 +8167,7 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
           T::ParamLevelId levelId = contentInfo->mFmiParameterLevelId;
           T::ParamLevel level = contentInfo->mParameterLevel;
 
-          std::shared_ptr<T::ContentInfoList> cList(new T::ContentInfoList());
-
+          std::shared_ptr<T::ContentInfoList> cList = std::make_shared<T::ContentInfoList>();
 
           int result = getContentListByParameterGenerationIdAndForecastTime(0, contentInfo->mProducerId, 0, contentInfo->mGenerationId, paramKeyType, paramKey, 0xFFFFFFFE,
             levelId, level, -1, -1, contentInfo->mGeometryId, contentInfo->mForecastTimeUTC, cList);
