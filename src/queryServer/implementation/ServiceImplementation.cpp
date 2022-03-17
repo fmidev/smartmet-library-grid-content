@@ -2985,12 +2985,12 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
         if (mActiveContentCache == 0)
         {
           mContentCache[1].clear();
-          mActiveContentCache = 0;
+          mActiveContentCache = 1;
         }
         else
         {
           mContentCache[0].clear();
-          mActiveContentCache = 1;
+          mActiveContentCache = 0;
         }
         mContentCache_records = 0;
       }
