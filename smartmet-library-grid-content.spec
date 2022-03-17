@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 22.3.15
+Version: 22.3.17
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -78,6 +78,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Mar 17 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.3.17-1.fmi
+- Prefer using make_shared
+- Bug fix to content cache swapping
 * Tue Mar 15 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.3.15-1.fmi
 - Fixes to ModificationLock require recompile
 * Thu Mar 10 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.3.10-1.fmi
