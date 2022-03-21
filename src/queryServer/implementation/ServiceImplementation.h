@@ -55,8 +55,8 @@ typedef std::unordered_map<std::size_t,ContentCacheEntry_sptr> ContentCache;
 class ContentSearchCacheEntry
 {
   public:
-    std::shared_ptr<T::ContentInfoList> contentInfoList;
-    ulonglong producerHash;
+    std::shared_ptr<T::ContentInfoList> contentInfoList[3];
+    ulonglong producerHash[3];
     uint generationId;
 };
 typedef std::unordered_map<std::size_t,ContentSearchCacheEntry> ContentSearchCache;

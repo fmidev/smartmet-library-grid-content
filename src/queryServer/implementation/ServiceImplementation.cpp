@@ -2822,10 +2822,25 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     {
       AutoReadLock readLock(&mContentSearchCache_modificationLock);
       auto it = mContentSearchCache[mActiveContentSearchCache].find(hash2);
-      if (it != mContentSearchCache[mActiveContentSearchCache].end()  &&  it->second.producerHash == producerHash)
+      if (it != mContentSearchCache[mActiveContentSearchCache].end())
       {
-        contentInfoList = it->second.contentInfoList;
-        return Result::OK;
+        if (it->second.producerHash[0] == producerHash)
+        {
+          contentInfoList = it->second.contentInfoList[0];
+          return Result::OK;
+        }
+
+        if (it->second.producerHash[1] == producerHash)
+        {
+          contentInfoList = it->second.contentInfoList[1];
+          return Result::OK;
+        }
+
+        if (it->second.producerHash[2] == producerHash)
+        {
+          contentInfoList = it->second.contentInfoList[2];
+          return Result::OK;
+        }
       }
     }
 
@@ -2938,6 +2953,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
       contentInfoList = cList;
       AutoWriteLock lock(&mContentSearchCache_modificationLock);
+
       if (mContentSearchCache_records >= mContentSearchCache_maxRecords)
       {
         //printf("CLEAR CONTENT SEARCH CACHE %u %ld %ld\n",mActiveContentSearchCache,mContentSearchCache_records,mContentSearchCache[mActiveContentSearchCache].size());
@@ -2957,22 +2973,37 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       auto rr = mContentSearchCache[mActiveContentSearchCache].find(hash2);
       if (rr == mContentSearchCache[mActiveContentSearchCache].end())
       {
+        // Curren cache record is new. We should add in into the cache.
+
         ContentSearchCacheEntry rc;
-        rc.contentInfoList = cList;
-        rc.producerHash = producerHash;
+        rc.contentInfoList[0] = cList;
+        rc.producerHash[0] = producerHash;
+        rc.producerHash[1] = 0;
+        rc.producerHash[2] = 0;
         rc.generationId = generationId;
-        //printf("INSERT CONTENT SEARCH %ld\n",mContentSearchCache.size());
         mContentSearchCache[mActiveContentSearchCache].insert(std::pair<std::size_t,ContentSearchCacheEntry>(hash2,rc));
         mContentSearchCache_records += cList->getLength();
-        //if ((mContentSearchCache[mActiveContentSearchCache].size() % 10) == 0)
-          //printf("INSERT CONTENT SEARCH %u %u %ld %ld\n",mActiveContentSearchCache,cList->getLength(),mContentSearchCache_records,mContentSearchCache[mActiveContentSearchCache].size());
       }
       else
       {
-        //printf("SET CONTENT SEARCH %ld\n",mContentSearchCache.size());
-        rr->second.contentInfoList = cList;
-        rr->second.producerHash = producerHash;
-        rr->second.generationId = generationId;
+        // Current cache record is already in use, but it has old information. We should update this information.
+        if (rr->second.producerHash[1] == 0  &&  rr->second.producerHash[0] != producerHash)
+        {
+          rr->second.contentInfoList[1] = cList;
+          rr->second.producerHash[1] = producerHash;
+        }
+        else
+        if (rr->second.producerHash[2] == 0  &&  rr->second.producerHash[0] != producerHash &&  rr->second.producerHash[1] != producerHash)
+        {
+          rr->second.contentInfoList[2] = cList;
+          rr->second.producerHash[2] = producerHash;
+        }
+        else
+        {
+          // We need to clear the cache
+
+          mContentSearchCache_records = mContentSearchCache_maxRecords;
+        }
       }
     }
 
