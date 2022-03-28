@@ -1518,6 +1518,99 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByAnalysisTime()
 
 
 
+GenerationInfo* GenerationInfoList::getLastGenerationInfoByAnalysisTime(uchar generationStatus)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
+    AutoReadLock lock(mModificationLockPtr);
+    T::GenerationInfo *generationInfo = nullptr;
+    for (uint t=0; t<mLength; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr && info->mStatus == generationStatus &&  (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
+      {
+        if (generationInfo == nullptr  ||  generationInfo->mAnalysisTime < info->mAnalysisTime)
+          generationInfo = info;
+      }
+    }
+    return generationInfo;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+GenerationInfo* GenerationInfoList::getFirstGenerationInfoByAnalysisTime()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
+    AutoReadLock lock(mModificationLockPtr);
+    T::GenerationInfo *generationInfo = nullptr;
+    for (uint t=0; t<mLength; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
+      {
+        if (generationInfo == nullptr  ||  generationInfo->mAnalysisTime > info->mAnalysisTime)
+          generationInfo = info;
+      }
+    }
+    return generationInfo;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+GenerationInfo* GenerationInfoList::getFirstGenerationInfoByAnalysisTime(uchar generationStatus)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
+    AutoReadLock lock(mModificationLockPtr);
+    T::GenerationInfo *generationInfo = nullptr;
+    for (uint t=0; t<mLength; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr && info->mStatus == generationStatus &&  (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
+      {
+        if (generationInfo == nullptr  ||  generationInfo->mAnalysisTime > info->mAnalysisTime)
+          generationInfo = info;
+      }
+    }
+    return generationInfo;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(uint producerId)
 {
   FUNCTION_TRACE

@@ -6531,6 +6531,21 @@ void ServiceImplementation::getGridValues(
           if (!analysisTime.empty())
             origGenerationInfo = cacheEntry->generationInfoList->getGenerationInfoByAnalysisTime(analysisTime);
 
+          if (queryFlags & Query::Flags::LatestGeneration)
+          {
+            if (acceptNotReadyGenerations)
+              origGenerationInfo = cacheEntry->generationInfoList->getLastGenerationInfoByAnalysisTime();
+            else
+              origGenerationInfo = cacheEntry->generationInfoList->getLastGenerationInfoByAnalysisTime(T::GenerationInfo::Status::Ready);
+          }
+
+          if (queryFlags & Query::Flags::OldestGeneration)
+          {
+            if (acceptNotReadyGenerations)
+              origGenerationInfo = cacheEntry->generationInfoList->getFirstGenerationInfoByAnalysisTime();
+            else
+              origGenerationInfo = cacheEntry->generationInfoList->getFirstGenerationInfoByAnalysisTime(T::GenerationInfo::Status::Ready);
+          }
 
           bool climatologicalMappings = false;
           if (mappings->size() > 0)
@@ -6545,6 +6560,7 @@ void ServiceImplementation::getGridValues(
             }
 
             PRINT_DATA(mDebugLog, "  - Going through the generations from the newest to the oldest.\n");
+
 
             uint gLen = analysisTimes->size();
             for (uint g = 0; g < gLen; g++)
@@ -6609,8 +6625,16 @@ void ServiceImplementation::getGridValues(
               if (generationInfo != nullptr  &&  !acceptNotReadyGenerations)
               {
                 // Checking if the geometry is ready.
-                if (!isGeometryReady(generationInfo->mGenerationId,producerGeometryId,0))
-                  generationValid = false;
+                if (mCheckGeometryStatus)
+                {
+                  if (!isGeometryReady(generationInfo->mGenerationId,producerGeometryId,0))
+                    generationValid = false;
+                }
+                else
+                {
+                  if (generationInfo->mStatus != T::GenerationInfo::Status::Ready)
+                    generationValid = false;
+                }
               }
 
               if (generationInfo != nullptr  &&  !climatologicalMappings  &&  producerId != 0)

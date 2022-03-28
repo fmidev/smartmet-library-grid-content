@@ -49,7 +49,10 @@ class GenerationInfoList
     void                getGenerationInfoListByProducerIdAndStatus(uint producerId,GenerationInfoList& generationInfoList,uchar generationStatus);
     void                getGenerationInfoListBySourceId(uint sourceId,GenerationInfoList& generationInfoList);
     GenerationInfo*     getPrevGenerationInfoByProducerId(uint producerId,const std::string& nextGenerationName);
+    GenerationInfo*     getFirstGenerationInfoByAnalysisTime();
+    GenerationInfo*     getFirstGenerationInfoByAnalysisTime(uchar generationStatus);
     GenerationInfo*     getLastGenerationInfoByAnalysisTime();
+    GenerationInfo*     getLastGenerationInfoByAnalysisTime(uchar generationStatus);
     GenerationInfo*     getLastGenerationInfoByProducerId(uint producerId);
     GenerationInfo*     getLastGenerationInfoByProducerIdAndStatus(uint producerId,uchar generationStatus);
     bool                getLastGenerationInfoByProducerIdAndStatus(uint producerId,uchar generationStatus,T::GenerationInfo& generationInfo);
