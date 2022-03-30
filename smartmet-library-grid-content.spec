@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 22.3.28
+Version: 22.3.30
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -78,6 +78,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Mar 30 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.3.30-1.fmi
+- Use thread local caching for better speed
 * Mon Mar 28 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.3.28-1.fmi
 - Fixed queries that use values "latest", "oldest" or "newest" as an origintime
 * Mon Mar 21 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.3.21-1.fmi
