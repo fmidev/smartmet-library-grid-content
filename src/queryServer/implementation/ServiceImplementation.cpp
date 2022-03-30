@@ -35,6 +35,23 @@ namespace QueryServer
 boost::local_time::time_zone_ptr tz_utc(new boost::local_time::posix_time_zone("UTC"));
 
 
+thread_local static ContentCache mContentCache;
+thread_local static std::size_t mContentCache_records;
+
+thread_local static ContentSearchCache mContentSearchCache;
+thread_local static std::size_t mContentSearchCache_records;
+
+
+thread_local static ParameterMappingCache mParameterMappingCache;
+thread_local static time_t mParameterMappingCache_clearTime;
+
+thread_local static std::set<ulonglong> mReadyGeometryList;
+
+thread_local static ProducerGenarationListCache mProducerGenerationListCache;
+thread_local static time_t mProducerGenerationListCache_clearTime;
+
+
+
 static void* queryServer_updateThread(void *arg)
 {
   try
@@ -78,8 +95,9 @@ ServiceImplementation::ServiceImplementation()
     mContentSearchCache_maxRecords = 500000;
     mContentSearchCache_records = 0;
     mCheckGeometryStatus = false;
-    mActiveContentCache = 0;
-    mActiveContentSearchCache = 0;
+    mParameterMappingCache_clearTime = time(nullptr);
+    mProducerGenerationListCache_clearTime  = time(nullptr);
+    mProducerGenerationListCache_clearRequired = 0;
 
     GRID::Operation::getOperatorNames(mOperationNames);
   }
@@ -292,23 +310,25 @@ CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(uint pr
   FUNCTION_TRACE
   try
   {
+    if (mProducerGenerationListCache_clearRequired > mProducerGenerationListCache_clearTime)
+    {
+      mProducerGenerationListCache.clear();
+      mProducerGenerationListCache_clearTime = mProducerGenerationListCache_clearRequired;
+    }
+
     uint key = producerId;
     if (acceptNotReadyGenerations)
       key = producerId | 0x80000000;
 
-    {
-      AutoReadLock lock(&mProducerGenerationListCacheModificationLock);
-      auto gl = mProducerGenerationListCache.find(key);
-      if (gl != mProducerGenerationListCache.end())
-        return gl->second;
-    }
+    auto gl = mProducerGenerationListCache.find(key);
+    if (gl != mProducerGenerationListCache.end())
+      return gl->second;
 
     CacheEntry_sptr cacheEntry(new CacheEntry);
     if (!mGenerationInfoList)
       return cacheEntry;
 
     T::GenerationInfoList_sptr generationInfoList(new T::GenerationInfoList());
-    AutoReadLock readLock(&mGenerationInfoList_modificationLock);
     mGenerationInfoList->getGenerationInfoListByProducerIdAndStatus(producerId,*generationInfoList,T::GenerationInfo::Status::Ready);
 
     if (acceptNotReadyGenerations)
@@ -331,7 +351,6 @@ CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(uint pr
     cacheEntry->generationInfoList = generationInfoList;
     cacheEntry->analysisTimes = analysisTimes;
 
-    AutoWriteLock lock(&mProducerGenerationListCacheModificationLock);
     mProducerGenerationListCache.insert(std::pair<uint,CacheEntry_sptr>(key,cacheEntry));
 
     return cacheEntry;
@@ -842,8 +861,15 @@ void ServiceImplementation::getParameterMappings(const std::string& producerName
     boost::hash_combine(hash,geometryId);
     boost::hash_combine(hash,onlySearchEnabled);
 
+    if (mParameterMappingCache_clearTime < mParameterMappingCache_clearRequired)
     {
-      AutoReadLock lock(&mParameterMappingCache_modificationLock);
+      mParameterMappingCache.clear();
+      mParameterMappingCache_clearTime = mParameterMappingCache_clearRequired;
+    }
+
+
+    {
+      //AutoReadLock lock(&mParameterMappingCache_modificationLock);
       auto it = mParameterMappingCache.find(hash);
       if (it != mParameterMappingCache.end())
       {
@@ -859,7 +885,7 @@ void ServiceImplementation::getParameterMappings(const std::string& producerName
       }
     }
 
-    AutoWriteLock lock(&mParameterMappingCache_modificationLock);
+    //AutoWriteLock lock(&mParameterMappingCache_modificationLock);
     if (mParameterMappingCache.find(hash) == mParameterMappingCache.end())
       mParameterMappingCache.insert(std::pair<std::size_t, ParameterMapping_vec_sptr>(hash, mappings));
   }
@@ -903,8 +929,14 @@ void ServiceImplementation::getParameterMappings(
     boost::hash_combine(hash,level);
     boost::hash_combine(hash,onlySearchEnabled);
 
+    if (mParameterMappingCache_clearTime < mParameterMappingCache_clearRequired)
     {
-      AutoReadLock lock(&mParameterMappingCache_modificationLock);
+      mParameterMappingCache.clear();
+      mParameterMappingCache_clearTime = mParameterMappingCache_clearRequired;
+    }
+
+    {
+      //AutoReadLock lock(&mParameterMappingCache_modificationLock);
       auto it = mParameterMappingCache.find(hash);
       if (it != mParameterMappingCache.end())
       {
@@ -921,7 +953,7 @@ void ServiceImplementation::getParameterMappings(
       }
     }
 
-    AutoWriteLock lock(&mParameterMappingCache_modificationLock);
+    //AutoWriteLock lock(&mParameterMappingCache_modificationLock);
     if (mParameterMappingCache.find(hash) == mParameterMappingCache.end())
       mParameterMappingCache.insert(std::pair<std::size_t, ParameterMapping_vec_sptr>(hash, mappings));
   }
@@ -1171,17 +1203,13 @@ bool ServiceImplementation::isGeometryReady(uint generationId,int geometryId,T::
 
     ulonglong key = ((ulonglong)generationId << 32) + ((ulonglong)geometryId << 8) + levelId;
 
-    {
-      AutoReadLock readLock(&mGenerationInfoList_modificationLock);
-      if (mReadyGeometryList.find(key) != mReadyGeometryList.end())
-        return true;
-    }
+    if (mReadyGeometryList.find(key) != mReadyGeometryList.end())
+      return true;
 
     T::GeometryInfo geometryInfo;
     int result = mContentServerPtr->getGeometryInfoById(0,generationId,geometryId,levelId,geometryInfo);
     if (result == 0  &&  geometryInfo.mStatus == T::GeometryInfo::Status::Ready)
     {
-      AutoWriteLock writeLock(&mGenerationInfoList_modificationLock);
       if (mReadyGeometryList.size() > 100000)
         mReadyGeometryList.clear();
 
@@ -2820,9 +2848,9 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       producerHash = getProducerHash(producerId);
 
     {
-      AutoReadLock readLock(&mContentSearchCache_modificationLock);
-      auto it = mContentSearchCache[mActiveContentSearchCache].find(hash2);
-      if (it != mContentSearchCache[mActiveContentSearchCache].end())
+      //AutoReadLock readLock(&mContentSearchCache_modificationLock);
+      auto it = mContentSearchCache.find(hash2);
+      if (it != mContentSearchCache.end())
       {
         if (it->second.producerHash[0] == producerHash)
         {
@@ -2848,18 +2876,18 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     bool newEntry = false;
 
     {
-      AutoReadLock readLock(&mContentCache_modificationLock);
-      auto cc = mContentCache[mActiveContentCache].find(hash);
+      //AutoReadLock readLock(&mContentCache_modificationLock);
+      auto cc = mContentCache.find(hash);
       auto cc3 = cc;
 
-      if (cc != mContentCache[mActiveContentCache].end())
+      if (cc != mContentCache.end())
       {
         entry = cc->second;
       }
       else
       {
-        cc3 = mContentCache[mActiveContentCache].find(hash3);
-        if (cc3 != mContentCache[mActiveContentCache].end())
+        cc3 = mContentCache.find(hash3);
+        if (cc3 != mContentCache.end())
         {
           entry = cc3->second;
           hash = hash3;
@@ -2903,7 +2931,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     {
       // Producer hash does not match
       //printf("*** UPDATE \n");
-      AutoWriteLock lock(&mContentCache_modificationLock);
+      //AutoWriteLock lock(&mContentCache_modificationLock);
       if (entry->producerHash != producerHash)
       {
         time_t startTime = 0;
@@ -2928,7 +2956,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
     std::shared_ptr<T::ContentInfoList> cList = std::make_shared<T::ContentInfoList>();
     {
-      AutoReadLock readLock(&mContentCache_modificationLock);
+      //AutoReadLock readLock(&mContentCache_modificationLock);
       switch (parameterKeyType)
       {
         case T::ParamKeyTypeValue::FMI_ID:
@@ -2952,26 +2980,17 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       }
 
       contentInfoList = cList;
-      AutoWriteLock lock(&mContentSearchCache_modificationLock);
+      //AutoWriteLock lock(&mContentSearchCache_modificationLock);
 
       if (mContentSearchCache_records >= mContentSearchCache_maxRecords)
       {
         //printf("CLEAR CONTENT SEARCH CACHE %u %ld %ld\n",mActiveContentSearchCache,mContentSearchCache_records,mContentSearchCache[mActiveContentSearchCache].size());
-        if (mActiveContentSearchCache == 0)
-        {
-          mContentSearchCache[1].clear();
-          mActiveContentSearchCache = 1;
-        }
-        else
-        {
-          mContentSearchCache[0].clear();
-          mActiveContentSearchCache = 0;
-        }
+        mContentSearchCache.clear();
         mContentSearchCache_records = 0;
       }
 
-      auto rr = mContentSearchCache[mActiveContentSearchCache].find(hash2);
-      if (rr == mContentSearchCache[mActiveContentSearchCache].end())
+      auto rr = mContentSearchCache.find(hash2);
+      if (rr == mContentSearchCache.end())
       {
         // Curren cache record is new. We should add in into the cache.
 
@@ -2981,7 +3000,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
         rc.producerHash[1] = 0;
         rc.producerHash[2] = 0;
         rc.generationId = generationId;
-        mContentSearchCache[mActiveContentSearchCache].insert(std::pair<std::size_t,ContentSearchCacheEntry>(hash2,rc));
+        mContentSearchCache.insert(std::pair<std::size_t,ContentSearchCacheEntry>(hash2,rc));
         mContentSearchCache_records += cList->getLength();
       }
       else
@@ -3009,27 +3028,18 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
     if (newEntry)
     {
-      AutoWriteLock lock(&mContentCache_modificationLock);
+      //AutoWriteLock lock(&mContentCache_modificationLock);
       if (mContentCache_records > mContentCache_maxRecords)
       {
         //printf("CLEAR CONTENT CACHE\n");
-        if (mActiveContentCache == 0)
-        {
-          mContentCache[1].clear();
-          mActiveContentCache = 1;
-        }
-        else
-        {
-          mContentCache[0].clear();
-          mActiveContentCache = 0;
-        }
+        mContentCache.clear();
         mContentCache_records = 0;
       }
 
-      if (mContentCache[mActiveContentCache].find(hash) == mContentCache[mActiveContentCache].end())
+      if (mContentCache.find(hash) == mContentCache.end())
       {
         //printf("INSERT %ld\n",mContentCache.size());
-        mContentCache[mActiveContentCache].insert(std::pair<std::size_t,ContentCacheEntry_sptr>(hash,entry));
+        mContentCache.insert(std::pair<std::size_t,ContentCacheEntry_sptr>(hash,entry));
         mContentCache_records += entry->contentInfoList.getLength();
       }
     }
@@ -8338,8 +8348,7 @@ void ServiceImplementation::checkGenerationUpdates()
       }
       mGenerationInfoList_checkTime = time(nullptr);
 
-      AutoWriteLock cacheLock(&mProducerGenerationListCacheModificationLock);
-      mProducerGenerationListCache.clear();
+      mProducerGenerationListCache_clearRequired = time(nullptr);
     }
     else
     {
@@ -8397,8 +8406,8 @@ void ServiceImplementation::checkParameterMappingUpdates()
     {
       if (it->checkUpdates())
       {
-        AutoWriteLock lock(&mParameterMappingCache_modificationLock);
-        mParameterMappingCache.clear();
+        //AutoWriteLock lock(&mParameterMappingCache_modificationLock);
+        mParameterMappingCache_clearRequired = time(nullptr);
       }
     }
   }
@@ -8433,40 +8442,9 @@ void ServiceImplementation::updateProcessing()
 
               PRINT_DATA(mDebugLog, "#### Content server restart detected, clearing cached information #######\n");
 
-              {
-                AutoWriteLock cacheLock(&mProducerGenerationListCacheModificationLock);
-                mProducerGenerationListCache.clear();
-              }
-
-              {
-                AutoWriteLock lock(&mContentSearchCache_modificationLock);
-                if (mActiveContentSearchCache == 0)
-                {
-                  mContentSearchCache[1].clear();
-                  mActiveContentSearchCache = 1;
-                }
-                else
-                {
-                  mContentSearchCache[0].clear();
-                  mActiveContentSearchCache = 0;
-                }
-                mContentSearchCache_records = 0;
-              }
-
-              {
-                AutoWriteLock lock(&mContentCache_modificationLock);
-                if (mActiveContentCache == 0)
-                {
-                  mContentCache[1].clear();
-                  mActiveContentCache = 1;
-                }
-                else
-                {
-                  mContentCache[0].clear();
-                  mActiveContentCache = 0;
-                }
-                mContentCache_records = 0;
-              }
+              mProducerGenerationListCache_clearRequired = time(nullptr);
+              mContentSearchCache_records = mContentSearchCache_maxRecords;
+              mContentCache_records = mContentCache_maxRecords;
 
               {
                 AutoWriteLock lock(&mHeightCache_modificationLock);
