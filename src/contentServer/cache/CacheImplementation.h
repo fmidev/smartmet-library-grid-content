@@ -269,7 +269,6 @@ class CacheImplementation : public ServiceInterface
     pthread_t              mThread;
     ThreadLock             mEventProcessingLock;
     ModificationLock       mModificationLock;
-    ModificationLock       mCacheModificationLock;
     ModificationLock       mSearchModificationLock;
     ServiceInterface*      mContentStorage;
     time_t                 mContentStorageStartTime;
@@ -285,13 +284,15 @@ class CacheImplementation : public ServiceInterface
     uint                   mGeometryCount;
     uint                   mFileCount;
     uint                   mContentCount;
-    ContentTimeCache       mContentTimeCache;
-    ContentTimeRangeCache  mContentTimeRangeCache;
     uint                   mActiveSearchStructure;
-    SearchStructure_sptr   mSearchStructureSptr[2];
+    SearchStructure*       mSearchStructurePtr[2];
     time_t                 mContentUpdateTime;
     uint                   mContentUpdateInterval;
     bool                   mContentSwapEnabled;
+    time_t                 mContentTimeRangeCache_clearRequested;
+    time_t                 mContentTimeRangeCache_checkRequested;
+    ContentTimeCache       mContentTimeCache;
+    ModificationLock       mContentTimeCache_modificationLock;
 };
 
 

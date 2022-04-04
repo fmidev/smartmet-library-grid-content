@@ -234,6 +234,10 @@ int ServiceInterface::addProducerInfo(T::SessionId sessionId,T::ProducerInfo& pr
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _addProducerInfo(sessionId,producerInfo);
+
+
     unsigned long long timeStart = getTime();
     int result = _addProducerInfo(sessionId,producerInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -258,6 +262,9 @@ int ServiceInterface::setProducerInfo(T::SessionId sessionId,T::ProducerInfo& pr
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _setProducerInfo(sessionId,producerInfo);
 
     unsigned long long timeStart = getTime();
     int result = _setProducerInfo(sessionId,producerInfo);
@@ -284,6 +291,9 @@ int ServiceInterface::deleteProducerInfoById(T::SessionId sessionId,uint produce
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteProducerInfoById(sessionId,producerId);
+
     unsigned long long timeStart = getTime();
     int result = _deleteProducerInfoById(sessionId,producerId);
     unsigned long requestTime = getTime() - timeStart;
@@ -308,6 +318,9 @@ int ServiceInterface::deleteProducerInfoByName(T::SessionId sessionId,const std:
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteProducerInfoByName(sessionId,producerName);
 
     unsigned long long timeStart = getTime();
     int result = _deleteProducerInfoByName(sessionId,producerName);
@@ -334,6 +347,9 @@ int ServiceInterface::deleteProducerInfoListBySourceId(T::SessionId sessionId,ui
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteProducerInfoListBySourceId(sessionId,sourceId);
+
     unsigned long long timeStart = getTime();
     int result = _deleteProducerInfoListBySourceId(sessionId,sourceId);
     unsigned long requestTime = getTime() - timeStart;
@@ -358,6 +374,9 @@ int ServiceInterface::getProducerInfoById(T::SessionId sessionId,uint producerId
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getProducerInfoById(sessionId,producerId,producerInfo);
 
     unsigned long long timeStart = getTime();
     int result = _getProducerInfoById(sessionId,producerId,producerInfo);
@@ -384,6 +403,9 @@ int ServiceInterface::getProducerInfoByName(T::SessionId sessionId,const std::st
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getProducerInfoByName(sessionId,producerName,producerInfo);
+
     unsigned long long timeStart = getTime();
     int result = _getProducerInfoByName(sessionId,producerName,producerInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -408,6 +430,9 @@ int ServiceInterface::getProducerInfoList(T::SessionId sessionId,T::ProducerInfo
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getProducerInfoList(sessionId,producerInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getProducerInfoList(sessionId,producerInfoList);
@@ -434,6 +459,9 @@ int ServiceInterface::getProducerInfoListByParameter(T::SessionId sessionId,T::P
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getProducerInfoListByParameter(sessionId,parameterKeyType,parameterKey,producerInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getProducerInfoListByParameter(sessionId,parameterKeyType,parameterKey,producerInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -458,6 +486,9 @@ int ServiceInterface::getProducerInfoListBySourceId(T::SessionId sessionId,uint 
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getProducerInfoListBySourceId(sessionId,sourceId,producerInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getProducerInfoListBySourceId(sessionId,sourceId,producerInfoList);
@@ -484,6 +515,9 @@ int ServiceInterface::getProducerInfoCount(T::SessionId sessionId,uint& count)
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getProducerInfoCount(sessionId,count);
+
     unsigned long long timeStart = getTime();
     int result = _getProducerInfoCount(sessionId,count);
     unsigned long requestTime = getTime() - timeStart;
@@ -508,6 +542,9 @@ int ServiceInterface::getProducerNameAndGeometryList(T::SessionId sessionId,std:
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getProducerNameAndGeometryList(sessionId,list);
 
     unsigned long long timeStart = getTime();
     int result = _getProducerNameAndGeometryList(sessionId,list);
@@ -534,6 +571,9 @@ int ServiceInterface::getProducerParameterList(T::SessionId sessionId,T::ParamKe
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getProducerParameterList(sessionId,sourceParameterKeyType,targetParameterKeyType,list);
+
     unsigned long long timeStart = getTime();
     int result = _getProducerParameterList(sessionId,sourceParameterKeyType,targetParameterKeyType,list);
     unsigned long requestTime = getTime() - timeStart;
@@ -558,6 +598,9 @@ int ServiceInterface::getProducerParameterListByProducerId(T::SessionId sessionI
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getProducerParameterListByProducerId(sessionId,producerId,sourceParameterKeyType,targetParameterKeyType,list);
 
     unsigned long long timeStart = getTime();
     int result = _getProducerParameterListByProducerId(sessionId,producerId,sourceParameterKeyType,targetParameterKeyType,list);
@@ -584,6 +627,9 @@ int ServiceInterface::addGenerationInfo(T::SessionId sessionId,T::GenerationInfo
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _addGenerationInfo(sessionId,generationInfo);
+
     unsigned long long timeStart = getTime();
     int result = _addGenerationInfo(sessionId,generationInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -608,6 +654,9 @@ int ServiceInterface::setGenerationInfo(T::SessionId sessionId,T::GenerationInfo
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _setGenerationInfo(sessionId,generationInfo);
 
     unsigned long long timeStart = getTime();
     int result = _setGenerationInfo(sessionId,generationInfo);
@@ -634,6 +683,9 @@ int ServiceInterface::deleteGenerationInfoById(T::SessionId sessionId,uint gener
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteGenerationInfoById(sessionId,generationId);
+
     unsigned long long timeStart = getTime();
     int result = _deleteGenerationInfoById(sessionId,generationId);
     unsigned long requestTime = getTime() - timeStart;
@@ -658,6 +710,9 @@ int ServiceInterface::deleteGenerationInfoByName(T::SessionId sessionId,const st
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteGenerationInfoByName(sessionId,generationName);
 
     unsigned long long timeStart = getTime();
     int result = _deleteGenerationInfoByName(sessionId,generationName);
@@ -684,6 +739,9 @@ int ServiceInterface::deleteGenerationInfoListByIdList(T::SessionId sessionId,st
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteGenerationInfoListByIdList(sessionId,generationIdList);
+
     unsigned long long timeStart = getTime();
     int result = _deleteGenerationInfoListByIdList(sessionId,generationIdList);
     unsigned long requestTime = getTime() - timeStart;
@@ -708,6 +766,9 @@ int ServiceInterface::deleteGenerationInfoListByProducerId(T::SessionId sessionI
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteGenerationInfoListByProducerId(sessionId,producerId);
 
     unsigned long long timeStart = getTime();
     int result = _deleteGenerationInfoListByProducerId(sessionId,producerId);
@@ -734,6 +795,9 @@ int ServiceInterface::deleteGenerationInfoListByProducerName(T::SessionId sessio
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteGenerationInfoListByProducerName(sessionId,producerName);
+
     unsigned long long timeStart = getTime();
     int result = _deleteGenerationInfoListByProducerName(sessionId,producerName);
     unsigned long requestTime = getTime() - timeStart;
@@ -758,6 +822,9 @@ int ServiceInterface::deleteGenerationInfoListBySourceId(T::SessionId sessionId,
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteGenerationInfoListBySourceId(sessionId,sourceId);
 
     unsigned long long timeStart = getTime();
     int result = _deleteGenerationInfoListBySourceId(sessionId,sourceId);
@@ -784,6 +851,9 @@ int ServiceInterface::getGenerationInfoListByGeometryId(T::SessionId sessionId,T
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getGenerationInfoListByGeometryId(sessionId,geometryId,generationInfoList);;
+
     unsigned long long timeStart = getTime();
     int result = _getGenerationInfoListByGeometryId(sessionId,geometryId,generationInfoList);;
     unsigned long requestTime = getTime() - timeStart;
@@ -808,6 +878,9 @@ int ServiceInterface::getGenerationInfoById(T::SessionId sessionId,uint generati
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getGenerationInfoById(sessionId,generationId,generationInfo);
 
     unsigned long long timeStart = getTime();
     int result = _getGenerationInfoById(sessionId,generationId,generationInfo);
@@ -834,6 +907,9 @@ int ServiceInterface::getGenerationInfoByName(T::SessionId sessionId,const std::
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getGenerationInfoByName(sessionId,generationName,generationInfo);
+
     unsigned long long timeStart = getTime();
     int result = _getGenerationInfoByName(sessionId,generationName,generationInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -858,6 +934,9 @@ int ServiceInterface::getGenerationInfoList(T::SessionId sessionId,T::Generation
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getGenerationInfoList(sessionId,generationInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getGenerationInfoList(sessionId,generationInfoList);
@@ -884,6 +963,9 @@ int ServiceInterface::getGenerationInfoListByProducerId(T::SessionId sessionId,u
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getGenerationInfoListByProducerId(sessionId,producerId,generationInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getGenerationInfoListByProducerId(sessionId,producerId,generationInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -908,6 +990,9 @@ int ServiceInterface::getGenerationInfoListByProducerName(T::SessionId sessionId
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getGenerationInfoListByProducerName(sessionId,producerName,generationInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getGenerationInfoListByProducerName(sessionId,producerName,generationInfoList);
@@ -934,6 +1019,9 @@ int ServiceInterface::getGenerationInfoListBySourceId(T::SessionId sessionId,uin
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getGenerationInfoListBySourceId(sessionId,sourceId,generationInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getGenerationInfoListBySourceId(sessionId,sourceId,generationInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -958,6 +1046,9 @@ int ServiceInterface::getLastGenerationInfoByProducerIdAndStatus(T::SessionId se
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getLastGenerationInfoByProducerIdAndStatus(sessionId,producerId,generationStatus,generationInfo);
 
     unsigned long long timeStart = getTime();
     int result = _getLastGenerationInfoByProducerIdAndStatus(sessionId,producerId,generationStatus,generationInfo);
@@ -984,6 +1075,9 @@ int ServiceInterface::getLastGenerationInfoByProducerNameAndStatus(T::SessionId 
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getLastGenerationInfoByProducerNameAndStatus(sessionId,producerName,generationStatus,generationInfo);
+
     unsigned long long timeStart = getTime();
     int result = _getLastGenerationInfoByProducerNameAndStatus(sessionId,producerName,generationStatus,generationInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -1008,6 +1102,9 @@ int ServiceInterface::getGenerationInfoCount(T::SessionId sessionId,uint& count)
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getGenerationInfoCount(sessionId,count);
 
     unsigned long long timeStart = getTime();
     int result = _getGenerationInfoCount(sessionId,count);
@@ -1034,6 +1131,9 @@ int ServiceInterface::setGenerationInfoStatusById(T::SessionId sessionId,uint ge
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _setGenerationInfoStatusById(sessionId,generationId,status);
+
     unsigned long long timeStart = getTime();
     int result = _setGenerationInfoStatusById(sessionId,generationId,status);
     unsigned long requestTime = getTime() - timeStart;
@@ -1058,6 +1158,9 @@ int ServiceInterface::setGenerationInfoStatusByName(T::SessionId sessionId,const
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _setGenerationInfoStatusByName(sessionId,generationName,status);
 
     unsigned long long timeStart = getTime();
     int result = _setGenerationInfoStatusByName(sessionId,generationName,status);
@@ -1084,6 +1187,9 @@ int ServiceInterface::addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& ge
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _addGeometryInfo(sessionId,geometryInfo);
+
     unsigned long long timeStart = getTime();
     int result = _addGeometryInfo(sessionId,geometryInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -1108,6 +1214,9 @@ int ServiceInterface::deleteGeometryInfoById(T::SessionId sessionId,uint generat
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteGeometryInfoById(sessionId,generationId,geometryId,levelId);
 
     unsigned long long timeStart = getTime();
     int result = _deleteGeometryInfoById(sessionId,generationId,geometryId,levelId);
@@ -1134,6 +1243,9 @@ int ServiceInterface::deleteGeometryInfoListByGenerationId(T::SessionId sessionI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteGeometryInfoListByGenerationId(sessionId,generationId);
+
     unsigned long long timeStart = getTime();
     int result = _deleteGeometryInfoListByGenerationId(sessionId,generationId);
     unsigned long requestTime = getTime() - timeStart;
@@ -1158,6 +1270,9 @@ int ServiceInterface::deleteGeometryInfoListByProducerId(T::SessionId sessionId,
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteGeometryInfoListByProducerId(sessionId,producerId);
 
     unsigned long long timeStart = getTime();
     int result = _deleteGeometryInfoListByProducerId(sessionId,producerId);
@@ -1184,6 +1299,9 @@ int ServiceInterface::deleteGeometryInfoListBySourceId(T::SessionId sessionId,ui
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteGeometryInfoListBySourceId(sessionId,sourceId);
+
     unsigned long long timeStart = getTime();
     int result = _deleteGeometryInfoListBySourceId(sessionId,sourceId);
     unsigned long requestTime = getTime() - timeStart;
@@ -1208,6 +1326,9 @@ int ServiceInterface::getGeometryInfoById(T::SessionId sessionId,uint generation
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getGeometryInfoById(sessionId,generationId,geometryId,levelId,geometryInfo);
 
     unsigned long long timeStart = getTime();
     int result = _getGeometryInfoById(sessionId,generationId,geometryId,levelId,geometryInfo);
@@ -1234,6 +1355,9 @@ int ServiceInterface::getGeometryInfoList(T::SessionId sessionId,T::GeometryInfo
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getGeometryInfoList(sessionId,geometryInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getGeometryInfoList(sessionId,geometryInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1257,6 +1381,9 @@ int ServiceInterface::getGeometryInfoListByGenerationId(T::SessionId sessionId,u
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getGeometryInfoListByGenerationId(sessionId,generationId,geometryInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getGeometryInfoListByGenerationId(sessionId,generationId,geometryInfoList);
@@ -1282,6 +1409,9 @@ int ServiceInterface::getGeometryInfoListByProducerId(T::SessionId sessionId,uin
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getGeometryInfoListByProducerId(sessionId,producerId,geometryInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getGeometryInfoListByProducerId(sessionId,producerId,geometryInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1305,6 +1435,9 @@ int ServiceInterface::getGeometryInfoListBySourceId(T::SessionId sessionId,uint 
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getGeometryInfoListBySourceId(sessionId,sourceId,geometryInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getGeometryInfoListBySourceId(sessionId,sourceId,geometryInfoList);
@@ -1331,6 +1464,9 @@ int ServiceInterface::getGeometryInfoCount(T::SessionId sessionId,uint& count)
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getGeometryInfoCount(sessionId,count);
+
     unsigned long long timeStart = getTime();
     int result = _getGeometryInfoCount(sessionId,count);
     unsigned long requestTime = getTime() - timeStart;
@@ -1356,6 +1492,9 @@ int ServiceInterface::setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& ge
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _setGeometryInfo(sessionId,geometryInfo);
+
     unsigned long long timeStart = getTime();
     int result = _setGeometryInfo(sessionId,geometryInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -1379,6 +1518,9 @@ int ServiceInterface::setGeometryInfoStatusById(T::SessionId sessionId,uint gene
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _setGeometryInfoStatusById(sessionId,generationId,geometryId,levelId,status);
 
     unsigned long long timeStart = getTime();
     int result = _setGeometryInfoStatusById(sessionId,generationId,geometryId,levelId,status);
@@ -1405,6 +1547,9 @@ int ServiceInterface::addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _addFileInfo(sessionId,fileInfo);
+
     unsigned long long timeStart = getTime();
     int result = _addFileInfo(sessionId,fileInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -1429,6 +1574,9 @@ int ServiceInterface::setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _setFileInfo(sessionId,fileInfo);
 
     unsigned long long timeStart = getTime();
     int result = _setFileInfo(sessionId,fileInfo);
@@ -1455,6 +1603,9 @@ int ServiceInterface::addFileInfoWithContentList(T::SessionId sessionId,T::FileI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _addFileInfoWithContentList(sessionId,fileInfo,contentInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _addFileInfoWithContentList(sessionId,fileInfo,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1479,6 +1630,9 @@ int ServiceInterface::addFileInfoListWithContent(T::SessionId sessionId,uint req
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _addFileInfoListWithContent(sessionId,requestFlags,fileAndContentList);
 
     unsigned long long timeStart = getTime();
     int result = _addFileInfoListWithContent(sessionId,requestFlags,fileAndContentList);
@@ -1505,6 +1659,9 @@ int ServiceInterface::deleteFileInfoById(T::SessionId sessionId,uint fileId)
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteFileInfoById(sessionId,fileId);
+
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoById(sessionId,fileId);
     unsigned long requestTime = getTime() - timeStart;
@@ -1529,6 +1686,9 @@ int ServiceInterface::deleteFileInfoByName(T::SessionId sessionId,const std::str
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteFileInfoByName(sessionId,filename);
 
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoByName(sessionId,filename);
@@ -1555,6 +1715,9 @@ int ServiceInterface::deleteFileInfoListByProducerId(T::SessionId sessionId,uint
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteFileInfoListByProducerId(sessionId,producerId);
+
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByProducerId(sessionId,producerId);
     unsigned long requestTime = getTime() - timeStart;
@@ -1579,6 +1742,9 @@ int ServiceInterface::deleteFileInfoListByProducerName(T::SessionId sessionId,co
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteFileInfoListByProducerName(sessionId,producerName);
 
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByProducerName(sessionId,producerName);
@@ -1605,6 +1771,9 @@ int ServiceInterface::deleteFileInfoListByGenerationId(T::SessionId sessionId,ui
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteFileInfoListByGenerationId(sessionId,generationId);
+
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByGenerationId(sessionId,generationId);
     unsigned long requestTime = getTime() - timeStart;
@@ -1629,6 +1798,9 @@ int ServiceInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Session
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime);
 
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime);
@@ -1655,6 +1827,9 @@ int ServiceInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Session
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime);
+
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime);
     unsigned long requestTime = getTime() - timeStart;
@@ -1679,6 +1854,9 @@ int ServiceInterface::deleteFileInfoListByForecastTimeList(T::SessionId sessionI
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteFileInfoListByForecastTimeList(sessionId,forecastTimeList);
 
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByForecastTimeList(sessionId,forecastTimeList);
@@ -1705,6 +1883,9 @@ int ServiceInterface::deleteFileInfoListByGenerationName(T::SessionId sessionId,
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteFileInfoListByGenerationName(sessionId,generationName);
+
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByGenerationName(sessionId,generationName);
     unsigned long requestTime = getTime() - timeStart;
@@ -1729,6 +1910,9 @@ int ServiceInterface::deleteFileInfoListBySourceId(T::SessionId sessionId,uint s
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteFileInfoListBySourceId(sessionId,sourceId);
 
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListBySourceId(sessionId,sourceId);
@@ -1755,6 +1939,9 @@ int ServiceInterface::deleteFileInfoListByFileIdList(T::SessionId sessionId,std:
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteFileInfoListByFileIdList(sessionId,fileIdList);
+
     unsigned long long timeStart = getTime();
     int result = _deleteFileInfoListByFileIdList(sessionId,fileIdList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1779,6 +1966,9 @@ int ServiceInterface::getFileInfoById(T::SessionId sessionId,uint fileId,T::File
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getFileInfoById(sessionId,fileId,fileInfo);
 
     unsigned long long timeStart = getTime();
     int result = _getFileInfoById(sessionId,fileId,fileInfo);
@@ -1805,6 +1995,9 @@ int ServiceInterface::getFileInfoByName(T::SessionId sessionId,const std::string
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getFileInfoByName(sessionId,filename,fileInfo);
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoByName(sessionId,filename,fileInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -1829,6 +2022,9 @@ int ServiceInterface::getFileInfoList(T::SessionId sessionId,uint startFileId,in
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getFileInfoList(sessionId,startFileId,maxRecords,fileInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getFileInfoList(sessionId,startFileId,maxRecords,fileInfoList);
@@ -1855,6 +2051,9 @@ int ServiceInterface::getFileInfoListByFileIdList(T::SessionId sessionId,std::ve
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getFileInfoListByFileIdList(sessionId,fileIdList,fileInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoListByFileIdList(sessionId,fileIdList,fileInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1879,6 +2078,9 @@ int ServiceInterface::getFileInfoListByProducerId(T::SessionId sessionId,uint pr
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getFileInfoListByProducerId(sessionId,producerId,startFileId,maxRecords,fileInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getFileInfoListByProducerId(sessionId,producerId,startFileId,maxRecords,fileInfoList);
@@ -1905,6 +2107,9 @@ int ServiceInterface::getFileInfoListByProducerName(T::SessionId sessionId,const
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getFileInfoListByProducerName(sessionId,producerName,startFileId,maxRecords,fileInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoListByProducerName(sessionId,producerName,startFileId,maxRecords,fileInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1929,6 +2134,9 @@ int ServiceInterface::getFileInfoListByGenerationId(T::SessionId sessionId,uint 
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getFileInfoListByGenerationId(sessionId,generationId,startFileId,maxRecords,fileInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getFileInfoListByGenerationId(sessionId,generationId,startFileId,maxRecords,fileInfoList);
@@ -1955,6 +2163,9 @@ int ServiceInterface::getFileInfoListByGenerationName(T::SessionId sessionId,con
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getFileInfoListByGenerationName(sessionId,generationName,startFileId,maxRecords,fileInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoListByGenerationName(sessionId,generationName,startFileId,maxRecords,fileInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -1979,6 +2190,9 @@ int ServiceInterface::getFileInfoListBySourceId(T::SessionId sessionId,uint sour
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getFileInfoListBySourceId(sessionId,sourceId,startFileId,maxRecords,fileInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getFileInfoListBySourceId(sessionId,sourceId,startFileId,maxRecords,fileInfoList);
@@ -2005,6 +2219,9 @@ int ServiceInterface::getFileInfoCount(T::SessionId sessionId,uint& count)
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getFileInfoCount(sessionId,count);
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoCount(sessionId,count);
     unsigned long requestTime = getTime() - timeStart;
@@ -2029,6 +2246,9 @@ int ServiceInterface::getFileInfoCountByProducerId(T::SessionId sessionId,uint p
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getFileInfoCountByProducerId(sessionId,producerId,count);
 
     unsigned long long timeStart = getTime();
     int result = _getFileInfoCountByProducerId(sessionId,producerId,count);
@@ -2055,6 +2275,9 @@ int ServiceInterface::getFileInfoCountByGenerationId(T::SessionId sessionId,uint
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getFileInfoCountByGenerationId(sessionId,generationId,count);
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoCountByGenerationId(sessionId,generationId,count);
     unsigned long requestTime = getTime() - timeStart;
@@ -2080,6 +2303,9 @@ int ServiceInterface::getFileInfoCountBySourceId(T::SessionId sessionId,uint sou
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getFileInfoCountBySourceId(sessionId,sourceId,count);
+
     unsigned long long timeStart = getTime();
     int result = _getFileInfoCountBySourceId(sessionId,sourceId,count);
     unsigned long requestTime = getTime() - timeStart;
@@ -2104,6 +2330,9 @@ int ServiceInterface::addEventInfo(T::SessionId sessionId,T::EventInfo& eventInf
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _addEventInfo(sessionId,eventInfo);
 
     unsigned long long timeStart = getTime();
     int result = _addEventInfo(sessionId,eventInfo);
@@ -2157,6 +2386,9 @@ int ServiceInterface::getEventInfoList(T::SessionId sessionId,uint requestingSer
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getEventInfoList(sessionId,requestingServerId,startEventId,maxRecords,eventInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getEventInfoList(sessionId,requestingServerId,startEventId,maxRecords,eventInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2183,6 +2415,9 @@ int ServiceInterface::getEventInfoCount(T::SessionId sessionId,uint& count)
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getEventInfoCount(sessionId,count);
+
     unsigned long long timeStart = getTime();
     int result = _getEventInfoCount(sessionId,count);
     unsigned long requestTime = getTime() - timeStart;
@@ -2207,6 +2442,9 @@ int ServiceInterface::addContentInfo(T::SessionId sessionId,T::ContentInfo& cont
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _addContentInfo(sessionId,contentInfo);
 
     unsigned long long timeStart = getTime();
     int result = _addContentInfo(sessionId,contentInfo);
@@ -2233,6 +2471,9 @@ int ServiceInterface::setContentInfo(T::SessionId sessionId,T::ContentInfo& cont
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _setContentInfo(sessionId,contentInfo);
+
     unsigned long long timeStart = getTime();
     int result = _setContentInfo(sessionId,contentInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -2257,6 +2498,9 @@ int ServiceInterface::addContentList(T::SessionId sessionId,T::ContentInfoList& 
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _addContentList(sessionId,contentInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _addContentList(sessionId,contentInfoList);
@@ -2283,6 +2527,9 @@ int ServiceInterface::deleteContentInfo(T::SessionId sessionId,uint fileId,uint 
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteContentInfo(sessionId,fileId,messageIndex);
+
     unsigned long long timeStart = getTime();
     int result = _deleteContentInfo(sessionId,fileId,messageIndex);
     unsigned long requestTime = getTime() - timeStart;
@@ -2307,6 +2554,9 @@ int ServiceInterface::deleteContentListByFileId(T::SessionId sessionId,uint file
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteContentListByFileId(sessionId,fileId);
 
     unsigned long long timeStart = getTime();
     int result = _deleteContentListByFileId(sessionId,fileId);
@@ -2333,6 +2583,9 @@ int ServiceInterface::deleteContentListByFileName(T::SessionId sessionId,const s
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteContentListByFileName(sessionId,filename);
+
     unsigned long long timeStart = getTime();
     int result = _deleteContentListByFileName(sessionId,filename);
     unsigned long requestTime = getTime() - timeStart;
@@ -2357,6 +2610,9 @@ int ServiceInterface::deleteContentListByProducerId(T::SessionId sessionId,uint 
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteContentListByProducerId(sessionId,producerId);
 
     unsigned long long timeStart = getTime();
     int result = _deleteContentListByProducerId(sessionId,producerId);
@@ -2383,6 +2639,9 @@ int ServiceInterface::deleteContentListByProducerName(T::SessionId sessionId,con
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteContentListByProducerName(sessionId,producerName);
+
     unsigned long long timeStart = getTime();
     int result = _deleteContentListByProducerName(sessionId,producerName);
     unsigned long requestTime = getTime() - timeStart;
@@ -2407,6 +2666,9 @@ int ServiceInterface::deleteContentListByGenerationId(T::SessionId sessionId,uin
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteContentListByGenerationId(sessionId,generationId);
 
     unsigned long long timeStart = getTime();
     int result = _deleteContentListByGenerationId(sessionId,generationId);
@@ -2433,6 +2695,9 @@ int ServiceInterface::deleteContentListByGenerationName(T::SessionId sessionId,c
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteContentListByGenerationName(sessionId,generationName);
+
     unsigned long long timeStart = getTime();
     int result = _deleteContentListByGenerationName(sessionId,generationName);
     unsigned long requestTime = getTime() - timeStart;
@@ -2457,6 +2722,9 @@ int ServiceInterface::deleteContentListBySourceId(T::SessionId sessionId,uint so
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteContentListBySourceId(sessionId,sourceId);
 
     unsigned long long timeStart = getTime();
     int result = _deleteContentListBySourceId(sessionId,sourceId);
@@ -2483,6 +2751,9 @@ int ServiceInterface::getContentInfo(T::SessionId sessionId,uint fileId,uint mes
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentInfo(sessionId,fileId,messageIndex,contentInfo);
+
     unsigned long long timeStart = getTime();
     int result = _getContentInfo(sessionId,fileId,messageIndex,contentInfo);
     unsigned long requestTime = getTime() - timeStart;
@@ -2507,6 +2778,9 @@ int ServiceInterface::getContentList(T::SessionId sessionId,uint startFileId,uin
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentList(sessionId,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getContentList(sessionId,startFileId,startMessageIndex,maxRecords,contentInfoList);
@@ -2533,6 +2807,9 @@ int ServiceInterface::getContentListByFileId(T::SessionId sessionId,uint fileId,
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByFileId(sessionId,fileId,contentInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByFileId(sessionId,fileId,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2557,6 +2834,9 @@ int ServiceInterface::getContentListByFileIdList(T::SessionId sessionId,std::vec
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByFileIdList(sessionId,fileIdList,contentInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getContentListByFileIdList(sessionId,fileIdList,contentInfoList);
@@ -2583,6 +2863,9 @@ int ServiceInterface::getContentListByFileName(T::SessionId sessionId,const std:
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByFileName(sessionId,filename,contentInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByFileName(sessionId,filename,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2607,6 +2890,9 @@ int ServiceInterface::getContentListByProducerId(T::SessionId sessionId,uint pro
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByProducerId(sessionId,producerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getContentListByProducerId(sessionId,producerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
@@ -2633,6 +2919,9 @@ int ServiceInterface::getContentListByProducerName(T::SessionId sessionId,const 
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByProducerName(sessionId,producerName,startFileId,startMessageIndex,maxRecords,contentInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByProducerName(sessionId,producerName,startFileId,startMessageIndex,maxRecords,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2657,6 +2946,9 @@ int ServiceInterface::getContentListBySourceId(T::SessionId sessionId,uint sourc
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListBySourceId(sessionId,sourceId,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getContentListBySourceId(sessionId,sourceId,startFileId,startMessageIndex,maxRecords,contentInfoList);
@@ -2683,6 +2975,9 @@ int ServiceInterface::getContentListByGenerationId(T::SessionId sessionId,uint g
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByGenerationId(sessionId,generationId,startFileId,startMessageIndex,maxRecords,requestFlags,contentInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByGenerationId(sessionId,generationId,startFileId,startMessageIndex,maxRecords,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2707,6 +3002,9 @@ int ServiceInterface::getContentListByGenerationName(T::SessionId sessionId,cons
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByGenerationName(sessionId,generationName,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getContentListByGenerationName(sessionId,generationName,startFileId,startMessageIndex,maxRecords,contentInfoList);
@@ -2733,6 +3031,9 @@ int ServiceInterface::getContentListByGenerationIdAndTimeRange(T::SessionId sess
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByGenerationIdAndTimeRange(sessionId,generationId,startTime,endTime,contentInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByGenerationIdAndTimeRange(sessionId,generationId,startTime,endTime,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2757,6 +3058,9 @@ int ServiceInterface::getContentListByGenerationIdAndTimeRange(T::SessionId sess
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByGenerationIdAndTimeRange(sessionId,generationId,startTime,endTime,contentInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getContentListByGenerationIdAndTimeRange(sessionId,generationId,startTime,endTime,contentInfoList);
@@ -2783,6 +3087,9 @@ int ServiceInterface::getContentListByGenerationNameAndTimeRange(T::SessionId se
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByGenerationNameAndTimeRange(sessionId,generationName,startTime,endTime,contentInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByGenerationNameAndTimeRange(sessionId,generationName,startTime,endTime,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2807,6 +3114,9 @@ int ServiceInterface::getContentListByGenerationNameAndTimeRange(T::SessionId se
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByGenerationNameAndTimeRange(sessionId,generationName,startTime,endTime,contentInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getContentListByGenerationNameAndTimeRange(sessionId,generationName,startTime,endTime,contentInfoList);
@@ -2833,6 +3143,9 @@ int ServiceInterface::getContentListByParameter(T::SessionId sessionId,T::ParamK
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByParameter(sessionId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameter(sessionId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2857,6 +3170,9 @@ int ServiceInterface::getContentListByParameter(T::SessionId sessionId,T::ParamK
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByParameter(sessionId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameter(sessionId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -2883,6 +3199,9 @@ int ServiceInterface::getContentListByParameterAndGenerationId(T::SessionId sess
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2907,6 +3226,9 @@ int ServiceInterface::getContentListByParameterAndGenerationId(T::SessionId sess
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -2933,6 +3255,9 @@ int ServiceInterface::getContentListByParameterAndGenerationName(T::SessionId se
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -2957,6 +3282,9 @@ int ServiceInterface::getContentListByParameterAndGenerationName(T::SessionId se
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -2983,6 +3311,9 @@ int ServiceInterface::getContentListByParameterAndProducerId(T::SessionId sessio
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -3007,6 +3338,9 @@ int ServiceInterface::getContentListByParameterAndProducerId(T::SessionId sessio
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -3033,6 +3367,9 @@ int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sess
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -3057,6 +3394,9 @@ int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sess
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -3083,6 +3423,9 @@ int ServiceInterface::getContentListByParameterGenerationIdAndForecastTime(T::Se
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -3107,6 +3450,9 @@ int ServiceInterface::getContentListByParameterGenerationIdAndForecastTime(T::Se
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
@@ -3133,6 +3479,9 @@ int ServiceInterface::getContentListOfInvalidIntegrity(T::SessionId sessionId,T:
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentListOfInvalidIntegrity(sessionId,contentInfoList);
+
     unsigned long long timeStart = getTime();
     int result = _getContentListOfInvalidIntegrity(sessionId,contentInfoList);
     unsigned long requestTime = getTime() - timeStart;
@@ -3157,6 +3506,9 @@ int ServiceInterface::getContentGeometryIdListByGenerationId(T::SessionId sessio
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentGeometryIdListByGenerationId(sessionId,generationId,geometryIdList);
 
     unsigned long long timeStart = getTime();
     int result = _getContentGeometryIdListByGenerationId(sessionId,generationId,geometryIdList);
@@ -3183,6 +3535,9 @@ int ServiceInterface::getContentParamListByGenerationId(T::SessionId sessionId,u
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentParamListByGenerationId(sessionId,generationId,contentParamList);
+
     unsigned long long timeStart = getTime();
     int result = _getContentParamListByGenerationId(sessionId,generationId,contentParamList);
     unsigned long requestTime = getTime() - timeStart;
@@ -3207,6 +3562,9 @@ int ServiceInterface::getContentParamKeyListByGenerationId(T::SessionId sessionI
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentParamKeyListByGenerationId(sessionId,generationId,parameterKeyType,paramKeyList);
 
     unsigned long long timeStart = getTime();
     int result = _getContentParamKeyListByGenerationId(sessionId,generationId,parameterKeyType,paramKeyList);
@@ -3233,6 +3591,9 @@ int ServiceInterface::getContentParamKeyListByGenerationAndGeometryId(T::Session
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentParamKeyListByGenerationAndGeometryId(sessionId,generationId,geometryId,parameterKeyType,paramKeyList);
+
     unsigned long long timeStart = getTime();
     int result = _getContentParamKeyListByGenerationAndGeometryId(sessionId,generationId,geometryId,parameterKeyType,paramKeyList);
     unsigned long requestTime = getTime() - timeStart;
@@ -3257,6 +3618,9 @@ int ServiceInterface::getContentTimeListByGenerationId(T::SessionId sessionId,ui
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentTimeListByGenerationId(sessionId,generationId,contentTimeList);
 
     unsigned long long timeStart = getTime();
     int result = _getContentTimeListByGenerationId(sessionId,generationId,contentTimeList);
@@ -3283,6 +3647,9 @@ int ServiceInterface::getContentTimeListByGenerationAndGeometryId(T::SessionId s
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentTimeListByGenerationAndGeometryId(sessionId,generationId,geometryId,contentTimeList);
+
     unsigned long long timeStart = getTime();
     int result = _getContentTimeListByGenerationAndGeometryId(sessionId,generationId,geometryId,contentTimeList);
     unsigned long requestTime = getTime() - timeStart;
@@ -3307,6 +3674,9 @@ int ServiceInterface::getContentTimeListByProducerId(T::SessionId sessionId,uint
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentTimeListByProducerId(sessionId,producerId,contentTimeList);
 
     unsigned long long timeStart = getTime();
     int result = _getContentTimeListByProducerId(sessionId,producerId,contentTimeList);
@@ -3333,6 +3703,9 @@ int ServiceInterface::getContentTimeRangeByProducerAndGenerationId(T::SessionId 
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentTimeRangeByProducerAndGenerationId(sessionId,producerId,generationId,startTime,endTime);
+
     unsigned long long timeStart = getTime();
     int result = _getContentTimeRangeByProducerAndGenerationId(sessionId,producerId,generationId,startTime,endTime);
     unsigned long requestTime = getTime() - timeStart;
@@ -3357,6 +3730,9 @@ int ServiceInterface::getContentTimeRangeByGenerationId(T::SessionId sessionId,u
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentTimeRangeByGenerationId(sessionId,generationId,startTime,endTime);
 
     unsigned long long timeStart = getTime();
     int result = _getContentTimeRangeByGenerationId(sessionId,generationId,startTime,endTime);
@@ -3383,6 +3759,9 @@ int ServiceInterface::getGenerationIdGeometryIdAndForecastTimeList(T::SessionId 
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getGenerationIdGeometryIdAndForecastTimeList(sessionId,list);
+
     unsigned long long timeStart = getTime();
     int result = _getGenerationIdGeometryIdAndForecastTimeList(sessionId,list);
     unsigned long requestTime = getTime() - timeStart;
@@ -3407,6 +3786,9 @@ int ServiceInterface::getContentCount(T::SessionId sessionId,uint& count)
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getContentCount(sessionId,count);
 
     unsigned long long timeStart = getTime();
     int result = _getContentCount(sessionId,count);
@@ -3433,6 +3815,9 @@ int ServiceInterface::getHashByProducerId(T::SessionId sessionId,uint producerId
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getHashByProducerId(sessionId,producerId,hash);
+
     unsigned long long timeStart = getTime();
     int result = _getHashByProducerId(sessionId,producerId,hash);
     unsigned long requestTime = getTime() - timeStart;
@@ -3457,6 +3842,9 @@ int ServiceInterface::getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& 
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _getLevelInfoList(sessionId,levelInfoList);
 
     unsigned long long timeStart = getTime();
     int result = _getLevelInfoList(sessionId,levelInfoList);
@@ -3484,6 +3872,9 @@ int ServiceInterface::deleteVirtualContent(T::SessionId sessionId)
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _deleteVirtualContent(sessionId);
+
     unsigned long long timeStart = getTime();
     int result = _deleteVirtualContent(sessionId);
     unsigned long requestTime = getTime() - timeStart;
@@ -3508,6 +3899,9 @@ int ServiceInterface::updateVirtualContent(T::SessionId sessionId)
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _updateVirtualContent(sessionId);
 
     unsigned long long timeStart = getTime();
     int result = _updateVirtualContent(sessionId);

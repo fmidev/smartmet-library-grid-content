@@ -629,36 +629,19 @@ class ServiceImplementation : public ServiceInterface
      ParamMappingFile_vec       mParameterMappings;
      time_t                     mParameterMapping_checkTime;
      uint                       mParameterMapping_checkInterval;
-
-     ParameterMappingCache      mParameterMappingCache;
-     ModificationLock           mParameterMappingCache_modificationLock;
-
-     uint                       mActiveContentCache;
-     ContentCache               mContentCache[2];
-     ModificationLock           mContentCache_modificationLock;
-     std::size_t                mContentCache_records;
      std::size_t                mContentCache_maxRecords;
-
-     uint                       mActiveContentSearchCache;
-     ContentSearchCache         mContentSearchCache[2];
-     ModificationLock           mContentSearchCache_modificationLock;
-     std::size_t                mContentSearchCache_records;
      std::size_t                mContentSearchCache_maxRecords;
-
+     time_t                     mParameterMappingCache_clearRequired;
 
      pthread_t                  mThread;
      bool                       mShutdownRequested;
      bool                       mCheckGeometryStatus;
+     time_t                     mProducerGenerationListCache_clearRequired;
 
      std::map<std::string,uint>        mOperationNames;
      Functions::FunctionCollection     mFunctionCollection;
      boost::shared_ptr<Fmi::LandCover> mLandCover;
      boost::shared_ptr<Fmi::DEM>       mDem;
-     std::set<ulonglong>               mReadyGeometryList;
-
-     ProducerGenarationListCache       mProducerGenerationListCache;
-     ModificationLock                  mProducerGenerationListCacheModificationLock;
-
 };
 
 
