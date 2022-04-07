@@ -6241,7 +6241,7 @@ void CacheImplementation::event_geometryDeleted(T::EventInfo& eventInfo)
   {
     AutoWriteLock lock(&mModificationLock);
 
-    // mContentDeleteCounter += mContentInfoList.markDeletedByGenerationAndGeometryId(eventInfo.mId1,eventInfo.mId2);
+    mContentDeleteCounter += mContentInfoList.markDeletedByGenerationAndGeometryId(eventInfo.mId1,eventInfo.mId2);
     // mFileDeleteCounter += mFileInfoList.markDeletedByGenerationAndGeometryId(eventInfo.mId1,eventInfo.mId2);
     mGeometryDeleteCounter += mGeometryInfoList.deleteGeometryInfoById(eventInfo.mId1,eventInfo.mId2,eventInfo.mId3);
 
@@ -6251,7 +6251,7 @@ void CacheImplementation::event_geometryDeleted(T::EventInfo& eventInfo)
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
-        //mContentDeleteCounter += ssp->mContentInfoList[0].markDeletedByGenerationAndGeometrtId(eventInfo.mId1,eventInfo.mId2);
+        mContentDeleteCounter += ssp->mContentInfoList[0].markDeletedByGenerationAndGeometryId(eventInfo.mId1,eventInfo.mId2);
         //mFileDeleteCounter += ssp->mFileInfoList.markDeletedByGenerationAndGeometryId(eventInfo.mId1,eventInfo.mId2);
         mGeometryDeleteCounter += ssp->mGeometryInfoList.markDeletedById(eventInfo.mId1,eventInfo.mId2,eventInfo.mId3);
       }

@@ -1117,6 +1117,40 @@ uint ContentInfoList::markDeletedByGenerationId(uint generationId)
 
 
 
+uint ContentInfoList::markDeletedByGenerationAndGeometryId(uint generationId,T::GeometryId geometryId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    AutoReadLock lock(mModificationLockPtr);
+
+    uint cnt = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info->mGenerationId == generationId &&  info->mGeometryId == geometryId)
+        {
+          info->mFlags = info->mFlags | T::ContentInfo::Flags::DeletedContent;
+          cnt++;
+        }
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 uint ContentInfoList::markDeletedByProducerId(uint producerId)
 {
   FUNCTION_TRACE

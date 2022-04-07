@@ -7737,7 +7737,7 @@ int RedisImplementation::deleteContentByGeometry(uint generationId,T::GeometryId
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
-      if (contentInfo->mGeometryId == geometryId  &&  contentInfo->mFmiParameterLevelId == levelId)
+      if (contentInfo->mGeometryId == geometryId  &&  (levelId <= 0 || contentInfo->mFmiParameterLevelId == levelId))
         deleteContent(contentInfo->mFileId,contentInfo->mMessageIndex);
     }
 
