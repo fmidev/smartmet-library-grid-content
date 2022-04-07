@@ -53,6 +53,7 @@ class ContentInfoList
     uint                markDeletedByFileId(uint fileId);
     uint                markDeletedByFileIdAndMessageIndex(uint fileId,uint messageIndex);
     uint                markDeletedByGenerationId(uint generationId);
+    uint                markDeletedByGenerationAndGeometryId(uint generationId,T::GeometryId geometryId);
     uint                markDeletedByProducerId(uint fileId);
     uint                markDeletedBySourceId(uint sourceId);
 
