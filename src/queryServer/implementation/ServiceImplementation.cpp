@@ -969,6 +969,7 @@ void ServiceImplementation::getParameterMappings(
 
 void ServiceImplementation::getParameterStringInfo(
     const std::string& param,
+    char fieldSeparator,
     std::string& key,
     T::GeometryId& geometryId,
     T::ParamLevelId& paramLevelId,
@@ -987,7 +988,7 @@ void ServiceImplementation::getParameterStringInfo(
   try
   {
     std::vector<T::ForecastNumber> forecastNumberVec;
-    getParameterStringInfo(param, key, geometryId,paramLevelId, paramLevel, forecastType, forecastNumberVec, producerName, producerId, generationFlags, areaInterpolationMethod,
+    getParameterStringInfo(param, fieldSeparator, key, geometryId,paramLevelId, paramLevel, forecastType, forecastNumberVec, producerName, producerId, generationFlags, areaInterpolationMethod,
         timeInterpolationMethod, levelInterpolationMethod);
 
     if (forecastNumberVec.size() > 0)
@@ -1006,6 +1007,7 @@ void ServiceImplementation::getParameterStringInfo(
 
 void ServiceImplementation::getParameterStringInfo(
     const std::string& param,
+    char fieldSeparator,
     std::string& key,
     T::GeometryId& geometryId,
     T::ParamLevelId& paramLevelId,
@@ -1039,7 +1041,7 @@ void ServiceImplementation::getParameterStringInfo(
       if (*p == '}')
         level--;
 
-      if (level == 0 && *p == ':')
+      if (level == 0 && *p == fieldSeparator)
       {
         *p = '\0';
         p++;
@@ -1289,7 +1291,7 @@ bool ServiceImplementation::parseFunction(
             newParam.mParam = alias;
             newParam.mOrigParam = newParam.mOrigParam + " => " + alias;
             std::string paramName;
-            getParameterStringInfo(fParam->second, paramName, newParam.mGeometryId, newParam.mParameterLevelId, newParam.mParameterLevel, newParam.mForecastType, newParam.mForecastNumber,
+            getParameterStringInfo(fParam->second, ':', paramName, newParam.mGeometryId, newParam.mParameterLevelId, newParam.mParameterLevel, newParam.mForecastType, newParam.mForecastNumber,
                 newParam.mProducerName,newParam.mProducerId, newParam.mGenerationFlags, newParam.mAreaInterpolationMethod, newParam.mTimeInterpolationMethod, newParam.mLevelInterpolationMethod);
           }
 
@@ -1306,7 +1308,7 @@ bool ServiceImplementation::parseFunction(
       std::string producerName;
 
       std::string paramName;
-      getParameterStringInfo(paramStr, paramName, queryParam.mGeometryId, queryParam.mParameterLevelId, queryParam.mParameterLevel, queryParam.mForecastType, forecastNumberVec, producerName,
+      getParameterStringInfo(paramStr, ':', paramName, queryParam.mGeometryId, queryParam.mParameterLevelId, queryParam.mParameterLevel, queryParam.mForecastType, forecastNumberVec, producerName,
           queryParam.mProducerId, queryParam.mGenerationFlags, queryParam.mAreaInterpolationMethod, queryParam.mTimeInterpolationMethod, queryParam.mLevelInterpolationMethod);
 
       size_t sz = forecastNumberVec.size();
@@ -1469,7 +1471,7 @@ void ServiceImplementation::updateQueryParameters(Query& query)
 
         std::vector<T::ForecastNumber> forecastNumberVec;
 
-        getParameterStringInfo(qParam->mParam, qParam->mParameterKey, qParam->mGeometryId, qParam->mParameterLevelId, qParam->mParameterLevel, qParam->mForecastType, forecastNumberVec, qParam->mProducerName,
+        getParameterStringInfo(qParam->mParam, ':', qParam->mParameterKey, qParam->mGeometryId, qParam->mParameterLevelId, qParam->mParameterLevel, qParam->mForecastType, forecastNumberVec, qParam->mProducerName,
             qParam->mProducerId, qParam->mGenerationFlags, qParam->mAreaInterpolationMethod, qParam->mTimeInterpolationMethod, qParam->mLevelInterpolationMethod);
 
         size_t sz = forecastNumberVec.size();
@@ -1874,7 +1876,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
         bool useAlternative = false;
 
-        getParameterStringInfo(qParam->mParam, paramName, geometryId, paramLevelId, paramLevel, forecastType, forecastNumber, producerName,producerId, generationFlags, areaInterpolationMethod,
+        getParameterStringInfo(qParam->mParam, ':', paramName, geometryId, paramLevelId, paramLevel, forecastType, forecastNumber, producerName,producerId, generationFlags, areaInterpolationMethod,
             timeInterpolationMethod, levelInterpolationMethod);
 
         if (paramName.c_str()[0] == '$')
@@ -2204,7 +2206,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
         bool useAlternative = false;
 
-        getParameterStringInfo(qParam->mParam, paramName, geometryId,paramLevelId, paramLevel, forecastType, forecastNumber, producerName, producerId, generationFlags, areaInterpolationMethod,
+        getParameterStringInfo(qParam->mParam, ':', paramName, geometryId,paramLevelId, paramLevel, forecastType, forecastNumber, producerName, producerId, generationFlags, areaInterpolationMethod,
             timeInterpolationMethod, levelInterpolationMethod);
 
         if (paramName.c_str()[0] == '$')
@@ -6775,32 +6777,90 @@ void ServiceImplementation::getGridValues(
                           pList.emplace_back(std::pair<std::string,T::GeometryId>(it->first,it->second));
                           gList.insert(it->second);
 
-                          std::string pname = "GeopHeight";
+                          std::string param = "GeopHeight;" + it->first + ";" + std::to_string(it->second);
+                          std::string paramStr;
+
+                          if (!getAlias(param,paramStr))
+                            paramStr = param;
+
+
+                          std::string x_param;
+                          T::GeometryId x_geometryId = it->second;
+                          T::ParamLevelId x_paramLevelId = 0;
+                          T::ParamLevel x_paramLevel = 0;
+                          T::ForecastType x_forecastType = 1;
+                          T::ForecastNumber x_forecastNumber = -1;
+                          std::string x_producerName;
+                          uint x_producerId = 0;
+                          ulonglong x_generationFlags = 0;
+                          short x_areaInterpolationMethod = 500;
+                          short x_timeInterpolationMethod = 1;
+                          short x_levelInterpolationMethod = 1;
+
+                          getParameterStringInfo(paramStr,';',x_param,x_geometryId,x_paramLevelId,x_paramLevel,x_forecastType,x_forecastNumber,x_producerName,
+                            x_producerId,x_generationFlags,x_areaInterpolationMethod,x_timeInterpolationMethod,x_levelInterpolationMethod);
+
+                          if (strcasecmp(x_producerName.c_str(),it->first.c_str()) != 0)
+                          {
+                            pList.emplace_back(std::pair<std::string,T::GeometryId>(x_producerName,x_geometryId));
+                            gList.insert(x_geometryId);
+                          }
+
                           ParameterValues zhValueList;
-                          getGridValues(queryType,pList,gList,producerInfo.mProducerId,
-                              analysisTime,generationFlags,reverseGenerations,acceptNotReadyGenerations,pname,0,6,0,
-                              forecastType,forecastNumber,queryFlags,parameterFlags,500,timeInterpolationMethod,
-                              levelInterpolationMethod,forecastTime,timeMatchRequired,locationType,
-                              coordinateType,areaCoordinates,contourLowValues,contourHighValues,
-                              queryAttributeList,radius,precision,zhValueList,coordinates,producerStr);
+                          getGridValues(queryType,pList,gList,x_producerId,
+                            analysisTime,generationFlags,reverseGenerations,acceptNotReadyGenerations,x_param,0,x_paramLevelId,x_paramLevel,
+                            x_forecastType,x_forecastNumber,queryFlags,parameterFlags,x_areaInterpolationMethod,x_timeInterpolationMethod,
+                            x_levelInterpolationMethod,forecastTime,timeMatchRequired,locationType,
+                            coordinateType,areaCoordinates,contourLowValues,contourHighValues,
+                            queryAttributeList,radius,precision,zhValueList,coordinates,producerStr);
 
-                          pname = "LapseRate";
+                          param = "LapseRate;" + it->first + ";" + std::to_string(it->second);
+                          if (!getAlias(param,paramStr))
+                            paramStr = param;
+
+                          x_paramLevelId = 0;
+                          x_paramLevel = 0;
+
+                          getParameterStringInfo(paramStr,';',x_param,x_geometryId,x_paramLevelId,x_paramLevel,x_forecastType,x_forecastNumber,x_producerName,
+                            x_producerId,x_generationFlags,x_areaInterpolationMethod,x_timeInterpolationMethod,x_levelInterpolationMethod);
+
+                          if (strcasecmp(x_producerName.c_str(),it->first.c_str()) != 0)
+                          {
+                            pList.emplace_back(std::pair<std::string,T::GeometryId>(x_producerName,x_geometryId));
+                            gList.insert(x_geometryId);
+                          }
+
+
                           ParameterValues lrValueList;
-                          getGridValues(queryType,pList,gList,producerInfo.mProducerId,
-                              analysisTime,generationFlags,reverseGenerations,acceptNotReadyGenerations,pname,0,6,0,
-                              forecastType,forecastNumber,queryFlags,parameterFlags,500,timeInterpolationMethod,
-                              levelInterpolationMethod,forecastTime,timeMatchRequired,locationType,
-                              coordinateType,areaCoordinates,contourLowValues,contourHighValues,
-                              queryAttributeList,radius,precision,lrValueList,coordinates,producerStr);
+                          getGridValues(queryType,pList,gList,x_producerId,
+                            analysisTime,generationFlags,reverseGenerations,acceptNotReadyGenerations,x_param,0,x_paramLevelId,x_paramLevel,
+                            x_forecastType,x_forecastNumber,queryFlags,parameterFlags,x_areaInterpolationMethod,x_timeInterpolationMethod,
+                            x_levelInterpolationMethod,forecastTime,timeMatchRequired,locationType,
+                            coordinateType,areaCoordinates,contourLowValues,contourHighValues,
+                            queryAttributeList,radius,precision,lrValueList,coordinates,producerStr);
 
-                          pname = "LandSeaMask";
+                          param = "LandSeaMask;" + it->first + ";" + std::to_string(it->second);
+                          if (!getAlias(param,paramStr))
+                            paramStr = param;
+
+                          x_paramLevelId = 0;
+                          x_paramLevel = 0;
+
+                          getParameterStringInfo(paramStr,';',x_param,x_geometryId,x_paramLevelId,x_paramLevel,x_forecastType,x_forecastNumber,x_producerName,
+                            x_producerId,x_generationFlags,x_areaInterpolationMethod,x_timeInterpolationMethod,x_levelInterpolationMethod);
+
+                          if (strcasecmp(x_producerName.c_str(),it->first.c_str()) != 0)
+                          {
+                            pList.emplace_back(std::pair<std::string,T::GeometryId>(x_producerName,x_geometryId));
+                            gList.insert(x_geometryId);
+                          }
                           ParameterValues lsValueList;
-                          getGridValues(queryType,pList,gList,producerInfo.mProducerId,
-                              analysisTime,generationFlags,reverseGenerations,acceptNotReadyGenerations,pname,0,6,0,
-                              forecastType,forecastNumber,queryFlags,parameterFlags,500,timeInterpolationMethod,
-                              levelInterpolationMethod,forecastTime,timeMatchRequired,locationType,
-                              coordinateType,areaCoordinates,contourLowValues,contourHighValues,
-                              queryAttributeList,radius,precision,lsValueList,coordinates,producerStr);
+                          getGridValues(queryType,pList,gList,x_producerId,
+                            analysisTime,generationFlags,reverseGenerations,acceptNotReadyGenerations,x_param,0,x_paramLevelId,x_paramLevel,
+                            x_forecastType,x_forecastNumber,queryFlags,parameterFlags,x_areaInterpolationMethod,x_timeInterpolationMethod,
+                            x_levelInterpolationMethod,forecastTime,timeMatchRequired,locationType,
+                            coordinateType,areaCoordinates,contourLowValues,contourHighValues,
+                            queryAttributeList,radius,precision,lsValueList,coordinates,producerStr);
 
                           std::vector<double> vList;
                           std::vector<double> zhList;
@@ -6847,6 +6907,13 @@ void ServiceImplementation::getGridValues(
                               splitString(v->mValueString,';',vList);
                               if (vList.size() == 0)
                                 return;
+
+                              PRINT_DATA(mDebugLog, "  - Landscape interpolation : %f,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
+                                  dem,coverType,
+                                  vList[1],vList[2],vList[3],vList[4],vList[5],vList[6],
+                                  zhList[3],zhList[4],zhList[5],zhList[6],
+                                  lrList[3],lrList[4],lrList[5],lrList[6],
+                                  lsList[3],lsList[4],lsList[5],lsList[6]);
 
                               double val = landscapeInterpolation(
                                   dem,coverType,

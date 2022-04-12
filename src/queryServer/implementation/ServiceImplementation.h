@@ -199,6 +199,7 @@ class ServiceImplementation : public ServiceInterface
 
      void           getParameterStringInfo(
                        const std::string& param,
+                       char fieldSeparator,
                        std::string& key,
                        T::GeometryId& geometryId,
                        T::ParamLevelId& paramLevelId,
@@ -214,6 +215,7 @@ class ServiceImplementation : public ServiceInterface
 
      void           getParameterStringInfo(
                        const std::string& param,
+                       char fieldSeparator,
                        std::string& key,
                        T::GeometryId& geometryId,
                        T::ParamLevelId& paramLevelId,
