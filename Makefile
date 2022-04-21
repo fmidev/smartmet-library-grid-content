@@ -7,7 +7,7 @@ INCDIR = smartmet/$(SUBNAME)
 
 CORBA = enabled
 
-REQUIRES = gdal
+REQUIRES = gdal icu-i18n
 
 include $(shell echo $${PREFIX-/usr})/share/smartmet/devel/makefile.inc
 
@@ -28,8 +28,7 @@ CFLAGS += $(CORBA_FLAGS)
 INCLUDES += $(CORBA_INCLUDE)
 
 CFLAGS += \
-	-isystem /usr/include/lua \
-	$(pkg-config --cflags icu-i18n)
+	-isystem /usr/include/lua
 
 LIBS += $(REQUIRED_LIBS) $(CORBA_LIBS) \
 	-L$(libdir) \
