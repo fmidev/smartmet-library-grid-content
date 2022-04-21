@@ -230,8 +230,8 @@ clean: delete_stubs
 	rm -f src/*~ src/*/*~ src/*/*/*~
 	rm -rf obj
 	rm -rf $(LIBFILE)
-	
-clean-install: 
+
+clean-install:
 	rm -rf $(includedir)/$(INCDIR)/*
 	rm -f $(libdir)/$(LIBFILE)
 
