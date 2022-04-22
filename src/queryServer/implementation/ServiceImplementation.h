@@ -637,6 +637,7 @@ class ServiceImplementation : public ServiceInterface
 
      pthread_t                  mThread;
      bool                       mShutdownRequested;
+     bool                       mUpdateProcessingActive;
      bool                       mCheckGeometryStatus;
      time_t                     mProducerGenerationListCache_clearRequired;
 

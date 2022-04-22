@@ -176,6 +176,46 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,cons
 
 
 
+void ServiceImplementation::shutdown()
+{
+  FUNCTION_TRACE
+  try
+  {
+    PRINT_DATA(mDebugLog,"*** SHUTDOWN ***\n");
+    mShutdownRequested = true;
+    while (mEventProcessingActive)
+      sleep(1);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+bool ServiceImplementation::isSessionValid(T::SessionId sessionId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mShutdownRequested)
+      return false;
+
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ServiceImplementation::setPreload(bool preloadEnabled,bool preloadMemoryLock,const std::string& preloadFile)
 {
   FUNCTION_TRACE
@@ -374,6 +414,9 @@ int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,uint mo
   FUNCTION_TRACE
   try
   {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
     uint sz = valueRecordList.getLength();
     for (uint t=0; t<sz; t++)
     {
@@ -445,6 +488,9 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileI
   FUNCTION_TRACE
   try
   {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
     GRID::GridFile_sptr gridFile = getGridFile(fileId);
     if (!gridFile)
       return Result::FILE_NOT_FOUND;
@@ -499,6 +545,9 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
   FUNCTION_TRACE
   try
   {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
     GRID::GridFile_sptr gridFile = getGridFile(fileId);
     if (!gridFile)
       return Result::DATA_NOT_FOUND;
@@ -556,6 +605,9 @@ int ServiceImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
   FUNCTION_TRACE
   try
   {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
     count = mGridFileManager.getFileCount();
     return Result::OK;
   }
@@ -574,6 +626,9 @@ int ServiceImplementation::_getGridMessageBytes(T::SessionId sessionId,uint file
   FUNCTION_TRACE
   try
   {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
     GRID::GridFile_sptr gridFile = getGridFile(fileId);
     if (!gridFile)
       return Result::DATA_NOT_FOUND;
@@ -628,6 +683,9 @@ int ServiceImplementation::_getGridMessagePreloadCount(T::SessionId sessionId,ui
   FUNCTION_TRACE
   try
   {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
     if (mContentPreloadEnabled)
       count = mPreloadList.size();
     else
@@ -650,6 +708,9 @@ int ServiceImplementation::_getGridAttributeList(T::SessionId sessionId,uint fil
   FUNCTION_TRACE
   try
   {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
     GRID::GridFile_sptr gridFile = getGridFile(fileId);
     if (!gridFile)
       return Result::DATA_NOT_FOUND;
@@ -679,6 +740,9 @@ int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint file
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -718,6 +782,9 @@ int ServiceImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,u
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -768,6 +835,9 @@ int ServiceImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,ui
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -818,6 +888,9 @@ int ServiceImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId session
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -888,6 +961,9 @@ int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,uint fileI
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -926,6 +1002,9 @@ int ServiceImplementation::_getGridValueVectorByLevel(T::SessionId sessionId,uin
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -976,6 +1055,9 @@ int ServiceImplementation::_getGridValueVectorByTime(T::SessionId sessionId,uint
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -1026,6 +1108,9 @@ int ServiceImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId se
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -1076,6 +1161,9 @@ int ServiceImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId ses
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -1126,6 +1214,9 @@ int ServiceImplementation::_getGridValueVectorByCoordinateList(T::SessionId sess
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -1164,6 +1255,9 @@ int ServiceImplementation::_getGridValueVectorByLevelAndCoordinateList(T::Sessio
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -1214,6 +1308,9 @@ int ServiceImplementation::_getGridValueVectorByTimeAndCoordinateList(T::Session
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -1264,6 +1361,9 @@ int ServiceImplementation::_getGridValueVectorByTimeAndLevel(T::SessionId sessio
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -1335,6 +1435,9 @@ int ServiceImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionI
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -1405,6 +1508,9 @@ int ServiceImplementation::_getGridValueVectorByTimeLevelAndCoordinateList(T::Se
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -1476,6 +1582,9 @@ int ServiceImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -1514,6 +1623,9 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -1552,6 +1664,9 @@ int ServiceImplementation::_getGridValueListByTimeAndCircle(T::SessionId session
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -1603,6 +1718,9 @@ int ServiceImplementation::_getGridValueListByLevelAndCircle(T::SessionId sessio
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -1653,6 +1771,9 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndCircle(T::SessionId se
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -1724,6 +1845,9 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -1796,6 +1920,9 @@ int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,u
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -1835,6 +1962,9 @@ int ServiceImplementation::_getGridValueListByLevelAndPointList(T::SessionId ses
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -1885,6 +2015,9 @@ int ServiceImplementation::_getGridValueListByTimeAndPointList(T::SessionId sess
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -1935,6 +2068,9 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndPointList(T::SessionId
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2005,6 +2141,9 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2043,6 +2182,9 @@ int ServiceImplementation::_getGridValueListByLevelAndPolygon(T::SessionId sessi
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2093,6 +2235,9 @@ int ServiceImplementation::_getGridValueListByTimeAndPolygon(T::SessionId sessio
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2143,6 +2288,9 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndPolygon(T::SessionId s
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2209,6 +2357,9 @@ int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2247,6 +2398,9 @@ int ServiceImplementation::_getGridValueListByTimeAndPolygonPath(T::SessionId se
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2297,6 +2451,9 @@ int ServiceImplementation::_getGridValueListByLevelAndPolygonPath(T::SessionId s
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2348,6 +2505,9 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndPolygonPath(T::Session
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2414,6 +2574,9 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,u
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2453,6 +2616,9 @@ int ServiceImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,uin
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2492,6 +2658,9 @@ int ServiceImplementation::_getGridIsobands(T::SessionId sessionId,uint fileId,u
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2531,6 +2700,9 @@ int ServiceImplementation::_getGridIsobandsByGeometry(T::SessionId sessionId,uin
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2570,6 +2742,9 @@ int ServiceImplementation::_getGridIsobandsByGrid(T::SessionId sessionId,uint fi
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2609,6 +2784,9 @@ int ServiceImplementation::_getGridIsobandsByLevel(T::SessionId sessionId,uint f
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2659,6 +2837,9 @@ int ServiceImplementation::_getGridIsobandsByTime(T::SessionId sessionId,uint fi
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2709,6 +2890,9 @@ int ServiceImplementation::_getGridIsobandsByLevelAndGeometry(T::SessionId sessi
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2761,6 +2945,9 @@ int ServiceImplementation::_getGridIsobandsByTimeAndGeometry(T::SessionId sessio
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2812,6 +2999,9 @@ int ServiceImplementation::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2868,6 +3058,9 @@ int ServiceImplementation::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2924,6 +3117,9 @@ int ServiceImplementation::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -2995,6 +3191,9 @@ int ServiceImplementation::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId s
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -3066,6 +3265,9 @@ int ServiceImplementation::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessi
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -3143,6 +3345,9 @@ int ServiceImplementation::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -3214,6 +3419,9 @@ int ServiceImplementation::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId s
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -3284,6 +3492,9 @@ int ServiceImplementation::_getGridIsolines(T::SessionId sessionId,uint fileId,u
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -3323,6 +3534,9 @@ int ServiceImplementation::_getGridIsolinesByGeometry(T::SessionId sessionId,uin
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -3362,6 +3576,9 @@ int ServiceImplementation::_getGridIsolinesByGrid(T::SessionId sessionId,uint fi
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -3401,6 +3618,9 @@ int ServiceImplementation::_getGridIsolinesByLevel(T::SessionId sessionId,uint f
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -3451,6 +3671,9 @@ int ServiceImplementation::_getGridIsolinesByTime(T::SessionId sessionId,uint fi
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -3501,6 +3724,9 @@ int ServiceImplementation::_getGridIsolinesByLevelAndGeometry(T::SessionId sessi
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -3552,6 +3778,9 @@ int ServiceImplementation::_getGridIsolinesByTimeAndGeometry(T::SessionId sessio
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -3602,6 +3831,9 @@ int ServiceImplementation::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -3658,6 +3890,9 @@ int ServiceImplementation::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -3715,6 +3950,9 @@ int ServiceImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessi
   {
     try
     {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
         return Result::FILE_NOT_FOUND;
@@ -5325,24 +5563,6 @@ void ServiceImplementation::eventProcessingThread()
 }
 
 
-
-
-
-void ServiceImplementation::shutdown()
-{
-  FUNCTION_TRACE
-  try
-  {
-    PRINT_DATA(mDebugLog,"*** SHUTDOWN ***\n");
-    mShutdownRequested = true;
-    while (mEventProcessingActive)
-      sleep(1);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
 
 }
 }

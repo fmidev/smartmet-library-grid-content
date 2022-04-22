@@ -309,6 +309,9 @@ bool CacheImplementation::isSessionValid(T::SessionId sessionId)
   FUNCTION_TRACE
   try
   {
+    if (mShutdownRequested)
+      return false;
+
     return true;
   }
   catch (...)
@@ -7063,6 +7066,9 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
+    if (mShutdownRequested)
+      return;
+
     switch (eventInfo.mType)
     {
       case EventType::UNKNOWN:
@@ -7239,6 +7245,9 @@ void CacheImplementation::processEvents(bool eventThread)
     uint len = 1000;
     while (len > 0)
     {
+      if (mShutdownRequested)
+        return;
+
       len = 0;
       T::EventInfo eventInfo;
       int result = mContentStorage->getLastEventInfo(mSessionId,0,eventInfo);
@@ -7309,6 +7318,9 @@ void CacheImplementation::processEvents(bool eventThread)
       {
         if (ssp->mGenerationInfoList.getGenerationInfoById(it->first) == nullptr)
         {
+          if (mShutdownRequested)
+            return;
+
           mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
           mContentTimeCache.erase(it->first);
           mContentTimeCache_modificationLock.writeUnlock();
@@ -7410,6 +7422,9 @@ void CacheImplementation::updateContent()
   //FUNCTION_TRACE
   try
   {
+    if (mShutdownRequested)
+      return;
+
     if (mReloadActivated)
       return;
 
@@ -7483,6 +7498,9 @@ void CacheImplementation::updateContent()
 
       for (uint p=0; p<pLen; p++)
       {
+        if (mShutdownRequested)
+          return;
+
         T::ProducerInfo *producerInfo = nptr->mProducerInfoList.getProducerInfoByIndex(p);
         if (producerInfo != nullptr)
         {
@@ -7568,7 +7586,7 @@ void CacheImplementation::updateContent()
 
       // Removing information that is marked to be deleted
 
-      if (mContentDeleteCounter > 0)
+      if (mContentDeleteCounter > 0  &&  !mShutdownRequested)
       {
         PRINT_DATA(mDebugLog, "  -- Delete content records (%u)\n",mContentDeleteCounter);
         mContentInfoList.deleteMarkedContent();
@@ -7579,7 +7597,7 @@ void CacheImplementation::updateContent()
         PRINT_DATA(mDebugLog, "     => Content %u\n",ssp->mContentInfoList[0].getLength());
       }
 
-      if (mFileDeleteCounter > 0)
+      if (mFileDeleteCounter > 0  &&  !mShutdownRequested)
       {
         PRINT_DATA(mDebugLog, "  -- Delete file records (%u)\n",mFileDeleteCounter);
         mFileInfoList.deleteMarkedFiles();
@@ -7589,7 +7607,7 @@ void CacheImplementation::updateContent()
         PRINT_DATA(mDebugLog, "     => Files %u\n",ssp->mFileInfoList.getLength());
       }
 
-      if (mGenerationDeleteCounter > 0)
+      if (mGenerationDeleteCounter > 0  &&  !mShutdownRequested)
       {
         PRINT_DATA(mDebugLog, "  -- Delete generation records (%u)\n",mGenerationDeleteCounter);
         mGenerationInfoList.deleteMarkedGenerations();
@@ -7598,7 +7616,7 @@ void CacheImplementation::updateContent()
         PRINT_DATA(mDebugLog, "     => Generations %u\n",ssp->mGenerationInfoList.getLength());
       }
 
-      if (mGeometryDeleteCounter > 0)
+      if (mGeometryDeleteCounter > 0  &&  !mShutdownRequested)
       {
         PRINT_DATA(mDebugLog, "  -- Delete geometry records (%u)\n",mGeometryDeleteCounter);
         mGeometryInfoList.deleteMarkedGeometries();
@@ -7607,7 +7625,7 @@ void CacheImplementation::updateContent()
         PRINT_DATA(mDebugLog, "     => Geometries %u\n",ssp->mGeometryInfoList.getLength());
       }
 
-      if (mProducerDeleteCounter > 0)
+      if (mProducerDeleteCounter > 0  &&  !mShutdownRequested)
       {
         PRINT_DATA(mDebugLog, "  -- Delete producer records (%u)\n",mProducerDeleteCounter);
         mProducerInfoList.deleteMarkedProducers();
@@ -7617,7 +7635,7 @@ void CacheImplementation::updateContent()
       }
 
 
-      if (mProducerInfoList.getLength() > 0)
+      if (mProducerInfoList.getLength() > 0  &&  !mShutdownRequested)
       {
         // Adding producer information into the search structure
 
@@ -7634,7 +7652,7 @@ void CacheImplementation::updateContent()
       }
 
 
-      if (mGeometryInfoList.getLength() > 0)
+      if (mGeometryInfoList.getLength() > 0  &&  !mShutdownRequested)
       {
         // Adding geometry information into the search structure
 
@@ -7650,7 +7668,7 @@ void CacheImplementation::updateContent()
         PRINT_DATA(mDebugLog, "     => Geometries %u\n",ssp->mGeometryInfoList.getLength());
       }
 
-      if (mGenerationInfoList.getLength() > 0)
+      if (mGenerationInfoList.getLength() > 0  &&  !mShutdownRequested)
       {
         // Adding generation information into the search structure
 
@@ -7666,7 +7684,7 @@ void CacheImplementation::updateContent()
         PRINT_DATA(mDebugLog, "     => Generations %u\n",ssp->mGenerationInfoList.getLength());
       }
 
-      if (mFileInfoList.getLength() > 0)
+      if (mFileInfoList.getLength() > 0  &&  !mShutdownRequested)
       {
         // Adding file information (= moving FileInfo -objects from mFileInfoList into the search structure)
 
@@ -7683,7 +7701,7 @@ void CacheImplementation::updateContent()
       }
 
 
-      if (mContentInfoList.getLength() > 0)
+      if (mContentInfoList.getLength() > 0  &&  !mShutdownRequested)
       {
         PRINT_DATA(mDebugLog, "  -- Add content %u\n",mContentInfoList.getLength());
         // Adding content information (= moving ContentInfo -objects from mContentInfoList into the search structure)

@@ -124,6 +124,8 @@ class ServiceImplementation : public ServiceInterface
 
   protected:
 
+     virtual bool   isSessionValid(T::SessionId sessionId);
+
      virtual void   event_clear(T::EventInfo& eventInfo);
      virtual void   event_contentServerReload(T::EventInfo& eventInfo);
      virtual void   event_producerAdded(T::EventInfo& eventInfo);

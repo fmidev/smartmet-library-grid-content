@@ -98,6 +98,7 @@ ServiceImplementation::ServiceImplementation()
     mParameterMappingCache_clearTime = time(nullptr);
     mProducerGenerationListCache_clearTime  = time(nullptr);
     mProducerGenerationListCache_clearRequired = 0;
+    mUpdateProcessingActive = false;
 
     GRID::Operation::getOperatorNames(mOperationNames);
   }
@@ -246,7 +247,9 @@ void ServiceImplementation::shutdown()
   try
   {
     mShutdownRequested = true;
-    exit(0);
+
+    while (mUpdateProcessingActive)
+      sleep(1);
   }
   catch (...)
   {
@@ -371,6 +374,9 @@ int ServiceImplementation::_executeQuery(T::SessionId sessionId, Query& query)
   FUNCTION_TRACE
   try
   {
+    if (mShutdownRequested)
+      return 0;
+
     // query.print(std::cout,0,0);
 
     if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
@@ -420,6 +426,9 @@ int ServiceImplementation::_getProducerList(T::SessionId sessionId, string_vec& 
   FUNCTION_TRACE
   try
   {
+    if (mShutdownRequested)
+      return 0;
+
     producerList.clear();
     std::string prev;
 
@@ -448,6 +457,9 @@ void ServiceImplementation::loadProducerFile()
   FUNCTION_TRACE
   try
   {
+    if (mShutdownRequested)
+      return;
+
     AutoWriteLock lock(&mProducerList_modificationLock);
 
     if (mProducerFile_modificationTime == getFileModificationTime(mProducerFile.c_str()))
@@ -1775,8 +1787,6 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
   FUNCTION_TRACE
   try
   {
-    // Fetching valid producers.
-
     Producer_vec producers;
     getProducers(query, producers);
     T::Coordinate_vec coordinates;
@@ -2110,8 +2120,6 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
   FUNCTION_TRACE
   try
   {
-    // Fetching valid producers.
-
     Producer_vec producers;
     getProducers(query, producers);
     T::Coordinate_vec coordinates;
@@ -8404,7 +8412,6 @@ void ServiceImplementation::checkGenerationUpdates()
     if ((currentTime - mGenerationInfoList_checkTime) < mGenerationInfoList_checkInterval)
       return;
 
-
     T::GenerationInfoList *generationInfoList = new T::GenerationInfoList();
     if (mContentServerPtr->getGenerationInfoList(0,*generationInfoList) == 0)
     {
@@ -8471,7 +8478,7 @@ void ServiceImplementation::checkParameterMappingUpdates()
     mParameterMapping_checkTime = time(nullptr);
     for (auto it = mParameterMappings.begin(); it != mParameterMappings.end(); ++it)
     {
-      if (it->checkUpdates())
+      if (!mShutdownRequested  &&  it->checkUpdates())
       {
         //AutoWriteLock lock(&mParameterMappingCache_modificationLock);
         mParameterMappingCache_clearRequired = time(nullptr);
@@ -8492,6 +8499,7 @@ void ServiceImplementation::updateProcessing()
 {
   try
   {
+    mUpdateProcessingActive = true;
     while (!mShutdownRequested)
     {
 
@@ -8591,8 +8599,10 @@ void ServiceImplementation::updateProcessing()
       {
       }
 
-      sleep(1);
+      if (!mShutdownRequested)
+        sleep(1);
     }
+    mUpdateProcessingActive = false;
   }
   catch (...)
   {
