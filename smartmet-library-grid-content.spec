@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 22.3.30
+Version: 22.4.25
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -78,6 +78,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Apr 25 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.4.25-1.fmi
+- Improved shutdown logistics
 * Wed Mar 30 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.3.30-1.fmi
 - Use thread local caching for better speed
 * Mon Mar 28 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.3.28-1.fmi
