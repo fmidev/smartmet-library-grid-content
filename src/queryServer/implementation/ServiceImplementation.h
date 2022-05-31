@@ -87,7 +87,8 @@ class ServiceImplementation : public ServiceInterface
                        const std::string& producerFile,
                        string_vec& producerAliasFiles,
                        string_vec& luaFileNames,
-                       bool checkGeometryStatus);
+                       bool checkGeometryStatus,
+                       bool dataServerMethodsEnabled);
 
      virtual void   shutdown();
      virtual void   setDem(boost::shared_ptr<Fmi::DEM> dem);
@@ -639,6 +640,7 @@ class ServiceImplementation : public ServiceInterface
      bool                       mShutdownRequested;
      bool                       mUpdateProcessingActive;
      bool                       mCheckGeometryStatus;
+     bool                       mDataServerMethodsEnabled;
      time_t                     mProducerGenerationListCache_clearRequired;
 
      std::map<std::string,uint>        mOperationNames;

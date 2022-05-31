@@ -99,6 +99,7 @@ ServiceImplementation::ServiceImplementation()
     mProducerGenerationListCache_clearTime  = time(nullptr);
     mProducerGenerationListCache_clearRequired = 0;
     mUpdateProcessingActive = false;
+    mDataServerMethodsEnabled = false;
 
     GRID::Operation::getOperatorNames(mOperationNames);
   }
@@ -138,7 +139,8 @@ void ServiceImplementation::init(
     const std::string& producerFile,
     string_vec& producerAliasFiles,
     string_vec& luaFiles,
-    bool checkGeometryStatus)
+    bool checkGeometryStatus,
+    bool dataServerMethodsEnabled)
 {
   FUNCTION_TRACE
   try
@@ -147,6 +149,7 @@ void ServiceImplementation::init(
     mDataServerPtr = dataServerPtr;
 
     mCheckGeometryStatus = checkGeometryStatus;
+    mDataServerMethodsEnabled = dataServerMethodsEnabled;
 
     mGridConfigFile = gridConfigFile;
     SmartMet::Identification::gridDef.init(mGridConfigFile.c_str());
@@ -3098,18 +3101,23 @@ bool ServiceImplementation::getSpecialValues(
     std::string function;
     std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
-/*
-    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    int result = getContentListByParameterGenerationIdAndForecastTime(0,producerInfo.mProducerId,producerInfo.mHash,generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.getKeyHash(),
-        paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
-    if (result != 0)
+
+    if (conversionByFunction && mDataServerMethodsEnabled)
     {
-      Fmi::Exception exception(BCP, "ContentServer returns an error!");
-      exception.addParameter("Service", "getContentListByParameterGenerationIdAndForecastTime");
-      exception.addParameter("Message", ContentServer::getResultString(result));
-      throw exception;
+      std::string f = toUpperString(function);
+      auto p = mOperationNames.find(f);
+      if (p != mOperationNames.end())
+      {
+        modificationOperation = p->second;
+        for (auto it = functionParams.begin(); it != functionParams.end(); ++it)
+        {
+          if (*it != "$")
+            modificationParameters.push_back(atof(it->c_str()));
+        }
+        conversionByFunction = false;
+      }
     }
-*/
+
     std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
@@ -3376,19 +3384,23 @@ bool ServiceImplementation::getValueVectors(
     std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
     T::ParamValue_vec valueVector;
-/*
-    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, producerInfo.mHash, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.getKeyHash(),
-        paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
 
-    if (result != 0)
+    if (conversionByFunction && mDataServerMethodsEnabled)
     {
-      Fmi::Exception exception(BCP, "ContentServer returns an error!");
-      exception.addParameter("Service", "getContentListByParameterGenerationIdAndForecastTime");
-      exception.addParameter("Message", ContentServer::getResultString(result));
-      throw exception;
+      std::string f = toUpperString(function);
+      auto p = mOperationNames.find(f);
+      if (p != mOperationNames.end())
+      {
+        modificationOperation = p->second;
+        for (auto it = functionParams.begin(); it != functionParams.end(); ++it)
+        {
+          if (*it != "$")
+            modificationParameters.push_back(atof(it->c_str()));
+        }
+        conversionByFunction = false;
+      }
     }
-*/
+
     std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
@@ -4445,6 +4457,22 @@ bool ServiceImplementation::getPointValuesByHeight(
     std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
+    if (conversionByFunction && mDataServerMethodsEnabled)
+    {
+      std::string f = toUpperString(function);
+      auto p = mOperationNames.find(f);
+      if (p != mOperationNames.end())
+      {
+        modificationOperation = p->second;
+        for (auto it = functionParams.begin(); it != functionParams.end(); ++it)
+        {
+          if (*it != "$")
+            modificationParameters.push_back(atof(it->c_str()));
+        }
+        conversionByFunction = false;
+      }
+    }
+
     time_t fTime = forecastTime;
     time_t startTime = forecastTime -4*3600;
     time_t endTime = forecastTime + 4*3600;
@@ -4906,14 +4934,14 @@ bool ServiceImplementation::getPointValues(
     std::string function;
     std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
-/*
-    if (conversionByFunction)
+
+    if (conversionByFunction && mDataServerMethodsEnabled)
     {
       std::string f = toUpperString(function);
       auto p = mOperationNames.find(f);
       if (p != mOperationNames.end())
       {
-        modificationParameters.push_back((double)p->second);
+        modificationOperation = p->second;
         for (auto it = functionParams.begin(); it != functionParams.end(); ++it)
         {
           if (*it != "$")
@@ -4922,7 +4950,7 @@ bool ServiceImplementation::getPointValues(
         conversionByFunction = false;
       }
     }
-*/
+
     std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
@@ -5185,18 +5213,23 @@ bool ServiceImplementation::getCircleValues(
     std::string function;
     std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
-/*
-    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, producerInfo.mHash, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.getKeyHash(),
-        paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
-    if (result != 0)
+
+    if (conversionByFunction && mDataServerMethodsEnabled)
     {
-      Fmi::Exception exception(BCP, "ContentServer returns an error!");
-      exception.addParameter("Service", "getContentListByParameterGenerationIdAndForecastTime");
-      exception.addParameter("Message", ContentServer::getResultString(result));
-      throw exception;
+      std::string f = toUpperString(function);
+      auto p = mOperationNames.find(f);
+      if (p != mOperationNames.end())
+      {
+        modificationOperation = p->second;
+        for (auto it = functionParams.begin(); it != functionParams.end(); ++it)
+        {
+          if (*it != "$")
+            modificationParameters.push_back(atof(it->c_str()));
+        }
+        conversionByFunction = false;
+      }
     }
-*/
+
     std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
@@ -5450,18 +5483,23 @@ bool ServiceImplementation::getPolygonValues(
     std::string function;
     std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
-/*
-    std::shared_ptr<T::ContentInfoList> contentList(new T::ContentInfoList());
-    int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, producerInfo.mHash, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.getKeyHash(),
-        paramLevelId, paramLevel, forecastType, forecastNumber, producerGeometryId, forecastTime, contentList);
-    if (result != 0)
+
+    if (conversionByFunction && mDataServerMethodsEnabled)
     {
-      Fmi::Exception exception(BCP, "ContentServer returns an error!");
-      exception.addParameter("Service", "getContentListByParameterGenerationIdAndForecastTime");
-      exception.addParameter("Message", ContentServer::getResultString(result));
-      throw exception;
+      std::string f = toUpperString(function);
+      auto p = mOperationNames.find(f);
+      if (p != mOperationNames.end())
+      {
+        modificationOperation = p->second;
+        for (auto it = functionParams.begin(); it != functionParams.end(); ++it)
+        {
+          if (*it != "$")
+            modificationParameters.push_back(atof(it->c_str()));
+        }
+        conversionByFunction = false;
+      }
     }
-*/
+
     std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
         paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
