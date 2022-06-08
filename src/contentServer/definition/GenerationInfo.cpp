@@ -115,6 +115,7 @@ GenerationInfo& GenerationInfo::operator=(const GenerationInfo& generationInfo)
     mFlags = generationInfo.mFlags;
     mSourceId = generationInfo.mSourceId;
     mDeletionTime = generationInfo.mDeletionTime;
+    mModificationTime = generationInfo.mModificationTime;
 
     return *this;
   }
