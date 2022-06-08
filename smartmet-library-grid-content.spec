@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 22.6.1
+Version: 22.6.8
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -20,19 +20,19 @@ BuildRequires: lua-devel
 BuildRequires: make
 BuildRequires: omniORB-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 22.5.4
+BuildRequires: smartmet-library-gis-devel >= 22.6.7
 BuildRequires: smartmet-library-grid-files-devel >= 22.5.24
 BuildRequires: smartmet-library-macgyver-devel >= 22.5.24
-BuildRequires: smartmet-library-spine-devel >= 22.5.24
+BuildRequires: smartmet-library-spine-devel >= 22.6.8
 Requires: boost169-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
-Requires: smartmet-library-gis >= 22.5.4
+Requires: smartmet-library-gis >= 22.6.7
 Requires: smartmet-library-grid-files >= 22.5.24
 Requires: smartmet-library-macgyver >= 22.5.24
-Requires: smartmet-library-spine >= 22.5.24
+Requires: smartmet-library-spine >= 22.6.8
 Provides: %{SPECNAME}
 
 %description
@@ -66,8 +66,8 @@ Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
 Requires: smartmet-library-macgyver-devel >= 22.5.24
-Requires: smartmet-library-gis-devel >= 22.5.4
-Requires: smartmet-library-spine-devel >= 22.5.24
+Requires: smartmet-library-gis-devel >= 22.6.7
+Requires: smartmet-library-spine-devel >= 22.6.8
 Requires: smartmet-library-grid-files-devel >= 22.5.24
 
 %description -n %{SPECNAME}-devel
@@ -78,6 +78,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Jun  8 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.6.8-1.fmi
+- Added tracking of generation modification times
 * Wed Jun  1 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.6.1-1.fmi
 - Improved ETag calculation support
 * Tue May 24 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.24-1.fmi
