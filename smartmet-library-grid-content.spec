@@ -10,7 +10,14 @@ Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires: boost169-devel
+
+%if 0%{?rhel} && 0%{rhel} < 9
+%define smartmet_boost boost169
+%else
+%define smartmet_boost boost
+%endif
+
+BuildRequires: %{smartmet_boost}-devel
 BuildRequires: gcc-c++
 BuildRequires: gdal34-devel
 BuildRequires: hiredis-devel
@@ -20,19 +27,19 @@ BuildRequires: lua-devel
 BuildRequires: make
 BuildRequires: omniORB-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 22.6.7
+BuildRequires: smartmet-library-gis-devel >= 22.6.16
 BuildRequires: smartmet-library-grid-files-devel >= 22.5.24
-BuildRequires: smartmet-library-macgyver-devel >= 22.5.24
-BuildRequires: smartmet-library-spine-devel >= 22.6.8
-Requires: boost169-date-time
+BuildRequires: smartmet-library-macgyver-devel >= 22.6.16
+BuildRequires: smartmet-library-spine-devel >= 22.6.16
+Requires: %{smartmet_boost}-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
-Requires: smartmet-library-gis >= 22.6.7
+Requires: smartmet-library-gis >= 22.6.16
 Requires: smartmet-library-grid-files >= 22.5.24
-Requires: smartmet-library-macgyver >= 22.5.24
-Requires: smartmet-library-spine >= 22.6.8
+Requires: smartmet-library-macgyver >= 22.6.16
+Requires: smartmet-library-spine >= 22.6.16
 Provides: %{SPECNAME}
 
 %description
@@ -65,9 +72,9 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 22.5.24
-Requires: smartmet-library-gis-devel >= 22.6.7
-Requires: smartmet-library-spine-devel >= 22.6.8
+Requires: smartmet-library-macgyver-devel >= 22.6.16
+Requires: smartmet-library-gis-devel >= 22.6.16
+Requires: smartmet-library-spine-devel >= 22.6.16
 Requires: smartmet-library-grid-files-devel >= 22.5.24
 
 %description -n %{SPECNAME}-devel
