@@ -165,6 +165,7 @@ void Server::shutdown()
   try
   {
     mOrb->shutdown(0);
+    pthread_join(mThread, nullptr);
   }
   catch (...)
   {

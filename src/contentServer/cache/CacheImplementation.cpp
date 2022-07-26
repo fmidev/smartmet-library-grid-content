@@ -109,6 +109,9 @@ CacheImplementation::~CacheImplementation()
   FUNCTION_TRACE
   try
   {
+    mShutdownRequested = true;
+    pthread_join(mThread, nullptr);
+
     if (mSearchStructurePtr[0])
       delete mSearchStructurePtr[0];
 

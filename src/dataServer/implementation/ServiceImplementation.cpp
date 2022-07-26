@@ -183,8 +183,7 @@ void ServiceImplementation::shutdown()
   {
     PRINT_DATA(mDebugLog,"*** SHUTDOWN ***\n");
     mShutdownRequested = true;
-    while (mEventProcessingActive)
-      sleep(1);
+    pthread_join(mEventProcessingThread, nullptr);
   }
   catch (...)
   {

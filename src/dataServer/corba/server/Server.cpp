@@ -93,6 +93,7 @@ Server::~Server()
 {
   try
   {
+    pthread_join(mThread, nullptr);
     mOrb->destroy();
   }
   catch (...)

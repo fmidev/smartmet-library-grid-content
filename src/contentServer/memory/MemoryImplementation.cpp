@@ -109,6 +109,8 @@ MemoryImplementation::~MemoryImplementation()
   FUNCTION_TRACE
   try
   {
+    mShutdownRequested = true;
+    pthread_join(mThread, nullptr);
   }
   catch (...)
   {
@@ -182,7 +184,7 @@ void MemoryImplementation::shutdown()
   FUNCTION_TRACE
   try
   {
-    //exit(0);
+    mShutdownRequested = true;
   }
   catch (...)
   {

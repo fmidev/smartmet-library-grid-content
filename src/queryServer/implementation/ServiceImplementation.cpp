@@ -118,6 +118,8 @@ ServiceImplementation::~ServiceImplementation()
   FUNCTION_TRACE
   try
   {
+    mShutdownRequested = true;
+    pthread_join(mThread, nullptr);
   }
   catch (...)
   {
@@ -250,9 +252,6 @@ void ServiceImplementation::shutdown()
   try
   {
     mShutdownRequested = true;
-
-    while (mUpdateProcessingActive)
-      sleep(1);
   }
   catch (...)
   {
