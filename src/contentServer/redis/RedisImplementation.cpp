@@ -350,7 +350,7 @@ int RedisImplementation::openConnection()
     if (mContext != nullptr)
       return Result::OK;
 
-    struct timeval timeout = { 1, 500000 }; // 1.5 seconds
+    struct timeval timeout = { 3, 0 }; // 3 seconds
 
     redisContext *context = nullptr;
 
@@ -382,11 +382,22 @@ int RedisImplementation::openConnection()
             return Result::PERMANENT_STORAGE_ERROR;
           }
         }
+        else
+        {
+          mSourceInfo = "Redis:" + mRedisSecondaryAddress + ":" + std::to_string(mRedisSecondaryPort);
+        }
       }
+    }
+    else
+    {
+      mSourceInfo = "Redis:" + mRedisAddress + ":" + std::to_string(mRedisPort);
     }
 
     if (context == NULL)
+    {
+      mSourceInfo = "Redis:CONNECTION_ERROR";
       return Result::PERMANENT_STORAGE_ERROR;
+    }
 
     while (!mShutdownRequested)
     {

@@ -57,6 +57,7 @@ void ClientImplementation::init(std::string url)
   try
   {
     mUrl = url;
+    mSourceInfo = url;
   }
   catch (...)
   {

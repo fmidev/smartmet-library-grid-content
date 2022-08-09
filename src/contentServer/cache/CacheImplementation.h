@@ -50,6 +50,7 @@ class CacheImplementation : public ServiceInterface
     virtual void    setContentUpdateInterval(uint intervalInSec);
     virtual void    shutdown();
     virtual void    synchronize();
+    std::string&    getSourceInfo();
 
     virtual void    eventProcessingThread();
 

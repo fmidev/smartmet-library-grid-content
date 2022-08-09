@@ -58,6 +58,8 @@ class ServiceInterface
      virtual void   setEnabled(bool enabled);
      virtual bool   isEnabled();
 
+     virtual std::string&   getSourceInfo();
+
      virtual int    clear(T::SessionId sessionId);
      virtual int    reload(T::SessionId sessionId);
 
@@ -360,6 +362,7 @@ class ServiceInterface
      Log            *mDebugLog;
      Log            *mProcessingLog;
      Implementation mImplementationType;
+     std::string    mSourceInfo;
 };
 
 

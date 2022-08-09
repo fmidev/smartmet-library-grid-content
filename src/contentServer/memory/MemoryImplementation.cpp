@@ -128,6 +128,8 @@ void MemoryImplementation::init(bool contentLoadEnabled,bool contentSaveEnabled,
   FUNCTION_TRACE
   try
   {
+    mSourceInfo = "memory";
+
     if (contentSaveEnabled && contentSyncEnabled)
       throw Fmi::Exception(BCP,"Content save and sync cannot be set at the same time!");
 

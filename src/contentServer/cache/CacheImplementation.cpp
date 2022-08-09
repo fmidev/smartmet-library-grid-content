@@ -248,6 +248,26 @@ void CacheImplementation::setEventListMaxLength(uint maxLength)
 
 
 
+std::string& CacheImplementation::getSourceInfo()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentStorage)
+      return mContentStorage->getSourceInfo();
+
+    mSourceInfo = "No source";
+    return mSourceInfo;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 void CacheImplementation::synchronize()
 {
   FUNCTION_TRACE
@@ -405,6 +425,7 @@ void CacheImplementation::reloadData()
       readContentList();
 
       mUpdateInProgress = false;
+      mContentUpdateTime = 0;
     }
     mReloadActivated = false;
     updateContent();

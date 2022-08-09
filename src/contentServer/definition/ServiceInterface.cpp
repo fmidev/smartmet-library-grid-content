@@ -168,6 +168,23 @@ void ServiceInterface::setProcessingLog(Log *processingLog)
 
 
 
+std::string& ServiceInterface::getSourceInfo()
+{
+  FUNCTION_TRACE
+  try
+  {
+    return mSourceInfo;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ServiceInterface::shutdown()
 {
   FUNCTION_TRACE

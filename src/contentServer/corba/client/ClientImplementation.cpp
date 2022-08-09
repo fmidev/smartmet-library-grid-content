@@ -91,6 +91,7 @@ void ClientImplementation::init(const std::string& serviceIor)
 {
   try
   {
+    mSourceInfo = "corba";
     mServiceIor = serviceIor;
 
     int argc = 2;
