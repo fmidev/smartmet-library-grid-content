@@ -5533,6 +5533,43 @@ int RedisImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::Ses
 
 
 
+
+
+int RedisImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationById(generationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    paramKeyList.clear();
+
+    T::ContentInfoList contentInfoList;
+    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,10000000,contentInfoList);
+    contentInfoList.getContentParamKeyListByGenerationGeometryAndLevelId(generationInfo.mProducerId,generationId,geometryId,levelId,parameterKeyType,paramKeyList);
+
+    return res;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int RedisImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
@@ -5654,6 +5691,74 @@ int RedisImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
     T::ContentInfoList contentInfoList;
     int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,10000000,contentInfoList);
     contentInfoList.getForecastTimeListByGenerationAndGeometry(generationInfo.mProducerId,generationId,geometryId,contentTimeList);
+    return res;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& contentTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationById(generationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    contentTimeList.clear();
+
+    T::ContentInfoList contentInfoList;
+    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,10000000,contentInfoList);
+    contentInfoList.getForecastTimeListByGenerationGeometryAndLevelId(generationInfo.mProducerId,generationId,geometryId,levelId,contentTimeList);
+    return res;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationById(generationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    contentLevelList.clear();
+
+    T::ContentInfoList contentInfoList;
+    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,10000000,contentInfoList);
+    contentInfoList.getContentLevelListByGenerationGeometryAndLevelId(generationInfo.mProducerId,generationId,geometryId,levelId,contentLevelList);
     return res;
   }
   catch (...)

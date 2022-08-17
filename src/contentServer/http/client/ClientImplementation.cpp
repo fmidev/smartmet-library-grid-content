@@ -3929,6 +3929,46 @@ int ClientImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::Se
 
 
 
+int ClientImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getContentParamKeyListByGenerationGeometryAndLevelId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("generationId",generationId);
+    request.addLine("geometryId",geometryId);
+    request.addLine("levelId",levelId);
+    request.addLine("parameterKeyType",(unsigned char)parameterKeyType);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      string_vec lines;
+      uint len = response.getLinesByKey("paramKey",lines);
+      for (uint t=0; t<len; t++)
+      {
+        paramKeyList.insert(lines[t]);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   try
@@ -3952,6 +3992,84 @@ int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
       for (uint t=0; t<len; t++)
       {
         contentTimeList.insert(lines[t]);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& contentTimeList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getContentTimeListByGenerationGeometryAndLevelId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("generationId",generationId);
+    request.addLine("geometryId",geometryId);
+    request.addLine("levelId",levelId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      string_vec lines;
+      uint len = response.getLinesByKey("contentTime",lines);
+      for (uint t=0; t<len; t++)
+      {
+        contentTimeList.insert(lines[t]);
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ClientImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getContentLevelListByGenerationGeometryAndLevelId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("generationId",generationId);
+    request.addLine("geometryId",geometryId);
+    request.addLine("levelId",levelId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      string_vec lines;
+      uint len = response.getLinesByKey("level",lines);
+      for (uint t=0; t<len; t++)
+      {
+        contentLevelList.insert(toInt32(lines[t]));
       }
     }
 

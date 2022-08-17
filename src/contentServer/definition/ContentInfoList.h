@@ -124,8 +124,11 @@ class ContentInfoList
     void                getContentGeometryIdList(std::set<T::GeometryId>& geometryIdList);
     void                getContentGeometryIdListByGenerationId(uint producerId,uint generationId,std::set<T::GeometryId>& geometryIdList);
     void                getContentParamKeyListByGenerationId(uint producerId,uint generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList);
-    void                getContentParamKeyListByGenerationAndGeometryId(uint producerId,uint generationId,T::GeometryId geometeryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList);
+    void                getContentParamKeyListByGenerationAndGeometryId(uint producerId,uint generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList);
+    void                getContentParamKeyListByGenerationGeometryAndLevelId(uint producerId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList);
     void                getGenerationIdListByGeometryId(T::GeometryId geometryId,std::set<uint>& generationIdList);
+
+    void                getContentLevelListByGenerationGeometryAndLevelId(uint producerId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList);
 
     void                getForecastTimeList(std::set<std::string>& forecastTimeList);
     void                getForecastTimeList(std::set<time_t>& forecastTimeList);
@@ -133,6 +136,7 @@ class ContentInfoList
     void                getForecastTimeListByGenerationId(uint producerId,uint generationId,std::set<time_t>& forecastTimeList);
     void                getForecastTimeListByGenerationAndGeometry(uint producerId,uint generationId,T::GeometryId geometryId,std::set<std::string>& forecastTimeList);
     void                getForecastTimeListByGenerationAndGeometry(uint producerId,uint generationId,T::GeometryId geometryId,std::set<time_t>& forecastTimeList);
+    void                getForecastTimeListByGenerationGeometryAndLevelId(uint producerId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& forecastTimeList);
     void                getForecastTimeListByProducerId(uint producerId,std::set<std::string>& forecastTimeList);
     void                getForecastTimeListByProducerId(uint producerId,std::set<time_t>& forecastTimeList);
     void                getForecastTimeRangeByGenerationId(uint producerId,uint generationId,time_t& startTime,time_t& endTime);

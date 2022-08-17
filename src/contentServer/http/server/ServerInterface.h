@@ -142,11 +142,14 @@ class ServerInterface
     virtual void getContentListByParameterGenerationIdAndForecastTime(T::RequestMessage& request,T::ResponseMessage& response);
 
     virtual void getContentGeometryIdListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getContentLevelListByGenerationGeometryAndLevelId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentParamListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentParamKeyListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentParamKeyListByGenerationAndGeometryId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getContentParamKeyListByGenerationGeometryAndLevelId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentTimeListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentTimeListByGenerationAndGeometryId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getContentTimeListByGenerationGeometryAndLevelId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentTimeListByProducerId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentTimeRangeByProducerAndGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentTimeRangeByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);

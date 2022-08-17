@@ -3283,6 +3283,37 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getContentParamKeyListByGenerationGeometryAndLevelId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::ULong geometryId, ::CORBA::Short parameterLevelId, ::CORBA::Octet parameterKeyType, SmartMet::ContentServer::Corba::CorbaStringList_out paramKeyList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::set<std::string> sParamKeyList;
+    ContentServer::Corba::CorbaStringList *corbaParamKeyList = new ContentServer::Corba::CorbaStringList();
+    paramKeyList = corbaParamKeyList;
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getContentParamKeyListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,parameterLevelId,parameterKeyType,sParamKeyList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sParamKeyList,*corbaParamKeyList);
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::getContentTimeListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList)
 {
   FUNCTION_TRACE
@@ -3406,6 +3437,66 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
   }
 }
 
+
+
+
+::CORBA::Long ServerInterface::getContentTimeListByGenerationGeometryAndLevelId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, ::CORBA::Short parameterLevelId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::set<std::string> sContentTimeList;
+    ContentServer::Corba::CorbaStringList *corbaContentTimeList = new ContentServer::Corba::CorbaStringList();
+    contentTimeList = corbaContentTimeList;
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getContentTimeListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,parameterLevelId,sContentTimeList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sContentTimeList,*corbaContentTimeList);
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+::CORBA::Long ServerInterface::getContentLevelListByGenerationGeometryAndLevelId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, ::CORBA::Short parameterLevelId, SmartMet::ContentServer::Corba::CorbaLongList_out contentLevelList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::set<T::ParamLevel> sContentLevelList;
+    ContentServer::Corba::CorbaLongList *corbaContentLevelList = new ContentServer::Corba::CorbaLongList();
+    contentLevelList = corbaContentLevelList;
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getContentLevelListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,parameterLevelId,sContentLevelList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(sContentLevelList,*corbaContentLevelList);
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
 
 
 

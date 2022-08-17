@@ -5041,6 +5041,104 @@ int CacheImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::Ses
 
 
 
+int CacheImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
+    if (mUpdateInProgress)
+      return mContentStorage->getContentParamKeyListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,levelId,parameterKeyType,paramKeyList);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    if (!ssp)
+      return Result::DATA_NOT_FOUND;
+
+    paramKeyList.clear();
+
+    if (!mContentSwapEnabled)
+    {
+      AutoReadLock readLock(&mSearchModificationLock);
+      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(generationId);
+      if (generationInfo == nullptr)
+        return Result::UNKNOWN_GENERATION_ID;
+
+      ssp->mContentInfoList[1].getContentParamKeyListByGenerationGeometryAndLevelId(generationInfo->mProducerId,generationId,geometryId,levelId,parameterKeyType,paramKeyList);
+    }
+    else
+    {
+      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(generationId);
+      if (generationInfo == nullptr)
+        return Result::UNKNOWN_GENERATION_ID;
+
+      ssp->mContentInfoList[1].getContentParamKeyListByGenerationGeometryAndLevelId(generationInfo->mProducerId,generationId,geometryId,levelId,parameterKeyType,paramKeyList);
+    }
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
+    if (mUpdateInProgress)
+      return mContentStorage->getContentLevelListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,levelId,contentLevelList);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    if (!ssp)
+      return Result::DATA_NOT_FOUND;
+
+    contentLevelList.clear();
+
+    if (!mContentSwapEnabled)
+    {
+      AutoReadLock readLock(&mSearchModificationLock);
+      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(generationId);
+      if (generationInfo == nullptr)
+        return Result::UNKNOWN_GENERATION_ID;
+
+      ssp->mContentInfoList[1].getContentLevelListByGenerationGeometryAndLevelId(generationInfo->mProducerId,generationId,geometryId,levelId,contentLevelList);
+    }
+    else
+    {
+      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(generationId);
+      if (generationInfo == nullptr)
+        return Result::UNKNOWN_GENERATION_ID;
+
+      ssp->mContentInfoList[1].getContentLevelListByGenerationGeometryAndLevelId(generationInfo->mProducerId,generationId,geometryId,levelId,contentLevelList);
+    }
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
@@ -5363,6 +5461,57 @@ int CacheImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
         return Result::UNKNOWN_GENERATION_ID;
 
       ssp->mContentInfoList[1].getForecastTimeListByGenerationAndGeometry(generationInfo->mProducerId,generationId,geometryId,contentTimeList);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& contentTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mUpdateInProgress &&  !mRequestForwardEnabled)
+      return Result::OK;
+
+    if (mUpdateInProgress)
+      return mContentStorage->getContentTimeListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,levelId,contentTimeList);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    if (!ssp)
+      return Result::DATA_NOT_FOUND;
+
+    contentTimeList.clear();
+
+    if (!mContentSwapEnabled)
+    {
+      AutoReadLock readLock(&mSearchModificationLock);
+      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(generationId);
+      if (generationInfo == nullptr)
+        return Result::UNKNOWN_GENERATION_ID;
+
+      ssp->mContentInfoList[1].getForecastTimeListByGenerationGeometryAndLevelId(generationInfo->mProducerId,generationId,geometryId,levelId,contentTimeList);
+    }
+    else
+    {
+      AutoReadLock readLock(&mSearchModificationLock);
+      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(generationId);
+      if (generationInfo == nullptr)
+        return Result::UNKNOWN_GENERATION_ID;
+
+      ssp->mContentInfoList[1].getForecastTimeListByGenerationGeometryAndLevelId(generationInfo->mProducerId,generationId,geometryId,levelId,contentTimeList);
     }
 
     return Result::OK;
