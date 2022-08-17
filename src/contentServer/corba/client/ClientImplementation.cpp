@@ -2810,6 +2810,30 @@ int ClientImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::Se
 
 
 
+int ClientImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaStringList_var corbaParamKeyList;
+
+    int result = mService->getContentParamKeyListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,levelId,(unsigned char)parameterKeyType,corbaParamKeyList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaParamKeyList,paramKeyList);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
 int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
 {
   try
@@ -2897,6 +2921,54 @@ int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
     ContentServer::Corba::CorbaStringList_var corbaContentTimeList;
 
     int result = mService->getContentTimeListByGenerationAndGeometryId(sessionId,generationId,geometryId,corbaContentTimeList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaContentTimeList,contentTimeList);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaLongList_var corbaLevelList;
+
+    int result = mService->getContentLevelListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,levelId,corbaLevelList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaLevelList,contentLevelList);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& contentTimeList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ContentServer::Corba::CorbaStringList_var corbaContentTimeList;
+
+    int result = mService->getContentTimeListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,levelId,corbaContentTimeList);
 
     if (result == 0)
       ContentServer::Corba::Converter::convert(corbaContentTimeList,contentTimeList);

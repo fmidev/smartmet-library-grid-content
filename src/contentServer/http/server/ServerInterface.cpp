@@ -72,6 +72,8 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
   FUNCTION_TRACE
   try
   {
+    // request.print(std::cout,0,0);
+
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"The server not initialized!");
 
@@ -717,6 +719,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getContentLevelListByGenerationGeometryAndLevelId") == 0)
+    {
+      getContentLevelListByGenerationGeometryAndLevelId(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"getContentParamListByGenerationId") == 0)
     {
       getContentParamListByGenerationId(request,response);
@@ -735,6 +743,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getContentParamKeyListByGenerationGeometryAndLevelId") == 0)
+    {
+      getContentParamKeyListByGenerationGeometryAndLevelId(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"getContentTimeListByGenerationId") == 0)
     {
       getContentTimeListByGenerationId(request,response);
@@ -750,6 +764,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
     if (strcasecmp(method,"getContentTimeListByGenerationAndGeometryId") == 0)
     {
       getContentTimeListByGenerationAndGeometryId(request,response);
+      return;
+    }
+
+    if (strcasecmp(method,"getContentTimeListByGenerationGeometryAndLevelId") == 0)
+    {
+      getContentTimeListByGenerationGeometryAndLevelId(request,response);
       return;
     }
 
@@ -6858,6 +6878,78 @@ void ServerInterface::getContentParamKeyListByGenerationAndGeometryId(T::Request
 
 
 
+void ServerInterface::getContentParamKeyListByGenerationGeometryAndLevelId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint generationId = 0;
+    if (!request.getLineByKey("generationId",generationId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    T::GeometryId geometryId = 0;
+    if (!request.getLineByKey("geometryId",geometryId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: geometryId");
+      return;
+    }
+
+    T::ParamLevelId levelId = 0;
+    if (!request.getLineByKey("levelId",levelId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: levelId");
+      return;
+    }
+
+    unsigned char parameterKeyType = 0;
+    if (!request.getLineByKey("parameterKeyType",parameterKeyType))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: parameterKeyType");
+      return;
+    }
+
+    std::set<std::string> paramKeyList;
+
+    int result = mService->getContentParamKeyListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,levelId,parameterKeyType,paramKeyList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      for (auto it=paramKeyList.begin(); it!=paramKeyList.end(); ++it)
+      {
+        response.addLine("paramKey",*it);
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ServerInterface::getContentTimeListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
@@ -7050,6 +7142,134 @@ void ServerInterface::getContentTimeListByGenerationAndGeometryId(T::RequestMess
       for (auto it=contentTimeList.begin(); it!=contentTimeList.end(); ++it)
       {
         response.addLine("contentTime",*it);
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ServerInterface::getContentTimeListByGenerationGeometryAndLevelId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint generationId = 0;
+    if (!request.getLineByKey("generationId",generationId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    T::GeometryId geometryId = 0;
+    if (!request.getLineByKey("geometryId",geometryId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: geometryId");
+      return;
+    }
+
+    T::ParamLevelId levelId = 0;
+    if (!request.getLineByKey("levelId",levelId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: levelId");
+      return;
+    }
+
+    std::set<std::string> contentTimeList;
+
+    int result = mService->getContentTimeListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,levelId,contentTimeList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      for (auto it=contentTimeList.begin(); it!=contentTimeList.end(); ++it)
+      {
+        response.addLine("contentTime",*it);
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ServerInterface::getContentLevelListByGenerationGeometryAndLevelId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    uint generationId = 0;
+    if (!request.getLineByKey("generationId",generationId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    T::GeometryId geometryId = 0;
+    if (!request.getLineByKey("geometryId",geometryId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: geometryId");
+      return;
+    }
+
+    T::ParamLevelId levelId = 0;
+    if (!request.getLineByKey("levelId",levelId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: levelId");
+      return;
+    }
+
+    std::set<T::ParamLevel> contentLevelList;
+
+    int result = mService->getContentLevelListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,levelId,contentLevelList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      for (auto it=contentLevelList.begin(); it!=contentLevelList.end(); ++it)
+      {
+        response.addLine("level",*it);
       }
     }
     else
