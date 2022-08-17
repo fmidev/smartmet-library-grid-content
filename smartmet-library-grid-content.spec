@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 22.7.26
+Version: 22.8.17
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -85,12 +85,12 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Aug 17 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.8.17-1.fmi
+- Added support for EDR metadata queries
 * Tue Jul 26 2022 Andris Pavenis <andris.pavenis@fmi.fi> 22.7.26-1.fmi
 - Add missing joining threads
-
 * Fri Jun 17 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.6.17-1.fmi
 - Add support for RHEL9. Update libpqxx to 7.7.0 (rhel8+) and fmt to 8.1.1
-
 * Wed Jun  8 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.6.8-1.fmi
 - Added tracking of generation modification times
 * Wed Jun  1 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.6.1-1.fmi
