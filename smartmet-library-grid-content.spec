@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 22.8.17
+Version: 22.8.19
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -85,6 +85,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Aug 19 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.8.19-1.fmi
+- Added cache statistics
 * Wed Aug 17 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.8.17-1.fmi
 - Added support for EDR metadata queries
 * Tue Jul 26 2022 Andris Pavenis <andris.pavenis@fmi.fi> 22.7.26-1.fmi
