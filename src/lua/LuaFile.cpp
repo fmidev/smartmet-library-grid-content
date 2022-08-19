@@ -1752,7 +1752,7 @@ void LuaFile::loadFunctionList(uint type)
       uint c = 0;
       for (size_t t = 0; t<= len; t++)
       {
-        if (cstr[t] != '\0'  &&  cstr[t] != ','  &&  c < 100)
+        if (cstr[t] != '\0'  &&  cstr[t] != ','  &&  c < 99)
         {
           buf[c] = cstr[t];
           c++;
