@@ -8,7 +8,6 @@
 #include "../../lua/LuaFileCollection.h"
 #include "../../functions/FunctionCollection.h"
 #include <boost/unordered_map.hpp>
-
 #include <unordered_map>
 
 
@@ -78,7 +77,7 @@ class ServiceImplementation : public ServiceInterface
                     ServiceImplementation();
      virtual        ~ServiceImplementation();
 
-     virtual void   init(
+     void           init(
                        ContentServer::ServiceInterface *contentServerPtr,
                        DataServer::ServiceInterface *dataServerPtr,
                        const std::string& gridConfigFile,
@@ -90,20 +89,22 @@ class ServiceImplementation : public ServiceInterface
                        bool checkGeometryStatus,
                        bool dataServerMethodsEnabled);
 
-     virtual void   shutdown();
-     virtual void   setDem(boost::shared_ptr<Fmi::DEM> dem);
-     virtual void   setLandCover(boost::shared_ptr<Fmi::LandCover> landCover);
-     virtual void   updateProcessing();
+     void           getCacheStats(Fmi::Cache::CacheStatistics& statistics) const;
+
+     void           shutdown();
+     void           setDem(boost::shared_ptr<Fmi::DEM> dem);
+     void           setLandCover(boost::shared_ptr<Fmi::LandCover> landCover);
+     void           updateProcessing();
 
   protected:
 
      // Methods that can be called through the service interface
 
-     virtual int    _executeQuery(T::SessionId sessionId,Query& query);
+     int            _executeQuery(T::SessionId sessionId,Query& query);
 
-     virtual int    _getProducerList(T::SessionId sessionId,string_vec& producerList);
+     int            _getProducerList(T::SessionId sessionId,string_vec& producerList);
 
-     virtual int    _getValuesByGridPoint(
+     int            _getValuesByGridPoint(
                        T::SessionId sessionId,
                        T::ContentInfoList& contentInfoList,
                        T::CoordinateType coordinateType,
@@ -633,7 +634,9 @@ class ServiceImplementation : public ServiceInterface
      time_t                     mParameterMapping_checkTime;
      uint                       mParameterMapping_checkInterval;
      std::size_t                mContentCache_maxRecords;
+     std::size_t                mContentCache_maxRecordsPerThread;
      std::size_t                mContentSearchCache_maxRecords;
+     std::size_t                mContentSearchCache_maxRecordsPerThread;
      time_t                     mParameterMappingCache_clearRequired;
 
      pthread_t                  mThread;
@@ -642,6 +645,10 @@ class ServiceImplementation : public ServiceInterface
      bool                       mCheckGeometryStatus;
      bool                       mDataServerMethodsEnabled;
      time_t                     mProducerGenerationListCache_clearRequired;
+
+     mutable Fmi::Cache::CacheStats    mContentCache_stats;
+     mutable Fmi::Cache::CacheStats    mContentSearchCache_stats;
+
 
      std::map<std::string,uint>        mOperationNames;
      Functions::FunctionCollection     mFunctionCollection;

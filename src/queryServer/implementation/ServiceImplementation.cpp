@@ -37,6 +37,7 @@ boost::local_time::time_zone_ptr tz_utc(new boost::local_time::posix_time_zone("
 
 thread_local static ContentCache mContentCache;
 thread_local static std::size_t mContentCache_records;
+thread_local static bool thread_init = false;
 
 thread_local static ContentSearchCache mContentSearchCache;
 thread_local static std::size_t mContentSearchCache_records;
@@ -90,16 +91,24 @@ ServiceImplementation::ServiceImplementation()
     mProducerMap_updateTime = 0;
     mShutdownRequested = false;
     mContentServerStartTime = 0;
-    mContentCache_maxRecords = 500000;
+    mContentCache_maxRecords = 0;
+    mContentCache_maxRecordsPerThread = 500000;
+    mContentCache_stats.size = 0;
+    mContentCache_stats.starttime = boost::posix_time::second_clock::universal_time();
     mContentCache_records = 0;
-    mContentSearchCache_maxRecords = 500000;
+    mContentSearchCache_maxRecords = 0;
+    mContentSearchCache_maxRecordsPerThread = 500000;
     mContentSearchCache_records = 0;
+    mContentSearchCache_stats.size = 0;
+    mContentSearchCache_stats.starttime = boost::posix_time::second_clock::universal_time();
     mCheckGeometryStatus = false;
     mParameterMappingCache_clearTime = time(nullptr);
     mProducerGenerationListCache_clearTime  = time(nullptr);
     mProducerGenerationListCache_clearRequired = 0;
     mUpdateProcessingActive = false;
     mDataServerMethodsEnabled = false;
+    mContentCache_stats.maxsize = 0;
+    mContentSearchCache_stats.maxsize = 0;
 
     GRID::Operation::getOperatorNames(mOperationNames);
   }
@@ -205,6 +214,27 @@ void ServiceImplementation::init(
   catch (...)
   {
     throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::getCacheStats(Fmi::Cache::CacheStatistics& statistics) const
+{
+  try
+  {
+    mContentCache_stats.maxsize = mContentCache_maxRecords;
+    mContentSearchCache_stats.maxsize = mContentSearchCache_maxRecords;
+
+    statistics.insert(std::make_pair("Grid::QueryServer::content_cache", mContentCache_stats));
+    statistics.insert(std::make_pair("Grid::QueryServer::content_search_cache", mContentSearchCache_stats));
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP, "Operation failed!", nullptr);
+    throw exception;
   }
 }
 
@@ -2840,6 +2870,13 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       fmiId = toUInt32(parameterKey.c_str()+4);
     }
 
+    if (!thread_init)
+    {
+      thread_init = true;
+      mContentCache_maxRecords += mContentCache_maxRecordsPerThread;
+      mContentSearchCache_maxRecords += mContentSearchCache_maxRecordsPerThread;
+    }
+
     std::size_t hash = 0;
     boost::hash_combine(hash,producerId);
     boost::hash_combine(hash,generationId);
@@ -2864,6 +2901,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       auto it = mContentSearchCache.find(hash2);
       if (it != mContentSearchCache.end())
       {
+        mContentSearchCache_stats.hits++;
         if (it->second.producerHash[0] == producerHash)
         {
           contentInfoList = it->second.contentInfoList[0];
@@ -2882,6 +2920,10 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
           return Result::OK;
         }
       }
+      else
+      {
+        mContentSearchCache_stats.misses++;
+      }
     }
 
     ContentCacheEntry_sptr entry;
@@ -2895,17 +2937,21 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       if (cc != mContentCache.end())
       {
         entry = cc->second;
+        mContentCache_stats.hits++;
       }
       else
       {
+        mContentCache_stats.misses++;
         cc3 = mContentCache.find(hash3);
         if (cc3 != mContentCache.end())
         {
+          mContentCache_stats.hits++;
           entry = cc3->second;
           hash = hash3;
         }
         else
         {
+          mContentCache_stats.misses++;
           // No cache entry available
 
           entry.reset(new ContentCacheEntry());
@@ -2997,6 +3043,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       if (mContentSearchCache_records >= mContentSearchCache_maxRecords)
       {
         //printf("CLEAR CONTENT SEARCH CACHE %u %ld %ld\n",mActiveContentSearchCache,mContentSearchCache_records,mContentSearchCache[mActiveContentSearchCache].size());
+        mContentSearchCache_stats.size -= mContentSearchCache_records;
         mContentSearchCache.clear();
         mContentSearchCache_records = 0;
       }
@@ -3006,6 +3053,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       {
         // Curren cache record is new. We should add in into the cache.
 
+        mContentSearchCache_stats.misses++;
         ContentSearchCacheEntry rc;
         rc.contentInfoList[0] = cList;
         rc.producerHash[0] = producerHash;
@@ -3013,11 +3061,20 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
         rc.producerHash[2] = 0;
         rc.generationId = generationId;
         mContentSearchCache.insert(std::pair<std::size_t,ContentSearchCacheEntry>(hash2,rc));
-        mContentSearchCache_records += cList->getLength();
+
+        auto len = cList->getLength();
+        if (!len)
+          len = 1;
+
+        mContentSearchCache_records += len;
+        mContentSearchCache_stats.inserts += len;
+        mContentSearchCache_stats.size += len;
       }
       else
       {
         // Current cache record is already in use, but it has old information. We should update this information.
+        mContentSearchCache_stats.hits++;
+
         if (rr->second.producerHash[1] == 0  &&  rr->second.producerHash[0] != producerHash)
         {
           rr->second.contentInfoList[1] = cList;
@@ -3041,9 +3098,10 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     if (newEntry)
     {
       //AutoWriteLock lock(&mContentCache_modificationLock);
-      if (mContentCache_records > mContentCache_maxRecords)
+      if (mContentCache_records > mContentCache_maxRecordsPerThread)
       {
         //printf("CLEAR CONTENT CACHE\n");
+        mContentCache_stats.size -= mContentCache_records;
         mContentCache.clear();
         mContentCache_records = 0;
       }
@@ -3052,7 +3110,14 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       {
         //printf("INSERT %ld\n",mContentCache.size());
         mContentCache.insert(std::pair<std::size_t,ContentCacheEntry_sptr>(hash,entry));
-        mContentCache_records += entry->contentInfoList.getLength();
+
+        auto len = entry->contentInfoList.getLength();
+        if (!len)
+          len = 1;
+
+        mContentCache_records += len;
+        mContentCache_stats.inserts += len;
+        mContentCache_stats.size += len;
       }
     }
 
@@ -8556,7 +8621,7 @@ void ServiceImplementation::updateProcessing()
 
               mProducerGenerationListCache_clearRequired = time(nullptr);
               mContentSearchCache_records = mContentSearchCache_maxRecords;
-              mContentCache_records = mContentCache_maxRecords;
+              mContentCache_records = mContentCache_maxRecordsPerThread;
 
               {
                 AutoWriteLock lock(&mHeightCache_modificationLock);

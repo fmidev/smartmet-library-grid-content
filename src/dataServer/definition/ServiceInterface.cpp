@@ -50,6 +50,22 @@ ServiceInterface::~ServiceInterface()
 
 
 
+void ServiceInterface::getCacheStats(Fmi::Cache::CacheStatistics& statistics) const
+{
+  FUNCTION_TRACE
+  try
+  {
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 Log* ServiceInterface::getDebugLog()
 {
   FUNCTION_TRACE

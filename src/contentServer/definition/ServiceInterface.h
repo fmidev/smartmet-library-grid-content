@@ -19,6 +19,7 @@
 
 #include <grid-files/common/Log.h>
 #include <grid-files/grid/Typedefs.h>
+#include <macgyver/CacheStats.h>
 #include <set>
 
 
@@ -54,6 +55,7 @@ class ServiceInterface
      virtual void   setDebugLog(Log *debugLog);
      virtual void   setProcessingLog(Log *processingLog);
      virtual void   shutdown();
+     virtual void   getCacheStats(Fmi::Cache::CacheStatistics& statistics) const;
 
      virtual void   setEnabled(bool enabled);
      virtual bool   isEnabled();

@@ -12,6 +12,7 @@
 #include <grid-files/common/AttributeList.h>
 #include <gis/DEM.h>
 #include <gis/LandCover.h>
+#include <macgyver/CacheStats.h>
 
 
 namespace SmartMet
@@ -29,6 +30,7 @@ class ServiceInterface
      virtual Log*   getProcessingLog();
      virtual void   setDebugLog(Log *debugLog);
      virtual void   setProcessingLog(Log *processingLog);
+     virtual void   getCacheStats(Fmi::Cache::CacheStatistics& statistics) const;
 
      virtual void   setEnabled(bool enabled);
      virtual bool   isEnabled();
