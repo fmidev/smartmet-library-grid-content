@@ -10,6 +10,7 @@
 #include <grid-files/common/AttributeList.h>
 #include <grid-files/common/Log.h>
 #include <grid-files/grid/GridValueList.h>
+#include <macgyver/CacheStats.h>
 
 
 namespace SmartMet
@@ -28,6 +29,7 @@ class ServiceInterface
      virtual Log*   getProcessingLog();
      virtual void   setDebugLog(Log *debugLog);
      virtual void   setProcessingLog(Log *processingLog);
+     virtual void   getCacheStats(Fmi::Cache::CacheStatistics& statistics) const;
 
      virtual void   setEnabled(bool enabled);
      virtual bool   isEnabled();
