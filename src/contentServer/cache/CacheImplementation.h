@@ -4,6 +4,7 @@
 
 #include <grid-files/common/ModificationLock.h>
 #include <pthread.h>
+#include <atomic>
 #include <boost/smart_ptr/atomic_shared_ptr.hpp>
 
 
@@ -18,6 +19,7 @@ namespace ContentServer
 
 typedef std::map<uint,std::set<std::string>> ContentTimeCache;
 typedef std::map<uint,std::pair<time_t,time_t>> ContentTimeRangeCache;
+typedef Fmi::Cache::CacheStats CacheStistics;
 
 
 class SearchStructure
@@ -298,6 +300,8 @@ class CacheImplementation : public ServiceInterface
     time_t                 mContentTimeRangeCache_checkRequested;
     uint                   mContentTimeRangeCache_maxRecords;
     uint                   mContentTimeRangeCache_maxRecordsPerThread;
+    std::atomic<long long> mContentTimeRangeCache_size;
+    mutable CacheStistics  mContentTimeRangeCache_stats;
     ContentTimeCache       mContentTimeCache;
     ModificationLock       mContentTimeCache_modificationLock;
 };

@@ -9,6 +9,7 @@
 #include "../../functions/FunctionCollection.h"
 #include <boost/unordered_map.hpp>
 #include <unordered_map>
+#include <atomic>
 
 
 namespace SmartMet
@@ -647,7 +648,9 @@ class ServiceImplementation : public ServiceInterface
      time_t                     mProducerGenerationListCache_clearRequired;
 
      mutable Fmi::Cache::CacheStats    mContentCache_stats;
+     std::atomic<long long>            mContentCache_size;
      mutable Fmi::Cache::CacheStats    mContentSearchCache_stats;
+     std::atomic<long long>            mContentSearchCache_size;
 
 
      std::map<std::string,uint>        mOperationNames;

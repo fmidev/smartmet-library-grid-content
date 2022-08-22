@@ -27,7 +27,6 @@ thread_local static time_t mContentTimeRangeCache_clearTime;
 thread_local static time_t mContentTimeRangeCache_checkTime;
 thread_local static bool thread_init = false;
 
-Fmi::Cache::CacheStats mContentTimeRangeCache_stats;
 
 
 
@@ -142,6 +141,7 @@ void CacheImplementation::getCacheStats(Fmi::Cache::CacheStatistics& statistics)
   FUNCTION_TRACE
   try
   {
+    mContentTimeRangeCache_stats.size = mContentTimeRangeCache_size;
     mContentTimeRangeCache_stats.maxsize = mContentTimeRangeCache_maxRecords;
     statistics.insert(std::make_pair("Grid::ContentServer::contentTimeRange_cache", mContentTimeRangeCache_stats));
   }
@@ -5278,7 +5278,7 @@ int CacheImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessio
 
     if (mContentTimeRangeCache_clearRequested > mContentTimeRangeCache_clearTime)
     {
-      mContentTimeRangeCache_stats.size -= mContentTimeRangeCache.size();
+      mContentTimeRangeCache_size -= mContentTimeRangeCache.size();
       mContentTimeRangeCache.clear();
       mContentTimeRangeCache_clearTime = mContentTimeRangeCache_clearRequested;
     }
@@ -5291,7 +5291,7 @@ int CacheImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessio
         if (ssp->mGenerationInfoList.getGenerationInfoById(it->first) == nullptr)
         {
           mContentTimeRangeCache.erase(it->first);
-          mContentTimeRangeCache_stats.size--;
+          mContentTimeRangeCache_size--;
 
         }
       }
@@ -5314,13 +5314,13 @@ int CacheImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessio
         {
           if (mContentTimeRangeCache.size() > mContentTimeRangeCache_maxRecordsPerThread)
           {
-            mContentTimeRangeCache_stats.size -= mContentTimeRangeCache.size();
+            mContentTimeRangeCache_size -= mContentTimeRangeCache.size();
             mContentTimeRangeCache.clear();
           }
 
           mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
           mContentTimeRangeCache_stats.inserts++;
-          mContentTimeRangeCache_stats.size++;
+          mContentTimeRangeCache_size++;
         }
       }
       else
@@ -5346,13 +5346,13 @@ int CacheImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessio
         {
           if (mContentTimeRangeCache.size() > mContentTimeRangeCache_maxRecordsPerThread)
           {
-            mContentTimeRangeCache_stats.size -= mContentTimeRangeCache.size();
+            mContentTimeRangeCache_size -= mContentTimeRangeCache.size();
             mContentTimeRangeCache.clear();
           }
 
           mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
           mContentTimeRangeCache_stats.inserts++;
-          mContentTimeRangeCache_stats.size++;
+          mContentTimeRangeCache_size++;
         }
       }
       else
@@ -5394,7 +5394,7 @@ int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
 
     if (mContentTimeRangeCache_clearRequested > mContentTimeRangeCache_clearTime)
     {
-      mContentTimeRangeCache_stats.size -= mContentTimeRangeCache.size();
+      mContentTimeRangeCache_size -= mContentTimeRangeCache.size();
       mContentTimeRangeCache.clear();
       mContentTimeRangeCache_clearTime = mContentTimeRangeCache_clearRequested;
     }
@@ -5407,7 +5407,7 @@ int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
         if (ssp->mGenerationInfoList.getGenerationInfoById(it->first) == nullptr)
         {
           mContentTimeRangeCache.erase(it->first);
-          mContentTimeRangeCache_stats.size--;
+          mContentTimeRangeCache_size--;
         }
       }
     }
@@ -5429,12 +5429,12 @@ int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
         {
           if (mContentTimeRangeCache.size() > mContentTimeRangeCache_maxRecordsPerThread)
           {
-            mContentTimeRangeCache_stats.size -= mContentTimeRangeCache.size();
+            mContentTimeRangeCache_size -= mContentTimeRangeCache.size();
             mContentTimeRangeCache.clear();
           }
           mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
           mContentTimeRangeCache_stats.inserts++;
-          mContentTimeRangeCache_stats.size++;
+          mContentTimeRangeCache_size++;
         }
       }
       else
@@ -5459,13 +5459,13 @@ int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
         {
           if (mContentTimeRangeCache.size() > mContentTimeRangeCache_maxRecordsPerThread)
           {
-            mContentTimeRangeCache_stats.size -= mContentTimeRangeCache.size();
+            mContentTimeRangeCache_size -= mContentTimeRangeCache.size();
             mContentTimeRangeCache.clear();
           }
 
           mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
           mContentTimeRangeCache_stats.inserts++;
-          mContentTimeRangeCache_stats.size++;
+          mContentTimeRangeCache_size++;
         }
       }
       else

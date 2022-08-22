@@ -109,6 +109,8 @@ ServiceImplementation::ServiceImplementation()
     mDataServerMethodsEnabled = false;
     mContentCache_stats.maxsize = 0;
     mContentSearchCache_stats.maxsize = 0;
+    mContentCache_size = 0;
+    mContentSearchCache_size = 0;
 
     GRID::Operation::getOperatorNames(mOperationNames);
   }
@@ -225,7 +227,9 @@ void ServiceImplementation::getCacheStats(Fmi::Cache::CacheStatistics& statistic
 {
   try
   {
+    mContentCache_stats.size = mContentCache_size;
     mContentCache_stats.maxsize = mContentCache_maxRecords;
+    mContentSearchCache_stats.size = mContentSearchCache_size;
     mContentSearchCache_stats.maxsize = mContentSearchCache_maxRecords;
 
     statistics.insert(std::make_pair("Grid::QueryServer::content_cache", mContentCache_stats));
@@ -3043,7 +3047,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       if (mContentSearchCache_records >= mContentSearchCache_maxRecords)
       {
         //printf("CLEAR CONTENT SEARCH CACHE %u %ld %ld\n",mActiveContentSearchCache,mContentSearchCache_records,mContentSearchCache[mActiveContentSearchCache].size());
-        mContentSearchCache_stats.size -= mContentSearchCache_records;
+        mContentSearchCache_size -= mContentSearchCache_records;
         mContentSearchCache.clear();
         mContentSearchCache_records = 0;
       }
@@ -3068,7 +3072,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
         mContentSearchCache_records += len;
         mContentSearchCache_stats.inserts += len;
-        mContentSearchCache_stats.size += len;
+        mContentSearchCache_size += len;
       }
       else
       {
@@ -3101,7 +3105,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       if (mContentCache_records > mContentCache_maxRecordsPerThread)
       {
         //printf("CLEAR CONTENT CACHE\n");
-        mContentCache_stats.size -= mContentCache_records;
+        mContentCache_size -= mContentCache_records;
         mContentCache.clear();
         mContentCache_records = 0;
       }
@@ -3117,7 +3121,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
         mContentCache_records += len;
         mContentCache_stats.inserts += len;
-        mContentCache_stats.size += len;
+        mContentCache_size += len;
       }
     }
 

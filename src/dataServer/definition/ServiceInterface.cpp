@@ -2,6 +2,8 @@
 #include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/ShowFunction.h>
+#include <grid-files/grib1/GridDefinition.h>
+#include <grid-files/grib2/GridDefinition.h>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -55,6 +57,12 @@ void ServiceInterface::getCacheStats(Fmi::Cache::CacheStatistics& statistics) co
   FUNCTION_TRACE
   try
   {
+    statistics.insert(std::make_pair("Grid-files::GRIB1_coordinate_cache", GRIB1::coordinateCache_stats));
+    statistics.insert(std::make_pair("Grid-files::GRIB1_coordinate_transform1_cache", GRIB1::transformCache1_stats));
+    statistics.insert(std::make_pair("Grid-files::GRIB1_coordinate_transform2_cache", GRIB1::transformCache2_stats));
+    statistics.insert(std::make_pair("Grid-files::GRIB2_coordinate_cache", GRIB2::coordinateCache_stats));
+    statistics.insert(std::make_pair("Grid-files::GRIB2_coordinate_transform1_cache", GRIB2::transformCache1_stats));
+    statistics.insert(std::make_pair("Grid-files::GRIB2_coordinate_transform2_cache", GRIB2::transformCache2_stats));
   }
   catch (...)
   {
