@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 22.8.19
+Version: 22.8.23
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -27,19 +27,19 @@ BuildRequires: lua-devel
 BuildRequires: make
 BuildRequires: omniORB-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 22.6.16
-BuildRequires: smartmet-library-grid-files-devel >= 22.5.24
-BuildRequires: smartmet-library-macgyver-devel >= 22.6.16
-BuildRequires: smartmet-library-spine-devel >= 22.6.16
+BuildRequires: smartmet-library-gis-devel >= 22.7.27
+BuildRequires: smartmet-library-grid-files-devel >= 22.6.23
+BuildRequires: smartmet-library-macgyver-devel >= 22.8.9
+BuildRequires: smartmet-library-spine-devel >= 22.8.19
 Requires: %{smartmet_boost}-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
-Requires: smartmet-library-gis >= 22.6.16
-Requires: smartmet-library-grid-files >= 22.5.24
-Requires: smartmet-library-macgyver >= 22.6.16
-Requires: smartmet-library-spine >= 22.6.16
+Requires: smartmet-library-gis >= 22.7.27
+Requires: smartmet-library-grid-files >= 22.6.23
+Requires: smartmet-library-macgyver >= 22.8.9
+Requires: smartmet-library-spine >= 22.8.19
 Provides: %{SPECNAME}
 
 %description
@@ -72,10 +72,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 22.6.16
-Requires: smartmet-library-gis-devel >= 22.6.16
-Requires: smartmet-library-spine-devel >= 22.6.16
-Requires: smartmet-library-grid-files-devel >= 22.5.24
+Requires: smartmet-library-macgyver-devel >= 22.8.9
+Requires: smartmet-library-gis-devel >= 22.7.27
+Requires: smartmet-library-spine-devel >= 22.8.19
+Requires: smartmet-library-grid-files-devel >= 22.6.23
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -85,6 +85,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Aug 23 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.8.23-1.fmi
+- Improved cache statistics
 * Fri Aug 19 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.8.19-1.fmi
 - Added cache statistics
 * Wed Aug 17 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.8.17-1.fmi
