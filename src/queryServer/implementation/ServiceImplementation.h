@@ -636,6 +636,8 @@ class ServiceImplementation : public ServiceInterface
      uint                       mParameterMapping_checkInterval;
      std::size_t                mContentCache_maxRecords;
      std::size_t                mContentCache_maxRecordsPerThread;
+     time_t                     mContentCache_globalClearRequiredTime;
+     time_t                     mContentSearchCache_globalClearRequiredTime;
      std::size_t                mContentSearchCache_maxRecords;
      std::size_t                mContentSearchCache_maxRecordsPerThread;
      time_t                     mParameterMappingCache_clearRequired;

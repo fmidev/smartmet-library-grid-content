@@ -37,10 +37,15 @@ boost::local_time::time_zone_ptr tz_utc(new boost::local_time::posix_time_zone("
 
 thread_local static ContentCache mContentCache;
 thread_local static std::size_t mContentCache_records;
+thread_local static time_t mContentCache_clearRequiredTime;
+thread_local static time_t mContentCache_clearTime;
 thread_local static bool thread_init = false;
 
 thread_local static ContentSearchCache mContentSearchCache;
 thread_local static std::size_t mContentSearchCache_records;
+thread_local static time_t mContentSearchCache_clearRequiredTime;
+thread_local static time_t mContentSearchCache_clearTime;
+
 
 
 thread_local static ParameterMappingCache mParameterMappingCache;
@@ -111,6 +116,14 @@ ServiceImplementation::ServiceImplementation()
     mContentSearchCache_stats.maxsize = 0;
     mContentCache_size = 0;
     mContentSearchCache_size = 0;
+
+    mContentSearchCache_globalClearRequiredTime = 0;
+    mContentSearchCache_clearRequiredTime = 0;
+    mContentSearchCache_clearTime = 0;
+
+    mContentCache_globalClearRequiredTime = 0;
+    mContentCache_clearRequiredTime = 0;
+    mContentCache_clearTime = 0;
 
     GRID::Operation::getOperatorNames(mOperationNames);
   }
@@ -3044,12 +3057,15 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       contentInfoList = cList;
       //AutoWriteLock lock(&mContentSearchCache_modificationLock);
 
-      if (mContentSearchCache_records >= mContentSearchCache_maxRecords)
+      if (mContentSearchCache_clearTime < mContentSearchCache_clearRequiredTime ||
+          mContentSearchCache_clearTime <  mContentSearchCache_globalClearRequiredTime ||
+          mContentSearchCache_records >= mContentSearchCache_maxRecords)
       {
         //printf("CLEAR CONTENT SEARCH CACHE %u %ld %ld\n",mActiveContentSearchCache,mContentSearchCache_records,mContentSearchCache[mActiveContentSearchCache].size());
         mContentSearchCache_size -= mContentSearchCache_records;
         mContentSearchCache.clear();
         mContentSearchCache_records = 0;
+        mContentSearchCache_clearTime = time(nullptr);
       }
 
       auto rr = mContentSearchCache.find(hash2);
@@ -3093,8 +3109,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
         else
         {
           // We need to clear the cache
-
-          mContentSearchCache_records = mContentSearchCache_maxRecords;
+          mContentSearchCache_clearRequiredTime = time(nullptr);
         }
       }
     }
@@ -3102,12 +3117,15 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     if (newEntry)
     {
       //AutoWriteLock lock(&mContentCache_modificationLock);
-      if (mContentCache_records > mContentCache_maxRecordsPerThread)
+      if (mContentCache_clearTime < mContentCache_clearRequiredTime ||
+          mContentCache_clearTime < mContentCache_globalClearRequiredTime ||
+          mContentCache_records > mContentCache_maxRecordsPerThread)
       {
         //printf("CLEAR CONTENT CACHE\n");
         mContentCache_size -= mContentCache_records;
         mContentCache.clear();
         mContentCache_records = 0;
+        mContentCache_clearTime = time(nullptr);
       }
 
       if (mContentCache.find(hash) == mContentCache.end())
@@ -8624,8 +8642,8 @@ void ServiceImplementation::updateProcessing()
               PRINT_DATA(mDebugLog, "#### Content server restart detected, clearing cached information #######\n");
 
               mProducerGenerationListCache_clearRequired = time(nullptr);
-              mContentSearchCache_records = mContentSearchCache_maxRecords;
-              mContentCache_records = mContentCache_maxRecordsPerThread;
+              mContentSearchCache_globalClearRequiredTime = time(nullptr);
+              mContentCache_globalClearRequiredTime = time(nullptr);
 
               {
                 AutoWriteLock lock(&mHeightCache_modificationLock);
