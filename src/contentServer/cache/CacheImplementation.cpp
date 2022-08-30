@@ -95,6 +95,7 @@ CacheImplementation::CacheImplementation()
     mSearchStructurePtr[0] = nullptr;
     mSearchStructurePtr[1] = nullptr;
 
+    mContentTimeRangeCache_size = 0;
     mContentTimeRangeCache_clearRequested = 0;
     mContentTimeRangeCache_maxRecords = 0;
     mContentTimeRangeCache_maxRecordsPerThread = 100000;
