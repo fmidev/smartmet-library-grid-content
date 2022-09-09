@@ -96,11 +96,13 @@ CacheImplementation::CacheImplementation()
     mSearchStructurePtr[1] = nullptr;
 
     mContentTimeRangeCache_size = 0;
+    mContentTimeRangeCache_hits = 0;
+    mContentTimeRangeCache_misses = 0;
+    mContentTimeRangeCache_inserts = 0;
     mContentTimeRangeCache_clearRequested = 0;
     mContentTimeRangeCache_maxRecords = 0;
     mContentTimeRangeCache_maxRecordsPerThread = 100000;
     mContentTimeRangeCache_stats.starttime = boost::posix_time::second_clock::universal_time();
-
   }
   catch (...)
   {
@@ -136,6 +138,21 @@ CacheImplementation::~CacheImplementation()
 
 
 
+void CacheImplementation::initContentTimeRangeCache(uint maxRecordsPerThread)
+{
+  try
+  {
+    mContentTimeRangeCache_maxRecordsPerThread = maxRecordsPerThread;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 
 void CacheImplementation::getCacheStats(Fmi::Cache::CacheStatistics& statistics) const
 {
@@ -143,6 +160,9 @@ void CacheImplementation::getCacheStats(Fmi::Cache::CacheStatistics& statistics)
   try
   {
     mContentTimeRangeCache_stats.size = mContentTimeRangeCache_size;
+    mContentTimeRangeCache_stats.hits = mContentTimeRangeCache_hits;
+    mContentTimeRangeCache_stats.misses = mContentTimeRangeCache_misses;
+    mContentTimeRangeCache_stats.inserts = mContentTimeRangeCache_inserts;
     mContentTimeRangeCache_stats.maxsize = mContentTimeRangeCache_maxRecords;
     statistics.insert(std::make_pair("Grid::ContentServer::contentTimeRange_cache", mContentTimeRangeCache_stats));
   }
@@ -5262,7 +5282,7 @@ int CacheImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessio
       return Result::OK;
 
     if (mUpdateInProgress)
-      return mContentStorage->getContentTimeRangeByGenerationId(sessionId,generationId,startTime,endTime);
+      return mContentStorage->getContentTimeRangeByProducerAndGenerationId(sessionId,producerId,generationId,startTime,endTime);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -5293,7 +5313,6 @@ int CacheImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessio
         {
           mContentTimeRangeCache.erase(it->first);
           mContentTimeRangeCache_size--;
-
         }
       }
     }
@@ -5303,7 +5322,7 @@ int CacheImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessio
       auto it = mContentTimeRangeCache.find(generationId);
       if (it == mContentTimeRangeCache.end())
       {
-        mContentTimeRangeCache_stats.misses++;
+        mContentTimeRangeCache_misses++;
         ssp->mContentInfoList[1].getForecastTimeRangeByGenerationId(producerId,generationId,startTime,endTime);
 
         AutoReadLock readLock(&mSearchModificationLock);
@@ -5320,13 +5339,13 @@ int CacheImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessio
           }
 
           mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
-          mContentTimeRangeCache_stats.inserts++;
+          mContentTimeRangeCache_inserts++;
           mContentTimeRangeCache_size++;
         }
       }
       else
       {
-        mContentTimeRangeCache_stats.hits++;
+        mContentTimeRangeCache_hits++;
         startTime = it->second.first;
         endTime = it->second.second;
       }
@@ -5336,7 +5355,7 @@ int CacheImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessio
       auto it = mContentTimeRangeCache.find(generationId);
       if (it == mContentTimeRangeCache.end())
       {
-        mContentTimeRangeCache_stats.misses++;
+        mContentTimeRangeCache_misses++;
         ssp->mContentInfoList[1].getForecastTimeRangeByGenerationId(producerId,generationId,startTime,endTime);
 
         T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(generationId);
@@ -5352,7 +5371,7 @@ int CacheImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessio
           }
 
           mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
-          mContentTimeRangeCache_stats.inserts++;
+          mContentTimeRangeCache_inserts++;
           mContentTimeRangeCache_size++;
         }
       }
@@ -5360,7 +5379,7 @@ int CacheImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessio
       {
         startTime = it->second.first;
         endTime = it->second.second;
-        mContentTimeRangeCache_stats.hits++;
+        mContentTimeRangeCache_hits++;
       }
     }
     return Result::OK;
@@ -5423,7 +5442,7 @@ int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
       auto it = mContentTimeRangeCache.find(generationId);
       if (it == mContentTimeRangeCache.end())
       {
-        mContentTimeRangeCache_stats.misses++;
+        mContentTimeRangeCache_misses++;
         ssp->mContentInfoList[1].getForecastTimeRangeByGenerationId(generationInfo->mProducerId,generationId,startTime,endTime);
 
         if (generationInfo->mStatus == T::GenerationInfo::Status::Ready)
@@ -5434,13 +5453,13 @@ int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
             mContentTimeRangeCache.clear();
           }
           mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
-          mContentTimeRangeCache_stats.inserts++;
+          mContentTimeRangeCache_inserts++;
           mContentTimeRangeCache_size++;
         }
       }
       else
       {
-        mContentTimeRangeCache_stats.hits++;
+        mContentTimeRangeCache_hits++;
         startTime = it->second.first;
         endTime = it->second.second;
       }
@@ -5465,13 +5484,13 @@ int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
           }
 
           mContentTimeRangeCache.insert(std::pair<uint,std::pair<time_t,time_t>>(generationId,std::pair<time_t,time_t>(startTime,endTime)));
-          mContentTimeRangeCache_stats.inserts++;
+          mContentTimeRangeCache_inserts++;
           mContentTimeRangeCache_size++;
         }
       }
       else
       {
-        mContentTimeRangeCache_stats.hits++;
+        mContentTimeRangeCache_hits++;
         startTime = it->second.first;
         endTime = it->second.second;
       }

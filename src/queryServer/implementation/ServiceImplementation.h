@@ -91,6 +91,8 @@ class ServiceImplementation : public ServiceInterface
                        bool dataServerMethodsEnabled);
 
      void           getCacheStats(Fmi::Cache::CacheStatistics& statistics) const;
+     void           initContentCache(std::size_t maxRecordsPerThread,uint clearIntervalInSeconds);
+     void           initContentSearchCache(std::size_t maxRecordsPerThread,uint clearIntervalInSeconds);
 
      void           shutdown();
      void           setDem(boost::shared_ptr<Fmi::DEM> dem);
@@ -636,10 +638,12 @@ class ServiceImplementation : public ServiceInterface
      uint                       mParameterMapping_checkInterval;
      std::size_t                mContentCache_maxRecords;
      std::size_t                mContentCache_maxRecordsPerThread;
+     uint                       mContentCache_clearInterval;
      time_t                     mContentCache_globalClearRequiredTime;
      time_t                     mContentSearchCache_globalClearRequiredTime;
      std::size_t                mContentSearchCache_maxRecords;
      std::size_t                mContentSearchCache_maxRecordsPerThread;
+     uint                       mContentSearchCache_clearInterval;
      time_t                     mParameterMappingCache_clearRequired;
 
      pthread_t                  mThread;
@@ -651,8 +655,15 @@ class ServiceImplementation : public ServiceInterface
 
      mutable Fmi::Cache::CacheStats    mContentCache_stats;
      std::atomic<long long>            mContentCache_size;
+     long long                         mContentCache_hits;
+     long long                         mContentCache_misses;
+     long long                         mContentCache_inserts;
+
      mutable Fmi::Cache::CacheStats    mContentSearchCache_stats;
      std::atomic<long long>            mContentSearchCache_size;
+     long long                         mContentSearchCache_hits;
+     long long                         mContentSearchCache_misses;
+     long long                         mContentSearchCache_inserts;
 
 
      std::map<std::string,uint>        mOperationNames;

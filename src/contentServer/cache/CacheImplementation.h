@@ -54,6 +54,7 @@ class CacheImplementation : public ServiceInterface
     virtual void    synchronize();
     std::string&    getSourceInfo();
     virtual void    getCacheStats(Fmi::Cache::CacheStatistics& statistics) const;
+    virtual void    initContentTimeRangeCache(uint maxRecordsPerThread);
 
     virtual void    eventProcessingThread();
 
@@ -298,9 +299,12 @@ class CacheImplementation : public ServiceInterface
     bool                   mContentSwapEnabled;
     time_t                 mContentTimeRangeCache_clearRequested;
     time_t                 mContentTimeRangeCache_checkRequested;
-    uint                   mContentTimeRangeCache_maxRecords;
+    std::atomic<uint>      mContentTimeRangeCache_maxRecords;
     uint                   mContentTimeRangeCache_maxRecordsPerThread;
     std::atomic<long long> mContentTimeRangeCache_size;
+    long long              mContentTimeRangeCache_hits;
+    long long              mContentTimeRangeCache_misses;
+    long long              mContentTimeRangeCache_inserts;
     mutable CacheStistics  mContentTimeRangeCache_stats;
     ContentTimeCache       mContentTimeCache;
     ModificationLock       mContentTimeCache_modificationLock;
