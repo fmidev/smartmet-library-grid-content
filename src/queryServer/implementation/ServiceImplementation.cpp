@@ -2752,31 +2752,38 @@ void ServiceImplementation::executeConversion(const std::string& function, std::
     newValueList.reserve(size);
     for (int t=0; t<size; t++)
     {
-      std::vector<double> parameters;
-      for (auto fp = functionParams.begin(); fp != functionParams.end(); ++fp)
+      if (valueList[t] == ParamValueMissing)
       {
-        std::string f = fp->substr(0, 1);
-        std::string p = fp->substr(1);
-
-        if (*fp == "$")
-          parameters.emplace_back(valueList[t]);
-        else
-        if (f == "$"  &&  !p.empty())
-        {
-          T::ParamValue val = getAdditionalValue(p,forecastTime,coordinates[t].x(), coordinates[t].y());
-          parameters.emplace_back(val);
-        }
-        else
-          parameters.emplace_back(toDouble(fp->c_str()));
+        newValueList.emplace_back(ParamValueMissing);
       }
-
-      T::ParamValue newValue = 0;
-      if (functionPtr)
-        newValue = functionPtr->executeFunctionCall1(parameters);
       else
-        newValue = mLuaFileCollection.executeFunctionCall1(function, parameters);
+      {
+        std::vector<double> parameters;
+        for (auto fp = functionParams.begin(); fp != functionParams.end(); ++fp)
+        {
+          std::string f = fp->substr(0, 1);
+          std::string p = fp->substr(1);
 
-      newValueList.emplace_back(newValue);
+          if (*fp == "$")
+            parameters.emplace_back(valueList[t]);
+          else
+          if (f == "$"  &&  !p.empty())
+          {
+            T::ParamValue val = getAdditionalValue(p,forecastTime,coordinates[t].x(), coordinates[t].y());
+            parameters.emplace_back(val);
+          }
+          else
+            parameters.emplace_back(toDouble(fp->c_str()));
+        }
+
+        T::ParamValue newValue = 0;
+        if (functionPtr)
+          newValue = functionPtr->executeFunctionCall1(parameters);
+        else
+          newValue = mLuaFileCollection.executeFunctionCall1(function, parameters);
+
+        newValueList.emplace_back(newValue);
+      }
     }
   }
   catch (...)
@@ -2799,21 +2806,28 @@ void ServiceImplementation::executeConversion(const std::string& function, std::
     newValueList.reserve(size);
     for (int t=0; t<size; t++)
     {
-      std::vector<double> parameters;
-      for (auto fp = functionParams.begin(); fp != functionParams.end(); ++fp)
+      if (valueList[t] == ParamValueMissing)
       {
-        if (*fp == "$")
-          parameters.emplace_back(valueList[t]);
-        else
-          parameters.emplace_back(toDouble(fp->c_str()));
+        newValueList.emplace_back(ParamValueMissing);
       }
-      T::ParamValue newValue = 0;
-      if (functionPtr)
-        newValue = functionPtr->executeFunctionCall1(parameters);
       else
-        newValue = mLuaFileCollection.executeFunctionCall1(function, parameters);
+      {
+        std::vector<double> parameters;
+        for (auto fp = functionParams.begin(); fp != functionParams.end(); ++fp)
+        {
+          if (*fp == "$")
+            parameters.emplace_back(valueList[t]);
+          else
+            parameters.emplace_back(toDouble(fp->c_str()));
+        }
+        T::ParamValue newValue = 0;
+        if (functionPtr)
+          newValue = functionPtr->executeFunctionCall1(parameters);
+        else
+          newValue = mLuaFileCollection.executeFunctionCall1(function, parameters);
 
-      newValueList.emplace_back(newValue);
+        newValueList.emplace_back(newValue);
+      }
     }
   }
   catch (...)
@@ -2838,7 +2852,7 @@ void ServiceImplementation::executeConversion(const std::string& function, std::
     for (uint i = 0; i < vLen; i++)
     {
       auto gv = valueList.getGridValuePtrByIndex(i);
-      if (gv != nullptr)
+      if (gv != nullptr  &&  gv->mValue != ParamValueMissing)
       {
         std::vector<double> parameters;
         for (auto fp = functionParams.begin(); fp != functionParams.end(); ++fp)
@@ -3652,6 +3666,7 @@ bool ServiceImplementation::getValueVectors(
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             return false;
           }
+
           if (conversionByFunction)
              executeConversion(function, functionParams, forecastTime, coordinates, valueVector, valueList.mValueVector);
           else
