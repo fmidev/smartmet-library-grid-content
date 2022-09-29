@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 22.9.21
+Version: 22.9.29
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -27,8 +27,8 @@ BuildRequires: lua-devel
 BuildRequires: make
 BuildRequires: omniORB-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 22.9.1
-BuildRequires: smartmet-library-grid-files-devel >= 22.9.21
+BuildRequires: smartmet-library-gis-devel >= 22.9.28
+BuildRequires: smartmet-library-grid-files-devel >= 22.9.29
 BuildRequires: smartmet-library-macgyver-devel >= 22.8.23
 BuildRequires: smartmet-library-spine-devel >= 22.9.5
 Requires: %{smartmet_boost}-date-time
@@ -36,8 +36,8 @@ Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
-Requires: smartmet-library-gis >= 22.9.1
-Requires: smartmet-library-grid-files >= 22.9.21
+Requires: smartmet-library-gis >= 22.9.28
+Requires: smartmet-library-grid-files >= 22.9.29
 Requires: smartmet-library-macgyver >= 22.8.23
 Requires: smartmet-library-spine >= 22.9.5
 Provides: %{SPECNAME}
@@ -73,9 +73,9 @@ Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
 Requires: smartmet-library-macgyver-devel >= 22.8.23
-Requires: smartmet-library-gis-devel >= 22.9.1
+Requires: smartmet-library-gis-devel >= 22.9.28
 Requires: smartmet-library-spine-devel >= 22.9.5
-Requires: smartmet-library-grid-files-devel >= 22.9.21
+Requires: smartmet-library-grid-files-devel >= 22.9.29
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -85,6 +85,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Sep 29 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.9.29-1.fmi
+- Repackaged after Trax and GIS changes
 * Wed Sep 21 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.9.21-1.fmi
 - Disabling a conversion function call when parameter value is missing
 * Fri Sep  9 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.9.9-1.fmi
