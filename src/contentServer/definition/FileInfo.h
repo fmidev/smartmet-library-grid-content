@@ -48,11 +48,18 @@ class FileInfo
     /*! \brief The file identifier. */
     uint          mFileId;
 
+    /*! \brief The file protocol. */
+    uchar         mProtocol;
+
+    /*! \brief The file server. */
+    std::string   mServer;
+
     /*! \brief The file type. */
     uchar         mFileType;
 
     /*! \brief The file name. */
     std::string   mName;
+
 
     /*! \brief The file flags are used for indicating same additional information related
      * to the current file. For example, if the bit 0 is set to '1' then the content
@@ -65,6 +72,8 @@ class FileInfo
     time_t        mModificationTime;
 
     time_t        mDeletionTime;
+
+    ulonglong     mSize;
 
     /* The FileInfo records can be sorted in different ways when they are stored
      * into the FileInfoList object. That's why the FileInfo class contains
@@ -94,6 +103,16 @@ class FileInfo
         static const uint VirtualContent    = 2;
         static const uint DeletedFile       = 4;
     };
+
+    class Protocol
+    {
+      public:
+        static const uchar unknown          = 0;
+        static const uchar filesys          = 1;    // Local file system
+        static const uchar S3               = 2;    // S3
+        static const uchar HTTP             = 3;    // HTTP
+    };
+
 };
 
 

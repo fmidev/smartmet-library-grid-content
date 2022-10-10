@@ -14,6 +14,7 @@ FileInfo::FileInfo()
   try
   {
     mFileId = 0;
+    mProtocol = Protocol::filesys;
     mFileType = T::FileTypeValue::Unknown;
     mProducerId = 0;
     mGenerationId = 0;
@@ -21,6 +22,7 @@ FileInfo::FileInfo()
     mSourceId = 0;
     mModificationTime = 0;
     mDeletionTime = 0;
+    mSize = 0;
   }
   catch (...)
   {
@@ -37,6 +39,8 @@ FileInfo::FileInfo(const FileInfo& fileInfo)
   try
   {
     mFileId = fileInfo.mFileId;
+    mProtocol = fileInfo.mProtocol;
+    mServer = fileInfo.mServer;
     mFileType = fileInfo.mFileType;
     mName = fileInfo.mName;
     mProducerId = fileInfo.mProducerId;
@@ -45,6 +49,7 @@ FileInfo::FileInfo(const FileInfo& fileInfo)
     mSourceId = fileInfo.mSourceId;
     mModificationTime = fileInfo.mModificationTime;
     mDeletionTime = fileInfo.mDeletionTime;
+    mSize = fileInfo.mSize;
   }
   catch (...)
   {
@@ -62,6 +67,7 @@ FileInfo::FileInfo(uint producerId,uint generationId,uchar type,const std::strin
   {
     mProducerId = producerId;
     mGenerationId = generationId;
+    mProtocol = Protocol::filesys;
     mFileId = 0;
     mFileType = type;
     mName = filename;
@@ -69,6 +75,7 @@ FileInfo::FileInfo(uint producerId,uint generationId,uchar type,const std::strin
     mSourceId = sourceId;
     mModificationTime = 0;
     mDeletionTime = 0;
+    mSize = 0;
   }
   catch (...)
   {
@@ -85,6 +92,7 @@ FileInfo::FileInfo(const char *csv)
   try
   {
     mFileId = 0;
+    mProtocol = Protocol::filesys;
     mFileType = T::FileTypeValue::Unknown;
     mProducerId = 0;
     mGenerationId = 0;
@@ -92,6 +100,7 @@ FileInfo::FileInfo(const char *csv)
     mSourceId = 0;
     mModificationTime = 0;
     mDeletionTime = 0;
+    mSize = 0;
     setCsv(csv);
   }
   catch (...)
@@ -128,6 +137,8 @@ FileInfo& FileInfo::operator=(const FileInfo& fileInfo)
       return *this;
 
     mFileId = fileInfo.mFileId;
+    mProtocol = fileInfo.mProtocol;
+    mServer = fileInfo.mServer;
     mFileType = fileInfo.mFileType;
     mName = fileInfo.mName;
     mProducerId = fileInfo.mProducerId;
@@ -136,6 +147,7 @@ FileInfo& FileInfo::operator=(const FileInfo& fileInfo)
     mSourceId = fileInfo.mSourceId;
     mModificationTime = fileInfo.mModificationTime;
     mDeletionTime = fileInfo.mDeletionTime;
+    mSize = fileInfo.mSize;
 
     return *this;
   }
@@ -153,17 +165,19 @@ std::string FileInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%s;%u;%u;;%u;%u;%ld;%ld",
+    sprintf(st,"%u;%u;%s;%u;%u;%u;%u;%u;%ld;%ld;%s;%llu",
         mFileId,
         mFileType,
         mName.c_str(),
         mProducerId,
         mGenerationId,
-        //mGroupFlags,
+        mProtocol,
         mFlags,
         mSourceId,
         mModificationTime,
-        mDeletionTime);
+        mDeletionTime,
+        mServer.c_str(),
+        mSize);
 
     return std::string(st);
   }
@@ -181,7 +195,7 @@ std::string FileInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "fileId;fileType;name;producerId;generationId;;flags;sourceId;modificationTimeT;deletionTimeT";
+    std::string header = "fileId;fileType;name;producerId;generationId;protocol;flags;sourceId;modificationTimeT;deletionTimeT;server;size";
     return header;
   }
   catch (...)
@@ -227,13 +241,17 @@ void FileInfo::setCsv(const char *csv)
       mName = field[2];
       mProducerId = toUInt32(field[3]);
       mGenerationId = toUInt32(field[4]);
-      //mGroupFlags = toUInt32(field[5]);
+      mProtocol = toUInt32(field[5]);
       mFlags = toUInt32(field[6]);
       mSourceId = toUInt32(field[7]);
       if (c >= 8)
         mModificationTime = toInt64(field[8]);
       if (c >= 9)
         mDeletionTime = toInt64(field[9]);
+      if (c >= 10)
+        mServer = field[10];
+      if (c >= 11)
+        mSize = toInt64(field[11]);
     }
   }
   catch (...)
@@ -314,8 +332,11 @@ void FileInfo::print(std::ostream& stream,uint level,uint optionFlags)
   {
     stream << space(level) << "FileInfo\n";
     stream << space(level) << "- mFileId           = " << mFileId << "\n";
+    stream << space(level) << "- mProtocol         = " << C_INT(mProtocol) << "\n";
+    stream << space(level) << "- mServer           = " << mServer << "\n";
     stream << space(level) << "- mFileType         = " << C_INT(mFileType) << "\n";
     stream << space(level) << "- mName             = " << mName << "\n";
+    stream << space(level) << "- mSize             = " << mSize << "\n";
     stream << space(level) << "- mProducerId       = " << mProducerId << "\n";
     stream << space(level) << "- mGenerationId     = " << mGenerationId << "\n";
     stream << space(level) << "- mFlags            = " << mFlags << "\n";

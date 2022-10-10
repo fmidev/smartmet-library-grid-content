@@ -65,8 +65,11 @@ struct CorbaFileInfo
   unsigned long      producerId;
   unsigned long      generationId;
   unsigned long      fileId;
+  octet              protocol;
+  string             server;
   octet              fileType;
   string             name;
+  unsigned long long size;
   unsigned long      flags;
   unsigned long      sourceId;
   long long          modificationTime;
@@ -164,8 +167,6 @@ struct CorbaLevelInfo
   unsigned long producerId;
   string        fmiParameterName;
   short         fmiParameterLevelId;
-  //octet         grib1ParameterLevelId;
-  //octet         grib2ParameterLevelId;
   long          parameterLevel;
 };
 

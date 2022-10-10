@@ -4351,7 +4351,11 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
       return;
 
     time_t checkTime = time(nullptr);
-    std::string filename = mDataDir + "/" + fileInfo.mName;
+    std::string filename;
+    if (!mDataDir.empty()  &&  mDataDir != "/")
+      filename = mDataDir + "/" + fileInfo.mName;
+    else
+      filename = fileInfo.mName;
 
     GRID::GridFile_sptr storageFile = mGridFileManager.getFileByIdNoMapping(fileInfo.mFileId);
 
@@ -4380,6 +4384,9 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
       gridFile->setGenerationId(fileInfo.mGenerationId);
       gridFile->setSourceId(fileInfo.mSourceId);
       gridFile->setDeletionTime(fileInfo.mDeletionTime);
+      gridFile->setProtocol(fileInfo.mProtocol);
+      gridFile->setServer(fileInfo.mServer);
+      gridFile->setSize(fileInfo.mSize);
     }
 
     T::ProducerInfo producerInfo;

@@ -177,8 +177,11 @@ void Converter::convert(T::FileInfo& source,ContentServer::Corba::CorbaFileInfo&
     target.producerId = source.mProducerId;
     target.generationId = source.mGenerationId;
     target.fileId = source.mFileId;
+    target.protocol = (CORBA::Octet)source.mProtocol;
+    target.server = CORBA::string_dup(source.mServer.c_str());
     target.fileType = (CORBA::Octet)source.mFileType;
     target.name = CORBA::string_dup(source.mName.c_str());
+    target.size = source.mSize;
     target.flags = source.mFlags;
     target.sourceId = source.mSourceId;
     target.modificationTime = source.mModificationTime;
@@ -201,8 +204,11 @@ void Converter::convert(const ContentServer::Corba::CorbaFileInfo& source,T::Fil
     target.mProducerId = source.producerId;
     target.mGenerationId = source.generationId;
     target.mFileId = source.fileId;
+    target.mProtocol = source.protocol;
+    target.mServer = source.server;
     target.mFileType = source.fileType;
     target.mName = source.name;
+    target.mSize = source.size;
     target.mFlags = source.flags;
     target.mSourceId = source.sourceId;
     target.mModificationTime = source.modificationTime;
@@ -500,9 +506,6 @@ void Converter::convert(const ContentServer::Corba::CorbaGeometryInfo& source,T:
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
-
-
-
 
 
 
@@ -1051,8 +1054,6 @@ void Converter::convert(T::LevelInfo& source,ContentServer::Corba::CorbaLevelInf
     target.producerId = source.mProducerId;
     target.fmiParameterName = CORBA::string_dup(source.mFmiParameterName.c_str());
     target.fmiParameterLevelId = source.mFmiParameterLevelId;
-    //target.grib1ParameterLevelId = source.mGrib1ParameterLevelId;
-    //target.grib2ParameterLevelId = source.mGrib2ParameterLevelId;
     target.parameterLevel = source.mParameterLevel;
   }
   catch (...)
@@ -1072,8 +1073,6 @@ void Converter::convert(const ContentServer::Corba::CorbaLevelInfo& source,T::Le
     target.mProducerId = source.producerId;
     target.mFmiParameterName = source.fmiParameterName;
     target.mFmiParameterLevelId = source.fmiParameterLevelId;
-    //target.mGrib1ParameterLevelId = source.grib1ParameterLevelId;
-    //target.mGrib2ParameterLevelId = source.grib2ParameterLevelId;
     target.mParameterLevel = source.parameterLevel;
   }
   catch (...)
