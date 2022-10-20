@@ -1467,6 +1467,37 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(u
 
 
 
+GenerationInfo* GenerationInfoList::getLastGenerationInfoByContentTimeAndStatus(uint producerId,uchar generationStatus)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
+    AutoReadLock lock(mModificationLockPtr);
+    T::GenerationInfo *generationInfo = nullptr;
+    for (uint t=0; t<mLength; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr  &&  info->mProducerId == producerId && info->mStatus == generationStatus  &&  (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
+      {
+        if (generationInfo == nullptr  ||  generationInfo->mContentEndTime < info->mContentEndTime)
+          generationInfo = info;
+      }
+    }
+    return generationInfo;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 bool GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(uint producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -1484,6 +1515,8 @@ bool GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(uint produce
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
+
+
 
 
 
@@ -1627,6 +1660,37 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(uint produ
       if (info != nullptr  &&  info->mProducerId == producerId && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
       {
         if (generationInfo == nullptr  ||  generationInfo->mName < info->mName)
+          generationInfo = info;
+      }
+    }
+    return generationInfo;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+GenerationInfo* GenerationInfoList::getLastGenerationInfoByContentTime(uint producerId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
+    AutoReadLock lock(mModificationLockPtr);
+    T::GenerationInfo *generationInfo = nullptr;
+    for (uint t=0; t<mLength; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr  &&  info->mProducerId == producerId && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
+      {
+        if (generationInfo == nullptr  ||  generationInfo->mContentEndTime < info->mContentEndTime)
           generationInfo = info;
       }
     }

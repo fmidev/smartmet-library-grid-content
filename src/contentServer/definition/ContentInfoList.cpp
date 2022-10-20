@@ -6227,12 +6227,29 @@ void ContentInfoList::getForecastTimeListByGenerationId(uint producerId,uint gen
 
 void ContentInfoList::getForecastTimeRangeByGenerationId(uint producerId,uint generationId,time_t& startTime,time_t& endTime)
 {
+  try
+  {
+    std::size_t hash = 0;
+    getForecastTimeRangeByGenerationId(producerId,generationId,startTime,endTime,hash);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void ContentInfoList::getForecastTimeRangeByGenerationId(uint producerId,uint generationId,time_t& startTime,time_t& endTime,std::size_t& hash)
+{
   FUNCTION_TRACE
   try
   {
     if (mArray == nullptr ||  mLength == 0)
       return;
 
+    hash = 0;
     AutoReadLock lock(mModificationLockPtr);
 
     ContentInfo searchInfo;
@@ -6262,6 +6279,9 @@ void ContentInfoList::getForecastTimeRangeByGenerationId(uint producerId,uint ge
         {
           if (info->mGenerationId == generationId)
           {
+            boost::hash_combine(hash,info->mFileId);
+            boost::hash_combine(hash,info->mMessageIndex);
+
             if (startTime == 0 || info->mForecastTimeUTC < startTime)
               startTime = info->mForecastTimeUTC;
 

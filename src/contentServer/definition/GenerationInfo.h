@@ -40,6 +40,9 @@ class GenerationInfo
     uint             mSourceId;
     time_t           mDeletionTime;
     time_t           mModificationTime;
+    time_t           mContentStartTime;
+    time_t           mContentEndTime;
+    std::size_t      mContentHash;
 
     class Status
     {

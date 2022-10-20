@@ -1941,6 +1941,7 @@ int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,u
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
+       exception.printError();
        return Result::UNEXPECTED_EXCEPTION;
     }
   }

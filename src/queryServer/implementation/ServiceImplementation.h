@@ -55,8 +55,8 @@ typedef std::unordered_map<std::size_t,ContentCacheEntry_sptr> ContentCache;
 class ContentSearchCacheEntry
 {
   public:
-    std::shared_ptr<T::ContentInfoList> contentInfoList[3];
-    ulonglong producerHash[3];
+    std::shared_ptr<T::ContentInfoList> contentInfoList;
+    ulonglong producerHash;
     uint generationId;
 };
 typedef std::unordered_map<std::size_t,ContentSearchCacheEntry> ContentSearchCache;
@@ -137,6 +137,7 @@ class ServiceImplementation : public ServiceInterface
                        std::set<T::GeometryId>& geometryIdList,
                        uint producerId,
                        const std::string& analysisTime,
+                       const std::string& maxAnalysisTime,
                        ulonglong generationFlags,
                        bool reverseGenerations,
                        bool acceptNotReadyGenerations,

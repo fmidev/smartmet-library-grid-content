@@ -56,6 +56,8 @@ class GenerationInfoList
     GenerationInfo*     getLastGenerationInfoByProducerId(uint producerId);
     GenerationInfo*     getLastGenerationInfoByProducerIdAndStatus(uint producerId,uchar generationStatus);
     bool                getLastGenerationInfoByProducerIdAndStatus(uint producerId,uchar generationStatus,T::GenerationInfo& generationInfo);
+    GenerationInfo*     getLastGenerationInfoByContentTime(uint producerId);
+    GenerationInfo*     getLastGenerationInfoByContentTimeAndStatus(uint producerId,uchar generationStatus);
     uint                getLength();
     std::size_t         getHash();
     std::size_t         getHashByProducerId(uint producerId);

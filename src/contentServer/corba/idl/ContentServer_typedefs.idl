@@ -141,6 +141,9 @@ struct CorbaGenerationInfo
   unsigned long      sourceId;
   long long          deletionTime;
   unsigned long long modificationTime;
+  unsigned long long contentStartTime;
+  unsigned long long contentEndTime;
+  unsigned long long contentHash;
 };
 
 typedef sequence<CorbaGenerationInfo> CorbaGenerationInfoList;

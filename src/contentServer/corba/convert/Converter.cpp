@@ -378,6 +378,9 @@ void Converter::convert(T::GenerationInfo& source,ContentServer::Corba::CorbaGen
     target.sourceId = source.mSourceId;
     target.deletionTime = source.mDeletionTime;
     target.modificationTime = source.mModificationTime;
+    target.contentStartTime = source.mContentStartTime;
+    target.contentEndTime = source.mContentEndTime;
+    target.contentHash = source.mContentHash;
   }
   catch (...)
   {
@@ -404,6 +407,9 @@ void Converter::convert(const ContentServer::Corba::CorbaGenerationInfo& source,
     target.mSourceId = source.sourceId;
     target.mDeletionTime = source.deletionTime;
     target.mModificationTime = source.modificationTime;
+    target.mContentStartTime = source.contentStartTime;
+    target.mContentEndTime = source.contentEndTime;
+    target.mContentHash = source.contentHash;
   }
   catch (...)
   {

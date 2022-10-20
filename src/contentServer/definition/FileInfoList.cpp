@@ -1195,6 +1195,39 @@ std::size_t FileInfoList::getHashByProducerId(uint producerId)
 
 
 
+std::size_t FileInfoList::getHashByGenerationId(uint generationId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::size_t hash = 0;
+
+    if (mArray == nullptr ||  mLength == 0)
+      return hash;
+
+    AutoReadLock lock(mModificationLockPtr);
+    uint sz = getLength();
+
+    for (uint t=0; t<sz; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mGenerationId == generationId)
+      {
+        boost::hash_combine(hash,info->mFileId);
+      }
+    }
+    return hash;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void FileInfoList::getFileInfoListByGenerationId(uint generationId,FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE

@@ -18,9 +18,6 @@ namespace ContentServer
 #define CONTENT_LIST_COUNT 2
 
 typedef std::map<uint,std::set<std::string>> ContentTimeCache;
-typedef std::map<uint,std::pair<time_t,time_t>> ContentTimeRangeCache;
-typedef Fmi::Cache::CacheStats CacheStistics;
-
 
 class SearchStructure
 {
@@ -54,7 +51,6 @@ class CacheImplementation : public ServiceInterface
     virtual void    synchronize();
     std::string&    getSourceInfo();
     virtual void    getCacheStats(Fmi::Cache::CacheStatistics& statistics) const;
-    virtual void    initContentTimeRangeCache(uint maxRecordsPerThread);
 
     virtual void    eventProcessingThread();
 
@@ -297,15 +293,6 @@ class CacheImplementation : public ServiceInterface
     time_t                 mContentUpdateTime;
     uint                   mContentUpdateInterval;
     bool                   mContentSwapEnabled;
-    time_t                 mContentTimeRangeCache_clearRequested;
-    time_t                 mContentTimeRangeCache_checkRequested;
-    std::atomic<uint>      mContentTimeRangeCache_maxRecords;
-    uint                   mContentTimeRangeCache_maxRecordsPerThread;
-    std::atomic<long long> mContentTimeRangeCache_size;
-    long long              mContentTimeRangeCache_hits;
-    long long              mContentTimeRangeCache_misses;
-    long long              mContentTimeRangeCache_inserts;
-    mutable CacheStistics  mContentTimeRangeCache_stats;
     ContentTimeCache       mContentTimeCache;
     ModificationLock       mContentTimeCache_modificationLock;
 };

@@ -118,12 +118,12 @@ ServiceImplementation::ServiceImplementation()
     mContentCache_hits = 0;
     mContentCache_misses = 0;
     mContentCache_inserts = 0;
-    mContentCache_clearInterval = 3600 * 60 * 3;
+    mContentCache_clearInterval = 3600 * 24;
     mContentSearchCache_size = 0;
     mContentSearchCache_hits = 0;
     mContentSearchCache_misses = 0;
     mContentSearchCache_inserts = 0;
-    mContentSearchCache_clearInterval = 3600 * 60 * 3;
+    mContentSearchCache_clearInterval = 3600 * 24;
 
     mContentSearchCache_globalClearRequiredTime = 0;
     mContentSearchCache_clearRequiredTime = 0;
@@ -2444,10 +2444,11 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
                 geomIdListPtr = &tmpGeomIdList;
 
               std::string producerStr;
+              std::string maxAnalysisTime;
 
               //printf("SEARCH %s %u\n",producerStr.c_str(),producerId);
 
-              getGridValues(qParam->mType,*producersPtr, *geomIdListPtr, producerId, analysisTime, gflags, reverseGenerations, acceptNotReadyGenerations, paramName, paramHash, paramLevelId, paramLevel, forecastType,
+              getGridValues(qParam->mType,*producersPtr, *geomIdListPtr, producerId, analysisTime, maxAnalysisTime, gflags, reverseGenerations, acceptNotReadyGenerations, paramName, paramHash, paramLevelId, paramLevel, forecastType,
                   forecastNumber,queryFlags,parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, *fTime, false, qParam->mLocationType,
                   query.mCoordinateType, query.mAreaCoordinates, qParam->mContourLowValues, qParam->mContourHighValues, query.mAttributeList,query.mRadius,qParam->mPrecision,*valueList,qParam->mCoordinates,producerStr);
 
@@ -2475,7 +2476,8 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
                   auto p2 = geomIdListPtr;
                   producersPtr = &(vec->second);
                   geomIdListPtr = &tmpGeomIdList;
-                  getGridValues(qParam->mType,*producersPtr, *geomIdListPtr, producerId, analysisTime, gflags, reverseGenerations, acceptNotReadyGenerations, paramName, paramHash, paramLevelId, paramLevel, forecastType,
+                  std::string maxAnalysisTime;
+                  getGridValues(qParam->mType,*producersPtr, *geomIdListPtr, producerId, analysisTime, maxAnalysisTime, gflags, reverseGenerations, acceptNotReadyGenerations, paramName, paramHash, paramLevelId, paramLevel, forecastType,
                       forecastNumber,queryFlags,parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, *fTime, false, qParam->mLocationType,
                       query.mCoordinateType, query.mAreaCoordinates, qParam->mContourLowValues, qParam->mContourHighValues, query.mAttributeList,query.mRadius,qParam->mPrecision,*valueList,qParam->mCoordinates,producerStr);
 
@@ -2983,210 +2985,171 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     if (producerHash == 0)
       producerHash = getProducerHash(producerId);
 
+    // ### Checking if we have the result for this search already in the cache
+
+    auto it = mContentSearchCache.find(hash2);
+    if (it != mContentSearchCache.end())
     {
-      //AutoReadLock readLock(&mContentSearchCache_modificationLock);
-      auto it = mContentSearchCache.find(hash2);
-      if (it != mContentSearchCache.end())
+      mContentSearchCache_hits++;
+      if (it->second.producerHash == producerHash)
       {
-        mContentSearchCache_hits++;
-        if (it->second.producerHash[0] == producerHash)
-        {
-          contentInfoList = it->second.contentInfoList[0];
-          return Result::OK;
-        }
+        // The result was found from the cache
 
-        if (it->second.producerHash[1] == producerHash)
-        {
-          contentInfoList = it->second.contentInfoList[1];
-          return Result::OK;
-        }
-
-        if (it->second.producerHash[2] == producerHash)
-        {
-          contentInfoList = it->second.contentInfoList[2];
-          return Result::OK;
-        }
-      }
-      else
-      {
-        mContentSearchCache_misses++;
+        contentInfoList = it->second.contentInfoList;
+        return Result::OK;
       }
     }
+    else
+    {
+      mContentSearchCache_misses++;
+    }
+
+
+    // ### Checking if we have already cached the required content information.
 
     ContentCacheEntry_sptr entry;
     bool newEntry = false;
 
-    {
-      //AutoReadLock readLock(&mContentCache_modificationLock);
-      auto cc = mContentCache.find(hash);
-      auto cc3 = cc;
+    auto cc = mContentCache.find(hash);
+    auto cc3 = cc;
 
-      if (cc != mContentCache.end())
+    if (cc != mContentCache.end())
+    {
+      // The required content information is was found from the cache
+
+      mContentCache_hits++;
+      entry = cc->second;
+    }
+    else
+    {
+      mContentCache_misses++;
+
+      // Trying to find the required content with another hash value
+
+      cc3 = mContentCache.find(hash3);
+      if (cc3 != mContentCache.end())
       {
-        entry = cc->second;
+        // The required content information is was found from the cache
+
         mContentCache_hits++;
+        entry = cc3->second;
+        hash = hash3;
       }
       else
       {
+        // No cache entry available. We have to fetch the required content
+        // information from the contentServer.
+
         mContentCache_misses++;
-        cc3 = mContentCache.find(hash3);
-        if (cc3 != mContentCache.end())
-        {
-          mContentCache_hits++;
-          entry = cc3->second;
-          hash = hash3;
-        }
-        else
-        {
-          mContentCache_misses++;
-          // No cache entry available
 
-          entry.reset(new ContentCacheEntry());
-          newEntry = true;
-
-          time_t startTime = 0;
-          time_t endTime = 0xFFFFFFFF;
-
-          mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,entry->contentInfoList);
-
-          if (entry->contentInfoList.getLength() == 0)
-          {
-            mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,0,1000000000,forecastType,forecastNumber,geometryId,startTime,endTime,0,entry->contentInfoList);
-            if (entry->contentInfoList.getLength() == 0)
-              hash = hash3;
-          }
-
-          entry->generationId = generationId;
-          entry->producerHash = producerHash;
-
-          switch (parameterKeyType)
-          {
-            case T::ParamKeyTypeValue::FMI_ID:
-              break;
-
-            case T::ParamKeyTypeValue::FMI_NAME:
-              entry->contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
-              break;
-          }
-        }
+        entry.reset(new ContentCacheEntry());
+        newEntry = true;
       }
     }
 
-    if (!newEntry && entry->producerHash != producerHash)
+
+    if (newEntry || entry->producerHash != producerHash)
     {
-      // Producer hash does not match
-      //printf("*** UPDATE \n");
-      //AutoWriteLock lock(&mContentCache_modificationLock);
-      if (entry->producerHash != producerHash)
+      // The content entry in the cache seems to be old or missing. That's why we should update this entry.
+
+      time_t startTime = 0;
+      time_t endTime = 0xFFFFFFFF;
+
+      mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,entry->contentInfoList);
+      if (entry->contentInfoList.getLength() == 0)
       {
-        time_t startTime = 0;
-        time_t endTime = 0xFFFFFFFF;
+        // It seems that the content information on the required level is not available. Let's ignore
+        // the level requirement.
 
-        mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,entry->contentInfoList);
-
-        entry->producerHash = producerHash;
-        entry->generationId = generationId;
-
-        switch (parameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            entry->contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
-            break;
-        }
+        mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,0,1000000000,forecastType,forecastNumber,geometryId,startTime,endTime,0,entry->contentInfoList);
+        if (entry->contentInfoList.getLength() == 0)
+          hash = hash3;
       }
-    }
 
-    std::shared_ptr<T::ContentInfoList> cList = std::make_shared<T::ContentInfoList>();
-    {
-      //AutoReadLock readLock(&mContentCache_modificationLock);
+      entry->producerHash = producerHash;
+      entry->generationId = generationId;
+
       switch (parameterKeyType)
       {
         case T::ParamKeyTypeValue::FMI_ID:
-        {
-          if (fmiId == 0)
-            fmiId = toUInt32(parameterKey);
-
-          entry->contentInfoList.getContentInfoListByFmiParameterIdAndGenerationId2(producerId,generationId,fmiId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
-          if (cList->getLength() == 0)
-            entry->contentInfoList.getContentInfoListByFmiParameterIdAndGenerationId(producerId,generationId,fmiId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
-        }
-        break;
+          break;
 
         case T::ParamKeyTypeValue::FMI_NAME:
-        {
-          entry->contentInfoList.getContentInfoListByFmiParameterNameAndGenerationId2(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
-          if (cList->getLength() == 0)
-            entry->contentInfoList.getContentInfoListByFmiParameterNameAndGenerationId(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
-        }
-        break;
+          entry->contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
+          break;
       }
+    }
 
-      contentInfoList = cList;
-      //AutoWriteLock lock(&mContentSearchCache_modificationLock);
 
-      if (mContentSearchCache_clearTime < mContentSearchCache_clearRequiredTime ||
-          mContentSearchCache_clearTime <  mContentSearchCache_globalClearRequiredTime ||
-          mContentSearchCache_records >= mContentSearchCache_maxRecordsPerThread)
+    // ### Now we should have the required content information ready for the search.
+
+    std::shared_ptr<T::ContentInfoList> cList = std::make_shared<T::ContentInfoList>();
+    switch (parameterKeyType)
+    {
+      case T::ParamKeyTypeValue::FMI_ID:
       {
-        //printf("CLEAR CONTENT SEARCH CACHE %ld %ld %ld\n",mContentSearchCache_records,mContentSearchCache_maxRecords,(std::size_t)mContentSearchCache_size);
-        mContentSearchCache_size -= mContentSearchCache_records;
-        mContentSearchCache.clear();
-        mContentSearchCache_records = 0;
-        mContentSearchCache_clearTime = time(nullptr);
-      }
+        if (fmiId == 0)
+          fmiId = toUInt32(parameterKey);
 
-      auto rr = mContentSearchCache.find(hash2);
-      if (rr == mContentSearchCache.end())
+        entry->contentInfoList.getContentInfoListByFmiParameterIdAndGenerationId2(producerId,generationId,fmiId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
+        if (cList->getLength() == 0)
+          entry->contentInfoList.getContentInfoListByFmiParameterIdAndGenerationId(producerId,generationId,fmiId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
+      }
+      break;
+
+      case T::ParamKeyTypeValue::FMI_NAME:
       {
-        // Curren cache record is new. We should add in into the cache.
-
-        mContentSearchCache_misses++;
-        ContentSearchCacheEntry rc;
-        rc.contentInfoList[0] = cList;
-        rc.producerHash[0] = producerHash;
-        rc.producerHash[1] = 0;
-        rc.producerHash[2] = 0;
-        rc.generationId = generationId;
-        mContentSearchCache.insert(std::pair<std::size_t,ContentSearchCacheEntry>(hash2,rc));
-
-        auto len = cList->getLength();
-        if (!len)
-          len = 1;
-
-        mContentSearchCache_records += len;
-        mContentSearchCache_inserts++;
-        mContentSearchCache_size += len;
+        entry->contentInfoList.getContentInfoListByFmiParameterNameAndGenerationId2(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
+        if (cList->getLength() == 0)
+          entry->contentInfoList.getContentInfoListByFmiParameterNameAndGenerationId(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
       }
-      else
-      {
-        // Current cache record is already in use, but it has old information. We should update this information.
-        mContentSearchCache_hits++;
+      break;
+    }
 
-        if (rr->second.producerHash[1] == 0  &&  rr->second.producerHash[0] != producerHash)
-        {
-          rr->second.contentInfoList[1] = cList;
-          rr->second.producerHash[1] = producerHash;
-        }
-        else
-        if (rr->second.producerHash[2] == 0  &&  rr->second.producerHash[0] != producerHash &&  rr->second.producerHash[1] != producerHash)
-        {
-          rr->second.contentInfoList[2] = cList;
-          rr->second.producerHash[2] = producerHash;
-        }
-        else
-        {
-          // We need to clear the cache
-          mContentSearchCache_clearRequiredTime = time(nullptr);
-        }
-      }
+    contentInfoList = cList;
+
+    if (mContentSearchCache_clearTime < mContentSearchCache_clearRequiredTime ||
+        mContentSearchCache_clearTime <  mContentSearchCache_globalClearRequiredTime ||
+        mContentSearchCache_records >= mContentSearchCache_maxRecordsPerThread)
+    {
+      //printf("CLEAR CONTENT SEARCH CACHE %ld %ld %ld\n",mContentSearchCache_records,mContentSearchCache_maxRecords,(std::size_t)mContentSearchCache_size);
+      mContentSearchCache_size -= mContentSearchCache_records;
+      mContentSearchCache.clear();
+      mContentSearchCache_records = 0;
+      mContentSearchCache_clearTime = time(nullptr);
+    }
+
+    auto rr = mContentSearchCache.find(hash2);
+    if (rr == mContentSearchCache.end())
+    {
+      // Current search result is new. We should add in into the cache.
+
+      mContentSearchCache_misses++;
+      ContentSearchCacheEntry rc;
+      rc.contentInfoList = cList;
+      rc.producerHash = producerHash;
+      rc.generationId = generationId;
+      mContentSearchCache.insert(std::pair<std::size_t,ContentSearchCacheEntry>(hash2,rc));
+
+      auto len = cList->getLength();
+      if (!len)
+        len = 1;
+
+      mContentSearchCache_records += len;
+      mContentSearchCache_inserts++;
+      mContentSearchCache_size += len;
+    }
+    else
+    {
+      // Current search result is already in use, but it has old information. We should update this information.
+      mContentSearchCache_hits++;
+
+      rr->second.contentInfoList = cList;
+      rr->second.producerHash = producerHash;
     }
 
     if (newEntry)
     {
-      //AutoWriteLock lock(&mContentCache_modificationLock);
       if (mContentCache_clearTime < mContentCache_clearRequiredTime ||
           mContentCache_clearTime < mContentCache_globalClearRequiredTime ||
           mContentCache_records > mContentCache_maxRecordsPerThread)
@@ -3200,7 +3163,6 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
       if (mContentCache.find(hash) == mContentCache.end())
       {
-        //printf("INSERT %ld\n",mContentCache.size());
         mContentCache.insert(std::pair<std::size_t,ContentCacheEntry_sptr>(hash,entry));
 
         auto len = entry->contentInfoList.getLength();
@@ -3217,7 +3179,6 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
   }
   catch (...)
   {
-    //mContentCache_modificationLock.writeUnlock();
     throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
@@ -6562,6 +6523,7 @@ void ServiceImplementation::getGridValues(
     std::set<T::GeometryId>& geometryIdList,
     uint producerId,
     const std::string& analysisTime,
+    const std::string& maxAnalysisTime,
     ulonglong generationFlags,
     bool reverseGenerations,
     bool acceptNotReadyGenerations,
@@ -6605,6 +6567,7 @@ void ServiceImplementation::getGridValues(
         PRINT_DATA(mDebugLog, "    * %d\n",* it);
       PRINT_DATA(mDebugLog, "  - producerId               : %u\n", producerId);
       PRINT_DATA(mDebugLog, "  - analysisTime             : %s\n", analysisTime.c_str());
+      PRINT_DATA(mDebugLog, "  - maxAnalysisTime          : %s\n", maxAnalysisTime.c_str());
       PRINT_DATA(mDebugLog, "  - generationFlags          : %llu\n", generationFlags);
       PRINT_DATA(mDebugLog, "  - reverseGenerations       : %d\n", reverseGenerations);
       PRINT_DATA(mDebugLog, "  - parameterKey             : %s\n", parameterKey.c_str());
@@ -6837,7 +6800,7 @@ void ServiceImplementation::getGridValues(
               if (generationInfo == nullptr || (generationInfo != nullptr && generationInfo->mDeletionTime > 0 && generationInfo->mDeletionTime < requiredAccessTime))
                 generationValid = false;
 
-              if (generationInfo != nullptr  &&  !acceptNotReadyGenerations)
+              if (generationValid  &&  generationInfo != nullptr  &&  !acceptNotReadyGenerations)
               {
                 // Checking if the geometry is ready.
                 if (mCheckGeometryStatus)
@@ -6852,14 +6815,17 @@ void ServiceImplementation::getGridValues(
                 }
               }
 
-              if (generationInfo != nullptr  &&  !climatologicalMappings  &&  producerId != 0)
+              if (generationValid  &&  !maxAnalysisTime.empty()  &&  generationInfo->mAnalysisTime > maxAnalysisTime)
+                generationValid = false;
+
+              if (generationValid  &&  generationInfo != nullptr  &&  !climatologicalMappings  &&  producerId != 0)
               {
                 // Checking if the requested forecast time is outside of the generation's time range.
-                time_t startTime = 0;
-                time_t endTime = 0;
 
-                getGenerationTimeRangeByProducerAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,startTime,endTime);
-                if (forecastTime < startTime || forecastTime > endTime)
+                if (generationInfo->mContentStartTime == 0 || generationInfo->mContentEndTime == 0)
+                  getGenerationTimeRangeByProducerAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,generationInfo->mContentStartTime,generationInfo->mContentEndTime);
+
+                if (forecastTime < generationInfo->mContentStartTime || forecastTime > generationInfo->mContentEndTime)
                   generationValid = false;
               }
 
@@ -7011,7 +6977,7 @@ void ServiceImplementation::getGridValues(
 
                           ParameterValues zhValueList;
                           getGridValues(queryType,pList,gList,x_producerId,
-                            analysisTime,generationFlags,reverseGenerations,acceptNotReadyGenerations,x_param,0,x_paramLevelId,x_paramLevel,
+                            analysisTime,maxAnalysisTime,generationFlags,reverseGenerations,acceptNotReadyGenerations,x_param,0,x_paramLevelId,x_paramLevel,
                             x_forecastType,x_forecastNumber,queryFlags,parameterFlags,x_areaInterpolationMethod,x_timeInterpolationMethod,
                             x_levelInterpolationMethod,forecastTime,timeMatchRequired,locationType,
                             coordinateType,areaCoordinates,contourLowValues,contourHighValues,
@@ -7036,7 +7002,7 @@ void ServiceImplementation::getGridValues(
 
                           ParameterValues lrValueList;
                           getGridValues(queryType,pList,gList,x_producerId,
-                            analysisTime,generationFlags,reverseGenerations,acceptNotReadyGenerations,x_param,0,x_paramLevelId,x_paramLevel,
+                            analysisTime,maxAnalysisTime,generationFlags,reverseGenerations,acceptNotReadyGenerations,x_param,0,x_paramLevelId,x_paramLevel,
                             x_forecastType,x_forecastNumber,queryFlags,parameterFlags,x_areaInterpolationMethod,x_timeInterpolationMethod,
                             x_levelInterpolationMethod,forecastTime,timeMatchRequired,locationType,
                             coordinateType,areaCoordinates,contourLowValues,contourHighValues,
@@ -7059,7 +7025,7 @@ void ServiceImplementation::getGridValues(
                           }
                           ParameterValues lsValueList;
                           getGridValues(queryType,pList,gList,x_producerId,
-                            analysisTime,generationFlags,reverseGenerations,acceptNotReadyGenerations,x_param,0,x_paramLevelId,x_paramLevel,
+                            analysisTime,maxAnalysisTime,generationFlags,reverseGenerations,acceptNotReadyGenerations,x_param,0,x_paramLevelId,x_paramLevel,
                             x_forecastType,x_forecastNumber,queryFlags,parameterFlags,x_areaInterpolationMethod,x_timeInterpolationMethod,
                             x_levelInterpolationMethod,forecastTime,timeMatchRequired,locationType,
                             coordinateType,areaCoordinates,contourLowValues,contourHighValues,
@@ -7293,7 +7259,7 @@ void ServiceImplementation::getGridValues(
                                 geomIdList.insert(producerGeometryId);
 
                                 ParameterValues valList;
-                                getGridValues(queryType,producers, geomIdList, a_producerId, a_analysisTime, a_generationFlags, a_reverseGenerations, a_acceptNotReadyGenerations, a_parameterKey, 0, a_paramLevelId,
+                                getGridValues(queryType,producers, geomIdList, a_producerId, a_analysisTime, maxAnalysisTime, a_generationFlags, a_reverseGenerations, a_acceptNotReadyGenerations, a_parameterKey, 0, a_paramLevelId,
                                     a_paramLevel, a_forecastType, a_forecastNumber, a_queryFlags, a_parameterFlags, a_areaInterpolationMethod, a_timeInterpolationMethod,
                                     a_levelInterpolationMethod, a_forecastTime, a_timeMatchRequired, a_locationType, coordinateType, areaCoordinates, contourLowValues, contourHighValues,
                                     queryAttributeList,a_radius, precision, valList,coordinates,producerStr);
@@ -7567,6 +7533,8 @@ void ServiceImplementation::getGridValues(
       }
     }
 
+    std::string maxAnalysisTime;
+
     time_t requiredAccessTime = time(nullptr) + 120;
 
     bool ignoreStartTimeValue = false;
@@ -7689,6 +7657,13 @@ void ServiceImplementation::getGridValues(
                   time_t firstTime = 0xFFFFFFFF;
                   time_t lastTime = startTime;
 
+                  if (analysisTime.empty())
+                  {
+                    T::GenerationInfo *lastGeneration = cacheEntry->generationInfoList->getLastGenerationInfoByContentTime(producerInfo.mProducerId);
+                    if (lastGeneration)
+                      maxAnalysisTime = lastGeneration->mAnalysisTime;
+                  }
+
                   uint c = 0;
                   for (int g=gLen-1; g>=0; g--)
                   {
@@ -7803,7 +7778,7 @@ void ServiceImplementation::getGridValues(
                       while (tt <= et)
                       {
                         //std::string ts = utcTimeFromTimeT(tt);
-                        contentTimeList2.insert(std::pair<time_t,std::string>(tt,""));
+                        contentTimeList2.insert(std::pair<time_t,std::string>(tt,analysisTime));
                         tt = tt + timestepSizeInMinutes*60;
                       }
                     }
@@ -7820,7 +7795,7 @@ void ServiceImplementation::getGridValues(
 
                       while (tt >= et)
                       {
-                        contentTimeList2.insert(std::pair<time_t,std::string>(tt,""));
+                        contentTimeList2.insert(std::pair<time_t,std::string>(tt,analysisTime));
                         tt = tt - timestepSizeInMinutes*60;
                       }
                     }
@@ -7835,7 +7810,7 @@ void ServiceImplementation::getGridValues(
 
                       while (tt <= et)
                       {
-                        contentTimeList2.insert(std::pair<time_t,std::string>(tt,""));
+                        contentTimeList2.insert(std::pair<time_t,std::string>(tt,analysisTime));
                         tt = tt + timestepSizeInMinutes*60;
                       }
                     }
@@ -7855,7 +7830,7 @@ void ServiceImplementation::getGridValues(
                       {
                         std::shared_ptr<ParameterValues> valList = std::make_shared<ParameterValues>();
 
-                        getGridValues(queryType,producers2, geometryIdList2, producerInfo.mProducerId, forecastTime->second, 0, reverseGenerations, acceptNotReadyGenerations, parameterKey, parameterHash, paramLevelId, paramLevel,
+                        getGridValues(queryType,producers2, geometryIdList2, producerInfo.mProducerId, forecastTime->second, maxAnalysisTime, 0, reverseGenerations, acceptNotReadyGenerations, parameterKey, parameterHash, paramLevelId, paramLevel,
                             forecastType, forecastNumber, queryFlags, parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, forecastTime->first, true,
                             locationType, coordinateType, areaCoordinates, contourLowValues, contourHighValues, queryAttributeList, radius, precision, *valList, coordinates,producerStr);
 
@@ -7864,7 +7839,9 @@ void ServiceImplementation::getGridValues(
                           if (valList->mForecastTimeUTC == 0)
                             valList->mForecastTimeUTC = forecastTime->first;
 
-                          a_lastTime = valList->mForecastTimeUTC;
+                          if (a_lastTime < valList->mForecastTimeUTC)
+                            a_lastTime = valList->mForecastTimeUTC;
+
                           valueList.emplace_back(valList);
                         }
 
@@ -7890,7 +7867,6 @@ void ServiceImplementation::getGridValues(
                         }
 
                         producerStr = "";
-
                         getGridValues(queryType,rec->second, tmpGeomIdList, 0, analysisTime, generationFlags, acceptNotReadyGenerations, parameterKey, parameterHash, paramLevelId, paramLevel, forecastType,
                             forecastNumber,queryFlags,parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, a_lastTime+1,endTime, timesteps, timestepSizeInMinutes, locationType,
                             coordinateType, areaCoordinates, contourLowValues, contourHighValues, queryAttributeList,radius,maxValues,precision,valueList,coordinates,producerStr,recursionCounter+1);
