@@ -4346,6 +4346,9 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
   FUNCTION_TRACE
   try
   {
+    if (mShutdownRequested)
+      return;
+
     AutoThreadLock lock(&mThreadLock);
 
     if ((fileInfo.mFlags & T::FileInfo::Flags::VirtualContent) != 0)
@@ -4406,6 +4409,9 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
     {
       for (uint t=0; t<cLen; t++)
       {
+        if (mShutdownRequested)
+          return;
+
         T::ContentInfo *info = contentList.getContentInfoByIndex(t);
 
         GRID::MessageInfo mInfo;

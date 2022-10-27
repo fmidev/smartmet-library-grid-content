@@ -168,6 +168,7 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
       readFileList();
 
       mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
+
       readContentList();
 
       mUpdateInProgress = false;
@@ -5691,6 +5692,9 @@ void CacheImplementation::readProducerList()
     if (mContentStorage == nullptr)
       return;
 
+    if (mShutdownRequested)
+      return;
+
     mProducerInfoList.clear();
 
     int result = mContentStorage->getProducerInfoList(mSessionId,mProducerInfoList);
@@ -5718,6 +5722,9 @@ void CacheImplementation::readGenerationList()
     PRINT_DATA(mDebugLog,"* Reading the generation list\n");
 
     if (mContentStorage == nullptr)
+      return;
+
+    if (mShutdownRequested)
       return;
 
     mGenerationInfoList.clear();
@@ -5751,6 +5758,9 @@ void CacheImplementation::readGeometryList()
     if (mContentStorage == nullptr)
       return;
 
+    if (mShutdownRequested)
+      return;
+
     mGeometryInfoList.clear();
 
     int result = mContentStorage->getGeometryInfoList(mSessionId,mGeometryInfoList);
@@ -5782,6 +5792,9 @@ void CacheImplementation::readFileList()
     if (mContentStorage == nullptr)
       return;
 
+    if (mShutdownRequested)
+      return;
+
     mFileInfoList.clear();
     mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
 
@@ -5790,6 +5803,9 @@ void CacheImplementation::readFileList()
     uint len = 50000;
     while (len > 0)
     {
+      if (mShutdownRequested)
+        return;
+
       T::FileInfoList fileInfoList;
 
       int result = mContentStorage->getFileInfoList(mSessionId,startFileId,50000,fileInfoList);
@@ -5803,6 +5819,9 @@ void CacheImplementation::readFileList()
       len = fileInfoList.getLength();
       for (uint t=0; t<len; t++)
       {
+        if (mShutdownRequested)
+          return;
+
         T::FileInfo *fileInfo = fileInfoList.getFileInfoByIndex(t);
         if (fileInfo != nullptr)
         {
@@ -5832,6 +5851,9 @@ void CacheImplementation::readContentList()
     if (mContentStorage == nullptr)
       return;
 
+    if (mShutdownRequested)
+      return;
+
     mContentInfoList.clear();
 
     uint startFileId = 0;
@@ -5839,6 +5861,9 @@ void CacheImplementation::readContentList()
     uint len = 50000;
     while (len > 0)
     {
+      if (mShutdownRequested)
+        return;
+
       T::ContentInfoList contentInfoList;
 
       int result = mContentStorage->getContentList(mSessionId,startFileId,startMessageIndex,50000,contentInfoList);
@@ -5854,6 +5879,9 @@ void CacheImplementation::readContentList()
 
       for (uint t=0; t<len; t++)
       {
+        if (mShutdownRequested)
+          return;
+
         T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
         if (contentInfo != nullptr)
         {
@@ -7641,6 +7669,9 @@ void CacheImplementation::updateContent()
       uint glen = nptr->mGenerationInfoList.getLength();
       for (uint g=0; g<glen; g++)
       {
+        if (mShutdownRequested)
+          return;
+
         auto ginfo = nptr->mGenerationInfoList.getGenerationInfoByIndex(g);
         nptr->mContentInfoList[1].getForecastTimeRangeByGenerationId(ginfo->mProducerId,ginfo->mGenerationId,ginfo->mContentStartTime,ginfo->mContentEndTime,ginfo->mContentHash);
       }
