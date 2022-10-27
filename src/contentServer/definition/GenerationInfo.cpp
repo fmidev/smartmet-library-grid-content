@@ -146,7 +146,7 @@ std::string GenerationInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%u;%s;%s;%s;%u;%u;%u;%ld;%ld;%ld;%ld;ld",
+    sprintf(st,"%u;%u;%u;%s;%s;%s;%u;%u;%u;%ld;%ld;%ld;%ld;%ld",
         mGenerationId,
         mGenerationType,
         mProducerId,
