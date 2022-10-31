@@ -79,7 +79,7 @@ ServiceImplementation::ServiceImplementation()
     mPreloadFile_modificationTime = 0;
     mPreloadMemoryLock = false;
     mMemoryMapCheckEnabled = false;
-    mFileCleanup_age = 60;
+    mFileCleanup_age = 3600;
     mFileCleanup_checkInterval = 60;
     mFileCleanup_time = 0;
     mDeletedFileCleanup_time = 0;
@@ -385,7 +385,7 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
         }
       }
 
-      if (getFileSize(fileInfo.mName.c_str()) > 0)
+      if (fileInfo.mProtocol > 1 || getFileSize(fileInfo.mName.c_str()) > 0)
       {
         T::ContentInfoList contentList;
         if (mContentServer->getContentListByFileId(mServerSessionId,fileId,contentList) == 0)
