@@ -1283,6 +1283,7 @@ std::size_t GenerationInfoList::getHash()
       {
         boost::hash_combine(hash,info->mGenerationId);
         boost::hash_combine(hash,info->mStatus);
+        boost::hash_combine(hash,info->mModificationTime);
       }
     }
     return hash;
@@ -1331,6 +1332,7 @@ std::size_t GenerationInfoList::getHashByProducerId(uint producerId)
         {
           boost::hash_combine(hash,info->mGenerationId);
           boost::hash_combine(hash,info->mStatus);
+          boost::hash_combine(hash,info->mModificationTime);
         }
         else
         {
@@ -1482,7 +1484,8 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByContentTimeAndStatus(
       GenerationInfo *info = mArray[t];
       if (info != nullptr  &&  info->mProducerId == producerId && info->mStatus == generationStatus  &&  (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
       {
-        if (generationInfo == nullptr  ||  generationInfo->mContentEndTime < info->mContentEndTime)
+        if (generationInfo == nullptr  ||  generationInfo->mContentEndTime < info->mContentEndTime
+            ||  (generationInfo->mContentEndTime == info->mContentEndTime  &&  generationInfo->mAnalysisTime < info->mAnalysisTime))
           generationInfo = info;
       }
     }
@@ -1690,7 +1693,8 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByContentTime(uint prod
       GenerationInfo *info = mArray[t];
       if (info != nullptr  &&  info->mProducerId == producerId && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
       {
-        if (generationInfo == nullptr  ||  generationInfo->mContentEndTime < info->mContentEndTime)
+        if (generationInfo == nullptr  ||  generationInfo->mContentEndTime < info->mContentEndTime
+            || (generationInfo->mContentEndTime == info->mContentEndTime  &&  generationInfo->mAnalysisTime < info->mAnalysisTime))
           generationInfo = info;
       }
     }

@@ -14,7 +14,8 @@ FileInfo::FileInfo()
   try
   {
     mFileId = 0;
-    mProtocol = Protocol::filesys;
+    mProtocol = Protocol::None;
+    mServerType = ServerType::Filesys;
     mFileType = T::FileTypeValue::Unknown;
     mProducerId = 0;
     mGenerationId = 0;
@@ -40,6 +41,7 @@ FileInfo::FileInfo(const FileInfo& fileInfo)
   {
     mFileId = fileInfo.mFileId;
     mProtocol = fileInfo.mProtocol;
+    mServerType = fileInfo.mServerType;
     mServer = fileInfo.mServer;
     mFileType = fileInfo.mFileType;
     mName = fileInfo.mName;
@@ -67,7 +69,8 @@ FileInfo::FileInfo(uint producerId,uint generationId,uchar type,const std::strin
   {
     mProducerId = producerId;
     mGenerationId = generationId;
-    mProtocol = Protocol::filesys;
+    mProtocol = Protocol::None;
+    mServerType = ServerType::Filesys;
     mFileId = 0;
     mFileType = type;
     mName = filename;
@@ -92,7 +95,8 @@ FileInfo::FileInfo(const char *csv)
   try
   {
     mFileId = 0;
-    mProtocol = Protocol::filesys;
+    mProtocol = Protocol::None;
+    mServerType = ServerType::Filesys;
     mFileType = T::FileTypeValue::Unknown;
     mProducerId = 0;
     mGenerationId = 0;
@@ -138,6 +142,7 @@ FileInfo& FileInfo::operator=(const FileInfo& fileInfo)
 
     mFileId = fileInfo.mFileId;
     mProtocol = fileInfo.mProtocol;
+    mServerType = fileInfo.mServerType;
     mServer = fileInfo.mServer;
     mFileType = fileInfo.mFileType;
     mName = fileInfo.mName;
@@ -165,7 +170,7 @@ std::string FileInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%s;%u;%u;%u;%u;%u;%ld;%ld;%s;%llu",
+    sprintf(st,"%u;%u;%s;%u;%u;%u;%u;%u;%ld;%ld;%s;%llu;%u",
         mFileId,
         mFileType,
         mName.c_str(),
@@ -177,7 +182,8 @@ std::string FileInfo::getCsv()
         mModificationTime,
         mDeletionTime,
         mServer.c_str(),
-        mSize);
+        mSize,
+        mServerType);
 
     return std::string(st);
   }
@@ -195,7 +201,7 @@ std::string FileInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "fileId;fileType;name;producerId;generationId;protocol;flags;sourceId;modificationTimeT;deletionTimeT;server;size";
+    std::string header = "fileId;fileType;name;producerId;generationId;protocol;flags;sourceId;modificationTimeT;deletionTimeT;server;size;serverType";
     return header;
   }
   catch (...)
@@ -252,6 +258,8 @@ void FileInfo::setCsv(const char *csv)
         mServer = field[10];
       if (c >= 11)
         mSize = toInt64(field[11]);
+      if (c >= 12)
+        mServerType = toUInt32(field[12]);
     }
   }
   catch (...)
@@ -333,6 +341,7 @@ void FileInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "FileInfo\n";
     stream << space(level) << "- mFileId           = " << mFileId << "\n";
     stream << space(level) << "- mProtocol         = " << C_INT(mProtocol) << "\n";
+    stream << space(level) << "- mServerType      = " << C_INT(mServerType) << "\n";
     stream << space(level) << "- mServer           = " << mServer << "\n";
     stream << space(level) << "- mFileType         = " << C_INT(mFileType) << "\n";
     stream << space(level) << "- mName             = " << mName << "\n";

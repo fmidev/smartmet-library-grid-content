@@ -34,6 +34,7 @@ class CacheEntry
   public:
     T::GenerationInfoList_sptr generationInfoList;
     StringVector_sptr          analysisTimes;
+    ulonglong                  producerHash;
 };
 
 typedef std::shared_ptr<CacheEntry> CacheEntry_sptr;
@@ -537,6 +538,7 @@ class ServiceImplementation : public ServiceInterface
                        ParameterValues& valueList);
 
      void           convertLevelsToHeights(
+                       unsigned long long producerHash,
                        T::ContentInfoList& contentList,
                        uchar coordinateType,
                        double x,
@@ -557,7 +559,7 @@ class ServiceImplementation : public ServiceInterface
 
      bool           getProducerInfoByName(const std::string& name,T::ProducerInfo& info);
 
-     ulonglong      getProducerHash(uint producerId);
+     //ulonglong      getProducerHash(uint producerId);
 
      time_t         getContentList(
                       T::ProducerInfo& producerInfo,
@@ -588,7 +590,7 @@ class ServiceImplementation : public ServiceInterface
                        time_t forecastTime,
                        std::shared_ptr<T::ContentInfoList>& contentInfoList);
 
-     CacheEntry_sptr getGenerationInfoListByProducerId(uint producerId,bool acceptNotReadyGenerations);
+     CacheEntry_sptr getGenerationInfoListByProducerId(uint producerId,ulonglong producerHash,bool acceptNotReadyGenerations);
 
      void            getGenerationTimeRangeByProducerAndGenerationId(uint producerId,uint generationId,time_t& startTime,time_t& endTime);
 
@@ -606,8 +608,8 @@ class ServiceImplementation : public ServiceInterface
      std::string                mGridConfigFile;
      Lua::LuaFileCollection     mLuaFileCollection;
      string_vec                 mParameterMappingFiles;
-     ProducerHash_map           mProducerHashMap;
-     ModificationLock           mProducerHashMap_modificationLock;
+     //ProducerHash_map           mProducerHashMap;
+     //ModificationLock           mProducerHashMap_modificationLock;
 
      std::string                mProducerFile;
      time_t                     mProducerFile_modificationTime;

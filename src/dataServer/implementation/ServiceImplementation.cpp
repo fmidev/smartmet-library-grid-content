@@ -4389,6 +4389,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
       gridFile->setSourceId(fileInfo.mSourceId);
       gridFile->setDeletionTime(fileInfo.mDeletionTime);
       gridFile->setProtocol(fileInfo.mProtocol);
+      gridFile->setServerType(fileInfo.mServerType);
       gridFile->setServer(fileInfo.mServer);
       gridFile->setSize(fileInfo.mSize);
     }

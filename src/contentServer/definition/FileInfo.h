@@ -48,8 +48,11 @@ class FileInfo
     /*! \brief The file identifier. */
     uint          mFileId;
 
-    /*! \brief The file protocol. */
-    uchar         mProtocol;
+    /*! \brief The file protocol. (0 = None, 1 = HTTPS, 2 = HTTP) */
+    uint          mProtocol;
+
+    /*! \brief The file server type (0 = Unknow, 1= Filesys, 2 = S3, 3 = Httpd. */
+    uint          mServerType;
 
     /*! \brief The file server. */
     std::string   mServer;
@@ -104,13 +107,22 @@ class FileInfo
         static const uint DeletedFile       = 4;
     };
 
+    class ServerType
+    {
+      public:
+        static const uint Unknown          = 0;
+        static const uint Filesys          = 1;    // Local file system
+        static const uint S3               = 2;    // S3
+        static const uint THREDDS          = 3;    // THREDDS data server
+        static const uint HTTPD            = 4;    // HTTPD
+    };
+
     class Protocol
     {
       public:
-        static const uchar unknown          = 0;
-        static const uchar filesys          = 1;    // Local file system
-        static const uchar S3               = 2;    // S3
-        static const uchar HTTP             = 3;    // HTTP
+        static const uint None             = 0;
+        static const uint HTTP             = 1;
+        static const uint HTTPS            = 2;
     };
 
 };

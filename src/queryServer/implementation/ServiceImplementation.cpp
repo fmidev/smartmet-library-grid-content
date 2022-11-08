@@ -90,8 +90,8 @@ ServiceImplementation::ServiceImplementation()
     mProducerFile_checkTime = 0;
     mProducerFile_checkInterval = 30;
     mParameterMapping_checkInterval = 30;
-    mGenerationInfoList_checkInterval = 120;
-    mProducerMap_checkInterval = 120;
+    mGenerationInfoList_checkInterval = 60;
+    mProducerMap_checkInterval = 60;
     mGenerationInfoList_checkTime = 0;
     mProducerMap_updateTime = 0;
     mShutdownRequested = false;
@@ -406,7 +406,7 @@ void ServiceImplementation::getGenerationTimeRangeByProducerAndGenerationId(uint
 
 
 
-CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(uint producerId,bool acceptNotReadyGenerations)
+CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(uint producerId,ulonglong producerHash,bool acceptNotReadyGenerations)
 {
   FUNCTION_TRACE
   try
@@ -414,7 +414,7 @@ CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(uint pr
     if (mProducerGenerationListCache_clearRequired > mProducerGenerationListCache_clearTime)
     {
       mProducerGenerationListCache.clear();
-      mProducerGenerationListCache_clearTime = mProducerGenerationListCache_clearRequired;
+      mProducerGenerationListCache_clearTime = time(nullptr);
     }
 
     uint key = producerId;
@@ -423,7 +423,18 @@ CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(uint pr
 
     auto gl = mProducerGenerationListCache.find(key);
     if (gl != mProducerGenerationListCache.end())
-      return gl->second;
+    {
+      if (gl->second->producerHash == producerHash)
+      {
+        // Return valid entry
+        return gl->second;
+      }
+      else
+      {
+        // Remove old entry
+        mProducerGenerationListCache.erase(gl);
+      }
+    }
 
     CacheEntry_sptr cacheEntry(new CacheEntry);
     if (!mGenerationInfoList)
@@ -451,6 +462,7 @@ CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(uint pr
 
     cacheEntry->generationInfoList = generationInfoList;
     cacheEntry->analysisTimes = analysisTimes;
+    cacheEntry->producerHash = producerHash;
 
     mProducerGenerationListCache.insert(std::pair<uint,CacheEntry_sptr>(key,cacheEntry));
 
@@ -2889,7 +2901,7 @@ void ServiceImplementation::executeConversion(const std::string& function, std::
 
 
 
-
+/*
 ulonglong ServiceImplementation::getProducerHash(uint producerId)
 {
   FUNCTION_TRACE
@@ -2936,7 +2948,7 @@ ulonglong ServiceImplementation::getProducerHash(uint producerId)
     throw exception;
   }
 }
-
+*/
 
 
 
@@ -2983,7 +2995,10 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     std::size_t hash2 = hash;
     boost::hash_combine(hash2,forecastTime);
     if (producerHash == 0)
-      producerHash = getProducerHash(producerId);
+    {
+      //producerHash = getProducerHash(producerId);
+      printf("%s:%d:%s: The producer hash should be never zero!\n",BCP);
+    }
 
     // ### Checking if we have the result for this search already in the cache
 
@@ -3029,7 +3044,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       cc3 = mContentCache.find(hash3);
       if (cc3 != mContentCache.end())
       {
-        // The required content information is was found from the cache
+        // The required content information was found from the cache
 
         mContentCache_hits++;
         entry = cc3->second;
@@ -3146,6 +3161,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
       rr->second.contentInfoList = cList;
       rr->second.producerHash = producerHash;
+      rr->second.generationId = generationId;
     }
 
     if (newEntry)
@@ -3172,6 +3188,10 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
         mContentCache_records += len;
         mContentCache_inserts++;
         mContentCache_size += len;
+      }
+      else
+      {
+        printf("%s:%d:%s: The code should never reach this point!\n",BCP);
       }
     }
 
@@ -4662,7 +4682,7 @@ bool ServiceImplementation::getPointValuesByHeight(
         T::ContentInfoList contentList;
 
         T::ContentInfoList tmpContentList3;
-        convertLevelsToHeights(tmpContentList2,coordinateType,coordinate->x(),coordinate->y(),tmpContentList3);
+        convertLevelsToHeights(producerInfo.mHash,tmpContentList2,coordinateType,coordinate->x(),coordinate->y(),tmpContentList3);
         tmpContentList3.sort(T::ContentInfo::ComparisonMethod::starttime_fmiName_fmiLevelId_level_file_message);
 
         PRINT_DATA(mDebugLog, "         + Found %u tmp3 content records\n", tmpContentList3.getLength());
@@ -6650,7 +6670,7 @@ void ServiceImplementation::getGridValues(
 
           // Reading generations supported by the current producer.
 
-          auto cacheEntry = getGenerationInfoListByProducerId(producerInfo.mProducerId,true);
+          auto cacheEntry = getGenerationInfoListByProducerId(producerInfo.mProducerId,producerInfo.mHash,true);
 
           uint gLen = cacheEntry->generationInfoList->getLength();
           if (gLen == 0)
@@ -6737,10 +6757,10 @@ void ServiceImplementation::getGridValues(
               }
             }
 
-            PRINT_DATA(mDebugLog, "  - Going through the generations from the newest to the oldest.\n");
-
-
             uint gLen = analysisTimes->size();
+
+            PRINT_DATA(mDebugLog, "  - Going through the generations from the newest to the oldest (generationCount = %u).\n",gLen);
+
             for (uint g = 0; g < gLen; g++)
             {
               if (origGenerationInfo != nullptr)
@@ -7586,7 +7606,7 @@ void ServiceImplementation::getGridValues(
 
           // Reading generations supported by the current producer.
 
-          auto cacheEntry = getGenerationInfoListByProducerId(producerInfo.mProducerId,true);
+          auto cacheEntry = getGenerationInfoListByProducerId(producerInfo.mProducerId,producerInfo.mHash,true);
           uint gLen = cacheEntry->generationInfoList->getLength();
 
           if (gLen > 0)
@@ -7720,6 +7740,9 @@ void ServiceImplementation::getGridValues(
                     }
 
                     if (gInfo == nullptr || (gInfo != nullptr &&  gInfo->mDeletionTime > 0 && gInfo->mDeletionTime < requiredAccessTime))
+                      generationValid = false;
+
+                    if (gInfo != nullptr  &&  !maxAnalysisTime.empty() &&  maxAnalysisTime < gInfo->mAnalysisTime)
                       generationValid = false;
 
                     if (generationValid)
@@ -8389,7 +8412,7 @@ T::ParamValue ServiceImplementation::getAdditionalValue(
 
 
 
-void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentList,uchar coordinateType,double x,double y,T::ContentInfoList& newContentList)
+void ServiceImplementation::convertLevelsToHeights(unsigned long long producerHash,T::ContentInfoList& contentList,uchar coordinateType,double x,double y,T::ContentInfoList& newContentList)
 {
   FUNCTION_TRACE
   try
@@ -8430,7 +8453,7 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
 
         std::shared_ptr<T::ContentInfoList> cList = std::make_shared<T::ContentInfoList>();
 
-        int result = getContentListByParameterGenerationIdAndForecastTime(0, contentInfo->mProducerId, 0, contentInfo->mGenerationId, paramKeyType, paramKey, 0xFFFFFFFF,
+        int result = getContentListByParameterGenerationIdAndForecastTime(0, contentInfo->mProducerId, producerHash, contentInfo->mGenerationId, paramKeyType, paramKey, 0xFFFFFFFF,
           levelId, level, -1, -1, contentInfo->mGeometryId, contentInfo->mForecastTimeUTC, cList);
 
         if (result != 0)
@@ -8480,7 +8503,7 @@ void ServiceImplementation::convertLevelsToHeights(T::ContentInfoList& contentLi
 
           std::shared_ptr<T::ContentInfoList> cList = std::make_shared<T::ContentInfoList>();
 
-          int result = getContentListByParameterGenerationIdAndForecastTime(0, contentInfo->mProducerId, 0, contentInfo->mGenerationId, paramKeyType, paramKey, 0xFFFFFFFE,
+          int result = getContentListByParameterGenerationIdAndForecastTime(0, contentInfo->mProducerId, producerHash, contentInfo->mGenerationId, paramKeyType, paramKey, 0xFFFFFFFE,
             levelId, level, -1, -1, contentInfo->mGeometryId, contentInfo->mForecastTimeUTC, cList);
 
           if (result != 0)
@@ -8697,10 +8720,12 @@ void ServiceImplementation::updateProcessing()
                 mLevelHeightCache.clear();
               }
 
+              /*
               {
                 AutoWriteLock lock(&mProducerHashMap_modificationLock);
                 mProducerHashMap.clear();
               }
+              */
 
 
               mProducerMap_updateTime = 0;

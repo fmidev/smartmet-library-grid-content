@@ -7866,16 +7866,42 @@ void CacheImplementation::updateContent()
         PRINT_DATA(mDebugLog, "     => Content %u\n",ssp->mContentInfoList[0].getLength());
       }
 
+      uint pLen = ssp->mProducerInfoList.getLength();
+
+      for (uint p=0; p<pLen; p++)
+      {
+        if (mShutdownRequested)
+          return;
+
+        T::ProducerInfo *producerInfo = ssp->mProducerInfoList.getProducerInfoByIndex(p);
+        if (producerInfo != nullptr)
+        {
+          std::size_t generationHash = ssp->mGenerationInfoList.getHashByProducerId(producerInfo->mProducerId);
+          std::size_t geometryHash = ssp->mGeometryInfoList.getHashByProducerId(producerInfo->mProducerId);
+          std::size_t fileHash = ssp->mFileInfoList.getHashByProducerId(producerInfo->mProducerId);
+          std::size_t contentHash = ssp->mContentInfoList[0].getHashByProducerId(producerInfo->mProducerId);
+
+          std::size_t h = 0;
+          boost::hash_combine(h,generationHash);
+          boost::hash_combine(h,geometryHash);
+          boost::hash_combine(h,fileHash);
+          boost::hash_combine(h,contentHash);
+
+          producerInfo->mHash = h;
+        }
+      }
+
+
       // ### Updating generation time ranges
-/*
+
       PRINT_DATA(mDebugLog, "  -- Updating generation time ranges\n");
-      uint glen = nptr->mGenerationInfoList.getLength();
+      uint glen = ssp->mGenerationInfoList.getLength();
       for (uint g=0; g<glen; g++)
       {
-        auto gInfo = ssp->mGenerationInfoList.getGenerationInfoByIndex(g);
-        ssp->mContentInfoList[1]->getForecastTimeRangeByGenerationId(ginfo->mProducerId,ginfo->mGenerationId,ginfo->mConentStartTime,ginfo->mContentEndTime,ginfo->mContentHash);
+        auto ginfo = ssp->mGenerationInfoList.getGenerationInfoByIndex(g);
+        ssp->mContentInfoList[1].getForecastTimeRangeByGenerationId(ginfo->mProducerId,ginfo->mGenerationId,ginfo->mContentStartTime,ginfo->mContentEndTime,ginfo->mContentHash);
       }
-*/
+
       // Disabled locking
 
       ssp->mProducerInfoList.setLockingEnabled(false);
