@@ -211,24 +211,6 @@ int CacheImplementation::_getGridMessageBytes(T::SessionId sessionId,uint fileId
 
 
 
-int CacheImplementation::_getGridMessagePreloadCount(T::SessionId sessionId,uint& count)
-{
-  try
-  {
-    if (mDataServer == nullptr)
-      throw Fmi::Exception(BCP,"Service not initialized!");
-
-    return mDataServer->getGridMessagePreloadCount(sessionId,count);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
 int CacheImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   try

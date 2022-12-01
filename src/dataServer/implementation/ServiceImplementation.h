@@ -15,8 +15,8 @@ namespace DataServer
 {
 
 
-typedef std::list<std::pair<uint,uint>> PreloadList;
-typedef std::set<std::string> PreloadDefList;
+//typedef std::list<std::pair<uint,uint>> PreloadList;
+//typedef std::set<std::string> PreloadDefList;
 
 
 
@@ -40,8 +40,6 @@ class ServiceImplementation : public ServiceInterface
 
      virtual void   addVirtualContentFactory(VirtualContentFactory *factory);
      virtual void   setVirtualContentEnabled(bool enabled);
-     virtual void   setMemoryMapCheckEnabled(bool enabled);
-     virtual void   setPreload(bool preloadEnabled,bool preloadMemoryLock,const std::string& preloadFile);
      virtual void   setCleanup(time_t age,time_t checkInterval);
 
      virtual void   eventProcessingThread();
@@ -53,7 +51,6 @@ class ServiceImplementation : public ServiceInterface
      virtual int    _getGridData(T::SessionId sessionId,uint fileId,uint messageIndex,T::GridData& data);
      virtual int    _getGridFileCount(T::SessionId sessionId,uint& count);
      virtual int    _getGridMessageBytes(T::SessionId sessionId,uint fileId,uint messageIndex,std::vector<uchar>& messageBytes,std::vector<uint>& messageSections);
-     virtual int    _getGridMessagePreloadCount(T::SessionId sessionId,uint& count);
 
      virtual int    _getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value);
      virtual int    _getGridValueByLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value);
@@ -156,7 +153,6 @@ class ServiceImplementation : public ServiceInterface
 
      virtual void   addFile(T::FileInfo& fileInfo,T::ContentInfoList& currentContentList);
      virtual void   fullUpdate();
-     virtual void   loadPreloadList();
      virtual void   updateVirtualFiles(T::ContentInfoList fullContentList);
      virtual void   registerVirtualFiles(VirtualGridFilePtr_map& gridFileMap);
      virtual void   processEvent(T::EventInfo& eventInfo,T::EventInfo *nextEventInfo);
@@ -170,22 +166,14 @@ class ServiceImplementation : public ServiceInterface
      bool                 mFullUpdateRequired;
      bool                 mEventProcessingActive;
      bool                 mVirtualContentEnabled;
-     bool                 mContentPreloadEnabled;
-     bool                 mMemoryMapCheckEnabled;
-
      T::SessionId         mServerSessionId;
      uint                 mServerId;
      std::string          mServerName;
      std::string          mServerIor;
      std::string          mDataDir;
-     bool                 mPreloadMemoryLock;
      pthread_t            mEventProcessingThread;
      time_t               mContentServerStartTime;
      GridFileManager      mGridFileManager;
-     std::string          mPreloadFile;
-     time_t               mPreloadFile_modificationTime;
-     PreloadList          mPreloadList;
-     PreloadDefList       mPreloadDefList;
      std::vector<uint>    mFileAdditionList;
      ThreadLock           mThreadLock;
 

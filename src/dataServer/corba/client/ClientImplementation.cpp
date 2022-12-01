@@ -232,28 +232,6 @@ int ClientImplementation::_getGridMessageBytes(T::SessionId sessionId,uint fileI
 
 
 
-int ClientImplementation::_getGridMessagePreloadCount(T::SessionId sessionId,uint& count)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP,"The client is not initialized!");
-
-    ::CORBA::ULong corbaCount = 0;
-
-    int result = mService->getGridMessagePreloadCount(sessionId,corbaCount);
-
-    if (result == 0)
-      count = corbaCount;
-
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
-
-
 int ClientImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   try

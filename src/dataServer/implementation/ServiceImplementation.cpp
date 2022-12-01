@@ -75,10 +75,6 @@ ServiceImplementation::ServiceImplementation()
     mVirtualContentEnabled = false;
     mContentServerStartTime = 0;
     mLastVirtualFileRegistration = 0;
-    mContentPreloadEnabled = true;
-    mPreloadFile_modificationTime = 0;
-    mPreloadMemoryLock = false;
-    mMemoryMapCheckEnabled = false;
     mFileCleanup_age = 3600;
     mFileCleanup_checkInterval = 60;
     mFileCleanup_time = 0;
@@ -215,30 +211,6 @@ bool ServiceImplementation::isSessionValid(T::SessionId sessionId)
 
 
 
-void ServiceImplementation::setPreload(bool preloadEnabled,bool preloadMemoryLock,const std::string& preloadFile)
-{
-  FUNCTION_TRACE
-  try
-  {
-    mContentPreloadEnabled = preloadEnabled;
-    mPreloadMemoryLock = preloadMemoryLock;
-    mPreloadFile = preloadFile;
-
-    if (mContentPreloadEnabled)
-    {
-      loadPreloadList();
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 void ServiceImplementation::setCleanup(time_t age,time_t checkInterval)
 {
   FUNCTION_TRACE
@@ -254,21 +226,6 @@ void ServiceImplementation::setCleanup(time_t age,time_t checkInterval)
 }
 
 
-
-
-
-void ServiceImplementation::setMemoryMapCheckEnabled(bool enabled)
-{
-  FUNCTION_TRACE
-  try
-  {
-    mMemoryMapCheckEnabled = enabled;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
 
 
 
@@ -342,16 +299,6 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
       }
       else
       {
-        if (mMemoryMapCheckEnabled  &&  !gridFile->isVirtual() && gridFile->isMemoryMapped())
-        {
-          std::string fname = gridFile->getFileName();
-          if (getFileSize(fname.c_str()) <= 100)
-          {
-            mGridFileManager.deleteFileById(fileId);
-            return nullptr;
-          }
-        }
-
         time_t deletionTime = gridFile->getDeletionTime();
         if (deletionTime == 0)
           return gridFile;
@@ -664,31 +611,6 @@ int ServiceImplementation::_getGridMessageBytes(T::SessionId sessionId,uint file
         messageSections.emplace_back(*it - messagePosition);
       }
     }
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int ServiceImplementation::_getGridMessagePreloadCount(T::SessionId sessionId,uint& count)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (mContentPreloadEnabled)
-      count = mPreloadList.size();
-    else
-      count = 0xFFFFFFFF;
 
     return Result::OK;
   }
@@ -4432,14 +4354,6 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
         mInfo.mGeometryId = info->mGeometryId;
 
         gridFile->newMessage(info->mMessageIndex,mInfo);
-
-        if (mContentPreloadEnabled)
-        {
-          char tmp[200];
-          sprintf(tmp,"%u;%s;%u;1;%u;%05u;%d;%d;1",info->mProducerId,info->getFmiParameterName(),info->mGeometryId,info->mFmiParameterLevelId,info->mParameterLevel,info->mForecastType,info->mForecastNumber);
-          if (mPreloadDefList.find(toLowerString(std::string(tmp))) != mPreloadDefList.end())
-            mPreloadList.emplace_back(std::pair<uint,uint>(info->mFileId,info->mMessageIndex));
-        }
       }
     }
 
@@ -5095,14 +5009,6 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
 
         gridFile->newMessage(contentInfo.mMessageIndex,mInfo);
 
-        if (mContentPreloadEnabled)
-        {
-          char tmp[200];
-          sprintf(tmp,"%u;%s;%u;1;%u;%05u;%d;%d;1",contentInfo.mProducerId,contentInfo.getFmiParameterName(),contentInfo.mGenerationId,contentInfo.mFmiParameterLevelId,contentInfo.mParameterLevel,contentInfo.mForecastType,contentInfo.mForecastNumber);
-          if (mPreloadDefList.find(toLowerString(std::string(tmp))) != mPreloadDefList.end())
-            mPreloadList.emplace_back(std::pair<uint,uint>(contentInfo.mFileId,contentInfo.mMessageIndex));
-        }
-
         if (mVirtualContentEnabled)
         {
           T::ProducerInfo producerInfo;
@@ -5351,73 +5257,6 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *n
 
 
 
-void ServiceImplementation::loadPreloadList()
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!mContentPreloadEnabled)
-      return;
-
-    FILE *file = fopen(mPreloadFile.c_str(), "re");
-    if (file == nullptr)
-    {
-      PRINT_DATA(mDebugLog, "  -- Preload file not available (%s).\n",mPreloadFile.c_str());
-      return;
-    }
-
-    mPreloadFile_modificationTime = getFileModificationTime(mPreloadFile.c_str());
-
-    T::ProducerInfoList producerInfoList;
-    mContentServer->getProducerInfoList(mServerSessionId,producerInfoList);
-
-    mPreloadDefList.clear();
-
-    char st[1000];
-    while (!feof(file))
-    {
-      if (fgets(st, 1000, file) != nullptr)
-      {
-        if (st[0] != '#')
-        {
-          char *p = st;
-          while (*p != '\0')
-          {
-            if (*p <= ' ')
-              *p = '\0';
-            else
-              p++;
-          }
-
-          std::vector <std::string> a;
-          splitString(st, ';', a);
-          if (a.size() == 9)
-          {
-            if (a[8] == "1")
-            {
-              T::ProducerInfo *producer = producerInfoList.getProducerInfoByName(a[0]);
-              if (producer != nullptr)
-              {
-                char tmp[200];
-                sprintf(tmp,"%u;%s;%s;%s;%s;%s;%s;%s;%s",producer->mProducerId,a[1].c_str(),a[2].c_str(),a[3].c_str(),a[4].c_str(),a[5].c_str(),a[6].c_str(),a[7].c_str(),a[8].c_str());
-                mPreloadDefList.insert(toLowerString(std::string(tmp)));
-              }
-            }
-          }
-        }
-      }
-    }
-    fclose(file);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-
-
-
-
 void ServiceImplementation::processEvents()
 {
   //FUNCTION_TRACE
@@ -5446,36 +5285,6 @@ void ServiceImplementation::processEvents()
     {
       fullUpdate();
       return;
-    }
-
-    time_t sTime = time(0);
-    while (mContentPreloadEnabled  &&  !mPreloadList.empty()  &&  (time(0)-sTime) < 10)
-    {
-      auto it = mPreloadList.front();
-
-      auto gFile = mGridFileManager.getFileByIdNoMapping(it.first);
-      if (gFile)
-      {
-        if (!gFile->isMemoryMapped())
-          gFile->mapToMemory();
-
-        GRID::Message *message = gFile->getMessageByIndex(it.second);
-        if (message != nullptr)
-        {
-          PRINT_DATA(mDebugLog,"** PRELOAD (%lu) : %s:%u:%s:%u:%u:%d:%d\n",mPreloadList.size(),message->getForecastTime().c_str(),message->getProducerId(),message->getFmiParameterName(),message->getFmiParameterLevelId(),message->getGridParameterLevel(),message->getForecastType(),message->getForecastNumber());
-
-          if (mPreloadMemoryLock)
-            message->lockData();
-/*
-          T::Dimensions d = message->getGridDimensions();
-          int geometryId = message->getGridGeometryId();
-
-          message->getGridValueByGridPoint(x,y);
-*/
-        }
-      }
-
-      mPreloadList.pop_front();
     }
 
 
