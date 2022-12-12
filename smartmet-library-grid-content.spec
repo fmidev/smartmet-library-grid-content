@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 22.11.8
+Version: 22.12.12
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -28,18 +28,18 @@ BuildRequires: make
 BuildRequires: omniORB-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 22.9.28
-BuildRequires: smartmet-library-grid-files-devel >= 22.11.8
+BuildRequires: smartmet-library-grid-files-devel >= 22.12.12
 BuildRequires: smartmet-library-macgyver-devel >= 22.10.20
-BuildRequires: smartmet-library-spine-devel >= 22.10.26
+BuildRequires: smartmet-library-spine-devel >= 22.12.2
 Requires: %{smartmet_boost}-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
 Requires: smartmet-library-gis >= 22.9.28
-Requires: smartmet-library-grid-files >= 22.11.8
+Requires: smartmet-library-grid-files >= 22.12.12
 Requires: smartmet-library-macgyver >= 22.10.20
-Requires: smartmet-library-spine >= 22.10.26
+Requires: smartmet-library-spine >= 22.12.2
 Provides: %{SPECNAME}
 
 %description
@@ -74,8 +74,8 @@ Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
 Requires: smartmet-library-macgyver-devel >= 22.10.20
 Requires: smartmet-library-gis-devel >= 22.9.28
-Requires: smartmet-library-spine-devel >= 22.10.26
-Requires: smartmet-library-grid-files-devel >= 22.11.8
+Requires: smartmet-library-spine-devel >= 22.12.2
+Requires: smartmet-library-grid-files-devel >= 22.12.12
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -85,6 +85,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Dec 12 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.12.12-1.fmi
+- Removed unused grid preloading functionality
 * Tue Nov  8 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.11.8-1.fmi
 - Bug fixes
 - Info additions
