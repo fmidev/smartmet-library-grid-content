@@ -290,7 +290,7 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
   FUNCTION_TRACE
   try
   {
-    GRID::GridFile_sptr gridFile = mGridFileManager.getFileById(fileId);
+    GRID::GridFile_sptr gridFile = mGridFileManager.getFileByIdNoMapping(fileId);
     if (gridFile)
     {
       if (gridFile->hasMessagePositionError())
@@ -310,6 +310,9 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
         }
         else
         {
+          if (!gridFile->isMemoryMapped())
+            gridFile->mapToMemory();
+
           gridFile->setAccessTime(time(nullptr));
           return gridFile;
         }
@@ -338,7 +341,10 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
         if (mContentServer->getContentListByFileId(mServerSessionId,fileId,contentList) == 0)
         {
           addFile(fileInfo,contentList);
-          gridFile = mGridFileManager.getFileById(fileId);
+          gridFile = mGridFileManager.getFileByIdNoMapping(fileId);
+          if (!gridFile->isMemoryMapped())
+            gridFile->mapToMemory();
+
           gridFile->setAccessTime(time(nullptr));
         }
       }
