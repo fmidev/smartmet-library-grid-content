@@ -1692,11 +1692,13 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
   try
   {
     uint valueCount = query.getValuesPerTimeStep();
+    // printf("EXECUTE QUERY FUNCTIONS %u\n",valueCount);
 
     for (auto qParam = query.mQueryParameterList.rbegin(); qParam != query.mQueryParameterList.rend(); ++qParam)
     {
       if (qParam->mFunction.length() > 0)
       {
+        // printf(" *** EXECUTE %s\n",qParam->mFunction.c_str());
         uint tCount = 0;
         for (auto tt = query.mForecastTimeList.begin(); tt != query.mForecastTimeList.end(); ++tt)
         {
@@ -1707,14 +1709,14 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
           std::vector<double> extParameters;
 
           bool areaCnt = false;
+          uint producerId = 0;
+          uint generationId = 0;
+          uint geometryId = 0;
+
           T::GridValue lastRec;
           for (uint v = 0; v < valueCount; v++)
           {
             std::vector<double> parameters;
-
-            uint producerId = 0;
-            uint generationId = 0;
-            uint geometryId = 0;
 
             for (auto it = qParam->mFunctionParams.begin(); it != qParam->mFunctionParams.end(); ++it)
             {
@@ -1787,11 +1789,12 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
 
             std::string f = qParam->mFunction.substr(0, 1);
 
-            if (f != "@")
+            if (f != "@" && !areaCnt)
             {
               auto functionPtr = mFunctionCollection.getFunction(qParam->mFunction);
               if (functionPtr)
               {
+                // printf("F1 : %s %ld\n",qParam->mFunction.c_str(),parameters.size());
                 double val = functionPtr->executeFunctionCall1(parameters);
                 T::GridValue rec(lastRec.mX, lastRec.mY, val);
                 pValues->mValueList.addGridValue(rec);
@@ -1804,6 +1807,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
                 {
                   case 1:
                   {
+                    // printf("LUA1 : %s %ld\n",qParam->mFunction.c_str(),parameters.size());
                     double val = mLuaFileCollection.executeFunctionCall1(function, parameters);
                     T::GridValue rec(lastRec.mX, lastRec.mY, val);
                     pValues->mValueList.addGridValue(rec);
@@ -1812,6 +1816,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
 
                   case 5:
                   {
+                    // printf("LUA5 : %s %ld\n",qParam->mFunction.c_str(),parameters.size());
                     std::string val = mLuaFileCollection.executeFunctionCall5(function, query.mLanguage, parameters);
                     T::GridValue rec(lastRec.mX, lastRec.mY, val);
                     pValues->mValueList.addGridValue(rec);
@@ -1829,9 +1834,33 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
           std::string f = qParam->mFunction.substr(0, 1);
           if (areaCnt && f != "@")
           {
-            double val = mLuaFileCollection.executeFunctionCall1(qParam->mFunction, extParameters);
-            T::GridValue rec(-1000, -1000, val);
-            pValues->mValueList.addGridValue(rec);
+            std::string function;
+            uint type = mLuaFileCollection.getFunction(qParam->mFunction, function);
+            switch (type)
+            {
+              case 1:
+              {
+                // printf("ALUA1 : %s %ld\n",qParam->mFunction.c_str(),extParameters.size());
+                double val = mLuaFileCollection.executeFunctionCall1(function, extParameters);
+                T::GridValue rec(-1000, -1000, val);
+                pValues->mValueList.addGridValue(rec);
+              }
+              break;
+
+              case 5:
+              {
+                // printf("ALUA5 : %s %ld\n",qParam->mFunction.c_str(),extParameters.size());
+                std::string val = mLuaFileCollection.executeFunctionCall5(function, query.mLanguage, extParameters);
+                T::GridValue rec(-1000, -1000, val);
+                rec.print(std::cout,0,0);
+                pValues->mValueList.addGridValue(rec);
+              }
+              break;
+            }
+
+            pValues->mProducerId = producerId;
+            pValues->mGenerationId = generationId;
+            pValues->mGeometryId = geometryId;
           }
 
           if (qParam->mFunction.substr(0, 1) == "@")
@@ -1841,28 +1870,52 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
             auto functionPtr = mFunctionCollection.getFunction(func);
             if (functionPtr)
             {
+              // printf("@F1 : %s %ld\n",qParam->mFunction.c_str(),areaParameters.size());
               double val = functionPtr->executeFunctionCall1(areaParameters);
               T::GridValue rec(-1000, -1000, val);
               pValues->mValueList.addGridValue(rec);
             }
             else
             {
-              double val = mLuaFileCollection.executeFunctionCall1(func, areaParameters);
-              T::GridValue rec(-1000, -1000, val);
-              pValues->mValueList.addGridValue(rec);
+              std::string function;
+              uint type = mLuaFileCollection.getFunction(func, function);
+              switch (type)
+              {
+                case 1:
+                {
+                  // printf("@ALUA1 : %s %ld\n",qParam->mFunction.c_str(),areaParameters.size());
+                  double val = mLuaFileCollection.executeFunctionCall1(function, areaParameters);
+                  T::GridValue rec(-1000, -1000, val);
+                  pValues->mValueList.addGridValue(rec);
+                }
+                break;
+
+                case 5:
+                {
+                  // printf("@ALUA5 : %s %ld\n",qParam->mFunction.c_str(),areaParameters.size());
+                  std::string val = mLuaFileCollection.executeFunctionCall5(function, query.mLanguage, areaParameters);
+                  T::GridValue rec(-1000, -1000, val);
+                  pValues->mValueList.addGridValue(rec);
+                }
+                break;
+              }
             }
+
+            pValues->mProducerId = producerId;
+            pValues->mGenerationId = generationId;
+            pValues->mGeometryId = geometryId;
           }
 
           if (areaCnt)
           {
-            if (pValues->mValueList.getLength() > 0)
+            if (pValues->mValueList.getLength() > 1)
             {
               T::GridValue rec;
               pValues->mValueList.getGridValueByIndex(0,rec);
-              T::ParamValue val = rec.mValue;
               pValues->mValueList.clear();
-              T::GridValue rec2(-1000, -1000, val);
-              pValues->mValueList.addGridValue(rec2);
+              rec.mX = -1000;
+              rec.mY = -1000;
+              pValues->mValueList.addGridValue(rec);
             }
           }
           qParam->mValueList.emplace_back(pValues);
