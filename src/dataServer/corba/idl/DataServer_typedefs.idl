@@ -93,6 +93,8 @@ struct CorbaGridData
   string              newbaseParameterName;
   long                parameterLevel;
   unsigned long	      geometryId;
+  boolean             reverseXDirection;
+  boolean             reverseYDirection;
   unsigned long       projection;
   unsigned long       columns;
   unsigned long       rows;  

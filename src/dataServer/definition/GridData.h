@@ -39,6 +39,8 @@ class GridData
     std::string         mNewbaseParameterName;
     T::ParamLevel       mParameterLevel;
     uint                mGeometryId;
+    bool                mReverseXDirection;
+    bool                mReverseYDirection;
     uint                mProjection;
     uint                mColumns;
     uint                mRows;

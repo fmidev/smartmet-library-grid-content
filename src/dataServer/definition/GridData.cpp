@@ -25,6 +25,8 @@ GridData::GridData()
     mGrib2ParameterLevelId = 0;
     mParameterLevel = 0;
     mGeometryId = 0;
+    mReverseXDirection = false;
+    mReverseYDirection = false;
     mProjection = 0;
     mColumns = 0;
     mRows = 0;
@@ -127,6 +129,8 @@ void GridData::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mNewbaseParameterName     = " << mNewbaseParameterName << "\n";
     stream << space(level) << "- mParameterLevel           = " << mParameterLevel << "\n";
     stream << space(level) << "- mGeometryId               = " << mGeometryId << "\n";
+    stream << space(level) << "- mReverseXDirection        = " << (int)mReverseXDirection << "\n";
+    stream << space(level) << "- mReverseYDirection        = " << (int)mReverseYDirection << "\n";
     stream << space(level) << "- mProjection               = " << mProjection << "\n";
     stream << space(level) << "- mColumns                  = " << mColumns << "\n";
     stream << space(level) << "- mRows                     = " << mRows << "\n";

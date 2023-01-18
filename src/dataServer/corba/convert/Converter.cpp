@@ -68,6 +68,8 @@ void Converter::convert(const T::GridData& source,DataServer::Corba::CorbaGridDa
     target.newbaseParameterName = CORBA::string_dup(source.mNewbaseParameterName.c_str());
     target.parameterLevel = source.mParameterLevel;
     target.geometryId = source.mGeometryId;
+    target.reverseXDirection = source.mReverseXDirection;
+    target.reverseYDirection = source.mReverseYDirection;
     target.projection = source.mProjection;
     target.columns = source.mColumns;
     target.rows = source.mRows;
@@ -116,6 +118,8 @@ void Converter::convert(const DataServer::Corba::CorbaGridData& source,T::GridDa
     target.mNewbaseParameterName = source.newbaseParameterName;
     target.mParameterLevel = source.parameterLevel;
     target.mGeometryId = source.geometryId;
+    target.mReverseXDirection = source.reverseXDirection;
+    target.mReverseYDirection = source.reverseYDirection;
     target.mProjection = source.projection;
     target.mColumns = source.columns;
     target.mRows = source.rows;

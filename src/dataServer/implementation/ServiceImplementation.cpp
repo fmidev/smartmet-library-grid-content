@@ -531,6 +531,8 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
     data.mNewbaseParameterName = message->getNewbaseParameterName();
     data.mParameterLevel = message->getGridParameterLevel();
     data.mGeometryId = message->getGridGeometryId();
+    data.mReverseXDirection = message->reverseXDirection();
+    data.mReverseYDirection = message->reverseYDirection();
     data.mProjection = message->getGridProjection();
     data.mColumns = message->getGridColumnCount();
     data.mRows = message->getGridRowCount();
