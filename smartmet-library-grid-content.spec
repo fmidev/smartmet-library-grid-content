@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 22.12.12
+Version: 23.1.19
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -27,19 +27,19 @@ BuildRequires: lua-devel
 BuildRequires: make
 BuildRequires: omniORB-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 22.9.28
-BuildRequires: smartmet-library-grid-files-devel >= 22.12.12
-BuildRequires: smartmet-library-macgyver-devel >= 22.10.20
-BuildRequires: smartmet-library-spine-devel >= 22.12.2
+BuildRequires: smartmet-library-gis-devel >= 23.1.5
+BuildRequires: smartmet-library-grid-files-devel >= 23.1.19
+BuildRequires: smartmet-library-macgyver-devel >= 22.12.16
+BuildRequires: smartmet-library-spine-devel >= 23.1.16
 Requires: %{smartmet_boost}-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
-Requires: smartmet-library-gis >= 22.9.28
-Requires: smartmet-library-grid-files >= 22.12.12
-Requires: smartmet-library-macgyver >= 22.10.20
-Requires: smartmet-library-spine >= 22.12.2
+Requires: smartmet-library-gis >= 23.1.5
+Requires: smartmet-library-grid-files >= 23.1.19
+Requires: smartmet-library-macgyver >= 22.12.16
+Requires: smartmet-library-spine >= 23.1.16
 Provides: %{SPECNAME}
 
 %description
@@ -72,10 +72,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 22.10.20
-Requires: smartmet-library-gis-devel >= 22.9.28
-Requires: smartmet-library-spine-devel >= 22.12.2
-Requires: smartmet-library-grid-files-devel >= 22.12.12
+Requires: smartmet-library-macgyver-devel >= 22.12.16
+Requires: smartmet-library-gis-devel >= 23.1.5
+Requires: smartmet-library-spine-devel >= 23.1.16
+Requires: smartmet-library-grid-files-devel >= 23.1.19
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -85,6 +85,10 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Jan 19 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.1.19-1.fmi
+- Added grid reverse information indicators for data fetching operations
+- Improved processing of functions in queries
+- Avoiding possible dead-lock situation when old memory mapped files are cleaned
 * Mon Dec 12 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.12.12-1.fmi
 - Removed unused grid preloading functionality
 * Tue Nov  8 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.11.8-1.fmi
