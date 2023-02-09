@@ -3953,6 +3953,698 @@ int ServiceImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessi
 
 
 
+int ServiceImplementation::_getGridStreamlines(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    try
+    {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
+      GRID::GridFile_sptr gridFile = getGridFile(fileId);
+      if (gridFile == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
+      if (message == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      message->getGridStreamlines(attributeList,modificationOperation,modificationParameters,streamlines);
+
+      return Result::OK;
+    }
+    catch (...)
+    {
+       Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceImplementation::_getGridStreamlinesByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    try
+    {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
+      GRID::GridFile_sptr gridFile = getGridFile(fileId);
+      if (gridFile == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
+      if (message == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      message->getGridStreamlinesByGeometry(attributeList,modificationOperation,modificationParameters,streamlines);
+
+      return Result::OK;
+    }
+    catch (...)
+    {
+       Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int ServiceImplementation::_getGridStreamlinesByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    try
+    {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
+      GRID::GridFile_sptr gridFile = getGridFile(fileId);
+      if (gridFile == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
+      if (message == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      message->getGridStreamlinesByGrid(gridWidth,gridHeight,gridLatLonCoordinates,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,streamlines);
+
+      return Result::OK;
+    }
+    catch (...)
+    {
+       Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+       exception.addParameter("FileId",Fmi::to_string(fileId));
+       exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceImplementation::_getGridStreamlinesByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    try
+    {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
+      GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
+      if (gridFile1 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
+      if (message1 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::GridFile_sptr gridFile2 = getGridFile(fileId2);
+      if (gridFile2 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message2 = gridFile2->getMessageByIndex(messageIndex2);
+      if (message2 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::MessageProcessing messageProcessing;
+      messageProcessing.getGridStreamlinesByLevel(*message1,*message2,newLevel,attributeList,modificationOperation,modificationParameters,streamlines);
+
+      return Result::OK;
+    }
+    catch (...)
+    {
+       Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+
+
+
+
+int ServiceImplementation::_getGridStreamlinesByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    try
+    {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
+      GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
+      if (gridFile1 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
+      if (message1 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::GridFile_sptr gridFile2 = getGridFile(fileId2);
+      if (gridFile2 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message2 = gridFile2->getMessageByIndex(messageIndex2);
+      if (message2 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::MessageProcessing messageProcessing;
+      messageProcessing.getGridStreamlinesByLevelAndGeometry(*message1,*message2,newLevel,attributeList,modificationOperation,modificationParameters,streamlines);
+
+      return Result::OK;
+    }
+    catch (...)
+    {
+       Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceImplementation::_getGridStreamlinesByLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  try
+  {
+    try
+    {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
+      GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
+      if (gridFile1 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
+      if (message1 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::GridFile_sptr gridFile2 = getGridFile(fileId2);
+      if (gridFile2 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message2 = gridFile2->getMessageByIndex(messageIndex2);
+      if (message2 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      if (gridLatLonCoordinates.size() == 0 ||  gridWidth == 0 || gridHeight == 0)
+        return Result::INVALID_NUMBER_OF_COORDINATES;
+
+      if (gridWidth == 0 || gridHeight == 0)
+        return Result::INVALID_DIMENSIONS;
+
+
+      GRID::MessageProcessing messageProcessing;
+      messageProcessing.getGridStreamlinesByLevelAndGrid(*message1,*message2,newLevel,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,streamlines);
+
+      return Result::OK;
+    }
+    catch (...)
+    {
+       Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceImplementation::_getGridStreamlinesByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    try
+    {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
+      GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
+      if (gridFile1 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
+      if (message1 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::GridFile_sptr gridFile2 = getGridFile(fileId2);
+      if (gridFile2 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message2 = gridFile2->getMessageByIndex(messageIndex2);
+      if (message2 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::MessageProcessing messageProcessing;
+      messageProcessing.getGridStreamlinesByTime(*message1,*message2,newTime,attributeList,modificationOperation,modificationParameters,streamlines);
+
+      return Result::OK;
+    }
+    catch (...)
+    {
+       Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceImplementation::_getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    try
+    {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
+      GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
+      if (gridFile1 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
+      if (message1 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::GridFile_sptr gridFile2 = getGridFile(fileId2);
+      if (gridFile2 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message2 = gridFile2->getMessageByIndex(messageIndex2);
+      if (message2 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::MessageProcessing messageProcessing;
+      messageProcessing.getGridStreamlinesByTimeAndGeometry(*message1,*message2,newTime,attributeList,modificationOperation,modificationParameters,streamlines);
+
+      return Result::OK;
+    }
+    catch (...)
+    {
+       Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+
+
+
+
+int ServiceImplementation::_getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  try
+  {
+    try
+    {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
+      GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
+      if (gridFile1 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
+      if (message1 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::GridFile_sptr gridFile2 = getGridFile(fileId2);
+      if (gridFile2 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message2 = gridFile2->getMessageByIndex(messageIndex2);
+      if (message2 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      if (gridLatLonCoordinates.size() == 0 ||  gridWidth == 0 || gridHeight == 0)
+        return Result::INVALID_NUMBER_OF_COORDINATES;
+
+      if (gridWidth == 0 || gridHeight == 0)
+        return Result::INVALID_DIMENSIONS;
+
+
+      GRID::MessageProcessing messageProcessing;
+      messageProcessing.getGridStreamlinesByTimeAndGrid(*message1,*message2,newTime,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,streamlines);
+
+      return Result::OK;
+    }
+    catch (...)
+    {
+       Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex1));
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+
+
+int ServiceImplementation::_getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    try
+    {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
+      GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
+      if (gridFile1 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
+      if (message1 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::GridFile_sptr gridFile2 = getGridFile(fileId2);
+      if (gridFile2 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message2 = gridFile2->getMessageByIndex(messageIndex2);
+      if (message2 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::GridFile_sptr gridFile3 = getGridFile(fileId3);
+      if (gridFile3 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message3 = gridFile3->getMessageByIndex(messageIndex3);
+      if (message3 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::GridFile_sptr gridFile4 = getGridFile(fileId4);
+      if (gridFile4 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message4 = gridFile4->getMessageByIndex(messageIndex4);
+      if (message4 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+
+      GRID::MessageProcessing messageProcessing;
+      messageProcessing.getGridStreamlinesByTimeAndLevel(*message1,*message2,*message3,*message4,newTime,newLevel,attributeList,modificationOperation,modificationParameters,streamlines);
+
+      return Result::OK;
+    }
+    catch (...)
+    {
+       Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
+       exception.addParameter("FileId3",Fmi::to_string(fileId3));
+       exception.addParameter("MessageIndex3",Fmi::to_string(messageIndex3));
+       exception.addParameter("FileId4",Fmi::to_string(fileId4));
+       exception.addParameter("MessageIndex4",Fmi::to_string(messageIndex4));
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceImplementation::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    try
+    {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
+      GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
+      if (gridFile1 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
+      if (message1 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::GridFile_sptr gridFile2 = getGridFile(fileId2);
+      if (gridFile2 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message2 = gridFile2->getMessageByIndex(messageIndex2);
+      if (message2 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::GridFile_sptr gridFile3 = getGridFile(fileId3);
+      if (gridFile3 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message3 = gridFile3->getMessageByIndex(messageIndex3);
+      if (message3 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::GridFile_sptr gridFile4 = getGridFile(fileId4);
+      if (gridFile4 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message4 = gridFile4->getMessageByIndex(messageIndex4);
+      if (message4 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::MessageProcessing messageProcessing;
+      messageProcessing.getGridStreamlinesByTimeLevelAndGeometry(*message1,*message2,*message3,*message4,newTime,newLevel,attributeList,modificationOperation,modificationParameters,streamlines);
+
+      return Result::OK;
+    }
+    catch (...)
+    {
+       Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
+       exception.addParameter("FileId3",Fmi::to_string(fileId3));
+       exception.addParameter("MessageIndex3",Fmi::to_string(messageIndex3));
+       exception.addParameter("FileId4",Fmi::to_string(fileId4));
+       exception.addParameter("MessageIndex4",Fmi::to_string(messageIndex4));
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceImplementation::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    try
+    {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
+      GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
+      if (gridFile1 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
+      if (message1 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::GridFile_sptr gridFile2 = getGridFile(fileId2);
+      if (gridFile2 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message2 = gridFile2->getMessageByIndex(messageIndex2);
+      if (message2 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::GridFile_sptr gridFile3 = getGridFile(fileId3);
+      if (gridFile3 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message3 = gridFile3->getMessageByIndex(messageIndex3);
+      if (message3 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+      GRID::GridFile_sptr gridFile4 = getGridFile(fileId4);
+      if (gridFile4 == nullptr)
+        return Result::FILE_NOT_FOUND;
+
+      GRID::Message *message4 = gridFile4->getMessageByIndex(messageIndex4);
+      if (message4 == nullptr)
+        return Result::MESSAGE_NOT_FOUND;
+
+
+      if (gridLatLonCoordinates.size() == 0 ||  gridWidth == 0 || gridHeight == 0)
+        return Result::INVALID_NUMBER_OF_COORDINATES;
+
+      if (gridWidth == 0 || gridHeight == 0)
+        return Result::INVALID_DIMENSIONS;
+
+      GRID::MessageProcessing messageProcessing;
+      messageProcessing.getGridStreamlinesByTimeLevelAndGrid(*message1,*message2,*message3,*message4,newTime,newLevel,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,streamlines);
+
+      return Result::OK;
+    }
+    catch (...)
+    {
+       Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+       exception.addParameter("FileId1",Fmi::to_string(fileId1));
+       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
+       exception.addParameter("FileId2",Fmi::to_string(fileId2));
+       exception.addParameter("MessageIndex2",Fmi::to_string(messageIndex2));
+       exception.addParameter("FileId3",Fmi::to_string(fileId3));
+       exception.addParameter("MessageIndex3",Fmi::to_string(messageIndex3));
+       exception.addParameter("FileId4",Fmi::to_string(fileId4));
+       exception.addParameter("MessageIndex4",Fmi::to_string(messageIndex4));
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 void ServiceImplementation::readContentList(T::ContentInfoList& contentList,bool includePhysicalContent,bool includeVirtualContent)
 {
   FUNCTION_TRACE

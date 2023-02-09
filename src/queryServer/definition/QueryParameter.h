@@ -69,6 +69,7 @@ class QueryParameter
         static const uchar Isoband        = 2;
         static const uchar Vector         = 3;
         static const uchar GridFile       = 4;
+        static const uchar StreamLine     = 5;
     };
 
     class LocationType

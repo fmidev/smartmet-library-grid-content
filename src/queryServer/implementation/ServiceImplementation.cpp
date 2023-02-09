@@ -5918,6 +5918,316 @@ bool ServiceImplementation::getPolygonValues(
 
 
 
+bool ServiceImplementation::getStreamlineValues(
+    T::ProducerInfo& producerInfo,
+    T::GeometryId producerGeometryId,
+    uint generationId,
+    const std::string& analysisTime,
+    ulonglong generationFlags,
+    ParameterMapping& pInfo,
+    time_t forecastTime,
+    T::ParamLevelId paramLevelId,
+    T::ParamLevel paramLevel,
+    T::ForecastType forecastType,
+    T::ForecastNumber forecastNumber,
+    uint parameterFlags,
+    short areaInterpolationMethod,
+    short timeInterpolationMethod,
+    short levelInterpolationMethod,
+    uchar locationType,
+    uchar coordinateType,
+    T::Coordinate_vec& gridCoordinates,
+    T::AttributeList& queryAttributeList,
+    uint& newProducerId,
+    short& precision,
+    ParameterValues& valueList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    uint modificationOperation = 0;
+    double_vec modificationParameters;
+
+    const char *gridWidthStr = queryAttributeList.getAttributeValue("grid.width");
+    const char *gridHeightStr = queryAttributeList.getAttributeValue("grid.height");
+
+    std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
+    time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
+        paramLevelId,paramLevel,forecastType,forecastNumber,parameterFlags,contentList);
+
+    PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
+
+    if (fTime == 0)
+      return false;
+
+    PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
+
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
+    {
+      std::stringstream stream;
+      contentList->print(stream, 0, 4);
+      PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
+    }
+
+    uint contentLen = contentList->getLength();
+    if (contentLen == 0)
+      return false;
+
+    T::ContentInfo* contentInfo1 = contentList->getContentInfoByIndex(0);
+    T::ContentInfo* contentInfo2 = contentList->getContentInfoByIndex(1);
+    T::ContentInfo* contentInfo3 = contentList->getContentInfoByIndex(2);
+    T::ContentInfo* contentInfo4 = contentList->getContentInfoByIndex(3);
+
+    valueList.mParameterKeyType = pInfo.mParameterKeyType;
+    valueList.mParameterKey = pInfo.mParameterKey;
+    valueList.mParameterLevelId = paramLevelId;
+
+    //valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+    valueList.mForecastTimeUTC = forecastTime;
+    valueList.mProducerId = contentInfo1->mProducerId;
+    valueList.mGenerationId = contentInfo1->mGenerationId;
+    valueList.mGenerationFlags = generationFlags;
+    valueList.mGeometryId = contentInfo1->mGeometryId;
+    valueList.mFileId[0] = contentInfo1->mFileId;
+    valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
+    valueList.mModificationTime = contentInfo1->mModificationTime;
+    valueList.mAnalysisTime = analysisTime;
+    valueList.mForecastType = contentInfo1->mForecastType;
+    valueList.mForecastNumber = contentInfo1->mForecastNumber;
+    valueList.mParameterLevel = contentInfo1->mParameterLevel;
+    valueList.mParameterLevelId = contentInfo1->mFmiParameterLevelId;
+
+    queryAttributeList.setAttribute("grid.timeInterpolationMethod",Fmi::to_string(timeInterpolationMethod));
+    queryAttributeList.setAttribute("grid.areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
+
+
+    if (contentLen == 1)
+    {
+      if (contentInfo1->mForecastTimeUTC == fTime)
+      {
+        // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
+
+        valueList.mFlags = ParameterValues::Flags::DataAvailable;
+
+        if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
+        {
+          int result = 0;
+
+          switch (locationType)
+          {
+            case QueryParameter::LocationType::Geometry:
+              result = mDataServerPtr->getGridStreamlinesByGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,queryAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
+              break;
+
+            case QueryParameter::LocationType::Grid:
+              if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
+                result = mDataServerPtr->getGridStreamlinesByGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,toUInt32(gridWidthStr),toUInt32(gridHeightStr),gridCoordinates,queryAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
+              break;
+
+            default:
+              result = mDataServerPtr->getGridStreamlines(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,queryAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
+              break;
+          }
+
+          if (result != 0)
+          {
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
+            exception.addParameter("Service", "getGridStreamlinesByGeometry / getGridStreamlinesByGrid / getGridStreamlines");
+            exception.addParameter("LocationType",Fmi::to_string(locationType));
+            exception.addParameter("Message", DataServer::getResultString(result));
+            std::string errorMsg = exception.getStackTrace();
+            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+            // throw exception;
+          }
+        }
+
+        if (precision < 0)
+          precision = pInfo.mDefaultPrecision;
+
+        return true;
+      }
+      else
+      {
+        // There is one content record in place, but its time does not match to
+        // the requested forecast time. This is used for indicating that there
+        // are content records available, but not for the requested time.
+        // So, we should use this producer.
+
+        newProducerId = producerInfo.mProducerId;
+        valueList.clear();
+        valueList.mProducerId = producerInfo.mProducerId;
+        valueList.mParameterKeyType = pInfo.mParameterKeyType;
+        valueList.mParameterKey = pInfo.mParameterKey;
+        valueList.mForecastTimeUTC = forecastTime;
+        return false;
+      }
+    }
+
+    if (contentLen == 2)
+    {
+      if (contentInfo1->mForecastTimeUTC < fTime && contentInfo2->mForecastTimeUTC > fTime  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
+      {
+        // We did not find a grid with the exact forecast time, but we find grids that
+        // are before and after the current forecast time. This means that we should do
+        // some time interpolation.
+
+        valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+
+        if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
+        {
+          int result = 0;
+          switch (locationType)
+          {
+            case QueryParameter::LocationType::Geometry:
+              result = mDataServerPtr->getGridStreamlinesByTimeAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,queryAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
+              break;
+
+            case QueryParameter::LocationType::Grid:
+              if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
+                result = mDataServerPtr->getGridStreamlinesByTimeAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,toUInt32(gridWidthStr),toUInt32(gridHeightStr),gridCoordinates,queryAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
+              break;
+
+            default:
+              result = mDataServerPtr->getGridStreamlinesByTime(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,queryAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
+              break;
+          }
+
+          if (result != 0)
+          {
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
+            exception.addParameter("Service", "getGridStreamlinesByTimeAndGeometry / getGridStreamlinesByTimeAndGrid / getGridStreamlinesByTime");
+            exception.addParameter("LocationType",Fmi::to_string(locationType));
+            exception.addParameter("Message", DataServer::getResultString(result));
+            std::string errorMsg = exception.getStackTrace();
+            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+            // throw exception;
+          }
+        }
+
+        if (precision < 0)
+          precision = pInfo.mDefaultPrecision;
+
+        return true;
+      }
+
+      if (contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
+      {
+        // We did not find a grid with the exact level but we find grids that
+        // are before and after the current level. This means that we should do
+        // some level interpolation.
+
+        valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+
+        if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
+        {
+          int result = 0;
+          switch (locationType)
+          {
+            case QueryParameter::LocationType::Geometry:
+              result = mDataServerPtr->getGridStreamlinesByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,queryAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
+              break;
+
+            case QueryParameter::LocationType::Grid:
+              if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
+                result = mDataServerPtr->getGridStreamlinesByLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,toUInt32(gridWidthStr),toUInt32(gridHeightStr),gridCoordinates,queryAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
+              break;
+
+            default:
+              result = mDataServerPtr->getGridStreamlinesByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,queryAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
+              break;
+          }
+
+          if (result != 0)
+          {
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
+            exception.addParameter("Service", "getGridStreamlinesByLevelAndGeometry / getGridStreamlinesByLevelAndGrid / getGridStreamlinesByLevel");
+            exception.addParameter("LocationType",Fmi::to_string(locationType));
+            exception.addParameter("Message", DataServer::getResultString(result));
+            std::string errorMsg = exception.getStackTrace();
+            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+            // throw exception;
+          }
+        }
+
+        valueList.mParameterLevel = paramLevel;
+
+        if (precision < 0)
+          precision = pInfo.mDefaultPrecision;
+
+        return true;
+      }
+    }
+
+    if (contentLen == 4)
+    {
+      if (contentInfo1->mForecastTimeUTC < fTime  &&  contentInfo2->mForecastTimeUTC < fTime  &&  contentInfo3->mForecastTimeUTC > fTime  &&  contentInfo4->mForecastTimeUTC > fTime  &&
+          contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&  contentInfo3->mParameterLevel < paramLevel  &&  contentInfo4->mParameterLevel > paramLevel
+          &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
+      {
+        valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+        valueList.mFileId[2] = contentInfo3->mFileId;
+        valueList.mMessageIndex[2] = contentInfo3->mMessageIndex;
+        valueList.mFileId[3] = contentInfo4->mFileId;
+        valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
+
+        if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
+        {
+          int result = 0;
+          switch (locationType)
+          {
+            case QueryParameter::LocationType::Geometry:
+              result = mDataServerPtr->getGridStreamlinesByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,queryAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
+              break;
+
+            case QueryParameter::LocationType::Grid:
+              if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
+                result = mDataServerPtr->getGridStreamlinesByTimeLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,toUInt32(gridWidthStr),toUInt32(gridHeightStr),gridCoordinates,queryAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
+              break;
+
+            default:
+              result = mDataServerPtr->getGridStreamlinesByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,queryAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
+              break;
+          }
+
+          if (result != 0)
+          {
+            Fmi::Exception exception(BCP, "DataServer returns an error!");
+            exception.addParameter("Service", "getGridStreamlinesByTimeLevelAndGeometry / getGridStreamlinesByTimeLevelAndGrid / getGridStreamlinesByTimeAndLevel");
+            exception.addParameter("LocationType",Fmi::to_string(locationType));
+            exception.addParameter("Message", DataServer::getResultString(result));
+            std::string errorMsg = exception.getStackTrace();
+            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+            // throw exception;
+          }
+        }
+
+        valueList.mParameterLevel = paramLevel;
+
+        if (precision < 0)
+          precision = pInfo.mDefaultPrecision;
+
+        return true;
+      }
+    }
+
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 bool ServiceImplementation::getIsolineValues(
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
@@ -7423,6 +7733,17 @@ void ServiceImplementation::getGridValues(
                       }
                     }
 
+                  }
+
+                  // ### STREAMLINE QUERY
+
+                  if (queryType == QueryParameter::Type::StreamLine)
+                  {
+                    if (getStreamlineValues(producerInfo, producerGeometryId, generationInfo->mGenerationId, generationInfo->mAnalysisTime, gflags, *pInfo, forecastTime, pLevelId, pLevel, forecastType, forecastNumber,
+                      parameterFlags, areaInterpolation, timeInterpolation, levelInterpolation, locationType, coordinateType, areaCoordinates[0], queryAttributeList, producerId, precision, valueList))
+                    {
+                      return;
+                    }
                   }
 
                   // ### ISOLINE QUERY
