@@ -436,6 +436,31 @@ class ServiceImplementation : public ServiceInterface
                        short& precision,
                        ParameterValues& valueList);
 
+     bool           getStreamlineValues(
+                       T::ProducerInfo& producerInfo,
+                       T::GeometryId producerGeometryId,
+                       uint generationId,
+                       const std::string& analysisTime,
+                       ulonglong generationFlags,
+                       ParameterMapping& pInfo,
+                       time_t forecastTime,
+                       T::ParamLevelId paramLevelId,
+                       T::ParamLevel paramLevel,
+                       T::ForecastType forecastType,
+                       T::ForecastNumber forecastNumber,
+                       uint parameterFlags,
+                       short areaInterpolationMethod,
+                       short timeInterpolationMethod,
+                       short levelInterpolationMethod,
+                       uchar locationType,
+                       uchar coordinateType,
+                       T::Coordinate_vec& gridCoordinates,
+                       T::AttributeList& queryAttributeList,
+                       uint& newProducerId,
+                       short& precision,
+                       ParameterValues& valueList);
+
+
      bool           getIsolineValues(
                        T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
