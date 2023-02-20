@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 23.1.19
+Version: 23.2.20
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -28,18 +28,18 @@ BuildRequires: make
 BuildRequires: omniORB-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 23.1.5
-BuildRequires: smartmet-library-grid-files-devel >= 23.1.19
-BuildRequires: smartmet-library-macgyver-devel >= 22.12.16
-BuildRequires: smartmet-library-spine-devel >= 23.1.16
+BuildRequires: smartmet-library-grid-files-devel >= 23.2.20
+BuildRequires: smartmet-library-macgyver-devel >= 23.2.8
+BuildRequires: smartmet-library-spine-devel >= 23.2.8
 Requires: %{smartmet_boost}-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
 Requires: smartmet-library-gis >= 23.1.5
-Requires: smartmet-library-grid-files >= 23.1.19
-Requires: smartmet-library-macgyver >= 22.12.16
-Requires: smartmet-library-spine >= 23.1.16
+Requires: smartmet-library-grid-files >= 23.2.20
+Requires: smartmet-library-macgyver >= 23.2.8
+Requires: smartmet-library-spine >= 23.2.8
 Provides: %{SPECNAME}
 
 %description
@@ -72,10 +72,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 22.12.16
+Requires: smartmet-library-macgyver-devel >= 23.2.8
 Requires: smartmet-library-gis-devel >= 23.1.5
-Requires: smartmet-library-spine-devel >= 23.1.16
-Requires: smartmet-library-grid-files-devel >= 23.1.19
+Requires: smartmet-library-spine-devel >= 23.2.8
+Requires: smartmet-library-grid-files-devel >= 23.2.20
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -85,6 +85,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Feb 20 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.2.20-1.fmi
+- Added streamline processing
 * Thu Jan 19 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.1.19-1.fmi
 - Added grid reverse information indicators for data fetching operations
 - Improved processing of functions in queries
