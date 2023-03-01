@@ -1224,20 +1224,28 @@ void ServiceImplementation::getParameterStringInfo(
       if (field[6][0] != '\0')
       {
         std::vector<std::string> partList;
-        splitString(field[6], '-', partList);
-        size_t sz = partList.size();
-        if (sz == 1)
+        char *p = strchr(field[6],'-');
+        if (p == nullptr ||  p == field[6])
         {
-          forecastNumberVec.emplace_back(toInt16(partList[0].c_str()));
+          forecastNumberVec.emplace_back(toInt16(field[6]));
         }
-        else if (sz == 2)
+        else
         {
-          auto start = toInt16(partList[0].c_str());
-          auto end = toInt16(partList[1].c_str());
-          if (start < end && (end - start) <= 200)
+          splitString(field[6], '-', partList);
+          size_t sz = partList.size();
+          if (sz == 1)
           {
-            for (auto t = start; t <= end; t++)
-              forecastNumberVec.emplace_back((T::ForecastNumber) t);
+            forecastNumberVec.emplace_back(toInt16(partList[0].c_str()));
+          }
+          else if (sz == 2)
+          {
+            auto start = toInt16(partList[0].c_str());
+            auto end = toInt16(partList[1].c_str());
+            if (start < end && (end - start) <= 200)
+            {
+              for (auto t = start; t <= end; t++)
+                forecastNumberVec.emplace_back((T::ForecastNumber) t);
+            }
           }
         }
       }
