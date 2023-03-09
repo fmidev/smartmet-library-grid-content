@@ -327,7 +327,7 @@ void AliasFile::loadFile()
         char *p = strstr(st,"\n");
         if (p != nullptr)
         {
-          while (*p < ' '  &&  p >= st)
+          while (p >= st && *p < ' ')
           {
             *p = '\0';
             p--;
