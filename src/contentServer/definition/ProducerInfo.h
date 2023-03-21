@@ -35,8 +35,9 @@ class ProducerInfo
     std::string     mDescription;
     uint            mFlags;
     uint            mSourceId;
-    ulonglong       mHash;
+    uchar           mStatus;
 
+    ulonglong       mHash;
 
   public:
 

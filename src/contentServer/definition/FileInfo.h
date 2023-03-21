@@ -78,6 +78,8 @@ class FileInfo
 
     ulonglong     mSize;
 
+    uchar         mStatus;
+
     /* The FileInfo records can be sorted in different ways when they are stored
      * into the FileInfoList object. That's why the FileInfo class contains
      * the "compare" -method, which compares objects of the current class

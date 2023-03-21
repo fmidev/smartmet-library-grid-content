@@ -7,9 +7,14 @@ INCDIR = smartmet/$(SUBNAME)
 
 CORBA = enabled
 
-REQUIRES = gdal icu-i18n
+REQUIRES = libpqxx gdal icu-i18n
 
 include $(shell echo $${PREFIX-/usr})/share/smartmet/devel/makefile.inc
+
+ifneq ($(wildcard /usr/pgsql-13/lib/libpq.so),)
+INCLUDES += -isystem /usr/pgsql-13/include
+REQUIRED_LIBS += -L/usr/pgsql-13/lib
+endif
 
 # Compiler options
 
@@ -66,6 +71,7 @@ vpath %.cpp src/ \
 			src/contentServer/http/common \
 			src/contentServer/http/server \
 			src/contentServer/memory \
+			src/contentServer/postgresql \
 			src/contentServer/redis \
 			src/contentServer/sync \
       src/dataServer \
@@ -86,6 +92,7 @@ vpath %.h 	src/ \
 			src/contentServer/http/common \
 			src/contentServer/http/server \
 			src/contentServer/memory \
+			src/contentServer/postgresql \
 			src/contentServer/redis \
 			src/contentServer/sync \
       src/dataServer \
@@ -122,6 +129,7 @@ vpath %.cpp src/ \
 			src/contentServer/http/common \
 			src/contentServer/http/server \
 			src/contentServer/memory \
+			src/contentServer/postgresql \
 			src/contentServer/redis \
 			src/contentServer/sync \
       src/dataServer \
@@ -155,6 +163,7 @@ vpath %.h 	src/ \
 			src/contentServer/http/common \
 			src/contentServer/http/server \
 			src/contentServer/memory \
+			src/contentServer/postgresql \
 			src/contentServer/redis \
 			src/contentServer/sync \
       src/dataServer \
@@ -179,7 +188,7 @@ vpath %.o obj
 
 # The files to be compiled
 
-SRCS     = $(patsubst src/%,%,$(wildcard src/*.cpp src/*/*.cpp src/*/definition/*.cpp src/*/cache/*.cpp src/*/sync/*.cpp src/*/redis/*.cpp src/*/memory/*.cpp src/*/corba/*/*.cpp src/*/http/*/*.cpp src/*/implementation/*.cpp))
+SRCS     = $(patsubst src/%,%,$(wildcard src/*.cpp src/*/*.cpp src/*/definition/*.cpp src/*/cache/*.cpp src/*/sync/*.cpp src/*/redis/*.cpp src/*/memory/*.cpp src/*/postgresql/*.cpp src/*/corba/*/*.cpp src/*/http/*/*.cpp src/*/implementation/*.cpp))
 
 endif
 
@@ -255,6 +264,7 @@ install:
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/http/common/
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/http/server
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/memory
+	@mkdir -p $(includedir)/$(INCDIR)/contentServer/postgresql
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/redis
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/sync
 	@mkdir -p $(includedir)/$(INCDIR)/dataServer/definition
@@ -271,6 +281,7 @@ install:
 	@cp src/contentServer/http/common/*.h $(includedir)/$(INCDIR)/contentServer/http/common
 	@cp src/contentServer/http/server/*.h $(includedir)/$(INCDIR)/contentServer/http/server
 	@cp src/contentServer/memory/*.h $(includedir)/$(INCDIR)/contentServer/memory
+	@cp src/contentServer/postgresql/*.h $(includedir)/$(INCDIR)/contentServer/postgresql
 	@cp src/contentServer/redis/*.h $(includedir)/$(INCDIR)/contentServer/redis
 	@cp src/contentServer/sync/*.h $(includedir)/$(INCDIR)/contentServer/sync
 	@cp src/dataServer/definition/*.h $(includedir)/$(INCDIR)/dataServer/definition
@@ -325,6 +336,7 @@ objdir:
 	@mkdir -p obj/contentServer/http/common
 	@mkdir -p obj/contentServer/http/server
 	@mkdir -p obj/contentServer/memory
+	@mkdir -p obj/contentServer/postgresql
 	@mkdir -p obj/contentServer/redis
 	@mkdir -p obj/contentServer/sync
 	@mkdir -p obj/dataServer/definition

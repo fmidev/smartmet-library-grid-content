@@ -2672,7 +2672,7 @@ int ServiceInterface::getGridStreamlinesByTime(T::SessionId sessionId,uint fileI
     int result = _getGridStreamlinesByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList,modificationOperation,modificationParameters,streamlines);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%lld,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%ld,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2722,7 +2722,7 @@ int ServiceInterface::getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId
     int result = _getGridStreamlinesByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList,modificationOperation,modificationParameters,streamlines);
     unsigned long requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%lld,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%ld,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
