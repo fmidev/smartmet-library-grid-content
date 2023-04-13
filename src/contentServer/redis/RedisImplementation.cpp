@@ -3186,7 +3186,7 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
             freeReplyObject(reply);
 
             if (fileId > 0  &&  (requestFlags & 0x00000001) == 0)
-              addEvent(EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,0);
+              addEvent(EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,info->mFlags);
           }
         }
       }
@@ -4182,7 +4182,7 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
                 output << contentInfo->getCsv() << "\n";
               }
             }
-            eventInfo->mNote = output.str();
+            eventInfo->mEventData = output.str();
           }
           else
           {
@@ -4195,7 +4195,7 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
           T::ContentInfo contentInfo;
           if (getContent(eventInfo->mId1,eventInfo->mId2,contentInfo) == 0)
           {
-            eventInfo->mNote = contentInfo.getCsv();
+            eventInfo->mEventData = contentInfo.getCsv();
           }
           else
           {
@@ -4447,7 +4447,7 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
 
         freeReplyObject(reply);
 
-        addEvent(EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,0);
+        addEvent(EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,info->mFlags);
       }
     }
 
@@ -9218,7 +9218,7 @@ T::EventId RedisImplementation::addEvent(uint eventType,uint id1,uint id2,uint i
     T::EventId eventId = (T::EventId)reply->integer;
     freeReplyObject(reply);
 
-    T::EventInfo eventInfo(mStartTime,eventId,eventType,id1,id2,id3,flags);
+    T::EventInfo eventInfo(mStartTime,eventId,eventType,id1,id2,id3,flags,"");
 
     reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %sevents %llu %s",mTablePrefix.c_str(),eventId,eventInfo.getCsv().c_str()));
     if (reply == nullptr)

@@ -18,15 +18,6 @@ namespace ContentServer
 {
 
 
-unsigned long long getContentId(uint fileId,uint messageIndex)
-{
-  unsigned long long key = fileId;
-  key = (key << 32) + messageIndex;
-  return key;
-}
-
-
-
 
 PostgresqlImplementation::PostgresqlImplementation()
 {
@@ -38,6 +29,7 @@ PostgresqlImplementation::PostgresqlImplementation()
     mShutdownRequested = false;
     mConnection = nullptr;
     mEventTruncateCheckTime = 0;
+    mTableCreationAllowed = false;
   }
   catch (...)
   {
@@ -71,21 +63,25 @@ PostgresqlImplementation::~PostgresqlImplementation()
 
 
 
-void PostgresqlImplementation::init(const char *connectionString)
+void PostgresqlImplementation::init(const char *primaryConnectionString,const char *secondaryConnectionString,bool tableCreationAllowed)
 {
   FUNCTION_TRACE
   try
   {
-    mConnectionString = connectionString;
+    mPrimaryConnectionString = primaryConnectionString;
+    mSecondaryConnectionString = secondaryConnectionString;
+    mTableCreationAllowed = tableCreationAllowed;
 
     openConnection();
 
-    mConnection = PQconnectdb(connectionString);
+    //mConnection = PQconnectdb(primaryConnectionString);
     if (mConnection == nullptr)
     {
       Fmi::Exception exception(BCP,"Cannot connect to the database!");
       throw exception;
     }
+
+    createTables();
   }
   catch (...)
   {
@@ -94,6 +90,212 @@ void PostgresqlImplementation::init(const char *connectionString)
 }
 
 
+
+
+
+
+void PostgresqlImplementation::createTables()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mTableCreationAllowed)
+      return;
+
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isConnectionValid())
+      return;
+
+    char sql[10000];
+    char *p = sql;
+
+    p += sprintf(p,"CREATE TABLE IF NOT EXISTS producer (\n");
+    p += sprintf(p,"  producerId serial PRIMARY KEY,\n");
+    p += sprintf(p,"  name VARCHAR (40) NOT NULL,\n");
+    p += sprintf(p,"  title VARCHAR (50) NOT NULL,\n");
+    p += sprintf(p,"  description VARCHAR (100) NOT NULL,\n");
+    p += sprintf(p,"  flags INTEGER NOT NULL, \n");
+    p += sprintf(p,"  sourceId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  status SMALLINT NOT NULL\n");
+    p += sprintf(p,");\n");
+
+    PGresult *res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_COMMAND_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+    PQclear(res);
+
+    p = sql;
+    p += sprintf(p,"CREATE TABLE IF NOT EXISTS generation (\n");
+    p += sprintf(p,"  generationId serial PRIMARY KEY,\n");
+    p += sprintf(p,"  generationType INTEGER NOT NULL,\n");
+    p += sprintf(p,"  producerId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  name VARCHAR (50) UNIQUE NOT NULL,\n");
+    p += sprintf(p,"  description VARCHAR (100) NOT NULL,\n");
+    p += sprintf(p,"  analysisTime TIMESTAMP NOT NULL,\n");
+    p += sprintf(p,"  flags INTEGER NOT NULL,\n");
+    p += sprintf(p,"  sourceId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  modificationTime TIMESTAMP,\n");
+    p += sprintf(p,"  deletionTime TIMESTAMP,\n");
+    p += sprintf(p,"  status SMALLINT NOT NULL,\n");
+    p += sprintf(p,"  FOREIGN KEY (producerId) REFERENCES producer (producerId)\n");
+    p += sprintf(p,"  );\n");
+
+    res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_COMMAND_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+    PQclear(res);
+
+    p = sql;
+    p += sprintf(p,"CREATE TABLE IF NOT EXISTS file (\n");
+    p += sprintf(p,"  fileId serial PRIMARY KEY,\n");
+    p += sprintf(p,"  producerId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  generationId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  protocol SMALLINT NOT NULL,\n");
+    p += sprintf(p,"  serverType SMALLINT NOT NULL,\n");
+    p += sprintf(p,"  server VARCHAR (50) NOT NULL,\n");
+    p += sprintf(p,"  fileType SMALLINT NOT NULL,\n");
+    p += sprintf(p,"  fileName VARCHAR (200) UNIQUE NOT NULL,\n");
+    p += sprintf(p,"  flags INTEGER NOT NULL,\n");
+    p += sprintf(p,"  sourceId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  modificationTime TIMESTAMP,\n");
+    p += sprintf(p,"  deletionTime TIMESTAMP,\n");
+    p += sprintf(p,"  fileSize BIGINT NOT NULL,\n");
+    p += sprintf(p,"  status SMALLINT NOT NULL,\n");
+    p += sprintf(p,"  FOREIGN KEY (producerId) REFERENCES producer (producerId),\n");
+    p += sprintf(p,"  FOREIGN KEY (generationId) REFERENCES generation (generationId)\n");
+    p += sprintf(p,");\n");
+
+    res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_COMMAND_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+    PQclear(res);
+
+    p = sql;
+    p += sprintf(p,"CREATE TABLE IF NOT EXISTS generationGeometry (\n");
+    p += sprintf(p,"  producerId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  generationId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  geometryId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  levelId SMALLINT NOT NULL,\n");
+    p += sprintf(p,"  flags INTEGER NOT NULL,\n");
+    p += sprintf(p,"  sourceId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  modificationTime TIMESTAMP,\n");
+    p += sprintf(p,"  deletionTime TIMESTAMP,\n");
+    p += sprintf(p,"  status SMALLINT NOT NULL,\n");
+    p += sprintf(p,"  PRIMARY KEY (generationId,geometryId,levelId),\n");
+    p += sprintf(p,"  FOREIGN KEY (producerId) REFERENCES producer (producerId),\n");
+    p += sprintf(p,"  FOREIGN KEY (generationId) REFERENCES generation (generationId)\n");
+    p += sprintf(p,");\n");
+
+
+    res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_COMMAND_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+    PQclear(res);
+
+    p = sql;
+    p += sprintf(p,"CREATE TABLE IF NOT EXISTS content (\n");
+    p += sprintf(p,"  fileId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  messageIndex INTEGER NOT NULL,\n");
+    p += sprintf(p,"  fileType SMALLINT NOT NULL,\n");
+    p += sprintf(p,"  filePosition BIGINT NOT NULL,\n");
+    p += sprintf(p,"  messageSize INTEGER NOT NULL,\n");
+    p += sprintf(p,"  producerId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  generationId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  geometryId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  parameterId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  parameterName VARCHAR (50) NOT NULL,\n");
+    p += sprintf(p,"  forecastTime TIMESTAMP NOT NULL,\n");
+    p += sprintf(p,"  levelId SMALLINT NOT NULL,\n");
+    p += sprintf(p,"  level INTEGER NOT NULL,\n");
+    p += sprintf(p,"  forecastType SMALLINT,\n");
+    p += sprintf(p,"  foracastNumber INTEGER,\n");
+    p += sprintf(p,"  flags INTEGER NOT NULL,\n");
+    p += sprintf(p,"  sourceId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  modificationTime TIMESTAMP,\n");
+    p += sprintf(p,"  deletionTime TIMESTAMP,\n");
+    p += sprintf(p,"  PRIMARY KEY (fileId, messageIndex),\n");
+    p += sprintf(p,"  FOREIGN KEY (fileId) REFERENCES file (fileId),\n");
+    p += sprintf(p,"  FOREIGN KEY (producerId) REFERENCES producer (producerId),\n");
+    p += sprintf(p,"  FOREIGN KEY (generationId) REFERENCES generation (generationId)\n");
+    p += sprintf(p,");\n");
+
+    res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_COMMAND_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+    PQclear(res);
+
+    p = sql;
+    p += sprintf(p,"CREATE TABLE IF NOT EXISTS event (\n");
+    p += sprintf(p,"  eventId serial PRIMARY KEY,\n");
+    p += sprintf(p,"  eventTime TIMESTAMP,\n");
+    p += sprintf(p,"  eventType SMALLINT NOT NULL,\n");
+    p += sprintf(p,"  id1 INTEGER,\n");
+    p += sprintf(p,"  id2 INTEGER,\n");
+    p += sprintf(p,"  id3 INTEGER,\n");
+    p += sprintf(p,"  flags INTEGER,\n");
+    p += sprintf(p,"  eventData VARCHAR (300)\n");
+    p += sprintf(p,");\n");
+
+    res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_COMMAND_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+    PQclear(res);
+
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
 
 
 
@@ -109,12 +311,27 @@ int PostgresqlImplementation::openConnection()
       mConnection = nullptr;
     }
 
-    mConnection = PQconnectdb(mConnectionString.c_str());
+    mConnection = PQconnectdb(mPrimaryConnectionString.c_str());
     if (PQstatus(mConnection) != CONNECTION_OK)
     {
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
       exception.printError();
-      return Result::PERMANENT_STORAGE_ERROR;
+
+      if (!mSecondaryConnectionString.empty())
+
+      {
+        mConnection = PQconnectdb(mSecondaryConnectionString.c_str());
+        if (PQstatus(mConnection) != CONNECTION_OK)
+        {
+          Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+          exception.printError();
+          return Result::PERMANENT_STORAGE_ERROR;
+        }
+      }
+      else
+      {
+        return Result::PERMANENT_STORAGE_ERROR;
+      }
     }
 
     mStartTime = time(nullptr);
@@ -205,16 +422,13 @@ bool PostgresqlImplementation::isConnectionValid()
 
 
 
-
-
-
-
-
 int PostgresqlImplementation::_clear(T::SessionId sessionId)
 {
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -224,44 +438,49 @@ int PostgresqlImplementation::_clear(T::SessionId sessionId)
     PGresult *res = PQexec(mConnection,"TRUNCATE TABLE event;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      throw exception;
+      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      //PQclear(res);
+      //throw exception;
     }
     PQclear(res);
 
     res = PQexec(mConnection,"TRUNCATE TABLE content CASCADE;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      throw exception;
+      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      //PQclear(res);
+      //throw exception;
     }
     PQclear(res);
 
     res = PQexec(mConnection,"TRUNCATE TABLE file CASCADE;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      throw exception;
+      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      //PQclear(res);
+      //throw exception;
     }
     PQclear(res);
 
     res = PQexec(mConnection,"TRUNCATE TABLE generation CASCADE;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      throw exception;
+      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      //PQclear(res);
+      //throw exception;
     }
     PQclear(res);
 
     res = PQexec(mConnection,"TRUNCATE TABLE producer CASCADE;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      throw exception;
+      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      //PQclear(res);
+      //throw exception;
     }
     PQclear(res);
 
-    addEvent(EventType::CLEAR,0,0,0,0);
+    addEvent(EventType::CLEAR,0,0,0,0,"");
 
     return Result::OK;
   }
@@ -300,6 +519,8 @@ int PostgresqlImplementation::_addProducerInfo(T::SessionId sessionId,T::Produce
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -337,8 +558,12 @@ int PostgresqlImplementation::_addProducerInfo(T::SessionId sessionId,T::Produce
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
@@ -347,7 +572,7 @@ int PostgresqlImplementation::_addProducerInfo(T::SessionId sessionId,T::Produce
     if (result != Result::OK)
       return result;
 
-    addEvent(EventType::PRODUCER_ADDED,producerInfo.mProducerId,0,0,0);
+    addEvent(EventType::PRODUCER_ADDED,producerInfo.mProducerId,0,0,0,producerInfo.getCsv().c_str());
 
     return Result::OK;
   }
@@ -366,6 +591,8 @@ int PostgresqlImplementation::_deleteProducerInfoById(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -379,7 +606,7 @@ int PostgresqlImplementation::_deleteProducerInfoById(T::SessionId sessionId,uin
     int result = deleteProducerById(producerInfo.mProducerId,true,true,true,true);
 
     if (result == Result::OK)
-      addEvent(EventType::PRODUCER_DELETED,producerId,0,0,0);
+      addEvent(EventType::PRODUCER_DELETED,producerId,0,0,0,"");
 
     return result;
   }
@@ -398,6 +625,8 @@ int PostgresqlImplementation::_deleteProducerInfoByName(T::SessionId sessionId,c
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -412,7 +641,7 @@ int PostgresqlImplementation::_deleteProducerInfoByName(T::SessionId sessionId,c
     int result = deleteProducerById(producerInfo.mProducerId,true,true,true,true);
 
     if (result == Result::OK)
-      addEvent(EventType::PRODUCER_DELETED,producerInfo.mProducerId,0,0,0);
+      addEvent(EventType::PRODUCER_DELETED,producerInfo.mProducerId,0,0,0,"");
 
     return result;
   }
@@ -431,6 +660,8 @@ int PostgresqlImplementation::_deleteProducerInfoListBySourceId(T::SessionId ses
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -440,7 +671,7 @@ int PostgresqlImplementation::_deleteProducerInfoListBySourceId(T::SessionId ses
     int result = deleteProducerListBySourceId(sourceId,true,true,true,true);
 
     if (result == Result::OK)
-      addEvent(EventType::PRODUCER_LIST_DELETED_BY_SOURCE_ID,sourceId,0,0,0);
+      addEvent(EventType::PRODUCER_LIST_DELETED_BY_SOURCE_ID,sourceId,0,0,0,"");
 
     return result;
   }
@@ -459,6 +690,8 @@ int PostgresqlImplementation::_getProducerInfoById(T::SessionId sessionId,uint p
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -482,6 +715,8 @@ int PostgresqlImplementation::_getProducerInfoByName(T::SessionId sessionId,cons
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -505,6 +740,8 @@ int PostgresqlImplementation::_getProducerInfoList(T::SessionId sessionId,T::Pro
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -530,6 +767,8 @@ int PostgresqlImplementation::_getProducerInfoListByParameter(T::SessionId sessi
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -595,6 +834,8 @@ int PostgresqlImplementation::_getProducerInfoListBySourceId(T::SessionId sessio
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -620,6 +861,8 @@ int PostgresqlImplementation::_getProducerInfoCount(T::SessionId sessionId,uint&
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     count = 0;
 
     if (!isSessionValid(sessionId))
@@ -647,6 +890,8 @@ int PostgresqlImplementation::_getProducerNameAndGeometryList(T::SessionId sessi
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -697,6 +942,8 @@ int PostgresqlImplementation::_getProducerParameterList(T::SessionId sessionId,T
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -885,11 +1132,66 @@ int PostgresqlImplementation::_getProducerParameterList(T::SessionId sessionId,T
 
 
 
+int PostgresqlImplementation::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    char sql[10000];
+    char *p = sql;
+
+    p += sprintf(p,"UPDATE producer\n");
+    p += sprintf(p,"SET\n");
+    p += sprintf(p,"  name = '%s',\n",producerInfo.mName.c_str());
+    p += sprintf(p,"  title = '%s',\n",producerInfo.mTitle.c_str());
+    p += sprintf(p,"  description = '%s',\n",producerInfo.mDescription.c_str());
+    p += sprintf(p,"  flags = %u,\n",producerInfo.mFlags);
+    p += sprintf(p,"  sourceId = %u,\n",producerInfo.mSourceId);
+    p += sprintf(p,"  status = %u\n",producerInfo.mStatus);
+    p += sprintf(p,"WHERE \n");
+    p += sprintf(p, "  producerId = %u;\n", producerInfo.mProducerId);
+
+    PGresult *res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_COMMAND_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+    PQclear(res);
+
+    addEvent(EventType::PRODUCER_UPDATED,producerInfo.mProducerId,0,0,0,"");
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 int PostgresqlImplementation::_addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -942,8 +1244,12 @@ int PostgresqlImplementation::_addGenerationInfo(T::SessionId sessionId,T::Gener
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
@@ -952,7 +1258,7 @@ int PostgresqlImplementation::_addGenerationInfo(T::SessionId sessionId,T::Gener
     if (result != Result::OK)
       return result;
 
-    addEvent(EventType::GENERATION_ADDED,generationInfo.mGenerationId,0,0,0);
+    addEvent(EventType::GENERATION_ADDED,generationInfo.mGenerationId,0,0,0,generationInfo.getCsv().c_str());
 
     return Result::OK;
   }
@@ -971,6 +1277,8 @@ int PostgresqlImplementation::_deleteGenerationInfoById(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -984,7 +1292,7 @@ int PostgresqlImplementation::_deleteGenerationInfoById(T::SessionId sessionId,u
     int result = deleteGenerationById(generationInfo.mGenerationId,true,true,true);
 
     if (result == Result::OK)
-      addEvent(EventType::GENERATION_DELETED,generationId,0,0,0);
+      addEvent(EventType::GENERATION_DELETED,generationId,0,0,0,"");
 
     return result;
   }
@@ -1003,6 +1311,8 @@ int PostgresqlImplementation::_deleteGenerationInfoByName(T::SessionId sessionId
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1017,7 +1327,7 @@ int PostgresqlImplementation::_deleteGenerationInfoByName(T::SessionId sessionId
     int result = deleteGenerationById(generationInfo.mGenerationId,true,true,true);
 
     if (result == Result::OK)
-      addEvent(EventType::GENERATION_DELETED,generationInfo.mGenerationId,0,0,0);
+      addEvent(EventType::GENERATION_DELETED,generationInfo.mGenerationId,0,0,0,"");
 
     return result;
   }
@@ -1036,6 +1346,8 @@ int PostgresqlImplementation::_deleteGenerationInfoListByIdList(T::SessionId ses
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1046,7 +1358,7 @@ int PostgresqlImplementation::_deleteGenerationInfoListByIdList(T::SessionId ses
     for (auto it = generationIdList.begin(); it != generationIdList.end(); ++it)
     {
       deleteGenerationById(*it,true,true,true);
-      addEvent(EventType::GENERATION_DELETED,*it,0,0,0);
+      addEvent(EventType::GENERATION_DELETED,*it,0,0,0,"");
     }
 
     return Result::OK;
@@ -1066,6 +1378,8 @@ int PostgresqlImplementation::_deleteGenerationInfoListByProducerId(T::SessionId
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1079,7 +1393,7 @@ int PostgresqlImplementation::_deleteGenerationInfoListByProducerId(T::SessionId
     int result = deleteGenerationListByProducerId(producerId,true,true,true);
 
     if (result == Result::OK)
-      addEvent(EventType::GENERATION_LIST_DELETED_BY_PRODUCER_ID,producerId,0,0,0);
+      addEvent(EventType::GENERATION_LIST_DELETED_BY_PRODUCER_ID,producerId,0,0,0,"");
 
     return result;
   }
@@ -1098,6 +1412,8 @@ int PostgresqlImplementation::_deleteGenerationInfoListByProducerName(T::Session
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1111,7 +1427,7 @@ int PostgresqlImplementation::_deleteGenerationInfoListByProducerName(T::Session
     int result = deleteGenerationListByProducerId(producerInfo.mProducerId,true,true,true);
 
     if (result == Result::OK)
-      addEvent(EventType::GENERATION_LIST_DELETED_BY_PRODUCER_ID,producerInfo.mProducerId,0,0,0);
+      addEvent(EventType::GENERATION_LIST_DELETED_BY_PRODUCER_ID,producerInfo.mProducerId,0,0,0,"");
 
     return result;
   }
@@ -1130,6 +1446,8 @@ int PostgresqlImplementation::_deleteGenerationInfoListBySourceId(T::SessionId s
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1140,7 +1458,7 @@ int PostgresqlImplementation::_deleteGenerationInfoListBySourceId(T::SessionId s
     int result = deleteGenerationListBySourceId(sourceId,true,true,true);
 
     if (result == Result::OK)
-      addEvent(EventType::GENERATION_LIST_DELETED_BY_SOURCE_ID,sourceId,0,0,0);
+      addEvent(EventType::GENERATION_LIST_DELETED_BY_SOURCE_ID,sourceId,0,0,0,"");
 
     return result;
   }
@@ -1159,6 +1477,8 @@ int PostgresqlImplementation::_getGenerationInfoById(T::SessionId sessionId,uint
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1182,6 +1502,8 @@ int PostgresqlImplementation::_getGenerationInfoByName(T::SessionId sessionId,co
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1205,6 +1527,8 @@ int PostgresqlImplementation::_getGenerationInfoList(T::SessionId sessionId,T::G
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1230,6 +1554,8 @@ int PostgresqlImplementation::_getGenerationInfoListByGeometryId(T::SessionId se
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1255,6 +1581,8 @@ int PostgresqlImplementation::_getGenerationInfoListByProducerId(T::SessionId se
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1284,6 +1612,8 @@ int PostgresqlImplementation::_getGenerationInfoListByProducerName(T::SessionId 
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1313,6 +1643,8 @@ int PostgresqlImplementation::_getGenerationInfoListBySourceId(T::SessionId sess
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1338,6 +1670,8 @@ int PostgresqlImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::Ses
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1372,6 +1706,8 @@ int PostgresqlImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::S
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1406,6 +1742,8 @@ int PostgresqlImplementation::_getGenerationInfoCount(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     count = 0;
 
     if (!isSessionValid(sessionId))
@@ -1433,6 +1771,8 @@ int PostgresqlImplementation::_setGenerationInfoStatusById(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1455,13 +1795,17 @@ int PostgresqlImplementation::_setGenerationInfoStatusById(T::SessionId sessionI
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
 
-    addEvent(EventType::GENERATION_STATUS_CHANGED,generationInfo.mGenerationId,status,0,0);
+    addEvent(EventType::GENERATION_STATUS_CHANGED,generationInfo.mGenerationId,status,0,0,"");
 
     return Result::OK;
   }
@@ -1480,6 +1824,8 @@ int PostgresqlImplementation::_setGenerationInfoStatusByName(T::SessionId sessio
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1502,13 +1848,17 @@ int PostgresqlImplementation::_setGenerationInfoStatusByName(T::SessionId sessio
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
 
-    addEvent(EventType::GENERATION_STATUS_CHANGED,generationInfo.mGenerationId,status,0,0);
+    addEvent(EventType::GENERATION_STATUS_CHANGED,generationInfo.mGenerationId,status,0,0,"");
 
     return Result::OK;
   }
@@ -1528,6 +1878,8 @@ int PostgresqlImplementation::_setGenerationInfo(T::SessionId sessionId,T::Gener
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1562,8 +1914,12 @@ int PostgresqlImplementation::_setGenerationInfo(T::SessionId sessionId,T::Gener
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
@@ -1572,7 +1928,7 @@ int PostgresqlImplementation::_setGenerationInfo(T::SessionId sessionId,T::Gener
     if (result != Result::OK)
       return result;
 
-    addEvent(EventType::GENERATION_UPDATED,generationInfo.mGenerationId,0,0,0);
+    addEvent(EventType::GENERATION_UPDATED,generationInfo.mGenerationId,0,0,0,generationInfo.getCsv().c_str());
 
     return Result::OK;
   }
@@ -1585,11 +1941,789 @@ int PostgresqlImplementation::_setGenerationInfo(T::SessionId sessionId,T::Gener
 
 
 
+
+int PostgresqlImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    std::string modificationTime = utcTimeFromTimeT(geometryInfo.mModificationTime);
+    std::string deletionTime = utcTimeFromTimeT(geometryInfo.mDeletionTime);
+
+    char sql[10000];
+    char *p = sql;
+
+    p += sprintf(p,"INSERT INTO generationGeometry\n");
+    p += sprintf(p,"(\n");
+    p += sprintf(p,"  producerId,\n");
+    p += sprintf(p,"  generationId,\n");
+    p += sprintf(p,"  geometryId,\n");
+    p += sprintf(p,"  levelId,\n");
+    p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  sourceId,\n");
+    p += sprintf(p,"  modificationTime,\n");
+    p += sprintf(p,"  deletionTime,\n");
+    p += sprintf(p,"  status\n");
+    p += sprintf(p,")\n");
+    p += sprintf(p,"VALUES \n");
+    p += sprintf(p,"(\n");
+    p += sprintf(p,"  %u,\n",geometryInfo.mProducerId);
+    p += sprintf(p,"  %u,\n",geometryInfo.mGenerationId);
+    p += sprintf(p,"  %u,\n",geometryInfo.mGeometryId);
+    p += sprintf(p,"  %u,\n",geometryInfo.mLevelId);
+    p += sprintf(p,"  %u,\n",geometryInfo.mFlags);
+    p += sprintf(p,"  %u,\n",geometryInfo.mSourceId);
+    p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
+    p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
+    p += sprintf(p,"  %u\n",(uint)geometryInfo.mStatus);
+    p += sprintf(p,");\n");
+
+    PGresult *res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_COMMAND_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+    PQclear(res);
+
+
+    addEvent(EventType::GEOMETRY_ADDED,geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId,0,geometryInfo.getCsv().c_str());
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+
+int PostgresqlImplementation::_deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    char sql[100];
+    sprintf(sql,"DELETE FROM generationGeometry WHERE generationId=%u AND geometryId=%u AND levelId=%u;",generationId,geometryId,levelId);
+    PGresult *res = PQexec(mConnection,sql);
+    if (PQresultStatus(res) != PGRES_COMMAND_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      PQclear(res);
+      throw exception;
+    }
+    PQclear(res);
+
+    addEvent(EventType::GEOMETRY_DELETED,generationId,geometryId,levelId,0,"");
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int PostgresqlImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    char sql[100];
+    sprintf(sql,"DELETE FROM generationGeometry WHERE generationId=%u;",generationId);
+    PGresult *res = PQexec(mConnection,sql);
+    if (PQresultStatus(res) != PGRES_COMMAND_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      PQclear(res);
+      throw exception;
+    }
+    PQclear(res);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int PostgresqlImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    char sql[100];
+    sprintf(sql,"DELETE FROM generationGeometry WHERE producerId=%u;",producerId);
+    PGresult *res = PQexec(mConnection,sql);
+    if (PQresultStatus(res) != PGRES_COMMAND_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      PQclear(res);
+      throw exception;
+    }
+    PQclear(res);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int PostgresqlImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    char sql[100];
+    sprintf(sql,"DELETE FROM generationGeometry WHERE sourceId=%u;",sourceId);
+    PGresult *res = PQexec(mConnection,sql);
+    if (PQresultStatus(res) != PGRES_COMMAND_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      PQclear(res);
+      throw exception;
+    }
+    PQclear(res);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int PostgresqlImplementation::_getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    char sql[10000];
+    char *p = sql;
+
+    p += sprintf(p,"SELECT\n");
+    p += sprintf(p,"  producerId,\n");
+    p += sprintf(p,"  generationId,\n");
+    p += sprintf(p,"  geometryId,\n");
+    p += sprintf(p,"  levelId,\n");
+    p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  sourceId,\n");
+    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  status\n");
+    p += sprintf(p,"FROM\n");
+    p += sprintf(p,"  generationGeometry\n");
+    p += sprintf(p,"WHERE\n");
+    p += sprintf(p,"  generationId=%u AND geometryId=%u AND levelId=%u;\n",generationId,geometryId,levelId);
+
+    PGresult *res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_TUPLES_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQresultErrorMessage(res));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+
+    int rowCount = PQntuples(res);
+    if (rowCount == 0)
+      return Result::DATA_NOT_FOUND;
+
+    for (int i = 0; i < rowCount; i++)
+    {
+      geometryInfo.mProducerId = atoi(PQgetvalue(res, i, 0));
+      geometryInfo.mGenerationId = atoi(PQgetvalue(res, i, 1));
+      geometryInfo.mGeometryId = atoi(PQgetvalue(res, i, 2));
+      geometryInfo.mLevelId = atoi(PQgetvalue(res, i, 3));
+      geometryInfo.mFlags = atoi(PQgetvalue(res, i, 4));
+      geometryInfo.mSourceId = atoi(PQgetvalue(res, i, 5));
+
+      std::string modificationTime = PQgetvalue(res, i, 6);
+      geometryInfo.mModificationTime = utcTimeToTimeT(modificationTime);
+
+      std::string deletionTime = PQgetvalue(res, i, 7);
+      geometryInfo.mDeletionTime = utcTimeToTimeT(deletionTime);
+
+      geometryInfo.mStatus = atoi(PQgetvalue(res, i, 8));
+    }
+
+    PQclear(res);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int PostgresqlImplementation::_getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    geometryInfoList.clear();
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    char sql[10000];
+    char *p = sql;
+
+    p += sprintf(p,"SELECT\n");
+    p += sprintf(p,"  producerId,\n");
+    p += sprintf(p,"  generationId,\n");
+    p += sprintf(p,"  geometryId,\n");
+    p += sprintf(p,"  levelId,\n");
+    p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  sourceId,\n");
+    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  status\n");
+    p += sprintf(p,"FROM\n");
+    p += sprintf(p,"  generationGeometry;\n");
+
+    PGresult *res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_TUPLES_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQresultErrorMessage(res));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+
+    int rowCount = PQntuples(res);
+
+    for (int i = 0; i < rowCount; i++)
+    {
+      T::GeometryInfo *geometryInfo = new T::GeometryInfo();
+
+      geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
+      geometryInfo->mGenerationId = atoi(PQgetvalue(res, i, 1));
+      geometryInfo->mGeometryId = atoi(PQgetvalue(res, i, 2));
+      geometryInfo->mLevelId = atoi(PQgetvalue(res, i, 3));
+      geometryInfo->mFlags = atoi(PQgetvalue(res, i, 4));
+      geometryInfo->mSourceId = atoi(PQgetvalue(res, i, 5));
+
+      std::string modificationTime = PQgetvalue(res, i, 6);
+      geometryInfo->mModificationTime = utcTimeToTimeT(modificationTime);
+
+      std::string deletionTime = PQgetvalue(res, i, 7);
+      geometryInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
+
+      geometryInfo->mStatus = atoi(PQgetvalue(res, i, 8));
+
+      geometryInfoList.addGeometryInfo(geometryInfo);
+    }
+
+    PQclear(res);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int PostgresqlImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    geometryInfoList.clear();
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    char sql[10000];
+    char *p = sql;
+
+    p += sprintf(p,"SELECT\n");
+    p += sprintf(p,"  producerId,\n");
+    p += sprintf(p,"  generationId,\n");
+    p += sprintf(p,"  geometryId,\n");
+    p += sprintf(p,"  levelId,\n");
+    p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  sourceId,\n");
+    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  status\n");
+    p += sprintf(p,"FROM\n");
+    p += sprintf(p,"  generationGeometry\n");
+    p += sprintf(p,"WHERE\n");
+    p += sprintf(p,"  generationId=%u;\n",generationId);
+
+    PGresult *res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_TUPLES_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQresultErrorMessage(res));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+
+    int rowCount = PQntuples(res);
+
+    for (int i = 0; i < rowCount; i++)
+    {
+      T::GeometryInfo *geometryInfo = new T::GeometryInfo();
+
+      geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
+      geometryInfo->mGenerationId = atoi(PQgetvalue(res, i, 1));
+      geometryInfo->mGeometryId = atoi(PQgetvalue(res, i, 2));
+      geometryInfo->mLevelId = atoi(PQgetvalue(res, i, 3));
+      geometryInfo->mFlags = atoi(PQgetvalue(res, i, 4));
+      geometryInfo->mSourceId = atoi(PQgetvalue(res, i, 5));
+
+      std::string modificationTime = PQgetvalue(res, i, 6);
+      geometryInfo->mModificationTime = utcTimeToTimeT(modificationTime);
+
+      std::string deletionTime = PQgetvalue(res, i, 7);
+      geometryInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
+
+      geometryInfo->mStatus = atoi(PQgetvalue(res, i, 8));
+
+      geometryInfoList.addGeometryInfo(geometryInfo);
+    }
+
+    PQclear(res);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int PostgresqlImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    geometryInfoList.clear();
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    char sql[10000];
+    char *p = sql;
+
+    p += sprintf(p,"SELECT\n");
+    p += sprintf(p,"  producerId,\n");
+    p += sprintf(p,"  generationId,\n");
+    p += sprintf(p,"  geometryId,\n");
+    p += sprintf(p,"  levelId,\n");
+    p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  sourceId,\n");
+    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  status\n");
+    p += sprintf(p,"FROM\n");
+    p += sprintf(p,"  generationGeometry;\n");
+    p += sprintf(p,"WHERE\n");
+    p += sprintf(p,"  producerId=%u;\n",producerId);
+
+    PGresult *res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_TUPLES_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQresultErrorMessage(res));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+
+    int rowCount = PQntuples(res);
+
+    for (int i = 0; i < rowCount; i++)
+    {
+      T::GeometryInfo *geometryInfo = new T::GeometryInfo();
+
+      geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
+      geometryInfo->mGenerationId = atoi(PQgetvalue(res, i, 1));
+      geometryInfo->mGeometryId = atoi(PQgetvalue(res, i, 2));
+      geometryInfo->mLevelId = atoi(PQgetvalue(res, i, 3));
+      geometryInfo->mFlags = atoi(PQgetvalue(res, i, 4));
+      geometryInfo->mSourceId = atoi(PQgetvalue(res, i, 5));
+
+      std::string modificationTime = PQgetvalue(res, i, 6);
+      geometryInfo->mModificationTime = utcTimeToTimeT(modificationTime);
+
+      std::string deletionTime = PQgetvalue(res, i, 7);
+      geometryInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
+
+      geometryInfo->mStatus = atoi(PQgetvalue(res, i, 8));
+
+      geometryInfoList.addGeometryInfo(geometryInfo);
+    }
+
+    PQclear(res);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int PostgresqlImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    geometryInfoList.clear();
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    char sql[10000];
+    char *p = sql;
+
+    p += sprintf(p,"SELECT\n");
+    p += sprintf(p,"  producerId,\n");
+    p += sprintf(p,"  generationId,\n");
+    p += sprintf(p,"  geometryId,\n");
+    p += sprintf(p,"  levelId,\n");
+    p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  sourceId,\n");
+    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  status\n");
+    p += sprintf(p,"FROM\n");
+    p += sprintf(p,"  generationGeometry;\n");
+    p += sprintf(p,"WHERE\n");
+    p += sprintf(p,"  sourceId=%u;\n",sourceId);
+
+    PGresult *res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_TUPLES_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQresultErrorMessage(res));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+
+    int rowCount = PQntuples(res);
+
+    for (int i = 0; i < rowCount; i++)
+    {
+      T::GeometryInfo *geometryInfo = new T::GeometryInfo();
+
+      geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
+      geometryInfo->mGenerationId = atoi(PQgetvalue(res, i, 1));
+      geometryInfo->mGeometryId = atoi(PQgetvalue(res, i, 2));
+      geometryInfo->mLevelId = atoi(PQgetvalue(res, i, 3));
+      geometryInfo->mFlags = atoi(PQgetvalue(res, i, 4));
+      geometryInfo->mSourceId = atoi(PQgetvalue(res, i, 5));
+
+      std::string modificationTime = PQgetvalue(res, i, 6);
+      geometryInfo->mModificationTime = utcTimeToTimeT(modificationTime);
+
+      std::string deletionTime = PQgetvalue(res, i, 7);
+      geometryInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
+
+      geometryInfo->mStatus = atoi(PQgetvalue(res, i, 8));
+
+      geometryInfoList.addGeometryInfo(geometryInfo);
+    }
+
+    PQclear(res);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int PostgresqlImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& count)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    count = 0;
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    count = getCount("SELECT COUNT(*) FROM generationGeometry");
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int PostgresqlImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+
+    std::string modificationTime = utcTimeFromTimeT(geometryInfo.mModificationTime);
+    std::string deletionTime = utcTimeFromTimeT(geometryInfo.mDeletionTime);
+
+    char sql[10000];
+    char *p = sql;
+
+    p += sprintf(p,"UPDATE generationGeometry\n");
+    p += sprintf(p,"SET\n");
+    p += sprintf(p,"  flags = %u,\n",geometryInfo.mFlags);
+    p += sprintf(p,"  sourceId = %u,\n",geometryInfo.mSourceId);
+    p += sprintf(p,"  modificationTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
+    p += sprintf(p,"  deletionTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
+    p += sprintf(p,"  status = %u\n",geometryInfo.mStatus);
+    p += sprintf(p,"WHERE \n");
+    p += sprintf(p,"  generationId=%u AND geometryId=%u AND levelId=%u;\n",geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId);
+
+    PGresult *res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_COMMAND_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+    PQclear(res);
+
+    addEvent(EventType::GEOMETRY_UPDATED,geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId,0,geometryInfo.getCsv().c_str());
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int PostgresqlImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    char sql[1000];
+    char *p = sql;
+
+    p += sprintf(p,"UPDATE generationGeometry\n");
+    p += sprintf(p,"SET\n");
+    p += sprintf(p,"  status = %u\n",status);
+    p += sprintf(p,"WHERE \n");
+    p += sprintf(p,"  generationId=%u AND geometryId=%u AND levelId=%u;\n",generationId,geometryId,levelId);
+
+    PGresult *res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_COMMAND_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+    PQclear(res);
+
+    addEvent(EventType::GEOMETRY_STATUS_CHANGED,generationId,geometryId,levelId,status,"");
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int PostgresqlImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1598,7 +2732,7 @@ int PostgresqlImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& f
     if (result != Result::OK)
       return result;
 
-    addEvent(EventType::FILE_ADDED,fileInfo.mFileId,fileInfo.mFileType,0,0);
+    addEvent(EventType::FILE_ADDED,fileInfo.mFileId,fileInfo.mFileType,0,0,fileInfo.getCsv().c_str());
 
     return Result::OK;
   }
@@ -1617,6 +2751,8 @@ int PostgresqlImplementation::_addFileInfoWithContentList(T::SessionId sessionId
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1634,7 +2770,7 @@ int PostgresqlImplementation::_addFileInfoWithContentList(T::SessionId sessionId
 
     addContentList(contentInfoList);
 
-    addEvent(EventType::FILE_ADDED,fileInfo.mFileId,fileInfo.mFileType,contentInfoList.getLength(),0);
+    addEvent(EventType::FILE_ADDED,fileInfo.mFileId,fileInfo.mFileType,contentInfoList.getLength(),0,fileInfo.getCsv().c_str());
 
     return Result::OK;
   }
@@ -1653,6 +2789,8 @@ int PostgresqlImplementation::_addFileInfoListWithContent(T::SessionId sessionId
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1660,6 +2798,7 @@ int PostgresqlImplementation::_addFileInfoListWithContent(T::SessionId sessionId
 
     for (auto ff = fileAndContentList.begin();ff != fileAndContentList.end(); ++ff)
     {
+      //ff->mFileInfo.print(std::cout,0,0);
       fileInfoList.addFileInfo(new T::FileInfo(ff->mFileInfo));
     }
 
@@ -1700,10 +2839,10 @@ int PostgresqlImplementation::_addFileInfoListWithContent(T::SessionId sessionId
     {
       T::FileInfo *fileInfo = fileInfoList.getFileInfoByIndex(t);
       //addEvent(EventType::FILE_ADDED,fileInfo->mFileId,fileInfo->mFileType,0,0);
-      eventInfoList.addEventInfo(new T::EventInfo(time(0),0,EventType::FILE_ADDED,fileInfo->mFileId,fileInfo->mFileType,0,0));
+      eventInfoList.addEventInfo(new T::EventInfo(time(0),0,EventType::FILE_ADDED,fileInfo->mFileId,fileInfo->mFileType,0,0,fileInfo->getCsv().c_str()));
     }
 
-    addEventIntoList(eventInfoList);
+    addEventInfoList(eventInfoList);
 
     return Result::OK;
   }
@@ -1722,6 +2861,8 @@ int PostgresqlImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fi
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1732,12 +2873,10 @@ int PostgresqlImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fi
     if (getFileById(fileId,fileInfo) != Result::OK)
       return Result::UNKNOWN_FILE_ID;
 
-
-    deleteFilename(fileInfo.mName);
     int result = deleteFileById(fileId,true);
 
     if (result == Result::OK)
-      addEvent(EventType::FILE_DELETED,fileId,fileInfo.mFileType,0,0);
+      addEvent(EventType::FILE_DELETED,fileId,fileInfo.mFileType,0,0,"");
 
     return result;
   }
@@ -1756,32 +2895,27 @@ int PostgresqlImplementation::_deleteFileInfoByName(T::SessionId sessionId,const
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    uint fileId = getFileId(filename);
-    if (fileId == 0)
+    T::FileInfo fileInfo;
+    getFileByName(filename,fileInfo);
+    if (fileInfo.mFileId == 0)
       return Result::UNKNOWN_FILE_NAME;
 
-    deleteFilename(filename);
-
-    T::FileInfo fileInfo;
-    if (getFileById(fileId,fileInfo) != Result::OK)
-    {
-      return Result::UNKNOWN_FILE_ID;
-    }
-
-    int result = deleteFileById(fileId,true);
+    int result = deleteFileById(fileInfo.mFileId,true);
 
     if (result == Result::OK)
     {
       if (fileInfo.mFileType == T::FileTypeValue::Virtual)
-        addEvent(EventType::FILE_DELETED,fileId,T::FileTypeValue::Virtual,0,0);
+        addEvent(EventType::FILE_DELETED,fileInfo.mFileId,T::FileTypeValue::Virtual,0,0,"");
       else
-        addEvent(EventType::FILE_DELETED,fileId,0,0,0);
+        addEvent(EventType::FILE_DELETED,fileInfo.mFileId,0,0,0,"");
     }
 
     return result;
@@ -1801,6 +2935,8 @@ int PostgresqlImplementation::_deleteFileInfoListByProducerId(T::SessionId sessi
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1815,7 +2951,7 @@ int PostgresqlImplementation::_deleteFileInfoListByProducerId(T::SessionId sessi
     int result = deleteFileListByProducerId(producerInfo.mProducerId,true);
 
     if (result == Result::OK)
-      addEvent(EventType::FILE_LIST_DELETED_BY_PRODUCER_ID,producerId,0,0,0);
+      addEvent(EventType::FILE_LIST_DELETED_BY_PRODUCER_ID,producerId,0,0,0,"");
 
     return result;
   }
@@ -1834,6 +2970,8 @@ int PostgresqlImplementation::_deleteFileInfoListByProducerName(T::SessionId ses
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1848,7 +2986,7 @@ int PostgresqlImplementation::_deleteFileInfoListByProducerName(T::SessionId ses
     int result = deleteFileListByProducerId(producerInfo.mProducerId,true);
 
     if (result == Result::OK)
-      addEvent(EventType::FILE_LIST_DELETED_BY_PRODUCER_ID,producerInfo.mProducerId,0,0,0);
+      addEvent(EventType::FILE_LIST_DELETED_BY_PRODUCER_ID,producerInfo.mProducerId,0,0,0,"");
 
     return result;
   }
@@ -1867,6 +3005,8 @@ int PostgresqlImplementation::_deleteFileInfoListByGenerationId(T::SessionId ses
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1881,7 +3021,7 @@ int PostgresqlImplementation::_deleteFileInfoListByGenerationId(T::SessionId ses
     int result = deleteFileListByGenerationId(generationInfo.mGenerationId,true);
 
     if (result == Result::OK)
-      addEvent(EventType::FILE_LIST_DELETED_BY_GENERATION_ID,generationId,0,0,0);
+      addEvent(EventType::FILE_LIST_DELETED_BY_GENERATION_ID,generationId,0,0,0,"");
 
     return result;
   }
@@ -1900,6 +3040,8 @@ int PostgresqlImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1935,9 +3077,8 @@ int PostgresqlImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T
         T::FileInfo fileInfo;
         if (getFileById(*it,fileInfo) == Result::OK)
         {
-          deleteFilename(fileInfo.mName);
           deleteFileById(*it,false);
-          addEvent(EventType::FILE_DELETED,*it,fileInfo.mFileType,0,0);
+          addEvent(EventType::FILE_DELETED,*it,fileInfo.mFileType,0,0,"");
         }
       }
     }
@@ -1959,6 +3100,8 @@ int PostgresqlImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -1977,9 +3120,8 @@ int PostgresqlImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId
       T::FileInfo fileInfo;
       if (getFileById(info->mFileId,fileInfo) == Result::OK)
       {
-        deleteFilename(fileInfo.mName);
         deleteFileById(info->mFileId,false);
-        addEvent(EventType::FILE_DELETED,info->mFileId,fileInfo.mFileType,0,0);
+        addEvent(EventType::FILE_DELETED,info->mFileId,fileInfo.mFileType,0,0,"");
       }
     }
 
@@ -2000,6 +3142,8 @@ int PostgresqlImplementation::_deleteFileInfoListByGenerationName(T::SessionId s
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -2010,11 +3154,10 @@ int PostgresqlImplementation::_deleteFileInfoListByGenerationName(T::SessionId s
     if (getGenerationByName(generationName,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_NAME;
 
-
     int result = deleteFileListByGenerationId(generationInfo.mGenerationId,true);
 
     if (result == Result::OK)
-      addEvent(EventType::FILE_LIST_DELETED_BY_GENERATION_ID,generationInfo.mGenerationId,0,0,0);
+      addEvent(EventType::FILE_LIST_DELETED_BY_GENERATION_ID,generationInfo.mGenerationId,0,0,0,"");
 
     return result;
   }
@@ -2033,17 +3176,18 @@ int PostgresqlImplementation::_deleteFileInfoListBySourceId(T::SessionId session
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-
     int result = deleteFileListBySourceId(sourceId,true);
 
     if (result == Result::OK)
-      addEvent(EventType::FILE_LIST_DELETED_BY_SOURCE_ID,sourceId,0,0,0);
+      addEvent(EventType::FILE_LIST_DELETED_BY_SOURCE_ID,sourceId,0,0,0,"");
 
     return result;
   }
@@ -2062,6 +3206,8 @@ int PostgresqlImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessi
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -2074,9 +3220,8 @@ int PostgresqlImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessi
       T::FileInfo fileInfo;
       if (getFileById(*it,fileInfo) == Result::OK)
       {
-        deleteFilename(fileInfo.mName);
         deleteFileById(*it,true);
-        addEvent(EventType::FILE_DELETED,*it,0,0,0);
+        addEvent(EventType::FILE_DELETED,*it,0,0,0,"");
       }
     }
 
@@ -2097,6 +3242,8 @@ int PostgresqlImplementation::_getFileInfoById(T::SessionId sessionId,uint fileI
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -2120,17 +3267,15 @@ int PostgresqlImplementation::_getFileInfoByName(T::SessionId sessionId,const st
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    uint fileId = getFileId(filename);
-    if (fileId == 0)
-      return Result::DATA_NOT_FOUND;
-
-    return getFileById(fileId,fileInfo);
+    return getFileByName(filename,fileInfo);
   }
   catch (...)
   {
@@ -2147,6 +3292,8 @@ int PostgresqlImplementation::_getFileInfoList(T::SessionId sessionId,uint start
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -2172,6 +3319,8 @@ int PostgresqlImplementation::_getFileInfoListByFileIdList(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -2206,6 +3355,8 @@ int PostgresqlImplementation::_getFileInfoListByProducerId(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -2235,6 +3386,8 @@ int PostgresqlImplementation::_getFileInfoListByProducerName(T::SessionId sessio
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -2264,6 +3417,8 @@ int PostgresqlImplementation::_getFileInfoListByGenerationId(T::SessionId sessio
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -2293,6 +3448,8 @@ int PostgresqlImplementation::_getFileInfoListByGenerationName(T::SessionId sess
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -2322,6 +3479,8 @@ int PostgresqlImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -2347,6 +3506,8 @@ int PostgresqlImplementation::_getFileInfoCount(T::SessionId sessionId,uint& cou
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     count = 0;
 
     if (!isSessionValid(sessionId))
@@ -2374,6 +3535,8 @@ int PostgresqlImplementation::_getFileInfoCountByProducerId(T::SessionId session
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     count = 0;
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -2399,6 +3562,8 @@ int PostgresqlImplementation::_getFileInfoCountByGenerationId(T::SessionId sessi
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     count = 0;
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -2424,6 +3589,8 @@ int PostgresqlImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     count = 0;
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
@@ -2444,18 +3611,83 @@ int PostgresqlImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId
 
 
 
-int PostgresqlImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
+int PostgresqlImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    eventInfo.mEventId = addEvent(eventInfo.mType,eventInfo.mId1,eventInfo.mId2,eventInfo.mId3,eventInfo.mFlags);
+    std::string modificationTime = utcTimeFromTimeT(fileInfo.mModificationTime);
+    std::string deletionTime = utcTimeFromTimeT(fileInfo.mDeletionTime);
+
+    char sql[10000];
+    char *p = sql;
+
+    p += sprintf(p,"UPDATE file\n");
+    p += sprintf(p,"SET\n");
+    p += sprintf(p,"  producerId = %u,\n",fileInfo.mProducerId);
+    p += sprintf(p,"  generationId = %u,\n",fileInfo.mGenerationId);
+    p += sprintf(p,"  protocol = %u,\n",(uint)fileInfo.mProtocol);
+    p += sprintf(p,"  serverType = %u,\n",(uint)fileInfo.mServerType);
+    p += sprintf(p,"  server = '%s',\n",fileInfo.mServer.c_str());
+    p += sprintf(p,"  fileType = %u,\n",(uint)fileInfo.mFileType);
+    p += sprintf(p,"  fileName = '%s',\n",fileInfo.mName.c_str());
+    p += sprintf(p,"  flags = %u,\n",fileInfo.mFlags);
+    p += sprintf(p,"  sourceId = %u,\n",fileInfo.mSourceId);
+    p += sprintf(p,"  modificationTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
+    p += sprintf(p,"  deletionTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
+    p += sprintf(p,"  fileSize = %llu,\n",fileInfo.mSize);
+    p += sprintf(p,"  status = %u\n",fileInfo.mStatus);
+    p += sprintf(p,"WHERE \n");
+    p += sprintf(p, "  fileId = %u;\n", fileInfo.mFileId);
+
+    PGresult *res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_COMMAND_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+    PQclear(res);
+
+    addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,0,0,0,"");
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int PostgresqlImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    eventInfo.mEventId = addEvent(eventInfo.mType,eventInfo.mId1,eventInfo.mId2,eventInfo.mId3,eventInfo.mFlags,eventInfo.mEventData.c_str());
     return Result::OK;
   }
   catch (...)
@@ -2473,6 +3705,8 @@ int PostgresqlImplementation::_getLastEventInfo(T::SessionId sessionId,uint requ
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -2484,7 +3718,11 @@ int PostgresqlImplementation::_getLastEventInfo(T::SessionId sessionId,uint requ
     PGresult *res = PQexec(mConnection, "SELECT MAX(eventId) FROM event;");
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
+      PQclear(res);
       throw exception;
     }
 
@@ -2496,19 +3734,6 @@ int PostgresqlImplementation::_getLastEventInfo(T::SessionId sessionId,uint requ
 
     PQclear(res);
 
-    /*
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"GET %seventCounter",mTablePrefix.c_str()));
-    if (reply == nullptr)
-    {
-      closeConnection();
-      return Result::PERMANENT_STORAGE_ERROR;
-    }
-
-    if (reply->str != nullptr)
-      eventId = (T::EventId)toInt64(reply->str);
-
-    freeReplyObject(reply);
-*/
     if (eventId == 0)
       return Result::DATA_NOT_FOUND;
 
@@ -2530,17 +3755,22 @@ int PostgresqlImplementation::_getLastEventInfo(T::SessionId sessionId,uint requ
     p += sprintf(p,"  id1,\n");
     p += sprintf(p,"  id2,\n");
     p += sprintf(p,"  id3,\n");
-    p += sprintf(p,"  flags\n");
+    p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  eventData\n");
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  event\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  eventId=%llu\n",eventId);
+    p += sprintf(p,"  eventId=%llu;\n",eventId);
 
     res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -2557,11 +3787,14 @@ int PostgresqlImplementation::_getLastEventInfo(T::SessionId sessionId,uint requ
     mLastEvent.mId2 = atoll(PQgetvalue(res, 0, 4));
     mLastEvent.mId3 = atoll(PQgetvalue(res, 0, 5));
     mLastEvent.mFlags = atoll(PQgetvalue(res, 0, 6));
+    mLastEvent.mEventData = PQgetvalue(res, 0, 7);
 
     PQclear(res);
 
     eventInfo = mLastEvent;
     eventInfo.mServerTime = mStartTime;
+
+    //eventInfo.print(std::cout,0,0);
     return Result::OK;
   }
   catch (...)
@@ -2579,6 +3812,8 @@ int PostgresqlImplementation::_getEventInfoList(T::SessionId sessionId,uint requ
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -2595,6 +3830,8 @@ int PostgresqlImplementation::_getEventInfoList(T::SessionId sessionId,uint requ
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+    //printf("GET EVENT LIST %llu\n",startEventId);
+
     char sql[10000];
     char *p = sql;
 
@@ -2605,23 +3842,30 @@ int PostgresqlImplementation::_getEventInfoList(T::SessionId sessionId,uint requ
     p += sprintf(p,"  id1,\n");
     p += sprintf(p,"  id2,\n");
     p += sprintf(p,"  id3,\n");
-    p += sprintf(p,"  flags\n");
+    p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  eventData\n");
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  event\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  eventId=%llu\n",startEventId);
+    p += sprintf(p,"  eventId>=%llu\n",startEventId);
     p += sprintf(p,"ORDER BY\n");
-    p += sprintf(p,"  eventId\n");
+    p += sprintf(p,"  eventId;\n");
 
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
     int rowCount = PQntuples(res);
+
+    //printf("GET EVENT LIST %llu  => %d\n",startEventId,rowCount);
 
     if (rowCount > maxRecords)
       rowCount = maxRecords;
@@ -2638,79 +3882,13 @@ int PostgresqlImplementation::_getEventInfoList(T::SessionId sessionId,uint requ
       eventInfo->mId2 = atoll(PQgetvalue(res, i, 4));
       eventInfo->mId3 = atoll(PQgetvalue(res, i, 5));
       eventInfo->mFlags = atoll(PQgetvalue(res, i, 6));
-      //eventInfo->mNote;
+      eventInfo->mEventData = PQgetvalue(res, i, 7);
 
       eventInfoList.addEventInfo(eventInfo);
     }
 
     PQclear(res);
 
-    return Result::OK;
-
-    /*
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sevents %llu %llu LIMIT 0 %u",mTablePrefix.c_str(),startEventId,0xFFFFFFFFFFFF,maxRecords));
-    if (reply == nullptr)
-    {
-      closeConnection();
-      return Result::PERMANENT_STORAGE_ERROR;
-    }
-
-    if (reply->type == REDIS_REPLY_ARRAY)
-    {
-      for (uint t = 0; t < reply->elements; t++)
-      {
-        T::EventInfo *eventInfo = new T::EventInfo();
-        eventInfo->setCsv(reply->element[t]->str);
-
-        //printf("# EVENT %llu,%u\n",eventInfo->mEventId,eventInfo->mType);
-
-        if (eventInfo->mType == EventType::FILE_ADDED)
-        {
-          T::FileInfo fileInfo;
-
-          if (getFileById(eventInfo->mId1,fileInfo) == 0)
-          {
-            std::ostringstream output;
-            output << fileInfo.getCsv() << "\n";
-
-            if (eventInfo->mId3 > 0)
-            {
-              T::ContentInfoList contentInfoList;
-              getContentByFileId(eventInfo->mId1,contentInfoList);
-
-              uint len = contentInfoList.getLength();
-              for (uint t=0; t<len; t++)
-              {
-                T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
-                output << contentInfo->getCsv() << "\n";
-              }
-            }
-            eventInfo->mNote = output.str();
-          }
-          else
-          {
-            //printf("File not found %u\n",eventInfo->mId1);
-          }
-        }
-        else
-        if (eventInfo->mType == EventType::CONTENT_ADDED)
-        {
-          T::ContentInfo contentInfo;
-          if (getContent(eventInfo->mId1,eventInfo->mId2,contentInfo) == 0)
-          {
-            eventInfo->mNote = contentInfo.getCsv();
-          }
-          else
-          {
-           //  printf("**************** CONTENT NOT FOUND   %u %u ***********\n", eventInfo->mId1,eventInfo->mId2);
-          }
-        }
-
-        eventInfoList.addEventInfo(eventInfo);
-      }
-    }
-    freeReplyObject(reply);
-*/
     return Result::OK;
   }
   catch (...)
@@ -2728,6 +3906,8 @@ int PostgresqlImplementation::_getEventInfoCount(T::SessionId sessionId,uint& co
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     count = 0;
 
     if (!isSessionValid(sessionId))
@@ -2755,15 +3935,16 @@ int PostgresqlImplementation::_addContentInfo(T::SessionId sessionId,T::ContentI
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
-
 
     int res = addContent(contentInfo);
     if (res != 0)
       return res;
 
-    addEvent(EventType::CONTENT_ADDED,contentInfo.mFileId,contentInfo.mMessageIndex,0,0);
+    addEvent(EventType::CONTENT_ADDED,contentInfo.mFileId,contentInfo.mMessageIndex,0,0,contentInfo.getCsv().c_str());
 
     return Result::OK;
   }
@@ -2777,13 +3958,80 @@ int PostgresqlImplementation::_addContentInfo(T::SessionId sessionId,T::ContentI
 
 
 
+int PostgresqlImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    std::string forecastTime = utcTimeFromTimeT(contentInfo.mForecastTimeUTC);
+    std::string modificationTime = utcTimeFromTimeT(contentInfo.mModificationTime);
+    std::string deletionTime = utcTimeFromTimeT(contentInfo.mDeletionTime);
+
+    char sql[10000];
+    char *p = sql;
+
+    p += sprintf(p,"UPDATE content\n");
+    p += sprintf(p,"SET\n");
+    p += sprintf(p,"  fileType = %u,\n",contentInfo.mFileType);
+    p += sprintf(p,"  filePosition = %llu,\n",contentInfo.mFilePosition);
+    p += sprintf(p,"  messageSize = %u,\n",contentInfo.mMessageSize);
+    p += sprintf(p,"  producerId = %u,\n",contentInfo.mProducerId);
+    p += sprintf(p,"  generationId = %u,\n",contentInfo.mGenerationId);
+    p += sprintf(p,"  geometryId = %u,\n",contentInfo.mGeometryId);
+    p += sprintf(p,"  parameterId = %d,\n",contentInfo.mFmiParameterId);
+    p += sprintf(p,"  parameterName = '%s',\n",contentInfo.getFmiParameterName());
+    p += sprintf(p,"  forecastTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",forecastTime.c_str());
+    p += sprintf(p,"  levelId = %d,\n",contentInfo.mFmiParameterLevelId);
+    p += sprintf(p,"  level = %d,\n",contentInfo.mParameterLevel);
+    p += sprintf(p,"  forecastType = %d,\n",contentInfo.mForecastType);
+    p += sprintf(p,"  foracastNumber = %d,\n",contentInfo.mForecastNumber);
+    p += sprintf(p,"  flags = %u,\n",contentInfo.mFlags);
+    p += sprintf(p,"  sourceId = %u,\n",contentInfo.mSourceId);
+    p += sprintf(p,"  modificationTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
+    p += sprintf(p,"  deletionTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS')\n",deletionTime.c_str());
+    p += sprintf(p,"WHERE \n");
+    p += sprintf(p, "  fileId = %u AND messageIndex = %u;\n",contentInfo.mFileId,contentInfo.mMessageIndex);
+
+    PGresult *res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_COMMAND_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+    PQclear(res);
+
+    addEvent(EventType::CONTENT_UPDATED,contentInfo.mFileId,contentInfo.mMessageIndex,0,0,"");
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 int PostgresqlImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
-    //printf("ADD CONTENT %u\n",contentInfoList.getLength());
-    //contentInfoList.print(std::cout,0,0);
+    AutoThreadLock lock(&mThreadLock);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -2801,9 +4049,9 @@ int PostgresqlImplementation::_addContentList(T::SessionId sessionId,T::ContentI
     {
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
       //addEvent(EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,0);
-      eventInfoList.addEventInfo(new T::EventInfo(time(0),0,EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,0));
+      eventInfoList.addEventInfo(new T::EventInfo(time(0),0,EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,0,info->getCsv().c_str()));
     }
-    addEventIntoList(eventInfoList);
+    addEventInfoList(eventInfoList);
 
     return Result::OK;
   }
@@ -2822,6 +4070,8 @@ int PostgresqlImplementation::_deleteContentInfo(T::SessionId sessionId,uint fil
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -2835,7 +4085,7 @@ int PostgresqlImplementation::_deleteContentInfo(T::SessionId sessionId,uint fil
     int result = deleteContent(fileId,messageIndex);
 
     if (result == Result::OK)
-      addEvent(EventType::CONTENT_DELETED,fileId,messageIndex,0,0);
+      addEvent(EventType::CONTENT_DELETED,fileId,messageIndex,0,0,"");
 
     return result;
   }
@@ -2854,6 +4104,8 @@ int PostgresqlImplementation::_deleteContentListByFileId(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -2868,7 +4120,7 @@ int PostgresqlImplementation::_deleteContentListByFileId(T::SessionId sessionId,
     int result = deleteContentByFileId(fileId);
 
     if (result == Result::OK)
-      addEvent(EventType::CONTENT_LIST_DELETED_BY_FILE_ID,fileId,0,0,0);
+      addEvent(EventType::CONTENT_LIST_DELETED_BY_FILE_ID,fileId,0,0,0,"");
 
     return result;
   }
@@ -2887,21 +4139,23 @@ int PostgresqlImplementation::_deleteContentListByFileName(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    uint fileId = getFileId(filename);
-    if (fileId == 0)
+    T::FileInfo fileInfo;
+    getFileByName(filename,fileInfo);
+    if (fileInfo.mFileId == 0)
       return Result::UNKNOWN_FILE_NAME;
 
-
-    int result = deleteContentByFileId(fileId);
+    int result = deleteContentByFileId(fileInfo.mFileId);
 
     if (result == Result::OK)
-      addEvent(EventType::CONTENT_LIST_DELETED_BY_FILE_ID,fileId,0,0,0);
+      addEvent(EventType::CONTENT_LIST_DELETED_BY_FILE_ID,fileInfo.mFileId,0,0,0,"");
 
     return result;
   }
@@ -2920,6 +4174,8 @@ int PostgresqlImplementation::_deleteContentListByProducerId(T::SessionId sessio
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -2934,7 +4190,7 @@ int PostgresqlImplementation::_deleteContentListByProducerId(T::SessionId sessio
     int result = deleteContentByProducerId(producerId);
 
     if (result == Result::OK)
-      addEvent(EventType::CONTENT_LIST_DELETED_BY_PRODUCER_ID,producerId,0,0,0);
+      addEvent(EventType::CONTENT_LIST_DELETED_BY_PRODUCER_ID,producerId,0,0,0,"");
 
     return result;
   }
@@ -2953,6 +4209,8 @@ int PostgresqlImplementation::_deleteContentListByProducerName(T::SessionId sess
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -2967,7 +4225,7 @@ int PostgresqlImplementation::_deleteContentListByProducerName(T::SessionId sess
     int result = deleteContentByProducerId(producerInfo.mProducerId);
 
     if (result == Result::OK)
-      addEvent(EventType::CONTENT_LIST_DELETED_BY_PRODUCER_ID,producerInfo.mProducerId,0,0,0);
+      addEvent(EventType::CONTENT_LIST_DELETED_BY_PRODUCER_ID,producerInfo.mProducerId,0,0,0,"");
 
     return result;
   }
@@ -2985,6 +4243,8 @@ int PostgresqlImplementation::_deleteContentListByGenerationId(T::SessionId sess
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -2999,7 +4259,7 @@ int PostgresqlImplementation::_deleteContentListByGenerationId(T::SessionId sess
     int result = deleteContentByGenerationId(generationId);
 
     if (result == Result::OK)
-      addEvent(EventType::CONTENT_LIST_DELETED_BY_GENERATION_ID,generationId,0,0,0);
+      addEvent(EventType::CONTENT_LIST_DELETED_BY_GENERATION_ID,generationId,0,0,0,"");
 
     return result;
   }
@@ -3018,6 +4278,8 @@ int PostgresqlImplementation::_deleteContentListByGenerationName(T::SessionId se
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3032,7 +4294,7 @@ int PostgresqlImplementation::_deleteContentListByGenerationName(T::SessionId se
     int result = deleteContentByGenerationId(generationInfo.mGenerationId);
 
     if (result == Result::OK)
-      addEvent(EventType::CONTENT_LIST_DELETED_BY_GENERATION_ID,generationInfo.mGenerationId,0,0,0);
+      addEvent(EventType::CONTENT_LIST_DELETED_BY_GENERATION_ID,generationInfo.mGenerationId,0,0,0,"");
 
     return result;
   }
@@ -3051,6 +4313,8 @@ int PostgresqlImplementation::_deleteContentListBySourceId(T::SessionId sessionI
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3061,7 +4325,7 @@ int PostgresqlImplementation::_deleteContentListBySourceId(T::SessionId sessionI
     int result = deleteContentBySourceId(sourceId);
 
     if (result == Result::OK)
-      addEvent(EventType::CONTENT_LIST_DELETED_BY_SOURCE_ID,sourceId,0,0,0);
+      addEvent(EventType::CONTENT_LIST_DELETED_BY_SOURCE_ID,sourceId,0,0,0,"");
 
     return result;
   }
@@ -3080,6 +4344,8 @@ int PostgresqlImplementation::_getContentInfo(T::SessionId sessionId,uint fileId
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3103,6 +4369,8 @@ int PostgresqlImplementation::_getContentList(T::SessionId sessionId,uint startF
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3128,6 +4396,8 @@ int PostgresqlImplementation::_getContentListByFileId(T::SessionId sessionId,uin
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3153,6 +4423,8 @@ int PostgresqlImplementation::_getContentListByFileIdList(T::SessionId sessionId
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3184,19 +4456,22 @@ int PostgresqlImplementation::_getContentListByFileName(T::SessionId sessionId,c
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    uint fileId = getFileId(filename);
-    if (fileId == 0)
+    T::FileInfo fileInfo;
+    getFileByName(filename,fileInfo);
+    if (fileInfo.mFileId == 0)
       return Result::UNKNOWN_FILE_NAME;
 
     contentInfoList.clear();
 
-    return getContentByFileId(fileId,contentInfoList);
+    return getContentByFileId(fileInfo.mFileId,contentInfoList);
   }
   catch (...)
   {
@@ -3213,6 +4488,8 @@ int PostgresqlImplementation::_getContentListByProducerId(T::SessionId sessionId
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3242,6 +4519,8 @@ int PostgresqlImplementation::_getContentListByProducerName(T::SessionId session
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3271,6 +4550,8 @@ int PostgresqlImplementation::_getContentListByGenerationId(T::SessionId session
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3301,6 +4582,8 @@ int PostgresqlImplementation::_getContentListByGenerationName(T::SessionId sessi
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3330,6 +4613,8 @@ int PostgresqlImplementation::_getContentListByGenerationIdAndTimeRange(T::Sessi
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3359,6 +4644,8 @@ int PostgresqlImplementation::_getContentListByGenerationNameAndTimeRange(T::Ses
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3388,6 +4675,8 @@ int PostgresqlImplementation::_getContentListBySourceId(T::SessionId sessionId,u
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3413,6 +4702,8 @@ int PostgresqlImplementation::_getContentListByParameter(T::SessionId sessionId,
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3462,6 +4753,8 @@ int PostgresqlImplementation::_getContentListByParameterAndGenerationId(T::Sessi
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3515,6 +4808,8 @@ int PostgresqlImplementation::_getContentListByParameterAndGenerationName(T::Ses
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3568,6 +4863,8 @@ int PostgresqlImplementation::_getContentListByParameterAndProducerId(T::Session
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3621,6 +4918,8 @@ int PostgresqlImplementation::_getContentListByParameterGenerationIdAndForecastT
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3696,6 +4995,8 @@ int PostgresqlImplementation::_getContentListByParameterAndProducerName(T::Sessi
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3749,6 +5050,8 @@ int PostgresqlImplementation::_getContentListOfInvalidIntegrity(T::SessionId ses
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     contentInfoList.clear();
 
     T::ProducerInfoList producerInfoList;
@@ -3819,6 +5122,8 @@ int PostgresqlImplementation::_getContentGeometryIdListByGenerationId(T::Session
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3852,6 +5157,8 @@ int PostgresqlImplementation::_getContentParamListByGenerationId(T::SessionId se
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3909,6 +5216,8 @@ int PostgresqlImplementation::_getContentParamKeyListByGenerationId(T::SessionId
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3942,6 +5251,8 @@ int PostgresqlImplementation::_getContentTimeListByGenerationId(T::SessionId ses
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -3975,6 +5286,8 @@ int PostgresqlImplementation::_getContentTimeListByGenerationAndGeometryId(T::Se
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -4007,6 +5320,8 @@ int PostgresqlImplementation::_getContentTimeListByProducerId(T::SessionId sessi
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -4040,6 +5355,8 @@ int PostgresqlImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::S
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -4066,6 +5383,8 @@ int PostgresqlImplementation::_getContentCount(T::SessionId sessionId,uint& coun
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     count = 0;
 
     if (!isSessionValid(sessionId))
@@ -4092,6 +5411,8 @@ int PostgresqlImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelI
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -4118,6 +5439,8 @@ int PostgresqlImplementation::_deleteVirtualContent(T::SessionId sessionId)
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -4128,7 +5451,7 @@ int PostgresqlImplementation::_deleteVirtualContent(T::SessionId sessionId)
     int result = deleteVirtualFiles(true);
 
     if (result == Result::OK)
-      addEvent(EventType::DELETE_VIRTUAL_CONTENT,0,0,0,0);
+      addEvent(EventType::DELETE_VIRTUAL_CONTENT,0,0,0,0,"");
 
     return result;
   }
@@ -4147,6 +5470,8 @@ int PostgresqlImplementation::_updateVirtualContent(T::SessionId sessionId)
   FUNCTION_TRACE
   try
   {
+    AutoThreadLock lock(&mThreadLock);
+
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
@@ -4158,7 +5483,7 @@ int PostgresqlImplementation::_updateVirtualContent(T::SessionId sessionId)
 
     if (result == Result::OK)
     {
-      addEvent(EventType::UPDATE_VIRTUAL_CONTENT,0,0,0,0);
+      addEvent(EventType::UPDATE_VIRTUAL_CONTENT,0,0,0,0,"");
     }
 
     return result;
@@ -4192,7 +5517,11 @@ uint PostgresqlImplementation::getCount(const char *sql)
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
+      PQclear(res);
       throw exception;
     }
 
@@ -4226,22 +5555,25 @@ int PostgresqlImplementation::deleteProducerById(uint producerId,bool deleteGene
 
     char sql[1000];
 
+    /*
     PGresult *res = PQexec(mConnection,"BEGIN TRANSACTION;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
-
+    */
     if (deleteContent)
     {
       sprintf(sql,"DELETE FROM content WHERE producerId=%u;",producerId);
-      res = PQexec(mConnection,sql);
+      PGresult *res = PQexec(mConnection,sql);
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
-        Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-        throw exception;
+        //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+        //PQclear(res);
+        //throw exception;
       }
       PQclear(res);
     }
@@ -4249,11 +5581,12 @@ int PostgresqlImplementation::deleteProducerById(uint producerId,bool deleteGene
     if (deleteFiles)
     {
       sprintf(sql,"DELETE FROM file WHERE producerId=%u;",producerId);
-      res = PQexec(mConnection,sql);
+      PGresult *res = PQexec(mConnection,sql);
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
-        Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-        throw exception;
+        //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+        //PQclear(res);
+        //throw exception;
       }
       PQclear(res);
     }
@@ -4261,11 +5594,12 @@ int PostgresqlImplementation::deleteProducerById(uint producerId,bool deleteGene
     if (deleteGenerationGeometries)
     {
       sprintf(sql,"DELETE FROM generationGeometry WHERE producerId=%u;",producerId);
-      res = PQexec(mConnection,sql);
+      PGresult *res = PQexec(mConnection,sql);
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
-        Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-        throw exception;
+        //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+        //PQclear(res);
+        //throw exception;
       }
       PQclear(res);
     }
@@ -4273,32 +5607,36 @@ int PostgresqlImplementation::deleteProducerById(uint producerId,bool deleteGene
     if (deleteGenerations)
     {
       sprintf(sql,"DELETE FROM generation WHERE producerId=%u;",producerId);
-      res = PQexec(mConnection,sql);
+      PGresult *res = PQexec(mConnection,sql);
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
-        Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-        throw exception;
+        //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+        //PQclear(res);
+        //throw exception;
       }
       PQclear(res);
     }
 
     sprintf(sql,"DELETE FROM producer WHERE producerId=%u;",producerId);
-    res = PQexec(mConnection,sql);
+    PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      throw exception;
+      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      //PQclear(res);
+      //throw exception;
     }
     PQclear(res);
 
+    /*
     res = PQexec(mConnection,"COMMIT TRANSACTION;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
-
+    */
     return Result::OK;
   }
   catch (...)
@@ -4368,8 +5706,12 @@ int PostgresqlImplementation::getProducerById(uint producerId,T::ProducerInfo& p
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -4430,8 +5772,12 @@ int PostgresqlImplementation::getProducerByName(std::string producerName,T::Prod
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -4492,8 +5838,12 @@ int PostgresqlImplementation::getProducerList(T::ProducerInfoList& producerInfoL
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -4556,7 +5906,11 @@ int PostgresqlImplementation::getProducerListBySourceId(uint sourceId,T::Produce
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
+      PQclear(res);
       exception.addParameter("sql",sql);
       throw exception;
     }
@@ -4621,8 +5975,12 @@ int PostgresqlImplementation::getGenerationById(uint generationId,T::GenerationI
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -4695,8 +6053,12 @@ int PostgresqlImplementation::getGenerationByName(std::string generationName,T::
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -4769,8 +6131,12 @@ int PostgresqlImplementation::getGenerationList(T::GenerationInfoList& generatio
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -4866,8 +6232,12 @@ int PostgresqlImplementation::getGenerationListByProducerId(uint producerId,T::G
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -4944,8 +6314,12 @@ int PostgresqlImplementation::getGenerationListBySourceId(uint sourceId,T::Gener
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -4998,7 +6372,7 @@ int PostgresqlImplementation::deleteGenerationById(uint generationId,bool delete
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     char sql[1000];
-
+/*
     PGresult *res = PQexec(mConnection,"BEGIN TRANSACTION;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
@@ -5006,15 +6380,16 @@ int PostgresqlImplementation::deleteGenerationById(uint generationId,bool delete
       throw exception;
     }
     PQclear(res);
-
+*/
     if (deleteContent)
     {
       sprintf(sql,"DELETE FROM content WHERE generationId=%u;",generationId);
-      res = PQexec(mConnection,sql);
+      PGresult *res = PQexec(mConnection,sql);
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
-        Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-        throw exception;
+        //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+        //PQclear(res);
+        //throw exception;
       }
       PQclear(res);
     }
@@ -5022,11 +6397,12 @@ int PostgresqlImplementation::deleteGenerationById(uint generationId,bool delete
     if (deleteFiles)
     {
       sprintf(sql,"DELETE FROM file WHERE generationId=%u;",generationId);
-      res = PQexec(mConnection,sql);
+      PGresult *res = PQexec(mConnection,sql);
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
-        Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-        throw exception;
+        //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+        //PQclear(res);
+        //throw exception;
       }
       PQclear(res);
     }
@@ -5034,730 +6410,35 @@ int PostgresqlImplementation::deleteGenerationById(uint generationId,bool delete
     if (deleteGenerationGeometries)
     {
       sprintf(sql,"DELETE FROM generationGeometry WHERE generationId=%u;",generationId);
-      res = PQexec(mConnection,sql);
+      PGresult *res = PQexec(mConnection,sql);
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
-        Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-        throw exception;
+        //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+        //PQclear(res);
+        //throw exception;
       }
       PQclear(res);
     }
+
     sprintf(sql,"DELETE FROM generation WHERE generationId=%u;",generationId);
-    res = PQexec(mConnection,sql);
+    PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      throw exception;
+      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      //PQclear(res);
+      //throw exception;
     }
     PQclear(res);
-
+/*
     res = PQexec(mConnection,"COMMIT TRANSACTION;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int PostgresqlImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    std::string modificationTime = utcTimeFromTimeT(geometryInfo.mModificationTime);
-    std::string deletionTime = utcTimeFromTimeT(geometryInfo.mDeletionTime);
-
-    char sql[10000];
-    char *p = sql;
-
-    p += sprintf(p,"INSERT INTO generationGeometry\n");
-    p += sprintf(p,"(\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  modificationTime,\n");
-    p += sprintf(p,"  deletionTime,\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,")\n");
-    p += sprintf(p,"VALUES \n");
-    p += sprintf(p,"(\n");
-    p += sprintf(p,"  %u,\n",geometryInfo.mProducerId);
-    p += sprintf(p,"  %u,\n",geometryInfo.mGenerationId);
-    p += sprintf(p,"  %u,\n",geometryInfo.mGeometryId);
-    p += sprintf(p,"  %u,\n",geometryInfo.mLevelId);
-    p += sprintf(p,"  %u,\n",geometryInfo.mFlags);
-    p += sprintf(p,"  %u,\n",geometryInfo.mSourceId);
-    p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
-    p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
-    p += sprintf(p,"  %u\n",(uint)geometryInfo.mStatus);
-    p += sprintf(p,");\n");
-
-    PGresult *res = PQexec(mConnection, sql);
-    if (PQresultStatus(res) != PGRES_COMMAND_OK)
-    {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      exception.addParameter("sql",sql);
-      throw exception;
-    }
-    PQclear(res);
-
-
-    addEvent(EventType::GEOMETRY_ADDED,geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId,0);
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-
-int PostgresqlImplementation::_deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    char sql[100];
-    sprintf(sql,"DELETE FROM generationGeometry WHERE generationId=%u AND geometryId=%u AND levelId=%u;",generationId,geometryId,levelId);
-    PGresult *res = PQexec(mConnection,sql);
-    if (PQresultStatus(res) != PGRES_COMMAND_OK)
-    {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      throw exception;
-    }
-    PQclear(res);
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int PostgresqlImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    char sql[100];
-    sprintf(sql,"DELETE FROM generationGeometry WHERE generationId=%u;",generationId);
-    PGresult *res = PQexec(mConnection,sql);
-    if (PQresultStatus(res) != PGRES_COMMAND_OK)
-    {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      throw exception;
-    }
-    PQclear(res);
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int PostgresqlImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    char sql[100];
-    sprintf(sql,"DELETE FROM generationGeometry WHERE producerId=%u;",producerId);
-    PGresult *res = PQexec(mConnection,sql);
-    if (PQresultStatus(res) != PGRES_COMMAND_OK)
-    {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      throw exception;
-    }
-    PQclear(res);
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int PostgresqlImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    char sql[100];
-    sprintf(sql,"DELETE FROM generationGeometry WHERE sourceId=%u;",sourceId);
-    PGresult *res = PQexec(mConnection,sql);
-    if (PQresultStatus(res) != PGRES_COMMAND_OK)
-    {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      throw exception;
-    }
-    PQclear(res);
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int PostgresqlImplementation::_getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    char sql[10000];
-    char *p = sql;
-
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  generationGeometry\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  generationId=%u AND geometryId=%u AND levelId=%u;\n",generationId,geometryId,levelId);
-
-    PGresult *res = PQexec(mConnection, sql);
-    if (PQresultStatus(res) != PGRES_TUPLES_OK)
-    {
-      Fmi::Exception exception(BCP,PQresultErrorMessage(res));
-      exception.addParameter("sql",sql);
-      throw exception;
-    }
-
-    int rowCount = PQntuples(res);
-    if (rowCount == 0)
-      return Result::DATA_NOT_FOUND;
-
-    for (int i = 0; i < rowCount; i++)
-    {
-      geometryInfo.mProducerId = atoi(PQgetvalue(res, i, 0));
-      geometryInfo.mGenerationId = atoi(PQgetvalue(res, i, 1));
-      geometryInfo.mGeometryId = atoi(PQgetvalue(res, i, 2));
-      geometryInfo.mLevelId = atoi(PQgetvalue(res, i, 3));
-      geometryInfo.mFlags = atoi(PQgetvalue(res, i, 4));
-      geometryInfo.mSourceId = atoi(PQgetvalue(res, i, 5));
-
-      std::string modificationTime = PQgetvalue(res, i, 6);
-      geometryInfo.mModificationTime = utcTimeToTimeT(modificationTime);
-
-      std::string deletionTime = PQgetvalue(res, i, 7);
-      geometryInfo.mDeletionTime = utcTimeToTimeT(deletionTime);
-
-      geometryInfo.mStatus = atoi(PQgetvalue(res, i, 8));
-    }
-
-    PQclear(res);
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int PostgresqlImplementation::_getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    geometryInfoList.clear();
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    char sql[10000];
-    char *p = sql;
-
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  generationGeometry;\n");
-
-    PGresult *res = PQexec(mConnection, sql);
-    if (PQresultStatus(res) != PGRES_TUPLES_OK)
-    {
-      Fmi::Exception exception(BCP,PQresultErrorMessage(res));
-      exception.addParameter("sql",sql);
-      throw exception;
-    }
-
-    int rowCount = PQntuples(res);
-
-    for (int i = 0; i < rowCount; i++)
-    {
-      T::GeometryInfo *geometryInfo = new T::GeometryInfo();
-
-      geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
-      geometryInfo->mGenerationId = atoi(PQgetvalue(res, i, 1));
-      geometryInfo->mGeometryId = atoi(PQgetvalue(res, i, 2));
-      geometryInfo->mLevelId = atoi(PQgetvalue(res, i, 3));
-      geometryInfo->mFlags = atoi(PQgetvalue(res, i, 4));
-      geometryInfo->mSourceId = atoi(PQgetvalue(res, i, 5));
-
-      std::string modificationTime = PQgetvalue(res, i, 6);
-      geometryInfo->mModificationTime = utcTimeToTimeT(modificationTime);
-
-      std::string deletionTime = PQgetvalue(res, i, 7);
-      geometryInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
-
-      geometryInfo->mStatus = atoi(PQgetvalue(res, i, 8));
-
-      geometryInfoList.addGeometryInfo(geometryInfo);
-    }
-
-    PQclear(res);
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int PostgresqlImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    geometryInfoList.clear();
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    char sql[10000];
-    char *p = sql;
-
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  generationGeometry\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  generationId=%u;\n",generationId);
-
-    PGresult *res = PQexec(mConnection, sql);
-    if (PQresultStatus(res) != PGRES_TUPLES_OK)
-    {
-      Fmi::Exception exception(BCP,PQresultErrorMessage(res));
-      exception.addParameter("sql",sql);
-      throw exception;
-    }
-
-    int rowCount = PQntuples(res);
-
-    for (int i = 0; i < rowCount; i++)
-    {
-      T::GeometryInfo *geometryInfo = new T::GeometryInfo();
-
-      geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
-      geometryInfo->mGenerationId = atoi(PQgetvalue(res, i, 1));
-      geometryInfo->mGeometryId = atoi(PQgetvalue(res, i, 2));
-      geometryInfo->mLevelId = atoi(PQgetvalue(res, i, 3));
-      geometryInfo->mFlags = atoi(PQgetvalue(res, i, 4));
-      geometryInfo->mSourceId = atoi(PQgetvalue(res, i, 5));
-
-      std::string modificationTime = PQgetvalue(res, i, 6);
-      geometryInfo->mModificationTime = utcTimeToTimeT(modificationTime);
-
-      std::string deletionTime = PQgetvalue(res, i, 7);
-      geometryInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
-
-      geometryInfo->mStatus = atoi(PQgetvalue(res, i, 8));
-
-      geometryInfoList.addGeometryInfo(geometryInfo);
-    }
-
-    PQclear(res);
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int PostgresqlImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    geometryInfoList.clear();
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    char sql[10000];
-    char *p = sql;
-
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  generationGeometry;\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  producerId=%u;\n",producerId);
-
-    PGresult *res = PQexec(mConnection, sql);
-    if (PQresultStatus(res) != PGRES_TUPLES_OK)
-    {
-      Fmi::Exception exception(BCP,PQresultErrorMessage(res));
-      exception.addParameter("sql",sql);
-      throw exception;
-    }
-
-    int rowCount = PQntuples(res);
-
-    for (int i = 0; i < rowCount; i++)
-    {
-      T::GeometryInfo *geometryInfo = new T::GeometryInfo();
-
-      geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
-      geometryInfo->mGenerationId = atoi(PQgetvalue(res, i, 1));
-      geometryInfo->mGeometryId = atoi(PQgetvalue(res, i, 2));
-      geometryInfo->mLevelId = atoi(PQgetvalue(res, i, 3));
-      geometryInfo->mFlags = atoi(PQgetvalue(res, i, 4));
-      geometryInfo->mSourceId = atoi(PQgetvalue(res, i, 5));
-
-      std::string modificationTime = PQgetvalue(res, i, 6);
-      geometryInfo->mModificationTime = utcTimeToTimeT(modificationTime);
-
-      std::string deletionTime = PQgetvalue(res, i, 7);
-      geometryInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
-
-      geometryInfo->mStatus = atoi(PQgetvalue(res, i, 8));
-
-      geometryInfoList.addGeometryInfo(geometryInfo);
-    }
-
-    PQclear(res);
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int PostgresqlImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    geometryInfoList.clear();
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    char sql[10000];
-    char *p = sql;
-
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  generationGeometry;\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  sourceId=%u;\n",sourceId);
-
-    PGresult *res = PQexec(mConnection, sql);
-    if (PQresultStatus(res) != PGRES_TUPLES_OK)
-    {
-      Fmi::Exception exception(BCP,PQresultErrorMessage(res));
-      exception.addParameter("sql",sql);
-      throw exception;
-    }
-
-    int rowCount = PQntuples(res);
-
-    for (int i = 0; i < rowCount; i++)
-    {
-      T::GeometryInfo *geometryInfo = new T::GeometryInfo();
-
-      geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
-      geometryInfo->mGenerationId = atoi(PQgetvalue(res, i, 1));
-      geometryInfo->mGeometryId = atoi(PQgetvalue(res, i, 2));
-      geometryInfo->mLevelId = atoi(PQgetvalue(res, i, 3));
-      geometryInfo->mFlags = atoi(PQgetvalue(res, i, 4));
-      geometryInfo->mSourceId = atoi(PQgetvalue(res, i, 5));
-
-      std::string modificationTime = PQgetvalue(res, i, 6);
-      geometryInfo->mModificationTime = utcTimeToTimeT(modificationTime);
-
-      std::string deletionTime = PQgetvalue(res, i, 7);
-      geometryInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
-
-      geometryInfo->mStatus = atoi(PQgetvalue(res, i, 8));
-
-      geometryInfoList.addGeometryInfo(geometryInfo);
-    }
-
-    PQclear(res);
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int PostgresqlImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& count)
-{
-  FUNCTION_TRACE
-  try
-  {
-    count = 0;
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    count = getCount("SELECT COUNT(*) FROM generationGeometry");
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int PostgresqlImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-
-    std::string modificationTime = utcTimeFromTimeT(geometryInfo.mModificationTime);
-    std::string deletionTime = utcTimeFromTimeT(geometryInfo.mDeletionTime);
-
-    char sql[10000];
-    char *p = sql;
-
-    p += sprintf(p,"UPDATE generationGeometry\n");
-    p += sprintf(p,"SET\n");
-    p += sprintf(p,"  flags = %u,\n",geometryInfo.mFlags);
-    p += sprintf(p,"  sourceId = %u,\n",geometryInfo.mSourceId);
-    p += sprintf(p,"  modificationTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
-    p += sprintf(p,"  deletionTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
-    p += sprintf(p,"  status = %u\n",geometryInfo.mStatus);
-    p += sprintf(p,"WHERE \n");
-    p += sprintf(p,"  generationId=%u AND geometryId=%u AND levelId=%u;\n",geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId);
-
-    PGresult *res = PQexec(mConnection, sql);
-    if (PQresultStatus(res) != PGRES_COMMAND_OK)
-    {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      exception.addParameter("sql",sql);
-      throw exception;
-    }
-    PQclear(res);
-
-    addEvent(EventType::GEOMETRY_UPDATED,geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId,0);
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int PostgresqlImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    char sql[1000];
-    char *p = sql;
-
-    p += sprintf(p,"UPDATE generationGeometry\n");
-    p += sprintf(p,"SET\n");
-    p += sprintf(p,"  status = %u\n",status);
-    p += sprintf(p,"WHERE \n");
-    p += sprintf(p,"  generationId=%u AND geometryId=%u AND levelId=%u;\n",generationId,geometryId,levelId);
-
-    PGresult *res = PQexec(mConnection, sql);
-    if (PQresultStatus(res) != PGRES_COMMAND_OK)
-    {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      exception.addParameter("sql",sql);
-      throw exception;
-    }
-    PQclear(res);
-
-    addEvent(EventType::GEOMETRY_STATUS_CHANGED,generationId,geometryId,levelId,status);
-
+*/
     return Result::OK;
   }
   catch (...)
@@ -5838,8 +6519,12 @@ int PostgresqlImplementation::addFile(T::FileInfo& fileInfo)
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
@@ -5887,18 +6572,26 @@ int PostgresqlImplementation::addFileList(T::FileInfoList& fileInfoList)
     uint len = fileInfoList.getLength();
     uint c = 0;
 
+
+    /*
     PGresult *res = PQexec(mConnection,"BEGIN TRANSACTION;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
+    */
 
-    res = PQexec(mConnection,"SELECT MAX(fileId) FROM file;");
+    PGresult *res = PQexec(mConnection,"SELECT MAX(fileId) FROM file;");
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
+      PQclear(res);
       throw exception;
     }
 
@@ -5964,9 +6657,15 @@ int PostgresqlImplementation::addFileList(T::FileInfoList& fileInfoList)
         PGresult *res = PQexec(mConnection, sql);
         if (PQresultStatus(res) != PGRES_COMMAND_OK)
         {
+          if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+            closeConnection();
+
+          /*
           Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
           exception.addParameter("sql",sql);
+          PQclear(res);
           throw exception;
+          */
         }
         PQclear(res);
         p = pp;
@@ -5978,13 +6677,16 @@ int PostgresqlImplementation::addFileList(T::FileInfoList& fileInfoList)
       c++;
     }
 
+    /*
     res = PQexec(mConnection,"COMMIT TRANSACTION;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
+    */
 
     return Result::OK;
   }
@@ -6068,35 +6770,41 @@ int PostgresqlImplementation::deleteFileById(uint fileId,bool deleteContent)
 
     char sql[1000];
 
+    /*
     PGresult *res = PQexec(mConnection,"BEGIN TRANSACTION;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
+    */
 
     if (deleteContent)
     {
       sprintf(sql,"DELETE FROM content WHERE fileId=%u;",fileId);
-      res = PQexec(mConnection,sql);
+      PGresult *res = PQexec(mConnection,sql);
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
-        Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-        throw exception;
+        //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+        //PQclear(res);
+        //throw exception;
       }
       PQclear(res);
     }
 
     sprintf(sql,"DELETE FROM file WHERE fileId=%u;",fileId);
-    res = PQexec(mConnection,sql);
+    PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      throw exception;
+      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      //PQclear(res);
+      //throw exception;
     }
     PQclear(res);
 
+    /*
     res = PQexec(mConnection,"COMMIT TRANSACTION;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
@@ -6104,6 +6812,7 @@ int PostgresqlImplementation::deleteFileById(uint fileId,bool deleteContent)
       throw exception;
     }
     PQclear(res);
+    */
 
     return Result::OK;
   }
@@ -6127,42 +6836,50 @@ int PostgresqlImplementation::deleteFileListByGenerationId(uint generationId,boo
 
     char sql[1000];
 
+    /*
     PGresult *res = PQexec(mConnection,"BEGIN TRANSACTION;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
+    */
 
     if (deleteContent)
     {
       sprintf(sql,"DELETE FROM content WHERE generationId=%u;",generationId);
-      res = PQexec(mConnection,sql);
+      PGresult *res = PQexec(mConnection,sql);
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
-        Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-        throw exception;
+        //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+        //PQclear(res);
+        //throw exception;
       }
       PQclear(res);
     }
 
     sprintf(sql,"DELETE FROM file WHERE generationId=%u;",generationId);
-    res = PQexec(mConnection,sql);
+    PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      throw exception;
+      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      //PQclear(res);
+      //throw exception;
     }
     PQclear(res);
 
+    /*
     res = PQexec(mConnection,"COMMIT TRANSACTION;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
+    */
 
     return Result::OK;
   }
@@ -6209,45 +6926,52 @@ int PostgresqlImplementation::deleteFileListByProducerId(uint producerId,bool de
 
     char sql[1000];
 
+    /*
     PGresult *res = PQexec(mConnection,"BEGIN TRANSACTION;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
+    */
 
     if (deleteContent)
     {
       sprintf(sql,"DELETE FROM content WHERE producerId=%u;",producerId);
-      res = PQexec(mConnection,sql);
+      PGresult *res = PQexec(mConnection,sql);
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
-        Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-        exception.addParameter("sql",sql);
-        throw exception;
+        //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+        //exception.addParameter("sql",sql);
+        //PQclear(res);
+        //throw exception;
       }
       PQclear(res);
     }
 
     sprintf(sql,"DELETE FROM file WHERE producerId=%u;",producerId);
-    res = PQexec(mConnection,sql);
+    PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      exception.addParameter("sql",sql);
-      throw exception;
+      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      //exception.addParameter("sql",sql);
+      //PQclear(res);
+      //throw exception;
     }
     PQclear(res);
 
+    /*
     res = PQexec(mConnection,"COMMIT TRANSACTION;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
-
+    */
     return Result::OK;
   }
   catch (...)
@@ -6270,44 +6994,52 @@ int PostgresqlImplementation::deleteFileListBySourceId(uint sourceId,bool delete
 
     char sql[1000];
 
+    /*
     PGresult *res = PQexec(mConnection,"BEGIN TRANSACTION;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
+    */
 
     if (deleteContent)
     {
       sprintf(sql,"DELETE FROM content WHERE sourceId=%u;",sourceId);
-      res = PQexec(mConnection,sql);
+      PGresult *res = PQexec(mConnection,sql);
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
-        Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-        exception.addParameter("sql",sql);
-        throw exception;
+        //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+        //exception.addParameter("sql",sql);
+        //PQclear(res);
+        //throw exception;
       }
       PQclear(res);
     }
 
     sprintf(sql,"DELETE FROM file WHERE sourceId=%u;",sourceId);
-    res = PQexec(mConnection,sql);
+    PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      exception.addParameter("sql",sql);
-      throw exception;
+      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      //exception.addParameter("sql",sql);
+      //PQclear(res);
+      //throw exception;
     }
     PQclear(res);
 
+    /*
     res = PQexec(mConnection,"COMMIT TRANSACTION;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
+    */
 
     return Result::OK;
   }
@@ -6331,44 +7063,52 @@ int PostgresqlImplementation::deleteVirtualFiles(bool deleteContent)
 
     char sql[1000];
 
+    /*
     PGresult *res = PQexec(mConnection,"BEGIN TRANSACTION;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
+    */
 
     if (deleteContent)
     {
       sprintf(sql,"DELETE FROM content WHERE fileType=%u;",T::FileTypeValue::Virtual);
-      res = PQexec(mConnection,sql);
+      PGresult *res = PQexec(mConnection,sql);
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
-        Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-        exception.addParameter("sql",sql);
-        throw exception;
+        //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+        //exception.addParameter("sql",sql);
+        //PQclear(res);
+        //throw exception;
       }
       PQclear(res);
     }
 
     sprintf(sql,"DELETE FROM file WHERE fileType=%u;",T::FileTypeValue::Virtual);
-    res = PQexec(mConnection,sql);
+    PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      exception.addParameter("sql",sql);
-      throw exception;
+      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      //exception.addParameter("sql",sql);
+      //PQclear(res);
+      //throw exception;
     }
     PQclear(res);
 
+    /*
     res = PQexec(mConnection,"COMMIT TRANSACTION;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
+    */
 
     return Result::OK;
   }
@@ -6414,8 +7154,12 @@ int PostgresqlImplementation::getFileById(uint fileId,T::FileInfo& fileInfo)
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -6484,13 +7228,17 @@ int PostgresqlImplementation::getFileByName(std::string fileName,T::FileInfo& fi
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  file\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  name='%s';\n",fileName.c_str());
+    p += sprintf(p,"  fileName='%s';\n",fileName.c_str());
 
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -6569,8 +7317,12 @@ int PostgresqlImplementation::getFileList(uint startFileId,int maxRecords,T::Fil
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -6650,8 +7402,12 @@ int PostgresqlImplementation::getFileListByGenerationId(uint generationId,uint s
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -6808,8 +7564,12 @@ int PostgresqlImplementation::getFileListByProducerId(uint producerId,uint start
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -6889,8 +7649,12 @@ int PostgresqlImplementation::getFileListBySourceId(uint sourceId,uint startFile
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -6970,8 +7734,12 @@ int PostgresqlImplementation::getVirtualFiles(uint startFileId,int maxRecords,T:
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -7098,9 +7866,12 @@ int PostgresqlImplementation::addContent(T::ContentInfo& contentInfo)
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
       exception.addParameter("sql",sql);
-      exception.printError();
+      //exception.printError();
       PQclear(res);
       return Result::CONTENT_ADDITION_FAILED;
     }
@@ -7163,9 +7934,6 @@ int PostgresqlImplementation::addContentList(T::ContentInfoList& contentInfoList
     {
       T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(c);
 
-      if (c < 100)
-        contentInfo->print(std::cout,0,0);
-
       std::string forecastTime = utcTimeFromTimeT(contentInfo->mForecastTimeUTC);
       std::string modificationTime = utcTimeFromTimeT(contentInfo->mModificationTime);
       std::string deletionTime = utcTimeFromTimeT(contentInfo->mDeletionTime);
@@ -7197,6 +7965,9 @@ int PostgresqlImplementation::addContentList(T::ContentInfoList& contentInfoList
         PGresult *res = PQexec(mConnection, sql);
         if (PQresultStatus(res) != PGRES_COMMAND_OK)
         {
+          if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+            closeConnection();
+
           Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
           //exception.addParameter("sql",sql);
           exception.printError();
@@ -7236,15 +8007,14 @@ int PostgresqlImplementation::deleteContent(uint fileId,uint messageIndex)
 
     char sql[1000];
 
-    ulonglong contentId = getContentId(fileId,messageIndex);
-
-    sprintf(sql,"DELETE FROM content WHERE contentId=%llu;",contentId);
+    sprintf(sql,"DELETE FROM content WHERE fileId=%u AND messageIndex=%u;",fileId,messageIndex);
     PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      exception.addParameter("sql",sql);
-      throw exception;
+      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      //exception.addParameter("sql",sql);
+      //PQclear(res);
+      //throw exception;
     }
     PQclear(res);
 
@@ -7274,9 +8044,10 @@ int PostgresqlImplementation::deleteContentByFileId(uint fileId)
     PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      exception.addParameter("sql",sql);
-      throw exception;
+      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      //exception.addParameter("sql",sql);
+      //PQclear(res);
+      //throw exception;
     }
     PQclear(res);
 
@@ -7306,9 +8077,10 @@ int PostgresqlImplementation::deleteContentByProducerId(uint producerId)
     PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      exception.addParameter("sql",sql);
-      throw exception;
+      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      //exception.addParameter("sql",sql);
+      //PQclear(res);
+      //throw exception;
     }
     PQclear(res);
 
@@ -7338,9 +8110,10 @@ int PostgresqlImplementation::deleteContentByGenerationId(uint generationId)
     PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      exception.addParameter("sql",sql);
-      throw exception;
+      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      //exception.addParameter("sql",sql);
+      //PQclear(res);
+      //throw exception;
     }
     PQclear(res);
 
@@ -7395,9 +8168,10 @@ int PostgresqlImplementation::deleteContentBySourceId(uint sourceId)
     PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      exception.addParameter("sql",sql);
-      throw exception;
+      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      //exception.addParameter("sql",sql);
+      //PQclear(res);
+      //throw exception;
     }
     PQclear(res);
 
@@ -7427,9 +8201,10 @@ int PostgresqlImplementation::removeVirtualContent()
     PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      exception.addParameter("sql",sql);
-      throw exception;
+      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
+      //exception.addParameter("sql",sql);
+      //PQclear(res);
+      //throw exception;
     }
     PQclear(res);
 
@@ -7495,8 +8270,6 @@ int PostgresqlImplementation::getContent(uint fileId,uint messageIndex,T::Conten
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    ulonglong contentId = getContentId(fileId,messageIndex);
-
     char sql[10000];
     char *p = sql;
 
@@ -7523,13 +8296,17 @@ int PostgresqlImplementation::getContent(uint fileId,uint messageIndex,T::Conten
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  content\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  contentId=%llu;\n",contentId);
+    p += sprintf(p,"  fileId=%u AND messageIndex=%u;\n",fileId,messageIndex);
 
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -7537,32 +8314,29 @@ int PostgresqlImplementation::getContent(uint fileId,uint messageIndex,T::Conten
     if (rowCount == 0)
       return Result::DATA_NOT_FOUND;
 
-    for (int i = 0; i < rowCount; i++)
-    {
-      contentInfo.mFileId = atoi(PQgetvalue(res, i, 0));
-      contentInfo.mMessageIndex = atoi(PQgetvalue(res, i, 1));
-      contentInfo.mFileType = atoi(PQgetvalue(res, i, 2));
-      contentInfo.mFilePosition = atoll(PQgetvalue(res, i, 3));
-      contentInfo.mMessageSize = atoi(PQgetvalue(res, i, 4));
-      contentInfo.mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo.mGenerationId = atoi(PQgetvalue(res, i, 6));
-      contentInfo.mGeometryId = atoi(PQgetvalue(res, i, 7));
-      contentInfo.mFmiParameterId = atoi(PQgetvalue(res, i, 8));
-      contentInfo.setFmiParameterName(PQgetvalue(res, i, 9));
-      contentInfo.setForecastTime(PQgetvalue(res, i, 10));
-      contentInfo.mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
-      contentInfo.mParameterLevel = atoi(PQgetvalue(res, i, 12));
-      contentInfo.mForecastType = atoi(PQgetvalue(res, i, 13));
-      contentInfo.mForecastNumber = atoi(PQgetvalue(res, i, 14));
-      contentInfo.mFlags = atoi(PQgetvalue(res, i, 15));
-      contentInfo.mSourceId = atoi(PQgetvalue(res, i, 16));
+    contentInfo.mFileId = atoi(PQgetvalue(res, 0, 0));
+    contentInfo.mMessageIndex = atoi(PQgetvalue(res, 0, 1));
+    contentInfo.mFileType = atoi(PQgetvalue(res, 0, 2));
+    contentInfo.mFilePosition = atoll(PQgetvalue(res, 0, 3));
+    contentInfo.mMessageSize = atoi(PQgetvalue(res, 0, 4));
+    contentInfo.mProducerId = atoi(PQgetvalue(res, 0, 5));
+    contentInfo.mGenerationId = atoi(PQgetvalue(res, 0, 6));
+    contentInfo.mGeometryId = atoi(PQgetvalue(res, 0, 7));
+    contentInfo.mFmiParameterId = atoi(PQgetvalue(res, 0, 8));
+    contentInfo.setFmiParameterName(PQgetvalue(res, 0, 9));
+    contentInfo.setForecastTime(PQgetvalue(res, 0, 10));
+    contentInfo.mFmiParameterLevelId = atoi(PQgetvalue(res, 0, 11));
+    contentInfo.mParameterLevel = atoi(PQgetvalue(res, 0, 12));
+    contentInfo.mForecastType = atoi(PQgetvalue(res, 0, 13));
+    contentInfo.mForecastNumber = atoi(PQgetvalue(res, 0, 14));
+    contentInfo.mFlags = atoi(PQgetvalue(res, 0, 15));
+    contentInfo.mSourceId = atoi(PQgetvalue(res, 0, 16));
 
-      std::string modificationTime = PQgetvalue(res, i, 17);
-      contentInfo.mModificationTime = utcTimeToTimeT(modificationTime);
+    std::string modificationTime = PQgetvalue(res, 0, 17);
+    contentInfo.mModificationTime = utcTimeToTimeT(modificationTime);
 
-      std::string deletionTime = PQgetvalue(res, i, 18);
-      contentInfo.mDeletionTime = utcTimeToTimeT(deletionTime);
-    }
+    std::string deletionTime = PQgetvalue(res, 0, 18);
+    contentInfo.mDeletionTime = utcTimeToTimeT(deletionTime);
 
     PQclear(res);
 
@@ -7623,8 +8397,12 @@ int PostgresqlImplementation::getContent(uint startFileId,uint startMessageIndex
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -7792,8 +8570,12 @@ int PostgresqlImplementation::getContentByGenerationId(uint generationId,uint st
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -7853,66 +8635,98 @@ int PostgresqlImplementation::getContentByGenerationIdList(std::set<uint>& gener
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-    /*
 
-    unsigned long long startId = getContentKey(startFileId,startMessageIndex);
-    unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
+    char sql[100000];
+    char *p = sql;
 
-    while (startId != prevStartId)
+    p += sprintf(p,"SELECT\n");
+    p += sprintf(p,"  fileId,\n");
+    p += sprintf(p,"  messageIndex,\n");
+    p += sprintf(p,"  fileType,\n");
+    p += sprintf(p,"  filePosition,\n");
+    p += sprintf(p,"  messageSize,\n");
+    p += sprintf(p,"  producerId,\n");
+    p += sprintf(p,"  generationId,\n");
+    p += sprintf(p,"  geometryId,\n");
+    p += sprintf(p,"  parameterId,\n");
+    p += sprintf(p,"  parameterName,\n");
+    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  levelId,\n");
+    p += sprintf(p,"  level,\n");
+    p += sprintf(p,"  forecastType,\n");
+    p += sprintf(p,"  foracastNumber,\n");
+    p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  sourceId,\n");
+    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
+    p += sprintf(p,"FROM\n");
+    p += sprintf(p,"  content\n");
+    p += sprintf(p,"WHERE\n");
+    p += sprintf(p,"  generationId IN (");
+
+    char *pp = p;
+    for (auto it = generationIdList.begin(); it != generationIdList.end(); ++it)
     {
-      prevStartId = startId;
+      if (p != pp)
+        p += sprintf(p,",");
 
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF));
-      if (reply == nullptr)
-      {
-        closeConnection();
-        return Result::PERMANENT_STORAGE_ERROR;
-      }
-
-      if (reply->elements == 0)
-      {
-        freeReplyObject(reply);
-        return Result::OK;
-      }
-
-      if (reply->type == REDIS_REPLY_ARRAY)
-      {
-        for (uint t = 0; t < reply->elements; t++)
-        {
-          T::ContentInfo *contentInfo = new T::ContentInfo();
-          contentInfo->setCsv(reply->element[t]->str);
-
-          if (contentInfo->mFileId > startFileId  ||  (contentInfo->mFileId == startFileId   &&  contentInfo->mMessageIndex >= startMessageIndex))
-          {
-            startFileId = contentInfo->mFileId;
-            startMessageIndex = contentInfo->mMessageIndex + 1;
-
-            if (generationIdList.find(contentInfo->mGenerationId) != generationIdList.end())
-              contentInfoList.addContentInfo(contentInfo);
-            else
-              delete contentInfo;
-
-            if (contentInfoList.getLength() == maxRecords)
-            {
-              freeReplyObject(reply);
-              return Result::OK;
-            }
-          }
-          else
-          {
-            delete contentInfo;
-          }
-        }
-        freeReplyObject(reply);
-      }
-      else
-      {
-        freeReplyObject(reply);
-        return Result::OK;
-      }
-      startId = getContentKey(startFileId,startMessageIndex);
+      p += sprintf(p,"%u",*it);
     }
-    */
+
+    p += sprintf(p,") AND ((fileId=%u AND messageIndex>=%u) OR fileId > %u)\n",startFileId,startMessageIndex,startFileId);
+
+    p += sprintf(p,"ORDER BY\n");
+    p += sprintf(p,"  fileId,messageIndex\n");
+    p += sprintf(p,"LIMIT\n");
+    p += sprintf(p,"  %u\n",maxRecords);
+
+    PGresult *res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_TUPLES_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQresultErrorMessage(res));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+
+    int rowCount = PQntuples(res);
+
+    for (int i = 0; i < rowCount; i++)
+    {
+      T::ContentInfo *contentInfo = new T::ContentInfo();
+
+      contentInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
+      contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
+      contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
+      contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
+      contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
+      contentInfo->mGenerationId = atoi(PQgetvalue(res, i, 6));
+      contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
+      contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
+      contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
+      contentInfo->setForecastTime(PQgetvalue(res, i, 10));
+      contentInfo->mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
+      contentInfo->mParameterLevel = atoi(PQgetvalue(res, i, 12));
+      contentInfo->mForecastType = atoi(PQgetvalue(res, i, 13));
+      contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
+      contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
+      contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
+
+      std::string modificationTime = PQgetvalue(res, i, 17);
+      contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
+
+      std::string deletionTime = PQgetvalue(res, i, 18);
+      contentInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
+
+      contentInfoList.addContentInfo(contentInfo);
+    }
+
+    PQclear(res);
+
     return Result::OK;
   }
   catch (...)
@@ -7975,8 +8789,12 @@ int PostgresqlImplementation::getVirtualContent(uint startFileId,uint startMessa
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -8100,8 +8918,12 @@ int PostgresqlImplementation::getContentByParameterId(T::ParamKeyType parameterK
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -8236,8 +9058,12 @@ int PostgresqlImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyTyp
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -8297,54 +9123,125 @@ int PostgresqlImplementation::getContentByParameterIdAndGeneration(uint generati
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-    /*
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF));
-    if (reply == nullptr)
+    T::FmiParamId paramId = 0;
+
+    switch (parameterKeyType)
     {
-      closeConnection();
-      return Result::PERMANENT_STORAGE_ERROR;
+      case T::ParamKeyTypeValue::FMI_ID:
+        paramId = atoi(parameterKey.c_str());
+        break;
+
+      case T::ParamKeyTypeValue::FMI_NAME:
+        paramId = Identification::gridDef.getFmiParameterIdByFmiName(parameterKey);
+        break;
+
+      case T::ParamKeyTypeValue::GRIB_ID:
+        paramId = Identification::gridDef.getFmiParameterIdByGribId(atoi(parameterKey.c_str()));
+        break;
+
+      case T::ParamKeyTypeValue::NEWBASE_ID:
+        paramId = Identification::gridDef.getFmiParameterIdByNewbaseId(atoi(parameterKey.c_str()));
+        break;
+
+      case T::ParamKeyTypeValue::NEWBASE_NAME:
+        paramId = Identification::gridDef.getFmiParameterIdByNewbaseName(parameterKey);
+        break;
+
+      default:
+        paramId = atoi(parameterKey.c_str());
+        break;
     }
 
-    if (reply->type == REDIS_REPLY_ARRAY)
+    char sql[10000];
+    char *p = sql;
+
+    p += sprintf(p,"SELECT\n");
+    p += sprintf(p,"  fileId,\n");
+    p += sprintf(p,"  messageIndex,\n");
+    p += sprintf(p,"  fileType,\n");
+    p += sprintf(p,"  filePosition,\n");
+    p += sprintf(p,"  messageSize,\n");
+    p += sprintf(p,"  producerId,\n");
+    p += sprintf(p,"  generationId,\n");
+    p += sprintf(p,"  geometryId,\n");
+    p += sprintf(p,"  parameterId,\n");
+    p += sprintf(p,"  parameterName,\n");
+    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  levelId,\n");
+    p += sprintf(p,"  level,\n");
+    p += sprintf(p,"  forecastType,\n");
+    p += sprintf(p,"  foracastNumber,\n");
+    p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  sourceId,\n");
+    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
+    p += sprintf(p,"FROM\n");
+    p += sprintf(p,"  content\n");
+    p += sprintf(p,"WHERE\n");
+    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS') >= '%s' AND to_char(forecastTime,'yyyymmddThh24MISS') <= '%s'\n",startTime.c_str(),endTime.c_str());
+    p += sprintf(p,"AND\n");
+    p += sprintf(p,"  generationId=%u AND parameterId=%d\n",generationId,paramId);
+    p += sprintf(p,"AND  parameterLevel >= %d AND parameterLevel <= %d\n",minLevel,maxLevel);
+
+    if (geometryId > 0)
+      p += sprintf(p,"AND geometryId = %d\n",geometryId);
+
+    if (forecastType > 0)
     {
-      for (uint t = 0; t < reply->elements; t++)
-      {
-        T::ContentInfo *info = new T::ContentInfo();
-        info->setCsv(reply->element[t]->str);
+      p += sprintf(p,"AND forecastType = %d\n",forecastType);
 
-        if (info->mGenerationId == generationId)
-        {
-          if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
-          {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
-            {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
-              {
-                if (info->hasKey(parameterKeyType,parameterKey) &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
-                {
-                  if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE) ||
-                      (parameterLevelIdType == T::ParamLevelIdTypeValue::ANY) ||
-                      (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
-                  {
-                    contentInfoList.addContentInfo(info);
-                    info = nullptr;
-                  }
-                }
-              }
-            }
-          }
-        }
-
-        if (info != nullptr)
-          delete info;
-      }
+      if (forecastNumber > 0)
+        p += sprintf(p,"AND forecastNumber = %d\n",forecastNumber);
     }
 
-    freeReplyObject(reply);
-    */
+    PGresult *res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_TUPLES_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQresultErrorMessage(res));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+
+    int rowCount = PQntuples(res);
+
+    for (int i = 0; i < rowCount; i++)
+    {
+      T::ContentInfo *contentInfo = new T::ContentInfo();
+
+      contentInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
+      contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
+      contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
+      contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
+      contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
+      contentInfo->mGenerationId = atoi(PQgetvalue(res, i, 6));
+      contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
+      contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
+      contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
+      contentInfo->setForecastTime(PQgetvalue(res, i, 10));
+      contentInfo->mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
+      contentInfo->mParameterLevel = atoi(PQgetvalue(res, i, 12));
+      contentInfo->mForecastType = atoi(PQgetvalue(res, i, 13));
+      contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
+      contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
+      contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
+
+      std::string modificationTime = PQgetvalue(res, i, 17);
+      contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
+
+      std::string deletionTime = PQgetvalue(res, i, 18);
+      contentInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
+
+      contentInfoList.addContentInfo(contentInfo);
+    }
+
+    PQclear(res);
+
     return Result::OK;
   }
   catch (...)
@@ -8365,54 +9262,125 @@ int PostgresqlImplementation::getContentByParameterIdAndProducer(uint producerId
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-    /*
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF));
-    if (reply == nullptr)
+    T::FmiParamId paramId = 0;
+
+    switch (parameterKeyType)
     {
-      closeConnection();
-      return Result::PERMANENT_STORAGE_ERROR;
+      case T::ParamKeyTypeValue::FMI_ID:
+        paramId = atoi(parameterKey.c_str());
+        break;
+
+      case T::ParamKeyTypeValue::FMI_NAME:
+        paramId = Identification::gridDef.getFmiParameterIdByFmiName(parameterKey);
+        break;
+
+      case T::ParamKeyTypeValue::GRIB_ID:
+        paramId = Identification::gridDef.getFmiParameterIdByGribId(atoi(parameterKey.c_str()));
+        break;
+
+      case T::ParamKeyTypeValue::NEWBASE_ID:
+        paramId = Identification::gridDef.getFmiParameterIdByNewbaseId(atoi(parameterKey.c_str()));
+        break;
+
+      case T::ParamKeyTypeValue::NEWBASE_NAME:
+        paramId = Identification::gridDef.getFmiParameterIdByNewbaseName(parameterKey);
+        break;
+
+      default:
+        paramId = atoi(parameterKey.c_str());
+        break;
     }
 
-    if (reply->type == REDIS_REPLY_ARRAY)
+    char sql[10000];
+    char *p = sql;
+
+    p += sprintf(p,"SELECT\n");
+    p += sprintf(p,"  fileId,\n");
+    p += sprintf(p,"  messageIndex,\n");
+    p += sprintf(p,"  fileType,\n");
+    p += sprintf(p,"  filePosition,\n");
+    p += sprintf(p,"  messageSize,\n");
+    p += sprintf(p,"  producerId,\n");
+    p += sprintf(p,"  generationId,\n");
+    p += sprintf(p,"  geometryId,\n");
+    p += sprintf(p,"  parameterId,\n");
+    p += sprintf(p,"  parameterName,\n");
+    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  levelId,\n");
+    p += sprintf(p,"  level,\n");
+    p += sprintf(p,"  forecastType,\n");
+    p += sprintf(p,"  foracastNumber,\n");
+    p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  sourceId,\n");
+    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
+    p += sprintf(p,"FROM\n");
+    p += sprintf(p,"  content\n");
+    p += sprintf(p,"WHERE\n");
+    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS') >= '%s' AND to_char(forecastTime,'yyyymmddThh24MISS') <= '%s'\n",startTime.c_str(),endTime.c_str());
+    p += sprintf(p,"AND\n");
+    p += sprintf(p,"  producerId=%u AND parameterId=%d\n",producerId,paramId);
+    p += sprintf(p,"AND  parameterLevel >= %d AND parameterLevel <= %d\n",minLevel,maxLevel);
+
+    if (geometryId > 0)
+      p += sprintf(p,"AND geometryId = %d\n",geometryId);
+
+    if (forecastType > 0)
     {
-      for (uint t = 0; t < reply->elements; t++)
-      {
-        T::ContentInfo *info = new T::ContentInfo();
-        info->setCsv(reply->element[t]->str);
+      p += sprintf(p,"AND forecastType = %d\n",forecastType);
 
-        if (info->mProducerId == producerId)
-        {
-          if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE) || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
-          {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
-            {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
-              {
-                if (info->hasKey(parameterKeyType,parameterKey) &&  info->mForecastTime >= startTime  &&  info->mForecastTime <= endTime)
-                {
-                  if ((parameterLevelIdType == T::ParamLevelIdTypeValue::IGNORE) ||
-                      (parameterLevelIdType == T::ParamLevelIdTypeValue::ANY) ||
-                      (parameterLevelIdType == T::ParamLevelIdTypeValue::FMI  &&  info->mFmiParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB1 &&  info->mGrib1ParameterLevelId == parameterLevelId) ||
-                      (parameterLevelIdType == T::ParamLevelIdTypeValue::GRIB2 &&  info->mGrib2ParameterLevelId == parameterLevelId))
-                  {
-                    contentInfoList.addContentInfo(info);
-                    info = nullptr;
-                  }
-                }
-              }
-            }
-          }
-        }
-
-        if (info != nullptr)
-          delete info;
-      }
+      if (forecastNumber > 0)
+        p += sprintf(p,"AND forecastNumber = %d\n",forecastNumber);
     }
 
-    freeReplyObject(reply);
-    */
+    PGresult *res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_TUPLES_OK)
+    {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQresultErrorMessage(res));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+
+    int rowCount = PQntuples(res);
+
+    for (int i = 0; i < rowCount; i++)
+    {
+      T::ContentInfo *contentInfo = new T::ContentInfo();
+
+      contentInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
+      contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
+      contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
+      contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
+      contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
+      contentInfo->mGenerationId = atoi(PQgetvalue(res, i, 6));
+      contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
+      contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
+      contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
+      contentInfo->setForecastTime(PQgetvalue(res, i, 10));
+      contentInfo->mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
+      contentInfo->mParameterLevel = atoi(PQgetvalue(res, i, 12));
+      contentInfo->mForecastType = atoi(PQgetvalue(res, i, 13));
+      contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
+      contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
+      contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
+
+      std::string modificationTime = PQgetvalue(res, i, 17);
+      contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
+
+      std::string deletionTime = PQgetvalue(res, i, 18);
+      contentInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
+
+      contentInfoList.addContentInfo(contentInfo);
+    }
+
+    PQclear(res);
+
     return Result::OK;
   }
   catch (...)
@@ -8434,30 +9402,83 @@ int PostgresqlImplementation::getContentByGenerationIdAndTimeRange(uint generati
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    /*
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF));
-    if (reply == nullptr)
+    char sql[10000];
+    char *p = sql;
+
+    p += sprintf(p,"SELECT\n");
+    p += sprintf(p,"  fileId,\n");
+    p += sprintf(p,"  messageIndex,\n");
+    p += sprintf(p,"  fileType,\n");
+    p += sprintf(p,"  filePosition,\n");
+    p += sprintf(p,"  messageSize,\n");
+    p += sprintf(p,"  producerId,\n");
+    p += sprintf(p,"  generationId,\n");
+    p += sprintf(p,"  geometryId,\n");
+    p += sprintf(p,"  parameterId,\n");
+    p += sprintf(p,"  parameterName,\n");
+    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  levelId,\n");
+    p += sprintf(p,"  level,\n");
+    p += sprintf(p,"  forecastType,\n");
+    p += sprintf(p,"  foracastNumber,\n");
+    p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  sourceId,\n");
+    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
+    p += sprintf(p,"FROM\n");
+    p += sprintf(p,"  content\n");
+    p += sprintf(p,"WHERE\n");
+    p += sprintf(p,"  generationId=%u AND forecastTime >= TO_TIMESTAMP('%s','yyyymmddThh24MISS') AND forecastTime <= TO_TIMESTAMP('%s','yyyymmddThh24MISS')\n",generationId,startTime.c_str(),endTime.c_str());
+    p += sprintf(p,"ORDER BY\n");
+    p += sprintf(p,"  fileId,messageIndex\n");
+
+    PGresult *res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
-      closeConnection();
-      return Result::PERMANENT_STORAGE_ERROR;
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQresultErrorMessage(res));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
     }
 
-    if (reply->type == REDIS_REPLY_ARRAY)
-    {
-      for (uint t = 0; t < reply->elements; t++)
-      {
-        T::ContentInfo *contentInfo = new T::ContentInfo();
-        contentInfo->setCsv(reply->element[t]->str);
+    int rowCount = PQntuples(res);
 
-        if (contentInfo->mGenerationId == generationId  &&  contentInfo->mForecastTime >= startTime  &&  contentInfo->mForecastTime <= endTime)
-          contentInfoList.addContentInfo(contentInfo);
-        else
-          delete contentInfo;
-      }
+    for (int i = 0; i < rowCount; i++)
+    {
+      T::ContentInfo *contentInfo = new T::ContentInfo();
+
+      contentInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
+      contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
+      contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
+      contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
+      contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
+      contentInfo->mGenerationId = atoi(PQgetvalue(res, i, 6));
+      contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
+      contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
+      contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
+      contentInfo->setForecastTime(PQgetvalue(res, i, 10));
+      contentInfo->mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
+      contentInfo->mParameterLevel = atoi(PQgetvalue(res, i, 12));
+      contentInfo->mForecastType = atoi(PQgetvalue(res, i, 13));
+      contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
+      contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
+      contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
+
+      std::string modificationTime = PQgetvalue(res, i, 17);
+      contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
+
+      std::string deletionTime = PQgetvalue(res, i, 18);
+      contentInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
+
+      contentInfoList.addContentInfo(contentInfo);
     }
 
-    freeReplyObject(reply);
-    */
+    PQclear(res);
+
     return Result::OK;
   }
   catch (...)
@@ -8480,6 +9501,7 @@ int PostgresqlImplementation::getContentByForecastTimeList(std::vector<T::Foreca
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
+
     std::set<std::string> searchList;
 
     char tmp[200];
@@ -8491,34 +9513,98 @@ int PostgresqlImplementation::getContentByForecastTimeList(std::vector<T::Foreca
         searchList.insert(st);
     }
 
-/*
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF));
-    if (reply == nullptr)
+    char sql[100000];
+    char *p = sql;
+
+    p += sprintf(p,"SELECT\n");
+    p += sprintf(p,"  fileId,\n");
+    p += sprintf(p,"  messageIndex,\n");
+    p += sprintf(p,"  fileType,\n");
+    p += sprintf(p,"  filePosition,\n");
+    p += sprintf(p,"  messageSize,\n");
+    p += sprintf(p,"  producerId,\n");
+    p += sprintf(p,"  generationId,\n");
+    p += sprintf(p,"  geometryId,\n");
+    p += sprintf(p,"  parameterId,\n");
+    p += sprintf(p,"  parameterName,\n");
+    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  levelId,\n");
+    p += sprintf(p,"  level,\n");
+    p += sprintf(p,"  forecastType,\n");
+    p += sprintf(p,"  foracastNumber,\n");
+    p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  sourceId,\n");
+    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
+    p += sprintf(p,"FROM\n");
+    p += sprintf(p,"  content\n");
+    p += sprintf(p,"WHERE\n");
+    p += sprintf(p,"  generationId IN (");
+
+    char *pp = p;
+    for (auto it = forecastTimeList.begin(); it != forecastTimeList.end(); ++it)
     {
-      closeConnection();
-      return Result::PERMANENT_STORAGE_ERROR;
+      if (p != pp)
+        p += sprintf(p,",");
+
+      p += sprintf(p,"%u",it->mGenerationId);
     }
 
-    if (reply->type == REDIS_REPLY_ARRAY)
+    p += sprintf(p,")\n");
+    p += sprintf(p,"ORDER BY\n");
+    p += sprintf(p,"  fileId,messageIndex\n");
+
+    PGresult *res = PQexec(mConnection, sql);
+    if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
-      for (uint t = 0; t < reply->elements; t++)
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
+      Fmi::Exception exception(BCP,PQresultErrorMessage(res));
+      exception.addParameter("sql",sql);
+      PQclear(res);
+      throw exception;
+    }
+
+    int rowCount = PQntuples(res);
+
+    for (int i = 0; i < rowCount; i++)
+    {
+      sprintf(tmp,"%s;%s;%s;%s;%s",PQgetvalue(res, i, 6),PQgetvalue(res, i, 7),PQgetvalue(res, i, 13),PQgetvalue(res, i, 14),PQgetvalue(res, i, 10));
+      if (searchList.find(tmp) != searchList.end())
       {
         T::ContentInfo *contentInfo = new T::ContentInfo();
-        contentInfo->setCsv(reply->element[t]->str);
 
-        sprintf(tmp,"%d;%d;%d;%d;%s",contentInfo->mGenerationId,contentInfo->mGeometryId,contentInfo->mForecastType,contentInfo->mForecastNumber,contentInfo->mForecastTime.c_str());
-        if (searchList.find(tmp) != searchList.end())
-        {
-          contentInfoList.addContentInfo(contentInfo);
-          // printf("-- delete %s %u\n",tmp,contentInfoList.getLength());
-        }
-        else
-          delete contentInfo;
+        contentInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+        contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
+        contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
+        contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
+        contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
+        contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
+        contentInfo->mGenerationId = atoi(PQgetvalue(res, i, 6));
+        contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
+        contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
+        contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
+        contentInfo->setForecastTime(PQgetvalue(res, i, 10));
+        contentInfo->mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
+        contentInfo->mParameterLevel = atoi(PQgetvalue(res, i, 12));
+        contentInfo->mForecastType = atoi(PQgetvalue(res, i, 13));
+        contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
+        contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
+        contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
+
+        std::string modificationTime = PQgetvalue(res, i, 17);
+        contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
+
+        std::string deletionTime = PQgetvalue(res, i, 18);
+        contentInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
+
+        contentInfoList.addContentInfo(contentInfo);
       }
     }
 
-    freeReplyObject(reply);
-    */
+    PQclear(res);
+
     return Result::OK;
   }
   catch (...)
@@ -8576,8 +9662,12 @@ int PostgresqlImplementation::getContentByProducerId(uint producerId,uint startF
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -8673,8 +9763,12 @@ int PostgresqlImplementation::getContentBySourceId(uint sourceId,uint startFileI
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -8768,8 +9862,12 @@ int PostgresqlImplementation::getContentByFileId(uint fileId,T::ContentInfoList&
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQresultErrorMessage(res));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
 
@@ -8820,7 +9918,7 @@ int PostgresqlImplementation::getContentByFileId(uint fileId,T::ContentInfoList&
 
 
 
-T::EventId PostgresqlImplementation::addEvent(uint eventType,uint id1,uint id2,uint id3,unsigned long long flags)
+T::EventId PostgresqlImplementation::addEvent(uint eventType,uint id1,uint id2,uint id3,unsigned long long flags,const char *eventData)
 {
   FUNCTION_TRACE
   try
@@ -8842,7 +9940,8 @@ T::EventId PostgresqlImplementation::addEvent(uint eventType,uint id1,uint id2,u
     p += sprintf(p,"  id1,\n");
     p += sprintf(p,"  id2,\n");
     p += sprintf(p,"  id3,\n");
-    p += sprintf(p,"  flags\n");
+    p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  eventData\n");
     p += sprintf(p,")\n");
     p += sprintf(p,"VALUES \n");
     p += sprintf(p,"(\n");
@@ -8852,14 +9951,22 @@ T::EventId PostgresqlImplementation::addEvent(uint eventType,uint id1,uint id2,u
     p += sprintf(p,"  %u,\n",id1);
     p += sprintf(p,"  %u,\n",id2);
     p += sprintf(p,"  %u,\n",id3);
-    p += sprintf(p,"  %llu\n",flags);
+    p += sprintf(p,"  %llu,\n",flags);
+    if (eventData[0] == '\0')
+      p += sprintf(p,"  ''\n");
+    else
+      p += sprintf(p,"  '%s\n'\n",eventData);
     p += sprintf(p,");\n");
 
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
@@ -8883,7 +9990,7 @@ T::EventId PostgresqlImplementation::addEvent(uint eventType,uint id1,uint id2,u
 
 
 
-int PostgresqlImplementation::addEventIntoList(T::EventInfoList& eventInfoList)
+int PostgresqlImplementation::addEventInfoList(T::EventInfoList& eventInfoList)
 {
   FUNCTION_TRACE
   try
@@ -8909,7 +10016,8 @@ int PostgresqlImplementation::addEventIntoList(T::EventInfoList& eventInfoList)
     p += sprintf(p,"  id1,\n");
     p += sprintf(p,"  id2,\n");
     p += sprintf(p,"  id3,\n");
-    p += sprintf(p,"  flags\n");
+    p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  eventData\n");
     p += sprintf(p,")\n");
     p += sprintf(p,"VALUES \n");
 
@@ -8927,7 +10035,11 @@ int PostgresqlImplementation::addEventIntoList(T::EventInfoList& eventInfoList)
       p += sprintf(p,"  %u,\n",event->mId1);
       p += sprintf(p,"  %u,\n",event->mId2);
       p += sprintf(p,"  %u,\n",event->mId3);
-      p += sprintf(p,"  %llu\n",event->mFlags);
+      p += sprintf(p,"  %llu,\n",event->mFlags);
+      if (event->mEventData.empty())
+        p += sprintf(p,"  ''\n");
+      else
+        p += sprintf(p,"  '%s\n'\n",event->mEventData.c_str());
       p += sprintf(p,")\n");
 
       if (p-sql > 990000 || (c+1) == len)
@@ -8935,9 +10047,12 @@ int PostgresqlImplementation::addEventIntoList(T::EventInfoList& eventInfoList)
         PGresult *res = PQexec(mConnection, sql);
         if (PQresultStatus(res) != PGRES_COMMAND_OK)
         {
+          if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+            closeConnection();
+
           Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
           //exception.addParameter("sql",sql);
-          exception.printError();
+          //exception.printError();
           PQclear(res);
           return Result::CONTENT_ADDITION_FAILED;
         }
@@ -8978,15 +10093,19 @@ void PostgresqlImplementation::truncateEvents()
     if (!isConnectionValid())
       return;
 
-    std::string deletionTime = utcTimeFromTimeT(time(nullptr)-600);
+    std::string deletionTime = utcTimeFromTimeT(time(nullptr)-1200);
 
     char sql[10000];
     sprintf(sql,"DELETE FROM event WHERE eventTime < TO_TIMESTAMP('%s','yyyymmddThh24MISS')\n",deletionTime.c_str());
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
+      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
+        closeConnection();
+
       Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
       exception.addParameter("sql",sql);
+      PQclear(res);
       throw exception;
     }
     PQclear(res);
@@ -8999,140 +10118,6 @@ void PostgresqlImplementation::truncateEvents()
 
 
 
-
-
-int PostgresqlImplementation::addFilename(std::string filename,uint fileId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    /*
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"HSET %sfilenames %s %u",mTablePrefix.c_str(),filename.c_str(),fileId));
-    if (reply == nullptr)
-    {
-      closeConnection();
-      return Result::PERMANENT_STORAGE_ERROR;
-    }
-
-    freeReplyObject(reply);
-*/
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-uint PostgresqlImplementation::getFileId(std::string filename)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isConnectionValid())
-      return 0;
-
-    /*
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"HGET %sfilenames %s",mTablePrefix.c_str(),filename.c_str()));
-    if (reply == nullptr)
-    {
-      closeConnection();
-      return 0;
-    }
-
-    uint id = 0;
-    if (reply->str != nullptr)
-      id = toInt64(reply->str);
-
-    freeReplyObject(reply);
-    */
-    return 0; //id;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int PostgresqlImplementation::deleteFilename(std::string filename)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    /*
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"HDEL %sfilenames %s",mTablePrefix.c_str(),filename.c_str()));
-    if (reply == nullptr)
-    {
-      closeConnection();
-      return Result::PERMANENT_STORAGE_ERROR;
-    }
-
-    freeReplyObject(reply);
-    */
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-
-void PostgresqlImplementation::getFilenames(std::map<std::string,uint>& fileList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isConnectionValid())
-      return;
-
-/*
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"HGETALL %sfilenames",mTablePrefix.c_str()));
-    if (reply == nullptr)
-    {
-       closeConnection();
-      return;
-    }
-
-    if (reply->type == REDIS_REPLY_ARRAY)
-    {
-      for (uint t = 0; t < reply->elements; t=t+2)
-      {
-        if (reply->element[t] &&  reply->element[t]->str  &&  reply->element[t+1] &&  reply->element[t+1]->str)
-        {
-          std::string name = reply->element[t]->str;
-          uint id = toInt64(reply->element[t+1]->str);
-          fileList.insert(std::pair<std::string,uint>(name,id));
-        }
-      }
-    }
-    freeReplyObject(reply);
-*/
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
 
 
 }

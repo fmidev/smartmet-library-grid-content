@@ -2024,6 +2024,387 @@ int ClientImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessio
 
 
 
+
+int ClientImplementation::_getGridStreamlines(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaByteDataSequence_var corbaStreamLines;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridStreamlines(sessionId,fileId,messageIndex,corbaAttributeList,modificationOperation,corbaModParams,corbaStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaStreamLines,streamlines);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridStreamlinesByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaByteDataSequence_var corbaStreamLines;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridStreamlinesByGeometry(sessionId,fileId,messageIndex,corbaAttributeList,modificationOperation,corbaModParams,corbaStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaStreamLines,streamlines);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridStreamlinesByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaByteDataSequence_var corbaStreamLines;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
+
+    DataServer::Corba::Converter::convert(gridLatLonCoordinates,corbaCoordinates);
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridStreamlinesByGrid(sessionId,fileId,messageIndex,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,modificationOperation,corbaModParams,corbaStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaStreamLines,streamlines);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridStreamlinesByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaByteDataSequence_var corbaStreamLines;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridStreamlinesByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,corbaAttributeList,modificationOperation,corbaModParams,corbaStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaStreamLines,streamlines);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridStreamlinesByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaByteDataSequence_var corbaStreamLines;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridStreamlinesByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,corbaAttributeList,modificationOperation,corbaModParams,corbaStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaStreamLines,streamlines);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridStreamlinesByLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaByteDataSequence_var corbaStreamLines;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
+
+    DataServer::Corba::Converter::convert(gridLatLonCoordinates,corbaCoordinates);
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridStreamlinesByLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,modificationOperation,corbaModParams,corbaStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaStreamLines,streamlines);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridStreamlinesByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaByteDataSequence_var corbaStreamLines;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridStreamlinesByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,corbaAttributeList,modificationOperation,corbaModParams,corbaStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaStreamLines,streamlines);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaByteDataSequence_var corbaStreamLines;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridStreamlinesByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,corbaAttributeList,modificationOperation,corbaModParams,corbaStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaStreamLines,streamlines);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaByteDataSequence_var corbaStreamLines;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
+
+    DataServer::Corba::Converter::convert(gridLatLonCoordinates,corbaCoordinates);
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridStreamlinesByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,modificationOperation,corbaModParams,corbaStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaStreamLines,streamlines);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaByteDataSequence_var corbaStreamLines;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridStreamlinesByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,corbaAttributeList,modificationOperation,corbaModParams,corbaStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaStreamLines,streamlines);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaByteDataSequence_var corbaStreamLines;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridStreamlinesByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,corbaAttributeList,modificationOperation,corbaModParams,corbaStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaStreamLines,streamlines);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,int newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaByteDataSequence_var corbaStreamLines;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    DataServer::Corba::CorbaDoubleList_var corbaModParams = new DataServer::Corba::CorbaDoubleList();
+    DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
+
+    DataServer::Corba::Converter::convert(gridLatLonCoordinates,corbaCoordinates);
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+    DataServer::Corba::Converter::convert(modificationParameters, corbaModParams);
+
+    int result = mService->getGridStreamlinesByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,gridWidth,gridHeight,corbaCoordinates,corbaAttributeList,modificationOperation,corbaModParams,corbaStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(corbaStreamLines,streamlines);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
 int ClientImplementation::_getMultipleGridValues(T::SessionId sessionId,uint modificationOperation,double_vec& modificationParameters,T::ValueRecordList& valueRecordList)
 {
   try

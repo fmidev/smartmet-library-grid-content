@@ -2536,7 +2536,6 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::AttributeList sAttributeList;
     std::vector<T::Coordinate> sCoordinateList;
 
-
     DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
     contours = corbaContours;
 
@@ -2556,6 +2555,498 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     {
       DataServer::Corba::Converter::convert(sAttributeList,attributeList);
       DataServer::Corba::Converter::convert(sContours,*corbaContours);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+::CORBA::Long ServerInterface::getGridStreamlines(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sStreamLines;
+
+    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    streamlines = corbaStreamLines;
+
+    T::AttributeList sAttributeList;
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridStreamlines(sessionId,fileId,messageIndex,sAttributeList,modificationOperation,modParams,sStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sStreamLines,*corbaStreamLines);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+::CORBA::Long ServerInterface::getGridStreamlinesByGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sStreamLines;
+
+    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    streamlines = corbaStreamLines;
+
+    T::AttributeList sAttributeList;
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridStreamlinesByGeometry(sessionId,fileId,messageIndex,sAttributeList,modificationOperation,modParams,sStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sStreamLines,*corbaStreamLines);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+::CORBA::Long ServerInterface::getGridStreamlinesByGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sStreamLines;
+
+    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    streamlines = corbaStreamLines;
+
+    T::AttributeList sAttributeList;
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    std::vector<T::Coordinate> sCoordinateList;
+    DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridStreamlinesByGrid(sessionId,fileId,messageIndex,gridWidth,gridHeight,sCoordinateList,sAttributeList,modificationOperation,modParams,sStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sStreamLines,*corbaStreamLines);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+::CORBA::Long ServerInterface::getGridStreamlinesByLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sStreamLines;
+
+    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    streamlines = corbaStreamLines;
+
+    T::AttributeList sAttributeList;
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridStreamlinesByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,sAttributeList,modificationOperation,modParams,sStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sStreamLines,*corbaStreamLines);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+::CORBA::Long ServerInterface::getGridStreamlinesByLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sStreamLines;
+
+    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    streamlines = corbaStreamLines;
+
+    T::AttributeList sAttributeList;
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridStreamlinesByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,sAttributeList,modificationOperation,modParams,sStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sStreamLines,*corbaStreamLines);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+::CORBA::Long ServerInterface::getGridStreamlinesByLevelAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long newLevel, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sStreamLines;
+
+    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    streamlines = corbaStreamLines;
+
+    T::AttributeList sAttributeList;
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    std::vector<T::Coordinate> sCoordinateList;
+    DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridStreamlinesByLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,gridWidth,gridHeight,sCoordinateList,sAttributeList,modificationOperation,modParams,sStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sStreamLines,*corbaStreamLines);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+::CORBA::Long ServerInterface::getGridStreamlinesByTime(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sStreamLines;
+
+    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    streamlines = corbaStreamLines;
+
+    T::AttributeList sAttributeList;
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridStreamlinesByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,sAttributeList,modificationOperation,modParams,sStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sStreamLines,*corbaStreamLines);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+::CORBA::Long ServerInterface::getGridStreamlinesByTimeAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sStreamLines;
+
+    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    streamlines = corbaStreamLines;
+
+    T::AttributeList sAttributeList;
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridStreamlinesByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,sAttributeList,modificationOperation,modParams,sStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sStreamLines,*corbaStreamLines);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+::CORBA::Long ServerInterface::getGridStreamlinesByTimeAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sStreamLines;
+
+    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    streamlines = corbaStreamLines;
+
+    T::AttributeList sAttributeList;
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    std::vector<T::Coordinate> sCoordinateList;
+    DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridStreamlinesByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,gridWidth,gridHeight,sCoordinateList,sAttributeList,modificationOperation,modParams,sStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sStreamLines,*corbaStreamLines);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+::CORBA::Long ServerInterface::getGridStreamlinesByTimeAndLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sStreamLines;
+
+    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    streamlines = corbaStreamLines;
+
+    T::AttributeList sAttributeList;
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridStreamlinesByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,sAttributeList,modificationOperation,modParams,sStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sStreamLines,*corbaStreamLines);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+::CORBA::Long ServerInterface::getGridStreamlinesByTimeLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sStreamLines;
+
+    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    streamlines = corbaStreamLines;
+
+    T::AttributeList sAttributeList;
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridStreamlinesByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,sAttributeList,modificationOperation,modParams,sStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sStreamLines,*corbaStreamLines);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+::CORBA::Long ServerInterface::getGridStreamlinesByTimeLevelAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Long newLevel, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ByteData_vec sStreamLines;
+
+    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    streamlines = corbaStreamLines;
+
+    T::AttributeList sAttributeList;
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    std::vector<T::Coordinate> sCoordinateList;
+    DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    double_vec modParams;
+    DataServer::Corba::Converter::convert(modificationParameters,modParams);
+
+    int result = mService->getGridStreamlinesByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,gridWidth,gridHeight,sCoordinateList,sAttributeList,modificationOperation,modParams,sStreamLines);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+      DataServer::Corba::Converter::convert(sStreamLines,*corbaStreamLines);
     }
 
     return result;

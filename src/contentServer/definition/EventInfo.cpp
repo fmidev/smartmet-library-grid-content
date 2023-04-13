@@ -48,7 +48,7 @@ EventInfo::EventInfo(const EventInfo& dataEventInfo)
     mId2 = dataEventInfo.mId2;
     mId3 = dataEventInfo.mId3;
     mFlags = dataEventInfo.mFlags;
-    mNote = dataEventInfo.mNote;
+    mEventData = dataEventInfo.mEventData;
 
     nextItem = nullptr;
     prevItem = nullptr;
@@ -63,7 +63,7 @@ EventInfo::EventInfo(const EventInfo& dataEventInfo)
 
 
 
-EventInfo::EventInfo(time_t serverTime,EventId eventId,uint eventType,uint id1,uint id2,uint id3,unsigned long long flags)
+EventInfo::EventInfo(time_t serverTime,EventId eventId,uint eventType,uint id1,uint id2,uint id3,unsigned long long flags,const char *eventData)
 {
   try
   {
@@ -75,6 +75,7 @@ EventInfo::EventInfo(time_t serverTime,EventId eventId,uint eventType,uint id1,u
     mId2 = id2;
     mId3 = id3;
     mFlags = flags;
+    mEventData = eventData;
 
     nextItem = nullptr;
     prevItem = nullptr;
@@ -145,7 +146,7 @@ EventInfo& EventInfo::operator=(const EventInfo& dataEventInfo)
     mId2 = dataEventInfo.mId2;
     mId3 = dataEventInfo.mId3;
     mFlags = dataEventInfo.mFlags;
-    mNote = dataEventInfo.mNote;
+    mEventData = dataEventInfo.mEventData;
 
     return *this;
   }
@@ -173,7 +174,7 @@ std::string EventInfo::getCsv()
         mId2,
         mId3,
         mFlags,
-        mNote.c_str());
+        mEventData.c_str());
 
     return std::string(st);
   }
@@ -240,7 +241,7 @@ void EventInfo::setCsv(const char *csv)
       mId2 = toUInt32(field[5]);
       mId3 = toUInt32(field[6]);
       mFlags = toUInt64(field[7]);
-      mNote = field[8];
+      mEventData = field[8];
     }
   }
   catch (...)
@@ -298,7 +299,7 @@ void EventInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mId2          = " << mId2 << "\n";
     stream << space(level) << "- mId3          = " << mId3 << "\n";
     stream << space(level) << "- mFlags        = " << mFlags << "\n";
-    stream << space(level) << "- mNote         = " << mNote << "\n";
+    stream << space(level) << "- mEventData    = " << mEventData << "\n";
   }
   catch (...)
   {

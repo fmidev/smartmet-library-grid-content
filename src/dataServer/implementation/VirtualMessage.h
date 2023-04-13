@@ -37,6 +37,9 @@ class VirtualMessage : public Message
     virtual time_t                  getForecastTimeT() const;
     virtual short                   getForecastType() const;
     virtual short                   getForecastNumber() const;
+    virtual std::size_t             getGridColumnCount() const;
+    virtual std::size_t             getGridRowCount() const;
+    virtual void                    getGridProjectionAttributes(const std::string& prefix,T::AttributeList& attributeList) const;
 
     virtual T::GeometryId           getGridGeometryId() const;
     virtual T::Coordinate_svec      getGridCoordinates() const;

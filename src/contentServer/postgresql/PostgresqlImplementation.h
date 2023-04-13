@@ -20,7 +20,7 @@ class PostgresqlImplementation : public ServiceInterface
                     PostgresqlImplementation();
      virtual        ~PostgresqlImplementation();
 
-     virtual void   init(const char *connectionString);
+     virtual void   init(const char *primaryConnectionString,const char *secondaryConnectionString,bool tableCreationAllowed);
      virtual void   shutdown();
 
    protected:
@@ -40,6 +40,7 @@ class PostgresqlImplementation : public ServiceInterface
      virtual int    _getProducerInfoCount(T::SessionId sessionId,uint& count);
      virtual int    _getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list);
      virtual int    _getProducerParameterList(T::SessionId sessionId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list);
+     virtual int    _setProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo);
 
      virtual int    _addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo);
      virtual int    _deleteGenerationInfoById(T::SessionId sessionId,uint generationId);
@@ -103,6 +104,7 @@ class PostgresqlImplementation : public ServiceInterface
      virtual int    _getFileInfoCountByProducerId(T::SessionId sessionId,uint producerId,uint& count);
      virtual int    _getFileInfoCountByGenerationId(T::SessionId sessionId,uint generationId,uint& count);
      virtual int    _getFileInfoCountBySourceId(T::SessionId sessionId,uint sourceId,uint& count);
+     virtual int    _setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo);
 
      virtual int    _addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo);
      virtual int    _getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo);
@@ -110,6 +112,7 @@ class PostgresqlImplementation : public ServiceInterface
      virtual int    _getEventInfoCount(T::SessionId sessionId,uint& count);
 
      virtual int    _addContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo);
+     virtual int    _setContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo);
      virtual int    _addContentList(T::SessionId sessionId,T::ContentInfoList& contentInfoList);
      virtual int    _deleteContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex);
      virtual int    _deleteContentListByFileId(T::SessionId sessionId,uint fileId);
@@ -158,13 +161,14 @@ class PostgresqlImplementation : public ServiceInterface
 
    protected:
 
+     void           createTables();
      bool           isConnectionValid();
      int            openConnection();
      void           closeConnection();
      bool           isSessionValid(T::SessionId sessionId);
 
-     T::EventId     addEvent(uint eventType,uint id1,uint id2,uint id3,unsigned long long flags);
-     int            addEventIntoList(T::EventInfoList& eventInfoList);
+     T::EventId     addEvent(uint eventType,uint id1,uint id2,uint id3,unsigned long long flags,const char *eventData);
+     int            addEventInfoList(T::EventInfoList& eventInfoList);
 
      uint           getCount(const char *sql);
 
@@ -232,18 +236,15 @@ class PostgresqlImplementation : public ServiceInterface
 
      void           truncateEvents();
 
-     int            addFilename(std::string filename,uint fileId);
-     int            deleteFilename(std::string filename);
-     uint           getFileId(std::string filename);
-     void           getFilenames(std::map<std::string,uint>& fileList);
-
-     bool              mShutdownRequested;
-     time_t            mStartTime;
-     time_t            mEventTruncateCheckTime;
-     ModificationLock  mModificationLock;
-     PGconn*           mConnection;
-     std::string       mConnectionString;
-     T::EventInfo      mLastEvent;
+     bool           mShutdownRequested;
+     bool           mTableCreationAllowed;
+     time_t         mStartTime;
+     time_t         mEventTruncateCheckTime;
+     ThreadLock     mThreadLock;
+     PGconn*        mConnection;
+     std::string    mPrimaryConnectionString;
+     std::string    mSecondaryConnectionString;
+     T::EventInfo   mLastEvent;
 
 };
 

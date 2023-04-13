@@ -4888,33 +4888,36 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
           if (fileInfo->mFileId >= startFileId)
             startFileId = fileInfo->mFileId + 1;
 
-          T::ContentInfoList contentInfoList;
-          if (mContentServer->getImplementationType() != ContentServer::Implementation::Cache || fullContentList.getLength() > 0)
-            fullContentList.getContentInfoListByFileId(fileInfo->mFileId,contentInfoList);
-          else
-            mContentServer->getContentListByFileId(mServerSessionId,fileInfo->mFileId,contentInfoList);
-
-          T::ProducerInfo *producerInfo = producerInfoList.getProducerInfoById(fileInfo->mProducerId);
-          if (producerInfo != nullptr)
+          if (fileInfo->mFileType != T::FileTypeValue::Virtual)
           {
-            T::GenerationInfo *generationInfo = generationInfoList.getGenerationInfoById(fileInfo->mGenerationId);
-            if (generationInfo != nullptr)
+            T::ContentInfoList contentInfoList;
+            if (mContentServer->getImplementationType() != ContentServer::Implementation::Cache || fullContentList.getLength() > 0)
+              fullContentList.getContentInfoListByFileId(fileInfo->mFileId,contentInfoList);
+            else
+              mContentServer->getContentListByFileId(mServerSessionId,fileInfo->mFileId,contentInfoList);
+
+            T::ProducerInfo *producerInfo = producerInfoList.getProducerInfoById(fileInfo->mProducerId);
+            if (producerInfo != nullptr)
             {
-              mVirtualContentManager.addFile(*producerInfo,*generationInfo,*fileInfo,contentInfoList,gridFileMap);
+              T::GenerationInfo *generationInfo = generationInfoList.getGenerationInfoById(fileInfo->mGenerationId);
+              if (generationInfo != nullptr)
+              {
+                mVirtualContentManager.addFile(*producerInfo,*generationInfo,*fileInfo,contentInfoList,gridFileMap);
+              }
+              else
+              {
+                PRINT_DATA(mDebugLog,"%s:%d: Cannot find the generation (%u)!\n",__FILE__,__LINE__,fileInfo->mGenerationId);
+              }
             }
             else
             {
-              PRINT_DATA(mDebugLog,"%s:%d: Cannot find the generation (%u)!\n",__FILE__,__LINE__,fileInfo->mGenerationId);
+              PRINT_DATA(mDebugLog,"%s:%d: Cannot find the producer (%u)!\n",__FILE__,__LINE__,fileInfo->mProducerId);
             }
-          }
-          else
-          {
-            PRINT_DATA(mDebugLog,"%s:%d: Cannot find the producer (%u)!\n",__FILE__,__LINE__,fileInfo->mProducerId);
-          }
 
-          counter++;
-          if ((counter % 10000) == 0)
-            PRINT_DATA(mDebugLog,"* Creating virtual files : %lu\n",gridFileMap.size());
+            counter++;
+            if ((counter % 10000) == 0)
+              PRINT_DATA(mDebugLog,"* Creating virtual files : %lu\n",gridFileMap.size());
+          }
         }
         catch (...)
         {
@@ -5397,17 +5400,23 @@ void ServiceImplementation::event_generationListDeletedBySourceId(T::EventInfo& 
 
 void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo *nextEventInfo)
 {
-  FUNCTION_TRACE
+  //FUNCTION_TRACE
   try
   {
-    uint len = eventInfo.mNote.length();
+    //printf("event_fileAdded %u %u\n",eventInfo.mId1,eventInfo.mId2);
+    //eventInfo.print(std::cout,0,0);
+
+    if (eventInfo.mId2 == T::FileTypeValue::Virtual)  // This is a virtual file that we have added.
+      return;
+
+    uint len = eventInfo.mEventData.length();
     T::FileInfo fileInfo;
     T::ContentInfoList contentList;
 
     if (len > 0)
     {
       char *buf = new char[len+10];
-      strcpy(buf,eventInfo.mNote.c_str());
+      strcpy(buf,eventInfo.mEventData.c_str());
       char *s = buf;
 
       while (s != nullptr)
@@ -5674,13 +5683,22 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
+    //printf("event_contentAdded %u %u\n",eventInfo.mId1,eventInfo.mId2);
+
+    if (eventInfo.mFlags & T::ContentInfo::Flags::VirtualContent)
+      return; // This is virtual content that we had added
+
+    //eventInfo.print(std::cout,0,0);
     T::ContentInfo contentInfo;
-    if (eventInfo.mNote > " ")
-      contentInfo.setCsv(eventInfo.mNote);
+    if (eventInfo.mEventData > " ")
+      contentInfo.setCsv(eventInfo.mEventData);
     else
     {
       if (mContentServer->getContentInfo(mServerSessionId,eventInfo.mId1,eventInfo.mId2,contentInfo) != Result::OK)
+      {
+        //printf("--- no found\n");
         return;
+      }
     }
 
     GRID::GridFile_sptr storageFile = mGridFileManager.getFileByIdNoMapping(eventInfo.mId1);
@@ -5708,6 +5726,7 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
         mInfo.mGeometryId = contentInfo.mGeometryId;
 
         gridFile->newMessage(contentInfo.mMessageIndex,mInfo);
+        //printf("--- new message %u\n",contentInfo.mMessageIndex);
 
         if (mVirtualContentEnabled)
         {
@@ -5729,6 +5748,10 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
         Fmi::Exception exception(BCP,"Operation failed!",nullptr);
         exception.printError();
       }
+    }
+    else
+    {
+      //printf("--- storage file not found\n");
     }
   }
   catch (...)
@@ -5824,7 +5847,7 @@ void ServiceImplementation::event_updateVirtualContent(T::EventInfo& eventInfo)
 
 void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *nextEventInfo)
 {
-  FUNCTION_TRACE
+  //FUNCTION_TRACE
   try
   {
     if (mGridFileMap.size() > 10000  ||  (mGridFileMap.size() > 0  &&  (mLastVirtualFileRegistration + 60) < time(nullptr)))
