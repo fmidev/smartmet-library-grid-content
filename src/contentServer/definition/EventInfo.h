@@ -72,7 +72,7 @@ class EventInfo
   public:
                    EventInfo();
                    EventInfo(const EventInfo& dataEventInfo);
-                   EventInfo(time_t serverTime,EventId eventId,uint eventType,uint id1,uint id2,uint id3,unsigned long long flags);
+                   EventInfo(time_t serverTime,EventId eventId,uint eventType,uint id1,uint id2,uint id3,unsigned long long flags,const char *eventData);
                    EventInfo(const char *csv);
     virtual        ~EventInfo();
 
@@ -93,7 +93,7 @@ class EventInfo
     uint           mId2;
     uint           mId3;
     ulonglong      mFlags;
-    std::string    mNote;
+    std::string    mEventData;
 
     EventInfo*     nextItem;
     EventInfo*     prevItem;

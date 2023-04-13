@@ -2553,7 +2553,7 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
           tmpContentList.addContentInfo(info);
 
           if (info->mFileId != mMaxFileId  &&  (requestFlags & 0x00000001) == 0)
-            tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,0));
+            tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,0,""));
         }
       }
 
@@ -2563,12 +2563,12 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
       {
         //printf("-- file update event\n");
         if (requestFlags & 0x00000001)
-          tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::FILE_UPDATED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,0,0));
+          tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::FILE_UPDATED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,0,0,""));
       }
       else
       {
         //printf("-- file add event\n");
-        tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::FILE_ADDED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,len,0));
+        tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::FILE_ADDED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,len,0,""));
       }
     }
 
@@ -3421,7 +3421,7 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
               output << contentInfo->getCsv() << "\n";
             }
           }
-          eventInfo->mNote = output.str();
+          eventInfo->mEventData = output.str();
         }
       }
       else
@@ -3431,7 +3431,7 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
 
         if (contentInfo != nullptr)
         {
-          eventInfo->mNote = contentInfo->getCsv();
+          eventInfo->mEventData = contentInfo->getCsv();
         }
         else
         {
@@ -5332,7 +5332,7 @@ T::EventId MemoryImplementation::addEvent(uint eventType,uint id1,uint id2,uint 
     mMaxEventId++;
     T::EventId eventId = mMaxEventId;
 
-    T::EventInfo *eventInfo = new T::EventInfo(mStartTime,eventId,eventType,id1,id2,id3,flags);
+    T::EventInfo *eventInfo = new T::EventInfo(mStartTime,eventId,eventType,id1,id2,id3,flags,"");
     mEventInfoList.addEventInfo(eventInfo);
 
     return eventId;

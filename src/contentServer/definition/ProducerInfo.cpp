@@ -18,6 +18,8 @@ ProducerInfo::ProducerInfo()
     mProducerId = 0;
     mFlags = 0;
     mSourceId = 0;
+    mStatus = 0;
+
     mHash = 0;
   }
   catch (...)
@@ -40,6 +42,8 @@ ProducerInfo::ProducerInfo(const ProducerInfo& producerInfo)
     mDescription = producerInfo.mDescription;
     mFlags = producerInfo.mFlags;
     mSourceId = producerInfo.mSourceId;
+    mStatus = producerInfo.mStatus;
+
     mHash = producerInfo.mHash;
   }
   catch (...)
@@ -59,6 +63,7 @@ ProducerInfo::ProducerInfo(const char *csv)
     mProducerId = 0;
     mFlags = 0;
     mSourceId = 0;
+    mStatus = 0;
     mHash = 0;
     setCsv(csv);
   }
@@ -100,6 +105,8 @@ ProducerInfo& ProducerInfo::operator=(const ProducerInfo& producerInfo)
     mDescription = producerInfo.mDescription;
     mFlags = producerInfo.mFlags;
     mSourceId = producerInfo.mSourceId;
+    mStatus = producerInfo.mStatus;
+
     mHash = producerInfo.mHash;
 
     return *this;
@@ -119,13 +126,14 @@ std::string ProducerInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%s;%s;%s;%u;%u",
+    sprintf(st,"%u;%s;%s;%s;%u;%u;%u",
         mProducerId,
         mName.c_str(),
         mTitle.c_str(),
         mDescription.c_str(),
         mFlags,
-        mSourceId);
+        mSourceId,
+        (uint)mStatus);
 
     return std::string(st);
   }
@@ -143,7 +151,7 @@ std::string ProducerInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "producerId;name;title;description;flags;producerId";
+    std::string header = "producerId;name;title;description;flags;sourceId;status";
     return header;
   }
   catch (...)
@@ -191,6 +199,9 @@ void ProducerInfo::setCsv(const char *csv)
        mFlags = toUInt32(field[4]);
        mSourceId = toUInt32(field[5]);
     }
+
+    if (c >= 6)
+      mStatus = toInt64(field[6]);
   }
   catch (...)
   {
@@ -245,6 +256,8 @@ void ProducerInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mDescription = " << mDescription << "\n";
     stream << space(level) << "- mFlags       = " << mFlags << "\n";
     stream << space(level) << "- mSourceId    = " << mSourceId << "\n";
+    stream << space(level) << "- mStatus      = " << (uint)mStatus << "\n";
+    stream << space(level) << "- mHash        = " << mHash << "\n";
   }
   catch (...)
   {

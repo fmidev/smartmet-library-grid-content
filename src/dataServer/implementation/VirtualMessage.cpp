@@ -206,6 +206,60 @@ time_t VirtualMessage::getForecastTimeT() const
 
 
 
+
+std::size_t VirtualMessage::getGridColumnCount() const
+{
+  FUNCTION_TRACE
+  try
+  {
+    initMessagePtrs();
+    return mMessageList[0]->getGridColumnCount();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+std::size_t VirtualMessage::getGridRowCount() const
+{
+  FUNCTION_TRACE
+  try
+  {
+    initMessagePtrs();
+    return mMessageList[0]->getGridRowCount();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void VirtualMessage::getGridProjectionAttributes(const std::string& prefix,T::AttributeList& attributeList) const
+{
+  FUNCTION_TRACE
+  try
+  {
+    initMessagePtrs();
+    mMessageList[0]->getGridProjectionAttributes(prefix,attributeList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief The method returns the forecast type of the current grid.
 
         \return   The forecast type.

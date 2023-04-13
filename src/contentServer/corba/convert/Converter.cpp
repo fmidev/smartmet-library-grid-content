@@ -577,7 +577,7 @@ void Converter::convert(T::EventInfo& source,ContentServer::Corba::CorbaEventInf
     target.id2 = source.mId2;
     target.id3 = source.mId3;
     target.flags = source.mFlags;
-    target.note= CORBA::string_dup(source.mNote.c_str());
+    target.eventData= CORBA::string_dup(source.mEventData.c_str());
   }
   catch (...)
   {
@@ -601,7 +601,7 @@ void Converter::convert(const ContentServer::Corba::CorbaEventInfo& source,T::Ev
     target.mId2 = source.id2;
     target.mId3 = source.id3;
     target.mFlags = source.flags;
-    target.mNote = source.note;
+    target.mEventData = source.eventData;
   }
   catch (...)
   {

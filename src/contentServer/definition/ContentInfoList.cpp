@@ -344,15 +344,10 @@ ContentInfoList::ContentInfoList(ContentInfoList& contentInfoList)
 
       for (uint t=0; t<mSize; t++)
       {
+        mArray[t] = nullptr;
         ContentInfo *info = contentInfoList.getContentInfoByIndexNoCheck(t);
         if (info != nullptr)
-        {
           mArray[t] = info->duplicate();
-        }
-        else
-        {
-          mArray[t] = nullptr;
-        }
       }
     }
     if (contentInfoList.getModificationLockPtr() != mModificationLockPtr)
@@ -388,15 +383,10 @@ ContentInfoList::ContentInfoList(const ContentInfoList& contentInfoList)
 
       for (uint t=0; t<mSize; t++)
       {
+        mArray[t] = nullptr;
         ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
         if (info != nullptr)
-        {
           mArray[t] = info->duplicate();
-        }
-        else
-        {
-          mArray[t] = nullptr;
-        }
       }
     }
   }
@@ -519,6 +509,7 @@ ContentInfoList& ContentInfoList::operator=(const ContentInfoList& contentInfoLi
       mArray = new ContentInfoPtr[mSize];
       for (uint t=0; t<mSize; t++)
       {
+        mArray[t] = nullptr;
         ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
         if (info != nullptr && (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
@@ -645,7 +636,7 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
     for (uint t=0; t<len2; t++)
     {
       ContentInfo *cInfo = contentInfoList.getContentInfoByIndex(t);
-      if (cInfo->mForecastTimeUTC == 0)
+      if (cInfo  && cInfo->mForecastTimeUTC == 0)
       {
         try
         {
@@ -689,6 +680,7 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
 
     for (uint t=0; t<newSize; t++)
     {
+      newArray[t] = nullptr;
       ContentInfo *cInfo1 = nullptr;
       ContentInfo *cInfo2 = nullptr;
 
@@ -746,7 +738,6 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
 
     mSize = newSize;
     mLength = c;
-
     delete[] mArray;
     mArray = newArray;
   }
@@ -819,7 +810,10 @@ void ContentInfoList::clear()
       for (uint t=0; t<mSize; t++)
       {
         if (mArray[t] != nullptr)
+        {
           delete mArray[t];
+          mArray[t] = nullptr;
+        }
       }
     }
     delete[] mArray;
@@ -927,7 +921,8 @@ uint ContentInfoList::deleteMarkedContent()
 
     uint p = 0;
     uint count = 0;
-    for (uint t=0; t<mSize; t++)
+
+    for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
       mArray[t] = nullptr;
@@ -6609,7 +6604,7 @@ void ContentInfoList::getForecastTimeListByProducerId(uint producerId,std::set<t
 
 uint ContentInfoList::getLength() const
 {
-  FUNCTION_TRACE
+  //FUNCTION_TRACE
   try
   {
     return mLength;

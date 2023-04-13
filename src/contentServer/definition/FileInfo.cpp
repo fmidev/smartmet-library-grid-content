@@ -24,6 +24,7 @@ FileInfo::FileInfo()
     mModificationTime = 0;
     mDeletionTime = 0;
     mSize = 0;
+    mStatus = 0;
   }
   catch (...)
   {
@@ -52,6 +53,7 @@ FileInfo::FileInfo(const FileInfo& fileInfo)
     mModificationTime = fileInfo.mModificationTime;
     mDeletionTime = fileInfo.mDeletionTime;
     mSize = fileInfo.mSize;
+    mStatus = fileInfo.mStatus;
   }
   catch (...)
   {
@@ -79,6 +81,7 @@ FileInfo::FileInfo(uint producerId,uint generationId,uchar type,const std::strin
     mModificationTime = 0;
     mDeletionTime = 0;
     mSize = 0;
+    mStatus = 0;
   }
   catch (...)
   {
@@ -105,6 +108,7 @@ FileInfo::FileInfo(const char *csv)
     mModificationTime = 0;
     mDeletionTime = 0;
     mSize = 0;
+    mStatus = 0;
     setCsv(csv);
   }
   catch (...)
@@ -153,6 +157,7 @@ FileInfo& FileInfo::operator=(const FileInfo& fileInfo)
     mModificationTime = fileInfo.mModificationTime;
     mDeletionTime = fileInfo.mDeletionTime;
     mSize = fileInfo.mSize;
+    mStatus = fileInfo.mStatus;
 
     return *this;
   }
@@ -170,7 +175,7 @@ std::string FileInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%s;%u;%u;%u;%u;%u;%ld;%ld;%s;%llu;%u",
+    sprintf(st,"%u;%u;%s;%u;%u;%u;%u;%u;%ld;%ld;%s;%llu;%u;%u",
         mFileId,
         mFileType,
         mName.c_str(),
@@ -183,7 +188,8 @@ std::string FileInfo::getCsv()
         mDeletionTime,
         mServer.c_str(),
         mSize,
-        mServerType);
+        mServerType,
+        mStatus);
 
     return std::string(st);
   }
@@ -201,7 +207,7 @@ std::string FileInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "fileId;fileType;name;producerId;generationId;protocol;flags;sourceId;modificationTimeT;deletionTimeT;server;size;serverType";
+    std::string header = "fileId;fileType;name;producerId;generationId;protocol;flags;sourceId;modificationTimeT;deletionTimeT;server;size;serverType;status";
     return header;
   }
   catch (...)
@@ -260,6 +266,8 @@ void FileInfo::setCsv(const char *csv)
         mSize = toInt64(field[11]);
       if (c >= 12)
         mServerType = toUInt32(field[12]);
+      if (c >= 13)
+        mStatus = toUInt8(field[13]);
     }
   }
   catch (...)
@@ -352,6 +360,7 @@ void FileInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mSourceId         = " << mSourceId << "\n";
     stream << space(level) << "- mModificationTime = " << utcTimeFromTimeT(mModificationTime) << "\n";
     stream << space(level) << "- mDeletionTime     = " << utcTimeFromTimeT(mDeletionTime) << "\n";
+    stream << space(level) << "- mStatus           = " << C_INT(mStatus) << "\n";
   }
   catch (...)
   {

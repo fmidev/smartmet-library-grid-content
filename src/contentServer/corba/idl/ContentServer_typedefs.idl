@@ -102,7 +102,7 @@ struct CorbaEventInfo
   unsigned long      id2;
   unsigned long      id3;
   unsigned long long flags;
-  string             note;
+  string             eventData;
 };
 
 typedef sequence<CorbaEventInfo> CorbaEventInfoList;

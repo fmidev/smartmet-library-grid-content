@@ -337,7 +337,7 @@ void CacheImplementation::shutdown()
 
 bool CacheImplementation::isSessionValid(T::SessionId sessionId)
 {
-  FUNCTION_TRACE
+  //FUNCTION_TRACE
   try
   {
     if (mShutdownRequested)
@@ -3304,7 +3304,7 @@ int CacheImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& even
 
 int CacheImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo)
 {
-  FUNCTION_TRACE
+  //FUNCTION_TRACE
   try
   {
     eventInfo.mServerTime = mContentStorageStartTime;
@@ -3343,7 +3343,7 @@ int CacheImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
 
 int CacheImplementation::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
-  FUNCTION_TRACE
+  //FUNCTION_TRACE
   try
   {
     if (mUpdateInProgress &&  !mRequestForwardEnabled)
@@ -6580,18 +6580,18 @@ void CacheImplementation::event_geometryListDeletedBySourceId(T::EventInfo& even
 
 void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
 {
-  FUNCTION_TRACE
+  //FUNCTION_TRACE
   try
   {
     AutoWriteLock lock(&mModificationLock);
 
-    uint len = eventInfo.mNote.length();
+    uint len = eventInfo.mEventData.length();
 
     if (len > 0)
     {
       char *buf = new char[len+10];
 
-      strcpy(buf,eventInfo.mNote.c_str());
+      strcpy(buf,eventInfo.mEventData.c_str());
       char *s = buf;
 
       while (s != nullptr)
@@ -7018,29 +7018,30 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    AutoReadLock lock(&mModificationLock);
-
-    T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
-    if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
     {
-      return;  // The content info is already in the cache.
-    }
-
-    if (!mContentSwapEnabled)
-    {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
-      if (ssp)
+      AutoReadLock lock(&mModificationLock);
+      T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
+      if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
-        AutoReadLock readLock(&mSearchModificationLock);
-        T::ContentInfo *cInfo = ssp->mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
-        if (cInfo != nullptr)
-          return;  // The content info is already in the cache.
+        return;  // The content info is already in the cache.
+      }
+
+      if (!mContentSwapEnabled)
+      {
+        auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+        if (ssp)
+        {
+          AutoReadLock readLock(&mSearchModificationLock);
+          T::ContentInfo *cInfo = ssp->mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(eventInfo.mId1,eventInfo.mId2);
+          if (cInfo != nullptr)
+            return;  // The content info is already in the cache.
+        }
       }
     }
 
     T::ContentInfo contentInfo;
-    if (eventInfo.mNote > " ")
-      contentInfo.setCsv(eventInfo.mNote);
+    if (eventInfo.mEventData > " ")
+      contentInfo.setCsv(eventInfo.mEventData);
     else
     {
       if (mContentStorage->getContentInfo(mSessionId,eventInfo.mId1,eventInfo.mId2,contentInfo) != Result::OK)
@@ -7057,6 +7058,7 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
           it->second.insert(contentInfo.getForecastTime());
       }
 
+      AutoWriteLock lock(&mModificationLock);
       T::ContentInfo *cInfo = contentInfo.duplicate();
       if (mContentInfoList.addContentInfo(cInfo) == cInfo)
       {
@@ -7206,7 +7208,7 @@ void CacheImplementation::event_updateVirtualContent(T::EventInfo& eventInfo)
 
 void CacheImplementation::processEvent(T::EventInfo& eventInfo)
 {
-  FUNCTION_TRACE
+  //FUNCTION_TRACE
   try
   {
     if (mShutdownRequested)
@@ -7366,7 +7368,7 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
 
 void CacheImplementation::processEvents(bool eventThread)
 {
-  FUNCTION_TRACE
+  // FUNCTION_TRACE
   try
   {
     if (mContentStorage == nullptr)
