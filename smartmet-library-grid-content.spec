@@ -31,30 +31,17 @@ BuildRequires: smartmet-library-gis-devel >= 23.3.14
 BuildRequires: smartmet-library-grid-files-devel >= 23.3.9
 BuildRequires: smartmet-library-macgyver-devel >= 23.3.3
 BuildRequires: smartmet-library-spine-devel >= 23.3.14
+BuildRequires: postgresql13-devel
 Requires: %{smartmet_boost}-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
-Requires: postgis32_13
+Requires: postgresql13-libs
 Requires: smartmet-library-gis >= 23.3.14
 Requires: smartmet-library-grid-files >= 23.3.9
 Requires: smartmet-library-macgyver >= 23.3.3
 Requires: smartmet-library-spine >= 23.3.14
-
-%if %{defined el7}
-Requires: libpqxx < 1:7.0
-BuildRequires: libpqxx-devel < 1:7.0
-%else
-%if 0%{?rhel} && 0%{rhel} >= 8
-Requires: libpqxx >= 1:7.7.0, libpqxx < 1:7.8.0
-BuildRequires: libpqxx-devel >= 1:7.7.0, libpqxx-devel < 1:7.8.0
-#TestRequires: libpqxx-devel >= 1:7.7.0, libpqxx-devel < 1:7.8.0
-%else
-Requires: libpqxx
-BuildRequires: libpqxx-devel
-%endif
-%endif
 
 Provides: %{SPECNAME}
 
