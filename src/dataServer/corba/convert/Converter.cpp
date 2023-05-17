@@ -232,6 +232,8 @@ void Converter::convert(const T::GridCoordinates& source,DataServer::Corba::Corb
     convert(source.mProjectionAttributes,target.projectionAttributes);
     target.rows = source.mRows;
     target.columns = source.mColumns;
+    target.reverseXDirection = source.mReverseXDirection;
+    target.reverseYDirection = source.mReverseYDirection;
     target.coordinateType = (CORBA::Octet)source.mCoordinateType;
 
     uint len = source.mCoordinateList.size();
@@ -264,6 +266,8 @@ void Converter::convert(const DataServer::Corba::CorbaGridCoordinates& source,T:
     target.mRows = source.rows;
     target.mColumns = source.columns;
     target.mCoordinateType = source.coordinateType;
+    target.mReverseXDirection = source.reverseXDirection;
+    target.mReverseYDirection = source.reverseYDirection;
 
     target.mCoordinateList.clear();
     uint len = source.coordinateList.length();

@@ -11,6 +11,8 @@
 #include <grid-files/common/Log.h>
 #include <grid-files/grid/GridValueList.h>
 #include <macgyver/CacheStats.h>
+#include <gis/DEM.h>
+#include <gis/LandCover.h>
 
 
 namespace SmartMet
@@ -35,12 +37,16 @@ class ServiceInterface
      virtual bool   isEnabled();
 
      virtual void   shutdown();
+     virtual void   setDem(boost::shared_ptr<Fmi::DEM> dem);
+     virtual void   setLandCover(boost::shared_ptr<Fmi::LandCover> landCover);
 
      virtual int    getGridAttributeList(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList);
      virtual int    getGridCoordinates(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,T::GridCoordinates& coordinates);
      virtual int    getGridData(T::SessionId sessionId,uint fileId,uint messageIndex,T::GridData& data);
      virtual int    getGridFileCount(T::SessionId sessionId,uint& count);
      virtual int    getGridMessageBytes(T::SessionId sessionId,uint fileId,uint messageIndex,std::vector<uchar>& messageBytes,std::vector<uint>& messageSections);
+
+     virtual int    getPropertyValuesByCoordinates(T::SessionId sessionId,const char *propertyName,T::Coordinate_vec& latlonCoordinates,T::ParamValue_vec& values);
 
      virtual int    getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value);
      virtual int    getGridValueByLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value);
@@ -167,6 +173,8 @@ class ServiceInterface
      virtual int    _getGridData(T::SessionId sessionId,uint fileId,uint messageIndex,T::GridData& data);
      virtual int    _getGridFileCount(T::SessionId sessionId,uint& count);
      virtual int    _getGridMessageBytes(T::SessionId sessionId,uint fileId,uint messageIndex,std::vector<uchar>& messageBytes,std::vector<uint>& messageSections);
+
+     virtual int    _getPropertyValuesByCoordinates(T::SessionId sessionId,const char *propertyName,T::Coordinate_vec& latlonCoordinates,T::ParamValue_vec& values);
 
      virtual int    _getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value);
      virtual int    _getGridValueByLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value);

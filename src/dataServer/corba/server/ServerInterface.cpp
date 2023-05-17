@@ -226,6 +226,39 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getPropertyValuesByCoordinates(::CORBA::LongLong sessionId, const char* propertyName, const SmartMet::DataServer::Corba::CorbaCoordinateList& latlonCoordinates, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ParamValue_vec sValues;
+    std::vector<T::Coordinate> sCoordinateList;
+    DataServer::Corba::CorbaParamValueList *corbaValues = new DataServer::Corba::CorbaParamValueList();
+    values = corbaValues;
+
+    DataServer::Corba::Converter::convert(latlonCoordinates,sCoordinateList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getPropertyValuesByCoordinates(sessionId,propertyName,sCoordinateList,sValues);
+
+    if (result == 0)
+      DataServer::Corba::Converter::convert(sValues,*corbaValues);
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
 ::CORBA::Long ServerInterface::getGridValueByPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short areaInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValue& value)
 {
   FUNCTION_TRACE

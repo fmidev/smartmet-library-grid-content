@@ -191,6 +191,40 @@ void ServiceImplementation::shutdown()
 
 
 
+void ServiceImplementation::setLandCover(boost::shared_ptr<Fmi::LandCover> landCover)
+{
+  try
+  {
+    mLandCover = landCover;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP, "Operation failed!", nullptr);
+    throw exception;
+  }
+}
+
+
+
+
+
+void ServiceImplementation::setDem(boost::shared_ptr<Fmi::DEM> dem)
+{
+  try
+  {
+    mDem = dem;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP, "Operation failed!", nullptr);
+    throw exception;
+  }
+}
+
+
+
+
+
 bool ServiceImplementation::isSessionValid(T::SessionId sessionId)
 {
   FUNCTION_TRACE
@@ -455,6 +489,8 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileI
     message->getGridProjectionAttributes("",coordinates.mProjectionAttributes);
     coordinates.mColumns = message->getGridColumnCount();
     coordinates.mRows = message->getGridRowCount();
+    coordinates.mReverseXDirection = message->reverseXDirection();
+    coordinates.mReverseYDirection = message->reverseYDirection();
     coordinates.mCoordinateType = coordinateType;
 
     switch (coordinateType)
@@ -618,6 +654,48 @@ int ServiceImplementation::_getGridMessageBytes(T::SessionId sessionId,uint file
       {
         messageSections.emplace_back(*it - messagePosition);
       }
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceImplementation::_getPropertyValuesByCoordinates(T::SessionId sessionId,const char *propertyName,T::Coordinate_vec& latlonCoordinates,T::ParamValue_vec& values)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (strcasecmp(propertyName,"dem") == 0 && mDem)
+    {
+      values.reserve(latlonCoordinates.size());
+      for (auto it = latlonCoordinates.begin(); it != latlonCoordinates.end(); ++it)
+      {
+        auto val = mDem->elevation(it->x(),it->y());
+        values.push_back(val);
+      }
+      return Result::OK;
+    }
+
+    if (strcasecmp(propertyName,"covertype") == 0 && mLandCover)
+    {
+      values.reserve(latlonCoordinates.size());
+      for (auto it = latlonCoordinates.begin(); it != latlonCoordinates.end(); ++it)
+      {
+        auto val = mLandCover->coverType(it->x(),it->y());
+        values.push_back(val);
+      }
+      return Result::OK;
     }
 
     return Result::OK;

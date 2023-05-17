@@ -232,6 +232,32 @@ int ClientImplementation::_getGridMessageBytes(T::SessionId sessionId,uint fileI
 
 
 
+int ClientImplementation::_getPropertyValuesByCoordinates(T::SessionId sessionId,const char *propertyName,T::Coordinate_vec& latlonCoordinates,T::ParamValue_vec& values)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaParamValueList_var corbaValues;
+    DataServer::Corba::CorbaCoordinateList_var corbaCoordinates = new DataServer::Corba::CorbaCoordinateList();
+
+    DataServer::Corba::Converter::convert(latlonCoordinates,corbaCoordinates);
+
+    int result = mService->getPropertyValuesByCoordinates(sessionId,propertyName,corbaCoordinates,corbaValues);
+
+    if (result == 0)
+      DataServer::Corba::Converter::convert(corbaValues,values);
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
 int ClientImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   try

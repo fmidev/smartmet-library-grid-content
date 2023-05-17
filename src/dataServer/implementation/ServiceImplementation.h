@@ -6,6 +6,8 @@
 #include "../../lua/LuaFileCollection.h"
 
 #include <grid-files/common/AttributeList.h>
+#include <gis/DEM.h>
+#include <gis/LandCover.h>
 #include <pthread.h>
 
 
@@ -41,6 +43,8 @@ class ServiceImplementation : public ServiceInterface
      virtual void   addVirtualContentFactory(VirtualContentFactory *factory);
      virtual void   setVirtualContentEnabled(bool enabled);
      virtual void   setCleanup(time_t age,time_t checkInterval);
+     virtual void   setDem(boost::shared_ptr<Fmi::DEM> dem);
+     virtual void   setLandCover(boost::shared_ptr<Fmi::LandCover> landCover);
 
      virtual void   eventProcessingThread();
 
@@ -51,6 +55,8 @@ class ServiceImplementation : public ServiceInterface
      virtual int    _getGridData(T::SessionId sessionId,uint fileId,uint messageIndex,T::GridData& data);
      virtual int    _getGridFileCount(T::SessionId sessionId,uint& count);
      virtual int    _getGridMessageBytes(T::SessionId sessionId,uint fileId,uint messageIndex,std::vector<uchar>& messageBytes,std::vector<uint>& messageSections);
+
+     virtual int    _getPropertyValuesByCoordinates(T::SessionId sessionId,const char *propertyName,T::Coordinate_vec& latlonCoordinates,T::ParamValue_vec& values);
 
      virtual int    _getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value);
      virtual int    _getGridValueByLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,int newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value);
@@ -190,16 +196,18 @@ class ServiceImplementation : public ServiceInterface
      std::vector<uint>    mFileAdditionList;
      ThreadLock           mThreadLock;
 
-     VirtualContentManager            mVirtualContentManager;
-     ContentServer::ServiceInterface* mContentServer;
-     Lua::LuaFileCollection           mLuaFileCollection;
-     Functions::FunctionCollection    mFunctionCollection;
-     VirtualGridFilePtr_map           mGridFileMap;
-     time_t                           mLastVirtualFileRegistration;
-     time_t                           mFileCleanup_age;
-     time_t                           mFileCleanup_checkInterval;
-     time_t                           mFileCleanup_time;
-     time_t                           mDeletedFileCleanup_time;
+     VirtualContentManager              mVirtualContentManager;
+     ContentServer::ServiceInterface*   mContentServer;
+     Lua::LuaFileCollection             mLuaFileCollection;
+     Functions::FunctionCollection      mFunctionCollection;
+     VirtualGridFilePtr_map             mGridFileMap;
+     time_t                             mLastVirtualFileRegistration;
+     time_t                             mFileCleanup_age;
+     time_t                             mFileCleanup_checkInterval;
+     time_t                             mFileCleanup_time;
+     time_t                             mDeletedFileCleanup_time;
+     boost::shared_ptr<Fmi::DEM>        mDem;
+     boost::shared_ptr<Fmi::LandCover>  mLandCover;
 };
 
 
