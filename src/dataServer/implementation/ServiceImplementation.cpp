@@ -1623,6 +1623,53 @@ int ServiceImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,
 
 
 
+int ServiceImplementation::_getGridLatlonCoordinatesByGeometry(T::SessionId sessionId,T::AttributeList& attributeList,T::GridCoordinates& coordinates)
+{
+  FUNCTION_TRACE
+  try
+  {
+    try
+    {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
+      uint width = 0;
+      uint height = 0;
+      T::Coordinate_svec latLonCoordinates;
+      Identification::gridDef.getGridLatLonCoordinatesByGeometry(attributeList,latLonCoordinates,width,height);
+
+      if (!latLonCoordinates || latLonCoordinates->size() == 0)
+        return Result::DATA_NOT_FOUND;
+
+      coordinates.mCoordinateList = *latLonCoordinates;
+      coordinates.mColumns = width;
+      coordinates.mRows = height;
+      coordinates.mCoordinateType = T::CoordinateTypeValue::LATLON_COORDINATES;
+      if (coordinates.mCoordinateList[0].y() > coordinates.mCoordinateList[coordinates.mCoordinateList.size()-1].y())
+        coordinates.mReverseYDirection = true;
+
+      attributeList.setAttribute("grid.width",Fmi::to_string(width));
+      attributeList.setAttribute("grid.height",Fmi::to_string(height));
+      return Result::OK;
+    }
+    catch (...)
+    {
+       Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double origoX,double origoY,double radius,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE

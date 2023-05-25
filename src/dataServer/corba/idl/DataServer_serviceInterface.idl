@@ -18,6 +18,7 @@ interface ServiceInterface
 {
   long  getGridAttributeList(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,out CorbaAttributeList attributeList);
   long  getGridCoordinates(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,out CorbaGridCoordinates coordinates);
+  long  getGridLatlonCoordinatesByGeometry(in long long sessionId,inout CorbaAttributeList attributeList,out CorbaGridCoordinates coordinates);
   long  getGridData(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,out CorbaGridData data);
   long  getGridFileCount(in long long sessionId,out unsigned long count);
   long  getGridMessageBytes(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,out CorbaByteData messageBytes,out CorbaULongList messageSections);

@@ -135,6 +135,35 @@ int ClientImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileId
 
 
 
+int ClientImplementation::_getGridLatlonCoordinatesByGeometry(T::SessionId sessionId,T::AttributeList& attributeList,T::GridCoordinates& coordinates)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaGridCoordinates_var corbaGridCoordinates;
+    DataServer::Corba::CorbaAttributeList_var corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+
+    DataServer::Corba::Converter::convert(attributeList,corbaAttributeList);
+
+    int result = mService->getGridLatlonCoordinatesByGeometry(sessionId,corbaAttributeList,corbaGridCoordinates);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(corbaGridCoordinates,coordinates);
+      DataServer::Corba::Converter::convert(corbaAttributeList,attributeList);
+    }
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
 int ClientImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint messageIndex,T::GridData& data)
 {
   try

@@ -28,6 +28,7 @@ class ServerInterface : public POA_SmartMet::DataServer::Corba::ServiceInterface
 
     ::CORBA::Long getGridAttributeList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaAttributeList_out attributeList);
     ::CORBA::Long getGridCoordinates(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, SmartMet::DataServer::Corba::CorbaGridCoordinates_out coordinates);
+    ::CORBA::Long getGridLatlonCoordinatesByGeometry(::CORBA::LongLong sessionId, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaGridCoordinates_out coordinates);
     ::CORBA::Long getGridData(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaGridData_out data);
     ::CORBA::Long getGridFileCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count);
     ::CORBA::Long getGridMessageBytes(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaByteData_out messageBytes, SmartMet::DataServer::Corba::CorbaULongList_out messageSections);

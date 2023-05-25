@@ -247,6 +247,33 @@ int ServiceInterface::getGridCoordinates(T::SessionId sessionId,uint fileId,uint
 
 
 
+
+int ServiceInterface::getGridLatlonCoordinatesByGeometry(T::SessionId sessionId,T::AttributeList& attributeList,T::GridCoordinates& coordinates)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _getGridLatlonCoordinatesByGeometry(sessionId,attributeList,coordinates);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,GridCoordinates);result %d;time %f;",__FUNCTION__,sessionId,result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+
 int ServiceInterface::getGridData(T::SessionId sessionId,uint fileId,uint messageIndex,T::GridData& data)
 {
   FUNCTION_TRACE
@@ -3023,6 +3050,15 @@ int ServiceInterface::getMultipleGridValues(T::SessionId sessionId,uint modifica
 //    T::Coordinate_vec latLonCoordinates = def->getGridLatLonCoordinates();
 
 int ServiceInterface::_getGridCoordinates(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,T::GridCoordinates& coordinates)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_getGridLatlonCoordinatesByGeometry(T::SessionId sessionId,T::AttributeList& attributeList,T::GridCoordinates& coordinates)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
