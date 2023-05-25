@@ -1450,14 +1450,19 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(u
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
+    GenerationInfo *selectedInfo = nullptr;
+
     AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
     {
       GenerationInfo *info = mArray[t];
       if (info != nullptr  &&  info->mProducerId == producerId  &&  info->mStatus == generationStatus && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
-        return info;
+      {
+        if (!selectedInfo || info->mAnalysisTime > selectedInfo->mAnalysisTime)
+          selectedInfo = info;
+      }
     }
-    return nullptr;
+    return selectedInfo;
   }
   catch (...)
   {
