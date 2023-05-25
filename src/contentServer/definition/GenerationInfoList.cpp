@@ -1450,7 +1450,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(u
     if (mArray == nullptr ||  mLength == 0)
       return nullptr;
 
-    GenerationInfo *selectedInfo = nullptr;
+    GenerationInfo *generationInfo = nullptr;
 
     AutoReadLock lock(mModificationLockPtr);
     for (uint t=0; t<mLength; t++)
@@ -1458,11 +1458,11 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(u
       GenerationInfo *info = mArray[t];
       if (info != nullptr  &&  info->mProducerId == producerId  &&  info->mStatus == generationStatus && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
       {
-        if (!selectedInfo || info->mAnalysisTime > selectedInfo->mAnalysisTime)
-          selectedInfo = info;
+        if (!generationInfo || generationInfo->mAnalysisTime < info->mAnalysisTime)
+          generationInfo = info;
       }
     }
-    return selectedInfo;
+    return generationInfo;
   }
   catch (...)
   {
@@ -1667,7 +1667,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(uint produ
       GenerationInfo *info = mArray[t];
       if (info != nullptr  &&  info->mProducerId == producerId && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
       {
-        if (generationInfo == nullptr  ||  generationInfo->mName < info->mName)
+        if (generationInfo == nullptr  ||  generationInfo->mAnalysisTime < info->mAnalysisTime)
           generationInfo = info;
       }
     }
