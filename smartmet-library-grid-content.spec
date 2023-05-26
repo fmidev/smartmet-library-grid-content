@@ -25,7 +25,8 @@ BuildRequires: libcurl-devel
 BuildRequires: libicu-devel
 BuildRequires: lua-devel
 BuildRequires: make
-BuildRequires: omniORB-devel
+BuildRequires: omniORB-devel >= 4.3.0
+BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 23.3.14
 BuildRequires: smartmet-library-grid-files-devel >= 23.3.9
