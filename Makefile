@@ -228,7 +228,7 @@ endif
 	$(MAKE) $(LIBFILE)
 
 $(LIBFILE): $(OBJFILES)
-	$(CC) $(LDFLAGS) -shared -rdynamic -o $(LIBFILE) $(OBJFILES) $(LIBS)
+	$(CXX) $(LDFLAGS) -shared -rdynamic -o $(LIBFILE) $(OBJFILES) $(LIBS)
 	@echo Checking $(LIBFILE) for unresolved references
 	@if ldd -r $(LIBFILE) 2>&1 | c++filt | grep ^undefined\ symbol |\
 			grep -Pv ':\ __(?:(?:a|t|ub)san_|sanitizer_)'; \
