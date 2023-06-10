@@ -18,10 +18,13 @@ interface ServiceInterface
 {
   long  getGridAttributeList(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,out CorbaAttributeList attributeList);
   long  getGridCoordinates(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,out CorbaGridCoordinates coordinates);
+  long  getGridLatlonCoordinatesByGeometry(in long long sessionId,inout CorbaAttributeList attributeList,out CorbaGridCoordinates coordinates);
   long  getGridData(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,out CorbaGridData data);
   long  getGridFileCount(in long long sessionId,out unsigned long count);
   long  getGridMessageBytes(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,out CorbaByteData messageBytes,out CorbaULongList messageSections);
   
+  long  getPropertyValuesByCoordinates(in long long sessionId,in string propertyName,in CorbaCoordinateList latlonCoordinates,out CorbaParamValueList values);
+
   long  getGridValueByPoint(in long long sessionId,in unsigned long fileId,in unsigned long messageIndex,in octet coordinateType,in double x,in double y,in short areaInterpolationMethod,in unsigned long modificationOperation, in CorbaDoubleList modificationParameters,out CorbaParamValue value);
   long  getGridValueByLevelAndPoint(in long long sessionId,in unsigned long fileId1,in unsigned long messageIndex1,in long level1,in unsigned long fileId2,in unsigned long messageIndex2,in long level2,in long newLevel,in octet coordinateType,in double x,in double y,in short areaInterpolationMethod,in short levelInterpolationMethod,in unsigned long modificationOperation, in CorbaDoubleList modificationParameters,out CorbaParamValue value);
   long  getGridValueByTimeAndPoint(in long long sessionId,in unsigned long fileId1,in unsigned long messageIndex1,in unsigned long fileId2,in unsigned long messageIndex2,in unsigned long long newTime,in octet coordinateType,in double x,in double y,in short areaInterpolationMethod,in short timeInterpolationMethod,in unsigned long modificationOperation, in CorbaDoubleList modificationParameters,out CorbaParamValue value);

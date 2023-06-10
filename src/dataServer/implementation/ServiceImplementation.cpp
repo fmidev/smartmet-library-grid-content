@@ -191,6 +191,40 @@ void ServiceImplementation::shutdown()
 
 
 
+void ServiceImplementation::setLandCover(boost::shared_ptr<Fmi::LandCover> landCover)
+{
+  try
+  {
+    mLandCover = landCover;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP, "Operation failed!", nullptr);
+    throw exception;
+  }
+}
+
+
+
+
+
+void ServiceImplementation::setDem(boost::shared_ptr<Fmi::DEM> dem)
+{
+  try
+  {
+    mDem = dem;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP, "Operation failed!", nullptr);
+    throw exception;
+  }
+}
+
+
+
+
+
 bool ServiceImplementation::isSessionValid(T::SessionId sessionId)
 {
   FUNCTION_TRACE
@@ -455,6 +489,8 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileI
     message->getGridProjectionAttributes("",coordinates.mProjectionAttributes);
     coordinates.mColumns = message->getGridColumnCount();
     coordinates.mRows = message->getGridRowCount();
+    coordinates.mReverseXDirection = message->reverseXDirection();
+    coordinates.mReverseYDirection = message->reverseYDirection();
     coordinates.mCoordinateType = coordinateType;
 
     switch (coordinateType)
@@ -618,6 +654,48 @@ int ServiceImplementation::_getGridMessageBytes(T::SessionId sessionId,uint file
       {
         messageSections.emplace_back(*it - messagePosition);
       }
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceImplementation::_getPropertyValuesByCoordinates(T::SessionId sessionId,const char *propertyName,T::Coordinate_vec& latlonCoordinates,T::ParamValue_vec& values)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (strcasecmp(propertyName,"dem") == 0 && mDem)
+    {
+      values.reserve(latlonCoordinates.size());
+      for (auto it = latlonCoordinates.begin(); it != latlonCoordinates.end(); ++it)
+      {
+        auto val = mDem->elevation(it->x(),it->y());
+        values.push_back(val);
+      }
+      return Result::OK;
+    }
+
+    if (strcasecmp(propertyName,"covertype") == 0 && mLandCover)
+    {
+      values.reserve(latlonCoordinates.size());
+      for (auto it = latlonCoordinates.begin(); it != latlonCoordinates.end(); ++it)
+      {
+        auto val = mLandCover->coverType(it->x(),it->y());
+        values.push_back(val);
+      }
+      return Result::OK;
     }
 
     return Result::OK;
@@ -1530,6 +1608,53 @@ int ServiceImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
+       std::string st = exception.getStackTrace();
+       PRINT_DATA(mDebugLog,"%s",st.c_str());
+       return Result::UNEXPECTED_EXCEPTION;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceImplementation::_getGridLatlonCoordinatesByGeometry(T::SessionId sessionId,T::AttributeList& attributeList,T::GridCoordinates& coordinates)
+{
+  FUNCTION_TRACE
+  try
+  {
+    try
+    {
+      if (!isSessionValid(sessionId))
+        return Result::INVALID_SESSION;
+
+      uint width = 0;
+      uint height = 0;
+      T::Coordinate_svec latLonCoordinates;
+      Identification::gridDef.getGridLatLonCoordinatesByGeometry(attributeList,latLonCoordinates,width,height);
+
+      if (!latLonCoordinates || latLonCoordinates->size() == 0)
+        return Result::DATA_NOT_FOUND;
+
+      coordinates.mCoordinateList = *latLonCoordinates;
+      coordinates.mColumns = width;
+      coordinates.mRows = height;
+      coordinates.mCoordinateType = T::CoordinateTypeValue::LATLON_COORDINATES;
+      if (coordinates.mCoordinateList[0].y() > coordinates.mCoordinateList[coordinates.mCoordinateList.size()-1].y())
+        coordinates.mReverseYDirection = true;
+
+      attributeList.setAttribute("grid.width",Fmi::to_string(width));
+      attributeList.setAttribute("grid.height",Fmi::to_string(height));
+      return Result::OK;
+    }
+    catch (...)
+    {
+       Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
        return Result::UNEXPECTED_EXCEPTION;

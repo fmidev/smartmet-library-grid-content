@@ -190,6 +190,38 @@ void ServiceInterface::shutdown()
 
 
 
+void  ServiceInterface::setDem(boost::shared_ptr<Fmi::DEM> dem)
+{
+  FUNCTION_TRACE
+  try
+  {
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ServiceInterface::setLandCover(boost::shared_ptr<Fmi::LandCover> landCover)
+{
+  FUNCTION_TRACE
+  try
+  {
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getGridCoordinates(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,T::GridCoordinates& coordinates)
 {
   FUNCTION_TRACE
@@ -210,6 +242,33 @@ int ServiceInterface::getGridCoordinates(T::SessionId sessionId,uint fileId,uint
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
+
+
+
+
+
+
+int ServiceInterface::getGridLatlonCoordinatesByGeometry(T::SessionId sessionId,T::AttributeList& attributeList,T::GridCoordinates& coordinates)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _getGridLatlonCoordinatesByGeometry(sessionId,attributeList,coordinates);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,GridCoordinates);result %d;time %f;",__FUNCTION__,sessionId,result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
 
 
 
@@ -303,6 +362,31 @@ int ServiceInterface::getGridMessageBytes(T::SessionId sessionId,uint fileId,uin
     unsigned long requestTime = getTime() - timeStart;
 
     PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,byte[%lu],section[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,messageBytes.size(),messageSections.size(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getPropertyValuesByCoordinates(T::SessionId sessionId,const char *propertyName,T::Coordinate_vec& latlonCoordinates,T::ParamValue_vec& values)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _getPropertyValuesByCoordinates(sessionId,propertyName,latlonCoordinates,values);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s,Coordinates[%ld],Values[%ld]);result %d;time %f;",__FUNCTION__,sessionId,propertyName,latlonCoordinates.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2974,6 +3058,15 @@ int ServiceInterface::_getGridCoordinates(T::SessionId sessionId,uint fileId,uin
 
 
 
+int ServiceInterface::_getGridLatlonCoordinatesByGeometry(T::SessionId sessionId,T::AttributeList& attributeList,T::GridCoordinates& coordinates)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
 int ServiceInterface::_getGridData(T::SessionId sessionId,uint fileId,uint messageIndex,T::GridData& data)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -3005,6 +3098,15 @@ int ServiceInterface::_getGridMessageBytes(T::SessionId sessionId,uint fileId,ui
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
+
+
+
+
+int ServiceInterface::_getPropertyValuesByCoordinates(T::SessionId sessionId,const char *propertyName,T::Coordinate_vec& latlonCoordinates,T::ParamValue_vec& values)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
 
 
 

@@ -110,6 +110,8 @@ struct CorbaGridCoordinates
   unsigned long       projection;  
   unsigned long       columns;
   unsigned long       rows;  
+  boolean             reverseXDirection;
+  boolean             reverseYDirection;
   CorbaAttributeList  projectionAttributes;
   octet               coordinateType;  
   CorbaCoordinateList coordinateList;

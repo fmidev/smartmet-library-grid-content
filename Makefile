@@ -258,15 +258,18 @@ install:
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/http/client
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/http/common/
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/http/server
+	@mkdir -p $(includedir)/$(INCDIR)/contentServer/idl
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/memory
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/postgresql
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/redis
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/sync
 	@mkdir -p $(includedir)/$(INCDIR)/dataServer/definition
 	@mkdir -p $(includedir)/$(INCDIR)/dataServer/cache
+	@mkdir -p $(includedir)/$(INCDIR)/dataServer/idl
 	@mkdir -p $(includedir)/$(INCDIR)/dataServer/implementation
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer/definition
+	@mkdir -p $(includedir)/$(INCDIR)/queryServer/idl
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer/implementation
 	@mkdir -p $(includedir)/$(INCDIR)/functions
 	@mkdir -p $(includedir)/$(INCDIR)/lua
@@ -302,18 +305,23 @@ ifneq ($(CORBA), disabled)
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer/corba/convert
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer/corba/stubs
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer/corba/server
+	@mkdir -p $(includedir)/$(INCDIR)/python
 	@cp src/contentServer/corba/client/*.h $(includedir)/$(INCDIR)/contentServer/corba/client
 	@cp src/contentServer/corba/convert/*.h $(includedir)/$(INCDIR)/contentServer/corba/convert
+	@cp src/contentServer/corba/idl/*.idl $(includedir)/$(INCDIR)/contentServer/idl
 	@cp src/contentServer/corba/stubs/*.h $(includedir)/$(INCDIR)/contentServer/corba/stubs
 	@cp src/contentServer/corba/server/*.h $(includedir)/$(INCDIR)/contentServer/corba/server
 	@cp src/dataServer/corba/client/*.h $(includedir)/$(INCDIR)/dataServer/corba/client
 	@cp src/dataServer/corba/convert/*.h $(includedir)/$(INCDIR)/dataServer/corba/convert
+	@cp src/dataServer/corba/idl/*.idl $(includedir)/$(INCDIR)/dataServer/idl
 	@cp src/dataServer/corba/stubs/*.h $(includedir)/$(INCDIR)/dataServer/corba/stubs
 	@cp src/dataServer/corba/server/*.h $(includedir)/$(INCDIR)/dataServer/corba/server
 	@cp src/queryServer/corba/client/*.h $(includedir)/$(INCDIR)/queryServer/corba/client
 	@cp src/queryServer/corba/convert/*.h $(includedir)/$(INCDIR)/queryServer/corba/convert
+	@cp src/queryServer/corba/idl/*.idl $(includedir)/$(INCDIR)/queryServer/idl
 	@cp src/queryServer/corba/stubs/*.h $(includedir)/$(INCDIR)/queryServer/corba/stubs
 	@cp src/queryServer/corba/server/*.h $(includedir)/$(INCDIR)/queryServer/corba/server
+	@cp -r python/FmiSmartMet $(includedir)/$(INCDIR)/python
 endif
 	@mkdir -p $(libdir)
 	$(INSTALL_PROG) $(LIBFILE) $(libdir)/$(LIBFILE)
@@ -364,6 +372,7 @@ ifneq ($(CORBA), disabled)
 	cd src/contentServer/corba/stubs; $(MAKE) all;
 	cd src/dataServer/corba/stubs; $(MAKE) all;
 	cd src/queryServer/corba/stubs; $(MAKE) all;
+	cd python; $(MAKE) all;
 endif
 
 delete_stubs:
@@ -371,6 +380,7 @@ ifneq ($(CORBA), disabled)
 	cd src/contentServer/corba/stubs; $(MAKE) clean;
 	cd src/dataServer/corba/stubs; $(MAKE) clean;
 	cd src/queryServer/corba/stubs; $(MAKE) clean;
+	cd python; $(MAKE) clean;
 endif
 
 

@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 23.4.17
+Version: 23.5.26
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -25,7 +25,8 @@ BuildRequires: libcurl-devel
 BuildRequires: libicu-devel
 BuildRequires: lua-devel
 BuildRequires: make
-BuildRequires: omniORB-devel
+BuildRequires: omniORB-devel >= 4.3.0
+BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 23.3.14
 BuildRequires: smartmet-library-grid-files-devel >= 23.3.9
@@ -88,6 +89,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri May 26 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.5.26-1.fmi
+- Require omniORB-4.3.0 and add omniORBpy build require
+
 * Mon Apr 17 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.4.17-1.fmi
 - Added PostgreSQL support in order to replace Redis
 * Thu Mar  9 2023 Mika Heiskanen <mheiskan@rhel8.dev.fmi.fi> - 23.3.9-1.fmi

@@ -24,6 +24,8 @@ class GridCoordinates
     T::AttributeList   mProjectionAttributes; // Original projection attributes
     uint               mColumns;              // Grid columns
     uint               mRows;                 // Grid rows
+    bool               mReverseXDirection;
+    bool               mReverseYDirection;
     T::CoordinateType  mCoordinateType;       // Coordinate type used in the mCoordinateList
     T::Coordinate_vec  mCoordinateList;       // Grid coordinates
 };

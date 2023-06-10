@@ -97,6 +97,43 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getGridLatlonCoordinatesByGeometry(::CORBA::LongLong sessionId, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaGridCoordinates_out coordinates)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::GridCoordinates sCoordinates;
+    T::AttributeList sAttributeList;
+    DataServer::Corba::CorbaGridCoordinates *corbaGridCoordinates = new DataServer::Corba::CorbaGridCoordinates();
+    coordinates = corbaGridCoordinates;
+
+    DataServer::Corba::Converter::convert(attributeList,sAttributeList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getGridLatlonCoordinatesByGeometry(sessionId,sAttributeList,sCoordinates);
+
+    if (result == 0)
+    {
+      DataServer::Corba::Converter::convert(sCoordinates,*corbaGridCoordinates);
+      DataServer::Corba::Converter::convert(sAttributeList,attributeList);
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
 ::CORBA::Long ServerInterface::getGridData(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaGridData_out data)
 {
   FUNCTION_TRACE
@@ -222,6 +259,39 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
   }
 }
 
+
+
+
+
+::CORBA::Long ServerInterface::getPropertyValuesByCoordinates(::CORBA::LongLong sessionId, const char* propertyName, const SmartMet::DataServer::Corba::CorbaCoordinateList& latlonCoordinates, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ParamValue_vec sValues;
+    std::vector<T::Coordinate> sCoordinateList;
+    DataServer::Corba::CorbaParamValueList *corbaValues = new DataServer::Corba::CorbaParamValueList();
+    values = corbaValues;
+
+    DataServer::Corba::Converter::convert(latlonCoordinates,sCoordinateList);
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getPropertyValuesByCoordinates(sessionId,propertyName,sCoordinateList,sValues);
+
+    if (result == 0)
+      DataServer::Corba::Converter::convert(sValues,*corbaValues);
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
 
 
 
