@@ -19,7 +19,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: %{smartmet_boost}-devel
 BuildRequires: gcc-c++
-BuildRequires: gdal34-devel
+BuildRequires: gdal35-devel
 BuildRequires: hiredis-devel
 BuildRequires: libcurl-devel
 BuildRequires: libicu-devel
@@ -28,21 +28,21 @@ BuildRequires: make
 BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 23.3.14
-BuildRequires: smartmet-library-grid-files-devel >= 23.3.9
+BuildRequires: smartmet-library-gis-devel >= 23.7.10
+BuildRequires: smartmet-library-grid-files-devel >= 23.7.10
 BuildRequires: smartmet-library-macgyver-devel >= 23.3.3
-BuildRequires: smartmet-library-spine-devel >= 23.3.14
-BuildRequires: postgresql13-devel
+BuildRequires: smartmet-library-spine-devel >= 23.7.10
+BuildRequires: postgresql15-devel
 Requires: %{smartmet_boost}-date-time
 Requires: hiredis-devel
 Requires: libcurl-devel
 Requires: lua-devel
 Requires: omniORB
-Requires: postgresql13-libs
-Requires: smartmet-library-gis >= 23.3.14
-Requires: smartmet-library-grid-files >= 23.3.9
+Requires: postgresql15-libs
+Requires: smartmet-library-gis >= 23.7.10
+Requires: smartmet-library-grid-files >= 23.7.10
 Requires: smartmet-library-macgyver >= 23.3.3
-Requires: smartmet-library-spine >= 23.3.14
+Requires: smartmet-library-spine >= 23.7.10
 
 Provides: %{SPECNAME}
 
