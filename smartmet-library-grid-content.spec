@@ -77,9 +77,9 @@ Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
 Requires: smartmet-library-macgyver-devel >= 23.3.3
-Requires: smartmet-library-gis-devel >= 23.3.14
-Requires: smartmet-library-spine-devel >= 23.3.14
-Requires: smartmet-library-grid-files-devel >= 23.3.9
+Requires: smartmet-library-gis-devel >= 23.7.10
+Requires: smartmet-library-spine-devel >= 23.7.10
+Requires: smartmet-library-grid-files-devel >= 23.7.10
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
