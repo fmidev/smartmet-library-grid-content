@@ -35,7 +35,7 @@ BuildRequires: smartmet-library-spine-devel >= 23.7.28
 BuildRequires: postgresql15-devel
 Requires: %{smartmet_boost}-date-time
 Requires: hiredis-devel
-Requires: libcurl-devel
+Requires: libcurl
 Requires: lua-devel
 Requires: omniORB
 Requires: postgresql15-libs
