@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 23.7.28
+Version: 23.9.11
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -29,7 +29,7 @@ BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 23.8.30
-BuildRequires: smartmet-library-grid-files-devel >= 23.8.21
+BuildRequires: smartmet-library-grid-files-devel >= 23.9.11
 BuildRequires: smartmet-library-macgyver-devel >= 23.8.31
 BuildRequires: smartmet-library-spine-devel >= 23.8.31
 BuildRequires: postgresql15-devel
@@ -40,7 +40,7 @@ Requires: lua-devel
 Requires: omniORB
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 23.8.30
-Requires: smartmet-library-grid-files >= 23.8.21
+Requires: smartmet-library-grid-files >= 23.9.11
 Requires: smartmet-library-macgyver >= 23.8.31
 Requires: smartmet-library-spine >= 23.8.31
 
@@ -79,7 +79,7 @@ Requires: %{SPECNAME}
 Requires: smartmet-library-macgyver-devel >= 23.8.31
 Requires: smartmet-library-gis-devel >= 23.8.30
 Requires: smartmet-library-spine-devel >= 23.8.31
-Requires: smartmet-library-grid-files-devel >= 23.8.21
+Requires: smartmet-library-grid-files-devel >= 23.9.11
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -89,15 +89,14 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Sep 11 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.9.11-1.fmi
+- Adding grid size coordinate cache statistics
 * Fri Jul 28 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.7.28-1.fmi
 - Repackage due to bulk ABI changes in macgyver/newbase/spine
-
 * Mon Jul 10 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.7.10-1.fmi
 - Use postgresql 15, gdal 3.5, geos 3.11 and proj-9.0
-
 * Fri May 26 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.5.26-1.fmi
 - Require omniORB-4.3.0 and add omniORBpy build require
-
 * Mon Apr 17 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.4.17-1.fmi
 - Added PostgreSQL support in order to replace Redis
 * Thu Mar  9 2023 Mika Heiskanen <mheiskan@rhel8.dev.fmi.fi> - 23.3.9-1.fmi
