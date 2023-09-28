@@ -1384,6 +1384,194 @@ T::SpatialRef* VirtualMessage::getSpatialReference() const
 
 
 
+bool VirtualMessage::getGridMetricArea(T::Coordinate& topLeft,T::Coordinate& topRight,T::Coordinate& bottomLeft,T::Coordinate& bottomRight)
+{
+  FUNCTION_TRACE
+  try
+  {
+    initMessagePtrs();
+    return mMessageList[0]->getGridMetricArea(topLeft,topRight,bottomLeft,bottomRight);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+bool VirtualMessage::getGridMetricCellSize(double& width,double& height) const
+{
+  FUNCTION_TRACE
+  try
+  {
+    initMessagePtrs();
+    return mMessageList[0]->getGridMetricCellSize(width,height);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+bool VirtualMessage::getGridMetricSize(double& width,double& height) const
+{
+  FUNCTION_TRACE
+  try
+  {
+    initMessagePtrs();
+    return mMessageList[0]->getGridMetricSize(width,height);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+bool VirtualMessage::getGridLatLonArea(T::Coordinate& topLeft,T::Coordinate& topRight,T::Coordinate& bottomLeft,T::Coordinate& bottomRight)
+{
+  FUNCTION_TRACE
+  try
+  {
+    initMessagePtrs();
+    return mMessageList[0]->getGridLatLonArea(topLeft,topRight,bottomLeft,bottomRight);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+T::Coordinate_svec VirtualMessage::getGridOriginalCoordinates() const
+{
+  FUNCTION_TRACE
+  try
+  {
+    initMessagePtrs();
+    return mMessageList[0]->getGridOriginalCoordinates();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+float VirtualMessage::getGridPointAngleByLatLonCoordinates(double lat,double lon) const
+{
+  FUNCTION_TRACE
+  try
+  {
+    initMessagePtrs();
+    return mMessageList[0]->getGridPointAngleByLatLonCoordinates(lat,lon);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+float VirtualMessage::getGridPointAngle(T::CoordinateType coordinateType,double x,double y) const
+{
+  FUNCTION_TRACE
+  try
+  {
+    initMessagePtrs();
+    return mMessageList[0]->getGridPointAngle(coordinateType,x,y);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void VirtualMessage::getGridPointAngles(std::vector<float>& angles) const
+{
+  FUNCTION_TRACE
+  try
+  {
+    initMessagePtrs();
+    return mMessageList[0]->getGridPointAngles(angles);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void VirtualMessage::getGridPointListByLatLonCoordinates(T::Coordinate_vec& latlon,T::Coordinate_vec& points) const
+{
+  FUNCTION_TRACE
+  try
+  {
+    initMessagePtrs();
+    return mMessageList[0]->getGridPointListByLatLonCoordinates(latlon,points);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+uint VirtualMessage::getGridWidth() const
+{
+  FUNCTION_TRACE
+  try
+  {
+    initMessagePtrs();
+    return mMessageList[0]->getGridWidth();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+uint VirtualMessage::getGridHeight() const
+{
+  FUNCTION_TRACE
+  try
+  {
+    initMessagePtrs();
+    return mMessageList[0]->getGridHeight();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 std::string VirtualMessage::getWKT() const
 {
   FUNCTION_TRACE
@@ -1398,6 +1586,41 @@ std::string VirtualMessage::getWKT() const
   }
 }
 
+
+
+
+
+std::string VirtualMessage::getProj4() const
+{
+  FUNCTION_TRACE
+  try
+  {
+    initMessagePtrs();
+    return mMessageList[0]->getProj4();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+bool VirtualMessage::isRelativeUV() const
+{
+  FUNCTION_TRACE
+  try
+  {
+    initMessagePtrs();
+    return mMessageList[0]->isRelativeUV();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
 
 
 

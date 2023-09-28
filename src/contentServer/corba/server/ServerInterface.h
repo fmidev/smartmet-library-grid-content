@@ -29,6 +29,7 @@ class ServerInterface : public POA_SmartMet::ContentServer::Corba::ServiceInterf
 
     ::CORBA::Long clear(::CORBA::LongLong sessionId);
     ::CORBA::Long reload(::CORBA::LongLong sessionId);
+    ::CORBA::Long getContentChangeTime(::CORBA::LongLong sessionId, ::CORBA::LongLong& changeTime);
     ::CORBA::Long addProducerInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaProducerInfo& producerInfo);
     ::CORBA::Long deleteProducerInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong producerId);
     ::CORBA::Long deleteProducerInfoByName(::CORBA::LongLong sessionId, const char* producerName);

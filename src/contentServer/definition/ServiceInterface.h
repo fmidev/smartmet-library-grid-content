@@ -56,6 +56,7 @@ class ServiceInterface
      virtual void   setProcessingLog(Log *processingLog);
      virtual void   shutdown();
      virtual void   getCacheStats(Fmi::Cache::CacheStatistics& statistics) const;
+     virtual time_t getContentChangeTime();
 
      virtual void   setEnabled(bool enabled);
      virtual bool   isEnabled();
@@ -64,6 +65,7 @@ class ServiceInterface
 
      virtual int    clear(T::SessionId sessionId);
      virtual int    reload(T::SessionId sessionId);
+     virtual int    getContentChangeTime(T::SessionId sessionId,time_t& changeTime);
 
      virtual int    addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo);
      virtual int    deleteProducerInfoById(T::SessionId sessionId,uint producerId);
@@ -217,6 +219,7 @@ class ServiceInterface
 
      virtual int    _clear(T::SessionId sessionId);
      virtual int    _reload(T::SessionId sessionId);
+     virtual int    _getContentChangeTime(T::SessionId sessionId,time_t& changeTime);
 
      virtual int    _addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo);
      virtual int    _deleteProducerInfoById(T::SessionId sessionId,uint producerId);

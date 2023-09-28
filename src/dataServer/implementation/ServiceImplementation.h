@@ -17,10 +17,6 @@ namespace DataServer
 {
 
 
-//typedef std::list<std::pair<uint,uint>> PreloadList;
-//typedef std::set<std::string> PreloadDefList;
-
-
 
 class ServiceImplementation : public ServiceInterface
 {
@@ -41,6 +37,8 @@ class ServiceImplementation : public ServiceInterface
      virtual void   shutdown();
 
      virtual void   addVirtualContentFactory(VirtualContentFactory *factory);
+     virtual void   addSubServer(std::string& name,ServiceInterface *subServer);
+
      virtual void   setVirtualContentEnabled(bool enabled);
      virtual void   setCleanup(time_t age,time_t checkInterval);
      virtual void   setDem(boost::shared_ptr<Fmi::DEM> dem);
@@ -173,12 +171,13 @@ class ServiceImplementation : public ServiceInterface
 
      virtual void   addFile(T::FileInfo& fileInfo,T::ContentInfoList& currentContentList);
      virtual void   fullUpdate();
-     virtual void   updateVirtualFiles(T::ContentInfoList fullContentList);
-     virtual void   registerVirtualFiles(VirtualGridFilePtr_map& gridFileMap);
+     virtual void   updateVirtualFiles(T::ContentInfoList& fullContentList);
+     virtual void   registerVirtualFiles(VirtualGridFilePtr_map& gridFileMap,std::set<uint>& idList);
      virtual void   processEvent(T::EventInfo& eventInfo,T::EventInfo *nextEventInfo);
      virtual void   processEvents();
      virtual void   readContentList(T::ContentInfoList& contentList,bool includePhysicalContent,bool includeVirtualContent);
 
+     ServiceInterface*    getDataServerByFileId(uint fileId);
      GRID::GridFile_sptr  getGridFile(uint fileId);
 
      T::EventId           mLastProcessedEventId;
@@ -196,19 +195,22 @@ class ServiceImplementation : public ServiceInterface
      GridFileManager      mGridFileManager;
      std::vector<uint>    mFileAdditionList;
      ThreadLock           mThreadLock;
+     time_t               mContentChangeTime;
 
      VirtualContentManager              mVirtualContentManager;
      ContentServer::ServiceInterface*   mContentServer;
      Lua::LuaFileCollection             mLuaFileCollection;
      Functions::FunctionCollection      mFunctionCollection;
-     VirtualGridFilePtr_map             mGridFileMap;
      time_t                             mLastVirtualFileRegistration;
+     time_t                             mLastVirtualFileCheck;
      time_t                             mFileCleanup_age;
      time_t                             mFileCleanup_checkInterval;
      time_t                             mFileCleanup_time;
      time_t                             mDeletedFileCleanup_time;
      boost::shared_ptr<Fmi::DEM>        mDem;
      boost::shared_ptr<Fmi::LandCover>  mLandCover;
+
+     std::map<std::string,ServiceInterface*> mDataServers;
 };
 
 

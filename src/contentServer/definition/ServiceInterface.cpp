@@ -100,6 +100,23 @@ void ServiceInterface::getCacheStats(Fmi::Cache::CacheStatistics& statistics) co
 
 
 
+time_t ServiceInterface::getContentChangeTime()
+{
+  FUNCTION_TRACE
+  try
+  {
+    return 0;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 Implementation ServiceInterface::getImplementationType()
 {
   FUNCTION_TRACE
@@ -254,6 +271,28 @@ int ServiceInterface::reload(T::SessionId sessionId)
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
+
+
+
+
+
+int ServiceInterface::getContentChangeTime(T::SessionId sessionId,time_t& changeTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    int result = _getContentChangeTime(sessionId,changeTime);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
 
 
 
@@ -4051,6 +4090,14 @@ int ServiceInterface::_reload(T::SessionId sessionId)
   throw Fmi::Exception(BCP,"Implementation required!");
 }
 
+
+
+
+
+int ServiceInterface::_getContentChangeTime(T::SessionId sessionId,time_t& changeTime)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
 
 
 

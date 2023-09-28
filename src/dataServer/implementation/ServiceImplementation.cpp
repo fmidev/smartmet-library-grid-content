@@ -79,6 +79,8 @@ ServiceImplementation::ServiceImplementation()
     mFileCleanup_checkInterval = 60;
     mFileCleanup_time = 0;
     mDeletedFileCleanup_time = 0;
+    mLastVirtualFileCheck = time(nullptr);
+    mContentChangeTime = 0;
   }
   catch (...)
   {
@@ -301,6 +303,21 @@ void ServiceImplementation::addVirtualContentFactory(VirtualContentFactory *fact
 
 
 
+void ServiceImplementation::addSubServer(std::string& name,ServiceInterface *subServer)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mDataServers.insert(std::pair<std::string,ServiceInterface*>(name,subServer));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
 
 void ServiceImplementation::startEventProcessing()
 {
@@ -308,6 +325,43 @@ void ServiceImplementation::startEventProcessing()
   try
   {
     pthread_create(&mEventProcessingThread,nullptr,ServiceImplementation_eventProcessingThread,this);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+ServiceInterface* ServiceImplementation::getDataServerByFileId(uint fileId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::FileInfo fileInfo;
+
+    if (mContentServer->getFileInfoById(mServerSessionId,fileId,fileInfo) == 0)
+    {
+      if (fileInfo.mDeletionTime != 0)
+      {
+        if ((time(nullptr) + 180) > fileInfo.mDeletionTime)
+        {
+          // The grid file will be deleted soon. We should not access it anymore.
+          return nullptr;
+        }
+      }
+
+      if (fileInfo.mFileType == T::FileTypeValue::Virtual)
+      {
+        auto it = mDataServers.find(fileInfo.mServer);
+        if (it != mDataServers.end())
+          return it->second;
+      }
+    }
+    return nullptr;
   }
   catch (...)
   {
@@ -369,7 +423,7 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
         }
       }
 
-      if (fileInfo.mProtocol > 1 || getFileSize(fileInfo.mName.c_str()) > 0)
+      if (fileInfo.mFileType != T::FileTypeValue::Virtual  &&  (fileInfo.mProtocol > 1 || getFileSize(fileInfo.mName.c_str()) > 0))
       {
         T::ContentInfoList contentList;
         if (mContentServer->getContentListByFileId(mServerSessionId,fileId,contentList) == 0)
@@ -479,7 +533,13 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileI
 
     GRID::GridFile_sptr gridFile = getGridFile(fileId);
     if (!gridFile)
+    {
+      ServiceInterface *dataServer = getDataServerByFileId(fileId);
+      if (dataServer)
+        return dataServer->getGridCoordinates(sessionId,fileId,messageIndex,coordinateType,coordinates);
+
       return Result::FILE_NOT_FOUND;
+    }
 
     GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
     if (message == nullptr)
@@ -538,7 +598,13 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint 
 
     GRID::GridFile_sptr gridFile = getGridFile(fileId);
     if (!gridFile)
-      return Result::DATA_NOT_FOUND;
+    {
+      ServiceInterface *dataServer = getDataServerByFileId(fileId);
+      if (dataServer)
+        return dataServer->getGridData(sessionId,fileId,messageIndex,data);
+
+      return Result::FILE_NOT_FOUND;
+    }
 
     GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
     if (message == nullptr)
@@ -621,7 +687,13 @@ int ServiceImplementation::_getGridMessageBytes(T::SessionId sessionId,uint file
 
     GRID::GridFile_sptr gridFile = getGridFile(fileId);
     if (!gridFile)
-      return Result::DATA_NOT_FOUND;
+    {
+      ServiceInterface *dataServer = getDataServerByFileId(fileId);
+      if (dataServer)
+        return dataServer->getGridMessageBytes(sessionId,fileId,messageIndex,messageBytes,messageSections);
+
+      return Result::FILE_NOT_FOUND;
+    }
 
     GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
     if (message == nullptr)
@@ -720,7 +792,13 @@ int ServiceImplementation::_getGridAttributeList(T::SessionId sessionId,uint fil
 
     GRID::GridFile_sptr gridFile = getGridFile(fileId);
     if (!gridFile)
-      return Result::DATA_NOT_FOUND;
+    {
+      ServiceInterface *dataServer = getDataServerByFileId(fileId);
+      if (dataServer)
+        return dataServer->getGridAttributeList(sessionId,fileId,messageIndex,attributeList);
+
+      return Result::FILE_NOT_FOUND;
+    }
 
     GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
     if (message == nullptr)
@@ -751,8 +829,14 @@ int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint file
         return Result::INVALID_SESSION;
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
-      if (gridFile == nullptr)
+      if (!gridFile)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridValueByPoint(sessionId,fileId,messageIndex,coordinateType,x,y,areaInterpolationMethod,modificationOperation,modificationParameters,value);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -793,8 +877,14 @@ int ServiceImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,u
         return Result::INVALID_SESSION;
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
-      if (gridFile1 == nullptr)
+      if (!gridFile1)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueByLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,newLevel,coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,value);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -846,8 +936,14 @@ int ServiceImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,ui
         return Result::INVALID_SESSION;
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
-      if (gridFile1 == nullptr)
+      if (!gridFile1)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueByTimeAndPoint(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters,value);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -900,7 +996,13 @@ int ServiceImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId session
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueByTimeLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,newTime,newLevel,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,value);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -973,7 +1075,13 @@ int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,uint fileI
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridValueVector(sessionId,fileId,messageIndex,modificationOperation,modificationParameters,values);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -1014,7 +1122,13 @@ int ServiceImplementation::_getGridValueVectorByLevel(T::SessionId sessionId,uin
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueVectorByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,levelInterpolationMethod,modificationOperation,modificationParameters,values);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -1067,7 +1181,13 @@ int ServiceImplementation::_getGridValueVectorByTime(T::SessionId sessionId,uint
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueVectorByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,timeInterpolationMethod,modificationOperation,modificationParameters,values);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -1120,7 +1240,13 @@ int ServiceImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId se
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueVectorByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,attributeList,modificationOperation,modificationParameters,values);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -1173,7 +1299,13 @@ int ServiceImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId ses
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueVectorByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList,modificationOperation,modificationParameters,values);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -1226,7 +1358,13 @@ int ServiceImplementation::_getGridValueVectorByCoordinateList(T::SessionId sess
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridValueVectorByCoordinateList(sessionId,fileId,messageIndex,coordinateType,coordinates,areaInterpolationMethod,modificationOperation,modificationParameters,values);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -1267,7 +1405,13 @@ int ServiceImplementation::_getGridValueVectorByLevelAndCoordinateList(T::Sessio
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueVectorByLevelAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,coordinates,attributeList,modificationOperation,modificationParameters,values);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -1320,7 +1464,13 @@ int ServiceImplementation::_getGridValueVectorByTimeAndCoordinateList(T::Session
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueVectorByTimeAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,coordinates,attributeList,modificationOperation,modificationParameters,values);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -1373,7 +1523,13 @@ int ServiceImplementation::_getGridValueVectorByTimeAndLevel(T::SessionId sessio
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueVectorByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,values);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -1447,7 +1603,13 @@ int ServiceImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionI
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueVectorByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,attributeList,modificationOperation,modificationParameters,values);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -1520,7 +1682,13 @@ int ServiceImplementation::_getGridValueVectorByTimeLevelAndCoordinateList(T::Se
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueVectorByTimeLevelAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,coordinates,attributeList,modificationOperation,modificationParameters,values);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -1594,7 +1762,13 @@ int ServiceImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridValueVectorByGeometry(sessionId,fileId,messageIndex,attributeList,modificationOperation,modificationParameters,values);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -1682,7 +1856,13 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridValueListByCircle(sessionId,fileId,messageIndex,coordinateType,origoX,origoY,radius,modificationOperation,modificationParameters,valueList);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -1723,7 +1903,13 @@ int ServiceImplementation::_getGridValueListByTimeAndCircle(T::SessionId session
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueListByTimeAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,origoX,origoY,radius,timeInterpolationMethod,modificationOperation,modificationParameters,valueList);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -1777,7 +1963,13 @@ int ServiceImplementation::_getGridValueListByLevelAndCircle(T::SessionId sessio
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueListByLevelAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,origoX,origoY,radius,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -1830,7 +2022,13 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndCircle(T::SessionId se
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueListByTimeLevelAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,origoX,origoY,radius,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -1904,7 +2102,13 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridValueVectorByRectangle(sessionId,fileId,messageIndex,coordinateType,columns,rows,x,y,xStep,yStep,areaInterpolationMethod,modificationOperation,modificationParameters,values);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -1979,7 +2183,13 @@ int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,u
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridValueListByPointList(sessionId,fileId,messageIndex,coordinateType,pointList,areaInterpolationMethod,modificationOperation,modificationParameters,valueList);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -2022,7 +2232,13 @@ int ServiceImplementation::_getGridValueListByLevelAndPointList(T::SessionId ses
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueListByLevelAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,pointList,areaInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -2075,7 +2291,13 @@ int ServiceImplementation::_getGridValueListByTimeAndPointList(T::SessionId sess
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueListByTimeAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,pointList,areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters,valueList);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -2128,7 +2350,13 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndPointList(T::SessionId
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueListByTimeLevelAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,pointList,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -2201,7 +2429,13 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridValueListByPolygon(sessionId,fileId,messageIndex,coordinateType,polygonPoints,modificationOperation,modificationParameters,valueList);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -2242,7 +2476,13 @@ int ServiceImplementation::_getGridValueListByLevelAndPolygon(T::SessionId sessi
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueListByLevelAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,polygonPoints,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -2295,7 +2535,13 @@ int ServiceImplementation::_getGridValueListByTimeAndPolygon(T::SessionId sessio
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueListByTimeAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,polygonPoints,timeInterpolationMethod,modificationOperation,modificationParameters,valueList);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -2348,7 +2594,13 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndPolygon(T::SessionId s
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueListByTimeLevelAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,polygonPoints,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -2417,7 +2669,13 @@ int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridValueListByPolygonPath(sessionId,fileId,messageIndex,coordinateType,polygonPath,modificationOperation,modificationParameters,valueList);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -2458,7 +2716,13 @@ int ServiceImplementation::_getGridValueListByTimeAndPolygonPath(T::SessionId se
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueListByTimeAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,polygonPath,timeInterpolationMethod,modificationOperation,modificationParameters,valueList);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -2511,7 +2775,13 @@ int ServiceImplementation::_getGridValueListByLevelAndPolygonPath(T::SessionId s
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueListByLevelAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,polygonPath,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -2565,7 +2835,13 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndPolygonPath(T::Session
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridValueListByTimeLevelAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,polygonPath,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -2634,7 +2910,13 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,u
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridValueListByRectangle(sessionId,fileId,messageIndex,coordinateType,x1,y1,x2,y2,modificationOperation,modificationParameters,valueList);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -2676,7 +2958,13 @@ int ServiceImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,uin
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridValueVectorByPoint(sessionId,fileId,messageIndex,coordinateType,x,y,vectorType,modificationOperation,modificationParameters,valueVector);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -2718,7 +3006,13 @@ int ServiceImplementation::_getGridIsobands(T::SessionId sessionId,uint fileId,u
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridIsobands(sessionId,fileId,messageIndex,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -2760,7 +3054,13 @@ int ServiceImplementation::_getGridIsobandsByGeometry(T::SessionId sessionId,uin
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridIsobandsByGeometry(sessionId,fileId,messageIndex,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -2802,7 +3102,13 @@ int ServiceImplementation::_getGridIsobandsByGrid(T::SessionId sessionId,uint fi
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridIsobandsByGrid(sessionId,fileId,messageIndex,contourLowValues,contourHighValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -2844,7 +3150,13 @@ int ServiceImplementation::_getGridIsobandsByLevel(T::SessionId sessionId,uint f
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridIsobandsByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -2897,7 +3209,13 @@ int ServiceImplementation::_getGridIsobandsByTime(T::SessionId sessionId,uint fi
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridIsobandsByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -2950,7 +3268,13 @@ int ServiceImplementation::_getGridIsobandsByLevelAndGeometry(T::SessionId sessi
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridIsobandsByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -3005,7 +3329,13 @@ int ServiceImplementation::_getGridIsobandsByTimeAndGeometry(T::SessionId sessio
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridIsobandsByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -3059,7 +3389,13 @@ int ServiceImplementation::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridIsobandsByLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourLowValues,contourHighValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -3118,7 +3454,13 @@ int ServiceImplementation::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridIsobandsByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues,contourHighValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -3177,7 +3519,13 @@ int ServiceImplementation::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridIsobandsByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -3251,7 +3599,13 @@ int ServiceImplementation::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId s
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridIsobandsByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -3325,7 +3679,13 @@ int ServiceImplementation::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessi
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridIsobandsByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues,contourHighValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -3405,7 +3765,13 @@ int ServiceImplementation::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridIsolinesByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -3479,7 +3845,13 @@ int ServiceImplementation::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId s
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridIsolinesByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -3552,7 +3924,13 @@ int ServiceImplementation::_getGridIsolines(T::SessionId sessionId,uint fileId,u
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridIsolines(sessionId,fileId,messageIndex,contourValues,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -3594,7 +3972,13 @@ int ServiceImplementation::_getGridIsolinesByGeometry(T::SessionId sessionId,uin
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridIsolinesByGeometry(sessionId,fileId,messageIndex,contourValues,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -3636,7 +4020,13 @@ int ServiceImplementation::_getGridIsolinesByGrid(T::SessionId sessionId,uint fi
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridIsolinesByGrid(sessionId,fileId,messageIndex,contourValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -3678,7 +4068,13 @@ int ServiceImplementation::_getGridIsolinesByLevel(T::SessionId sessionId,uint f
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridIsolinesByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourValues,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -3731,7 +4127,13 @@ int ServiceImplementation::_getGridIsolinesByTime(T::SessionId sessionId,uint fi
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridIsolinesByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -3784,7 +4186,13 @@ int ServiceImplementation::_getGridIsolinesByLevelAndGeometry(T::SessionId sessi
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridIsolinesByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourValues,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -3838,7 +4246,13 @@ int ServiceImplementation::_getGridIsolinesByTimeAndGeometry(T::SessionId sessio
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridIsolinesByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -3891,7 +4305,13 @@ int ServiceImplementation::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridIsolinesByLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -3950,7 +4370,13 @@ int ServiceImplementation::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridIsolinesByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -4010,7 +4436,13 @@ int ServiceImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessi
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridIsolinesByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4, messageIndex4,newTime,newLevel,contourValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -4090,7 +4522,13 @@ int ServiceImplementation::_getGridStreamlines(T::SessionId sessionId,uint fileI
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridStreamlines(sessionId,fileId,messageIndex,attributeList,modificationOperation,modificationParameters,streamlines);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -4132,7 +4570,13 @@ int ServiceImplementation::_getGridStreamlinesByGeometry(T::SessionId sessionId,
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridStreamlinesByGeometry(sessionId,fileId,messageIndex,attributeList,modificationOperation,modificationParameters,streamlines);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -4173,7 +4617,13 @@ int ServiceImplementation::_getGridStreamlinesByGrid(T::SessionId sessionId,uint
 
       GRID::GridFile_sptr gridFile = getGridFile(fileId);
       if (gridFile == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId);
+        if (dataServer)
+          return dataServer->getGridStreamlinesByGrid(sessionId,fileId,messageIndex,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,streamlines);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
@@ -4215,7 +4665,13 @@ int ServiceImplementation::_getGridStreamlinesByLevel(T::SessionId sessionId,uin
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridStreamlinesByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,attributeList,modificationOperation,modificationParameters,streamlines);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -4256,10 +4712,6 @@ int ServiceImplementation::_getGridStreamlinesByLevel(T::SessionId sessionId,uin
 
 
 
-
-
-
-
 int ServiceImplementation::_getGridStreamlinesByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,int newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
@@ -4272,7 +4724,13 @@ int ServiceImplementation::_getGridStreamlinesByLevelAndGeometry(T::SessionId se
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridStreamlinesByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,attributeList,modificationOperation,modificationParameters,streamlines);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -4324,7 +4782,13 @@ int ServiceImplementation::_getGridStreamlinesByLevelAndGrid(T::SessionId sessio
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridStreamlinesByLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,streamlines);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -4384,7 +4848,13 @@ int ServiceImplementation::_getGridStreamlinesByTime(T::SessionId sessionId,uint
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridStreamlinesByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList,modificationOperation,modificationParameters,streamlines);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -4437,7 +4907,13 @@ int ServiceImplementation::_getGridStreamlinesByTimeAndGeometry(T::SessionId ses
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridStreamlinesByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList,modificationOperation,modificationParameters,streamlines);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -4494,7 +4970,13 @@ int ServiceImplementation::_getGridStreamlinesByTimeAndGrid(T::SessionId session
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridStreamlinesByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,streamlines);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -4556,7 +5038,13 @@ int ServiceImplementation::_getGridStreamlinesByTimeAndLevel(T::SessionId sessio
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridStreamlinesByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,attributeList,modificationOperation,modificationParameters,streamlines);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -4630,7 +5118,13 @@ int ServiceImplementation::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionI
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridStreamlinesByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,attributeList,modificationOperation,modificationParameters,streamlines);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -4703,7 +5197,13 @@ int ServiceImplementation::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId se
 
       GRID::GridFile_sptr gridFile1 = getGridFile(fileId1);
       if (gridFile1 == nullptr)
+      {
+        ServiceInterface *dataServer = getDataServerByFileId(fileId1);
+        if (dataServer)
+          return dataServer->getGridStreamlinesByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,streamlines);
+
         return Result::FILE_NOT_FOUND;
+      }
 
       GRID::Message *message1 = gridFile1->getMessageByIndex(messageIndex1);
       if (message1 == nullptr)
@@ -4821,7 +5321,7 @@ void ServiceImplementation::readContentList(T::ContentInfoList& contentList,bool
 
 
 
-void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFileMap)
+void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFileMap,std::set<uint>& idList)
 {
   FUNCTION_TRACE
   try
@@ -4830,6 +5330,9 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
       return;
 
     mLastVirtualFileRegistration = time(nullptr);
+
+    if (gridFileMap.size() == 0)
+      return;
 
     std::vector<T::FileAndContent> fileAndContentList;
 
@@ -4840,13 +5343,15 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
         return;
 
       auto virtualFilePtr = it->second;
+      //printf(" -- register %u %s\n",virtualFilePtr->getFileId(),virtualFilePtr->getFileName().c_str());
       if (virtualFilePtr->getFileId() == 0)
       {
         T::FileAndContent fc;
         fc.mFileInfo.mName = virtualFilePtr->getFileName();
         fc.mFileInfo.mProducerId = virtualFilePtr->getProducerId();
         fc.mFileInfo.mGenerationId = virtualFilePtr->getGenerationId();
-        fc.mFileInfo.mSourceId = virtualFilePtr->getSourceId();
+        fc.mFileInfo.mSourceId = mServerId;
+        fc.mFileInfo.mServer = mServerName;
         fc.mFileInfo.mFileType = T::FileTypeValue::Virtual;
         fc.mFileInfo.mFlags = fc.mFileInfo.mFlags | T::FileInfo::Flags::VirtualContent;
 
@@ -4855,6 +5360,7 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
         {
           GRID::VirtualMessage *msg = (GRID::VirtualMessage*)virtualFilePtr->getMessageByIndex(t);
           T::ContentInfo *contentInfo = msg->getContentInfo();
+          contentInfo->mSourceId = mServerId;
           fc.mContentInfoList.addContentInfo(contentInfo->duplicate());
         }
 
@@ -4863,6 +5369,7 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
         if (fileAndContentList.size() > 50000)
         {
           mContentServer->addFileInfoListWithContent(mServerSessionId,0,fileAndContentList);
+          PRINT_DATA(mDebugLog,"* Registering virtual files : %u\n",c);
 
           for (auto ff = fileAndContentList.begin(); ff != fileAndContentList.end(); ++ff)
           {
@@ -4884,6 +5391,9 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
                   fFile->addUser(ff->mFileInfo.mFileId);
                 }
 
+                //printf(" -- new %u %s\n",virtualFilePtr->getFileId(),virtualFilePtr->getFileName().c_str());
+                idList.insert(virtualFilePtr->getFileId());
+
                 mGridFileManager.addFile(virtualFilePtr);
               }
             }
@@ -4900,19 +5410,16 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
           fFile->addUser(virtualFilePtr->getFileId());
         }
         mGridFileManager.addFile(virtualFilePtr);
+        idList.insert(virtualFilePtr->getFileId());
+        //printf(" -- add %u %s\n",virtualFilePtr->getFileId(),virtualFilePtr->getFileName().c_str());
       }
-
       c++;
-      if ((c % 10000) == 0)
-      {
-        PRINT_DATA(mDebugLog,"* Registering virtual files : %u\n",c);
-        fflush(stdout);
-      }
     }
 
     if (fileAndContentList.size() > 0)
     {
       mContentServer->addFileInfoListWithContent(mServerSessionId,0,fileAndContentList);
+      PRINT_DATA(mDebugLog,"* Registering virtual files : %u\n",c);
 
       for (auto ff = fileAndContentList.begin(); ff != fileAndContentList.end(); ++ff)
       {
@@ -4934,15 +5441,15 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
               fFile->addUser(ff->mFileInfo.mFileId);
             }
 
+            //printf(" -- new %u %s\n",virtualFilePtr->getFileId(),virtualFilePtr->getFileName().c_str());
+
+            idList.insert(virtualFilePtr->getFileId());
             mGridFileManager.addFile(virtualFilePtr);
           }
         }
       }
-
       fileAndContentList.clear();
     }
-
-    PRINT_DATA(mDebugLog,"* Registering virtual files : %u\n",c);
   }
   catch (...)
   {
@@ -4954,7 +5461,7 @@ void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFil
 
 
 
-void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentList)
+void ServiceImplementation::updateVirtualFiles(T::ContentInfoList& fullContentList)
 {
   FUNCTION_TRACE
   try
@@ -4982,6 +5489,8 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
     }
 
     VirtualGridFilePtr_map gridFileMap;
+
+    std::set<uint> virtualFileIdList;
 
     uint counter = 0;
     uint startFileId = 0;
@@ -5041,7 +5550,12 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
 
             counter++;
             if ((counter % 10000) == 0)
-              PRINT_DATA(mDebugLog,"* Creating virtual files : %lu\n",gridFileMap.size());
+              PRINT_DATA(mDebugLog,"* Processing files : %lu\n",gridFileMap.size());
+          }
+          else
+          {
+            if (fileInfo->mSourceId == mServerId)
+              virtualFileIdList.insert(fileInfo->mFileId);
           }
         }
         catch (...)
@@ -5054,31 +5568,26 @@ void ServiceImplementation::updateVirtualFiles(T::ContentInfoList fullContentLis
     }
     PRINT_DATA(mDebugLog,"* Creating virtual files : %lu\n",gridFileMap.size());
 
-    registerVirtualFiles(gridFileMap);
-
     std::set<uint> idList;
-    mGridFileManager.getVirtualFiles(idList);
+    registerVirtualFiles(gridFileMap,idList);
 
-    PRINT_DATA(mDebugLog,"* Removing old virtual file registrations (%lu/%u)\n",idList.size(),fullContentList.getLength());
-    if (mVirtualContentEnabled)
+    //mGridFileManager.getVirtualFiles(idList);
+
+    PRINT_DATA(mDebugLog,"* Checking old virtual file registrations (%lu/%lu)\n",idList.size(),virtualFileIdList.size());
+
+    std::set<uint> fileDeleteList;
+    for (auto it = virtualFileIdList.begin(); it != virtualFileIdList.end(); ++it)
     {
-      std::set<uint> fileIdList;
-      uint len = fullContentList.getLength();
-      uint testCount = 0;
-      for (uint t=0; t<len; t++)
+      if (idList.find(*it) == idList.end())
       {
-        T::ContentInfo *cInfo = fullContentList.getContentInfoByIndex(t);
-        if (cInfo != nullptr  &&  (cInfo->mFlags &  T::ContentInfo::Flags::VirtualContent) != 0)
-        {
-          testCount++;
-          //if (idList.find(cInfo->mFileId) == idList.end())
-          {
-            fileIdList.insert(cInfo->mFileId);
-          }
-        }
+        fileDeleteList.insert(*it);
       }
-      if (fileIdList.size() > 0)
-        mContentServer->deleteFileInfoListByFileIdList(mServerSessionId,fileIdList);
+    }
+
+    if (fileDeleteList.size() > 0)
+    {
+      PRINT_DATA(mDebugLog,"* Removing virtual files (%lu)\n",fileDeleteList.size());
+      mContentServer->deleteFileInfoListByFileIdList(mServerSessionId,fileDeleteList);
     }
   }
   catch (...)
@@ -5101,7 +5610,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
 
     AutoThreadLock lock(&mThreadLock);
 
-    if ((fileInfo.mFlags & T::FileInfo::Flags::VirtualContent) != 0)
+    if (fileInfo.mFileType == T::FileTypeValue::Virtual || (fileInfo.mFlags & T::FileInfo::Flags::VirtualContent) != 0)
       return;
 
     time_t checkTime = time(nullptr);
@@ -5204,9 +5713,6 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
 
     gridFile->setAccessTime(checkTime);
     gridFile->setCheckTime(checkTime);
-
-    if (mVirtualContentEnabled)
-      mVirtualContentManager.addFile(producerInfo,generationInfo,fileInfo,contentList,mGridFileMap);
   }
   catch (...)
   {
@@ -5307,7 +5813,14 @@ void ServiceImplementation::fullUpdate()
     mGridFileManager.deleteFilesByCheckTime(checkTime);
     mGridFileManager.deleteVirtualFiles();
 
-    updateVirtualFiles(fullContentList);
+    if (mVirtualContentEnabled)
+    {
+      time_t changeTime = 0;
+      mContentServer->getContentChangeTime(mServerSessionId,changeTime);
+      updateVirtualFiles(fullContentList);
+      mContentChangeTime = changeTime;
+    }
+
 
     mFullUpdateRequired = false;
 
@@ -5588,6 +6101,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
       }
     }
 
+    //fileInfo.print(std::cout,0,0);
     addFile(fileInfo,contentList);
 
     uint cnt = mGridFileManager.getFileCount();
@@ -5851,22 +6365,6 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
         mInfo.mGeometryId = contentInfo.mGeometryId;
 
         gridFile->newMessage(contentInfo.mMessageIndex,mInfo);
-        //printf("--- new message %u\n",contentInfo.mMessageIndex);
-
-        if (mVirtualContentEnabled)
-        {
-          T::ProducerInfo producerInfo;
-          T::GenerationInfo generationInfo;
-          T::FileInfo fileInfo;
-          T::ContentInfoList contentList;
-          contentList.addContentInfo(contentInfo.duplicate());
-
-          mContentServer->getProducerInfoById(mServerSessionId,contentInfo.mProducerId,producerInfo);
-          mContentServer->getGenerationInfoById(mServerSessionId,contentInfo.mGenerationId,generationInfo);
-          mContentServer->getFileInfoById(mServerSessionId,contentInfo.mFileId,fileInfo);
-
-          mVirtualContentManager.addFile(producerInfo,generationInfo,fileInfo,contentList,mGridFileMap);
-        }
       }
       catch (...)
       {
@@ -5928,6 +6426,7 @@ void ServiceImplementation::event_deleteVirtualContent(T::EventInfo& eventInfo)
   {
     PRINT_DATA(mDebugLog,"* Delete virtual content\n");
     mGridFileManager.deleteVirtualFiles();
+    mContentChangeTime = 0;
   }
   catch (...)
   {
@@ -5944,6 +6443,9 @@ void ServiceImplementation::event_updateVirtualContent(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
+    if (!mVirtualContentEnabled)
+      return;
+
     PRINT_DATA(mDebugLog,"Update virtual content\n");
     mGridFileManager.deleteVirtualFiles();
     sleep(5);
@@ -5958,7 +6460,10 @@ void ServiceImplementation::event_updateVirtualContent(T::EventInfo& eventInfo)
       fullContentList.sort(T::ContentInfo::ComparisonMethod::file_message);
     }
 
+    time_t changeTime = 0;
+    mContentServer->getContentChangeTime(mServerSessionId,changeTime);
     updateVirtualFiles(fullContentList);
+    mContentChangeTime = changeTime;
   }
   catch (...)
   {
@@ -5975,12 +6480,6 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *n
   //FUNCTION_TRACE
   try
   {
-    if (mGridFileMap.size() > 10000  ||  (mGridFileMap.size() > 0  &&  (mLastVirtualFileRegistration + 60) < time(nullptr)))
-    {
-      registerVirtualFiles(mGridFileMap);
-      mGridFileMap.clear();
-    }
-
     switch (eventInfo.mType)
     {
       case ContentServer::EventType::UNKNOWN:
@@ -6128,13 +6627,25 @@ void ServiceImplementation::processEvents()
       mDeletedFileCleanup_time = currentTime;
     }
 
-
     if (mFullUpdateRequired)
     {
       fullUpdate();
       return;
     }
 
+    if (mVirtualContentEnabled  &&  (mLastVirtualFileCheck + 30) < time(nullptr))
+    {
+      time_t changeTime = 0;
+      mContentServer->getContentChangeTime(mServerSessionId,changeTime);
+
+      if (mContentChangeTime != changeTime || mVirtualContentManager.checkUpdates())
+      {
+        T::EventInfo eventInfo;
+        event_updateVirtualContent(eventInfo);
+        mContentChangeTime = changeTime;
+      }
+      mLastVirtualFileCheck = time(nullptr);
+    }
 
     T::EventInfo eventInfo;
     int result = mContentServer->getLastEventInfo(mServerSessionId,mServerId,eventInfo);
@@ -6151,6 +6662,7 @@ void ServiceImplementation::processEvents()
       mContentServerStartTime = eventInfo.mServerTime;
       return;
     }
+
 
     if (result == Result::OK)
     {

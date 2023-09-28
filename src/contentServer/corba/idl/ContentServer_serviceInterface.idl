@@ -18,6 +18,7 @@ interface ServiceInterface
 {
   long  clear(in long long sessionId);
   long  reload(in long long sessionId);
+  long  getContentChangeTime(in long long sessionId,out long long changeTime);
 
   long  addProducerInfo(in long long sessionId,inout CorbaProducerInfo producerInfo);
   long  deleteProducerInfoById(in long long sessionId,in unsigned long producerId);

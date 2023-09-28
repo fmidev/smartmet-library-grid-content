@@ -30,6 +30,7 @@ PostgresqlImplementation::PostgresqlImplementation()
     mConnection = nullptr;
     mEventTruncateCheckTime = 0;
     mTableCreationAllowed = false;
+    mContentChangeTime = 0;
   }
   catch (...)
   {
@@ -503,6 +504,28 @@ int PostgresqlImplementation::_reload(T::SessionId sessionId)
       return Result::INVALID_SESSION;
 
    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int PostgresqlImplementation::_getContentChangeTime(T::SessionId sessionId,time_t& changeTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    changeTime = mContentChangeTime;
+
+    return Result::OK;
   }
   catch (...)
   {

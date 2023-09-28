@@ -23,7 +23,7 @@ class VirtualContentDefinitionFile
 
     virtual void  init();
     virtual void  init(std::string filename);
-    virtual void  checkUpdates();
+    virtual bool  checkUpdates();
     virtual void  getContentDefinitions(T::ContentInfo& contentInfo,std::string producerName,VirtualContentDefinition_vec& definitions);
     virtual void  print(std::ostream& stream,uint level,uint optionFlags);
 

@@ -258,7 +258,7 @@ void GridFileManager::deleteFilesByAccessTime(time_t accessTime)
 
     for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
     {
-      if (it->second->getAccessTime() < accessTime  &&  !it->second->isVirtual())
+      if (it->second->getAccessTime() < accessTime  &&  !it->second->isVirtual()  &&  it->second->getUserCount() == 0)
         idList.emplace_back(it->first);
     }
 
@@ -495,11 +495,13 @@ void GridFileManager::deleteFileNoLock(uint fileId,bool sentMessageToContentServ
         deleteFileNoLock(*it,sentMessageToContentServer);
       }
 
+      /*
       if (sentMessageToContentServer &&  gridRec->second->isVirtual())
       {
         // We should tell the content server when virtual files are removed.
         mContentServer->deleteFileInfoById(0,fileId);
       }
+      */
 
       mFileList.erase(fileId);
     }

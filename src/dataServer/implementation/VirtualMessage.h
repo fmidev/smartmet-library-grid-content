@@ -49,6 +49,9 @@ class VirtualMessage : public Message
     virtual bool                    getGridLatLonCoordinatesByGridPoint(uint grid_i,uint grid_j,double& lat,double& lon) const;
     virtual bool                    getGridLatLonCoordinatesByGridPosition(double grid_i,double grid_j,double& lat,double& lon) const;
     virtual bool                    getGridLatLonCoordinatesByOriginalCoordinates(double x,double y,double& lat,double& lon) const;
+    virtual bool                    getGridMetricArea(T::Coordinate& topLeft,T::Coordinate& topRight,T::Coordinate& bottomLeft,T::Coordinate& bottomRight);
+    virtual bool                    getGridMetricCellSize(double& width,double& height) const;
+    virtual bool                    getGridMetricSize(double& width,double& height) const;
     virtual bool                    getGridOriginalCoordinatesByGridPoint(uint grid_i,uint grid_j,double& x,double& y) const;
     virtual bool                    getGridOriginalCoordinatesByGridPosition(double grid_i,double grid_j,double& x,double& y) const;
     virtual bool                    getGridOriginalCoordinatesByLatLonCoordinates(double lat,double lon,double& x,double& y) const;
@@ -58,6 +61,15 @@ class VirtualMessage : public Message
     virtual bool                    getGridPointByOriginalCoordinates(double x,double y,double& grid_i,double& grid_j) const;
     virtual T::GridProjection       getGridProjection() const;
     virtual void                    getGridProjectionAttributes(std::string prefix,T::AttributeList& attributeList) const;
+
+    virtual bool                    getGridLatLonArea(T::Coordinate& topLeft,T::Coordinate& topRight,T::Coordinate& bottomLeft,T::Coordinate& bottomRight);
+    virtual T::Coordinate_svec      getGridOriginalCoordinates() const;
+    virtual float                   getGridPointAngleByLatLonCoordinates(double lat,double lon) const;
+    virtual float                   getGridPointAngle(T::CoordinateType coordinateType,double x,double y) const;
+    virtual void                    getGridPointAngles(std::vector<float>& angles) const;
+    virtual void                    getGridPointListByLatLonCoordinates(T::Coordinate_vec& latlon,T::Coordinate_vec& points) const;
+    virtual uint                    getGridWidth() const;
+    virtual uint                    getGridHeight() const;
 
     virtual void                    getGridValueByPoint(T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::ParamValue& value);
     virtual void                    getGridValueListByCircle(T::CoordinateType coordinateType,double origoX,double origoY,double radius,T::GridValueList& valueList);
@@ -81,6 +93,8 @@ class VirtualMessage : public Message
     virtual T::TimeString           getReferenceTime() const;
     virtual T::SpatialRef*          getSpatialReference() const;
     virtual std::string             getWKT() const;
+    virtual std::string             getProj4() const;
+    virtual bool                    isRelativeUV() const;
     virtual bool                    reverseXDirection() const;
     virtual bool                    reverseYDirection() const;
 

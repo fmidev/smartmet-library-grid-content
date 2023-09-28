@@ -124,6 +124,35 @@ int ClientImplementation::_reload(T::SessionId sessionId)
 
 
 
+int ClientImplementation::_getContentChangeTime(T::SessionId sessionId,time_t& changeTime)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getContentChangeTime");
+    request.addLine("sessionId",sessionId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+      changeTime = response.getLineValueByKey("changeTime");
+    else
+      changeTime = 0;
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
 int ClientImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
   try
