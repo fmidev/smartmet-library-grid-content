@@ -112,6 +112,35 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getContentChangeTime(::CORBA::LongLong sessionId, ::CORBA::LongLong& changeTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    changeTime = 0;
+    time_t sTime = 0;
+
+    int result = mService->getContentChangeTime(sessionId,sTime);
+
+    if (result == 0)
+      changeTime = static_cast<::CORBA::ULong>(sTime);
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
 ::CORBA::Long ServerInterface::addProducerInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaProducerInfo& producerInfo)
 {
   FUNCTION_TRACE

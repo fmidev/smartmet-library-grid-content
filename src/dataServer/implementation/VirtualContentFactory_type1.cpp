@@ -65,6 +65,28 @@ void VirtualContentFactory_type1::init(std::string definitionFileName)
 
 
 
+bool VirtualContentFactory_type1::checkUpdates()
+{
+  FUNCTION_TRACE
+  try
+  {
+    printf("** factory update test\n");
+    time_t tt = time(nullptr);
+    if ((tt - mLastCheck) > 10)
+    {
+      mLastCheck = tt;
+      printf("** factory updated\n");
+      return mContentDefinitionFile.checkUpdates();
+    }
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
 
 
 void VirtualContentFactory_type1::addFile(T::ProducerInfo& producerInfo,T::GenerationInfo& generationInfo,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList,VirtualGridFilePtr_map& gridFileMap)
@@ -72,13 +94,6 @@ void VirtualContentFactory_type1::addFile(T::ProducerInfo& producerInfo,T::Gener
   FUNCTION_TRACE
   try
   {
-    time_t tt = time(nullptr);
-    if ((tt - mLastCheck) > 10)
-    {
-      mContentDefinitionFile.checkUpdates();
-      mLastCheck = tt;
-    }
-
     uint len = contentInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -146,7 +161,6 @@ void VirtualContentFactory_type1::addContent(T::ProducerInfo& producerInfo,T::Ge
 
         if (gridFileMap.find(std::string(filename)) == gridFileMap.end())
         {
-
           Identification::FmiParameterDef def;
           if (Identification::gridDef.getFmiParameterDefByName(contentDef->mVirtualParameter.mParameterName.c_str(),def))
           {

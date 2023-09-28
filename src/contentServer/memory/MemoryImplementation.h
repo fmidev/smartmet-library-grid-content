@@ -31,6 +31,7 @@ class MemoryImplementation : public ServiceInterface
 
      virtual int    _clear(T::SessionId sessionId);
      virtual int    _reload(T::SessionId sessionId);
+     virtual int    _getContentChangeTime(T::SessionId sessionId,time_t& changeTime);
 
      virtual int    _addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo);
      virtual int    _deleteProducerInfoById(T::SessionId sessionId,uint producerId);
@@ -213,6 +214,7 @@ class MemoryImplementation : public ServiceInterface
      bool                   mContentSyncEnabled;
      std::string            mContentDir;
      time_t                 mLastSaveTime;
+     time_t                 mContentChangeTime;
      uint                   mContentSaveInterval;
 
      uint                   mProducerCount;

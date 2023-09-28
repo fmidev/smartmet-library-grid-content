@@ -71,7 +71,7 @@ void VirtualContentDefinition::print(std::ostream& stream,uint level,uint option
     stream << space(level) << "- mId                 = " << mId << "\n";
     stream << space(level) << "- mVirtualParameter   = \n";
     mVirtualParameter.print(stream,level+2,optionFlags);
-    stream << space(level) << "- mSourceParameters   = ";
+    stream << space(level) << "- mSourceParameters   = \n";
 
     for (auto it = mSourceParameters.begin(); it != mSourceParameters.end(); ++it)
       it->print(stream,level+2,optionFlags);

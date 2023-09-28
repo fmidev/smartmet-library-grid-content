@@ -22,6 +22,8 @@ class VirtualContentManager
 
     virtual void addVirtualContentFactory(VirtualContentFactory_ptr factory);
 
+    virtual bool checkUpdates();
+
   protected:
 
     std::vector<VirtualContentFactory_ptr> mFactoryList;

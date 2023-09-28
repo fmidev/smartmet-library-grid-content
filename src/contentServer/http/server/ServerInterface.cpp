@@ -101,6 +101,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getContentChangeTime") == 0)
+    {
+      getContentChangeTime(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"addProducerInfo") == 0)
     {
       addProducerInfo(request,response);
@@ -871,6 +877,43 @@ void ServerInterface::reload(T::RequestMessage& request,T::ResponseMessage& resp
 
     if (result != Result::OK)
       response.addLine("resultString",getResultString(result));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ServerInterface::getContentChangeTime(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    time_t changeTime = 0;
+
+    int result = mService->getContentChangeTime(sessionId,changeTime);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      response.addLine("changeTime",changeTime);
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
   }
   catch (...)
   {

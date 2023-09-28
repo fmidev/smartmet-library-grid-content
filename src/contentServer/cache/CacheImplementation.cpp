@@ -85,6 +85,7 @@ CacheImplementation::CacheImplementation()
     mContentSwapEnabled = true;
     mSearchStructurePtr[0] = nullptr;
     mSearchStructurePtr[1] = nullptr;
+    mContentChangeTime = 0;
   }
   catch (...)
   {
@@ -183,6 +184,8 @@ void CacheImplementation::init(T::SessionId sessionId,ServiceInterface *contentS
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
+
+
 
 
 
@@ -442,6 +445,28 @@ void CacheImplementation::reloadData()
   {
     mReloadActivated = false;
     mUpdateInProgress = false;
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int CacheImplementation::_getContentChangeTime(T::SessionId sessionId,time_t& changeTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    changeTime = mContentChangeTime;
+
+    return Result::OK;
+  }
+  catch (...)
+  {
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
@@ -7684,6 +7709,8 @@ void CacheImplementation::updateContent()
         mActiveSearchStructure = 1;
       else
         mActiveSearchStructure = 0;
+
+      mContentChangeTime = time(nullptr);
     }
     else
     {
@@ -7914,6 +7941,8 @@ void CacheImplementation::updateContent()
 
       for (int t=0; t<CONTENT_LIST_COUNT; t++)
         ssp->mContentInfoList[t].setLockingEnabled(false);
+
+      mContentChangeTime = time(nullptr);
 
       PRINT_DATA(mDebugLog, "#### Cache update end #######\n");
     }

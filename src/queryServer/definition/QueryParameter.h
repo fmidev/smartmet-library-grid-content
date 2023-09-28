@@ -25,6 +25,12 @@ class QueryParameter
     QueryParameter*             duplicate();
     void                        print(std::ostream& stream,uint level,uint optionFlags);
 
+    void                        getValueListSize(int& columns,int& rows);
+    T::ParamValue               getValueListValue(int col,int row);
+    void                        getValueListValuesByColumnRange(int startCol,int endCol,int row,std::vector<T::ParamValue>& values);
+    void                        getValueListValuesByRowRange(int col,int startRow,int endRow,std::vector<T::ParamValue>& values);
+    T::GridValue*               getValueListRecord(int col,int row);
+
     uint                        mId;
     uint                        mAlternativeParamId;   // This parameter is an alternative for parameter which id is defined here.
     uchar                       mType;

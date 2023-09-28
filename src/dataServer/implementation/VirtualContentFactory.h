@@ -29,6 +29,7 @@ class VirtualContentFactory
     void          setFunctionCollection(Functions::FunctionCollection *functionCollection);
 
     virtual void  addFile(T::ProducerInfo& producerInfo,T::GenerationInfo& generationInfo,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList,VirtualGridFilePtr_map& gridFileMap);
+    virtual bool  checkUpdates();
 
   protected:
 

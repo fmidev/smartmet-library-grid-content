@@ -50,6 +50,7 @@ class CacheImplementation : public ServiceInterface
     virtual void    shutdown();
     virtual void    synchronize();
     std::string&    getSourceInfo();
+
     virtual void    getCacheStats(Fmi::Cache::CacheStatistics& statistics) const;
 
     virtual void    eventProcessingThread();
@@ -58,6 +59,7 @@ class CacheImplementation : public ServiceInterface
 
     virtual int     _clear(T::SessionId sessionId);
     virtual int     _reload(T::SessionId sessionId);
+    virtual int     _getContentChangeTime(T::SessionId sessionId,time_t& changeTime);
 
     virtual int     _addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo);
     virtual int     _deleteProducerInfoById(T::SessionId sessionId,uint producerId);
@@ -276,6 +278,7 @@ class CacheImplementation : public ServiceInterface
     ModificationLock       mSearchModificationLock;
     ServiceInterface*      mContentStorage;
     time_t                 mContentStorageStartTime;
+    time_t                 mContentChangeTime;
     bool                   mSaveEnabled;
     std::string            mSaveDir;
     uint                   mFileDeleteCounter;

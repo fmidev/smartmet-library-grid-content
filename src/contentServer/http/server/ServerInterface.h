@@ -26,6 +26,7 @@ class ServerInterface
 
     virtual void clear(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void reload(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getContentChangeTime(T::RequestMessage& request,T::ResponseMessage& response);
 
     virtual void addProducerInfo(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void deleteProducerInfoById(T::RequestMessage& request,T::ResponseMessage& response);

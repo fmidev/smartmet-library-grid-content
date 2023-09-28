@@ -20,6 +20,7 @@ class VirtualContentFactory_type1 : public VirtualContentFactory
 
     void        init(std::string definitionFileName);
     void        addFile(T::ProducerInfo& producerInfo,T::GenerationInfo& generationInfo,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList,VirtualGridFilePtr_map& gridFileMap);
+    bool        checkUpdates();
 
   protected:
 

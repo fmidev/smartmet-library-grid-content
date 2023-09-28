@@ -172,6 +172,118 @@ std::size_t QueryParameter::getHash()
 
 
 
+void QueryParameter::getValueListSize(int& columns,int& rows)
+{
+  try
+  {
+    columns = 0;
+    rows = 0;
+    if (mValueList.size() == 0)
+      return;
+
+    rows = mValueList.size();
+    for (auto it = mValueList.begin(); it != mValueList.end(); ++it)
+    {
+      int len = (*it)->mValueList.getLength();
+      if (len > columns)
+        columns = len;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+T::ParamValue QueryParameter::getValueListValue(int col,int row)
+{
+  try
+  {
+    if (row < 0 || row >= (int)mValueList.size())
+      return ParamValueMissing;
+
+    if (col < 0 || col >= (int)mValueList[row]->mValueList.getLength())
+      return ParamValueMissing;
+
+
+    auto rec = mValueList[row]->mValueList.getGridValuePtrByIndex(col);
+    if (!rec)
+      return ParamValueMissing;
+
+    return rec->mValue;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+void QueryParameter::getValueListValuesByColumnRange(int startCol,int endCol,int row,std::vector<T::ParamValue>& values)
+{
+  try
+  {
+    for (int c = startCol; c<= endCol; c++)
+    {
+      values.emplace_back(getValueListValue(c,row));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+void QueryParameter::getValueListValuesByRowRange(int col,int startRow,int endRow,std::vector<T::ParamValue>& values)
+{
+  try
+  {
+    for (int r = startRow; r<= endRow; r++)
+    {
+      values.emplace_back(getValueListValue(col,r));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+T::GridValue* QueryParameter::getValueListRecord(int col,int row)
+{
+  try
+  {
+    if (row < 0 || row >= (int)mValueList.size())
+      return nullptr;
+
+    if (col < 0 || col >= (int)mValueList[row]->mValueList.getLength())
+      return nullptr;
+
+    return mValueList[row]->mValueList.getGridValuePtrByIndex(col);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
 
 QueryParameter* QueryParameter::duplicate()
 {

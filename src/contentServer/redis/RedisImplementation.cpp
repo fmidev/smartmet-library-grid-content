@@ -98,6 +98,7 @@ RedisImplementation::RedisImplementation()
     mShutdownRequested = false;
     mDatabaseLockEnabled = false;
     mReloadRequired = false;
+    mContentChangeTime = 0;
   }
   catch (...)
   {
@@ -494,6 +495,28 @@ bool RedisImplementation::isConnectionValid()
       return false;
 
     return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int RedisImplementation::_getContentChangeTime(T::SessionId sessionId,time_t& changeTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    changeTime = mContentChangeTime;
+
+    return Result::OK;
   }
   catch (...)
   {
@@ -3203,7 +3226,6 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
         addEvent(EventType::FILE_ADDED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,len,0);
       }
     }
-
     return Result::OK;
   }
   catch (...)
@@ -5961,7 +5983,6 @@ int RedisImplementation::_deleteVirtualContent(T::SessionId sessionId)
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-
     int result = deleteVirtualFiles(true);
 
     if (result == Result::OK)
@@ -5991,7 +6012,6 @@ int RedisImplementation::_updateVirtualContent(T::SessionId sessionId)
 
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
 
     int result = deleteVirtualFiles(true);
 

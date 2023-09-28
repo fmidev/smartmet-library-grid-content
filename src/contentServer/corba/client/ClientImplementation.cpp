@@ -255,6 +255,30 @@ int ClientImplementation::_reload(T::SessionId sessionId)
 
 
 
+int ClientImplementation::_getContentChangeTime(T::SessionId sessionId,time_t& changeTime)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    ::CORBA::LongLong corbaTime = 0;
+
+    int result = mService->getContentChangeTime(sessionId, corbaTime);
+
+    if (result == 0)
+      changeTime = corbaTime;
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
 int ClientImplementation::_addProducerInfo(T::SessionId sessionId, T::ProducerInfo& producerInfo)
 {
   try

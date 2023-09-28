@@ -117,6 +117,23 @@ void VirtualContentFactory::setFunctionCollection(Functions::FunctionCollection 
 
 
 
+bool VirtualContentFactory::checkUpdates()
+{
+  FUNCTION_TRACE
+  try
+  {
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void VirtualContentFactory::addFile(T::ProducerInfo& producerInfo,T::GenerationInfo& generationInfo,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList,VirtualGridFilePtr_map& gridFileMap)
 {
   FUNCTION_TRACE

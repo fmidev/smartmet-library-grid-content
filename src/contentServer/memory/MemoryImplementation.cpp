@@ -81,6 +81,7 @@ MemoryImplementation::MemoryImplementation()
 
     mContentInfoList[0].setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
     mContentInfoList[0].setLockingEnabled(true);
+    mContentChangeTime = 0;
 
     for (int t=1; t<CONTENT_LIST_COUNT; t++)
     {
@@ -400,6 +401,28 @@ int MemoryImplementation::_reload(T::SessionId sessionId)
     mUpdateInProgress = false;
 
    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int MemoryImplementation::_getContentChangeTime(T::SessionId sessionId,time_t& changeTime)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    changeTime = mContentChangeTime;
+
+    return Result::OK;
   }
   catch (...)
   {

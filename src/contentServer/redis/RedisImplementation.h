@@ -30,6 +30,7 @@ class RedisImplementation : public ServiceInterface
 
      virtual int    _clear(T::SessionId sessionId);
      virtual int    _reload(T::SessionId sessionId);
+     virtual int    _getContentChangeTime(T::SessionId sessionId,time_t& changeTime);
 
      virtual int    _addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo);
      virtual int    _deleteProducerInfoById(T::SessionId sessionId,uint producerId);
@@ -272,7 +273,7 @@ class RedisImplementation : public ServiceInterface
      bool           mDatabaseLockEnabled;
      bool           mReloadRequired;
      ThreadLock     mThreadLock;
-
+     time_t         mContentChangeTime;
 };
 
 
