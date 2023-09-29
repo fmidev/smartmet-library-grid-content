@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 23.9.11
+Version: 23.9.29
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -28,8 +28,8 @@ BuildRequires: make
 BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 23.8.30
-BuildRequires: smartmet-library-grid-files-devel >= 23.9.11
+BuildRequires: smartmet-library-gis-devel >= 23.9.12
+BuildRequires: smartmet-library-grid-files-devel >= 23.9.29
 BuildRequires: smartmet-library-macgyver-devel >= 23.8.31
 BuildRequires: smartmet-library-spine-devel >= 23.8.31
 BuildRequires: postgresql15-devel
@@ -39,8 +39,8 @@ Requires: libcurl
 Requires: lua-devel
 Requires: omniORB
 Requires: postgresql15-libs
-Requires: smartmet-library-gis >= 23.8.30
-Requires: smartmet-library-grid-files >= 23.9.11
+Requires: smartmet-library-gis >= 23.9.12
+Requires: smartmet-library-grid-files >= 23.9.29
 Requires: smartmet-library-macgyver >= 23.8.31
 Requires: smartmet-library-spine >= 23.8.31
 
@@ -77,9 +77,9 @@ Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
 Requires: smartmet-library-macgyver-devel >= 23.8.31
-Requires: smartmet-library-gis-devel >= 23.8.30
+Requires: smartmet-library-gis-devel >= 23.9.12
 Requires: smartmet-library-spine-devel >= 23.8.31
-Requires: smartmet-library-grid-files-devel >= 23.9.11
+Requires: smartmet-library-grid-files-devel >= 23.9.29
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -89,6 +89,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Sep 29 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.9.29-1.fmi
+- Added virtual grid features
+- Added time aggregation for point requests
 * Mon Sep 11 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.9.11-1.fmi
 - Adding grid size coordinate cache statistics
 * Fri Jul 28 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.7.28-1.fmi
