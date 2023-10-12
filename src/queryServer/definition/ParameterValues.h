@@ -51,7 +51,6 @@ class ParameterValues
         static const uint  DataAvailable                         = 1 << 2;
         static const uint  DataAvailableByTimeInterpolation      = 1 << 3;
         static const uint  DataAvailableByLevelInterpolation     = 1 << 4;
-        static const uint  InternalAggregationValue              = 1 << 5;  // Value is added internally for aggregation purposes
     };
 
 };

@@ -106,24 +106,48 @@ void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 {
   try
   {
-    if (inParameters.size() != 2)
-      return;
-
-    uint len = inParameters[0].size();
-    outParameters.reserve(len);
-    for (uint t=0; t<len; t++)
+    if (inParameters.size() == 2)
     {
-      double a = inParameters[0][t];
-      double b = inParameters[1][t];
+      uint len = inParameters[0].size();
+      outParameters.reserve(len);
 
-      if (a != ParamValueMissing  &&  b != ParamValueMissing)
+      for (uint t=0; t<len; t++)
       {
-        float c = a*b;
-        outParameters.emplace_back(c);
+        double a = inParameters[0][t];
+        double b = inParameters[1][t];
+
+        if (a != ParamValueMissing  &&  b != ParamValueMissing)
+        {
+          float c = a*b;
+          outParameters.emplace_back(c);
+        }
+        else
+        {
+          outParameters.emplace_back(ParamValueMissing);
+        }
       }
-      else
+      return;
+    }
+
+    if (inParameters.size() == 1  &&  extParameters.size() == 1)
+    {
+      double b = extParameters[0];
+      uint len = inParameters[0].size();
+      outParameters.reserve(len);
+
+      for (uint t=0; t<len; t++)
       {
-        outParameters.emplace_back(ParamValueMissing);
+        double a = inParameters[0][t];
+
+        if (a != ParamValueMissing)
+        {
+          float c = a*b;
+          outParameters.emplace_back(c);
+        }
+        else
+        {
+          outParameters.emplace_back(ParamValueMissing);
+        }
       }
     }
   }
@@ -141,24 +165,48 @@ void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 {
   try
   {
-    if (inParameters.size() != 2)
-      return;
-
-    uint len = inParameters[0].size();
-    outParameters.reserve(len);
-    for (uint t=0; t<len; t++)
+    if (inParameters.size() == 2)
     {
-      double a = inParameters[0][t];
-      double b = inParameters[1][t];
+      uint len = inParameters[0].size();
+      outParameters.reserve(len);
 
-      if (a != ParamValueMissing  &&  b != ParamValueMissing)
+      for (uint t=0; t<len; t++)
       {
-        float c = a*b;
-        outParameters.emplace_back(c);
+        double a = inParameters[0][t];
+        double b = inParameters[1][t];
+
+        if (a != ParamValueMissing  &&  b != ParamValueMissing)
+        {
+          float c = a*b;
+          outParameters.emplace_back(c);
+        }
+        else
+        {
+          outParameters.emplace_back(ParamValueMissing);
+        }
       }
-      else
+      return;
+    }
+
+    if (inParameters.size() == 1  &&  extParameters.size() == 1)
+    {
+      double b = extParameters[0];
+      uint len = inParameters[0].size();
+      outParameters.reserve(len);
+
+      for (uint t=0; t<len; t++)
       {
-        outParameters.emplace_back(ParamValueMissing);
+        double a = inParameters[0][t];
+
+        if (a != ParamValueMissing)
+        {
+          float c = a*b;
+          outParameters.emplace_back(c);
+        }
+        else
+        {
+          outParameters.emplace_back(ParamValueMissing);
+        }
       }
     }
   }

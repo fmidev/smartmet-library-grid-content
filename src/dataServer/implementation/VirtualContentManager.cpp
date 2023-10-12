@@ -105,16 +105,12 @@ bool VirtualContentManager::checkUpdates()
   FUNCTION_TRACE
   try
   {
-    printf("** content manager update test\n");
     bool res = false;
     for (auto factory = mFactoryList.begin(); factory != mFactoryList.end(); ++factory)
     {
       if ((*factory)->checkUpdates())
         res = true;
     }
-
-    printf("** content manager update result = %d\n",(int)res);
-
 
     return res;
   }

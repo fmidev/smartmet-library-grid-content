@@ -70,12 +70,10 @@ bool VirtualContentFactory_type1::checkUpdates()
   FUNCTION_TRACE
   try
   {
-    printf("** factory update test\n");
     time_t tt = time(nullptr);
     if ((tt - mLastCheck) > 10)
     {
       mLastCheck = tt;
-      printf("** factory updated\n");
       return mContentDefinitionFile.checkUpdates();
     }
     return false;
