@@ -103,8 +103,6 @@ double Function_sum::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
-
-
 void Function_sum::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try
@@ -113,18 +111,26 @@ void Function_sum::executeFunctionCall9(uint columns,uint rows,std::vector<std::
     uint len = inParameters.size();
     outParameters.reserve(sz);
 
+    double b = 0;
+    if (extParameters.size() > 0)
+    {
+      for (auto it=extParameters.begin(); it != extParameters.end();++it)
+        b = b + *it;
+    }
+
     for (uint s=0; s<sz; s++)
     {
-      float sum = 0;
+      double sum = 0;
       for (uint t=0; t<len; t++)
       {
         if (s < inParameters[t].size())
         {
-          float val = inParameters[t][s];
+          double val = inParameters[t][s];
           if (val != ParamValueMissing)
             sum += val;
         }
       }
+      sum += b;
       outParameters.emplace_back(sum);
     }
   }
@@ -146,6 +152,13 @@ void Function_sum::executeFunctionCall9(uint columns,uint rows,std::vector<std::
     uint len = inParameters.size();
     outParameters.reserve(sz);
 
+    double b = 0;
+    if (extParameters.size() > 0)
+    {
+      for (auto it=extParameters.begin(); it != extParameters.end();++it)
+        b = b + *it;
+    }
+
     for (uint s=0; s<sz; s++)
     {
       double sum = 0;
@@ -158,6 +171,7 @@ void Function_sum::executeFunctionCall9(uint columns,uint rows,std::vector<std::
             sum += val;
         }
       }
+      sum += b;
       outParameters.emplace_back(sum);
     }
   }

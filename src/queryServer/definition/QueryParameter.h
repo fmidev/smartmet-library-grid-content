@@ -30,6 +30,9 @@ class QueryParameter
     void                        getValueListValuesByColumnRange(int startCol,int endCol,int row,std::vector<T::ParamValue>& values);
     void                        getValueListValuesByRowRange(int col,int startRow,int endRow,std::vector<T::ParamValue>& values);
     T::GridValue*               getValueListRecord(int col,int row);
+    void                        getValueVectorsByRowRange(int startRow,int endRow,std::vector<std::vector<T::ParamValue>>& valueVectors);
+    void                        removeAggregationValues();
+    void                        updateForecastTimeList(std::set<time_t>& mForecastTimeList);
 
     uint                        mId;
     uint                        mAlternativeParamId;   // This parameter is an alternative for parameter which id is defined here.
@@ -99,6 +102,8 @@ class QueryParameter
         static const uint  SameAnalysisTime             = 1 << 4;
         static const uint  AlternativeParameter         = 1 << 5;
         static const uint  InvisibleParameter           = 1 << 6;
+        static const uint  OriginalCoordinates          = 1 << 7;
+        static const uint  InternalAggregationParameter = 1 << 8;
     };
 };
 

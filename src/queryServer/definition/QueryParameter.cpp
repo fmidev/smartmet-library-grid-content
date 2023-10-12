@@ -264,6 +264,70 @@ void QueryParameter::getValueListValuesByRowRange(int col,int startRow,int endRo
 
 
 
+void QueryParameter::getValueVectorsByRowRange(int startRow,int endRow,std::vector<std::vector<T::ParamValue>>& valueVectors)
+{
+  try
+  {
+    if (startRow < 0 || endRow >= (int)mValueList.size())
+      return;
+
+    for (int r = startRow; r<= endRow; r++)
+    {
+      valueVectors.emplace_back(mValueList[r]->mValueVector);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+void QueryParameter::removeAggregationValues()
+{
+  try
+  {
+    ParameterValues_sptr_vec valueList = mValueList;
+    mValueList.clear();
+
+    for (auto it=valueList.begin(); it != valueList.end(); ++it)
+    {
+      if (((*it)->mFlags & ParameterValues::Flags::AggregationValue) == 0)
+        mValueList.emplace_back(*it);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+void QueryParameter::updateForecastTimeList(std::set<time_t>& mForecastTimeList)
+{
+  try
+  {
+    for (auto it=mValueList.begin(); it != mValueList.end(); ++it)
+    {
+      mForecastTimeList.insert((*it)->mForecastTimeUTC);
+    }
+
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 T::GridValue* QueryParameter::getValueListRecord(int col,int row)
 {
   try

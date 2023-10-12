@@ -55,6 +55,82 @@ Function_outPrcnt::~Function_outPrcnt()
 
 
 
+float Function_outPrcnt::executeFunctionCall1(std::vector<float>& parameters)
+{
+  try
+  {
+    if (parameters.size() < 3)
+      return ParamValueMissing;
+
+    double min = parameters[0];
+    double max = parameters[1];
+
+    uint agree = 0;
+    uint missing = 0;
+
+    uint len = parameters.size();
+    for (uint s=2; s<len; s++)
+    {
+      double val = parameters[s];
+      if (val == ParamValueMissing)
+        missing++;
+      else
+      if (val < min  ||  val > max)
+        agree++;
+    }
+
+    if (missing == (len-2))
+      return ParamValueMissing;
+
+    return (float)agree*100/(float)(len-2);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+double Function_outPrcnt::executeFunctionCall1(std::vector<double>& parameters)
+{
+  try
+  {
+    if (parameters.size() < 3)
+      return ParamValueMissing;
+
+    double min = parameters[0];
+    double max = parameters[1];
+
+    uint agree = 0;
+    uint missing = 0;
+
+    uint len = parameters.size();
+    for (uint s=2; s<len; s++)
+    {
+      double val = parameters[s];
+      if (val == ParamValueMissing)
+        missing++;
+      else
+      if (val < min  ||  val > max)
+        agree++;
+    }
+
+    if (missing == (len-2))
+      return ParamValueMissing;
+
+    return (double)agree*100/(double)(len-2);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
 void Function_outPrcnt::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try

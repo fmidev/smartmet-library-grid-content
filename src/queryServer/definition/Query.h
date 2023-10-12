@@ -23,7 +23,10 @@ class Query
     uint                getValuesPerTimeStep();
     std::size_t         getHash();
     void                getResultProducerIdList(std::set<uint>& producerIdList);
+    void                removeAggregationValues();
+    void                removeInternalAggregationValues();
     void                removeTemporaryParameters();
+    void                updateForecastTimeList();
     void                print(std::ostream& stream,uint level,uint optionFlags);
 
     uchar               mSearchType;
@@ -70,6 +73,7 @@ class Query
         static const uint AcceptNotReadyGeometries        = 1 << 9;
         static const uint LatestGeneration                = 1 << 10;
         static const uint OldestGeneration                = 1 << 11;
+        static const uint TimeStepIsData                  = 1 << 12;
     };
 
 };

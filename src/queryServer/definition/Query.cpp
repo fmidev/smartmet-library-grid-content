@@ -278,6 +278,63 @@ void Query::removeTemporaryParameters()
 
 
 
+void Query::removeAggregationValues()
+{
+  try
+  {
+    for (auto it = mQueryParameterList.begin(); it != mQueryParameterList.end(); ++it)
+    {
+      it->removeAggregationValues();
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+void Query::removeInternalAggregationValues()
+{
+  try
+  {
+    for (auto it = mQueryParameterList.begin(); it != mQueryParameterList.end(); ++it)
+    {
+      if (it->mFlags & QueryParameter::Flags::InternalAggregationParameter)
+        it->removeAggregationValues();
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+void Query::updateForecastTimeList()
+{
+  try
+  {
+    mForecastTimeList.clear();
+    for (auto it = mQueryParameterList.begin(); it != mQueryParameterList.end(); ++it)
+    {
+      it->updateForecastTimeList(mForecastTimeList);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+
+}
+
+
 void Query::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try

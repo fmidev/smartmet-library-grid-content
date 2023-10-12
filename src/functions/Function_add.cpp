@@ -127,6 +127,12 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
     if (inParameters.size() != 1)
       return;
 
+    double b = mValueToAdd;
+    if (extParameters.size() > 0)
+    {
+      for (auto it=extParameters.begin(); it != extParameters.end();++it)
+        b = b + *it;
+    }
     uint len = inParameters[0].size();
     outParameters.reserve(len);
     for (uint t=0; t<len; t++)
@@ -135,7 +141,7 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
       if (a != ParamValueMissing)
       {
-        float c = (float)(a + mValueToAdd);
+        double c = (double)(a + b);
         outParameters.emplace_back(c);
       }
       else
@@ -161,6 +167,12 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
     if (inParameters.size() != 1)
       return;
 
+    double b = mValueToAdd;
+    if (extParameters.size() > 0)
+    {
+      for (auto it=extParameters.begin(); it != extParameters.end();++it)
+        b = b + *it;
+    }
     uint len = inParameters[0].size();
     outParameters.reserve(len);
     for (uint t=0; t<len; t++)
@@ -169,7 +181,7 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
       if (a != ParamValueMissing)
       {
-        double c = (double)(a + mValueToAdd);
+        double c = (double)(a + b);
         outParameters.emplace_back(c);
       }
       else

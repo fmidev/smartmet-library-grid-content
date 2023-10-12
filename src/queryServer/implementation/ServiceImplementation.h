@@ -127,9 +127,12 @@ class ServiceImplementation : public ServiceInterface
      void           checkParameterMappingUpdates();
 
      bool           getAlias(const std::string& name,std::string& alias);
+     void           executeQueryFunctions_vector(Query& query);
      void           executeQueryFunctions(Query& query);
      int            executeTimeRangeQuery(Query& query);
      int            executeTimeStepQuery(Query& query);
+     void           postProcessQuery(Query& query);
+
      void           startUpdateProcessing();
 
      void           getGridValues(
@@ -291,6 +294,7 @@ class ServiceImplementation : public ServiceInterface
      void           loadProducerFile();
 
      bool           parseFunction(
+                       Query& query,
                        QueryParameter& queryParam,
                        const std::string& paramStr,
                        std::string& function,
