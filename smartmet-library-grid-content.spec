@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 23.9.29
+Version: 23.10.12
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -89,6 +89,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Oct 12 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.10.12-1.fmi
+- Implemented aggregation functionality
+
 * Fri Sep 29 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.9.29-1.fmi
 - Added virtual grid features
 - Added time aggregation for point requests
