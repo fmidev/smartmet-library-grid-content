@@ -75,6 +75,12 @@ vpath %.cpp src/ \
 			src/dataServer/implementation \
 			src/queryServer/definition \
 			src/queryServer/implementation \
+      src/sessionManagement \
+			src/sessionManagement/definition \
+			src/sessionManagement/implementation \
+      src/userManagement \
+			src/userManagement/definition \
+			src/userManagement/implementation \
 			src/functions \
 			src/lua
 
@@ -96,6 +102,12 @@ vpath %.h 	src/ \
 			src/dataServer/implementation \
 			src/queryServer/definition \
 			src/queryServer/implementation \
+      src/sessionManagement \
+			src/sessionManagement/definition \
+			src/sessionManagement/implementation \
+      src/userManagement \
+			src/userManagement/definition \
+			src/userManagement/implementation \
 			src/functions \
 			src/lua
 
@@ -141,6 +153,12 @@ vpath %.cpp src/ \
 			src/queryServer/corba/convert \
 			src/queryServer/corba/stubs \
 			src/queryServer/corba/server \
+      src/sessionManagement \
+			src/sessionManagement/definition \
+			src/sessionManagement/implementation \
+      src/userManagement \
+			src/userManagement/definition \
+			src/userManagement/implementation \
 			src/functions \
 			src/lua
 
@@ -175,6 +193,12 @@ vpath %.h 	src/ \
 			src/queryServer/corba/convert \
 			src/queryServer/corba/stubs \
 			src/queryServer/corba/server \
+      src/sessionManagement \
+			src/sessionManagement/definition \
+			src/sessionManagement/implementation \
+      src/userManagement \
+			src/userManagement/definition \
+			src/userManagement/implementation \
 			src/functions \
 			src/lua
 
@@ -271,6 +295,12 @@ install:
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer/definition
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer/idl
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer/implementation
+	@mkdir -p $(includedir)/$(INCDIR)/sessionManagement
+	@mkdir -p $(includedir)/$(INCDIR)/sessionManagement/definition
+	@mkdir -p $(includedir)/$(INCDIR)/sessionManagement/implementation
+	@mkdir -p $(includedir)/$(INCDIR)/userManagement
+	@mkdir -p $(includedir)/$(INCDIR)/userManagement/definition
+	@mkdir -p $(includedir)/$(INCDIR)/userManagement/implementation
 	@mkdir -p $(includedir)/$(INCDIR)/functions
 	@mkdir -p $(includedir)/$(INCDIR)/lua
 	@cp src/contentServer/cache/*.h $(includedir)/$(INCDIR)/contentServer/cache
@@ -287,6 +317,10 @@ install:
 	@cp src/dataServer/implementation/*.h $(includedir)/$(INCDIR)/dataServer/implementation
 	@cp src/queryServer/definition/*.h $(includedir)/$(INCDIR)/queryServer/definition
 	@cp src/queryServer/implementation/*.h $(includedir)/$(INCDIR)/queryServer/implementation
+	@cp src/sessionManagement/definition/*.h $(includedir)/$(INCDIR)/sessionManagement/definition
+	@cp src/sessionManagement/implementation/*.h $(includedir)/$(INCDIR)/sessionManagement/implementation
+	@cp src/userManagement/definition/*.h $(includedir)/$(INCDIR)/userManagement/definition
+	@cp src/userManagement/implementation/*.h $(includedir)/$(INCDIR)/userManagement/implementation
 	@cp src/functions/*.h $(includedir)/$(INCDIR)/functions
 	@cp src/lua/*.h $(includedir)/$(INCDIR)/lua
 ifneq ($(CORBA), disabled)
@@ -347,6 +381,10 @@ objdir:
 	@mkdir -p obj/dataServer/implementation
 	@mkdir -p obj/queryServer/definition
 	@mkdir -p obj/queryServer/implementation
+	@mkdir -p obj/sessionManagement/definition
+	@mkdir -p obj/sessionManagement/implementation
+	@mkdir -p obj/userManagement/definition
+	@mkdir -p obj/userManagement/implementation
 	@mkdir -p obj/functions
 	@mkdir -p obj/lua
 ifneq ($(CORBA), disabled)
