@@ -30,7 +30,7 @@ BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 23.9.12
 BuildRequires: smartmet-library-grid-files-devel >= 23.9.29
-BuildRequires: smartmet-library-macgyver-devel >= 23.8.31
+BuildRequires: smartmet-library-macgyver-devel >= 23.11.8
 BuildRequires: smartmet-library-spine-devel >= 23.8.31
 BuildRequires: postgresql15-devel
 Requires: %{smartmet_boost}-date-time
@@ -41,7 +41,7 @@ Requires: omniORB
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 23.9.12
 Requires: smartmet-library-grid-files >= 23.9.29
-Requires: smartmet-library-macgyver >= 23.8.31
+Requires: smartmet-library-macgyver >= 23.11.8
 Requires: smartmet-library-spine >= 23.8.31
 
 Provides: %{SPECNAME}
@@ -76,7 +76,7 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 23.8.31
+Requires: smartmet-library-macgyver-devel >= 23.11.8
 Requires: smartmet-library-gis-devel >= 23.9.12
 Requires: smartmet-library-spine-devel >= 23.8.31
 Requires: smartmet-library-grid-files-devel >= 23.9.29
