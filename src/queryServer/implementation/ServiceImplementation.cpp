@@ -39,7 +39,7 @@ namespace SmartMet
 namespace QueryServer
 {
 
-boost::local_time::time_zone_ptr tz_utc(new boost::local_time::posix_time_zone("UTC"));
+Fmi::TimeZonePtr tz_utc(new boost::local_time::posix_time_zone("UTC"));
 
 
 thread_local static ContentCache mContentCache;
@@ -106,13 +106,13 @@ ServiceImplementation::ServiceImplementation()
     mContentCache_maxRecords = 0;
     mContentCache_maxRecordsPerThread = 500000;
     mContentCache_stats.size = 0;
-    mContentCache_stats.starttime = boost::posix_time::second_clock::universal_time();
+    mContentCache_stats.starttime = Fmi::SecondClock::universal_time();
     mContentCache_records = 0;
     mContentSearchCache_maxRecords = 0;
     mContentSearchCache_maxRecordsPerThread = 500000;
     mContentSearchCache_records = 0;
     mContentSearchCache_stats.size = 0;
-    mContentSearchCache_stats.starttime = boost::posix_time::second_clock::universal_time();
+    mContentSearchCache_stats.starttime = Fmi::SecondClock::universal_time();
     mCheckGeometryStatus = false;
     mParameterMappingCache_clearTime = time(nullptr);
     mProducerGenerationListCache_clearTime  = time(nullptr);
@@ -3488,7 +3488,7 @@ void ServiceImplementation::executeConversion(const std::string& function, std::
   try
   {
     // ******************** TODO: Make this conversion better ******************
-    boost::local_time::local_date_time utcTime(toTimeStamp(utcTimeFromTimeT(forecastTime)), nullptr);
+    Fmi::LocalDateTime utcTime(toTimeStamp(utcTimeFromTimeT(forecastTime)), nullptr);
     auto functionPtr = mFunctionCollection.getFunction(function);
 
     uint vLen = valueList.getLength();
@@ -9132,7 +9132,7 @@ void ServiceImplementation::getAdditionalValues(
     std::string param = toLowerString(parameterName);
 
     auto dt = boost::posix_time::from_time_t(values.mForecastTimeUTC);
-    boost::local_time::local_date_time utcTime(dt, tz_utc);
+    Fmi::LocalDateTime utcTime(dt, tz_utc);
 
     if (param == "dem")
     {
@@ -9515,7 +9515,7 @@ T::ParamValue ServiceImplementation::getAdditionalValue(
   {
     std::string param = toLowerString(parameterName);
     auto dt = boost::posix_time::from_time_t(forecastTime);
-    boost::local_time::local_date_time utcTime(dt, tz_utc);
+    Fmi::LocalDateTime utcTime(dt, tz_utc);
 
     if (param == "dem")
     {
