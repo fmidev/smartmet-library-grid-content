@@ -191,8 +191,11 @@ class ServiceImplementation : public ServiceInterface
                        short levelInterpolationMethod,
                        time_t startTime,
                        time_t endTime,
-                       uint timesteps,
-                       uint timestepSizeInMinutes,
+                       uint queryTimesteps,
+                       uint queryTimestepSizeInMinutes,
+                       uint parameterTimestepsBefore,
+                       uint parameterTimestepsAfter,
+                       uint parameterTimestepSizeInMinutes,
                        uchar locationType,
                        uchar coordinateType,
                        T::AreaCoordinates& areaCoordinates,
@@ -205,6 +208,7 @@ class ServiceImplementation : public ServiceInterface
                        ParameterValues_sptr_vec& valueList,
                        T::Coordinate_vec& coordinates,
                        std::string& producerStr,
+                       uint valueCounter,
                        uint recursionCounter);
 
      void           getParameterStringInfo(

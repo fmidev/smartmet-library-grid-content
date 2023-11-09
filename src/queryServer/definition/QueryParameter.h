@@ -103,7 +103,8 @@ class QueryParameter
         static const uint  AlternativeParameter         = 1 << 5;
         static const uint  InvisibleParameter           = 1 << 6;
         static const uint  OriginalCoordinates          = 1 << 7;
-        static const uint  InternalAggregationParameter = 1 << 8;
+        static const uint  AggregationParameter         = 1 << 8;
+        static const uint  InternalAggregationParameter = 1 << 9;
     };
 };
 

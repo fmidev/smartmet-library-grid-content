@@ -74,6 +74,7 @@ class Query
         static const uint LatestGeneration                = 1 << 10;
         static const uint OldestGeneration                = 1 << 11;
         static const uint TimeStepIsData                  = 1 << 12;
+        static const uint ForceStartTime                  = 1 << 13;
     };
 
 };

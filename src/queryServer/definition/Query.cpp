@@ -260,12 +260,14 @@ void Query::removeTemporaryParameters()
 {
   try
   {
-    while (mQueryParameterList.size() > 0)
+    int s = mQueryParameterList.size();
+    while (s > 0)
     {
-      if (mQueryParameterList[mQueryParameterList.size()-1].mTemporary)
+      if (mQueryParameterList[s-1].mTemporary)
+      {
         mQueryParameterList.pop_back();
-      else
-        return;
+      }
+      s--;
     }
   }
   catch (...)

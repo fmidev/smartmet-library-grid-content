@@ -1857,7 +1857,7 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
             QueryParameter* q = query.getQueryParameterPtr(it->first);
             if (q != nullptr)
             {
-              if (tCount < q->mValueList.size())
+              if ((std::size_t)tCount < q->mValueList.size())
               {
                 if (producerId == 0 && q->mValueList[tCount]->mProducerId > 0)
                 {
@@ -1963,8 +1963,8 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
             }
             else
             {
-              std::string luaFunction;
-              uint type = mLuaFileCollection.getFunction(function, luaFunction);
+              //std::string luaFunction;
+              //uint type = mLuaFileCollection.getFunction(function, luaFunction);
               switch (type)
               {
                 case 9:
@@ -1986,8 +1986,8 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
 
     if (containsAggregation)
     {
-      //query.removeInternalAggregationValues();
-      query.removeAggregationValues();
+      query.removeInternalAggregationValues();
+      //query.removeAggregationValues();
     }
 
     query.updateForecastTimeList();
@@ -2079,7 +2079,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
               std::vector<double> valueList;
               if (q != nullptr)
               {
-                if (tCount < q->mValueList.size())
+                if ((std::size_t)tCount < q->mValueList.size())
                 {
                   if (producerId == 0 && q->mValueList[tCount]->mProducerId > 0)
                   {
@@ -2365,14 +2365,6 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
       }
     }
 
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      std::stringstream stream;
-      query.print(stream, 0, 0);
-      PRINT_DATA(mDebugLog, "\nQuery -object after function execution:\n");
-      PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
-    }
-
     query.removeTemporaryParameters();
 
     if (containsAggregation)
@@ -2382,6 +2374,14 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
     }
 
     query.updateForecastTimeList();
+
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
+    {
+      std::stringstream stream;
+      query.print(stream, 0, 0);
+      PRINT_DATA(mDebugLog, "\nQuery -object after function execution:\n");
+      PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
+    }
   }
   catch (...)
   {
@@ -2520,6 +2520,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
             time_t startTime = query.mStartTime;
             time_t endTime = query.mEndTime;
 
+            /*
             if (qParam->mTimestepsBefore > 0)
             {
               startTime = startTime - ((qParam->mTimestepsBefore + 1) * qParam->mTimestepSizeInMinutes * 60);
@@ -2529,6 +2530,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
             {
               endTime = endTime + (qParam->mTimestepsAfter * qParam->mTimestepSizeInMinutes * 60);
             }
+            */
 
             if ((query.mFlags & Query::Flags::StartTimeFromData) != 0)
             {
@@ -2579,10 +2581,15 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
             std::string producerStr;
 
+            //auto timesteps = query.mTimesteps + qParam->mTimestepsBefore + qParam->mTimestepsAfter;
+            //auto timestepSizeInMinutes = query.mTimestepSizeInMinutes;
+            //if (qParam->mFlags & QueryParameter::Flags::InternalAggregationParameter || qParam->mTimestepSizeInMinutes != 0)
+            //  timestepSizeInMinutes = qParam->mTimestepSizeInMinutes;
+
             getGridValues(qParam->mType,tmpProducers, geomIdList, producerId, analysisTime, generationFlags, acceptNotReadyGenerations, paramName, paramHash, paramLevelId, paramLevel, forecastType,
                 forecastNumber, queryFlags, parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, startTime, endTime, query.mTimesteps,
-                qParam->mTimestepSizeInMinutes,qParam->mLocationType, query.mCoordinateType, query.mAreaCoordinates, qParam->mContourLowValues, qParam->mContourHighValues, query.mAttributeList,
-                query.mRadius, query.mMaxParameterValues, qParam->mPrecision, qParam->mValueList,qParam->mCoordinates,producerStr,0);
+                query.mTimestepSizeInMinutes,qParam->mTimestepsBefore,qParam->mTimestepsAfter,qParam->mTimestepSizeInMinutes,qParam->mLocationType, query.mCoordinateType, query.mAreaCoordinates, qParam->mContourLowValues, qParam->mContourHighValues, query.mAttributeList,
+                query.mRadius, query.mMaxParameterValues, qParam->mPrecision, qParam->mValueList,qParam->mCoordinates,producerStr,0,0);
 
             if (qParam->mValueList.size() > 0 /*|| ((parameterFlags & QueryParameter::Flags::NoReturnValues) != 0  &&  (qParam->mValueList[0].mFlags & ParameterValues::Flags::DataAvailable) != 0)*/)
             {
@@ -2636,11 +2643,24 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
     // Finding out which forecast time are found from the forecast data. The point is that different
     // parameters might contain different forecast times, and we want a list of all forecast times.
 
+    std::set<time_t> originalTimeList;
     std::set<time_t> timeList;
     for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
     {
       for (auto it = qParam->mValueList.begin(); it != qParam->mValueList.end(); ++it)
       {
+        if (qParam->mTemporary || (/*(qParam->mFlags & QueryParameter::Flags::InternalAggregationParameter)  && */ ((*it)->mFlags & ParameterValues::Flags::AggregationValue)))
+        {
+        }
+        else
+        {
+          if (originalTimeList.find((*it)->mForecastTimeUTC) == originalTimeList.end())
+          {
+            originalTimeList.insert((*it)->mForecastTimeUTC);
+            // std::cout << "INSERT " << qParam->mParam  << " " << utcTimeFromTimeT((*it)->mForecastTimeUTC) << "\n";
+          }
+        }
+
         timeList.insert((*it)->mForecastTimeUTC);
       }
     }
@@ -2696,7 +2716,16 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
             if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN)
             {
-              pValues->mFlags = pValues->mFlags | QueryServer::ParameterValues::Flags::AdditionalValue;
+              if (originalTimeList.find(*tt) != originalTimeList.end())
+              {
+                // std::cout << "ADDITIONAL " << qParam->mParam  << " " << utcTimeFromTimeT(*tt) << "\n";
+                pValues->mFlags = pValues->mFlags | QueryServer::ParameterValues::Flags::AdditionalValue;
+              }
+              else
+              {
+                // std::cout << "AGGREGATION " << qParam->mParam  << " " << utcTimeFromTimeT(*tt) << "\n";
+                pValues->mFlags = pValues->mFlags | QueryServer::ParameterValues::Flags::AggregationValue;
+              }
             }
 
             getAdditionalValues(qParam->mSymbolicName,query.mCoordinateType,coordinates,*pValues);
@@ -8457,8 +8486,11 @@ void ServiceImplementation::getGridValues(
     short levelInterpolationMethod,
     time_t startTime,
     time_t endTime,
-    uint timesteps,
-    uint timestepSizeInMinutes,
+    uint queryTimesteps,
+    uint queryTimestepSizeInMinutes,
+    uint parameterTimestepsBefore,
+    uint parameterTimestepsAfter,
+    uint parameterTimestepSizeInMinutes,
     uchar locationType,
     uchar coordinateType,
     T::AreaCoordinates& areaCoordinates,
@@ -8471,6 +8503,7 @@ void ServiceImplementation::getGridValues(
     ParameterValues_sptr_vec& valueList,
     T::Coordinate_vec& coordinates,
     std::string& producerStr,
+    uint valueCounter,
     uint recursionCounter)
 {
   FUNCTION_TRACE
@@ -8487,38 +8520,42 @@ void ServiceImplementation::getGridValues(
     if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
     {
       PRINT_DATA(mDebugLog, "\nMETHOD getGridValues()\n");
-      PRINT_DATA(mDebugLog, "  - queryType                : %u\n", queryType);
-      PRINT_DATA(mDebugLog, "  - producers                : %lu items\n", producers.size());
+      PRINT_DATA(mDebugLog, "  - queryType                      : %u\n", queryType);
+      PRINT_DATA(mDebugLog, "  - producers                      : %lu items\n", producers.size());
       for (auto it = producers.begin(); it != producers.end(); ++it)
         PRINT_DATA(mDebugLog, "    * %s:%d\n", it->first.c_str(), it->second);
-      PRINT_DATA(mDebugLog, "  - geometryIdList           : %lu items\n", geometryIdList.size());
+      PRINT_DATA(mDebugLog, "  - geometryIdList                 : %lu items\n", geometryIdList.size());
       for (auto it = geometryIdList.begin(); it != geometryIdList.end(); ++it)
         PRINT_DATA(mDebugLog, "    * %d\n",* it);
-      PRINT_DATA(mDebugLog, "  - producerId               : %u\n", producerId);
-      PRINT_DATA(mDebugLog, "  - analysisTime             : %s\n", analysisTime.c_str());
-      PRINT_DATA(mDebugLog, "  - generationFlags          : %llu\n", generationFlags);
-      PRINT_DATA(mDebugLog, "  - parameterKey             : %s\n", parameterKey.c_str());
-      PRINT_DATA(mDebugLog, "  - paramLevelId             : %d\n", paramLevelId);
-      PRINT_DATA(mDebugLog, "  - paramLevel               : %d\n", paramLevel);
-      PRINT_DATA(mDebugLog, "  - forecastType             : %d\n", forecastType);
-      PRINT_DATA(mDebugLog, "  - forecastNumber           : %d\n", forecastNumber);
-      PRINT_DATA(mDebugLog, "  - queryFlags               : %04x\n", queryFlags);
-      PRINT_DATA(mDebugLog, "  - parameterFlags           : %04x\n", parameterFlags);
-      PRINT_DATA(mDebugLog, "  - areaInterpolationMethod  : %d\n", areaInterpolationMethod);
-      PRINT_DATA(mDebugLog, "  - timeInterpolationMethod  : %d\n", timeInterpolationMethod);
-      PRINT_DATA(mDebugLog, "  - levelInterpolationMethod : %d\n", levelInterpolationMethod);
-      PRINT_DATA(mDebugLog, "  - startTime                : %s\n", utcTimeFromTimeT(startTime).c_str());
-      PRINT_DATA(mDebugLog, "  - endTime                  : %s\n", utcTimeFromTimeT(endTime).c_str());
-      PRINT_DATA(mDebugLog, "  - timesteps                : %u\n", timesteps);
-      PRINT_DATA(mDebugLog, "  - timestepSizeInMinutes    : %u\n", timestepSizeInMinutes);
-      PRINT_DATA(mDebugLog, "  - locationType             : %d\n", locationType);
-      PRINT_DATA(mDebugLog, "  - coordinateType           : %d\n", coordinateType);
-      PRINT_DATA(mDebugLog, "  - areaCoordinates          : %lu vectors\n", areaCoordinates.size());
-      PRINT_DATA(mDebugLog, "  - radius                   : %f\n", radius);
-      PRINT_DATA(mDebugLog, "  - contourLowValues         : %lu values\n",contourLowValues.size());
-      PRINT_DATA(mDebugLog, "  - contourHighValues        : %lu values\n",contourHighValues.size());
-      PRINT_DATA(mDebugLog, "  - maxValues                : %u\n\n", maxValues);
-      PRINT_DATA(mDebugLog, "  - recursionCounter         : %u\n\n", recursionCounter);
+      PRINT_DATA(mDebugLog, "  - producerId                     : %u\n", producerId);
+      PRINT_DATA(mDebugLog, "  - analysisTime                   : %s\n", analysisTime.c_str());
+      PRINT_DATA(mDebugLog, "  - generationFlags                : %llu\n", generationFlags);
+      PRINT_DATA(mDebugLog, "  - parameterKey                   : %s\n", parameterKey.c_str());
+      PRINT_DATA(mDebugLog, "  - paramLevelId                   : %d\n", paramLevelId);
+      PRINT_DATA(mDebugLog, "  - paramLevel                     : %d\n", paramLevel);
+      PRINT_DATA(mDebugLog, "  - forecastType                   : %d\n", forecastType);
+      PRINT_DATA(mDebugLog, "  - forecastNumber                 : %d\n", forecastNumber);
+      PRINT_DATA(mDebugLog, "  - queryFlags                     : %04x\n", queryFlags);
+      PRINT_DATA(mDebugLog, "  - parameterFlags                 : %04x\n", parameterFlags);
+      PRINT_DATA(mDebugLog, "  - areaInterpolationMethod        : %d\n", areaInterpolationMethod);
+      PRINT_DATA(mDebugLog, "  - timeInterpolationMethod        : %d\n", timeInterpolationMethod);
+      PRINT_DATA(mDebugLog, "  - levelInterpolationMethod       : %d\n", levelInterpolationMethod);
+      PRINT_DATA(mDebugLog, "  - startTime                      : %s\n", utcTimeFromTimeT(startTime).c_str());
+      PRINT_DATA(mDebugLog, "  - endTime                        : %s\n", utcTimeFromTimeT(endTime).c_str());
+      PRINT_DATA(mDebugLog, "  - queryTimesteps                 : %u\n", queryTimesteps);
+      PRINT_DATA(mDebugLog, "  - queryTimestepSizeInMinutes     : %u\n", queryTimestepSizeInMinutes);
+      PRINT_DATA(mDebugLog, "  - parameterTimestepsBefore       : %u\n", parameterTimestepsBefore);
+      PRINT_DATA(mDebugLog, "  - parameterTimestepsBefore       : %u\n", parameterTimestepsAfter);
+      PRINT_DATA(mDebugLog, "  - parameterTimestepSizeInMinutes : %u\n", parameterTimestepSizeInMinutes);
+      PRINT_DATA(mDebugLog, "  - locationType                   : %d\n", locationType);
+      PRINT_DATA(mDebugLog, "  - coordinateType                 : %d\n", coordinateType);
+      PRINT_DATA(mDebugLog, "  - areaCoordinates                : %lu vectors\n", areaCoordinates.size());
+      PRINT_DATA(mDebugLog, "  - radius                         : %f\n", radius);
+      PRINT_DATA(mDebugLog, "  - contourLowValues               : %lu values\n",contourLowValues.size());
+      PRINT_DATA(mDebugLog, "  - contourHighValues              : %lu values\n",contourHighValues.size());
+      PRINT_DATA(mDebugLog, "  - maxValues                      : %u\n", maxValues);
+      PRINT_DATA(mDebugLog, "  - valueCounter                   : %u\n", valueCounter);
+      PRINT_DATA(mDebugLog, "  - recursionCounter               : %u\n", recursionCounter);
     }
 
     if (queryType != QueryParameter::Type::GridFile  &&  areaCoordinates.size() == 0  &&  queryAttributeList.getAttributeValue("grid.geometryId") == nullptr  &&  queryAttributeList.getAttributeValue("grid.geometryString") == nullptr  &&  queryAttributeList.getAttributeValue("grid.urn") == nullptr  &&  queryAttributeList.getAttributeValue("grid.crs") == nullptr)
@@ -8541,7 +8578,8 @@ void ServiceImplementation::getGridValues(
 
     std::string maxAnalysisTime;
 
-    uint timestepSizeInSeconds = timestepSizeInMinutes*60;
+    uint queryTimestepSizeInSeconds = queryTimestepSizeInMinutes*60;
+    uint parameterTimestepSizeInSeconds = parameterTimestepSizeInMinutes*60;
 
     time_t requiredAccessTime = time(nullptr) + 120;
 
@@ -8552,6 +8590,10 @@ void ServiceImplementation::getGridValues(
     bool reverseGenerations = false;
     if ((queryFlags & Query::Flags::ReverseGenerationFlags) != 0)
       reverseGenerations = true;
+
+    bool timeStepIsData = false;
+    if (queryFlags & Query::Flags::TimeStepIsData)
+      timeStepIsData = true;
 
     // Going through the producer list.
 
@@ -8776,93 +8818,215 @@ void ServiceImplementation::getGridValues(
                     geometryIdList2.insert(producerGeometryId);
 
                     std::set<time_t> originalTimes;
-
-                    bool timeStepsEnabled = true;
-                    if ((queryFlags & Query::Flags::TimeStepIsData) || timestepSizeInMinutes == 0  ||  timesteps == 0)
-                    {
-                      timeStepsEnabled = false;
-                    }
-                    else
-                    {
-                      for (auto it1 = contentTimeList.begin(); it1 != contentTimeList.end(); ++it1)
-                      {
-                        originalTimes.insert(it1->first);
-                      }
-                    }
-
-
                     std::map<time_t,std::string> contentTimeList2;
 
-                    if (timeStepsEnabled  &&  timestepSizeInMinutes > 0 && (queryFlags & Query::Flags::StartTimeFromData) != 0  &&  (queryFlags & Query::Flags::EndTimeFromData) == 0)
+                    time_t startTime_tt = startTime;
+                    time_t endTime_tt = endTime;
+
+                    auto dataStartTime_tt = contentTimeList.begin()->first;
+                    auto dataEndTime_tt = contentTimeList.rbegin()->first;
+
+                    if ((queryFlags & Query::Flags::StartTimeFromData) != 0)
                     {
-                      auto it = contentTimeList.begin();
-                      time_t  tt = it->first;
-                      time_t  et = tt + timesteps * timestepSizeInSeconds;
-
-                      if (timesteps == 0)
-                        et = endTime;
-
-                      while (tt <= et)
-                      {
-                        //std::string ts = utcTimeFromTimeT(tt);
-                        contentTimeList2.insert(std::pair<time_t,std::string>(tt,analysisTime));
-
-                        tt = tt + timestepSizeInSeconds;
-                      }
+                      startTime_tt = dataStartTime_tt;
                     }
                     else
-                    if (timeStepsEnabled  &&  timestepSizeInMinutes > 0 && (queryFlags & Query::Flags::StartTimeFromData) == 0  &&  (queryFlags & Query::Flags::EndTimeFromData) != 0)
                     {
-                      auto it = contentTimeList.rbegin();
-                      time_t  tt = it->first;
-                      time_t  et = tt - timesteps * timestepSizeInSeconds;
+                      // Finding first valid start time
 
-                      if (timesteps == 0)
-                        et = startTime;
-
-                      while (tt >= et)
+                      time_t  tt = 0;
+                      std::string atime;
+                      for (auto tm = contentTimeList.begin(); tm != contentTimeList.end()  &&  tt == 0; ++tm)
                       {
-                        contentTimeList2.insert(std::pair<time_t,std::string>(tt,analysisTime));
-                        tt = tt - timestepSizeInSeconds;
+                        if (tm->first >= startTime)
+                        {
+                          tt = tm->first;
+                          atime = tm->second;
+                        }
+                      }
+
+                      if (queryFlags & Query::Flags::ForceStartTime)
+                      {
+                        // We have to use the given starttime.
+                        contentTimeList.insert(std::pair<time_t,std::string>(startTime_tt,atime));
+                      }
+                      else
+                      {
+                        if (tt > 0)
+                          startTime_tt = tt;
                       }
                     }
-                    else
-                    if (timeStepsEnabled  &&  timestepSizeInMinutes > 0 && (queryFlags & Query::Flags::StartTimeFromData) != 0  &&  (queryFlags & Query::Flags::EndTimeFromData) != 0)
-                    {
-                      auto it1 = contentTimeList.begin();
-                      time_t tt = it1->first;
 
-                      auto it2 = contentTimeList.rbegin();
-                      time_t et = it2->first;
+                    if ((queryFlags & Query::Flags::EndTimeFromData) != 0)
+                      endTime_tt = dataEndTime_tt;
 
-                      while (tt <= et)
-                      {
-                        contentTimeList2.insert(std::pair<time_t,std::string>(tt,analysisTime));
-                        tt = tt + timestepSizeInSeconds;
-                      }
-                    }
-                    else
-                    if (timeStepsEnabled  &&  timestepSizeInMinutes > 0 && (queryFlags & Query::Flags::StartTimeFromData) == 0  &&  (queryFlags & Query::Flags::EndTimeFromData) == 0)
-                    {
-                      time_t  tt = startTime;
-                      time_t  et = endTime;
+                    //if (startTime_tt < dataStartTime_tt)
+                    //  startTime_tt = dataStartTime_tt;
 
-                      while (tt <= et)
-                      {
-                        contentTimeList2.insert(std::pair<time_t,std::string>(tt,analysisTime));
-                        tt = tt + timestepSizeInSeconds;
-                      }
-                    }
-                    else
+                    if (endTime_tt > dataEndTime_tt)
+                      endTime_tt = dataEndTime_tt;
+
+
+                    PRINT_DATA(mDebugLog," -- TIME RANGE %s - %s\n",utcTimeFromTimeT(startTime_tt).c_str(),utcTimeFromTimeT(endTime_tt).c_str());
+
+                    if (timeStepIsData)
                     {
                       for (auto it1 = contentTimeList.begin(); it1 != contentTimeList.end(); ++it1)
                       {
-                        contentTimeList2.insert(std::pair<time_t,std::string>(it1->first,it1->second));
+                        // We should pick data times that are in the given time range.
+
+                        if (it1->first >= startTime_tt  &&  it1->first <= endTime_tt)
+                        {
+                          if (queryTimesteps == 0 ||  valueCounter < queryTimesteps)
+                          {
+                            // If the parameter requires aggregation then we have to pick some additional times.
+
+                            for (uint tt=parameterTimestepsBefore; tt > 0; tt--)
+                            {
+                              time_t nt = it1->first - (tt * parameterTimestepSizeInSeconds);
+                              if (contentTimeList2.find(nt) == contentTimeList2.end())
+                              {
+                                // Required aggregation time might have different analysis time than the actual data time.
+
+                                auto at = contentTimeList.find(nt);
+                                if (at != contentTimeList.end())
+                                  contentTimeList2.insert(std::pair<time_t,std::string>(nt,at->second));
+                                else
+                                  contentTimeList2.insert(std::pair<time_t,std::string>(nt,it1->second));
+                              }
+                            }
+
+                            // Adding the data time.
+
+                            contentTimeList2.insert(std::pair<time_t,std::string>(it1->first,it1->second));
+                            originalTimes.insert(it1->first);
+
+                            // If the parameter requires aggregation then we have to pick some additional times.
+
+                            for (uint tt=1; tt <= parameterTimestepsAfter; tt++)
+                            {
+                              time_t nt = it1->first + (tt * parameterTimestepSizeInSeconds);
+                              if (contentTimeList2.find(nt) == contentTimeList2.end())
+                              {
+                                // Required aggregation time might have different analysis time than the actual data time.
+
+                                auto at = contentTimeList.find(nt);
+                                if (at != contentTimeList.end())
+                                  contentTimeList2.insert(std::pair<time_t,std::string>(nt,at->second));
+                                else
+                                  contentTimeList2.insert(std::pair<time_t,std::string>(nt,it1->second));
+                              }
+                            }
+
+                            valueCounter++;
+                          }
+                        }
+                      }
+                    }
+                    else
+                    {
+                      if (queryTimestepSizeInSeconds > 0)
+                      {
+                        auto qst = queryTimesteps;
+                        if (queryTimesteps == 0  && startTime_tt <= endTime_tt)
+                        {
+                          auto td = endTime_tt - startTime_tt;
+                          qst = (td/queryTimestepSizeInSeconds) + 1;
+                        }
+
+                        if (qst > 0  &&  qst < 10000)
+                        {
+                          auto stt = startTime_tt;
+                          for (uint ts = 0; ts<qst; ts++)
+                          {
+                            if (queryTimesteps == 0 ||  valueCounter < queryTimesteps)
+                            {
+                              // If the parameter requires aggregation then we have to pick some additional times.
+
+                              for (uint tt=parameterTimestepsBefore; tt > 0; tt--)
+                              {
+                                time_t nt = stt - (tt * parameterTimestepSizeInSeconds);
+                                if (contentTimeList2.find(nt) == contentTimeList2.end())
+                                {
+                                  auto at = contentTimeList.find(nt);
+                                  if (at != contentTimeList.end())
+                                    contentTimeList2.insert(std::pair<time_t,std::string>(nt,at->second));
+                                  else
+                                  {
+                                    auto upper = contentTimeList.upper_bound(nt);
+                                    if (upper != contentTimeList.end())
+                                      contentTimeList2.insert(std::pair<time_t,std::string>(nt,upper->second));
+                                    else
+                                    {
+                                      auto lower = contentTimeList.lower_bound(nt);
+                                      if (lower != contentTimeList.end())
+                                        contentTimeList2.insert(std::pair<time_t,std::string>(nt,lower->second));
+                                      else
+                                        contentTimeList2.insert(std::pair<time_t,std::string>(nt,analysisTime));
+                                    }
+                                  }
+                                }
+                              }
+
+                              // Adding the timestep time and its analysis time.
+
+                              auto at = contentTimeList.find(stt);
+                              if (at != contentTimeList.end())
+                                contentTimeList2.insert(std::pair<time_t,std::string>(stt,at->second));
+                              else
+                              {
+                                auto upper = contentTimeList.upper_bound(stt);
+                                if (upper != contentTimeList.end())
+                                  contentTimeList2.insert(std::pair<time_t,std::string>(stt,upper->second));
+                                else
+                                {
+                                  auto lower = contentTimeList.lower_bound(stt);
+                                  if (lower != contentTimeList.end())
+                                    contentTimeList2.insert(std::pair<time_t,std::string>(stt,lower->second));
+                                  else
+                                    contentTimeList2.insert(std::pair<time_t,std::string>(stt,analysisTime));
+                                }
+                              }
+
+                              originalTimes.insert(stt);
+
+                              // If the parameter requires aggregation then we have to pick some additional times.
+
+                              for (uint tt=1; tt <= parameterTimestepsAfter; tt++)
+                              {
+                                time_t nt = stt + (tt * parameterTimestepSizeInSeconds);
+                                if (contentTimeList2.find(nt) == contentTimeList2.end())
+                                {
+                                  auto at = contentTimeList.find(nt);
+                                  if (at != contentTimeList.end())
+                                    contentTimeList2.insert(std::pair<time_t,std::string>(nt,at->second));
+                                  else
+                                  {
+                                    auto upper = contentTimeList.upper_bound(nt);
+                                    if (upper != contentTimeList.end())
+                                      contentTimeList2.insert(std::pair<time_t,std::string>(nt,upper->second));
+                                    else
+                                    {
+                                      auto lower = contentTimeList.lower_bound(nt);
+                                      if (lower != contentTimeList.end())
+                                        contentTimeList2.insert(std::pair<time_t,std::string>(nt,lower->second));
+                                      else
+                                        contentTimeList2.insert(std::pair<time_t,std::string>(nt,analysisTime));
+                                    }
+                                  }
+                                }
+                              }
+
+                              stt += queryTimestepSizeInSeconds;
+                              valueCounter++;
+                            }
+                          }
+                        }
                       }
                     }
 
-                    time_t a_lastTime = startTime;
 
+                    time_t a_lastTime = startTime;
                     for (auto forecastTime = contentTimeList2.begin(); forecastTime != contentTimeList2.end(); ++forecastTime)
                     {
                       if (((forecastTime->first == startTime && !ignoreStartTimeValue) || (forecastTime->first > startTime && forecastTime->first <= endTime)))
@@ -8882,17 +9046,15 @@ void ServiceImplementation::getGridValues(
                             a_lastTime = valList->mForecastTimeUTC;
 
                           if (originalTimes.size() && originalTimes.find(valList->mForecastTimeUTC) == originalTimes.end())
+                          {
                             valList->mFlags |= ParameterValues::Flags::AggregationValue;
+                            PRINT_DATA(mDebugLog," ##### set aggregationFlag (%ld) %s\n",originalTimes.size(),utcTimeFromTimeT(valList->mForecastTimeUTC).c_str());
+                          }
 
                           valueList.emplace_back(valList);
                         }
-
-                        if (valueList.size() == maxValues)
-                          return;
                       }
                     }
-
-                    PRINT_DATA(mDebugLog, "    - Value list size = %ld\n\n",valueList.size());
 
                     if (producers.size() > 1)
                     {
@@ -8910,8 +9072,9 @@ void ServiceImplementation::getGridValues(
 
                         producerStr = "";
                         getGridValues(queryType,rec->second, tmpGeomIdList, 0, analysisTime, generationFlags, acceptNotReadyGenerations, parameterKey, parameterHash, paramLevelId, paramLevel, forecastType,
-                            forecastNumber,queryFlags,parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, a_lastTime+1,endTime, timesteps, timestepSizeInMinutes, locationType,
-                            coordinateType, areaCoordinates, contourLowValues, contourHighValues, queryAttributeList,radius,maxValues,precision,valueList,coordinates,producerStr,recursionCounter+1);
+                            forecastNumber,queryFlags,parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, a_lastTime+1,endTime, queryTimesteps, queryTimestepSizeInMinutes,
+                            parameterTimestepsBefore,parameterTimestepsAfter,parameterTimestepSizeInMinutes,locationType,coordinateType, areaCoordinates, contourLowValues,
+                            contourHighValues, queryAttributeList,radius,maxValues,precision,valueList,coordinates,producerStr,valueCounter,recursionCounter+1);
                       }
                     }
                     return;
