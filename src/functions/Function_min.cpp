@@ -64,8 +64,11 @@ float Function_min::executeFunctionCall1(std::vector<float>& parameters)
     for (uint t=0; t<len; t++)
     {
       auto val = parameters[t];
-      if (min == ParamValueMissing || val < min)
-        min = val;
+      if (val != ParamValueMissing)
+      {
+        if (min == ParamValueMissing || val < min)
+          min = val;
+      }
     }
     return min;
   }
@@ -88,8 +91,11 @@ double Function_min::executeFunctionCall1(std::vector<double>& parameters)
     for (uint t=0; t<len; t++)
     {
       auto val = parameters[t];
-      if (min == ParamValueMissing || val < min)
-        min = val;
+      if (val != ParamValueMissing)
+      {
+        if (min == ParamValueMissing || val < min)
+          min = val;
+      }
     }
     return min;
   }
@@ -121,8 +127,11 @@ void Function_min::executeFunctionCall9(uint columns,uint rows,std::vector<std::
         if (s < inParameters[t].size())
         {
           float val = inParameters[t][s];
-          if (min == ParamValueMissing || val < min)
-            min = val;
+          if (val != ParamValueMissing)
+          {
+            if (min == ParamValueMissing || val < min)
+              min = val;
+          }
         }
       }
       outParameters.emplace_back(min);
@@ -154,8 +163,11 @@ void Function_min::executeFunctionCall9(uint columns,uint rows,std::vector<std::
         if (s < inParameters[t].size())
         {
           double val = inParameters[t][s];
-          if (min == ParamValueMissing || val < min)
-            min = val;
+          if (val != ParamValueMissing)
+          {
+            if (min == ParamValueMissing || val < min)
+              min = val;
+          }
         }
       }
       outParameters.emplace_back(min);

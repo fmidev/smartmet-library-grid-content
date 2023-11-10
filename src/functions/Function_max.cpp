@@ -64,8 +64,11 @@ float Function_max::executeFunctionCall1(std::vector<float>& parameters)
     for (uint t=0; t<len; t++)
     {
       auto val = parameters[t];
-      if (max == ParamValueMissing || val > max)
-        max = val;
+      if (val != ParamValueMissing)
+      {
+        if (max == ParamValueMissing || val > max)
+          max = val;
+      }
     }
     return max;
   }
@@ -88,8 +91,11 @@ double Function_max::executeFunctionCall1(std::vector<double>& parameters)
     for (uint t=0; t<len; t++)
     {
       auto val = parameters[t];
-      if (max == ParamValueMissing || val > max)
-        max = val;
+      if (val != ParamValueMissing)
+      {
+        if (max == ParamValueMissing || val > max)
+          max = val;
+      }
     }
     return max;
   }
@@ -121,8 +127,11 @@ void Function_max::executeFunctionCall9(uint columns,uint rows,std::vector<std::
         if (s < inParameters[t].size())
         {
           float val = inParameters[t][s];
-          if (max == ParamValueMissing || val > max)
-            max = val;
+          if (val != ParamValueMissing)
+          {
+            if (max == ParamValueMissing || val > max)
+              max = val;
+          }
         }
       }
       outParameters.emplace_back(max);
@@ -154,8 +163,11 @@ void Function_max::executeFunctionCall9(uint columns,uint rows,std::vector<std::
         if (s < inParameters[t].size())
         {
           double val = inParameters[t][s];
-          if (max == ParamValueMissing || val > max)
-            max = val;
+          if (val != ParamValueMissing)
+          {
+            if (max == ParamValueMissing || val > max)
+              max = val;
+          }
         }
       }
       outParameters.emplace_back(max);
