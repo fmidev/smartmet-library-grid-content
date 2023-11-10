@@ -305,6 +305,7 @@ void Query::removeInternalAggregationValues()
   {
     for (auto it = mQueryParameterList.begin(); it != mQueryParameterList.end(); ++it)
     {
+      it->removeInternalAggregationValues();
       if (it->mFlags & QueryParameter::Flags::InternalAggregationParameter)
         it->removeAggregationValues();
     }

@@ -2406,6 +2406,8 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
     uint queryFlags = query.mFlags;
     int globalGeometryId = 0;
     bool acceptNotReadyGenerations = false;
+    bool containsTsAggregation = false;
+    bool containsInternalAggregation = false;
 
     if (producers.size() == 0)
       return Result::NO_PRODUCERS_FOUND;
@@ -2495,6 +2497,12 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
         if (generationFlags == 0)
           generationFlags = query.mGenerationFlags;
 
+        if (qParam->mFlags & QueryParameter::Flags::AggregationParameter)
+          containsTsAggregation = true;
+
+        if (qParam->mFlags & QueryParameter::Flags::InternalAggregationParameter)
+          containsInternalAggregation = true;
+
         bool useAlternative = false;
 
         getParameterStringInfo(qParam->mParam, ':', paramName, geometryId, paramLevelId, paramLevel, forecastType, forecastNumber, producerName,producerId, generationFlags, areaInterpolationMethod,
@@ -2519,18 +2527,6 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
           {
             time_t startTime = query.mStartTime;
             time_t endTime = query.mEndTime;
-
-            /*
-            if (qParam->mTimestepsBefore > 0)
-            {
-              startTime = startTime - ((qParam->mTimestepsBefore + 1) * qParam->mTimestepSizeInMinutes * 60);
-            }
-
-            if (qParam->mTimestepsAfter > 0)
-            {
-              endTime = endTime + (qParam->mTimestepsAfter * qParam->mTimestepSizeInMinutes * 60);
-            }
-            */
 
             if ((query.mFlags & Query::Flags::StartTimeFromData) != 0)
             {
@@ -2649,7 +2645,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
     {
       for (auto it = qParam->mValueList.begin(); it != qParam->mValueList.end(); ++it)
       {
-        if (qParam->mTemporary || (/*(qParam->mFlags & QueryParameter::Flags::InternalAggregationParameter)  && */ ((*it)->mFlags & ParameterValues::Flags::AggregationValue)))
+        if (qParam->mTemporary || ((*it)->mFlags & ParameterValues::Flags::InternalAggregationValue))
         {
         }
         else
@@ -2690,7 +2686,12 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
                 && (((*it)->mForecastTimeUTC < query.mStartTime || (*it)->mForecastTimeUTC > query.mEndTime) ||
                     ((*it)->mForecastTimeUTC == query.mStartTime &&  (query.mFlags & Query::Flags::StartTimeNotIncluded) != 0))
             )
+            {
               (*it)->mFlags = (*it)->mFlags | QueryServer::ParameterValues::Flags::AggregationValue;
+
+              if (containsInternalAggregation)
+                (*it)->mFlags = (*it)->mFlags | QueryServer::ParameterValues::Flags::InternalAggregationValue;
+            }
 
             if ((*it)->mForecastTimeUTC < *tt)
               cnt++;
@@ -2714,7 +2715,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
             std::shared_ptr<ParameterValues> pValues = std::make_shared<ParameterValues>();
             pValues->mForecastTimeUTC = *tt;
 
-            if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN)
+            //if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN)
             {
               if (originalTimeList.find(*tt) != originalTimeList.end())
               {
@@ -2725,6 +2726,9 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
               {
                 // std::cout << "AGGREGATION " << qParam->mParam  << " " << utcTimeFromTimeT(*tt) << "\n";
                 pValues->mFlags = pValues->mFlags | QueryServer::ParameterValues::Flags::AggregationValue;
+
+                if (containsInternalAggregation)
+                  pValues->mFlags = pValues->mFlags | QueryServer::ParameterValues::Flags::InternalAggregationValue;
               }
             }
 
@@ -2768,6 +2772,8 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
     int globalGeometryId = 0;
     std::unordered_set<uint> alternativeRequired;
     bool acceptNotReadyGenerations = false;
+    bool containsTsAggregation = false;
+    bool containsInternalAggregation = false;
 
     if (query.mFlags & Query::Flags::AcceptNotReadyGenerations)
       acceptNotReadyGenerations = true;
@@ -2807,7 +2813,6 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
       }
     }
 
-    //std::unordered_map<std::string,uint> parameterProducers;
 
     // Parsing parameters and functions in the query.
 
@@ -2872,6 +2877,13 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
         std::set<time_t> *forecastTimeList = &query.mForecastTimeList;
         std::set<time_t> forecastTimeList2;
 
+
+        if (qParam->mFlags & QueryParameter::Flags::AggregationParameter)
+          containsTsAggregation = true;
+
+        if (qParam->mFlags & QueryParameter::Flags::InternalAggregationParameter)
+          containsInternalAggregation = true;
+
         if (qParam->mTimestepsBefore > 0 || qParam->mTimestepsAfter > 0)
         {
           forecastTimeList = &forecastTimeList2;
@@ -2935,17 +2947,6 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
           try
           {
-            /*
-            if (producerId == 0)
-            {
-              auto it = parameterProducers.find(paramName + ":" + producerName);
-              if (it != parameterProducers.end())
-              {
-                producerId = it->second;
-              }
-            }
-            */
-
             if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN  &&  !useAlternative)
             {
               Producer_vec *producersPtr = &producers;
@@ -2994,13 +2995,6 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
                   forecastNumber,queryFlags,parameterFlags, areaInterpolationMethod, timeInterpolationMethod, levelInterpolationMethod, *fTime, false, qParam->mLocationType,
                   query.mCoordinateType, query.mAreaCoordinates, qParam->mContourLowValues, qParam->mContourHighValues, query.mAttributeList,query.mRadius,qParam->mPrecision,*valueList,qParam->mCoordinates,producerStr);
 
-              /*
-              if (producerId == 0 && valueList->mProducerId != 0)
-              {
-                parameterProducers.insert(std::pair<std::string, uint>(paramName + ":" + producerName, valueList->mProducerId));
-              }
-              */
-
               //printf("SEARCH RESULT %s %u %u %u %u\n",producerStr.c_str(),producerId,valueList->mValueList.getLength(),parameterFlags,valueList->mFlags);
               bool concat = false;
               if (producerId == 0 && producersPtr->size() > 1 && (valueList->mValueList.getLength() == 0 && (valueList->mFlags & ParameterValues::Flags::DataAvailable) == 0))
@@ -3026,15 +3020,6 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
                   tmpGeomIdList.clear();
                   producersPtr = p1;
                   geomIdListPtr = p2;
-                  /*
-                  if ((qParam->mLocationType == QueryParameter::LocationType::Polygon || qParam->mLocationType == QueryParameter::LocationType::Circle || qParam->mLocationType == QueryParameter::LocationType::Path) &&
-                      (valueList->mValueList.getLength() > 0 || ((parameterFlags & QueryParameter::Flags::NoReturnValues) != 0  &&  (valueList->mFlags & ParameterValues::Flags::DataAvailable) != 0)))
-                  {
-                    producerId = valueList->mProducerId;
-                    globalGeometryId = valueList->mGeometryId;
-                  }
-                  */
-
                   concat = true;
                 }
               }
@@ -3140,11 +3125,12 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
         if (query.mForecastTimeList.find((*it)->mForecastTimeUTC) == query.mForecastTimeList.end())
         {
           (*it)->mFlags |= QueryServer::ParameterValues::Flags::AggregationValue;
+
+          if (containsInternalAggregation)
+            (*it)->mFlags |= QueryServer::ParameterValues::Flags::InternalAggregationValue;
+
           additionalTimeList.insert((*it)->mForecastTimeUTC);
         }
-
-//        if (((*it)->mFlags & QueryServer::ParameterValues::Flags::AggregationValue) != 0)
-//          additionalTimeList.insert((*it)->mForecastTimeUTC);
       }
     }
 
@@ -3189,12 +3175,18 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
             //pValues->mForecastTime = utcTimeFromTimeT(tt);
 
             if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN)
+            {
               pValues->mFlags = pValues->mFlags | QueryServer::ParameterValues::Flags::AdditionalValue;
+            }
 
             getAdditionalValues(qParam->mSymbolicName,query.mCoordinateType,coordinates,*pValues);
 
             if (additionalTimeList.find(tt) != additionalTimeList.end())
+            {
               pValues->mFlags = pValues->mFlags | QueryServer::ParameterValues::Flags::AggregationValue;
+              if (containsInternalAggregation)
+                pValues->mFlags = pValues->mFlags | QueryServer::ParameterValues::Flags::InternalAggregationValue;
+            }
 
             qParam->mValueList.insert(qParam->mValueList.begin() + cnt, pValues);
           }

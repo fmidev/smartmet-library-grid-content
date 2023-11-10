@@ -308,6 +308,29 @@ void QueryParameter::removeAggregationValues()
 
 
 
+void QueryParameter::removeInternalAggregationValues()
+{
+  try
+  {
+    ParameterValues_sptr_vec valueList = mValueList;
+    mValueList.clear();
+
+    for (auto it=valueList.begin(); it != valueList.end(); ++it)
+    {
+      if (((*it)->mFlags & ParameterValues::Flags::InternalAggregationValue) == 0)
+        mValueList.emplace_back(*it);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 void QueryParameter::updateForecastTimeList(std::set<time_t>& mForecastTimeList)
 {
   try

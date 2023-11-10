@@ -32,6 +32,7 @@ class QueryParameter
     T::GridValue*               getValueListRecord(int col,int row);
     void                        getValueVectorsByRowRange(int startRow,int endRow,std::vector<std::vector<T::ParamValue>>& valueVectors);
     void                        removeAggregationValues();
+    void                        removeInternalAggregationValues();
     void                        updateForecastTimeList(std::set<time_t>& mForecastTimeList);
 
     uint                        mId;
