@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 23.11.10
+Version: 23.11.17
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -89,6 +89,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Nov 17 2023 Pertti Kinnia <pertti.kinnia@fmi.fi> - 23.11.17-1.fmi
+- Reduced unnecessary copying of parameters and fixed emplace_back methods
 * Fri Nov 10 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.11.10-1.fmi
 - Improving removal of internal aggregation values
 - Ignoring missing parameter values when finding min or max values
