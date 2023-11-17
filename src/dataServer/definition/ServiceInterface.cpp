@@ -57,11 +57,13 @@ void ServiceInterface::getCacheStats(Fmi::Cache::CacheStatistics& statistics) co
   FUNCTION_TRACE
   try
   {
-    statistics.insert(std::make_pair("Grid-files::GRIB1_coordinate_cache", GRIB1::coordinateCache_stats));
+    statistics.insert(std::make_pair("Grid-files::GRIB1_coordinate_latlon_cache", GRIB1::latlonCoordinateCache_stats));
+    statistics.insert(std::make_pair("Grid-files::GRIB1_coordinate_original_cache", GRIB1::originalCoordinateCache_stats));
     statistics.insert(std::make_pair("Grid-files::GRIB1_coordinate_transform1_cache", GRIB1::transformCache1_stats));
     statistics.insert(std::make_pair("Grid-files::GRIB1_coordinate_transform2_cache", GRIB1::transformCache2_stats));
     statistics.insert(std::make_pair("Grid-files::GRIB1_coordinate_transform3_cache", GRIB1::transformCache3_stats));
-    statistics.insert(std::make_pair("Grid-files::GRIB2_coordinate_cache", GRIB2::coordinateCache_stats));
+    statistics.insert(std::make_pair("Grid-files::GRIB2_coordinate_latlon_cache", GRIB2::latlonCoordinateCache_stats));
+    statistics.insert(std::make_pair("Grid-files::GRIB2_coordinate_original_cache", GRIB2::originalCoordinateCache_stats));
     statistics.insert(std::make_pair("Grid-files::GRIB2_coordinate_transform1_cache", GRIB2::transformCache1_stats));
     statistics.insert(std::make_pair("Grid-files::GRIB2_coordinate_transform2_cache", GRIB2::transformCache2_stats));
     statistics.insert(std::make_pair("Grid-files::GRIB2_coordinate_transform3_cache", GRIB2::transformCache3_stats));

@@ -61,7 +61,7 @@ void RequestMessage::addLine(const char *line)
 {
   try
   {
-    mLines.emplace_back(std::string(line));
+    mLines.emplace_back(line);
   }
   catch (...)
   {

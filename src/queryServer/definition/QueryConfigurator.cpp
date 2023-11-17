@@ -361,7 +361,7 @@ void QueryConfigurator::configureLocation(Query& query,T::AttributeList& attribu
         throw Fmi::Exception(BCP, "Invalid number of coordinates in 'lonlat' parameter!");
 
       T::Coordinate_vec coordinates;
-      coordinates.emplace_back(T::Coordinate(coordinateList[0],coordinateList[1]));
+      coordinates.emplace_back(coordinateList[0],coordinateList[1]);
       query.mAreaCoordinates.emplace_back(coordinates);
     }
 
@@ -373,7 +373,7 @@ void QueryConfigurator::configureLocation(Query& query,T::AttributeList& attribu
         throw Fmi::Exception(BCP, "Invalid number of coordinates in 'latlon' parameter!");
 
       T::Coordinate_vec coordinates;
-      coordinates.emplace_back(T::Coordinate(coordinateList[1],coordinateList[0]));
+      coordinates.emplace_back(coordinateList[1],coordinateList[0]);
       query.mAreaCoordinates.emplace_back(coordinates);
     }
 

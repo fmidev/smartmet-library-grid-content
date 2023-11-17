@@ -566,7 +566,7 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileI
         {
           for (uint x=0; x<coordinates.mColumns; x++)
           {
-            coordinates.mCoordinateList.emplace_back(T::Coordinate(x,y));
+            coordinates.mCoordinateList.emplace_back(x,y);
           }
         }
         break;

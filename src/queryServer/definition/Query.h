@@ -25,6 +25,9 @@ class Query
     void                getResultProducerIdList(std::set<uint>& producerIdList);
     void                removeAggregationValues();
     void                removeInternalAggregationValues();
+
+    void                removeAggregationTimes();
+
     void                removeTemporaryParameters();
     void                updateForecastTimeList();
     void                print(std::ostream& stream,uint level,uint optionFlags);
@@ -48,6 +51,10 @@ class Query
     ulonglong           mGenerationFlags;
     uint                mFlags;
     uint                mMaxParameterValues;
+    std::set<time_t>    mAggregationTimes;
+    time_t              mProcessingStartTime;
+    uint                mMaxProcessingTimeInSeconds;
+
 
 
     class SearchType

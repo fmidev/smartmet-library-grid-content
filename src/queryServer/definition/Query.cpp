@@ -26,6 +26,9 @@ Query::Query()
     mTimesteps = 0;
     mTimestepSizeInMinutes = 0;
     mMaxParameterValues = 1000000;
+    mProcessingStartTime = time(nullptr);
+    mMaxProcessingTimeInSeconds = 300;
+
   }
   catch (...)
   {
@@ -284,9 +287,34 @@ void Query::removeAggregationValues()
 {
   try
   {
+    //return;
+
     for (auto it = mQueryParameterList.begin(); it != mQueryParameterList.end(); ++it)
     {
       it->removeAggregationValues();
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+void Query::removeAggregationTimes()
+{
+  try
+  {
+    return;
+    if (mAggregationTimes.size() == 0)
+      return;
+
+    for (auto it = mQueryParameterList.begin(); it != mQueryParameterList.end(); ++it)
+    {
+      it->removeTimes(mAggregationTimes);
     }
   }
   catch (...)
@@ -303,6 +331,8 @@ void Query::removeInternalAggregationValues()
 {
   try
   {
+    //return;
+
     for (auto it = mQueryParameterList.begin(); it != mQueryParameterList.end(); ++it)
     {
       it->removeInternalAggregationValues();
@@ -363,6 +393,8 @@ void Query::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mRadius                 = " << mRadius << "\n";
     stream << space(level) << "- mLanguage               = " << mLanguage << "\n";
     stream << space(level) << "- mMaxParameterValues     = " << mMaxParameterValues << "\n";
+    stream << space(level) << "- mProcessingStartTime (UTC)   = " << utcTimeFromTimeT(mProcessingStartTime) << "\n";
+    stream << space(level) << "- mMaxProcessingTimeInSeconds  = " << mMaxProcessingTimeInSeconds << "\n";
 
     stream << space(level) << "- mGenerationFlags        = " << mGenerationFlags << "\n";
 
@@ -375,6 +407,10 @@ void Query::print(std::ostream& stream,uint level,uint optionFlags)
 
     stream << space(level) << "- mForecastTimeList\n";
     for (auto it = mForecastTimeList.begin(); it != mForecastTimeList.end(); ++it)
+      stream << space(level) << "   * " << utcTimeFromTimeT(*it) << "\n";
+
+    stream << space(level) << "- mAggregationTimes\n";
+    for (auto it = mAggregationTimes.begin(); it != mAggregationTimes.end(); ++it)
       stream << space(level) << "   * " << utcTimeFromTimeT(*it) << "\n";
 
     stream << space(level) << "- mProducerNameList       = \n";

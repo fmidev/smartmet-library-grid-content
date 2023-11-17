@@ -580,7 +580,7 @@ void Converter::convert(const DataServer::Corba::CorbaCoordinateList& source,std
     for (uint t=0; t<len; t++)
     {
       DataServer::Corba::CorbaCoordinate corbaObject = source[t];
-      target.emplace_back(T::Coordinate(corbaObject.x,corbaObject.y));
+      target.emplace_back(corbaObject.x,corbaObject.y);
     }
   }
   catch (...)

@@ -285,6 +285,29 @@ void QueryParameter::getValueVectorsByRowRange(int startRow,int endRow,std::vect
 
 
 
+void QueryParameter::removeTimes(std::set<time_t>& times)
+{
+  try
+  {
+    ParameterValues_sptr_vec valueList = mValueList;
+    mValueList.clear();
+
+    for (auto it=valueList.begin(); it != valueList.end(); ++it)
+    {
+      if (times.find((*it)->mForecastTimeUTC) == times.end())
+        mValueList.emplace_back(*it);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 void QueryParameter::removeAggregationValues()
 {
   try

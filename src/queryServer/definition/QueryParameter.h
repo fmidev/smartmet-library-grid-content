@@ -33,6 +33,7 @@ class QueryParameter
     void                        getValueVectorsByRowRange(int startRow,int endRow,std::vector<std::vector<T::ParamValue>>& valueVectors);
     void                        removeAggregationValues();
     void                        removeInternalAggregationValues();
+    void                        removeTimes(std::set<time_t>& times);
     void                        updateForecastTimeList(std::set<time_t>& mForecastTimeList);
 
     uint                        mId;
