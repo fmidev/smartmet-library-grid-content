@@ -10,6 +10,7 @@
 #include "../../functions/Function_max.h"
 #include "../../functions/Function_mul.h"
 #include "../../functions/Function_multiply.h"
+#include "../../functions/Function_sdev.h"
 #include "../../functions/Function_sequence.h"
 #include "../../functions/Function_sum.h"
 #include "../../functions/Function_hypotenuse.h"
@@ -142,6 +143,7 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,cons
     mFunctionCollection.addFunction("SUM",new Functions::Function_sum());
     mFunctionCollection.addFunction("DIV",new Functions::Function_div());
     mFunctionCollection.addFunction("MUL",new Functions::Function_mul());
+    mFunctionCollection.addFunction("SDEV",new Functions::Function_sdev());
 
     mFunctionCollection.addFunction("AVG",new Functions::Function_avg());
     mFunctionCollection.addFunction("MIN",new Functions::Function_min());

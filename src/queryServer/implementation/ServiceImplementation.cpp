@@ -23,6 +23,7 @@
 #include "../../functions/Function_max.h"
 #include "../../functions/Function_mul.h"
 #include "../../functions/Function_multiply.h"
+#include "../../functions/Function_sdev.h"
 #include "../../functions/Function_sequence.h"
 #include "../../functions/Function_sum.h"
 #include "../../functions/Function_hypotenuse.h"
@@ -217,6 +218,7 @@ void ServiceImplementation::init(
     mFunctionCollection.addFunction("MAX",new Functions::Function_max());
     mFunctionCollection.addFunction("MIN",new Functions::Function_min());
     mFunctionCollection.addFunction("MUL",new Functions::Function_mul());
+    mFunctionCollection.addFunction("SDEV",new Functions::Function_sdev());
 
     mFunctionCollection.addFunction("OUT_PRCNT",new Functions::Function_outPrcnt());
 
@@ -8315,6 +8317,11 @@ void ServiceImplementation::getGridValues(
     if (queryFlags & Query::Flags::TimeStepIsData)
       timeStepIsData = true;
 
+    bool acceptNotReadyGenerations = false;
+    if (query.mFlags & Query::Flags::AcceptNotReadyGenerations)
+      acceptNotReadyGenerations = true;
+
+
     // Going through the producer list.
 
     for (auto it = producers.begin(); it != producers.end(); ++it)
@@ -8493,6 +8500,9 @@ void ServiceImplementation::getGridValues(
                       generationValid = false;
 
                     if (gInfo != nullptr  &&  !maxAnalysisTime.empty() &&  maxAnalysisTime < gInfo->mAnalysisTime)
+                      generationValid = false;
+
+                    if (gInfo != nullptr  &&  gInfo->mStatus != 1  &&  !acceptNotReadyGenerations)
                       generationValid = false;
 
                     if (generationValid)
