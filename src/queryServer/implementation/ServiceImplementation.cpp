@@ -8360,11 +8360,6 @@ void ServiceImplementation::getGridValues(
     if (queryFlags & Query::Flags::TimeStepIsData)
       timeStepIsData = true;
 
-    bool acceptNotReadyGenerations = false;
-    if (query.mFlags & Query::Flags::AcceptNotReadyGenerations)
-      acceptNotReadyGenerations = true;
-
-
     // Going through the producer list.
 
     for (auto it = producers.begin(); it != producers.end(); ++it)
@@ -8543,9 +8538,6 @@ void ServiceImplementation::getGridValues(
                       generationValid = false;
 
                     if (gInfo != nullptr  &&  !maxAnalysisTime.empty() &&  maxAnalysisTime < gInfo->mAnalysisTime)
-                      generationValid = false;
-
-                    if (gInfo != nullptr  &&  gInfo->mStatus != 1  &&  !acceptNotReadyGenerations)
                       generationValid = false;
 
                     if (generationValid)
