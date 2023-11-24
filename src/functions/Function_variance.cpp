@@ -1,4 +1,4 @@
-#include "Function_sdev.h"
+#include "Function_variance.h"
 #include <grid-files/common/GeneralFunctions.h>
 
 
@@ -8,7 +8,7 @@ namespace Functions
 {
 
 
-Function_sdev::Function_sdev()
+Function_variance::Function_variance()
 {
   try
   {
@@ -23,7 +23,7 @@ Function_sdev::Function_sdev()
 
 
 
-Function_sdev::Function_sdev(const Function_sdev& function)
+Function_variance::Function_variance(const Function_variance& function)
 :Function(function)
 {
   try
@@ -39,7 +39,7 @@ Function_sdev::Function_sdev(const Function_sdev& function)
 
 
 
-Function_sdev::~Function_sdev()
+Function_variance::~Function_variance()
 {
   try
   {
@@ -55,7 +55,7 @@ Function_sdev::~Function_sdev()
 
 
 
-float Function_sdev::executeFunctionCall1(std::vector<float>& parameters)
+float Function_variance::executeFunctionCall1(std::vector<float>& parameters)
 {
   try
   {
@@ -80,7 +80,7 @@ float Function_sdev::executeFunctionCall1(std::vector<float>& parameters)
     }
 
     if (counter > 1)
-      return sqrt(v / (counter - 1));
+      return (v / (counter - 1));
 
     return ParamValueMissing;
   }
@@ -94,7 +94,7 @@ float Function_sdev::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
-double Function_sdev::executeFunctionCall1(std::vector<double>& parameters)
+double Function_variance::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
   {
@@ -119,7 +119,7 @@ double Function_sdev::executeFunctionCall1(std::vector<double>& parameters)
     }
 
     if (counter > 1)
-      return sqrt(v / (counter - 1));
+      return (v / (counter - 1));
 
     return ParamValueMissing;
   }
@@ -135,7 +135,7 @@ double Function_sdev::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
-void Function_sdev::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void Function_variance::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try
   {
@@ -167,7 +167,7 @@ void Function_sdev::executeFunctionCall9(uint columns,uint rows,std::vector<std:
       }
 
       if (counter > 1)
-        outParameters.emplace_back(sqrt(v / (counter - 1)));
+        outParameters.emplace_back(v / (counter - 1));
       else
         outParameters.emplace_back(ParamValueMissing);
     }
@@ -182,7 +182,7 @@ void Function_sdev::executeFunctionCall9(uint columns,uint rows,std::vector<std:
 
 
 
-void Function_sdev::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void Function_variance::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
   {
@@ -214,7 +214,7 @@ void Function_sdev::executeFunctionCall9(uint columns,uint rows,std::vector<std:
       }
 
       if (counter > 1)
-        outParameters.emplace_back(sqrt(v / (counter - 1)));
+        outParameters.emplace_back(v / (counter - 1));
       else
         outParameters.emplace_back(ParamValueMissing);
     }
@@ -228,11 +228,11 @@ void Function_sdev::executeFunctionCall9(uint columns,uint rows,std::vector<std:
 
 
 
-Function* Function_sdev::duplicate()
+Function* Function_variance::duplicate()
 {
   try
   {
-    return (Function*)new Function_sdev(*this);
+    return (Function*)new Function_variance(*this);
   }
   catch (...)
   {

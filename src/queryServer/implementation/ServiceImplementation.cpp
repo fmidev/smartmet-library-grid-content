@@ -15,22 +15,36 @@
 #include <unordered_set>
 #include <deque>
 #include "../../functions/Function_add.h"
+#include "../../functions/Function_acos.h"
+#include "../../functions/Function_asin.h"
+#include "../../functions/Function_atan.h"
 #include "../../functions/Function_avg.h"
+#include "../../functions/Function_change.h"
+#include "../../functions/Function_cos.h"
 #include "../../functions/Function_div.h"
+#include "../../functions/Function_hypotenuse.h"
+#include "../../functions/Function_inCount.h"
 #include "../../functions/Function_inPrcnt.h"
+#include "../../functions/Function_limit.h"
+#include "../../functions/Function_median.h"
+#include "../../functions/Function_outCount.h"
 #include "../../functions/Function_outPrcnt.h"
 #include "../../functions/Function_min.h"
 #include "../../functions/Function_max.h"
 #include "../../functions/Function_mul.h"
 #include "../../functions/Function_multiply.h"
 #include "../../functions/Function_sdev.h"
+#include "../../functions/Function_sdevDir.h"
 #include "../../functions/Function_sequence.h"
+#include "../../functions/Function_sin.h"
 #include "../../functions/Function_sum.h"
-#include "../../functions/Function_hypotenuse.h"
+#include "../../functions/Function_tan.h"
+#include "../../functions/Function_variance.h"
 #include "../../functions/Function_windDir.h"
 #include "../../functions/Function_vectorU.h"
 #include "../../functions/Function_vectorV.h"
 #include "../../functions/Function_feelsLike.h"
+#include "../../functions/Function_replace.h"
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -212,15 +226,29 @@ void ServiceImplementation::init(
     mFunctionCollection.addFunction("K2F",k2f);
 
     mFunctionCollection.addFunction("ADD",new Functions::Function_add());       // add const
+    mFunctionCollection.addFunction("ASIN",new Functions::Function_asin());
+    mFunctionCollection.addFunction("ACOS",new Functions::Function_acos());
+    mFunctionCollection.addFunction("ATAN",new Functions::Function_atan());
     mFunctionCollection.addFunction("AVG",new Functions::Function_avg());
+    mFunctionCollection.addFunction("CHANGE",new Functions::Function_change());
     mFunctionCollection.addFunction("DIV",new Functions::Function_div());
+    mFunctionCollection.addFunction("IN_COUNT",new Functions::Function_inCount());
     mFunctionCollection.addFunction("IN_PRCNT",new Functions::Function_inPrcnt());
+    mFunctionCollection.addFunction("LIMIT",new Functions::Function_limit());
     mFunctionCollection.addFunction("MAX",new Functions::Function_max());
+    mFunctionCollection.addFunction("MEDIAN",new Functions::Function_median());
     mFunctionCollection.addFunction("MIN",new Functions::Function_min());
     mFunctionCollection.addFunction("MUL",new Functions::Function_mul());
     mFunctionCollection.addFunction("SDEV",new Functions::Function_sdev());
+    mFunctionCollection.addFunction("SDEV_DIR",new Functions::Function_sdevDir());
+    mFunctionCollection.addFunction("SIN",new Functions::Function_sin());
+    mFunctionCollection.addFunction("COS",new Functions::Function_cos());
+    mFunctionCollection.addFunction("TAN",new Functions::Function_tan());
+    mFunctionCollection.addFunction("VARIANCE",new Functions::Function_variance());
 
+    mFunctionCollection.addFunction("OUT_COUNT",new Functions::Function_outCount());
     mFunctionCollection.addFunction("OUT_PRCNT",new Functions::Function_outPrcnt());
+    mFunctionCollection.addFunction("REPLACE",new Functions::Function_replace());
 
     mFunctionCollection.addFunction("SUM",new Functions::Function_sum());
 
@@ -1984,6 +2012,8 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
         for (int r = 0; r<len; r++)
         {
           (*qParam->mValueList[r]).mValueVector = outputVectors[r];
+          if (query.mAggregationTimes.find((*qParam->mValueList[r]).mForecastTimeUTC) != query.mAggregationTimes.end())
+            (*qParam->mValueList[r]).mFlags |= ParameterValues::Flags::InternalAggregationValue;
         }
       }
     }
@@ -2063,7 +2093,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
           std::shared_ptr<ParameterValues> pValues = std::make_shared<ParameterValues>();
           pValues->mForecastTimeUTC = *tt;
 
-          std::vector<double> areaParameters;
+          std::vector<double> areaParameters;  // If the case of area request, this contain all grid point values.
           std::vector<double> extParameters;
 
           bool areaCnt = false;
@@ -2129,9 +2159,10 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
               if (valueList.size() == 0)
               {
                 parameters.emplace_back(a);
-                areaParameters.emplace_back(a);
-
-                if (areaCnt && v == 0)
+                if (q)
+                  areaParameters.emplace_back(a);
+                else
+                if (v == 0)
                   extParameters.emplace_back(a);
               }
               else
@@ -2139,9 +2170,10 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
                 for (auto aa = valueList.begin(); aa != valueList.end(); ++aa)
                 {
                   parameters.emplace_back(*aa);
-                  areaParameters.emplace_back(*aa);
-
-                  if (areaCnt && v == 0)
+                  if (q)
+                    areaParameters.emplace_back(*aa);
+                  else
+                  if (v == 0)
                     extParameters.emplace_back(*aa);
                 }
               }
@@ -2164,6 +2196,9 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
             else
             if (f != "@" && !areaCnt)
             {
+              // Functions parameter list is a simple value list. If this is an area request
+              // then each grid point is calculated separately.
+
               auto functionPtr = mFunctionCollection.getFunction(function);
               if (functionPtr)
               {
@@ -2200,6 +2235,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
               pValues->mGeometryId = geometryId;
             }
           }
+          /*
 
           if (areaCnt && f != "@")
           {
@@ -2228,15 +2264,20 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
             pValues->mGenerationId = generationId;
             pValues->mGeometryId = geometryId;
           }
+          */
 
           if (!function.empty()  &&  function.substr(0, 1) == "@")
           {
+            // This is an area function call.
+
             std::string func = function.substr(1);
+            for (auto it = areaParameters.begin();it != areaParameters.end();++it)
+              extParameters.push_back(*it);
 
             auto functionPtr = mFunctionCollection.getFunction(func);
             if (functionPtr)
             {
-              double val = functionPtr->executeFunctionCall1(areaParameters);
+              double val = functionPtr->executeFunctionCall1(extParameters);
               T::GridValue rec(-1000, -1000, val);
               pValues->mValueList.addGridValue(rec);
             }
@@ -2248,7 +2289,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
               {
                 case 1:
                 {
-                  double val = mLuaFileCollection.executeFunctionCall1(luaFunction, areaParameters);
+                  double val = mLuaFileCollection.executeFunctionCall1(luaFunction, extParameters);
                   T::GridValue rec(-1000, -1000, val);
                   pValues->mValueList.addGridValue(rec);
                 }
@@ -2256,7 +2297,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
 
                 case 5:
                 {
-                  std::string val = mLuaFileCollection.executeFunctionCall5(luaFunction, query.mLanguage, areaParameters);
+                  std::string val = mLuaFileCollection.executeFunctionCall5(luaFunction, query.mLanguage, extParameters);
                   T::GridValue rec(-1000, -1000, val);
                   pValues->mValueList.addGridValue(rec);
                 }
@@ -2364,6 +2405,8 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
         for (int r = 0; r<rows; r++)
         {
           (*qParam->mValueList[r]).mValueList = valueList[r];
+          if (query.mAggregationTimes.find((*qParam->mValueList[r]).mForecastTimeUTC) != query.mAggregationTimes.end())
+            (*qParam->mValueList[r]).mFlags |= ParameterValues::Flags::InternalAggregationValue;
         }
       }
     }
