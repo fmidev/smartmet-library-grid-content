@@ -65,7 +65,7 @@ float Function_inPrcnt::executeFunctionCall1(std::vector<float>& parameters)
     double min = parameters[0];
     double max = parameters[1];
 
-    uint agree = 0;
+    uint count = 0;
     uint missing = 0;
 
     uint len = parameters.size();
@@ -76,13 +76,13 @@ float Function_inPrcnt::executeFunctionCall1(std::vector<float>& parameters)
         missing++;
       else
       if (val >= min  &&  val <= max)
-        agree++;
+        count++;
     }
 
     if (missing == (len-2))
       return ParamValueMissing;
 
-    return (float)agree*100/(float)(len-2);
+    return (float)count*100/(float)(len-2);
   }
   catch (...)
   {
@@ -103,7 +103,7 @@ double Function_inPrcnt::executeFunctionCall1(std::vector<double>& parameters)
     double min = parameters[0];
     double max = parameters[1];
 
-    uint agree = 0;
+    uint count = 0;
     uint missing = 0;
 
     uint len = parameters.size();
@@ -114,13 +114,13 @@ double Function_inPrcnt::executeFunctionCall1(std::vector<double>& parameters)
         missing++;
       else
       if (val >= min  &&  val <= max)
-        agree++;
+        count++;
     }
 
     if (missing == (len-2))
       return ParamValueMissing;
 
-    return (double)agree*100/(double)(len-2);
+    return (double)count*100/(double)(len-2);
   }
   catch (...)
   {
@@ -147,7 +147,7 @@ void Function_inPrcnt::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
     for (uint s=0; s<sz; s++)
     {
-      uint agree = 0;
+      uint count = 0;
       uint missing = 0;
       for (uint t=0; t<len; t++)
       {
@@ -159,12 +159,12 @@ void Function_inPrcnt::executeFunctionCall9(uint columns,uint rows,std::vector<s
           missing++;
         else
         if (val >= min  &&  val <= max)
-          agree++;
+          count++;
       }
       if (missing == sz)
         outParameters.emplace_back(ParamValueMissing);
       else
-        outParameters.emplace_back((float)agree*100/(float)len);
+        outParameters.emplace_back((float)count*100/(float)len);
     }
   }
   catch (...)
@@ -193,7 +193,7 @@ void Function_inPrcnt::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
     for (uint s=0; s<sz; s++)
     {
-      uint agree = 0;
+      uint count = 0;
       uint missing = 0;
       for (uint t=0; t<len; t++)
       {
@@ -205,12 +205,12 @@ void Function_inPrcnt::executeFunctionCall9(uint columns,uint rows,std::vector<s
           missing++;
         else
         if (val >= min  &&  val <= max)
-          agree++;
+          count++;
       }
       if (missing == sz)
         outParameters.emplace_back(ParamValueMissing);
       else
-        outParameters.emplace_back((double)agree*100/(double)len);
+        outParameters.emplace_back((double)count*100/(double)len);
     }
   }
   catch (...)

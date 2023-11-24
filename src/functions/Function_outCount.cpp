@@ -1,4 +1,4 @@
-#include "Function_outPrcnt.h"
+#include "Function_outCount.h"
 #include <grid-files/common/GeneralFunctions.h>
 
 
@@ -8,7 +8,7 @@ namespace Functions
 {
 
 
-Function_outPrcnt::Function_outPrcnt()
+Function_outCount::Function_outCount()
 {
   try
   {
@@ -23,7 +23,7 @@ Function_outPrcnt::Function_outPrcnt()
 
 
 
-Function_outPrcnt::Function_outPrcnt(const Function_outPrcnt& function)
+Function_outCount::Function_outCount(const Function_outCount& function)
 :Function(function)
 {
   try
@@ -39,7 +39,7 @@ Function_outPrcnt::Function_outPrcnt(const Function_outPrcnt& function)
 
 
 
-Function_outPrcnt::~Function_outPrcnt()
+Function_outCount::~Function_outCount()
 {
   try
   {
@@ -55,7 +55,7 @@ Function_outPrcnt::~Function_outPrcnt()
 
 
 
-float Function_outPrcnt::executeFunctionCall1(std::vector<float>& parameters)
+float Function_outCount::executeFunctionCall1(std::vector<float>& parameters)
 {
   try
   {
@@ -66,23 +66,16 @@ float Function_outPrcnt::executeFunctionCall1(std::vector<float>& parameters)
     double max = parameters[1];
 
     uint count = 0;
-    uint missing = 0;
 
     uint len = parameters.size();
     for (uint s=2; s<len; s++)
     {
       double val = parameters[s];
-      if (val == ParamValueMissing)
-        missing++;
-      else
       if (val < min  ||  val > max)
         count++;
     }
 
-    if (missing == (len-2))
-      return ParamValueMissing;
-
-    return (float)count*100/(float)(len-2);
+    return (float)count;
   }
   catch (...)
   {
@@ -93,7 +86,7 @@ float Function_outPrcnt::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
-double Function_outPrcnt::executeFunctionCall1(std::vector<double>& parameters)
+double Function_outCount::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
   {
@@ -104,23 +97,16 @@ double Function_outPrcnt::executeFunctionCall1(std::vector<double>& parameters)
     double max = parameters[1];
 
     uint count = 0;
-    uint missing = 0;
 
     uint len = parameters.size();
     for (uint s=2; s<len; s++)
     {
       double val = parameters[s];
-      if (val == ParamValueMissing)
-        missing++;
-      else
       if (val < min  ||  val > max)
         count++;
     }
 
-    if (missing == (len-2))
-      return ParamValueMissing;
-
-    return (double)count*100/(double)(len-2);
+    return (double)count;
   }
   catch (...)
   {
@@ -131,7 +117,7 @@ double Function_outPrcnt::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
-void Function_outPrcnt::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void Function_outCount::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try
   {
@@ -148,23 +134,16 @@ void Function_outPrcnt::executeFunctionCall9(uint columns,uint rows,std::vector<
     for (uint s=0; s<sz; s++)
     {
       uint count = 0;
-      uint missing = 0;
       for (uint t=0; t<len; t++)
       {
         float val = ParamValueMissing;
         if (s < inParameters[t].size())
           val = inParameters[t][s];
 
-        if (val == ParamValueMissing)
-          missing++;
-        else
-        if (val < min  || val > max)
+        if (val < min  ||  val > max)
           count++;
       }
-      if (missing == sz)
-        outParameters.emplace_back(ParamValueMissing);
-      else
-        outParameters.emplace_back((float)count*100/(float)len);
+      outParameters.emplace_back(count);
     }
   }
   catch (...)
@@ -177,7 +156,7 @@ void Function_outPrcnt::executeFunctionCall9(uint columns,uint rows,std::vector<
 
 
 
-void Function_outPrcnt::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void Function_outCount::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
   {
@@ -194,23 +173,16 @@ void Function_outPrcnt::executeFunctionCall9(uint columns,uint rows,std::vector<
     for (uint s=0; s<sz; s++)
     {
       uint count = 0;
-      uint missing = 0;
       for (uint t=0; t<len; t++)
       {
         double val = ParamValueMissing;
         if (s < inParameters[t].size())
           val = inParameters[t][s];
 
-        if (val == ParamValueMissing)
-          missing++;
-        else
         if (val < min  ||  val > max)
           count++;
       }
-      if (missing == sz)
-        outParameters.emplace_back(ParamValueMissing);
-      else
-        outParameters.emplace_back((double)count*100/(double)len);
+      outParameters.emplace_back((double)count);
     }
   }
   catch (...)
@@ -222,11 +194,11 @@ void Function_outPrcnt::executeFunctionCall9(uint columns,uint rows,std::vector<
 
 
 
-Function* Function_outPrcnt::duplicate()
+Function* Function_outCount::duplicate()
 {
   try
   {
-    return (Function*)new Function_outPrcnt(*this);
+    return (Function*)new Function_outCount(*this);
   }
   catch (...)
   {

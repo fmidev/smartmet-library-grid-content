@@ -378,7 +378,7 @@ void Query::print(std::ostream& stream,uint level,uint optionFlags)
     if (mStartTime > 0)
       stream << space(level) << "- mStartTime              = " << utcTimeFromTimeT(mStartTime) << "\n";
     else
-      stream << space(level) << "- mStartTime              = \n";
+      stream << space(level) << "- mStartTime              = " << utcTimeFromTimeT(0) << "\n";
 
     if (mEndTime > 0)
       stream << space(level) << "- mEndTime                = " << utcTimeFromTimeT(mEndTime) << "\n";

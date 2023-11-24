@@ -9,6 +9,9 @@ namespace SmartMet
 namespace Functions
 {
 
+const double degreesToRadiansMultiplier = 0.0174532925199;
+const double radiansToDegreesMultiplier = 57.2957795131;
+
 
 class Function
 {

@@ -66,7 +66,7 @@ float Function_mul::executeFunctionCall1(std::vector<float>& parameters)
         return ParamValueMissing;
     }
 
-    throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");
+    throw Fmi::Exception(BCP, "The parameters vector should contain only two values!");
   }
   catch (...)
   {
@@ -90,7 +90,7 @@ double Function_mul::executeFunctionCall1(std::vector<double>& parameters)
         return ParamValueMissing;
     }
 
-    throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");
+    throw Fmi::Exception(BCP, "The parameters vector should contain only two values!");
   }
   catch (...)
   {
