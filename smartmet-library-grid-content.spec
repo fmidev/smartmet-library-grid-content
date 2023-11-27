@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 23.11.20
+Version: 23.11.27
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -28,9 +28,9 @@ BuildRequires: make
 BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 23.9.12
-BuildRequires: smartmet-library-grid-files-devel >= 23.11.6
-BuildRequires: smartmet-library-macgyver-devel >= 23.11.8
+BuildRequires: smartmet-library-gis-devel >= 23.11.21
+BuildRequires: smartmet-library-grid-files-devel >= 23.11.23
+BuildRequires: smartmet-library-macgyver-devel >= 23.11.21
 BuildRequires: smartmet-library-spine-devel >= 23.10.20
 BuildRequires: postgresql15-devel
 Requires: %{smartmet_boost}-date-time
@@ -39,9 +39,9 @@ Requires: libcurl
 Requires: lua-devel
 Requires: omniORB
 Requires: postgresql15-libs
-Requires: smartmet-library-gis >= 23.9.12
-Requires: smartmet-library-grid-files >= 23.11.6
-Requires: smartmet-library-macgyver >= 23.11.8
+Requires: smartmet-library-gis >= 23.11.21
+Requires: smartmet-library-grid-files >= 23.11.23
+Requires: smartmet-library-macgyver >= 23.11.21
 Requires: smartmet-library-spine >= 23.10.20
 
 Provides: %{SPECNAME}
@@ -76,10 +76,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 23.11.8
-Requires: smartmet-library-gis-devel >= 23.9.12
+Requires: smartmet-library-macgyver-devel >= 23.11.21
+Requires: smartmet-library-gis-devel >= 23.11.21
 Requires: smartmet-library-spine-devel >= 23.10.20
-Requires: smartmet-library-grid-files-devel >= 23.11.6
+Requires: smartmet-library-grid-files-devel >= 23.11.23
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -89,6 +89,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Nov 27 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.11.27-1.fmi
+- Added new functions for data processing
 * Mon Nov 20 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.11.20-1.fmi
 - Fixed status checking when producers are concatenated
 * Fri Nov 17 2023 Pertti Kinnia <pertti.kinnia@fmi.fi> - 23.11.17-1.fmi
