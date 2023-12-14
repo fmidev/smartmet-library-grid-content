@@ -8484,6 +8484,7 @@ void ServiceImplementation::getGridValues(
                   }
 
                   uint c = 0;
+                  uint validCount = 0;
                   for (int g=gLen-1; g>=0; g--)
                   {
                     ulonglong gFlags = 1 << c;
@@ -8547,8 +8548,12 @@ void ServiceImplementation::getGridValues(
                     if (gInfo != nullptr  &&  gInfo->mStatus != 1  &&  !acceptNotReadyGenerations)
                       generationValid = false;
 
+                    if (generationValid  &&  (queryFlags & Query::Flags::LatestGeneration)  &&  validCount > 0)
+                      generationValid = false;
+
                     if (generationValid)
                     {
+                      validCount++;
                       for (int t = cLen-1; t >= 0; t--)
                       {
                         T::ContentInfo* cInfo = contentInfoList.getContentInfoByIndex(t);
