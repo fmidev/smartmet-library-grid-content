@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 23.11.27
+Version: 23.12.22
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -29,9 +29,9 @@ BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 23.11.21
-BuildRequires: smartmet-library-grid-files-devel >= 23.11.23
+BuildRequires: smartmet-library-grid-files-devel >= 23.12.22
 BuildRequires: smartmet-library-macgyver-devel >= 23.11.21
-BuildRequires: smartmet-library-spine-devel >= 23.10.20
+BuildRequires: smartmet-library-spine-devel >= 23.12.5
 BuildRequires: postgresql15-devel
 Requires: %{smartmet_boost}-date-time
 Requires: hiredis-devel
@@ -40,9 +40,9 @@ Requires: lua-devel
 Requires: omniORB
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 23.11.21
-Requires: smartmet-library-grid-files >= 23.11.23
+Requires: smartmet-library-grid-files >= 23.12.22
 Requires: smartmet-library-macgyver >= 23.11.21
-Requires: smartmet-library-spine >= 23.10.20
+Requires: smartmet-library-spine >= 23.12.5
 
 Provides: %{SPECNAME}
 
@@ -78,8 +78,8 @@ Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
 Requires: smartmet-library-macgyver-devel >= 23.11.21
 Requires: smartmet-library-gis-devel >= 23.11.21
-Requires: smartmet-library-spine-devel >= 23.10.20
-Requires: smartmet-library-grid-files-devel >= 23.11.23
+Requires: smartmet-library-spine-devel >= 23.12.5
+Requires: smartmet-library-grid-files-devel >= 23.12.22
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -89,6 +89,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Dec 22 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.12.22-1.fmi
+- Repackaged due to ThreadLock ABI changes
 * Mon Nov 27 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.11.27-1.fmi
 - Added new functions for data processing
 * Mon Nov 20 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.11.20-1.fmi
