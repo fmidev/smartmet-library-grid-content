@@ -34,6 +34,12 @@ class Converter
     static void   convert(const T::AttributeList& source,DataServer::Corba::CorbaAttributeList& target);
     static void   convert(const DataServer::Corba::CorbaAttributeList& source,T::AttributeList& target);
 
+    static void   convert(const T::PropertySetting& source,DataServer::Corba::CorbaPropertySetting& target);
+    static void   convert(const DataServer::Corba::CorbaPropertySetting& source,T::PropertySetting& target);
+
+    static void   convert(const T::PropertySettingVec& source,DataServer::Corba::CorbaPropertySettingList& target);
+    static void   convert(const DataServer::Corba::CorbaPropertySettingList& source,T::PropertySettingVec& target);
+
     static void   convert(const T::GridCoordinates& source,DataServer::Corba::CorbaGridCoordinates& target);
     static void   convert(const DataServer::Corba::CorbaGridCoordinates& source,T::GridCoordinates& target);
 

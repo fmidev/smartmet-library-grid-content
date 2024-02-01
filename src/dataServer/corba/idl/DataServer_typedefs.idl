@@ -31,6 +31,15 @@ typedef sequence<CorbaAttribute> CorbaAttributeList;
 
 
 
+struct CorbaPropertySetting
+{
+  unsigned long propertyId;
+  string propertyValue;
+};
+
+typedef sequence<CorbaPropertySetting> CorbaPropertySettingList;
+
+
 struct CorbaValueRecord
 {
   unsigned long    fileId;

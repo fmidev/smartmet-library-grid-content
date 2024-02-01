@@ -263,6 +263,35 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
+::CORBA::Long ServerInterface::getGridProperties(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaPropertySettingList_out propertyList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::PropertySettingVec sPropertySettingList;
+    DataServer::Corba::CorbaPropertySettingList *corbaPropertySettingList = new DataServer::Corba::CorbaPropertySettingList();
+    propertyList = corbaPropertySettingList;
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getGridProperties(sessionId,fileId,messageIndex,sPropertySettingList);
+
+    if (result == 0)
+      DataServer::Corba::Converter::convert(sPropertySettingList,*corbaPropertySettingList);
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
 ::CORBA::Long ServerInterface::getPropertyValuesByCoordinates(::CORBA::LongLong sessionId, const char* propertyName, const SmartMet::DataServer::Corba::CorbaCoordinateList& latlonCoordinates, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
 {
   FUNCTION_TRACE

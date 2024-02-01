@@ -820,6 +820,41 @@ int ServiceImplementation::_getGridAttributeList(T::SessionId sessionId,uint fil
 
 
 
+int ServiceImplementation::_getGridProperties(T::SessionId sessionId,uint fileId,uint messageIndex,T::PropertySettingVec& propertyList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    GRID::GridFile_sptr gridFile = getGridFile(fileId);
+    if (!gridFile)
+    {
+      ServiceInterface *dataServer = getDataServerByFileId(fileId);
+      if (dataServer)
+        return dataServer->getGridProperties(sessionId,fileId,messageIndex,propertyList);
+
+      return Result::FILE_NOT_FOUND;
+    }
+
+    GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
+    if (message == nullptr)
+      return Result::DATA_NOT_FOUND;
+
+    message->getProperties(propertyList);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   FUNCTION_TRACE

@@ -210,6 +210,28 @@ int ClientImplementation::_getGridAttributeList(T::SessionId sessionId,uint file
 
 
 
+int ClientImplementation::_getGridProperties(T::SessionId sessionId,uint fileId,uint messageIndex,T::PropertySettingVec& propertyList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP,"The client is not initialized!");
+
+    DataServer::Corba::CorbaPropertySettingList_var corbaPropertySettingList;
+
+    int result = mService->getGridProperties(sessionId,fileId,messageIndex,corbaPropertySettingList);
+
+    if (result == 0)
+      DataServer::Corba::Converter::convert(corbaPropertySettingList,propertyList);
+
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
 int ClientImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
 {
   try

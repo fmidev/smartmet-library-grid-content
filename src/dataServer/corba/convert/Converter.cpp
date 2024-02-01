@@ -224,6 +224,113 @@ void Converter::convert(const DataServer::Corba::CorbaAttributeList& source,T::A
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void Converter::convert(const T::PropertySetting& source,DataServer::Corba::CorbaPropertySetting& target)
+{
+  try
+  {
+    target.propertyId = source.propertyId;
+    target.propertyValue = CORBA::string_dup(source.propertyValue.c_str());
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const DataServer::Corba::CorbaPropertySetting& source,T::PropertySetting& target)
+{
+  try
+  {
+    target.propertyId = source.propertyId;
+    target.propertyValue = source.propertyValue;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const T::PropertySettingVec& source,DataServer::Corba::CorbaPropertySettingList& target)
+{
+  try
+  {
+    uint len = source.size();
+    target.length(len);
+    for (uint t=0; t<len; t++)
+    {
+      DataServer::Corba::CorbaPropertySetting corbaObject;
+      convert(source[t],corbaObject);
+      target[t] = corbaObject;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const DataServer::Corba::CorbaPropertySettingList& source,T::PropertySettingVec& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      DataServer::Corba::CorbaPropertySetting corbaObject = source[t];
+      T::PropertySetting prop;
+      convert(corbaObject,prop);
+      target.push_back(prop);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void Converter::convert(const T::GridCoordinates& source,DataServer::Corba::CorbaGridCoordinates& target)
 {
   try
