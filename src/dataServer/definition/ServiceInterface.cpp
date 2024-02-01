@@ -328,6 +328,31 @@ int ServiceInterface::getGridAttributeList(T::SessionId sessionId,uint fileId,ui
 
 
 
+int ServiceInterface::getGridProperties(T::SessionId sessionId,uint fileId,uint messageIndex,T::PropertySettingVec& propertyList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    unsigned long long timeStart = getTime();
+    int result = _getGridProperties(sessionId,fileId,messageIndex,propertyList);
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,PropertySetting[%ld]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,propertyList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int ServiceInterface::getGridFileCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -3081,6 +3106,15 @@ int ServiceInterface::_getGridData(T::SessionId sessionId,uint fileId,uint messa
 
 
 int ServiceInterface::_getGridAttributeList(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_getGridProperties(T::SessionId sessionId,uint fileId,uint messageIndex,T::PropertySettingVec& propertyList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
