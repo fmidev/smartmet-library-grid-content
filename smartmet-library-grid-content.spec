@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 23.12.22
+Version: 24.2.5
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -28,10 +28,10 @@ BuildRequires: make
 BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 23.11.21
-BuildRequires: smartmet-library-grid-files-devel >= 23.12.22
-BuildRequires: smartmet-library-macgyver-devel >= 23.11.21
-BuildRequires: smartmet-library-spine-devel >= 23.12.5
+BuildRequires: smartmet-library-gis-devel >= 24.1.3
+BuildRequires: smartmet-library-grid-files-devel >= 24.2.5
+BuildRequires: smartmet-library-macgyver-devel >= 24.1.17
+BuildRequires: smartmet-library-spine-devel >= 24.1.30
 BuildRequires: postgresql15-devel
 Requires: %{smartmet_boost}-date-time
 Requires: hiredis-devel
@@ -39,10 +39,10 @@ Requires: libcurl
 Requires: lua-devel
 Requires: omniORB
 Requires: postgresql15-libs
-Requires: smartmet-library-gis >= 23.11.21
-Requires: smartmet-library-grid-files >= 23.12.22
-Requires: smartmet-library-macgyver >= 23.11.21
-Requires: smartmet-library-spine >= 23.12.5
+Requires: smartmet-library-gis >= 24.1.3
+Requires: smartmet-library-grid-files >= 24.2.5
+Requires: smartmet-library-macgyver >= 24.1.17
+Requires: smartmet-library-spine >= 24.1.30
 
 Provides: %{SPECNAME}
 
@@ -76,10 +76,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 23.11.21
-Requires: smartmet-library-gis-devel >= 23.11.21
-Requires: smartmet-library-spine-devel >= 23.12.5
-Requires: smartmet-library-grid-files-devel >= 23.12.22
+Requires: smartmet-library-macgyver-devel >= 24.1.17
+Requires: smartmet-library-gis-devel >= 24.1.3
+Requires: smartmet-library-spine-devel >= 24.1.30
+Requires: smartmet-library-grid-files-devel >= 24.2.5
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -89,6 +89,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Feb  5 2024 Mika Heiskanen <mheiskan@rhel8.dev.fmi.fi> - 24.2.5-1.fmi
+- Improved support for writing GRIB files
 * Fri Dec 22 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.12.22-1.fmi
 - Repackaged due to ThreadLock ABI changes
 * Mon Nov 27 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.11.27-1.fmi
