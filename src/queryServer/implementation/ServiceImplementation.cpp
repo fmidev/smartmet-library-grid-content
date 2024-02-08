@@ -4726,13 +4726,15 @@ bool ServiceImplementation::getGridFiles(
     }
 
     uint version = 0;
-    auto v1 = oldProperties.find(GRIB1::Property::IndicatorSection::EditionNumber);
+    const int id = GRIB1::Property::IndicatorSection::EditionNumber;
+    auto v1 = oldProperties.find(id);
     if (v1 != oldProperties.end())
       version = 1;
 
     if (version == 0)
     {
-      auto v2 = oldProperties.find(GRIB2::Property::IndicatorSection::EditionNumber);
+      const int id = GRIB1::Property::IndicatorSection::EditionNumber;
+      auto v2 = oldProperties.find(id);
       if (v2 != oldProperties.end())
         version = 2;
     }
