@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 24.2.5
+Version: 24.2.8
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -89,6 +89,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Feb  8 2024 Andris Pavenis <andris.pavenis@fmi.fi> 24.2.8-1.fmi
+- Workaround build problem for RHEL7 (unresolved external references)
+
 * Mon Feb  5 2024 Mika Heiskanen <mheiskan@rhel8.dev.fmi.fi> - 24.2.5-1.fmi
 - Improved support for writing GRIB files
 * Fri Dec 22 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.12.22-1.fmi
