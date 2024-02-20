@@ -40,6 +40,7 @@ namespace DataServer
 {
 
 
+
 static void* ServiceImplementation_eventProcessingThread(void *arg)
 {
   try
@@ -59,6 +60,24 @@ static void* ServiceImplementation_eventProcessingThread(void *arg)
 
 
 
+static void* ServiceImplementation_cacheProcessingThread(void *arg)
+{
+  try
+  {
+    ServiceImplementation *service = (ServiceImplementation*)arg;
+    service->cacheProcessingThread();
+    return nullptr;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+    exception.printError();
+    exit(-1);
+  }
+}
+
+
+
 
 ServiceImplementation::ServiceImplementation()
 {
@@ -73,6 +92,7 @@ ServiceImplementation::ServiceImplementation()
     mShutdownRequested = false;
     mFullUpdateRequired = false;
     mEventProcessingActive = false;
+    mCacheProcessingActive = false;
     mVirtualContentEnabled = false;
     mContentServerStartTime = 0;
     mLastVirtualFileRegistration = 0;
@@ -82,6 +102,12 @@ ServiceImplementation::ServiceImplementation()
     mDeletedFileCleanup_time = 0;
     mLastVirtualFileCheck = time(nullptr);
     mContentChangeTime = 0;
+    mStartUpCache_enabled = false;
+    mStartUpCache_saveDiskData = false;
+    mStartUpCache_saveNetworkData = false;
+    mStartUpCache_saveInterval = 30*60;
+    mStartUpCache_saveTime = time(0);
+    mStartUpCache_maxSize = 30000000000LL;
   }
   catch (...)
   {
@@ -163,8 +189,6 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,cons
     mFunctionCollection.addFunction("WIND_U",new Functions::Function_vectorU());
 
     mFunctionCollection.addFunction("FEELS_LIKE",new Functions::Function_feelsLike());
-
-    // fullUpdate();
   }
   catch (...)
   {
@@ -172,6 +196,94 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,cons
   }
 }
 
+
+
+
+
+void ServiceImplementation::setStartUpCache(bool enabled,bool saveDiskData,bool saveNetworkData,const char *filename,uint saveIntervalInMinutes,long long maxSizeInMegaBytes)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mStartUpCache_enabled = enabled;
+    mStartUpCache_saveDiskData = saveDiskData;
+    mStartUpCache_saveNetworkData = saveNetworkData;
+    mStartUpCache_filename = filename;
+    mStartUpCache_saveInterval = 60*saveIntervalInMinutes;
+    mStartUpCache_saveTime = time(0) - mStartUpCache_saveInterval + 600;
+    mStartUpCache_maxSize = maxSizeInMegaBytes * 1000000;
+
+    if (mStartUpCache_enabled)
+    {
+      char fname1[200];
+      char fname2[200];
+      char nfname1[200];
+      char nfname2[200];
+
+      sprintf(fname1,"%s.dat.new",filename);
+      sprintf(fname2,"%s.index.new",filename);
+
+      sprintf(nfname1,"%s.dat",filename);
+      sprintf(nfname2,"%s.index",filename);
+
+      auto fs1 = getFileSize(fname1);
+      auto fs2 = getFileSize(fname2);
+
+
+      if (fs1 > 0  &&  fs2 > 0)
+      {
+        time_t modTime1 = getFileModificationTime(fname1);
+        if ((time(0) - modTime1) > 7200)
+        {
+          // New cache is too old.
+          remove(fname1);
+          remove(fname2);
+        }
+        else
+        {
+          rename(fname1,nfname1);
+          rename(fname2,nfname2);
+        }
+      }
+
+
+      time_t modTime2 = getFileModificationTime(nfname1);
+      if ((time(0) - modTime2) > 7200)
+        return;    // Cache is too old.
+
+      FILE *file = fopen(nfname2,"r");
+      if (!file)
+        return;
+
+      while (!feof(file))
+      {
+        StartUpCacheIndexRec rec;
+        fread(&rec,sizeof(rec),1,file);
+
+        unsigned long long key = ((unsigned long long)rec.fileId << 32) + rec.messageIndex;
+
+        mStartUpCache_indexMap.insert(std::pair<unsigned long long,StartUpCacheIndexRec>(key,rec));
+      }
+      fclose(file);
+
+      mStartUpCache_memoryMapInfo.protocol = 0;
+      mStartUpCache_memoryMapInfo.serverType = 0;
+      //mStartUpCache_memoryMapInfo.server;
+      mStartUpCache_memoryMapInfo.filename = nfname1;
+      mStartUpCache_memoryMapInfo.fileSize = getFileSize(nfname1);
+      mStartUpCache_memoryMapInfo.allocatedSize = 0;
+      mStartUpCache_memoryMapInfo.mappingTime = 0;
+      mStartUpCache_memoryMapInfo.memoryPtr = nullptr;
+      mStartUpCache_memoryMapInfo.mappingError = false;
+      //mStartUpCache_memoryMapInfo.mappedFile;
+      memoryMapper.map(mStartUpCache_memoryMapInfo);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
 
 
 
@@ -184,6 +296,8 @@ void ServiceImplementation::shutdown()
     PRINT_DATA(mDebugLog,"*** SHUTDOWN ***\n");
     mShutdownRequested = true;
     pthread_join(mEventProcessingThread, nullptr);
+    if (mStartUpCache_enabled)
+      pthread_join(mCacheProcessingThread, nullptr);
   }
   catch (...)
   {
@@ -327,6 +441,24 @@ void ServiceImplementation::startEventProcessing()
   try
   {
     pthread_create(&mEventProcessingThread,nullptr,ServiceImplementation_eventProcessingThread,this);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::startCacheProcessing()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mStartUpCache_enabled)
+      pthread_create(&mCacheProcessingThread,nullptr,ServiceImplementation_cacheProcessingThread,this);
   }
   catch (...)
   {
@@ -5712,8 +5844,20 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
         T::ContentInfo *info = contentList.getContentInfoByIndex(t);
 
         GRID::MessageInfo mInfo;
-
+        mInfo.mFileMemoryPtr = nullptr;
         mInfo.mFilePosition = info->mFilePosition;
+
+        if (mStartUpCache_enabled)
+        {
+          unsigned long long key = ((unsigned long long)fileInfo.mFileId << 32) + info->mMessageIndex;
+          auto rec = mStartUpCache_indexMap.find(key);
+          if (rec != mStartUpCache_indexMap.end() &&  rec->second.producerId == fileInfo.mProducerId  &&  rec->second.generationId == fileInfo.mGenerationId)
+          {
+            mInfo.mFileMemoryPtr = mStartUpCache_memoryMapInfo.memoryPtr;
+            mInfo.mFilePosition = rec->second.filePosition;
+          }
+        }
+
         mInfo.mMessageType = info->mFileType;
         mInfo.mMessageSize = info->mMessageSize;
         mInfo.mProducerId = info->mProducerId;
@@ -6387,7 +6531,20 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
       {
         GRID::MessageInfo mInfo;
 
+        mInfo.mFileMemoryPtr = nullptr;
         mInfo.mFilePosition = contentInfo.mFilePosition;
+
+        if (mStartUpCache_enabled)
+        {
+          unsigned long long key = ((unsigned long long)contentInfo.mFileId << 32) + contentInfo.mMessageIndex;
+          auto rec = mStartUpCache_indexMap.find(key);
+          if (rec != mStartUpCache_indexMap.end() &&  rec->second.producerId == contentInfo.mProducerId  &&  rec->second.generationId == contentInfo.mGenerationId)
+          {
+            mInfo.mFileMemoryPtr = mStartUpCache_memoryMapInfo.memoryPtr;
+            mInfo.mFilePosition = rec->second.filePosition;
+          }
+        }
+
         mInfo.mMessageType = contentInfo.mFileType;
         mInfo.mMessageSize = contentInfo.mMessageSize;
         mInfo.mProducerId = contentInfo.mProducerId;
@@ -6782,6 +6939,124 @@ void ServiceImplementation::eventProcessingThread()
   }
 }
 
+
+
+
+
+void ServiceImplementation::cacheProcessingThread()
+{
+  FUNCTION_TRACE
+  try
+  {
+    while (!mShutdownRequested)
+    {
+      time_t nextSaveTime = mStartUpCache_saveTime + mStartUpCache_saveInterval;
+
+      while (time(0) < nextSaveTime  &&  !mShutdownRequested)
+        sleep(1);
+
+      if (!mShutdownRequested)
+      {
+        try
+        {
+          mStartUpCache_saveTime = time(0);
+          mCacheProcessingActive = true;
+          GRID::RequestCounters requestCounters;
+          std::map<long long,std::vector<unsigned long long>> values;
+          mGridFileManager.getRequestCounters(requestCounters,mStartUpCache_saveDiskData,mStartUpCache_saveNetworkData);
+          mGridFileManager.resetRequestCounters();
+
+          for (auto it=requestCounters.begin(); it!=requestCounters.end();++it)
+          {
+            auto rec = values.find(it->second);
+            if (rec != values.end())
+              rec->second.push_back(it->first);
+            else
+            {
+              std::vector<unsigned long long> vec;
+              vec.push_back(it->first);
+              values.insert(std::pair<long long,std::vector<unsigned long long>>(it->second,vec));
+            }
+          }
+
+          char fname1[200];
+          char fname2[200];
+          char ifname1[200];
+          char ifname2[200];
+          sprintf(fname1,"%s.dat.tmp",mStartUpCache_filename.c_str());
+          sprintf(fname2,"%s.dat.new",mStartUpCache_filename.c_str());
+
+          sprintf(ifname1,"%s.index.tmp",mStartUpCache_filename.c_str());
+          sprintf(ifname2,"%s.index.new",mStartUpCache_filename.c_str());
+
+          time_t startTime = time(0);
+          FILE *file1 = fopen(fname1,"w");
+          FILE *file2 = fopen(ifname1,"w");
+
+          long long total = 0;
+          //std::cout << "REQUESTS  " << requestCounters.size() << "\n";
+          for (auto it = values.rbegin(); it != values.rend()  &&  !mShutdownRequested  &&  total < mStartUpCache_maxSize; ++it)
+          {
+            for (auto v = it->second.begin(); v != it->second.end(); ++v)
+            {
+              uint fileId = ((*v) >> 32) & 0xFFFFFFFF;
+              uint messageIndex = (*v) & 0xFFFFFFFF;
+
+              GRID::GridFile_sptr gridFile = getGridFile(fileId);
+              if (gridFile  &&  !mShutdownRequested)
+              {
+                GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
+                if (message  &&  (total + message->getMessageSize()) < mStartUpCache_maxSize)
+                {
+                  char *p = message->getMemoryPtr();
+
+                  StartUpCacheIndexRec rec;
+                  rec.producerId = message->getProducerId();
+                  rec.generationId = message->getGenerationId();
+                  rec.fileId = fileId;
+                  rec.messageIndex = messageIndex;
+                  rec.filePosition = ftell(file1);
+                  rec.messageSize = message->getMessageSize();
+
+                  fwrite(&rec,sizeof(rec),1,file2);
+                  fwrite(p,rec.messageSize,1,file1);
+
+                  total = total + rec.messageSize;
+                }
+              }
+            }
+
+            //std::cout << " * " << it->first << " : " << it->second.size() << " = " << total << "\n";
+          }
+          fclose(file1);
+          fclose(file2);
+
+          if (!mShutdownRequested)
+          {
+            rename(fname1,fname2);
+            rename(ifname1,ifname2);
+          }
+
+          time_t endTime = time(0);
+
+          //printf("WRITE TIME %u\n",endTime-startTime);
+        }
+        catch (...)
+        {
+          Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+          std::string st = exception.getStackTrace();
+          PRINT_DATA(mDebugLog,"%s",st.c_str());
+        }
+      }
+    }
+
+    mCacheProcessingActive = false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
 
 
 }

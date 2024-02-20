@@ -38,6 +38,8 @@ class GridFileManager
     GRID::GridFile_sptr getFileByIdNoMapping(uint fileId);
     std::size_t         getFileCount();
     void                getVirtualFiles(std::set<uint>& idList);
+    void                getRequestCounters(GRID::RequestCounters& requestCounters,bool diskFiles,bool networkFiles);
+    void                resetRequestCounters();
     void                print(std::ostream& stream,uint level,uint optionFlags);
 
   protected:
