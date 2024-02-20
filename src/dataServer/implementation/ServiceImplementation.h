@@ -17,6 +17,19 @@ namespace DataServer
 {
 
 
+struct StartUpCacheIndexRec
+{
+  uint producerId;
+  uint generationId;
+  uint fileId;
+  uint messageIndex;
+  unsigned long long filePosition;
+  uint messageSize;
+};
+
+
+typedef std::map<unsigned long long,StartUpCacheIndexRec> StartUpIndexMap;
+
 
 class ServiceImplementation : public ServiceInterface
 {
@@ -34,17 +47,20 @@ class ServiceImplementation : public ServiceInterface
                        string_vec& luaFileNames);
 
      virtual void   startEventProcessing();
+     virtual void   startCacheProcessing();
      virtual void   shutdown();
 
      virtual void   addVirtualContentFactory(VirtualContentFactory *factory);
      virtual void   addSubServer(std::string& name,ServiceInterface *subServer);
 
+     virtual void   setStartUpCache(bool enabled,bool saveDiskData,bool saveNetworkData,const char *filename,uint saveIntervalInMinutes,long long maxSizeInMegaBytes);
      virtual void   setVirtualContentEnabled(bool enabled);
      virtual void   setCleanup(time_t age,time_t checkInterval);
      virtual void   setDem(boost::shared_ptr<Fmi::DEM> dem);
      virtual void   setLandCover(boost::shared_ptr<Fmi::LandCover> landCover);
 
      virtual void   eventProcessingThread();
+     virtual void   cacheProcessingThread();
 
   protected:
 
@@ -185,6 +201,7 @@ class ServiceImplementation : public ServiceInterface
      bool                 mShutdownRequested;
      bool                 mFullUpdateRequired;
      bool                 mEventProcessingActive;
+     bool                 mCacheProcessingActive;
      bool                 mVirtualContentEnabled;
      T::SessionId         mServerSessionId;
      uint                 mServerId;
@@ -192,11 +209,22 @@ class ServiceImplementation : public ServiceInterface
      std::string          mServerIor;
      std::string          mDataDir;
      pthread_t            mEventProcessingThread;
+     pthread_t            mCacheProcessingThread;
      time_t               mContentServerStartTime;
      GridFileManager      mGridFileManager;
      std::vector<uint>    mFileAdditionList;
      ThreadLock           mThreadLock;
      time_t               mContentChangeTime;
+     std::string          mStartUpCache_filename;
+     bool                 mStartUpCache_enabled;
+     bool                 mStartUpCache_saveDiskData;
+     bool                 mStartUpCache_saveNetworkData;
+     MapInfo              mStartUpCache_memoryMapInfo;
+     StartUpIndexMap      mStartUpCache_indexMap;
+     uint                 mStartUpCache_saveInterval;
+     time_t               mStartUpCache_saveTime;
+     long long            mStartUpCache_maxSize;
+
 
      VirtualContentManager              mVirtualContentManager;
      ContentServer::ServiceInterface*   mContentServer;

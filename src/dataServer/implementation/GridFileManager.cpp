@@ -415,6 +415,61 @@ GRID::GridFile_sptr GridFileManager::getFileById(uint fileId)
 
 
 
+void GridFileManager::getRequestCounters(GRID::RequestCounters& requestCounters,bool diskFiles,bool networkFiles)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+
+    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
+    {
+      if (it->second->isNetworkFile())
+      {
+        if (networkFiles)
+          it->second->getRequestCounters(requestCounters);
+      }
+      else
+      {
+        if (diskFiles)
+          it->second->getRequestCounters(requestCounters);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+
+void GridFileManager::resetRequestCounters()
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+
+    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
+    {
+      //if (it->second->isNetworkFile())
+        it->second->resetRequestCounters();
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 GRID::GridFile_sptr GridFileManager::getFileByIdNoMapping(uint fileId)
 {
   FUNCTION_TRACE
