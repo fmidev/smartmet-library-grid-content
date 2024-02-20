@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 24.2.8
+Version: 24.2.20
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -29,9 +29,9 @@ BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 24.1.3
-BuildRequires: smartmet-library-grid-files-devel >= 24.2.5
+BuildRequires: smartmet-library-grid-files-devel >= 24.2.20
 BuildRequires: smartmet-library-macgyver-devel >= 24.1.17
-BuildRequires: smartmet-library-spine-devel >= 24.1.30
+BuildRequires: smartmet-library-spine-devel >= 24.2.8
 BuildRequires: postgresql15-devel
 Requires: %{smartmet_boost}-date-time
 Requires: hiredis-devel
@@ -40,9 +40,9 @@ Requires: lua-devel
 Requires: omniORB
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 24.1.3
-Requires: smartmet-library-grid-files >= 24.2.5
+Requires: smartmet-library-grid-files >= 24.2.20
 Requires: smartmet-library-macgyver >= 24.1.17
-Requires: smartmet-library-spine >= 24.1.30
+Requires: smartmet-library-spine >= 24.2.8
 
 Provides: %{SPECNAME}
 
@@ -78,8 +78,8 @@ Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
 Requires: smartmet-library-macgyver-devel >= 24.1.17
 Requires: smartmet-library-gis-devel >= 24.1.3
-Requires: smartmet-library-spine-devel >= 24.1.30
-Requires: smartmet-library-grid-files-devel >= 24.2.5
+Requires: smartmet-library-spine-devel >= 24.2.8
+Requires: smartmet-library-grid-files-devel >= 24.2.20
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -89,9 +89,10 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Feb 20 2024 Mika Heiskanen <mheiskan@rhel8.dev.fmi.fi> - 24.2.20-1.fmi
+- Enabled caching grids to disk
 * Thu Feb  8 2024 Andris Pavenis <andris.pavenis@fmi.fi> 24.2.8-1.fmi
 - Workaround build problem for RHEL7 (unresolved external references)
-
 * Mon Feb  5 2024 Mika Heiskanen <mheiskan@rhel8.dev.fmi.fi> - 24.2.5-1.fmi
 - Improved support for writing GRIB files
 * Fri Dec 22 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.12.22-1.fmi
