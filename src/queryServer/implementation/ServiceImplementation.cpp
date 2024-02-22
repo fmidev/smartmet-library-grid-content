@@ -1008,8 +1008,9 @@ bool ServiceImplementation::getFunctionParams(const std::string& functionParamsS
       std::string key;
       T::GeometryId geometryId = 0;
       T::ParamLevelId paramLevelId = 0;
-      T::ParamLevel paramLevel =0;
-      T::ForecastType forecastType = 0;
+      T::ParamLevel paramLevel = 0;
+      T::ForecastType forecastType = 1;
+      std::vector<T::ParamLevel> paramLevelVec;
       std::vector<T::ForecastNumber> forecastNumberVec;
       std::string producerName;
       uint producerId = 0;
@@ -1019,25 +1020,36 @@ bool ServiceImplementation::getFunctionParams(const std::string& functionParamsS
       short levelInterpolationMethod = 0;
 
 
-      getParameterStringInfo(*it,':',key,geometryId,paramLevelId,paramLevel,forecastType,forecastNumberVec,
+      getParameterStringInfo(*it,':',key,geometryId,paramLevelId,paramLevelVec,forecastType,forecastNumberVec,
           producerName,producerId,generationFlags,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod);
 
-      size_t sz = forecastNumberVec.size();
-      if (sz < 2)
+      size_t lsz = paramLevelVec.size();
+      size_t fsz = forecastNumberVec.size();
+      if (lsz < 2  &&  fsz < 2)
       {
         mFunctionParamId++;
         functionParams.emplace_back(mFunctionParamId,*it);
       }
       else
       {
-        for (size_t t = 0; t < sz; t++)
-        {
-          char buf[10000];
-          sprintf(buf, "%s:%s:%d:%d:%d:%d:%d:%llu", key.c_str(),producerName.c_str(),geometryId,paramLevelId,paramLevel,
-              forecastType,forecastNumberVec[t],generationFlags);
+        if (lsz < 1)
+          paramLevelVec.push_back(paramLevel);
 
-          mFunctionParamId++;
-          functionParams.emplace_back(mFunctionParamId, std::string(buf));
+        if (fsz < 1)
+          forecastNumberVec.push_back(-1);
+
+        for (auto lIt = paramLevelVec.begin(); lIt != paramLevelVec.end(); ++lIt)
+        {
+          paramLevel = *lIt;
+          for (auto fIt = forecastNumberVec.begin(); fIt != forecastNumberVec.end(); ++fIt)
+          {
+            char buf[200];
+            sprintf(buf, "%s:%s:%d:%d:%d:%d:%d:%llu", key.c_str(),producerName.c_str(),geometryId,paramLevelId,paramLevel,
+                  forecastType,*fIt,generationFlags);
+
+            mFunctionParamId++;
+            functionParams.emplace_back(mFunctionParamId, std::string(buf));
+          }
         }
       }
     }
@@ -1202,9 +1214,13 @@ void ServiceImplementation::getParameterStringInfo(
   FUNCTION_TRACE
   try
   {
+    std::vector<T::ParamLevel> paramLevelVec;
     std::vector<T::ForecastNumber> forecastNumberVec;
-    getParameterStringInfo(param, fieldSeparator, key, geometryId,paramLevelId, paramLevel, forecastType, forecastNumberVec, producerName, producerId, generationFlags, areaInterpolationMethod,
+    getParameterStringInfo(param, fieldSeparator, key, geometryId,paramLevelId, paramLevelVec, forecastType, forecastNumberVec, producerName, producerId, generationFlags, areaInterpolationMethod,
         timeInterpolationMethod, levelInterpolationMethod);
+
+    if (paramLevelVec.size() > 0)
+      paramLevel = paramLevelVec[0];
 
     if (forecastNumberVec.size() > 0)
       forecastNumber = forecastNumberVec[0];
@@ -1226,7 +1242,7 @@ void ServiceImplementation::getParameterStringInfo(
     std::string& key,
     T::GeometryId& geometryId,
     T::ParamLevelId& paramLevelId,
-    T::ParamLevel& paramLevel,
+    std::vector<T::ParamLevel>& paramLevelVec,
     T::ForecastType& forecastType,
     std::vector<T::ForecastNumber>& forecastNumberVec,
     std::string& producerName,
@@ -1303,7 +1319,12 @@ void ServiceImplementation::getParameterStringInfo(
     if (c > 4)
     {
       if (field[4][0] != '\0')
-        paramLevel = toInt32(field[4]);
+      {
+        std::vector<std::string> numbers;
+        splitNumbers(field[4],numbers);
+        for (auto n=numbers.begin(); n!=numbers.end(); ++n)
+          paramLevelVec.emplace_back(toInt32(*n));
+      }
     }
 
     if (c > 5)
@@ -1561,11 +1582,10 @@ bool ServiceImplementation::parseFunction(
     }
     else
     {
-      std::vector<T::ForecastNumber> forecastNumberVec;
       std::string producerName;
 
       std::string paramName;
-      getParameterStringInfo(paramStr, ':', paramName, queryParam.mGeometryId, queryParam.mParameterLevelId, queryParam.mParameterLevel, queryParam.mForecastType, forecastNumberVec, producerName,
+      getParameterStringInfo(paramStr, ':', paramName, queryParam.mGeometryId, queryParam.mParameterLevelId, queryParam.mParameterLevel, queryParam.mForecastType, queryParam.mForecastNumber, producerName,
           queryParam.mProducerId, queryParam.mGenerationFlags, queryParam.mAreaInterpolationMethod, queryParam.mTimeInterpolationMethod, queryParam.mLevelInterpolationMethod);
 
       std::string alias;
@@ -1688,9 +1708,8 @@ void ServiceImplementation::updateQueryParameters(Query& query)
         // definition or to the function parameters.
 
         PRINT_DATA(mDebugLog, " * PARAMETER: %s\n", qParam->mSymbolicName.c_str());
-        std::vector<T::ForecastNumber> forecastNumberVec;
 
-        getParameterStringInfo(qParam->mParam, ':', qParam->mParameterKey, qParam->mGeometryId, qParam->mParameterLevelId, qParam->mParameterLevel, qParam->mForecastType, forecastNumberVec, qParam->mProducerName,
+        getParameterStringInfo(qParam->mParam, ':', qParam->mParameterKey, qParam->mGeometryId, qParam->mParameterLevelId, qParam->mParameterLevel, qParam->mForecastType, qParam->mForecastNumber, qParam->mProducerName,
             qParam->mProducerId, qParam->mGenerationFlags, qParam->mAreaInterpolationMethod, qParam->mTimeInterpolationMethod, qParam->mLevelInterpolationMethod);
 
         if (qParam->mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID)
@@ -1863,6 +1882,16 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
     for (auto qParam = query.mQueryParameterList.rbegin(); qParam != query.mQueryParameterList.rend(); ++qParam)
     {
       std::string function = qParam->mFunction;
+      std::string subfunction;
+      std::vector<std::string> subVec;
+      splitString(function,':',subVec);
+      if (subVec.size() == 2)
+      {
+        function = subVec[0];
+        subfunction = subVec[1];
+      }
+      //printf("FUNCTION [%s][%s][%s]\n",qParam->mFunction.c_str(),function.c_str(),subfunction.c_str());
+
       if (!function.empty())
       {
         std::string f = function.substr(0, 1);
@@ -1924,6 +1953,8 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
           else
           if (f != "@"  &&  inputVectors.size() > 0)
           {
+            //unsigned long long startTime = getTime();
+
             auto functionPtr = mFunctionCollection.getFunction(function);
             if (functionPtr)
             {
@@ -1935,11 +1966,17 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
               uint type = mLuaFileCollection.getFunction(function, luaFunction);
               switch (type)
               {
+                case 8:
+                  mLuaFileCollection.executeFunctionCall8(luaFunction,subfunction.c_str(),columns,rows,inputVectors,parameters,pValues->mValueVector);
+                  break;
+
                 case 9:
                   mLuaFileCollection.executeFunctionCall9(luaFunction,columns,rows,inputVectors,parameters,pValues->mValueVector);
                   break;
               }
             }
+            //unsigned long long endTime = getTime();
+            //printf("TIME %f\n",(float)(endTime-startTime)/1000000.0);
           }
 
           pValues->mProducerId = producerId;
@@ -1955,6 +1992,14 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
       {
         std::vector<double> parameters;
         std::string function = qParam->mFunction.substr(1);
+        std::string subfunction;
+        std::vector<std::string> subVec;
+        splitString(function,':',subVec);
+        if (subVec.size() == 2)
+        {
+          function = subVec[0];
+          subfunction = subVec[1];
+        }
         auto functionPtr = mFunctionCollection.getFunction(function);
         uint type = 0;
         std::string luaFunction;
@@ -1965,6 +2010,7 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
         int endIdx = 0;
 
         int fpLen = qParam->mFunctionParams.size();
+
         if (fpLen > 1)
           startIdx = toInt32(qParam->mFunctionParams[1].second);
 
@@ -1990,22 +2036,28 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
 
           if (inputVectors.size())
           {
+            //unsigned long long startTime = getTime();
             if (functionPtr)
             {
               functionPtr->executeFunctionCall9(columns,rows,inputVectors,parameters,outputVector);
             }
             else
             {
-              //std::string luaFunction;
-              //uint type = mLuaFileCollection.getFunction(function, luaFunction);
               switch (type)
               {
+                case 8:
+                  mLuaFileCollection.executeFunctionCall8(luaFunction,subfunction.c_str(),columns,rows,inputVectors,parameters,outputVector);
+                  break;
+
                 case 9:
                   mLuaFileCollection.executeFunctionCall9(luaFunction,columns,rows,inputVectors,parameters,outputVector);
                   break;
               }
             }
+            //unsigned long long endTime = getTime();
+            //printf("TIME %f\n",(float)(endTime-startTime)/1000000.0);
           }
+
           outputVectors.emplace_back(outputVector);
         }
 
@@ -2106,10 +2158,12 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
           for (uint v = 0; v < valueCount; v++)
           {
             std::vector<double> parameters;
+            std::vector<std::string> strParameters;
 
             for (auto it = qParam->mFunctionParams.begin(); it != qParam->mFunctionParams.end(); ++it)
             {
               double a = toDouble(it->second.c_str());
+              strParameters.push_back(it->second);
               QueryParameter* q = query.getQueryParameterPtr(it->first);
               std::vector<double> valueList;
               if (q != nullptr)
@@ -2217,6 +2271,17 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
                     double val = mLuaFileCollection.executeFunctionCall1(luaFunction, parameters);
                     T::GridValue rec(lastRec.mX, lastRec.mY, val);
                     pValues->mValueList.addGridValue(rec);
+                  }
+                  break;
+
+                  case 2:
+                  {
+                    if (strParameters.size() == 1)
+                    {
+                      double val = mLuaFileCollection.executeFunctionCall2(luaFunction, strParameters[0].c_str());
+                      T::GridValue rec(lastRec.mX, lastRec.mY, val);
+                      pValues->mValueList.addGridValue(rec);
+                    }
                   }
                   break;
 

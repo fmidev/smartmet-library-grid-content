@@ -191,7 +191,7 @@ class ServiceImplementation : public ServiceInterface
                        std::string& key,
                        T::GeometryId& geometryId,
                        T::ParamLevelId& paramLevelId,
-                       T::ParamLevel& paramLevel,
+                       std::vector<T::ParamLevel>& paramLevelVec,
                        T::ForecastType& forecastType,
                        std::vector<T::ForecastNumber>& forecastNumberVec,
                        std::string& producerName,

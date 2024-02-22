@@ -34,6 +34,8 @@ class LuaFile
     float             executeFunctionCall1(const std::string& function,std::vector<float>& parameters);
     double            executeFunctionCall1(const std::string& function,std::vector<double>& parameters);
 
+    double            executeFunctionCall2(const std::string& function,const char *str);
+
     // Type 4: Takes two data vectors and angle vector, returns one vector
     void              executeFunctionCall4(const std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters);
     void              executeFunctionCall4(const std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters);
@@ -56,6 +58,8 @@ class LuaFile
                         short forecastNumber,
                         short interpolationMethod);
 
+    void              executeFunctionCall8(const std::string& function,const char *subFunction,uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters);
+    void              executeFunctionCall8(const std::string& function,const char *subFunction,uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters);
 
     // Type 9: Takes 1 to N vectors and returns one vector
     void              executeFunctionCall9(const std::string& function,uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters);

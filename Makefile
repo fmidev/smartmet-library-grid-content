@@ -39,7 +39,7 @@ LIBS += $(REQUIRED_LIBS) $(CORBA_LIBS) \
 	-lboost_date_time \
 	-lhiredis \
 	-lcurl \
-	-llua \
+	-lluajit-5.1 \
 	-lpthread
 
 #-L/usr/pgsql-9.5/lib -lpq

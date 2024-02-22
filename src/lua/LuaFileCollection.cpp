@@ -307,6 +307,33 @@ double LuaFileCollection::executeFunctionCall1(const std::string& function,std::
 
 
 
+double LuaFileCollection::executeFunctionCall2(const std::string& function,const char *str)
+{
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    {
+      std::string functionName;
+      uint type = it->getFunction(function,functionName);
+      if (type == 2)
+      {
+        return it->executeFunctionCall2(functionName,str);
+      }
+    }
+
+    Fmi::Exception exception(BCP, "Unknown LUA function!");
+    exception.addParameter("Function",function);
+    throw exception;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
+  }
+}
+
+
+
 void LuaFileCollection::executeFunctionCall4(const std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters)
 {
   try
@@ -433,6 +460,65 @@ std::string LuaFileCollection::executeFunctionCall6(
   }
 }
 
+
+
+
+
+void LuaFileCollection::executeFunctionCall8(const std::string& function,const char *subfunction,uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+{
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    {
+      std::string functionName;
+      uint type = it->getFunction(function,functionName);
+      if (type == 8)
+      {
+        it->executeFunctionCall8(functionName,subfunction,columns,rows,inParameters,extParameters,outParameters);
+        return;
+      }
+    }
+
+    Fmi::Exception exception(BCP, "Unknown LUA function!");
+    exception.addParameter("Function",function);
+    throw exception;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
+  }
+}
+
+
+
+
+
+void LuaFileCollection::executeFunctionCall8(const std::string& function,const char *subfunction,uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+{
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    {
+      std::string functionName;
+      uint type = it->getFunction(function,functionName);
+      if (type == 8)
+      {
+        it->executeFunctionCall8(functionName,subfunction,columns,rows,inParameters,extParameters,outParameters);
+        return;
+      }
+    }
+
+    Fmi::Exception exception(BCP, "Unknown LUA function!");
+    exception.addParameter("Function",function);
+    throw exception;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "LUA function execution failed!", nullptr);
+  }
+}
 
 
 
