@@ -17,10 +17,10 @@ extern "C"
   //#include <lualib.h>
 
   // Lua header files when using luajit compiler
-  #include "luajit-2.1/lua.h"
-  #include "luajit-2.1/lauxlib.h"
-  #include "luajit-2.1/lualib.h"
-  #include "luajit-2.1/luajit.h"
+  #include <lua.h>
+  #include <lauxlib.h>
+  #include <lualib.h>
+  #include <luajit.h>
 }
 
 
