@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 24.2.20
+Version: 24.2.23
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -89,6 +89,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Feb 23 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> 24.2.23-1.fmi
+- Full repackaging
+
 * Tue Feb 20 2024 Mika Heiskanen <mheiskan@rhel8.dev.fmi.fi> - 24.2.20-1.fmi
 - Enabled caching grids to disk
 * Thu Feb  8 2024 Andris Pavenis <andris.pavenis@fmi.fi> 24.2.8-1.fmi
