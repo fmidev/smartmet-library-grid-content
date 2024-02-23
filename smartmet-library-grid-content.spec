@@ -23,24 +23,24 @@ BuildRequires: gdal35-devel
 BuildRequires: hiredis-devel
 BuildRequires: libcurl-devel
 BuildRequires: libicu-devel
-BuildRequires: lua-devel
+BuildRequires: luajit-devel
 BuildRequires: make
 BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 24.1.3
-BuildRequires: smartmet-library-grid-files-devel >= 24.2.20
+BuildRequires: smartmet-library-grid-files-devel >= 24.2.23
 BuildRequires: smartmet-library-macgyver-devel >= 24.1.17
 BuildRequires: smartmet-library-spine-devel >= 24.2.8
 BuildRequires: postgresql15-devel
 Requires: %{smartmet_boost}-date-time
 Requires: hiredis-devel
 Requires: libcurl
-Requires: lua-devel
+Requires: luajit-devel
 Requires: omniORB
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 24.1.3
-Requires: smartmet-library-grid-files >= 24.2.20
+Requires: smartmet-library-grid-files >= 24.2.23
 Requires: smartmet-library-macgyver >= 24.1.17
 Requires: smartmet-library-spine >= 24.2.8
 
@@ -79,7 +79,7 @@ Requires: %{SPECNAME}
 Requires: smartmet-library-macgyver-devel >= 24.1.17
 Requires: smartmet-library-gis-devel >= 24.1.3
 Requires: smartmet-library-spine-devel >= 24.2.8
-Requires: smartmet-library-grid-files-devel >= 24.2.20
+Requires: smartmet-library-grid-files-devel >= 24.2.23
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -90,8 +90,7 @@ FMI Grid Content library development files
 
 %changelog
 * Fri Feb 23 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> 24.2.23-1.fmi
-- Full repackaging
-
+- Switch to luajit
 * Tue Feb 20 2024 Mika Heiskanen <mheiskan@rhel8.dev.fmi.fi> - 24.2.20-1.fmi
 - Enabled caching grids to disk
 * Thu Feb  8 2024 Andris Pavenis <andris.pavenis@fmi.fi> 24.2.8-1.fmi
