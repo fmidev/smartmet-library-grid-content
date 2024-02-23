@@ -27,8 +27,7 @@ endif
 CFLAGS += $(CORBA_FLAGS)
 INCLUDES += $(CORBA_INCLUDE)
 
-CFLAGS += \
-	-isystem /usr/include/lua
+CFLAGS += `pkg-config --cflags luajit`
 
 LIBS += $(REQUIRED_LIBS) $(CORBA_LIBS) \
 	-L$(libdir) \
@@ -39,7 +38,7 @@ LIBS += $(REQUIRED_LIBS) $(CORBA_LIBS) \
 	-lboost_date_time \
 	-lhiredis \
 	-lcurl \
-	-lluajit-5.1 \
+	`pkg-config --libs luajit` \
 	-lpthread
 
 #-L/usr/pgsql-9.5/lib -lpq
