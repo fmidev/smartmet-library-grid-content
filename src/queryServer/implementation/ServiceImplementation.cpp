@@ -54,7 +54,7 @@ namespace SmartMet
 namespace QueryServer
 {
 
-Fmi::TimeZonePtr tz_utc(new boost::local_time::posix_time_zone("UTC"));
+const Fmi::TimeZonePtr& tz_utc = (Fmi::TimeZonePtr::utc);
 
 
 thread_local static ContentCache mContentCache;
@@ -9169,7 +9169,7 @@ void ServiceImplementation::getAdditionalValues(
   {
     std::string param = toLowerString(parameterName);
 
-    auto dt = boost::posix_time::from_time_t(values.mForecastTimeUTC);
+    auto dt = Fmi::date_time::from_time_t(values.mForecastTimeUTC);
     Fmi::LocalDateTime utcTime(dt, tz_utc);
 
     if (param == "dem")
@@ -9552,7 +9552,7 @@ T::ParamValue ServiceImplementation::getAdditionalValue(
   try
   {
     std::string param = toLowerString(parameterName);
-    auto dt = boost::posix_time::from_time_t(forecastTime);
+    auto dt =Fmi::date_time::from_time_t(forecastTime);
     Fmi::LocalDateTime utcTime(dt, tz_utc);
 
     if (param == "dem")
