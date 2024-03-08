@@ -4,6 +4,7 @@
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/grib1/GridDefinition.h>
 #include <grid-files/grib2/GridDefinition.h>
+#include <boost/shared_ptr.hpp>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF

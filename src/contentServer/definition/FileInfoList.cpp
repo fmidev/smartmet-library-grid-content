@@ -6,6 +6,7 @@
 #include <grid-files/common/AutoReadLock.h>
 #include <grid-files/common/AutoThreadLock.h>
 #include <grid-files/common/ShowFunction.h>
+#include <iostream>
 #include <boost/functional/hash.hpp>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF

@@ -13,6 +13,7 @@
 #include <gis/DEM.h>
 #include <gis/LandCover.h>
 #include <macgyver/CacheStats.h>
+#include <boost/shared_ptr.hpp>
 
 
 namespace SmartMet
