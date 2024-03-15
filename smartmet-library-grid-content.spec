@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 24.2.23
+Version: 24.3.14
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -89,6 +89,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Mar 14 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.3.14-1.fmi
+- Reset cache creation time when the cache is reset to keep hit rate etc correct
 * Fri Feb 23 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> 24.2.23-1.fmi
 - Switch to luajit
 * Tue Feb 20 2024 Mika Heiskanen <mheiskan@rhel8.dev.fmi.fi> - 24.2.20-1.fmi

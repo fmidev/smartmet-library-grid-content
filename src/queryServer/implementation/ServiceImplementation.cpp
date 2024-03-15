@@ -3842,6 +3842,10 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       mContentSearchCache.clear();
       mContentSearchCache_records = 0;
       mContentSearchCache_clearTime = time(nullptr);
+      mContentSearchCache_stats.starttime = Fmi::SecondClock::universal_time();
+      mContentSearchCache_hits = 0;
+      mContentSearchCache_misses = 0;
+      mContentSearchCache_inserts = 0;
     }
 
     auto rr = mContentSearchCache.find(hash2);
@@ -3883,8 +3887,12 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
         //printf("CLEAR CONTENT CACHE %ld %ld %ld\n",mContentCache_records,mContentCache_maxRecordsPerThread,(std::size_t)mContentCache_size);
         mContentCache_size -= mContentCache_records;
         mContentCache.clear();
+        mContentCache_hits = 0;
+        mContentCache_misses = 0;
+        mContentCache_inserts = 0;
         mContentCache_records = 0;
         mContentCache_clearTime = time(nullptr);
+        mContentCache_stats.starttime = Fmi::SecondClock::universal_time();
       }
 
       if (mContentCache.find(hash) == mContentCache.end())
