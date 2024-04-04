@@ -1325,7 +1325,7 @@ int CacheImplementation::_getProducerParameterListByProducerId(T::SessionId sess
 
             char tmp[200];
             char *p = tmp;
-            p += sprintf(p,"%s;%s;%d;%s;%d;;%d;%05d;%d;%d",
+            p += sprintf(p,"%s;%s;%d;%s;%d;1;%d;%06d;%d;%d",
                   producerInfo->mName.c_str(),
                   sourceParamKey.c_str(),
                   targetParameterKeyType,
