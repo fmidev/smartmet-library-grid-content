@@ -30,6 +30,7 @@
 #include <grid-files/identification/GridDef.h>
 #include <macgyver/StringConversion.h>
 
+#include <boost/numeric/conversion/cast.hpp>
 #include <signal.h>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
