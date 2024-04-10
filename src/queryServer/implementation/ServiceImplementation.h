@@ -72,6 +72,20 @@ struct HashRec
 typedef std::unordered_map<uint,HashRec> ProducerHash_map;
 
 
+class HeightRec
+{
+  public:
+    HeightRec() {levelId = 0, level1 = 0, level2 = 0, height1 = 0, height2 = 0;};
+
+    int levelId;
+    int level1;
+    int level2;
+    float height1;
+    float height2;
+};
+
+typedef std::unordered_map<std::size_t,HeightRec> HeightCache;
+
 
 class ServiceImplementation : public ServiceInterface
 {
@@ -291,6 +305,7 @@ class ServiceImplementation : public ServiceInterface
                        T::ParamValue_vec& valueList,
                        T::ParamValue_vec& newValueList);
 
+#if 0
      bool           getPointValuesByHeight(
                        Query& query,
                        QueryParameter& qParam,
@@ -305,7 +320,7 @@ class ServiceImplementation : public ServiceInterface
                        T::ParamLevel paramLevel,
                        uint& newProducerId,
                        ParameterValues& valueList);
-
+#endif
      bool           getPolygonValues(
                        Query& query,
                        QueryParameter& qParam,
@@ -337,6 +352,21 @@ class ServiceImplementation : public ServiceInterface
                        double x,
                        double y,
                        double radius,
+                       uint& newProducerId,
+                       ParameterValues& valueList);
+
+     bool           getPointValuesByHeight(
+                       Query& query,
+                       QueryParameter& qParam,
+                       T::ProducerInfo& producerInfo,
+                       T::GeometryId producerGeometryId,
+                       uint generationId,
+                       const std::string& analysisTime,
+                       ulonglong generationFlags,
+                       ParameterMapping& pInfo,
+                       time_t forecastTime,
+                       T::ParamLevelId paramLevelId,
+                       T::ParamLevel paramLevel,
                        uint& newProducerId,
                        ParameterValues& valueList);
 
@@ -464,6 +494,20 @@ class ServiceImplementation : public ServiceInterface
                        double x,
                        double y,
                        T::ContentInfoList& newContentList);
+
+     bool           getClosestLevelsByHeight(
+                       uint producerId,
+                       uint generationId,
+                       int geometryId,
+                       int forecastType,
+                       int forecastNumber,
+                       time_t forecastTime,
+                       uchar coordinateType,
+                       double x,
+                       double y,
+                       int height,
+                       HeightRec& rec);
+
 
      T::ParamValue  getAdditionalValue(
                        const std::string& parameterName,
