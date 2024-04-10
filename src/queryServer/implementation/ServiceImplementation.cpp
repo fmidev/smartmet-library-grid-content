@@ -8682,7 +8682,22 @@ void ServiceImplementation::getGridValues(
           {
             ParameterMapping_vec_sptr mappings;
             if (qParam.mParameterLevelId > 0 || qParam.mParameterLevel > 0)
+            {
               getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, qParam.mParameterLevelId, qParam.mParameterLevel, false, mappings);
+              if (mappings->size() == 0)
+              {
+                // Getting a mapping by using the levelId. This probably returns all levels belonging
+                // to the current levelId. We need just one for mapping.
+                ParameterMapping_vec_sptr tmpMappings;
+                getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, qParam.mParameterLevelId, -1,false, tmpMappings);
+                if (tmpMappings->size() > 0)
+                {
+                  ParameterMapping m((*tmpMappings)[0]);
+                  m.mParameterLevel = qParam.mParameterLevel;
+                  mappings->emplace_back(m);
+                }
+              }
+            }
             else
               getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, true, mappings);
 
