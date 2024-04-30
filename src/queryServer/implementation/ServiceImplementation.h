@@ -7,6 +7,8 @@
 #include "../../contentServer/definition/ServiceInterface.h"
 #include "../../lua/LuaFileCollection.h"
 #include "../../functions/FunctionCollection.h"
+
+#include <macgyver/Cache.h>
 #include <boost/unordered_map.hpp>
 #include <unordered_map>
 #include <atomic>
@@ -22,7 +24,6 @@ typedef std::unordered_map<std::string,T::ProducerInfo>       Producer_map;
 typedef std::shared_ptr<Producer_map>                         Producer_map_sptr;
 typedef ContentServer::ServiceInterface*                      ContentServer_ptr;
 typedef DataServer::ServiceInterface*                         DataServer_ptr;
-typedef std::vector<std::pair<std::string,int>>               LevelHeightCache;
 typedef std::shared_ptr<ParameterMapping_vec>                 ParameterMapping_vec_sptr;
 typedef boost::unordered_map<size_t,ParameterMapping_vec_sptr>  ParameterMappingCache;
 typedef std::shared_ptr<std::vector<std::string>>             StringVector_sptr;
@@ -53,6 +54,7 @@ typedef std::shared_ptr<ContentCacheEntry> ContentCacheEntry_sptr;
 typedef std::unordered_map<std::size_t,ContentCacheEntry_sptr> ContentCache;
 
 
+
 class ContentSearchCacheEntry
 {
   public:
@@ -63,28 +65,48 @@ class ContentSearchCacheEntry
 typedef std::unordered_map<std::size_t,ContentSearchCacheEntry> ContentSearchCache;
 
 
-struct HashRec
-{
-  time_t checkTime;
-  ulonglong hash;
-};
-
-typedef std::unordered_map<uint,HashRec> ProducerHash_map;
-
-
 class HeightRec
 {
   public:
-    HeightRec() {levelId = 0, level1 = 0, level2 = 0, height1 = 0, height2 = 0;};
+    HeightRec() {levelId = 0; time1 = 0;level1_1 = 0; level1_2 = 0; height1_1 = 0; height1_2 = 0;time2 = 0; level2_1 = 0; level2_2 = 0;height2_1 = 0; height2_2 = 0;};
 
-    int levelId;
-    int level1;
-    int level2;
-    float height1;
-    float height2;
+    T::ParamLevelId levelId;
+    time_t time1;
+    T::ParamLevel level1_1;
+    T::ParamLevel level1_2;
+    T::ParamValue height1_1;
+    T::ParamValue height1_2;
+
+    time_t time2;
+    T::ParamLevel level2_1;
+    T::ParamLevel level2_2;
+    T::ParamValue height2_1;
+    T::ParamValue height2_2;
 };
 
-typedef std::unordered_map<std::size_t,HeightRec> HeightCache;
+typedef std::vector<HeightRec> HeightRec_vec;
+
+typedef Fmi::Cache::Cache<std::size_t,HeightRec> HeightCache;
+typedef Fmi::Cache::Cache<std::size_t,std::size_t> LevelCache;
+typedef Fmi::Cache::Cache<std::size_t,std::shared_ptr<T::ParamValue_vec>> HeightVecCache;
+typedef Fmi::Cache::Cache<std::size_t,ContentCacheEntry_sptr> LevelContentCache;
+
+
+
+class HeightConversion
+{
+  public:
+    HeightConversion() {producerId = 0; heightProducerId = 0; multiplier = 1.0;}
+
+    uint            producerId;
+    T::ParamLevelId levelId;
+    uint            heightProducerId;
+    std::string     heightParameter;
+    double          multiplier;
+};
+
+typedef std::unordered_map<std::size_t,HeightConversion> HeightConversionMap;
+
 
 
 class ServiceImplementation : public ServiceInterface
@@ -97,6 +119,7 @@ class ServiceImplementation : public ServiceInterface
                        ContentServer::ServiceInterface *contentServerPtr,
                        DataServer::ServiceInterface *dataServerPtr,
                        const std::string& gridConfigFile,
+                       const std::string& heightConversionFile,
                        string_vec& parameterMappingFiles,
                        string_vec& aliasFiles,
                        const std::string& producerFile,
@@ -197,7 +220,8 @@ class ServiceImplementation : public ServiceInterface
                        ulonglong& generationFlags,
                        short& areaInterpolationMethod,
                        short& timeInterpolationMethod,
-                       short& levelInterpolationMethod);
+                       short& levelInterpolationMethod,
+                       uint& flags);
 
      void           getParameterStringInfo(
                        const std::string& param,
@@ -213,7 +237,8 @@ class ServiceImplementation : public ServiceInterface
                        ulonglong& generationFlags,
                        short& areaInterpolationMethod,
                        short& timeInterpolationMethod,
-                       short& levelInterpolationMethod);
+                       short& levelInterpolationMethod,
+                       uint& flags);
 
      void          getParameterMappings(
                        const std::string& producerName,
@@ -268,6 +293,8 @@ class ServiceImplementation : public ServiceInterface
                        std::set<T::GeometryId>& geometryIdList);
 
      void           loadProducerFile();
+     void           loadHeightConversionFile();
+
 
      bool           parseFunction(
                        Query& query,
@@ -305,22 +332,6 @@ class ServiceImplementation : public ServiceInterface
                        T::ParamValue_vec& valueList,
                        T::ParamValue_vec& newValueList);
 
-#if 0
-     bool           getPointValuesByHeight(
-                       Query& query,
-                       QueryParameter& qParam,
-                       T::ProducerInfo& producerInfo,
-                       T::GeometryId producerGeometryId,
-                       uint generationId,
-                       const std::string& analysisTime,
-                       ulonglong generationFlags,
-                       ParameterMapping& pInfo,
-                       time_t forecastTime,
-                       T::ParamLevelId paramLevelId,
-                       T::ParamLevel paramLevel,
-                       uint& newProducerId,
-                       ParameterValues& valueList);
-#endif
      bool           getPolygonValues(
                        Query& query,
                        QueryParameter& qParam,
@@ -357,6 +368,8 @@ class ServiceImplementation : public ServiceInterface
 
      bool           getPointValuesByHeight(
                        Query& query,
+                       T::CoordinateType coordinateType,
+                       T::Coordinate_vec& coordinates,
                        QueryParameter& qParam,
                        T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
@@ -456,6 +469,23 @@ class ServiceImplementation : public ServiceInterface
                        uint& newProducerId,
                        ParameterValues& valueList);
 
+     bool           getValueVectorsByHeight(
+                       Query& query,
+                       T::CoordinateType coordinateType,
+                       T::Coordinate_vec& coordinates,
+                       QueryParameter& qParam,
+                       T::ProducerInfo& producerInfo,
+                       T::GeometryId producerGeometryId,
+                       uint generationId,
+                       const std::string& analysisTime,
+                       ulonglong generationFlags,
+                       ParameterMapping& pInfo,
+                       time_t forecastTime,
+                       T::ParamLevelId paramLevelId,
+                       T::ParamLevel paramLevel,
+                       uint& newProducerId,
+                       ParameterValues& valueList);
+
      bool           getValueVectors(
                        Query& query,
                        QueryParameter& qParam,
@@ -487,18 +517,16 @@ class ServiceImplementation : public ServiceInterface
                        uint& newProducerId,
                        ParameterValues& valueList);
 
-     void           convertLevelsToHeights(
-                       unsigned long long producerHash,
-                       T::ContentInfoList& contentList,
-                       uchar coordinateType,
-                       double x,
-                       double y,
-                       T::ContentInfoList& newContentList);
+     short          getLevelInterpolationMethod(
+                       T::ParamLevelId paramLevelId,
+                       short levelInterpolationMethod,
+                       uint flags);
 
      bool           getClosestLevelsByHeight(
                        uint producerId,
                        uint generationId,
                        int geometryId,
+                       T::ParamLevelId paramLevelId,
                        int forecastType,
                        int forecastNumber,
                        time_t forecastTime,
@@ -508,6 +536,42 @@ class ServiceImplementation : public ServiceInterface
                        int height,
                        HeightRec& rec);
 
+     bool           getClosestLevelsByHeight(
+                       uint producerId,
+                       uint generationId,
+                       int geometryId,
+                       T::ParamLevelId paramLevelId,
+                       int forecastType,
+                       int forecastNumber,
+                       time_t forecastTime,
+                       uchar coordinateType,
+                       std::vector<T::Coordinate>& coordinates,
+                       int height,
+                       HeightRec_vec& recs);
+
+     bool           getClosestLevelsByHeight(
+                       T::ContentInfoList& contentInfoList,
+                       uchar coordinateType,
+                       std::vector<T::Coordinate>& coordinates,
+                       uint coordinateIndex,
+                       std::size_t coordinateHash,
+                       int height,
+                       int& level1,
+                       float& height1,
+                       int& level2,
+                       float& height2);
+
+
+     bool           getClosestLevelsByHeight(
+                       T::ContentInfoList& contentInfoList,
+                       uchar coordinateType,
+                       double x,
+                       double y,
+                       int height,
+                       int& level1,
+                       float& height1,
+                       int& level2,
+                       float& height2);
 
      T::ParamValue  getAdditionalValue(
                        const std::string& parameterName,
@@ -522,8 +586,6 @@ class ServiceImplementation : public ServiceInterface
                        ParameterValues& values);
 
      bool           getProducerInfoByName(const std::string& name,T::ProducerInfo& info);
-
-     //ulonglong      getProducerHash(uint producerId);
 
      time_t         getContentList(
                       T::ProducerInfo& producerInfo,
@@ -572,8 +634,6 @@ class ServiceImplementation : public ServiceInterface
      std::string                mGridConfigFile;
      Lua::LuaFileCollection     mLuaFileCollection;
      string_vec                 mParameterMappingFiles;
-     //ProducerHash_map           mProducerHashMap;
-     //ModificationLock           mProducerHashMap_modificationLock;
 
      std::string                mProducerFile;
      time_t                     mProducerFile_modificationTime;
@@ -597,8 +657,11 @@ class ServiceImplementation : public ServiceInterface
      time_t                     mContentServerStartTime;
      ContentServer_ptr          mContentServerPtr;
      DataServer_ptr             mDataServerPtr;
-     LevelHeightCache           mLevelHeightCache;
-     ModificationLock           mHeightCache_modificationLock;
+
+     HeightCache                mPointHeightCache;
+     LevelCache                 mLevelRangeCache;
+     LevelContentCache          mLevelContentCache;
+     HeightVecCache             mHeightVecCache;
 
      ParamMappingFile_vec       mParameterMappings;
      time_t                     mParameterMapping_checkTime;
@@ -612,6 +675,12 @@ class ServiceImplementation : public ServiceInterface
      std::size_t                mContentSearchCache_maxRecordsPerThread;
      uint                       mContentSearchCache_clearInterval;
      time_t                     mParameterMappingCache_clearRequired;
+
+     HeightConversionMap        mHeightConversions;
+     ModificationLock           mHeightConversions_modificationLock;
+     std::string                mHeightConversionsFile;
+     time_t                     mHeightConversionsFile_modificationTime;
+     time_t                     mHeightConversionsFile_checkTime;
 
      pthread_t                  mThread;
      bool                       mShutdownRequested;

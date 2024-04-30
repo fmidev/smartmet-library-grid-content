@@ -8,10 +8,12 @@
 #include "../../functions/Function_outPrcnt.h"
 #include "../../functions/Function_min.h"
 #include "../../functions/Function_max.h"
+#include "../../functions/Function_mode.h"
 #include "../../functions/Function_mul.h"
 #include "../../functions/Function_multiply.h"
 #include "../../functions/Function_sdev.h"
 #include "../../functions/Function_sequence.h"
+#include "../../functions/Function_sub.h"
 #include "../../functions/Function_sum.h"
 #include "../../functions/Function_hypotenuse.h"
 #include "../../functions/Function_windDir.h"
@@ -166,7 +168,9 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,cons
     k2f->addFunction(new Functions::Function_add(32.0));
     mFunctionCollection.addFunction("K2F",k2f);
 
+    mFunctionCollection.addFunction("MODE",new Functions::Function_mode());
     mFunctionCollection.addFunction("SUM",new Functions::Function_sum());
+    mFunctionCollection.addFunction("SUB",new Functions::Function_sub());
     mFunctionCollection.addFunction("DIV",new Functions::Function_div());
     mFunctionCollection.addFunction("MUL",new Functions::Function_mul());
     mFunctionCollection.addFunction("SDEV",new Functions::Function_sdev());
