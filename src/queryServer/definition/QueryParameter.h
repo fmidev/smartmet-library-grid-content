@@ -97,8 +97,8 @@ class QueryParameter
     class Flags
     {
       public:
-        static const uint  PressureLevelInterpolation   = 1 << 0;
-        static const uint  HeightLevelInterpolation     = 1 << 1;
+        static const uint  PressureLevels               = 1 << 0;
+        static const uint  MetricLevels                 = 1 << 1;
         static const uint  ReturnCoordinates            = 1 << 2;
         static const uint  NoReturnValues               = 1 << 3;
         static const uint  SameAnalysisTime             = 1 << 4;

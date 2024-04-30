@@ -1409,6 +1409,61 @@ void GenerationInfoList::getGenerationInfoListByProducerIdAndStatus(uint produce
 
 
 
+bool GenerationInfoList::getGenerationInfoByProducerIdAndAnalysisTime(uint producerId,const std::string& analysisTime,GenerationInfo& generationInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return false;
+
+    AutoReadLock lock(mModificationLockPtr);
+
+    int len =  getLength();
+    int idx = 0;
+
+    if (mComparisonMethod == GenerationInfo::ComparisonMethod::producerId)
+    {
+      GenerationInfo search;
+      search.mProducerId = producerId;
+
+      idx = getClosestIndexNoLock(GenerationInfo::ComparisonMethod::producerId,search);
+      if (idx < 0  || idx >= len)
+        return false;
+
+    }
+
+    for (int t=idx; t<len; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info->mProducerId == producerId  &&  (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
+        {
+          if (info->mAnalysisTime == analysisTime)
+          {
+            generationInfo = *info;
+            return true;
+          }
+        }
+        else
+        {
+          if (mComparisonMethod == GenerationInfo::ComparisonMethod::producerId  &&  info->mProducerId > producerId)
+            return false;
+        }
+      }
+    }
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 void GenerationInfoList::getGenerationInfoListByAnalysisTime(const std::string& analysisTime,GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE

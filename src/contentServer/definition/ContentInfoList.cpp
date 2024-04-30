@@ -3226,7 +3226,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint pro
         t++;
       }
 
-      if (contentInfoList.getLength() == 0)
+      if (contentInfoList.getLength() != 0)
         return;
 
       if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
