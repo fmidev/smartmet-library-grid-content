@@ -33,7 +33,6 @@ BuildRequires: smartmet-library-grid-files-devel >= 24.5.3
 BuildRequires: smartmet-library-macgyver-devel >= 24.1.17
 BuildRequires: smartmet-library-spine-devel >= 24.4.23
 BuildRequires: postgresql15-devel
-Requires: %{smartmet_boost}-date-time
 Requires: hiredis-devel
 Requires: libcurl
 Requires: luajit-devel
