@@ -35,7 +35,6 @@ LIBS += $(REQUIRED_LIBS) $(CORBA_LIBS) \
 	-lsmartmet-spine \
 	-lsmartmet-macgyver \
 	-lsmartmet-gis \
-	-lboost_date_time \
 	-lhiredis \
 	-lcurl \
 	`pkg-config --libs luajit` \

@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 24.4.4
+Version: 24.5.6
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -28,21 +28,20 @@ BuildRequires: make
 BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 24.3.25
-BuildRequires: smartmet-library-grid-files-devel >= 24.3.26
-BuildRequires: smartmet-library-macgyver-devel >= 24.1.17
-BuildRequires: smartmet-library-spine-devel >= 24.3.15
+BuildRequires: smartmet-library-gis-devel >= 24.4.24
+BuildRequires: smartmet-library-grid-files-devel >= 24.5.6
+BuildRequires: smartmet-library-macgyver-devel >= 24.5.6
+BuildRequires: smartmet-library-spine-devel >= 24.5.6
 BuildRequires: postgresql15-devel
-Requires: %{smartmet_boost}-date-time
 Requires: hiredis-devel
 Requires: libcurl
 Requires: luajit-devel
 Requires: omniORB
 Requires: postgresql15-libs
-Requires: smartmet-library-gis >= 24.3.25
-Requires: smartmet-library-grid-files >= 24.3.26
-Requires: smartmet-library-macgyver >= 24.1.17
-Requires: smartmet-library-spine >= 24.3.15
+Requires: smartmet-library-gis >= 24.4.24
+Requires: smartmet-library-grid-files >= 24.5.6
+Requires: smartmet-library-macgyver >= 24.5.6
+Requires: smartmet-library-spine >= 24.5.6
 
 Provides: %{SPECNAME}
 
@@ -76,10 +75,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 24.1.17
-Requires: smartmet-library-gis-devel >= 24.3.25
-Requires: smartmet-library-spine-devel >= 24.3.15
-Requires: smartmet-library-grid-files-devel >= 24.3.26
+Requires: smartmet-library-macgyver-devel >= 24.5.6
+Requires: smartmet-library-gis-devel >= 24.4.24
+Requires: smartmet-library-spine-devel >= 24.5.6
+Requires: smartmet-library-grid-files-devel >= 24.5.6
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -89,6 +88,11 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon May  6 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.5.6-1.fmi
+- Use Date library (https://github.com/HowardHinnant/date) instead of boost date_time
+
+* Fri May  3 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.5.3-1.fmi
+- Added height based data queries
 * Thu Apr  4 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.4.4-1.fmi
 - Minor change to producer specs
 * Thu Mar 14 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.3.14-1.fmi
