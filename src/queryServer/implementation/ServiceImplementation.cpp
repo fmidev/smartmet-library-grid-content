@@ -652,6 +652,7 @@ void ServiceImplementation::loadProducerFile()
     }
 
     mProducerList.clear();
+    mProducerConcatMap.clear();
 
     char st[1000];
 
@@ -3215,32 +3216,40 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
               getGridValues(query,*qParam,*producersPtr, *geomIdListPtr, producerId, analysisTime, maxAnalysisTime, gflags, paramName, paramHash,
                   queryFlags, *fTime, false, *valueList, producerStr);
 
-              //printf("SEARCH RESULT %s %u %u %u %u\n",producerStr.c_str(),producerId,valueList->mValueList.getLength(),parameterFlags,valueList->mFlags);
+              //printf("SEARCH RESULT %s %u %u %u\n",producerStr.c_str(),producerId,valueList->mValueList.getLength(),valueList->mFlags);
               bool concat = false;
-              if (producerId == 0 && producersPtr->size() > 1 && (valueList->mValueList.getLength() == 0 && (valueList->mFlags & ParameterValues::Flags::DataAvailable) == 0))
+              if (producerId == 0 && (valueList->mValueList.getLength() == 0 && (valueList->mFlags & ParameterValues::Flags::DataAvailable) == 0))
               {
-                //printf("CONCAT SEARCH %s\n",producerStr.c_str());
-                auto vec = mProducerConcatMap.find(producerStr);
-                if (vec != mProducerConcatMap.end()  &&  vec->second.size() > 0)
+                std::string prodName = producerStr;
+                auto p1 = producersPtr;
+                auto p2 = geomIdListPtr;
+
+                while (!prodName.empty() &&  valueList->mValueList.getLength() == 0 && (valueList->mFlags & ParameterValues::Flags::DataAvailable) == 0)
                 {
-                  //printf("CONCAT SEARCH %s\n",vec->second[0].first.c_str());
-                  tmpGeomIdList.clear();
-                  for (auto gg = vec->second.begin(); gg != vec->second.end(); ++gg)
-                    tmpGeomIdList.insert(gg->second);
+                  //printf("CONCAT SEARCH %s\n",prodName.c_str());
+                  auto vec = mProducerConcatMap.find(prodName);
+                  if (vec != mProducerConcatMap.end()  &&  vec->second.size() > 0)
+                  {
+                    //printf("  -- CONCAT SEARCH %ld\n",vec->second.size());
+                    prodName = vec->second[0].first + ":" + std::to_string(vec->second[0].second);
+                    tmpGeomIdList.clear();
+                    for (auto gg = vec->second.begin(); gg != vec->second.end(); ++gg)
+                      tmpGeomIdList.insert(gg->second);
 
-                  auto p1 = producersPtr;
-                  auto p2 = geomIdListPtr;
-                  producersPtr = &(vec->second);
-                  geomIdListPtr = &tmpGeomIdList;
-                  std::string maxAnalysisTime;
-                  getGridValues(query,*qParam,*producersPtr, *geomIdListPtr, producerId, analysisTime, maxAnalysisTime, gflags, paramName, paramHash,
-                      queryFlags, *fTime, false, *valueList, producerStr);
+                    producersPtr = &(vec->second);
+                    geomIdListPtr = &tmpGeomIdList;
+                    std::string maxAnalysisTime;
+                    getGridValues(query,*qParam,*producersPtr, *geomIdListPtr, producerId, analysisTime, maxAnalysisTime, gflags, paramName, paramHash,
+                        queryFlags, *fTime, false, *valueList, producerStr);
 
-                  tmpGeomIdList.clear();
-                  producersPtr = p1;
-                  geomIdListPtr = p2;
-                  concat = true;
+                    concat = true;
+                  }
+                  else
+                    prodName = "";
                 }
+                tmpGeomIdList.clear();
+                producersPtr = p1;
+                geomIdListPtr = p2;
               }
 
               if (valueList->mValueList.getLength() == 0  || ((qParam->mFlags & QueryParameter::Flags::NoReturnValues) == 0  &&  (valueList->mFlags & ParameterValues::Flags::DataAvailable) == 0))
@@ -9857,24 +9866,21 @@ void ServiceImplementation::getGridValues(
                       }
                     }
 
-                    if (producers.size() > 1)
+                    auto rec = mProducerConcatMap.find(producerStr);
+                    if (rec != mProducerConcatMap.end()  &&  rec->second.size() > 0)
                     {
-                      auto rec = mProducerConcatMap.find(producerStr);
-                      if (rec != mProducerConcatMap.end()  &&  rec->second.size() > 0)
+                      //printf("CONCAT SEARCH %s  %s\n",producerStr.c_str(),rec->second[0].first.c_str());
+                      std::set<T::GeometryId> tmpGeomIdList;
+
+                      for (auto gg = rec->second.begin(); gg != rec->second.end(); ++gg)
                       {
-                        //printf("CONCAT SEARCH %s  %s\n",producerStr.c_str(),rec->second[0].first.c_str());
-                        std::set<T::GeometryId> tmpGeomIdList;
-
-                        for (auto gg = rec->second.begin(); gg != rec->second.end(); ++gg)
-                        {
-                          //printf("  ** SEARCH %ld %d\n",rec->second.size(),gg->second);
-                          tmpGeomIdList.insert(gg->second);
-                        }
-
-                        producerStr = "";
-                        getGridValues(query,qParam,rec->second, tmpGeomIdList, 0, analysisTime, generationFlags, parameterKey, parameterHash,
-                            queryFlags, a_lastTime+1,endTime,producerStr,valueCounter,recursionCounter+1);
+                        //printf("  ** SEARCH %ld %d\n",rec->second.size(),gg->second);
+                        tmpGeomIdList.insert(gg->second);
                       }
+
+                      producerStr = "";
+                      getGridValues(query,qParam,rec->second, tmpGeomIdList, 0, analysisTime, generationFlags, parameterKey, parameterHash,
+                          queryFlags, a_lastTime+1,endTime,producerStr,valueCounter,recursionCounter+1);
                     }
                     return;
                   }
@@ -10407,7 +10413,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(uint producerId,uint genera
     std::size_t hash = 0;
     boost::hash_combine(hash,producerId);
     boost::hash_combine(hash,paramLevelId);
-    std::size_t hashConversion = hash;
+    //std::size_t hashConversion = hash;
     uint heightGenerationId = generationId;
 
     {
@@ -10481,7 +10487,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(uint producerId,uint genera
     {
       std::set<T::ParamLevel> levels;
       int result = mContentServerPtr->getContentLevelListByGenerationGeometryAndLevelId(0,heightGenerationId,geometryId,paramLevelId,levels);
-      if (levels.size() == 0)
+      if (result != 0 || levels.size() == 0)
       {
         return false;
       }
@@ -10720,9 +10726,6 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ContentInfoList& content
 
     int firstIndex = 0;
     int lastIndex = len-1;
-
-    double x = coordinates[coordinateIndex].x();
-    double y = coordinates[coordinateIndex].y();
 
     T::ContentInfo *first = contentInfoList.getContentInfoByIndex(firstIndex);
     T::ContentInfo *last = contentInfoList.getContentInfoByIndex(lastIndex);
@@ -11027,7 +11030,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(uint producerId,uint genera
     int len = entry->contentInfoList.getLength();
     if (len > 0)
     {
-      for (int t=0; t<clen; t++)
+      for (uint t=0; t<clen; t++)
       {
         HeightRec rec;
         rec.levelId = paramLevelId;

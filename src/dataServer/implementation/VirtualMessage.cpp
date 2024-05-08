@@ -1366,7 +1366,7 @@ T::TimeString VirtualMessage::getReferenceTime() const
         \return   The pointer to the spatial reference.
 */
 
-T::SpatialRef* VirtualMessage::getSpatialReference() const
+T::SpatialRef_sptr VirtualMessage::getSpatialReference() const
 {
   FUNCTION_TRACE
   try

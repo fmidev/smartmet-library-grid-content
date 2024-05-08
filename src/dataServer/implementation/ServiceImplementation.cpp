@@ -5850,6 +5850,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
         GRID::MessageInfo mInfo;
         mInfo.mFileMemoryPtr = nullptr;
         mInfo.mFilePosition = info->mFilePosition;
+        mInfo.mOriginalFilePosition = info->mFilePosition;
 
         if (mStartUpCache_enabled)
         {
@@ -6537,6 +6538,7 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
 
         mInfo.mFileMemoryPtr = nullptr;
         mInfo.mFilePosition = contentInfo.mFilePosition;
+        mInfo.mOriginalFilePosition = contentInfo.mFilePosition;
 
         if (mStartUpCache_enabled)
         {
@@ -6993,7 +6995,7 @@ void ServiceImplementation::cacheProcessingThread()
           sprintf(ifname1,"%s.index.tmp",mStartUpCache_filename.c_str());
           sprintf(ifname2,"%s.index.new",mStartUpCache_filename.c_str());
 
-          time_t startTime = time(0);
+          //time_t startTime = time(0);
           FILE *file1 = fopen(fname1,"w");
           FILE *file2 = fopen(ifname1,"w");
 
@@ -7041,7 +7043,7 @@ void ServiceImplementation::cacheProcessingThread()
             rename(ifname1,ifname2);
           }
 
-          time_t endTime = time(0);
+          // time_t endTime = time(0);
 
           //printf("WRITE TIME %u\n",endTime-startTime);
         }
