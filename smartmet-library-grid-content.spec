@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 24.5.6
+Version: 24.5.8
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -88,9 +88,10 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed May  8 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.5.8-1.fmi
+- Fixed wrong initialization that disabled contour calculations.
 * Mon May  6 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.5.6-1.fmi
 - Use Date library (https://github.com/HowardHinnant/date) instead of boost date_time
-
 * Fri May  3 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.5.3-1.fmi
 - Added height based data queries
 * Thu Apr  4 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.4.4-1.fmi
