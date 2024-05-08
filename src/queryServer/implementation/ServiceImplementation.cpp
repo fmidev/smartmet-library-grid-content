@@ -1691,7 +1691,7 @@ bool ServiceImplementation::parseFunction(
           newParam.mTimestepsBefore = queryParam.mTimestepsBefore;
           newParam.mTimestepsAfter = queryParam.mTimestepsAfter;
           newParam.mTimestepSizeInMinutes = queryParam.mTimestepSizeInMinutes;
-          newParam.mFlags = queryParam.mFlags;
+          //newParam.mFlags = queryParam.mFlags;
           newParam.mTemporary = true;
 
           std::string alias;
@@ -10405,7 +10405,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(uint producerId,uint genera
   FUNCTION_TRACE
   try
   {
-    PRINT_DATA(mDebugLog,"getClosestLevelsByHeight (height = %d)\n",height);
+    //PRINT_DATA(mDebugLog,"getClosestLevelsByHeight (height = %d)\n",height);
 
     double mul = 1.0;
     uint heightProducerId = 0;
@@ -10601,7 +10601,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ContentInfoList& content
   FUNCTION_TRACE
   try
   {
-    PRINT_DATA(mDebugLog,"getClosestLevelsByHeight (height = %d)\n",height);
+    //PRINT_DATA(mDebugLog,"getClosestLevelsByHeight (height = %d)\n",height);
 
     int len = contentInfoList.getLength();
     if (len == 0)
@@ -10905,7 +10905,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(uint producerId,uint genera
   FUNCTION_TRACE
   try
   {
-    PRINT_DATA(mDebugLog,"getClosestLevelsByHeight (height = %d)\n",height);
+    //PRINT_DATA(mDebugLog,"getClosestLevelsByHeight (height = %d)\n",height);
 
     double mul = 1.0;
     uint heightProducerId = 0;
