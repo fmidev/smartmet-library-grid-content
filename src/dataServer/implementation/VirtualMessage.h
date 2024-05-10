@@ -7,6 +7,7 @@
 
 #include <grid-files/grid/Message.h>
 #include <grid-files/grid/GridFile.h>
+#include <grid-files/grid/Typedefs.h>
 #include <grid-files/grid/VirtualGridFile.h>
 
 
