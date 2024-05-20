@@ -1121,7 +1121,6 @@ bool ServiceImplementation::getFunctionParams(const std::string& functionParamsS
       T::GeometryId geometryId = 0;
       T::ParamLevelId paramLevelId = 0;
       T::ParamLevel paramLevel = 0;
-      char paramLevelUnit = 0;
       T::ForecastType forecastType = 1;
       std::vector<T::ParamLevel> paramLevelVec;
       std::vector<T::ForecastNumber> forecastNumberVec;
@@ -1150,6 +1149,10 @@ bool ServiceImplementation::getFunctionParams(const std::string& functionParamsS
 
         if (fsz < 1)
           forecastNumberVec.push_back(-1);
+
+        char paramLevelUnit = 0;
+        if (flags & QueryServer::QueryParameter::Flags::MetricLevels)
+          paramLevelUnit = 'm';
 
         for (auto lIt = paramLevelVec.begin(); lIt != paramLevelVec.end(); ++lIt)
         {
