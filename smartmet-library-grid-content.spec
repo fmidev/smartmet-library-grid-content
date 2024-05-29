@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 24.5.8
+Version: 24.5.29
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -28,20 +28,20 @@ BuildRequires: make
 BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 24.4.24
-BuildRequires: smartmet-library-grid-files-devel >= 24.5.6
-BuildRequires: smartmet-library-macgyver-devel >= 24.5.6
-BuildRequires: smartmet-library-spine-devel >= 24.5.6
+BuildRequires: smartmet-library-gis-devel >= 24.5.27
+BuildRequires: smartmet-library-grid-files-devel >= 24.5.22
+BuildRequires: smartmet-library-macgyver-devel >= 24.5.28
+BuildRequires: smartmet-library-spine-devel >= 24.5.27
 BuildRequires: postgresql15-devel
 Requires: hiredis-devel
 Requires: libcurl
 Requires: luajit-devel
 Requires: omniORB
 Requires: postgresql15-libs
-Requires: smartmet-library-gis >= 24.4.24
-Requires: smartmet-library-grid-files >= 24.5.6
-Requires: smartmet-library-macgyver >= 24.5.6
-Requires: smartmet-library-spine >= 24.5.6
+Requires: smartmet-library-gis >= 24.5.27
+Requires: smartmet-library-grid-files >= 24.5.22
+Requires: smartmet-library-macgyver >= 24.5.28
+Requires: smartmet-library-spine >= 24.5.27
 
 Provides: %{SPECNAME}
 
@@ -75,10 +75,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 24.5.6
-Requires: smartmet-library-gis-devel >= 24.4.24
-Requires: smartmet-library-spine-devel >= 24.5.6
-Requires: smartmet-library-grid-files-devel >= 24.5.6
+Requires: smartmet-library-macgyver-devel >= 24.5.28
+Requires: smartmet-library-gis-devel >= 24.5.27
+Requires: smartmet-library-spine-devel >= 24.5.27
+Requires: smartmet-library-grid-files-devel >= 24.5.22
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -88,6 +88,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed May 29 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.5.29-1.fmi
+- Enabling multiple level definitions in a parameter name when using metric heights
 * Wed May  8 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.5.8-1.fmi
 - Fixed wrong initialization that disabled contour calculations.
 * Mon May  6 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.5.6-1.fmi
