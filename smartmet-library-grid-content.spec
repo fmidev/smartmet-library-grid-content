@@ -19,7 +19,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: %{smartmet_boost}-devel
 BuildRequires: gcc-c++
-BuildRequires: gdal35-devel
+BuildRequires: gdal38-devel
 BuildRequires: hiredis-devel
 BuildRequires: libcurl-devel
 BuildRequires: libicu-devel
