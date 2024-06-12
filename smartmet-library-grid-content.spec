@@ -37,6 +37,7 @@ Requires: hiredis-devel
 Requires: libcurl
 Requires: luajit-devel
 Requires: omniORB
+Requires: gdal38
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 24.5.27
 Requires: smartmet-library-grid-files >= 24.5.29
