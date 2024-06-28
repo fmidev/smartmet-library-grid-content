@@ -171,17 +171,21 @@ void GridFileManager::deleteFilesByProducerId(uint producerId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
-
     std::vector<uint> idList;
-
-    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
     {
-      if (it->second->getProducerId() == producerId)
-        idList.emplace_back(it->first);
+      AutoReadLock lock(&mModificationLock);
+      for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
+      {
+        if (it->second->getProducerId() == producerId)
+          idList.emplace_back(it->first);
+      }
     }
 
-    deleteFilesNoLock(idList,false);
+    if (idList.size() > 0)
+    {
+      AutoWriteLock lock(&mModificationLock);
+      deleteFilesNoLock(idList,false);
+    }
   }
   catch (...)
   {
@@ -198,17 +202,21 @@ void GridFileManager::deleteFilesByGenerationId(uint generationId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
-
     std::vector<uint> idList;
-
-    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
     {
-      if (it->second->getGenerationId() == generationId)
-        idList.emplace_back(it->first);
+      AutoReadLock lock(&mModificationLock);
+      for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
+      {
+        if (it->second->getGenerationId() == generationId)
+          idList.emplace_back(it->first);
+      }
     }
 
-    deleteFilesNoLock(idList,false);
+    if (idList.size() > 0)
+    {
+      AutoWriteLock lock(&mModificationLock);
+      deleteFilesNoLock(idList,false);
+    }
   }
   catch (...)
   {
@@ -225,17 +233,21 @@ void GridFileManager::deleteFilesBySourceId(uint sourceId)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
-
     std::vector<uint> idList;
-
-    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
     {
-      if (it->second->getSourceId() == sourceId)
-        idList.emplace_back(it->first);
+      AutoReadLock lock(&mModificationLock);
+      for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
+      {
+        if (it->second->getSourceId() == sourceId)
+          idList.emplace_back(it->first);
+      }
     }
 
-    deleteFilesNoLock(idList,false);
+    if (idList.size() > 0)
+    {
+      AutoWriteLock lock(&mModificationLock);
+      deleteFilesNoLock(idList,false);
+    }
   }
   catch (...)
   {
@@ -252,17 +264,21 @@ void GridFileManager::deleteFilesByAccessTime(time_t accessTime)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
-
     std::vector<uint> idList;
-
-    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
     {
-      if (it->second->getAccessTime() < accessTime  &&  !it->second->isVirtual()  &&  it->second->getUserCount() == 0)
-        idList.emplace_back(it->first);
+      AutoReadLock lock(&mModificationLock);
+      for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
+      {
+        if (it->second->getAccessTime() < accessTime  &&  !it->second->isVirtual()  &&  it->second->getUserCount() == 0)
+          idList.emplace_back(it->first);
+      }
     }
 
-    deleteFilesNoLock(idList,true);
+    if (idList.size() > 0)
+    {
+      AutoWriteLock lock(&mModificationLock);
+      deleteFilesNoLock(idList,false);
+    }
   }
   catch (...)
   {
@@ -279,17 +295,21 @@ void GridFileManager::deleteFilesByCheckTime(time_t checkTime)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
-
     std::vector<uint> idList;
-
-    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
     {
-      if (it->second->getCheckTime() < checkTime  &&  !it->second->isVirtual())
-        idList.emplace_back(it->first);
+      AutoReadLock lock(&mModificationLock);
+      for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
+      {
+        if (it->second->getCheckTime() < checkTime  &&  !it->second->isVirtual())
+          idList.emplace_back(it->first);
+      }
     }
 
-    deleteFilesNoLock(idList,true);
+    if (idList.size() > 0)
+    {
+      AutoWriteLock lock(&mModificationLock);
+      deleteFilesNoLock(idList,false);
+    }
   }
   catch (...)
   {
@@ -306,17 +326,21 @@ void GridFileManager::deleteFilesByDeletionTime(time_t deletionTime)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
-
     std::vector<uint> idList;
-
-    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
     {
-      if (it->second->getDeletionTime() != 0  &&  it->second->getDeletionTime() < deletionTime  &&  !it->second->isVirtual())
-        idList.emplace_back(it->first);
+      AutoReadLock lock(&mModificationLock);
+      for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
+      {
+        if (it->second->getDeletionTime() != 0  &&  it->second->getDeletionTime() < deletionTime  &&  !it->second->isVirtual())
+          idList.emplace_back(it->first);
+      }
     }
 
-    deleteFilesNoLock(idList,true);
+    if (idList.size() > 0)
+    {
+      AutoWriteLock lock(&mModificationLock);
+      deleteFilesNoLock(idList,false);
+    }
   }
   catch (...)
   {
@@ -480,8 +504,12 @@ GRID::GridFile_sptr GridFileManager::getFileByIdNoMapping(uint fileId)
     auto it = mFileList.find(fileId);
 
     if (it != mFileList.end())
+    {
+      //printf("Found file %u  %d\n",fileId,it->second->hasMessagePositionError());
       return it->second;
+    }
 
+    //printf("NOT Found file %u\n",fileId);
     return nullptr;
   }
   catch (...)

@@ -220,6 +220,8 @@ void ServiceImplementation::setStartUpCache(bool enabled,bool saveDiskData,bool 
 
     if (mStartUpCache_enabled)
     {
+      mStartUpCache_memoryMapInfo.reset(new MapInfo);
+
       char fname1[200];
       char fname2[200];
       char nfname1[200];
@@ -271,15 +273,15 @@ void ServiceImplementation::setStartUpCache(bool enabled,bool saveDiskData,bool 
       }
       fclose(file);
 
-      mStartUpCache_memoryMapInfo.protocol = 0;
-      mStartUpCache_memoryMapInfo.serverType = 0;
+      mStartUpCache_memoryMapInfo->protocol = 0;
+      mStartUpCache_memoryMapInfo->serverType = 0;
       //mStartUpCache_memoryMapInfo.server;
-      mStartUpCache_memoryMapInfo.filename = nfname1;
-      mStartUpCache_memoryMapInfo.fileSize = getFileSize(nfname1);
-      mStartUpCache_memoryMapInfo.allocatedSize = 0;
-      mStartUpCache_memoryMapInfo.mappingTime = 0;
-      mStartUpCache_memoryMapInfo.memoryPtr = nullptr;
-      mStartUpCache_memoryMapInfo.mappingError = false;
+      mStartUpCache_memoryMapInfo->filename = nfname1;
+      mStartUpCache_memoryMapInfo->fileSize = getFileSize(nfname1);
+      mStartUpCache_memoryMapInfo->allocatedSize = 0;
+      mStartUpCache_memoryMapInfo->mappingTime = 0;
+      mStartUpCache_memoryMapInfo->memoryPtr = nullptr;
+      mStartUpCache_memoryMapInfo->mappingError = false;
       //mStartUpCache_memoryMapInfo.mappedFile;
       memoryMapper.map(mStartUpCache_memoryMapInfo);
     }
@@ -520,9 +522,16 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
     GRID::GridFile_sptr gridFile = mGridFileManager.getFileByIdNoMapping(fileId);
     if (gridFile)
     {
-      if (gridFile->hasMessagePositionError())
+      if (gridFile->hasMessagePositionError() || gridFile->hasMemoryMapperError())
       {
-        mGridFileManager.deleteFileById(fileId);
+        time_t deletionTime = gridFile->getDeletionTime();
+        if ((time(nullptr) + 60) < deletionTime)
+        {
+          //printf("SET DELETION TIME  %s  %ld %ld\n",gridFile->getFileName().c_str(),deletionTime,time(nullptr) + 60);
+          gridFile->setDeletionTime(time(nullptr) + 60);
+        }
+
+        return nullptr;
       }
       else
       {
@@ -5859,7 +5868,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
           auto rec = mStartUpCache_indexMap.find(key);
           if (rec != mStartUpCache_indexMap.end() &&  rec->second.producerId == fileInfo.mProducerId  &&  rec->second.generationId == fileInfo.mGenerationId)
           {
-            mInfo.mFileMemoryPtr = mStartUpCache_memoryMapInfo.memoryPtr;
+            mInfo.mFileMemoryPtr = mStartUpCache_memoryMapInfo->memoryPtr;
             mInfo.mFilePosition = rec->second.filePosition;
           }
         }
@@ -6547,7 +6556,7 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
           auto rec = mStartUpCache_indexMap.find(key);
           if (rec != mStartUpCache_indexMap.end() &&  rec->second.producerId == contentInfo.mProducerId  &&  rec->second.generationId == contentInfo.mGenerationId)
           {
-            mInfo.mFileMemoryPtr = mStartUpCache_memoryMapInfo.memoryPtr;
+            mInfo.mFileMemoryPtr = mStartUpCache_memoryMapInfo->memoryPtr;
             mInfo.mFilePosition = rec->second.filePosition;
           }
         }
@@ -6822,9 +6831,9 @@ void ServiceImplementation::processEvents()
       mGridFileManager.deleteFilesByAccessTime(currentTime - mFileCleanup_age);
     }
 
-    if ((currentTime - mDeletedFileCleanup_time) > 120)
+    if ((currentTime - mDeletedFileCleanup_time) > 30)
     {
-      mGridFileManager.deleteFilesByDeletionTime(currentTime-120);
+      mGridFileManager.deleteFilesByDeletionTime(currentTime-60);
       mDeletedFileCleanup_time = currentTime;
     }
 

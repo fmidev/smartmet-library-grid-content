@@ -219,7 +219,7 @@ class ServiceImplementation : public ServiceInterface
      bool                 mStartUpCache_enabled;
      bool                 mStartUpCache_saveDiskData;
      bool                 mStartUpCache_saveNetworkData;
-     MapInfo              mStartUpCache_memoryMapInfo;
+     MapInfo_sptr         mStartUpCache_memoryMapInfo;
      StartUpIndexMap      mStartUpCache_indexMap;
      uint                 mStartUpCache_saveInterval;
      time_t               mStartUpCache_saveTime;
