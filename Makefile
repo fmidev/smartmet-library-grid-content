@@ -258,7 +258,6 @@ $(LIBFILE): $(OBJFILES)
 		rm -v $(LIBFILE); \
 		exit 1; \
 	fi
-	ldd $(LIBFILE)
 
 clean: delete_stubs
 	rm -f src/*~ src/*/*~ src/*/*/*~
