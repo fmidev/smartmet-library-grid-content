@@ -2,7 +2,7 @@
 #include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/ShowFunction.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 

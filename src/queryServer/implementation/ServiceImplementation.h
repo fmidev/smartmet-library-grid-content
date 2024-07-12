@@ -133,8 +133,8 @@ class ServiceImplementation : public ServiceInterface
      void           initContentSearchCache(std::size_t maxRecordsPerThread,uint clearIntervalInSeconds);
 
      void           shutdown();
-     void           setDem(boost::shared_ptr<Fmi::DEM> dem);
-     void           setLandCover(boost::shared_ptr<Fmi::LandCover> landCover);
+     void           setDem(std::shared_ptr<Fmi::DEM> dem);
+     void           setLandCover(std::shared_ptr<Fmi::LandCover> landCover);
      void           updateProcessing();
 
   protected:
@@ -704,8 +704,8 @@ class ServiceImplementation : public ServiceInterface
 
      std::map<std::string,uint>        mOperationNames;
      Functions::FunctionCollection     mFunctionCollection;
-     boost::shared_ptr<Fmi::LandCover> mLandCover;
-     boost::shared_ptr<Fmi::DEM>       mDem;
+     std::shared_ptr<Fmi::LandCover> mLandCover;
+     std::shared_ptr<Fmi::DEM>       mDem;
 };
 
 

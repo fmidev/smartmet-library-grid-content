@@ -13,7 +13,7 @@
 #include <gis/DEM.h>
 #include <gis/LandCover.h>
 #include <macgyver/CacheStats.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 
 namespace SmartMet
@@ -37,8 +37,8 @@ class ServiceInterface
      virtual bool   isEnabled();
 
      virtual void   shutdown();
-     virtual void   setDem(boost::shared_ptr<Fmi::DEM> dem);
-     virtual void   setLandCover(boost::shared_ptr<Fmi::LandCover> landCover);
+     virtual void   setDem(std::shared_ptr<Fmi::DEM> dem);
+     virtual void   setLandCover(std::shared_ptr<Fmi::LandCover> landCover);
 
      virtual int    executeQuery(T::SessionId sessionId,Query& query);
      virtual int    getProducerList(T::SessionId sessionId,string_vec& producerList);

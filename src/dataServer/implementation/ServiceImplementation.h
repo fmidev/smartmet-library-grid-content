@@ -56,8 +56,8 @@ class ServiceImplementation : public ServiceInterface
      virtual void   setStartUpCache(bool enabled,bool saveDiskData,bool saveNetworkData,const char *filename,uint saveIntervalInMinutes,long long maxSizeInMegaBytes);
      virtual void   setVirtualContentEnabled(bool enabled);
      virtual void   setCleanup(time_t age,time_t checkInterval);
-     virtual void   setDem(boost::shared_ptr<Fmi::DEM> dem);
-     virtual void   setLandCover(boost::shared_ptr<Fmi::LandCover> landCover);
+     virtual void   setDem(std::shared_ptr<Fmi::DEM> dem);
+     virtual void   setLandCover(std::shared_ptr<Fmi::LandCover> landCover);
 
      virtual void   eventProcessingThread();
      virtual void   cacheProcessingThread();
@@ -236,8 +236,8 @@ class ServiceImplementation : public ServiceInterface
      time_t                             mFileCleanup_checkInterval;
      time_t                             mFileCleanup_time;
      time_t                             mDeletedFileCleanup_time;
-     boost::shared_ptr<Fmi::DEM>        mDem;
-     boost::shared_ptr<Fmi::LandCover>  mLandCover;
+     std::shared_ptr<Fmi::DEM>        mDem;
+     std::shared_ptr<Fmi::LandCover>  mLandCover;
 
      std::map<std::string,ServiceInterface*> mDataServers;
 };
