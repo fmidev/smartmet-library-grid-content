@@ -3,7 +3,7 @@
 #include "ServiceInterface.h"
 #include "Query.h"
 #include <spine/HTTP.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 
 
@@ -35,7 +35,7 @@ class QueryStreamer : public Spine::HTTP::ContentStreamer
 };
 
 
-typedef boost::shared_ptr<QueryStreamer> QueryStreamer_sptr;
+typedef std::shared_ptr<QueryStreamer> QueryStreamer_sptr;
 
 
 }  // namespace QueryServer

@@ -134,7 +134,7 @@ void ServiceInterface::setProcessingLog(Log *processingLog)
 
 
 
-void  ServiceInterface::setDem(boost::shared_ptr<Fmi::DEM> dem)
+void  ServiceInterface::setDem(std::shared_ptr<Fmi::DEM> dem)
 {
   FUNCTION_TRACE
   try
@@ -150,7 +150,7 @@ void  ServiceInterface::setDem(boost::shared_ptr<Fmi::DEM> dem)
 
 
 
-void ServiceInterface::setLandCover(boost::shared_ptr<Fmi::LandCover> landCover)
+void ServiceInterface::setLandCover(std::shared_ptr<Fmi::LandCover> landCover)
 {
   FUNCTION_TRACE
   try

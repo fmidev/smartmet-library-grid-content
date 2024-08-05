@@ -316,7 +316,7 @@ void ServiceImplementation::shutdown()
 
 
 
-void ServiceImplementation::setLandCover(boost::shared_ptr<Fmi::LandCover> landCover)
+void ServiceImplementation::setLandCover(std::shared_ptr<Fmi::LandCover> landCover)
 {
   try
   {
@@ -333,7 +333,7 @@ void ServiceImplementation::setLandCover(boost::shared_ptr<Fmi::LandCover> landC
 
 
 
-void ServiceImplementation::setDem(boost::shared_ptr<Fmi::DEM> dem)
+void ServiceImplementation::setDem(std::shared_ptr<Fmi::DEM> dem)
 {
   try
   {

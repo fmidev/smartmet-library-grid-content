@@ -37,8 +37,8 @@ class ServiceInterface
      virtual bool   isEnabled();
 
      virtual void   shutdown();
-     virtual void   setDem(boost::shared_ptr<Fmi::DEM> dem);
-     virtual void   setLandCover(boost::shared_ptr<Fmi::LandCover> landCover);
+     virtual void   setDem(std::shared_ptr<Fmi::DEM> dem);
+     virtual void   setLandCover(std::shared_ptr<Fmi::LandCover> landCover);
 
      virtual int    getGridAttributeList(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList);
      virtual int    getGridProperties(T::SessionId sessionId,uint fileId,uint messageIndex,T::PropertySettingVec& propertyList);

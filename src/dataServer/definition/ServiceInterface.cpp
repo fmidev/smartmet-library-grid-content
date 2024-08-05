@@ -4,7 +4,7 @@
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/grib1/GridDefinition.h>
 #include <grid-files/grib2/GridDefinition.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -195,7 +195,7 @@ void ServiceInterface::shutdown()
 
 
 
-void  ServiceInterface::setDem(boost::shared_ptr<Fmi::DEM> dem)
+void  ServiceInterface::setDem(std::shared_ptr<Fmi::DEM> dem)
 {
   FUNCTION_TRACE
   try
@@ -211,7 +211,7 @@ void  ServiceInterface::setDem(boost::shared_ptr<Fmi::DEM> dem)
 
 
 
-void ServiceInterface::setLandCover(boost::shared_ptr<Fmi::LandCover> landCover)
+void ServiceInterface::setLandCover(std::shared_ptr<Fmi::LandCover> landCover)
 {
   FUNCTION_TRACE
   try

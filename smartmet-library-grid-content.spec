@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 24.6.14
+Version: 24.7.12
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -28,10 +28,10 @@ BuildRequires: make
 BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 24.5.27
-BuildRequires: smartmet-library-grid-files-devel >= 24.5.29
-BuildRequires: smartmet-library-macgyver-devel >= 24.5.30
-BuildRequires: smartmet-library-spine-devel >= 24.5.27
+BuildRequires: smartmet-library-gis-devel >= 24.7.12
+BuildRequires: smartmet-library-grid-files-devel >= 24.7.12
+BuildRequires: smartmet-library-macgyver-devel >= 24.7.12
+BuildRequires: smartmet-library-spine-devel >= 24.7.12
 BuildRequires: postgresql15-devel
 Requires: hiredis-devel
 Requires: libcurl
@@ -39,10 +39,10 @@ Requires: luajit-devel
 Requires: omniORB
 Requires: gdal38
 Requires: postgresql15-libs
-Requires: smartmet-library-gis >= 24.5.27
-Requires: smartmet-library-grid-files >= 24.5.29
-Requires: smartmet-library-macgyver >= 24.5.30
-Requires: smartmet-library-spine >= 24.5.27
+Requires: smartmet-library-gis >= 24.7.12
+Requires: smartmet-library-grid-files >= 24.7.12
+Requires: smartmet-library-macgyver >= 24.7.12
+Requires: smartmet-library-spine >= 24.7.12
 
 Provides: %{SPECNAME}
 
@@ -76,10 +76,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 24.5.30
-Requires: smartmet-library-gis-devel >= 24.5.27
-Requires: smartmet-library-spine-devel >= 24.5.27
-Requires: smartmet-library-grid-files-devel >= 24.5.29
+Requires: smartmet-library-macgyver-devel >= 24.7.12
+Requires: smartmet-library-gis-devel >= 24.7.12
+Requires: smartmet-library-spine-devel >= 24.7.12
+Requires: smartmet-library-grid-files-devel >= 24.7.12
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -89,6 +89,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Jul 12 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.12-1.fmi
+- Replace many boost library types with C++ standard library ones
+
 * Fri Jun 14 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.6.14-1.fmi
 - Repackaged with latest grid-files
 * Mon Jun  3 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.6.3-1.fmi

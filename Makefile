@@ -29,7 +29,9 @@ INCLUDES += $(CORBA_INCLUDE)
 
 CFLAGS += `pkg-config --cflags luajit`
 
-LIBS += $(REQUIRED_LIBS) $(CORBA_LIBS) \
+LIBS += \
+	$(PREFIX_LDFLAGS) \
+	$(REQUIRED_LIBS) $(CORBA_LIBS) \
 	-L$(libdir) \
 	-lsmartmet-grid-files \
 	-lsmartmet-spine \
