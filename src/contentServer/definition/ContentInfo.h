@@ -86,7 +86,6 @@ class ContentInfo
     {
       public:
         static const uint UnusedFlag              = 0x0001;
-        static const uint VirtualContent          = 0x0002;
         static const uint PreloadRequired         = 0x0004;
         static const uint DeletedContent          = 0x1000;
     };

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GridFileManager.h"
-#include "VirtualContentManager.h"
 #include "../definition/ServiceInterface.h"
 #include "../../lua/LuaFileCollection.h"
 
@@ -43,18 +42,13 @@ class ServiceImplementation : public ServiceInterface
                        const std::string& serverName,
                        const std::string& serverIor,
                        const std::string& dataDir,
-                       ContentServer::ServiceInterface *contentServer,
-                       string_vec& luaFileNames);
+                       ContentServer::ServiceInterface *contentServer);
 
      virtual void   startEventProcessing();
      virtual void   startCacheProcessing();
      virtual void   shutdown();
 
-     virtual void   addVirtualContentFactory(VirtualContentFactory *factory);
-     virtual void   addSubServer(std::string& name,ServiceInterface *subServer);
-
      virtual void   setStartUpCache(bool enabled,bool saveDiskData,bool saveNetworkData,const char *filename,uint saveIntervalInMinutes,long long maxSizeInMegaBytes);
-     virtual void   setVirtualContentEnabled(bool enabled);
      virtual void   setCleanup(time_t age,time_t checkInterval);
      virtual void   setDem(std::shared_ptr<Fmi::DEM> dem);
      virtual void   setLandCover(std::shared_ptr<Fmi::LandCover> landCover);
@@ -183,16 +177,12 @@ class ServiceImplementation : public ServiceInterface
      virtual void   event_contentAdded(T::EventInfo& eventInfo);
      virtual void   event_contentDeleted(T::EventInfo& eventInfo);
      virtual void   event_contentUpdated(T::EventInfo& eventInfo);
-     virtual void   event_deleteVirtualContent(T::EventInfo& eventInfo);
-     virtual void   event_updateVirtualContent(T::EventInfo& eventInfo);
 
      virtual void   addFile(T::FileInfo& fileInfo,T::ContentInfoList& currentContentList);
      virtual void   fullUpdate();
-     virtual void   updateVirtualFiles(T::ContentInfoList& fullContentList);
-     virtual void   registerVirtualFiles(VirtualGridFilePtr_map& gridFileMap,std::set<uint>& idList);
      virtual void   processEvent(T::EventInfo& eventInfo,T::EventInfo *nextEventInfo);
      virtual void   processEvents();
-     virtual void   readContentList(T::ContentInfoList& contentList,bool includePhysicalContent,bool includeVirtualContent);
+     virtual void   readContentList(T::ContentInfoList& contentList);
 
      ServiceInterface*    getDataServerByFileId(uint fileId);
      GRID::GridFile_sptr  getGridFile(uint fileId);
@@ -202,7 +192,6 @@ class ServiceImplementation : public ServiceInterface
      bool                 mFullUpdateRequired;
      bool                 mEventProcessingActive;
      bool                 mCacheProcessingActive;
-     bool                 mVirtualContentEnabled;
      T::SessionId         mServerSessionId;
      uint                 mServerId;
      std::string          mServerName;
@@ -226,20 +215,13 @@ class ServiceImplementation : public ServiceInterface
      long long            mStartUpCache_maxSize;
 
 
-     VirtualContentManager              mVirtualContentManager;
      ContentServer::ServiceInterface*   mContentServer;
-     Lua::LuaFileCollection             mLuaFileCollection;
-     Functions::FunctionCollection      mFunctionCollection;
-     time_t                             mLastVirtualFileRegistration;
-     time_t                             mLastVirtualFileCheck;
      time_t                             mFileCleanup_age;
      time_t                             mFileCleanup_checkInterval;
      time_t                             mFileCleanup_time;
      time_t                             mDeletedFileCleanup_time;
-     std::shared_ptr<Fmi::DEM>        mDem;
-     std::shared_ptr<Fmi::LandCover>  mLandCover;
-
-     std::map<std::string,ServiceInterface*> mDataServers;
+     std::shared_ptr<Fmi::DEM>          mDem;
+     std::shared_ptr<Fmi::LandCover>    mLandCover;
 };
 
 

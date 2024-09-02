@@ -2935,10 +2935,7 @@ int PostgresqlImplementation::_deleteFileInfoByName(T::SessionId sessionId,const
 
     if (result == Result::OK)
     {
-      if (fileInfo.mFileType == T::FileTypeValue::Virtual)
-        addEvent(EventType::FILE_DELETED,fileInfo.mFileId,T::FileTypeValue::Virtual,0,0,"");
-      else
-        addEvent(EventType::FILE_DELETED,fileInfo.mFileId,0,0,0,"");
+      addEvent(EventType::FILE_DELETED,fileInfo.mFileId,0,0,0,"");
     }
 
     return result;
@@ -5457,70 +5454,6 @@ int PostgresqlImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelI
 
 
 
-int PostgresqlImplementation::_deleteVirtualContent(T::SessionId sessionId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    AutoThreadLock lock(&mThreadLock);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-
-    int result = deleteVirtualFiles(true);
-
-    if (result == Result::OK)
-      addEvent(EventType::DELETE_VIRTUAL_CONTENT,0,0,0,0,"");
-
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int PostgresqlImplementation::_updateVirtualContent(T::SessionId sessionId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    AutoThreadLock lock(&mThreadLock);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-
-    int result = deleteVirtualFiles(true);
-
-    if (result == Result::OK)
-    {
-      addEvent(EventType::UPDATE_VIRTUAL_CONTENT,0,0,0,0,"");
-    }
-
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 // *****************************************************************************************************************************************
 // *****************************************************************************************************************************************
 // *****************************************************************************************************************************************
@@ -7076,75 +7009,6 @@ int PostgresqlImplementation::deleteFileListBySourceId(uint sourceId,bool delete
 
 
 
-int PostgresqlImplementation::deleteVirtualFiles(bool deleteContent)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    char sql[1000];
-
-    /*
-    PGresult *res = PQexec(mConnection,"BEGIN TRANSACTION;");
-    if (PQresultStatus(res) != PGRES_COMMAND_OK)
-    {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      PQclear(res);
-      throw exception;
-    }
-    PQclear(res);
-    */
-
-    if (deleteContent)
-    {
-      sprintf(sql,"DELETE FROM content WHERE fileType=%u;",T::FileTypeValue::Virtual);
-      PGresult *res = PQexec(mConnection,sql);
-      if (PQresultStatus(res) != PGRES_COMMAND_OK)
-      {
-        //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-        //exception.addParameter("sql",sql);
-        //PQclear(res);
-        //throw exception;
-      }
-      PQclear(res);
-    }
-
-    sprintf(sql,"DELETE FROM file WHERE fileType=%u;",T::FileTypeValue::Virtual);
-    PGresult *res = PQexec(mConnection,sql);
-    if (PQresultStatus(res) != PGRES_COMMAND_OK)
-    {
-      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      //exception.addParameter("sql",sql);
-      //PQclear(res);
-      //throw exception;
-    }
-    PQclear(res);
-
-    /*
-    res = PQexec(mConnection,"COMMIT TRANSACTION;");
-    if (PQresultStatus(res) != PGRES_COMMAND_OK)
-    {
-      Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      PQclear(res);
-      throw exception;
-    }
-    PQclear(res);
-    */
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int PostgresqlImplementation::getFileById(uint fileId,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -7719,92 +7583,6 @@ int PostgresqlImplementation::getFileListBySourceId(uint sourceId,uint startFile
 
 
 
-int PostgresqlImplementation::getVirtualFiles(uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    fileInfoList.clear();
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    char sql[10000];
-    char *p = sql;
-
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  protocol,\n");
-    p += sprintf(p,"  serverType,\n");
-    p += sprintf(p,"  server,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  fileName,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  file\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  fileType=%u AND fileId >= %u\n",T::FileTypeValue::Virtual,startFileId);
-    p += sprintf(p,"ORDER BY\n");
-    p += sprintf(p,"  fileId\n");
-    p += sprintf(p,"LIMIT\n");
-    p += sprintf(p,"  %u\n",maxRecords);
-
-    PGresult *res = PQexec(mConnection, sql);
-    if (PQresultStatus(res) != PGRES_TUPLES_OK)
-    {
-      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
-        closeConnection();
-
-      Fmi::Exception exception(BCP,PQresultErrorMessage(res));
-      exception.addParameter("sql",sql);
-      PQclear(res);
-      throw exception;
-    }
-
-    int rowCount = PQntuples(res);
-
-    for (int i = 0; i < rowCount; i++)
-    {
-      T::FileInfo *fileInfo = new T::FileInfo();
-      fileInfo->mFileId = atoi(PQgetvalue(res, i, 0));
-      fileInfo->mProducerId = atoi(PQgetvalue(res, i, 1));
-      fileInfo->mGenerationId = atoi(PQgetvalue(res, i, 2));
-      fileInfo->mProtocol = atoi(PQgetvalue(res, i, 3));
-      fileInfo->mServerType = atoi(PQgetvalue(res, i, 4));
-      fileInfo->mServer = PQgetvalue(res, i, 5);
-      fileInfo->mFileType = atoi(PQgetvalue(res, i, 6));
-      fileInfo->mName = PQgetvalue(res, i, 7);
-      fileInfo->mFlags = atoi(PQgetvalue(res, i, 8));
-      fileInfo->mSourceId = atoi(PQgetvalue(res, i, 9));
-
-      std::string modificationTime = PQgetvalue(res, i, 10);
-      fileInfo->mModificationTime = utcTimeToTimeT(modificationTime);
-
-      std::string deletionTime = PQgetvalue(res, i, 11);
-      fileInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
-      fileInfoList.addFileInfo(fileInfo);
-    }
-
-    PQclear(res);
-
-    return Result::OK;
-
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int PostgresqlImplementation::addContent(T::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
@@ -8188,39 +7966,6 @@ int PostgresqlImplementation::deleteContentBySourceId(uint sourceId)
     char sql[1000];
 
     sprintf(sql,"DELETE FROM content WHERE sourceId=%u;",sourceId);
-    PGresult *res = PQexec(mConnection,sql);
-    if (PQresultStatus(res) != PGRES_COMMAND_OK)
-    {
-      //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
-      //exception.addParameter("sql",sql);
-      //PQclear(res);
-      //throw exception;
-    }
-    PQclear(res);
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int PostgresqlImplementation::removeVirtualContent()
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    char sql[1000];
-
-    sprintf(sql,"DELETE FROM content WHERE fileType=%u;",T::FileTypeValue::Virtual);
     PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
@@ -8751,113 +8496,6 @@ int PostgresqlImplementation::getContentByGenerationIdList(std::set<uint>& gener
     PQclear(res);
 
     return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int PostgresqlImplementation::getVirtualContent(uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    contentInfoList.clear();
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    contentInfoList.clear();
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    char sql[10000];
-    char *p = sql;
-
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  messageIndex,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  filePosition,\n");
-    p += sprintf(p,"  messageSize,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  parameterId,\n");
-    p += sprintf(p,"  parameterName,\n");
-    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  level,\n");
-    p += sprintf(p,"  forecastType,\n");
-    p += sprintf(p,"  foracastNumber,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  content\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  fileType=%u AND ((fileId=%u AND messageIndex>=%u) OR fileId > %u)\n",T::FileTypeValue::Virtual,startFileId,startMessageIndex,startFileId);
-    p += sprintf(p,"ORDER BY\n");
-    p += sprintf(p,"  fileId,messageIndex\n");
-    p += sprintf(p,"LIMIT\n");
-    p += sprintf(p,"  %u\n",maxRecords);
-
-    PGresult *res = PQexec(mConnection, sql);
-    if (PQresultStatus(res) != PGRES_TUPLES_OK)
-    {
-      if (PQresultStatus(res) == PGRES_FATAL_ERROR)
-        closeConnection();
-
-      Fmi::Exception exception(BCP,PQresultErrorMessage(res));
-      exception.addParameter("sql",sql);
-      PQclear(res);
-      throw exception;
-    }
-
-    int rowCount = PQntuples(res);
-
-    for (int i = 0; i < rowCount; i++)
-    {
-      T::ContentInfo *contentInfo = new T::ContentInfo();
-
-      contentInfo->mFileId = atoi(PQgetvalue(res, i, 0));
-      contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
-      contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
-      contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
-      contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
-      contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoi(PQgetvalue(res, i, 6));
-      contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
-      contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
-      contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
-      contentInfo->setForecastTime(PQgetvalue(res, i, 10));
-      contentInfo->mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
-      contentInfo->mParameterLevel = atoi(PQgetvalue(res, i, 12));
-      contentInfo->mForecastType = atoi(PQgetvalue(res, i, 13));
-      contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
-      contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
-      contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-
-      std::string modificationTime = PQgetvalue(res, i, 17);
-      contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
-
-      std::string deletionTime = PQgetvalue(res, i, 18);
-      contentInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
-
-      contentInfoList.addContentInfo(contentInfo);
-    }
-
-    PQclear(res);
-
-    return Result::OK;
-
   }
   catch (...)
   {

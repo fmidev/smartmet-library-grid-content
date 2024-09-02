@@ -105,7 +105,6 @@ class FileInfo
     {
       public:
         static const uint UnusedFlag        = 1;
-        static const uint VirtualContent    = 2;
         static const uint DeletedFile       = 4;
     };
 

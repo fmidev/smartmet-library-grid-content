@@ -803,18 +803,6 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
-    if (strcasecmp(method,"deleteVirtualContent") == 0)
-    {
-      deleteVirtualContent(request,response);
-      return;
-    }
-
-    if (strcasecmp(method,"updateVirtualContent") == 0)
-    {
-      updateVirtualContent(request,response);
-      return;
-    }
-
     response.addLine("result",Result::UNKNOWN_METHOD);
     response.addLine("resultString","Unknown method: " + methodStr);
   }
@@ -7541,59 +7529,6 @@ void ServerInterface::getLevelInfoList(T::RequestMessage& request,T::ResponseMes
   }
 }
 
-
-
-
-
-void ServerInterface::deleteVirtualContent(T::RequestMessage& request,T::ResponseMessage& response)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::SessionId sessionId = 0;
-    if (!request.getLineByKey("sessionId",sessionId))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: sessionId");
-      return;
-    }
-
-    int result = mService->deleteVirtualContent(sessionId);
-
-    response.addLine("result",result);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ServerInterface::updateVirtualContent(T::RequestMessage& request,T::ResponseMessage& response)
-{
-  FUNCTION_TRACE
-  try
-  {
-    T::SessionId sessionId = 0;
-    if (!request.getLineByKey("sessionId",sessionId))
-    {
-      response.addLine("result",Result::MISSING_PARAMETER);
-      response.addLine("resultString","Missing parameter: sessionId");
-      return;
-    }
-
-    int result = mService->updateVirtualContent(sessionId);
-
-    response.addLine("result",result);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
 
 
 

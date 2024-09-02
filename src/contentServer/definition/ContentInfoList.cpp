@@ -1216,40 +1216,6 @@ uint ContentInfoList::markDeletedBySourceId(uint sourceId)
 
 
 
-uint ContentInfoList::markDeletedByVirtualFlag()
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mArray == nullptr ||  mLength == 0)
-      return 0;
-
-    AutoReadLock lock(mModificationLockPtr);
-
-    uint cnt = 0;
-    for (uint t=0; t<mLength; t++)
-    {
-      ContentInfo *info = mArray[t];
-      if (info != nullptr)
-      {
-        if (info->mFlags & T::ContentInfo::Flags::VirtualContent)
-        {
-          info->mFlags = info->mFlags | T::ContentInfo::Flags::DeletedContent;
-          cnt++;
-        }
-      }
-    }
-    return cnt;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
 uint ContentInfoList::deleteContentInfo(ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
@@ -1666,47 +1632,6 @@ uint ContentInfoList::deleteContentInfoByFileIdList(std::set<uint>& fileIdList)
       ContentInfo *info = mArray[t];
       mArray[t] = nullptr;
       if (info != nullptr  &&  (fileIdList.find(info->mFileId) != fileIdList.end()  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
-      {
-        if (mReleaseObjects)
-          delete info;
-
-        count++;
-      }
-      else
-      {
-        mArray[p] = info;
-        p++;
-      }
-    }
-    mLength = p;
-    return count;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-uint ContentInfoList::deleteVirtualContent()
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mArray == nullptr ||  mLength == 0)
-      return 0;
-
-    AutoWriteLock lock(mModificationLockPtr);
-    uint p = 0;
-    uint count = 0;
-    for (uint t=0; t<mLength; t++)
-    {
-      ContentInfo *info = mArray[t];
-      mArray[t] = nullptr;
-      if (info != nullptr  &&  (info->mFileType == T::FileTypeValue::Virtual  ||  (info->mFlags & T::ContentInfo::Flags::VirtualContent) != 0))
       {
         if (mReleaseObjects)
           delete info;

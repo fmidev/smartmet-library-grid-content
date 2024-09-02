@@ -3123,43 +3123,6 @@ int ClientImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoL
 
 
 
-
-
-int ClientImplementation::_deleteVirtualContent(T::SessionId sessionId)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP, "The client is not initialized!");
-
-    int result = mService->deleteVirtualContent(sessionId);
-
-    mLastAccessTime = time(nullptr);
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
-
-
-
-int ClientImplementation::_updateVirtualContent(T::SessionId sessionId)
-{
-  try
-  {
-    if (!mInitialized)
-      throw Fmi::Exception(BCP, "The client is not initialized!");
-
-    int result = mService->updateVirtualContent(sessionId);
-
-    mLastAccessTime = time(nullptr);
-    return result;
-  }
-  CATCH_EXCEPTION
-}
-
-
 }
 }
 }

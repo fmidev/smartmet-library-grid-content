@@ -22,7 +22,6 @@ class GridFileManager
     void                init(ContentServer::ServiceInterface* contentServer);
 
     void                addFile(GRID::GridFile *gridFile);
-    void                addFileUser(uint fileId,uint userFileId);
     void                clear();
     void                deleteFile(GRID::GridFile *gridFile);
     void                deleteFileById(uint fileId);
@@ -33,11 +32,9 @@ class GridFileManager
     void                deleteFilesByAccessTime(time_t accessTime);
     void                deleteFilesByCheckTime(time_t checkTime);
     void                deleteFilesByDeletionTime(time_t deletionTime);
-    void                deleteVirtualFiles();
     GRID::GridFile_sptr getFileById(uint fileId);
     GRID::GridFile_sptr getFileByIdNoMapping(uint fileId);
     std::size_t         getFileCount();
-    void                getVirtualFiles(std::set<uint>& idList);
     void                getRequestCounters(GRID::RequestCounters& requestCounters,bool diskFiles,bool networkFiles);
     void                resetRequestCounters();
     void                print(std::ostream& stream,uint level,uint optionFlags);

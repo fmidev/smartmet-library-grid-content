@@ -638,6 +638,8 @@ int MemoryImplementation::_getProducerInfoById(T::SessionId sessionId,uint produ
     if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
+    updateProducerHashNoLock(info->mProducerId);
+
     producerInfo = *info;
     return Result::OK;
   }
@@ -665,6 +667,8 @@ int MemoryImplementation::_getProducerInfoByName(T::SessionId sessionId,const st
     if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
+    updateProducerHashNoLock(info->mProducerId);
+
     producerInfo = *info;
     return Result::OK;
   }
@@ -689,6 +693,15 @@ int MemoryImplementation::_getProducerInfoList(T::SessionId sessionId,T::Produce
     AutoReadLock lock(&mModificationLock);
 
     producerInfoList.clear();
+
+    uint pLen = mProducerInfoList.getLength();
+
+    for (uint p=0; p<pLen; p++)
+    {
+      T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByIndex(p);
+      if (producerInfo)
+        updateProducerHashNoLock(producerInfo->mProducerId);
+    }
 
     producerInfoList = mProducerInfoList;
     return Result::OK;
@@ -780,6 +793,8 @@ int MemoryImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
         prevProducerId = info->mProducerId;
         producerIdList.insert(info->mProducerId);
 
+        updateProducerHashNoLock(info->mProducerId);
+
         T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(info->mProducerId);
         if (producerInfo != nullptr)
           producerInfoList.addProducerInfo(producerInfo->duplicate());
@@ -809,6 +824,15 @@ int MemoryImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,
     AutoReadLock lock(&mModificationLock);
 
     producerInfoList.clear();
+
+    uint pLen = mProducerInfoList.getLength();
+
+    for (uint p=0; p<pLen; p++)
+    {
+      T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByIndex(p);
+      if (producerInfo)
+        updateProducerHashNoLock(producerInfo->mProducerId);
+    }
 
     mProducerInfoList.getProducerInfoListBySourceId(sourceId,producerInfoList);
 
@@ -1306,7 +1330,7 @@ int MemoryImplementation::_setGenerationInfo(T::SessionId sessionId,T::Generatio
       return Result::UNKNOWN_GENERATION_ID;
 
     T::GenerationInfo *gInfo = mGenerationInfoList.getGenerationInfoByName(generationInfo.mName);
-    if (gInfo != nullptr)
+    if (gInfo != nullptr && gInfo != info)
       return Result::GENERATION_NAME_ALREADY_REGISTERED;
 
     T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(generationInfo.mProducerId);
@@ -1565,6 +1589,8 @@ int MemoryImplementation::_getGenerationInfoById(T::SessionId sessionId,uint gen
     if (info == nullptr)
       return Result::DATA_NOT_FOUND;
 
+    updateProducerHashNoLock(info->mProducerId);
+
     generationInfo = *info;
     return Result::OK;
   }
@@ -1591,6 +1617,8 @@ int MemoryImplementation::_getGenerationInfoByName(T::SessionId sessionId,const 
     T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoByName(generationName);
     if (info == nullptr)
       return Result::DATA_NOT_FOUND;
+
+    updateProducerHashNoLock(info->mProducerId);
 
     generationInfo = *info;
     return Result::OK;
@@ -1905,7 +1933,7 @@ int MemoryImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInf
       return Result::UNKNOWN_PRODUCER_ID;
 
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(geometryInfo.mGenerationId);
-    if (generationInfo != nullptr)
+    if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
     T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoById(geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId);
@@ -4584,10 +4612,11 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
+
     contentInfoList.clear();
 
-    std::string startTime = "19000101T000000";
-    std::string endTime = "23000101T000000";
+    time_t startTime = 0;
+    time_t endTime = 0xFFFFFFFF;
 
     T::ParamLevel minLevel = level;
     T::ParamLevel maxLevel = level;
@@ -4649,7 +4678,6 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
     }
     mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
     contentInfoList = contentList;
-
     return Result::OK;
   }
   catch (...)
@@ -5012,12 +5040,24 @@ int MemoryImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessi
       return Result::INVALID_SESSION;
 
     AutoReadLock lock(&mModificationLock);
-/*
+
     T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
-*/
-    mContentInfoList[0].getForecastTimeRangeByGenerationId(producerId,generationId,startTime,endTime);
+
+    if (generationInfo->mContentStartTime == 0)
+    {
+      mContentInfoList[1].getForecastTimeRangeByGenerationId(producerId,generationId,startTime,endTime,generationInfo->mContentHash);
+      generationInfo->mContentStartTime = startTime;
+      generationInfo->mContentEndTime = endTime;
+    }
+    else
+    {
+      startTime = generationInfo->mContentStartTime;
+      endTime = generationInfo->mContentEndTime;
+    }
+
+    //mContentInfoList[0].getForecastTimeRangeByGenerationId(producerId,generationId,startTime,endTime);
 
     return Result::OK;
   }
@@ -5237,18 +5277,46 @@ int MemoryImplementation::_getHashByProducerId(T::SessionId sessionId,uint produ
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
+    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
+    if (producerInfo == nullptr)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    hash = updateProducerHashNoLock(producerId);
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+ulonglong MemoryImplementation::updateProducerHashNoLock(uint producerId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(producerId);
+    if (producerInfo == nullptr)
+      return 0;
+
     std::size_t generationHash = mGenerationInfoList.getHashByProducerId(producerId);
+    std::size_t geometryHash = mGeometryInfoList.getHashByProducerId(producerId);
     std::size_t fileHash = mFileInfoList.getHashByProducerId(producerId);
     std::size_t contentHash = mContentInfoList[0].getHashByProducerId(producerId);
 
     std::size_t h = 0;
     boost::hash_combine(h,generationHash);
+    boost::hash_combine(h,geometryHash);
     boost::hash_combine(h,fileHash);
     boost::hash_combine(h,contentHash);
 
-    hash = h;
-
-    return Result::OK;
+    producerInfo->mHash = h;
+    return h;
   }
   catch (...)
   {
@@ -5279,65 +5347,6 @@ int MemoryImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoL
   }
 }
 
-
-
-
-
-int MemoryImplementation::_deleteVirtualContent(T::SessionId sessionId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    AutoWriteLock lock(&mModificationLock);
-
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteVirtualContent();
-
-    mFileInfoListByName.deleteVirtualFiles();
-    mFileInfoList.deleteVirtualFiles();
-
-    addEvent(EventType::DELETE_VIRTUAL_CONTENT,0,0,0,0);
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int MemoryImplementation::_updateVirtualContent(T::SessionId sessionId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    AutoWriteLock lock(&mModificationLock);
-
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteVirtualContent();
-
-    mFileInfoListByName.deleteVirtualFiles();
-    mFileInfoList.deleteVirtualFiles();
-
-    addEvent(EventType::UPDATE_VIRTUAL_CONTENT,0,0,0,0);
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
 
 
 
@@ -6040,7 +6049,7 @@ bool MemoryImplementation::syncFileList()
     for (uint t=0; t<len; t++)
     {
       T::FileInfo *info = mFileInfoList.getFileInfoByIndex(t);
-      if ((info->mFlags &  0x80000000) == 0  &&  (info->mFlags & T::FileInfo::Flags::VirtualContent) == 0)
+      if ((info->mFlags &  0x80000000) == 0)
       {
         // The file is not in the csv-file anymore. We should delete it.
         idList.emplace_back(info->mFileId);
@@ -6174,7 +6183,7 @@ bool MemoryImplementation::syncContentList()
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *info = mContentInfoList[0].getContentInfoByIndex(t);
-      if ((info->mFlags &  0x80000000) == 0  &&  (info->mFlags & T::ContentInfo::Flags::VirtualContent) == 0)
+      if ((info->mFlags &  0x80000000) == 0)
       {
         // The generation is not in the csv-file anymore. We should delete it.
         info->mFlags = info->mFlags | T::ContentInfo::Flags::DeletedContent;

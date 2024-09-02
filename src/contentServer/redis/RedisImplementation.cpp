@@ -3303,10 +3303,7 @@ int RedisImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std:
 
     if (result == Result::OK)
     {
-      if (fileInfo.mFileType == T::FileTypeValue::Virtual)
-        addEvent(EventType::FILE_DELETED,fileId,T::FileTypeValue::Virtual,0,0);
-      else
-        addEvent(EventType::FILE_DELETED,fileId,0,0,0);
+      addEvent(EventType::FILE_DELETED,fileId,0,0,0);
     }
 
     return result;
@@ -5913,6 +5910,11 @@ int RedisImplementation::_getHashByProducerId(T::SessionId sessionId,uint produc
     if (res != Result::OK)
       return res;
 
+    T::GeometryInfoList geometryInfoList;
+    res = getGeometryListByProducerId(producerId,geometryInfoList);
+    if (res != Result::OK)
+      return res;
+
     T::FileInfoList fileInfoList;
     res = getFileListByProducerId(producerId,0,10000000,fileInfoList);
     if (res != Result::OK)
@@ -5924,11 +5926,13 @@ int RedisImplementation::_getHashByProducerId(T::SessionId sessionId,uint produc
       return res;
 
     std::size_t generationHash = generationInfoList.getHashByProducerId(producerId);
+    std::size_t geometryHash = geometryInfoList.getHashByProducerId(producerId);
     std::size_t fileHash = fileInfoList.getHashByProducerId(producerId);
     std::size_t contentHash = contentInfoList.getHashByProducerId(producerId);
 
     std::size_t h = 0;
     boost::hash_combine(h,generationHash);
+    boost::hash_combine(h,geometryHash);
     boost::hash_combine(h,fileHash);
     boost::hash_combine(h,contentHash);
 
@@ -5959,68 +5963,6 @@ int RedisImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoLi
 
     contentList.getLevelInfoList(levelInfoList);
     return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int RedisImplementation::_deleteVirtualContent(T::SessionId sessionId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    int result = deleteVirtualFiles(true);
-
-    if (result == Result::OK)
-      addEvent(EventType::DELETE_VIRTUAL_CONTENT,0,0,0,0);
-
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int RedisImplementation::_updateVirtualContent(T::SessionId sessionId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    RedisProcessLock redisProcessLock(FUNCTION_NAME,__LINE__,this);
-
-    if (!isSessionValid(sessionId))
-      return Result::INVALID_SESSION;
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    int result = deleteVirtualFiles(true);
-
-    if (result == Result::OK)
-    {
-      addEvent(EventType::UPDATE_VIRTUAL_CONTENT,0,0,0,0);
-    }
-
-    return result;
   }
   catch (...)
   {
@@ -7184,115 +7126,6 @@ int RedisImplementation::getFileListBySourceId(uint sourceId,uint startFileId,in
 
 
 
-int RedisImplementation::getVirtualFiles(uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    fileInfoList.clear();
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    uint max = (uint)abs(maxRecords);
-    uint prevFileId = 0xFFFFFFFF;
-
-    while (startFileId != prevFileId)
-    {
-      prevFileId = startFileId;
-
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %u %u LIMIT 0 10000",mTablePrefix.c_str(),startFileId,0xFFFFFFFF));
-      if (reply == nullptr)
-      {
-        closeConnection();
-        return Result::PERMANENT_STORAGE_ERROR;
-      }
-
-      if (reply->type == REDIS_REPLY_ARRAY)
-      {
-        if (reply->elements == 0)
-        {
-          freeReplyObject(reply);
-          return Result::OK;
-        }
-
-        for (uint t = 0; t < reply->elements; t++)
-        {
-          uint fileId = getCsvInt64Field(reply->element[t]->str,0);
-          if (fileId >= startFileId)
-          {
-            startFileId = fileId + 1;
-
-            uint type = getCsvInt64Field(reply->element[t]->str,1);
-            uint flags = getCsvInt64Field(reply->element[t]->str,6);
-
-            if (type == T::FileTypeValue::Virtual || (flags & T::FileInfo::Flags::VirtualContent) != 0)
-            {
-              T::FileInfo *fileInfo = new T::FileInfo();
-              fileInfo->setCsv(reply->element[t]->str);
-              fileInfoList.addFileInfo(fileInfo);
-
-              if (fileInfoList.getLength() == max)
-              {
-                freeReplyObject(reply);
-                return Result::OK;
-              }
-            }
-          }
-        }
-        freeReplyObject(reply);
-      }
-      else
-      {
-        freeReplyObject(reply);
-        return Result::OK;
-      }
-    }
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int RedisImplementation::deleteVirtualFiles(bool deleteContent)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    if (deleteContent)
-      removeVirtualContent();
-
-    T::FileInfoList fileInfoList;
-    getVirtualFiles(0,1000000000,fileInfoList);
-    uint len = fileInfoList.getLength();
-    for (uint t=0; t<len; t++)
-    {
-      T::FileInfo *fileInfo = fileInfoList.getFileInfoByIndex(t);
-      deleteFilename(fileInfo->mName);
-      deleteFileById(fileInfo->mFileId,false);
-    }
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int RedisImplementation::deleteGeometryById(uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,bool deleteFiles,bool deleteContent)
 {
   FUNCTION_TRACE
@@ -7947,35 +7780,6 @@ int RedisImplementation::deleteContentBySourceId(uint sourceId)
 
 
 
-int RedisImplementation::removeVirtualContent()
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    T::ContentInfoList contentInfoList;
-    getVirtualContent(0,0,1000000000,contentInfoList);
-    uint len = contentInfoList.getLength();
-    for (uint t=0; t<len; t++)
-    {
-      T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
-      deleteContent(contentInfo->mFileId,contentInfo->mMessageIndex);
-    }
-
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int RedisImplementation::setContent(T::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
@@ -8390,87 +8194,6 @@ int RedisImplementation::getContentByRequestCounterKey(ulonglong key,T::ContentI
           else
           {
             delete contentInfo;
-          }
-        }
-        freeReplyObject(reply);
-      }
-      else
-      {
-        freeReplyObject(reply);
-        return Result::OK;
-      }
-      startId = getContentKey(startFileId,startMessageIndex);
-    }
-    return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int RedisImplementation::getVirtualContent(uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    contentInfoList.clear();
-
-    if (!isConnectionValid())
-      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
-
-    uint max = (uint)abs(maxRecords);
-    unsigned long long startId = getContentKey(startFileId,startMessageIndex);
-    unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
-
-    while (startId != prevStartId)
-    {
-      prevStartId = startId;
-
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF));
-      if (reply == nullptr)
-      {
-        closeConnection();
-        return Result::PERMANENT_STORAGE_ERROR;
-      }
-
-      if (reply->elements == 0)
-      {
-        freeReplyObject(reply);
-        return Result::OK;
-      }
-
-      if (reply->type == REDIS_REPLY_ARRAY)
-      {
-        for (uint t = 0; t < reply->elements; t++)
-        {
-          uint fileId = getCsvInt64Field(reply->element[t]->str,0);
-          uint messageIndex = getCsvInt64Field(reply->element[t]->str,1);
-
-          if (fileId > startFileId  ||  (fileId == startFileId   &&  messageIndex >= startMessageIndex))
-          {
-            startFileId = fileId;
-            startMessageIndex = messageIndex + 1;
-
-            uint type = getCsvInt64Field(reply->element[t]->str,2);
-            uint flags = getCsvInt64Field(reply->element[t]->str,25);
-
-            if (type == T::FileTypeValue::Virtual ||  (flags & T::ContentInfo::Flags::VirtualContent) != 0)
-            {
-              T::ContentInfo *contentInfo = new T::ContentInfo();
-              contentInfo->setCsv(reply->element[t]->str);
-              contentInfoList.addContentInfo(contentInfo);
-
-              if (contentInfoList.getLength() == max)
-              {
-                freeReplyObject(reply);
-                return Result::OK;
-              }
-            }
           }
         }
         freeReplyObject(reply);

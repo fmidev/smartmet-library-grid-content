@@ -156,9 +156,6 @@ interface ServiceInterface
   long  getHashByProducerId(in long long sessionId,in unsigned long producerId,out unsigned long long hash);
 
   long  getLevelInfoList(in long long sessionId,out CorbaLevelInfoList levelInfoList);
-
-  long  deleteVirtualContent(in long long sessionId);
-  long  updateVirtualContent(in long long sessionId);
 };  
 
 

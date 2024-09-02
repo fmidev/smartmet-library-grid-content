@@ -168,9 +168,6 @@ class RedisImplementation : public ServiceInterface
 
      virtual int    _getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList);
 
-     virtual int    _deleteVirtualContent(T::SessionId sessionId);
-     virtual int    _updateVirtualContent(T::SessionId sessionId);
-
    protected:
 
      bool           isConnectionValid();
@@ -221,9 +218,6 @@ class RedisImplementation : public ServiceInterface
      int            getFileListByProducerId(uint producerId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList);
      int            getFileListBySourceId(uint sourceId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList);
 
-     int            deleteVirtualFiles(bool deleteContent);
-     int            getVirtualFiles(uint startFileId,int maxRecords,T::FileInfoList& fileInfoList);
-
      int            setContent(T::ContentInfo& contentInfo);
      int            deleteContent(uint fileId,uint messageIndex);
      int            deleteContentByFileId(uint fileId);
@@ -247,9 +241,6 @@ class RedisImplementation : public ServiceInterface
      int            getContentByParameterIdAndGeneration(uint generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList);
      int            getContentByParameterIdAndProducer(uint producerId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList);
      int            getGenerationTimeAndGeometryList(std::set<std::string>& list);
-
-     int            removeVirtualContent();
-     int            getVirtualContent(uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList);
 
      void           truncateEvents();
 

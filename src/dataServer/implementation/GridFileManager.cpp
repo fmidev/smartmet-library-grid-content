@@ -91,27 +91,6 @@ void GridFileManager::addFile(GRID::GridFile *gridFile)
 
 
 
-void GridFileManager::addFileUser(uint fileId,uint userFileId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    AutoWriteLock lock(&mModificationLock);
-
-    auto it = mFileList.find(fileId);
-    if (it != mFileList.end())
-      it->second->addUser(userFileId);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 void GridFileManager::clear()
 {
   FUNCTION_TRACE
@@ -269,7 +248,7 @@ void GridFileManager::deleteFilesByAccessTime(time_t accessTime)
       AutoReadLock lock(&mModificationLock);
       for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
       {
-        if (it->second->getAccessTime() < accessTime  &&  !it->second->isVirtual()  &&  it->second->getUserCount() == 0)
+        if (it->second->getAccessTime() < accessTime)
           idList.emplace_back(it->first);
       }
     }
@@ -300,7 +279,7 @@ void GridFileManager::deleteFilesByCheckTime(time_t checkTime)
       AutoReadLock lock(&mModificationLock);
       for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
       {
-        if (it->second->getCheckTime() < checkTime  &&  !it->second->isVirtual())
+        if (it->second->getCheckTime() < checkTime)
           idList.emplace_back(it->first);
       }
     }
@@ -331,7 +310,7 @@ void GridFileManager::deleteFilesByDeletionTime(time_t deletionTime)
       AutoReadLock lock(&mModificationLock);
       for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
       {
-        if (it->second->getDeletionTime() != 0  &&  it->second->getDeletionTime() < deletionTime  &&  !it->second->isVirtual())
+        if (it->second->getDeletionTime() != 0  &&  it->second->getDeletionTime() < deletionTime)
           idList.emplace_back(it->first);
       }
     }
@@ -348,63 +327,6 @@ void GridFileManager::deleteFilesByDeletionTime(time_t deletionTime)
   }
 }
 
-
-
-
-
-void GridFileManager::deleteVirtualFiles()
-{
-  FUNCTION_TRACE
-  try
-  {
-    AutoWriteLock lock(&mModificationLock);
-
-    std::vector<uint> idList;
-
-    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
-    {
-      if (it->second->isVirtual())
-      {
-        idList.emplace_back(it->first);
-      }
-      else
-      {
-        it->second->deleteUsers();
-      }
-    }
-
-    deleteFilesNoLock(idList,false);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void GridFileManager::getVirtualFiles(std::set<uint>& idList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    AutoReadLock lock(&mModificationLock);
-
-    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
-    {
-      if (it->second->isVirtual())
-      {
-        idList.insert(it->first);
-      }
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
 
 
 
@@ -571,21 +493,6 @@ void GridFileManager::deleteFileNoLock(uint fileId,bool sentMessageToContentServ
 
     if (gridRec != mFileList.end())
     {
-      std::set<uint> userList;
-      gridRec->second->getUsers(userList);
-      for (auto it = userList.begin();it != userList.end(); ++it)
-      {
-        deleteFileNoLock(*it,sentMessageToContentServer);
-      }
-
-      /*
-      if (sentMessageToContentServer &&  gridRec->second->isVirtual())
-      {
-        // We should tell the content server when virtual files are removed.
-        mContentServer->deleteFileInfoById(0,fileId);
-      }
-      */
-
       mFileList.erase(fileId);
     }
   }
