@@ -3650,52 +3650,6 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-
-
-::CORBA::Long ServerInterface::deleteVirtualContent(::CORBA::LongLong sessionId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mService == nullptr)
-      throw Fmi::Exception(BCP,"Service not initialized!");
-
-    int result = mService->deleteVirtualContent(sessionId);
-
-    return result;
-  }
-  catch (...)
-  {
-    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
-
-
-
-
-::CORBA::Long ServerInterface::updateVirtualContent(::CORBA::LongLong sessionId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mService == nullptr)
-      throw Fmi::Exception(BCP,"Service not initialized!");
-
-    int result = mService->updateVirtualContent(sessionId);
-
-    return result;
-  }
-  catch (...)
-  {
-    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
-    exception.printError();
-    return Result::UNEXPECTED_EXCEPTION;
-  }
-}
-
 }
 }
 }

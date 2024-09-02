@@ -724,40 +724,6 @@ uint FileInfoList::markDeletedBySourceId(uint sourceId)
 
 
 
-uint FileInfoList::markDeletedByVirtualFlag()
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mArray == nullptr ||  mLength == 0)
-      return 0;
-
-    uint cnt = 0;
-    AutoWriteLock lock(mModificationLockPtr);
-    for (uint t=0; t<mLength; t++)
-    {
-      FileInfo *info = mArray[t];
-      if (info != nullptr)
-      {
-        if (info->mFlags & T::FileInfo::Flags::VirtualContent)
-        {
-          info->mFlags |= T::FileInfo::Flags::DeletedFile;
-          cnt++;
-        }
-      }
-    }
-    return cnt;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int FileInfoList::getClosestIndex(uint comparisonMethod,FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -1929,50 +1895,6 @@ uint FileInfoList::deleteFileInfoByFileIdList(std::set<uint>& fileIdList)
       if (info != nullptr)
       {
         if (fileIdList.find(info->mFileId) != fileIdList.end() || (info->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
-        {
-          mArray[t] = nullptr;
-          if (mReleaseObjects)
-            delete info;
-          count++;
-        }
-        else
-        {
-          mArray[p] = info;
-          p++;
-        }
-      }
-    }
-    mLength = p;
-    return count;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-uint FileInfoList::deleteVirtualFiles()
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mArray == nullptr ||  mLength == 0)
-      return 0;
-
-    AutoWriteLock lock(mModificationLockPtr);
-    uint count = 0;
-    uint p = 0;
-    for (uint t=0; t<mLength; t++)
-    {
-      FileInfo *info = mArray[t];
-      mArray[t] = nullptr;
-      if (info != nullptr)
-      {
-        if (info->mFileType == T::FileTypeValue::Virtual || (info->mFlags & T::FileInfo::Flags::VirtualContent) != 0  || (info->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
         {
           mArray[t] = nullptr;
           if (mReleaseObjects)

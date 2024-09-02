@@ -68,10 +68,8 @@ vpath %.cpp src/ \
 			src/contentServer/memory \
 			src/contentServer/postgresql \
 			src/contentServer/redis \
-			src/contentServer/sync \
       src/dataServer \
 			src/dataServer/definition \
-			src/dataServer/cache \
 			src/dataServer/implementation \
 			src/queryServer/definition \
 			src/queryServer/implementation \
@@ -95,10 +93,8 @@ vpath %.h 	src/ \
 			src/contentServer/memory \
 			src/contentServer/postgresql \
 			src/contentServer/redis \
-			src/contentServer/sync \
       src/dataServer \
 			src/dataServer/definition \
-			src/dataServer/cache \
 			src/dataServer/implementation \
 			src/queryServer/definition \
 			src/queryServer/implementation \
@@ -138,10 +134,8 @@ vpath %.cpp src/ \
 			src/contentServer/memory \
 			src/contentServer/postgresql \
 			src/contentServer/redis \
-			src/contentServer/sync \
       src/dataServer \
 			src/dataServer/definition \
-			src/dataServer/cache \
 			src/dataServer/implementation \
 			src/dataServer/corba/client \
 			src/dataServer/corba/convert \
@@ -178,10 +172,8 @@ vpath %.h 	src/ \
 			src/contentServer/memory \
 			src/contentServer/postgresql \
 			src/contentServer/redis \
-			src/contentServer/sync \
       src/dataServer \
 			src/dataServer/definition \
-			src/dataServer/cache \
 			src/dataServer/implementation \
 			src/dataServer/corba/client \
 			src/dataServer/corba/convert \
@@ -207,7 +199,7 @@ vpath %.o obj
 
 # The files to be compiled
 
-SRCS     = $(patsubst src/%,%,$(wildcard src/*.cpp src/*/*.cpp src/*/definition/*.cpp src/*/cache/*.cpp src/*/sync/*.cpp src/*/redis/*.cpp src/*/memory/*.cpp src/*/postgresql/*.cpp src/*/corba/*/*.cpp src/*/http/*/*.cpp src/*/implementation/*.cpp))
+SRCS     = $(patsubst src/%,%,$(wildcard src/*.cpp src/*/*.cpp src/*/definition/*.cpp src/*/cache/*.cpp src/*/redis/*.cpp src/*/memory/*.cpp src/*/postgresql/*.cpp src/*/corba/*/*.cpp src/*/http/*/*.cpp src/*/implementation/*.cpp))
 
 endif
 
@@ -286,9 +278,7 @@ install:
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/memory
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/postgresql
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/redis
-	@mkdir -p $(includedir)/$(INCDIR)/contentServer/sync
 	@mkdir -p $(includedir)/$(INCDIR)/dataServer/definition
-	@mkdir -p $(includedir)/$(INCDIR)/dataServer/cache
 	@mkdir -p $(includedir)/$(INCDIR)/dataServer/idl
 	@mkdir -p $(includedir)/$(INCDIR)/dataServer/implementation
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer
@@ -311,9 +301,7 @@ install:
 	@cp src/contentServer/memory/*.h $(includedir)/$(INCDIR)/contentServer/memory
 	@cp src/contentServer/postgresql/*.h $(includedir)/$(INCDIR)/contentServer/postgresql
 	@cp src/contentServer/redis/*.h $(includedir)/$(INCDIR)/contentServer/redis
-	@cp src/contentServer/sync/*.h $(includedir)/$(INCDIR)/contentServer/sync
 	@cp src/dataServer/definition/*.h $(includedir)/$(INCDIR)/dataServer/definition
-	@cp src/dataServer/cache/*.h $(includedir)/$(INCDIR)/dataServer/cache
 	@cp src/dataServer/implementation/*.h $(includedir)/$(INCDIR)/dataServer/implementation
 	@cp src/queryServer/definition/*.h $(includedir)/$(INCDIR)/queryServer/definition
 	@cp src/queryServer/implementation/*.h $(includedir)/$(INCDIR)/queryServer/implementation
@@ -375,9 +363,7 @@ objdir:
 	@mkdir -p obj/contentServer/memory
 	@mkdir -p obj/contentServer/postgresql
 	@mkdir -p obj/contentServer/redis
-	@mkdir -p obj/contentServer/sync
 	@mkdir -p obj/dataServer/definition
-	@mkdir -p obj/dataServer/cache
 	@mkdir -p obj/dataServer/implementation
 	@mkdir -p obj/queryServer/definition
 	@mkdir -p obj/queryServer/implementation

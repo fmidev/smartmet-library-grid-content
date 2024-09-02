@@ -5600,11 +5600,13 @@ int CacheImplementation::_getHashByProducerId(T::SessionId sessionId,uint produc
     AutoReadLock readLock(mlock);
 
     std::size_t generationHash = ssp->mGenerationInfoList.getHashByProducerId(producerId);
+    std::size_t geometryHash = ssp->mGeometryInfoList.getHashByProducerId(producerId);
     std::size_t fileHash = ssp->mFileInfoList.getHashByProducerId(producerId);
     std::size_t contentHash = ssp->mContentInfoList[0].getHashByProducerId(producerId);
 
     std::size_t h = 0;
     boost::hash_combine(h,generationHash);
+    boost::hash_combine(h,geometryHash);
     boost::hash_combine(h,fileHash);
     boost::hash_combine(h,contentHash);
 
@@ -5652,50 +5654,6 @@ int CacheImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoLi
       ssp->mContentInfoList[0].getLevelInfoList(levelInfoList);
     }
     return Result::OK;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int CacheImplementation::_deleteVirtualContent(T::SessionId sessionId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mContentStorage == nullptr)
-      return Result::NO_PERMANENT_STORAGE_DEFINED;
-
-    int result = mContentStorage->deleteVirtualContent(sessionId);
-    processEvents(false);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int CacheImplementation::_updateVirtualContent(T::SessionId sessionId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mContentStorage == nullptr)
-      return Result::NO_PERMANENT_STORAGE_DEFINED;
-
-    int result = mContentStorage->updateVirtualContent(sessionId);
-    processEvents(false);
-    return result;
   }
   catch (...)
   {
@@ -7168,69 +7126,6 @@ void CacheImplementation::event_contentDeleted(T::EventInfo& eventInfo)
 
 
 
-void CacheImplementation::event_deleteVirtualContent(T::EventInfo& eventInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    PRINT_DATA(mDebugLog,"Delete virtual content event received\n");
-    AutoReadLock lock(&mModificationLock);
-
-    mContentDeleteCounter += mContentInfoList.markDeletedByVirtualFlag();
-    mFileDeleteCounter += mFileInfoList.markDeletedByVirtualFlag();
-
-    if (!mContentSwapEnabled)
-    {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
-      if (ssp)
-      {
-        AutoReadLock readLock(&mSearchModificationLock);
-        mContentDeleteCounter += ssp->mContentInfoList[0].markDeletedByVirtualFlag();
-        mFileDeleteCounter += ssp->mFileInfoList.markDeletedByVirtualFlag();
-      }
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void CacheImplementation::event_updateVirtualContent(T::EventInfo& eventInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    PRINT_DATA(mDebugLog,"Update virtual content event received\n");
-    AutoReadLock lock(&mModificationLock);
-
-    mContentDeleteCounter += mContentInfoList.markDeletedByVirtualFlag();
-    mFileDeleteCounter += mFileInfoList.markDeletedByVirtualFlag();
-
-    if (!mContentSwapEnabled)
-    {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
-      if (ssp)
-      {
-        AutoReadLock readLock(&mSearchModificationLock);
-        mContentDeleteCounter += ssp->mContentInfoList[0].markDeletedByVirtualFlag();
-        mFileDeleteCounter += ssp->mFileInfoList.markDeletedByVirtualFlag();
-      }
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
 void CacheImplementation::processEvent(T::EventInfo& eventInfo)
 {
   //FUNCTION_TRACE
@@ -7370,14 +7265,6 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
 
       case EventType::CONTENT_UPDATED:
         event_contentUpdated(eventInfo);
-        break;
-
-      case EventType::DELETE_VIRTUAL_CONTENT:
-        event_deleteVirtualContent(eventInfo);
-        break;
-
-      case EventType::UPDATE_VIRTUAL_CONTENT:
-        event_updateVirtualContent(eventInfo);
         break;
     }
   }

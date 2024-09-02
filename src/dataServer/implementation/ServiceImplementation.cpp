@@ -1,33 +1,11 @@
 #include "ServiceImplementation.h"
-#include "VirtualContentFactory_type1.h"
-#include "VirtualMessage.h"
-#include "../../functions/Function_add.h"
-#include "../../functions/Function_avg.h"
-#include "../../functions/Function_div.h"
-#include "../../functions/Function_inPrcnt.h"
-#include "../../functions/Function_outPrcnt.h"
-#include "../../functions/Function_min.h"
-#include "../../functions/Function_max.h"
-#include "../../functions/Function_mode.h"
-#include "../../functions/Function_mul.h"
-#include "../../functions/Function_multiply.h"
-#include "../../functions/Function_sdev.h"
-#include "../../functions/Function_sequence.h"
-#include "../../functions/Function_sub.h"
-#include "../../functions/Function_sum.h"
-#include "../../functions/Function_hypotenuse.h"
-#include "../../functions/Function_windDir.h"
-#include "../../functions/Function_vectorU.h"
-#include "../../functions/Function_vectorV.h"
-#include "../../functions/Function_feelsLike.h"
-
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/InterpolationFunctions.h>
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/common/GraphFunctions.h>
 #include <grid-files/common/CoordinateConversions.h>
 #include <grid-files/common/MemoryWriter.h>
-#include <grid-files/grid/PhysicalGridFile.h>
+#include <grid-files/grid/GridFile.h>
 #include <grid-files/grid/MessageProcessing.h>
 #include <grid-files/identification/GridDef.h>
 #include <macgyver/StringConversion.h>
@@ -96,14 +74,11 @@ ServiceImplementation::ServiceImplementation()
     mFullUpdateRequired = false;
     mEventProcessingActive = false;
     mCacheProcessingActive = false;
-    mVirtualContentEnabled = false;
     mContentServerStartTime = 0;
-    mLastVirtualFileRegistration = 0;
     mFileCleanup_age = 3600;
     mFileCleanup_checkInterval = 60;
     mFileCleanup_time = 0;
     mDeletedFileCleanup_time = 0;
-    mLastVirtualFileCheck = time(nullptr);
     mContentChangeTime = 0;
     mStartUpCache_enabled = false;
     mStartUpCache_saveDiskData = false;
@@ -141,7 +116,7 @@ ServiceImplementation::~ServiceImplementation()
 
 
 
-void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,const std::string& serverName,const std::string& serverIor,const std::string& dataDir,ContentServer::ServiceInterface *contentServer,string_vec& luaFileNames)
+void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,const std::string& serverName,const std::string& serverIor,const std::string& dataDir,ContentServer::ServiceInterface *contentServer)
 {
   FUNCTION_TRACE
   try
@@ -157,43 +132,7 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,cons
     mContentServer = contentServer;
     mFullUpdateRequired = true;
 
-    mVirtualContentManager.init();
     mGridFileManager.init(contentServer);
-    mLuaFileCollection.init(luaFileNames);
-
-    mFunctionCollection.addFunction("K2C",new Functions::Function_add(-273.15));
-
-    Functions::Function_sequence *k2f = new Functions::Function_sequence();
-    k2f->addFunction(new Functions::Function_add(-273.15));
-    k2f->addFunction(new Functions::Function_multiply(1.8));
-    k2f->addFunction(new Functions::Function_add(32.0));
-    mFunctionCollection.addFunction("K2F",k2f);
-
-    mFunctionCollection.addFunction("MODE",new Functions::Function_mode());
-    mFunctionCollection.addFunction("SUM",new Functions::Function_sum());
-    mFunctionCollection.addFunction("SUB",new Functions::Function_sub());
-    mFunctionCollection.addFunction("DIV",new Functions::Function_div());
-    mFunctionCollection.addFunction("MUL",new Functions::Function_mul());
-    mFunctionCollection.addFunction("SDEV",new Functions::Function_sdev());
-
-    mFunctionCollection.addFunction("AVG",new Functions::Function_avg());
-    mFunctionCollection.addFunction("MIN",new Functions::Function_min());
-    mFunctionCollection.addFunction("MAX",new Functions::Function_max());
-    mFunctionCollection.addFunction("IN_PRCNT",new Functions::Function_inPrcnt());
-    mFunctionCollection.addFunction("OUT_PRCNT",new Functions::Function_outPrcnt());
-
-    // Radians to degrees
-    mFunctionCollection.addFunction("RAD2DEG",new Functions::Function_multiply((360.0/2*3.1415926535)));
-
-    // Degrees to radians
-    mFunctionCollection.addFunction("DEG2RAD",new Functions::Function_multiply((2*3.1415926535/360.0)));
-
-    mFunctionCollection.addFunction("WIND_SPEED",new Functions::Function_hypotenuse());
-    mFunctionCollection.addFunction("WIND_DIR",new Functions::Function_windDir());
-    mFunctionCollection.addFunction("WIND_V",new Functions::Function_vectorV());
-    mFunctionCollection.addFunction("WIND_U",new Functions::Function_vectorU());
-
-    mFunctionCollection.addFunction("FEELS_LIKE",new Functions::Function_feelsLike());
   }
   catch (...)
   {
@@ -388,60 +327,6 @@ void ServiceImplementation::setCleanup(time_t age,time_t checkInterval)
 
 
 
-void ServiceImplementation::setVirtualContentEnabled(bool enabled)
-{
-  FUNCTION_TRACE
-  try
-  {
-    mVirtualContentEnabled = enabled;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ServiceImplementation::addVirtualContentFactory(VirtualContentFactory *factory)
-{
-  FUNCTION_TRACE
-  try
-  {
-    factory->setContentServer(mContentServer);
-    factory->setGridFileManager(&mGridFileManager);
-    factory->setLuaFileCollection(&mLuaFileCollection);
-    factory->setFunctionCollection(&mFunctionCollection);
-
-    mVirtualContentManager.addVirtualContentFactory(factory);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-void ServiceImplementation::addSubServer(std::string& name,ServiceInterface *subServer)
-{
-  FUNCTION_TRACE
-  try
-  {
-    mDataServers.insert(std::pair<std::string,ServiceInterface*>(name,subServer));
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
 void ServiceImplementation::startEventProcessing()
 {
   FUNCTION_TRACE
@@ -493,13 +378,6 @@ ServiceInterface* ServiceImplementation::getDataServerByFileId(uint fileId)
           // The grid file will be deleted soon. We should not access it anymore.
           return nullptr;
         }
-      }
-
-      if (fileInfo.mFileType == T::FileTypeValue::Virtual)
-      {
-        auto it = mDataServers.find(fileInfo.mServer);
-        if (it != mDataServers.end())
-          return it->second;
       }
     }
     return nullptr;
@@ -571,7 +449,7 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
         }
       }
 
-      if (fileInfo.mFileType != T::FileTypeValue::Virtual  &&  (fileInfo.mProtocol > 1 || getFileSize(fileInfo.mName.c_str()) > 0))
+      if (fileInfo.mProtocol > 1 || getFileSize(fileInfo.mName.c_str()) > 0)
       {
         T::ContentInfoList contentList;
         if (mContentServer->getContentListByFileId(mServerSessionId,fileId,contentList) == 0)
@@ -5453,7 +5331,7 @@ int ServiceImplementation::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId se
 
 
 
-void ServiceImplementation::readContentList(T::ContentInfoList& contentList,bool includePhysicalContent,bool includeVirtualContent)
+void ServiceImplementation::readContentList(T::ContentInfoList& contentList)
 {
   FUNCTION_TRACE
   try
@@ -5480,298 +5358,13 @@ void ServiceImplementation::readContentList(T::ContentInfoList& contentList,bool
         T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
         startFileId = contentInfo->mFileId;
         startMessageIndex = contentInfo->mMessageIndex + 1;
-
-        if (includePhysicalContent && contentInfo->mFileType != T::FileTypeValue::Virtual)
-          contentList.addContentInfo(contentInfo->duplicate());
-        else
-        if (includeVirtualContent && contentInfo->mFileType == T::FileTypeValue::Virtual)
-          contentList.addContentInfo(contentInfo->duplicate());
-
+        contentList.addContentInfo(contentInfo->duplicate());
         counter++;
         if ((counter % 10000) == 0)
           PRINT_DATA(mDebugLog,"* Caching content information : %u\n",counter);
       }
     }
     PRINT_DATA(mDebugLog,"* Caching content information : %u\n",counter);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ServiceImplementation::registerVirtualFiles(VirtualGridFilePtr_map& gridFileMap,std::set<uint>& idList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!mVirtualContentEnabled)
-      return;
-
-    mLastVirtualFileRegistration = time(nullptr);
-
-    if (gridFileMap.size() == 0)
-      return;
-
-    std::vector<T::FileAndContent> fileAndContentList;
-
-    uint c = 0;
-    for (auto it = gridFileMap.begin(); it != gridFileMap.end(); ++it)
-    {
-      if (mShutdownRequested)
-        return;
-
-      auto virtualFilePtr = it->second;
-      //printf(" -- register %u %s\n",virtualFilePtr->getFileId(),virtualFilePtr->getFileName().c_str());
-      if (virtualFilePtr->getFileId() == 0)
-      {
-        T::FileAndContent fc;
-        fc.mFileInfo.mName = virtualFilePtr->getFileName();
-        fc.mFileInfo.mProducerId = virtualFilePtr->getProducerId();
-        fc.mFileInfo.mGenerationId = virtualFilePtr->getGenerationId();
-        fc.mFileInfo.mSourceId = mServerId;
-        fc.mFileInfo.mServer = mServerName;
-        fc.mFileInfo.mFileType = T::FileTypeValue::Virtual;
-        fc.mFileInfo.mFlags = fc.mFileInfo.mFlags | T::FileInfo::Flags::VirtualContent;
-
-        std::size_t len = virtualFilePtr->getNumberOfMessages();
-        for (std::size_t t = 0; t<len; t++)
-        {
-          GRID::VirtualMessage *msg = (GRID::VirtualMessage*)virtualFilePtr->getMessageByIndex(t);
-          T::ContentInfo *contentInfo = msg->getContentInfo();
-          contentInfo->mSourceId = mServerId;
-          fc.mContentInfoList.addContentInfo(contentInfo->duplicate());
-        }
-
-        fileAndContentList.emplace_back(fc);
-
-        if (fileAndContentList.size() > 50000)
-        {
-          mContentServer->addFileInfoListWithContent(mServerSessionId,0,fileAndContentList);
-          PRINT_DATA(mDebugLog,"* Registering virtual files : %u\n",c);
-
-          for (auto ff = fileAndContentList.begin(); ff != fileAndContentList.end(); ++ff)
-          {
-            if (mShutdownRequested)
-              return;
-
-            if (ff->mFileInfo.mFileId > 0)
-            {
-              auto tt = gridFileMap.find(ff->mFileInfo.mName);
-              if (tt != gridFileMap.end())
-              {
-                auto virtualFilePtr = tt->second;
-                virtualFilePtr->setFileId(ff->mFileInfo.mFileId);
-
-                std::size_t fLen = virtualFilePtr->getNumberOfPhysicalGridFiles();
-                for (uint f=0; f<fLen; f++)
-                {
-                  GRID::GridFile_sptr fFile = virtualFilePtr->getPhysicalGridFileByIndex(f);
-                  fFile->addUser(ff->mFileInfo.mFileId);
-                }
-
-                //printf(" -- new %u %s\n",virtualFilePtr->getFileId(),virtualFilePtr->getFileName().c_str());
-                idList.insert(virtualFilePtr->getFileId());
-
-                mGridFileManager.addFile(virtualFilePtr);
-              }
-            }
-          }
-          fileAndContentList.clear();
-        }
-      }
-      else
-      {
-        std::size_t fLen = virtualFilePtr->getNumberOfPhysicalGridFiles();
-        for (uint f=0; f<fLen; f++)
-        {
-          GRID::GridFile_sptr fFile = virtualFilePtr->getPhysicalGridFileByIndex(f);
-          fFile->addUser(virtualFilePtr->getFileId());
-        }
-        mGridFileManager.addFile(virtualFilePtr);
-        idList.insert(virtualFilePtr->getFileId());
-        //printf(" -- add %u %s\n",virtualFilePtr->getFileId(),virtualFilePtr->getFileName().c_str());
-      }
-      c++;
-    }
-
-    if (fileAndContentList.size() > 0)
-    {
-      mContentServer->addFileInfoListWithContent(mServerSessionId,0,fileAndContentList);
-      PRINT_DATA(mDebugLog,"* Registering virtual files : %u\n",c);
-
-      for (auto ff = fileAndContentList.begin(); ff != fileAndContentList.end(); ++ff)
-      {
-        if (mShutdownRequested)
-          return;
-
-        if (ff->mFileInfo.mFileId > 0)
-        {
-          auto tt = gridFileMap.find(ff->mFileInfo.mName);
-          if (tt != gridFileMap.end())
-          {
-            auto virtualFilePtr = tt->second;
-            virtualFilePtr->setFileId(ff->mFileInfo.mFileId);
-
-            std::size_t fLen = virtualFilePtr->getNumberOfPhysicalGridFiles();
-            for (uint f=0; f<fLen; f++)
-            {
-              GRID::GridFile_sptr fFile = virtualFilePtr->getPhysicalGridFileByIndex(f);
-              fFile->addUser(ff->mFileInfo.mFileId);
-            }
-
-            //printf(" -- new %u %s\n",virtualFilePtr->getFileId(),virtualFilePtr->getFileName().c_str());
-
-            idList.insert(virtualFilePtr->getFileId());
-            mGridFileManager.addFile(virtualFilePtr);
-          }
-        }
-      }
-      fileAndContentList.clear();
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ServiceImplementation::updateVirtualFiles(T::ContentInfoList& fullContentList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    PRINT_DATA(mDebugLog,"Update virtual files (%d)\n",(int)mVirtualContentEnabled);
-    if (!mVirtualContentEnabled)
-      return;
-
-    T::ProducerInfoList producerInfoList;
-    int result = mContentServer->getProducerInfoList(mServerSessionId,producerInfoList);
-    if (result != 0)
-    {
-      PRINT_DATA(mDebugLog,"%s:%d: Cannot get the producer list from the content server!\n",__FILE__,__LINE__);
-      PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
-      return;
-    }
-
-    T::GenerationInfoList generationInfoList;
-    result = mContentServer->getGenerationInfoList(mServerSessionId,generationInfoList);
-    if (result != 0)
-    {
-      PRINT_DATA(mDebugLog,"%s:%d Cannot get the generation list from the content server!\n",__FILE__,__LINE__);
-      PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
-      return;
-    }
-
-    VirtualGridFilePtr_map gridFileMap;
-
-    std::set<uint> virtualFileIdList;
-
-    uint counter = 0;
-    uint startFileId = 0;
-    uint len = 50000;
-    while (len > 0)
-    {
-      if (mShutdownRequested)
-        return;
-
-      T::FileInfoList fileInfoList;
-
-      result = mContentServer->getFileInfoList(mServerSessionId,startFileId,10000,fileInfoList);
-      if (result != 0)
-      {
-        PRINT_DATA(mDebugLog,"%s:%d: Cannot get the file list from the content server!\n",__FILE__,__LINE__);
-        PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
-        return;
-      }
-
-      len = fileInfoList.getLength();
-      for (uint t=0; t<len; t++)
-      {
-        if (mShutdownRequested)
-          return;
-
-        try
-        {
-          T::FileInfo *fileInfo = fileInfoList.getFileInfoByIndex(t);
-          if (fileInfo->mFileId >= startFileId)
-            startFileId = fileInfo->mFileId + 1;
-
-          if (fileInfo->mFileType != T::FileTypeValue::Virtual)
-          {
-            T::ContentInfoList contentInfoList;
-            if (mContentServer->getImplementationType() != ContentServer::Implementation::Cache || fullContentList.getLength() > 0)
-              fullContentList.getContentInfoListByFileId(fileInfo->mFileId,contentInfoList);
-            else
-              mContentServer->getContentListByFileId(mServerSessionId,fileInfo->mFileId,contentInfoList);
-
-            T::ProducerInfo *producerInfo = producerInfoList.getProducerInfoById(fileInfo->mProducerId);
-            if (producerInfo != nullptr)
-            {
-              T::GenerationInfo *generationInfo = generationInfoList.getGenerationInfoById(fileInfo->mGenerationId);
-              if (generationInfo != nullptr)
-              {
-                mVirtualContentManager.addFile(*producerInfo,*generationInfo,*fileInfo,contentInfoList,gridFileMap);
-              }
-              else
-              {
-                PRINT_DATA(mDebugLog,"%s:%d: Cannot find the generation (%u)!\n",__FILE__,__LINE__,fileInfo->mGenerationId);
-              }
-            }
-            else
-            {
-              PRINT_DATA(mDebugLog,"%s:%d: Cannot find the producer (%u)!\n",__FILE__,__LINE__,fileInfo->mProducerId);
-            }
-
-            counter++;
-            if ((counter % 10000) == 0)
-              PRINT_DATA(mDebugLog,"* Processing files : %lu\n",gridFileMap.size());
-          }
-          else
-          {
-            if (fileInfo->mSourceId == mServerId)
-              virtualFileIdList.insert(fileInfo->mFileId);
-          }
-        }
-        catch (...)
-        {
-          Fmi::Exception exception(BCP,"Operation failed!",nullptr);
-          std::string st = exception.getStackTrace();
-          PRINT_DATA(mDebugLog,"%s",st.c_str());
-        }
-      }
-    }
-    PRINT_DATA(mDebugLog,"* Creating virtual files : %lu\n",gridFileMap.size());
-
-    std::set<uint> idList;
-    registerVirtualFiles(gridFileMap,idList);
-
-    //mGridFileManager.getVirtualFiles(idList);
-
-    PRINT_DATA(mDebugLog,"* Checking old virtual file registrations (%lu/%lu)\n",idList.size(),virtualFileIdList.size());
-
-    std::set<uint> fileDeleteList;
-    for (auto it = virtualFileIdList.begin(); it != virtualFileIdList.end(); ++it)
-    {
-      if (idList.find(*it) == idList.end())
-      {
-        fileDeleteList.insert(*it);
-      }
-    }
-
-    if (fileDeleteList.size() > 0)
-    {
-      PRINT_DATA(mDebugLog,"* Removing virtual files (%lu)\n",fileDeleteList.size());
-      mContentServer->deleteFileInfoListByFileIdList(mServerSessionId,fileDeleteList);
-    }
   }
   catch (...)
   {
@@ -5792,9 +5385,6 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
       return;
 
     AutoThreadLock lock(&mThreadLock);
-
-    if (fileInfo.mFileType == T::FileTypeValue::Virtual || (fileInfo.mFlags & T::FileInfo::Flags::VirtualContent) != 0)
-      return;
 
     time_t checkTime = time(nullptr);
     std::string filename;
@@ -5823,7 +5413,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
 
     if (gridFile == nullptr)
     {
-      gridFile = new GRID::PhysicalGridFile();
+      gridFile = new GRID::GridFile();
       gridFile->setFileName(filename);
       gridFile->setFileId(fileInfo.mFileId);
       gridFile->setProducerId(fileInfo.mProducerId);
@@ -5836,6 +5426,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
       gridFile->setSize(fileInfo.mSize);
     }
 
+    /*
     T::ProducerInfo producerInfo;
     T::GenerationInfo generationInfo;
 
@@ -5844,6 +5435,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
       mContentServer->getProducerInfoById(mServerSessionId,fileInfo.mProducerId,producerInfo);
       mContentServer->getGenerationInfoById(mServerSessionId,fileInfo.mGenerationId,generationInfo);
     }
+    */
 
 
     uint cLen = contentList.getLength();
@@ -5931,11 +5523,8 @@ void ServiceImplementation::fullUpdate()
     PRINT_DATA(mDebugLog,"****************** FULL UPDATE START *********************\n");
 
     T::ContentInfoList fullContentList;
-    readContentList(fullContentList,true,true);
+    readContentList(fullContentList);
     fullContentList.sort(T::ContentInfo::ComparisonMethod::file_message);
-
-    bool vContentEnabled = mVirtualContentEnabled;
-    mVirtualContentEnabled = false;
 
     T::EventInfo eventInfo;
 
@@ -6005,18 +5594,7 @@ void ServiceImplementation::fullUpdate()
 
     PRINT_DATA(mDebugLog,"* Adding grid files : %u\n",counter);
 
-    mVirtualContentEnabled  = vContentEnabled;
     mGridFileManager.deleteFilesByCheckTime(checkTime);
-    mGridFileManager.deleteVirtualFiles();
-
-    if (mVirtualContentEnabled)
-    {
-      time_t changeTime = 0;
-      mContentServer->getContentChangeTime(mServerSessionId,changeTime);
-      updateVirtualFiles(fullContentList);
-      mContentChangeTime = changeTime;
-    }
-
 
     mFullUpdateRequired = false;
 
@@ -6240,9 +5818,6 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
     //printf("event_fileAdded %u %u\n",eventInfo.mId1,eventInfo.mId2);
     //eventInfo.print(std::cout,0,0);
 
-    if (eventInfo.mId2 == T::FileTypeValue::Virtual)  // This is a virtual file that we have added.
-      return;
-
     uint len = eventInfo.mEventData.length();
     T::FileInfo fileInfo;
     T::ContentInfoList contentList;
@@ -6320,9 +5895,6 @@ void ServiceImplementation::event_fileDeleted(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    if (eventInfo.mId2 == T::FileTypeValue::Virtual)
-      return; // The deleted file was virtual. No need to react.
-
     mGridFileManager.deleteFileById(eventInfo.mId1);
   }
   catch (...)
@@ -6342,9 +5914,6 @@ void ServiceImplementation::event_fileUpdated(T::EventInfo& eventInfo)
   {
 #if 0
     //printf("EVENT[%llu]: filedUpdated(%u)\n",eventInfo.mEventId,eventInfo.mId1);
-
-    if (eventInfo.mId2 == T::FileTypeValue::Virtual)
-      return; // The updated file was virtual. No need to react.
 
     GRID::GridFile_sptr storageFile = mGridFileManager.getFileByIdNoMapping(eventInfo.mId1);
     if (storageFile)
@@ -6519,11 +6088,8 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
   try
   {
     //printf("event_contentAdded %u %u\n",eventInfo.mId1,eventInfo.mId2);
-
-    if (eventInfo.mFlags & T::ContentInfo::Flags::VirtualContent)
-      return; // This is virtual content that we had added
-
     //eventInfo.print(std::cout,0,0);
+
     T::ContentInfo contentInfo;
     if (eventInfo.mEventData > " ")
       contentInfo.setCsv(eventInfo.mEventData);
@@ -6618,62 +6184,6 @@ void ServiceImplementation::event_contentDeleted(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ServiceImplementation::event_deleteVirtualContent(T::EventInfo& eventInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    PRINT_DATA(mDebugLog,"* Delete virtual content\n");
-    mGridFileManager.deleteVirtualFiles();
-    mContentChangeTime = 0;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ServiceImplementation::event_updateVirtualContent(T::EventInfo& eventInfo)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!mVirtualContentEnabled)
-      return;
-
-    PRINT_DATA(mDebugLog,"Update virtual content\n");
-    mGridFileManager.deleteVirtualFiles();
-    sleep(5);
-
-    // If we are not using the content server cache implementation then it is faster
-    // to cache all content before processing.
-
-    T::ContentInfoList fullContentList;
-    if (mContentServer->getImplementationType() != ContentServer::Implementation::Cache)
-    {
-      readContentList(fullContentList,true,false);
-      fullContentList.sort(T::ContentInfo::ComparisonMethod::file_message);
-    }
-
-    time_t changeTime = 0;
-    mContentServer->getContentChangeTime(mServerSessionId,changeTime);
-    updateVirtualFiles(fullContentList);
-    mContentChangeTime = changeTime;
   }
   catch (...)
   {
@@ -6794,14 +6304,6 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *n
       case ContentServer::EventType::CONTENT_UPDATED:
         event_contentUpdated(eventInfo);
         break;
-
-      case ContentServer::EventType::DELETE_VIRTUAL_CONTENT:
-        event_deleteVirtualContent(eventInfo);
-        break;
-
-      case ContentServer::EventType::UPDATE_VIRTUAL_CONTENT:
-        event_updateVirtualContent(eventInfo);
-        break;
     }
 
   }
@@ -6822,8 +6324,6 @@ void ServiceImplementation::processEvents()
     if (mShutdownRequested)
       return;
 
-    mLuaFileCollection.checkUpdates(false);
-
     time_t currentTime = time(nullptr);
     if (mFileCleanup_checkInterval > 0  && (currentTime - mFileCleanup_time) > mFileCleanup_checkInterval)
     {
@@ -6841,20 +6341,6 @@ void ServiceImplementation::processEvents()
     {
       fullUpdate();
       return;
-    }
-
-    if (mVirtualContentEnabled  &&  (mLastVirtualFileCheck + 30) < time(nullptr))
-    {
-      time_t changeTime = 0;
-      mContentServer->getContentChangeTime(mServerSessionId,changeTime);
-
-      if (mContentChangeTime != changeTime || mVirtualContentManager.checkUpdates())
-      {
-        T::EventInfo eventInfo;
-        event_updateVirtualContent(eventInfo);
-        mContentChangeTime = changeTime;
-      }
-      mLastVirtualFileCheck = time(nullptr);
     }
 
     T::EventInfo eventInfo;

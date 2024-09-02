@@ -34,7 +34,6 @@ class FileInfoList
     bool           deleteFileInfoByName(const std::string& filename);
     uint           deleteFileInfoBySourceId(uint sourceId);
     uint           deleteFileInfoByFileIdList(std::set<uint>& fileIdList);
-    uint           deleteVirtualFiles();
     uint           deleteMarkedFiles();
     int            getClosestIndex(uint comparisonMethod,FileInfo& fileInfo);
     int            getClosestIndexNoLock(uint comparisonMethod,FileInfo& fileInfo);
@@ -68,7 +67,6 @@ class FileInfoList
     uint           markDeletedByProducerId(uint producerId);
     uint           markDeletedByGenerationId(uint generationId);
     uint           markDeletedBySourceId(uint sourceId);
-    uint           markDeletedByVirtualFlag();
     void           setLockingEnabled(bool lockingEnabled);
     void           setComparisonMethod(uint comparisonMethod);
     void           setReleaseObjects(bool releaseObjects);

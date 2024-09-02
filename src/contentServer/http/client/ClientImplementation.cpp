@@ -4380,57 +4380,6 @@ int ClientImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoL
 
 
 
-int ClientImplementation::_deleteVirtualContent(T::SessionId sessionId)
-{
-  try
-  {
-    T::RequestMessage request;
-
-    request.addLine("method","deleteVirtualContent");
-    request.addLine("sessionId",sessionId);
-
-    T::ResponseMessage response;
-
-    sendRequest(request,response);
-
-    int result = response.getLineValueByKey("result");
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int ClientImplementation::_updateVirtualContent(T::SessionId sessionId)
-{
-  try
-  {
-    T::RequestMessage request;
-
-    request.addLine("method","updateVirtualContent");
-    request.addLine("sessionId",sessionId);
-
-    T::ResponseMessage response;
-
-    sendRequest(request,response);
-
-    int result = response.getLineValueByKey("result");
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
 size_t ClientImplementation_responseProcessing(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
   try
@@ -4449,8 +4398,6 @@ size_t ClientImplementation_responseProcessing(char *ptr, size_t size, size_t nm
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
-
-
 
 
 

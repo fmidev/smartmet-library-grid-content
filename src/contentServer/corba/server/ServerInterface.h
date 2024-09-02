@@ -154,8 +154,6 @@ class ServerInterface : public POA_SmartMet::ContentServer::Corba::ServiceInterf
     ::CORBA::Long setContentInfo(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaContentInfo& contentInfo);
     ::CORBA::Long getHashByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::ULongLong& hash);
     ::CORBA::Long getLevelInfoList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaLevelInfoList_out levelInfoList);
-    ::CORBA::Long deleteVirtualContent(::CORBA::LongLong sessionId);
-    ::CORBA::Long updateVirtualContent(::CORBA::LongLong sessionId);
 
   protected:
 

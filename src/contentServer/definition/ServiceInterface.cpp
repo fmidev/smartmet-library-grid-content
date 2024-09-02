@@ -4020,62 +4020,6 @@ int ServiceInterface::getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& 
 
 
 
-int ServiceInterface::deleteVirtualContent(T::SessionId sessionId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!mEnabled)
-      return Result::SERVICE_DISABLED;
-
-    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
-      return _deleteVirtualContent(sessionId);
-
-    unsigned long long timeStart = getTime();
-    int result = _deleteVirtualContent(sessionId);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu);result %d;time %f;",__FUNCTION__,sessionId,result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-int ServiceInterface::updateVirtualContent(T::SessionId sessionId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (!mEnabled)
-      return Result::SERVICE_DISABLED;
-
-    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
-      return _updateVirtualContent(sessionId);
-
-    unsigned long long timeStart = getTime();
-    int result = _updateVirtualContent(sessionId);
-    unsigned long requestTime = getTime() - timeStart;
-
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu);result %d;time %f;",__FUNCTION__,sessionId,result,C_DOUBLE(requestTime) / 1000000);
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 int ServiceInterface::_clear(T::SessionId sessionId)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5368,27 +5312,6 @@ int ServiceInterface::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList&
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
-
-
-
-
-
-int ServiceInterface::_deleteVirtualContent(T::SessionId sessionId)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
-int ServiceInterface::_updateVirtualContent(T::SessionId sessionId)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
 
 
 

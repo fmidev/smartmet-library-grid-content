@@ -164,9 +164,6 @@ class ClientImplementation : public ContentServer::ServiceInterface
 
      virtual int    _getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList);
 
-     virtual int    _deleteVirtualContent(T::SessionId sessionId);
-     virtual int    _updateVirtualContent(T::SessionId sessionId);
-
      virtual void   sendRequest(T::RequestMessage& request,T::ResponseMessage& response);
 
      std::string    mUrl;

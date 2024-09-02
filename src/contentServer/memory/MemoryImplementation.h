@@ -169,14 +169,13 @@ class MemoryImplementation : public ServiceInterface
 
      virtual int    _getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList);
 
-     virtual int    _deleteVirtualContent(T::SessionId sessionId);
-     virtual int    _updateVirtualContent(T::SessionId sessionId);
-
    protected:
 
      virtual bool   isSessionValid(T::SessionId sessionId);
      T::EventId     addEvent(uint eventType,uint id1,uint id2,uint id3,unsigned long long flags);
      virtual void   saveData();
+     ulonglong      updateProducerHashNoLock(uint producerId);
+
 
      virtual void   readContentList();
      virtual void   readFileList();

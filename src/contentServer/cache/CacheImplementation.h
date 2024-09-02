@@ -197,9 +197,6 @@ class CacheImplementation : public ServiceInterface
 
     virtual int     _getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList);
 
-    virtual int     _deleteVirtualContent(T::SessionId sessionId);
-    virtual int     _updateVirtualContent(T::SessionId sessionId);
-
   protected:
 
     virtual bool    isSessionValid(T::SessionId sessionId);
@@ -247,9 +244,6 @@ class CacheImplementation : public ServiceInterface
     virtual void    event_contentAdded(T::EventInfo& eventInfo);
     virtual void    event_contentDeleted(T::EventInfo& eventInfo);
     virtual void    event_contentUpdated(T::EventInfo& eventInfo);
-
-    virtual void    event_deleteVirtualContent(T::EventInfo& eventInfo);
-    virtual void    event_updateVirtualContent(T::EventInfo& eventInfo);
 
     virtual void    processEvent(T::EventInfo& eventInfo);
     virtual void    processEvents(bool eventThread);

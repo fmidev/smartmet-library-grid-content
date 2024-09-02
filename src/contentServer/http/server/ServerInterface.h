@@ -160,9 +160,6 @@ class ServerInterface
 
     virtual void getLevelInfoList(T::RequestMessage& request,T::ResponseMessage& response);
 
-    virtual void deleteVirtualContent(T::RequestMessage& request,T::ResponseMessage& response);
-    virtual void updateVirtualContent(T::RequestMessage& request,T::ResponseMessage& response);
-
   protected:
 
     ContentServer::ServiceInterface *mService;

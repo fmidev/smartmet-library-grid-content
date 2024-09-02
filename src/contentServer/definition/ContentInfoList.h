@@ -47,9 +47,7 @@ class ContentInfoList
     uint                deleteContentInfoBySourceId(uint sourceId);
     uint                deleteContentInfoByFileIdList(std::set<uint>& fileIdList);
     uint                deleteMarkedContent();
-    uint                deleteVirtualContent();
     uint                markDeleted();
-    uint                markDeletedByVirtualFlag();
     uint                markDeletedByFileId(uint fileId);
     uint                markDeletedByFileIdAndMessageIndex(uint fileId,uint messageIndex);
     uint                markDeletedByGenerationId(uint generationId);
