@@ -41,11 +41,11 @@ class CacheImplementation : public ServiceInterface
                     CacheImplementation();
     virtual         ~CacheImplementation();
 
-    virtual void    init(T::SessionId sessionId,ServiceInterface *contentStorage);
+    virtual void    init(T::SessionId sessionId,T::SessionId dataServerSessionId,ServiceInterface *contentStorage);
     virtual void    startEventProcessing();
     virtual void    setEventListMaxLength(uint maxLength);
     virtual void    setRequestForwardEnabled(bool enabled);
-    virtual void    setContentSwapEnabled(bool enabled);
+    virtual void    setContentSwap(bool enabled,uint fileCacheMaxFirstWaitTime,uint fileCacheMaxWaitTime);
     virtual void    setContentUpdateInterval(uint intervalInSec);
     virtual void    shutdown();
     virtual void    synchronize();
@@ -197,6 +197,8 @@ class CacheImplementation : public ServiceInterface
 
     virtual int     _getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList);
 
+    virtual int     _updateCachedFiles(T::SessionId sessionId,std::set<uint>& fileIdList);
+
   protected:
 
     virtual bool    isSessionValid(T::SessionId sessionId);
@@ -258,6 +260,7 @@ class CacheImplementation : public ServiceInterface
     bool                   mUpdateInProgress;
     bool                   mRequestForwardEnabled;
     T::SessionId           mSessionId;
+    T::SessionId           mDataServerSessionId;
     T::EventId             mLastProcessedEventId;
     T::FileInfoList        mFileInfoList;
     T::ProducerInfoList    mProducerInfoList;
@@ -290,8 +293,14 @@ class CacheImplementation : public ServiceInterface
     time_t                 mContentUpdateTime;
     uint                   mContentUpdateInterval;
     bool                   mContentSwapEnabled;
+    uint                   mContentSwapCounter;
     ContentTimeCache       mContentTimeCache;
     ModificationLock       mContentTimeCache_modificationLock;
+    std::set<uint>         mCachedFiles;
+    uint                   mCachedFiles_waitTime;
+    uint                   mCachedFiles_totalWaitTime;
+    uint                   mCachedFiles_maxWaitTime;
+    uint                   mCachedFiles_maxFirstWaitTime;
 };
 
 

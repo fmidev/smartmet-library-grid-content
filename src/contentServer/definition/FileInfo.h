@@ -104,8 +104,10 @@ class FileInfo
     class Flags
     {
       public:
-        static const uint UnusedFlag        = 1;
-        static const uint DeletedFile       = 4;
+        static const uint UnusedFlag            = 1;
+        static const uint DeletedFile           = 4;     // The file is deleted
+        static const uint LocalCacheRecommended = 8;     // The file shoud be cached locally if possible
+        static const uint LocalCacheInUse       = 16;    // The file is cached locally
     };
 
     class ServerType

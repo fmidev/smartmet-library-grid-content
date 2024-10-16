@@ -38,6 +38,7 @@ Function_mul::Function_mul(const Function_mul& function)
 
 
 
+
 Function_mul::~Function_mul()
 {
   try
@@ -58,15 +59,18 @@ float Function_mul::executeFunctionCall1(std::vector<float>& parameters)
 {
   try
   {
-    if (parameters.size() == 2)
-    {
-      if (parameters[0] != ParamValueMissing  &&  parameters[1] != ParamValueMissing)
-        return parameters[0] * parameters[1];
-      else
-        return ParamValueMissing;
-    }
+    uint len = parameters.size();
+    if (len == 0)
+      return 0;
 
-    throw Fmi::Exception(BCP, "The parameters vector should contain only two values!");
+    float value = 1;
+    for (uint t=0; t<len; t++)
+    {
+      auto val = parameters[t];
+      if (val != ParamValueMissing)
+        value = value * val;
+    }
+    return value;
   }
   catch (...)
   {
@@ -82,15 +86,18 @@ double Function_mul::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
   {
-    if (parameters.size() == 2)
-    {
-      if (parameters[0] != ParamValueMissing && parameters[1] != ParamValueMissing)
-        return parameters[0] * parameters[1];
-      else
-        return ParamValueMissing;
-    }
+    uint len = parameters.size();
+    if (len == 0)
+      return 0;
 
-    throw Fmi::Exception(BCP, "The parameters vector should contain only two values!");
+    double value = 1;
+    for (uint t=0; t<len; t++)
+    {
+      auto val = parameters[t];
+      if (val != ParamValueMissing)
+        value = value * val;
+    }
+    return value;
   }
   catch (...)
   {
@@ -106,49 +113,34 @@ void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 {
   try
   {
-    if (inParameters.size() == 2)
+    uint sz = columns*rows;
+    uint len = inParameters.size();
+    uint elen = extParameters.size();
+    outParameters.reserve(sz);
+
+    float b = 1;
+    if (elen > 0)
     {
-      uint len = inParameters[0].size();
-      outParameters.reserve(len);
-
-      for (uint t=0; t<len; t++)
-      {
-        double a = inParameters[0][t];
-        double b = inParameters[1][t];
-
-        if (a != ParamValueMissing  &&  b != ParamValueMissing)
-        {
-          float c = a*b;
-          outParameters.emplace_back(c);
-        }
-        else
-        {
-          outParameters.emplace_back(ParamValueMissing);
-        }
-      }
-      return;
+      for (uint t=0; t<elen; t++)
+        b = b * extParameters[t];
     }
 
-    if (inParameters.size() == 1  &&  extParameters.size() == 1)
+    for (uint s=0; s<sz; s++)
     {
-      double b = extParameters[0];
-      uint len = inParameters[0].size();
-      outParameters.reserve(len);
-
+      float value = 1;
       for (uint t=0; t<len; t++)
       {
-        double a = inParameters[0][t];
-
-        if (a != ParamValueMissing)
+        if (s < inParameters[t].size())
         {
-          float c = a*b;
-          outParameters.emplace_back(c);
-        }
-        else
-        {
-          outParameters.emplace_back(ParamValueMissing);
+          float val = inParameters[t][s];
+          if (val != ParamValueMissing)
+            value = value * val;
         }
       }
+      if (b != 1)
+        value = value * b;
+
+      outParameters.emplace_back(value);
     }
   }
   catch (...)
@@ -165,49 +157,34 @@ void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 {
   try
   {
-    if (inParameters.size() == 2)
+    uint sz = columns*rows;
+    uint len = inParameters.size();
+    uint elen = extParameters.size();
+    outParameters.reserve(sz);
+
+    double b = 1;
+    if (elen > 0)
     {
-      uint len = inParameters[0].size();
-      outParameters.reserve(len);
-
-      for (uint t=0; t<len; t++)
-      {
-        double a = inParameters[0][t];
-        double b = inParameters[1][t];
-
-        if (a != ParamValueMissing  &&  b != ParamValueMissing)
-        {
-          float c = a*b;
-          outParameters.emplace_back(c);
-        }
-        else
-        {
-          outParameters.emplace_back(ParamValueMissing);
-        }
-      }
-      return;
+      for (uint t=0; t<elen; t++)
+        b = b * extParameters[t];
     }
 
-    if (inParameters.size() == 1  &&  extParameters.size() == 1)
+    for (uint s=0; s<sz; s++)
     {
-      double b = extParameters[0];
-      uint len = inParameters[0].size();
-      outParameters.reserve(len);
-
+      double value = 1;
       for (uint t=0; t<len; t++)
       {
-        double a = inParameters[0][t];
-
-        if (a != ParamValueMissing)
+        if (s < inParameters[t].size())
         {
-          float c = a*b;
-          outParameters.emplace_back(c);
-        }
-        else
-        {
-          outParameters.emplace_back(ParamValueMissing);
+          double val = inParameters[t][s];
+          if (val != ParamValueMissing)
+            value = value * val;
         }
       }
+      if (b != 1)
+        value = value * b;
+
+      outParameters.emplace_back(value);
     }
   }
   catch (...)
@@ -215,6 +192,7 @@ void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::
     throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
+
 
 
 

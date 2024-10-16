@@ -1,4 +1,4 @@
-#include "Function_div.h"
+#include "Function_diff.h"
 #include <grid-files/common/GeneralFunctions.h>
 
 
@@ -8,7 +8,7 @@ namespace Functions
 {
 
 
-Function_div::Function_div()
+Function_diff::Function_diff()
 {
   try
   {
@@ -23,7 +23,7 @@ Function_div::Function_div()
 
 
 
-Function_div::Function_div(const Function_div& function)
+Function_diff::Function_diff(const Function_diff& function)
 :Function(function)
 {
   try
@@ -39,7 +39,7 @@ Function_div::Function_div(const Function_div& function)
 
 
 
-Function_div::~Function_div()
+Function_diff::~Function_diff()
 {
   try
   {
@@ -55,7 +55,7 @@ Function_div::~Function_div()
 
 
 
-float Function_div::executeFunctionCall1(std::vector<float>& parameters)
+float Function_diff::executeFunctionCall1(std::vector<float>& parameters)
 {
   try
   {
@@ -67,8 +67,8 @@ float Function_div::executeFunctionCall1(std::vector<float>& parameters)
     for (uint t=1; t<len; t++)
     {
       auto val = parameters[t];
-      if (val != ParamValueMissing  &&  val != 0)
-        value = value / val;
+      if (val != ParamValueMissing)
+        value -= val;
     }
     return value;
   }
@@ -82,7 +82,7 @@ float Function_div::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
-double Function_div::executeFunctionCall1(std::vector<double>& parameters)
+double Function_diff::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
   {
@@ -94,8 +94,8 @@ double Function_div::executeFunctionCall1(std::vector<double>& parameters)
     for (uint t=1; t<len; t++)
     {
       auto val = parameters[t];
-      if (val != ParamValueMissing &&  val != 0)
-        value = value / val;
+      if (val != ParamValueMissing)
+        value -= val;
     }
     return value;
   }
@@ -109,7 +109,7 @@ double Function_div::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
-void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void Function_diff::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try
   {
@@ -118,11 +118,11 @@ void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::
     uint elen = extParameters.size();
     outParameters.reserve(sz);
 
-    float b = 1;
+    float b = 0;
     if (elen > 0)
     {
       for (uint t=0; t<elen; t++)
-        b = b * extParameters[t];
+        b = b + extParameters[t];
     }
 
     for (uint s=0; s<sz; s++)
@@ -138,12 +138,11 @@ void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::
           if (s < inParameters[t].size())
           {
             float val = inParameters[t][s];
-            if (val != ParamValueMissing && val != 0)
-              value = value / val;
+            if (val != ParamValueMissing)
+              value -= val;
           }
         }
-        if (b != 1)
-          value = value / b;
+        value -= b;
       }
       outParameters.emplace_back(value);
     }
@@ -158,7 +157,7 @@ void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
-void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void Function_diff::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
   {
@@ -167,11 +166,11 @@ void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::
     uint elen = extParameters.size();
     outParameters.reserve(sz);
 
-    double b = 1;
+    double b = 0;
     if (elen > 0)
     {
       for (uint t=0; t<elen; t++)
-        b = b * extParameters[t];
+        b = b + extParameters[t];
     }
 
     for (uint s=0; s<sz; s++)
@@ -187,12 +186,11 @@ void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::
           if (s < inParameters[t].size())
           {
             double val = inParameters[t][s];
-            if (val != ParamValueMissing && val != 0)
-              value = value / val;
+            if (val != ParamValueMissing)
+              value -= val;
           }
         }
-        if (b != 1)
-          value = value / b;
+        value -= b;
       }
       outParameters.emplace_back(value);
     }
@@ -206,11 +204,11 @@ void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
-Function* Function_div::duplicate()
+Function* Function_diff::duplicate()
 {
   try
   {
-    return (Function*)new Function_div(*this);
+    return (Function*)new Function_diff(*this);
   }
   catch (...)
   {

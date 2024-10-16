@@ -9,12 +9,12 @@ namespace Functions
 {
 
 
-class Function_div : public Function
+class Function_diff : public Function
 {
   public:
-                      Function_div();
-                      Function_div(const Function_div& function);
-    virtual           ~Function_div();
+                      Function_diff();
+                      Function_diff(const Function_diff& function);
+    virtual           ~Function_diff();
 
     // Type 1: Takes one or several parameters, returns one value
     virtual float     executeFunctionCall1(std::vector<float>& parameters);

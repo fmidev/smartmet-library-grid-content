@@ -75,17 +75,14 @@ ServiceImplementation::ServiceImplementation()
     mEventProcessingActive = false;
     mCacheProcessingActive = false;
     mContentServerStartTime = 0;
-    mFileCleanup_age = 3600;
+    mFileCleanup_age = 300;
     mFileCleanup_checkInterval = 60;
     mFileCleanup_time = 0;
     mDeletedFileCleanup_time = 0;
     mContentChangeTime = 0;
-    mStartUpCache_enabled = false;
-    mStartUpCache_saveDiskData = false;
-    mStartUpCache_saveNetworkData = false;
-    mStartUpCache_saveInterval = 30*60;
-    mStartUpCache_saveTime = time(0);
-    mStartUpCache_maxSize = 30000000000LL;
+    mFileCache_enabled = false;
+
+    mStartTime = time(0);
   }
   catch (...)
   {
@@ -132,7 +129,7 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,cons
     mContentServer = contentServer;
     mFullUpdateRequired = true;
 
-    mGridFileManager.init(contentServer);
+    mGridFileManager.init(mServerSessionId,contentServer);
   }
   catch (...)
   {
@@ -144,86 +141,13 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,cons
 
 
 
-void ServiceImplementation::setStartUpCache(bool enabled,bool saveDiskData,bool saveNetworkData,const char *filename,uint saveIntervalInMinutes,long long maxSizeInMegaBytes)
+void ServiceImplementation::setFileCache(bool enabled,const char *directory)
 {
   FUNCTION_TRACE
   try
   {
-    mStartUpCache_enabled = enabled;
-    mStartUpCache_saveDiskData = saveDiskData;
-    mStartUpCache_saveNetworkData = saveNetworkData;
-    mStartUpCache_filename = filename;
-    mStartUpCache_saveInterval = 60*saveIntervalInMinutes;
-    mStartUpCache_saveTime = time(0) - mStartUpCache_saveInterval + 600;
-    mStartUpCache_maxSize = maxSizeInMegaBytes * 1000000;
-
-    if (mStartUpCache_enabled)
-    {
-      mStartUpCache_memoryMapInfo.reset(new MapInfo);
-
-      char fname1[200];
-      char fname2[200];
-      char nfname1[200];
-      char nfname2[200];
-
-      sprintf(fname1,"%s.dat.new",filename);
-      sprintf(fname2,"%s.index.new",filename);
-
-      sprintf(nfname1,"%s.dat",filename);
-      sprintf(nfname2,"%s.index",filename);
-
-      auto fs1 = getFileSize(fname1);
-      auto fs2 = getFileSize(fname2);
-
-
-      if (fs1 > 0  &&  fs2 > 0)
-      {
-        time_t modTime1 = getFileModificationTime(fname1);
-        if ((time(0) - modTime1) > 7200)
-        {
-          // New cache is too old.
-          remove(fname1);
-          remove(fname2);
-        }
-        else
-        {
-          rename(fname1,nfname1);
-          rename(fname2,nfname2);
-        }
-      }
-
-
-      time_t modTime2 = getFileModificationTime(nfname1);
-      if ((time(0) - modTime2) > 7200)
-        return;    // Cache is too old.
-
-      FILE *file = fopen(nfname2,"r");
-      if (!file)
-        return;
-
-      while (!feof(file))
-      {
-        StartUpCacheIndexRec rec;
-        fread(&rec,sizeof(rec),1,file);
-
-        unsigned long long key = ((unsigned long long)rec.fileId << 32) + rec.messageIndex;
-
-        mStartUpCache_indexMap.insert(std::pair<unsigned long long,StartUpCacheIndexRec>(key,rec));
-      }
-      fclose(file);
-
-      mStartUpCache_memoryMapInfo->protocol = 0;
-      mStartUpCache_memoryMapInfo->serverType = 0;
-      //mStartUpCache_memoryMapInfo.server;
-      mStartUpCache_memoryMapInfo->filename = nfname1;
-      mStartUpCache_memoryMapInfo->fileSize = getFileSize(nfname1);
-      mStartUpCache_memoryMapInfo->allocatedSize = 0;
-      mStartUpCache_memoryMapInfo->mappingTime = 0;
-      mStartUpCache_memoryMapInfo->memoryPtr = nullptr;
-      mStartUpCache_memoryMapInfo->mappingError = false;
-      //mStartUpCache_memoryMapInfo.mappedFile;
-      memoryMapper.map(mStartUpCache_memoryMapInfo);
-    }
+    mFileCache_enabled = enabled;
+    mFileCache_directory = directory;
   }
   catch (...)
   {
@@ -242,7 +166,7 @@ void ServiceImplementation::shutdown()
     PRINT_DATA(mDebugLog,"*** SHUTDOWN ***\n");
     mShutdownRequested = true;
     pthread_join(mEventProcessingThread, nullptr);
-    if (mStartUpCache_enabled)
+    if (mFileCache_enabled)
       pthread_join(mCacheProcessingThread, nullptr);
   }
   catch (...)
@@ -349,7 +273,7 @@ void ServiceImplementation::startCacheProcessing()
   FUNCTION_TRACE
   try
   {
-    if (mStartUpCache_enabled)
+    if (mFileCache_enabled)
       pthread_create(&mCacheProcessingThread,nullptr,ServiceImplementation_cacheProcessingThread,this);
   }
   catch (...)
@@ -5344,7 +5268,7 @@ void ServiceImplementation::readContentList(T::ContentInfoList& contentList)
     {
       T::ContentInfoList contentInfoList;
 
-      int result = mContentServer->getContentList(0,startFileId,startMessageIndex,50000,contentInfoList);
+      int result = mContentServer->getContentList(mServerSessionId,startFileId,startMessageIndex,50000,contentInfoList);
       if (result != 0)
       {
         Fmi::Exception exception(BCP,"Cannot read the content list from the content storage!");
@@ -5424,6 +5348,9 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
       gridFile->setServerType(fileInfo.mServerType);
       gridFile->setServer(fileInfo.mServer);
       gridFile->setSize(fileInfo.mSize);
+
+      if (fileInfo.mFlags & T::FileInfo::Flags::LocalCacheRecommended)
+        gridFile->setFlags(GRID::GridFile::Flags::LocalCacheExpected);
     }
 
     /*
@@ -5452,19 +5379,6 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
         GRID::MessageInfo mInfo;
         mInfo.mFileMemoryPtr = nullptr;
         mInfo.mFilePosition = info->mFilePosition;
-        mInfo.mOriginalFilePosition = info->mFilePosition;
-
-        if (mStartUpCache_enabled)
-        {
-          unsigned long long key = ((unsigned long long)fileInfo.mFileId << 32) + info->mMessageIndex;
-          auto rec = mStartUpCache_indexMap.find(key);
-          if (rec != mStartUpCache_indexMap.end() &&  rec->second.producerId == fileInfo.mProducerId  &&  rec->second.generationId == fileInfo.mGenerationId)
-          {
-            mInfo.mFileMemoryPtr = mStartUpCache_memoryMapInfo->memoryPtr;
-            mInfo.mFilePosition = rec->second.filePosition;
-          }
-        }
-
         mInfo.mMessageType = info->mFileType;
         mInfo.mMessageSize = info->mMessageSize;
         mInfo.mProducerId = info->mProducerId;
@@ -6114,19 +6028,6 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
 
         mInfo.mFileMemoryPtr = nullptr;
         mInfo.mFilePosition = contentInfo.mFilePosition;
-        mInfo.mOriginalFilePosition = contentInfo.mFilePosition;
-
-        if (mStartUpCache_enabled)
-        {
-          unsigned long long key = ((unsigned long long)contentInfo.mFileId << 32) + contentInfo.mMessageIndex;
-          auto rec = mStartUpCache_indexMap.find(key);
-          if (rec != mStartUpCache_indexMap.end() &&  rec->second.producerId == contentInfo.mProducerId  &&  rec->second.generationId == contentInfo.mGenerationId)
-          {
-            mInfo.mFileMemoryPtr = mStartUpCache_memoryMapInfo->memoryPtr;
-            mInfo.mFilePosition = rec->second.filePosition;
-          }
-        }
-
         mInfo.mMessageType = contentInfo.mFileType;
         mInfo.mMessageSize = contentInfo.mMessageSize;
         mInfo.mProducerId = contentInfo.mProducerId;
@@ -6444,111 +6345,213 @@ void ServiceImplementation::eventProcessingThread()
 
 
 
+void getFileNameHash(const char *filename,std::string& hash)
+{
+  try
+  {
+    const char *n = filename;
+    char buf[1000];
+    char *p = buf;
+    *p = 'A';
+    p++;
+    *p = '\0';
+
+    while (*n != '\0')
+    {
+      char ch = *n;
+      if (ch == '/')
+        ch = '_';
+
+      *p = ch;
+      p++;
+      n++;
+    }
+    *p = '\0';
+    hash = buf;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::cacheFiles(std::map<uint,std::string>& filenames)
+{
+  FUNCTION_TRACE
+  try
+  {
+    char cacheFile[1000];
+    for (auto it = filenames.begin(); it != filenames.end(); ++it)
+    {
+      if (mShutdownRequested)
+        return;
+
+      const char *sourceFile = it->second.c_str();
+      auto source_fsize = getFileSize(sourceFile);
+
+      if (source_fsize > 0)
+      {
+        std::string hash;
+        getFileNameHash(sourceFile,hash);
+        std::string cacheFile = mFileCache_directory + "/" + hash;
+
+        auto target_fsize = getFileSize(cacheFile.c_str());
+        if (source_fsize != target_fsize)
+        {
+          PRINT_DATA(mDebugLog,"Copying a file into the local cache:\n");
+          PRINT_DATA(mDebugLog,"- source : %s (size: %lld)\n",sourceFile,source_fsize);
+          PRINT_DATA(mDebugLog,"- target : %s (size: %lld bytes)\n",cacheFile.c_str(),target_fsize);
+          copyFile(sourceFile,cacheFile.c_str(),mShutdownRequested);
+          target_fsize = getFileSize(cacheFile.c_str());
+          if (source_fsize != target_fsize)
+          {
+            Fmi::Exception exception(BCP,"File copying to the local cache failed!",nullptr);
+            exception.addParameter("- source-file",sourceFile);
+            exception.addParameter("- source-file-size",std::to_string(source_fsize));
+            exception.addParameter("- target-file",cacheFile);
+            exception.addParameter("- target-file-size",std::to_string(target_fsize));
+            exception.printError();
+          }
+        }
+
+        if (source_fsize == target_fsize)
+        {
+          GRID::GridFile_sptr gridFile = mGridFileManager.getFileByIdNoMapping(it->first);
+          if (gridFile)
+          {
+            PRINT_DATA(mDebugLog,"Using the local cache file:\n");
+            PRINT_DATA(mDebugLog,"- cache-file : %s (size: %lld)\n",cacheFile.c_str(),target_fsize);
+            gridFile->setFlags(gridFile->getFlags() | GRID::GridFile::Flags::LocalCacheReady);
+            gridFile->setMappingFileName(cacheFile);
+          }
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::removeOldCacheFiles(std::map<uint,std::string>& cachedFilenames)
+{
+  FUNCTION_TRACE
+  try
+  {
+    // ### Counting hash value for the files that should be in the cache:
+
+    std::set<std::string> hashList;
+    for (auto it = cachedFilenames.begin(); it != cachedFilenames.end(); ++it)
+    {
+      if (mShutdownRequested)
+        return;
+
+      const char *cacheFile = it->second.c_str();
+      std::string hash;
+      getFileNameHash(cacheFile,hash);
+      hashList.insert(hash);
+    }
+
+    // ### Reading actual files that are in the cache directory:
+
+    std::set<std::string> dirList;
+    std::vector<std::pair<std::string,std::string>> fileList;
+    std::vector<std::string> filePatterns;
+
+    getFileList(mFileCache_directory.c_str(),filePatterns,false,dirList,fileList);
+
+
+    // ### Removing files that should not be in the cache directory:
+
+    char buf[1000];
+    for (auto it = fileList.begin(); it != fileList.end(); ++it)
+    {
+      if (mShutdownRequested)
+        return;
+
+      if (hashList.find(it->second) == hashList.end())
+      {
+        sprintf(buf,"%s/%s",mFileCache_directory.c_str(),it->second.c_str());
+        PRINT_DATA(mDebugLog,"Removing cached file: %s\n",buf);
+        remove(buf);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
 
 void ServiceImplementation::cacheProcessingThread()
 {
   FUNCTION_TRACE
   try
   {
+
     while (!mShutdownRequested)
     {
-      time_t nextSaveTime = mStartUpCache_saveTime + mStartUpCache_saveInterval;
-
-      while (time(0) < nextSaveTime  &&  !mShutdownRequested)
-        sleep(1);
-
-      if (!mShutdownRequested)
+      try
       {
-        try
+        for (uint t=0;t<20; t++)
         {
-          mStartUpCache_saveTime = time(0);
-          mCacheProcessingActive = true;
-          GRID::RequestCounters requestCounters;
-          std::map<long long,std::vector<unsigned long long>> values;
-          mGridFileManager.getRequestCounters(requestCounters,mStartUpCache_saveDiskData,mStartUpCache_saveNetworkData);
-          mGridFileManager.resetRequestCounters();
-
-          for (auto it=requestCounters.begin(); it!=requestCounters.end();++it)
-          {
-            auto rec = values.find(it->second);
-            if (rec != values.end())
-              rec->second.push_back(it->first);
-            else
-            {
-              std::vector<unsigned long long> vec;
-              vec.push_back(it->first);
-              values.insert(std::pair<long long,std::vector<unsigned long long>>(it->second,vec));
-            }
-          }
-
-          char fname1[200];
-          char fname2[200];
-          char ifname1[200];
-          char ifname2[200];
-          sprintf(fname1,"%s.dat.tmp",mStartUpCache_filename.c_str());
-          sprintf(fname2,"%s.dat.new",mStartUpCache_filename.c_str());
-
-          sprintf(ifname1,"%s.index.tmp",mStartUpCache_filename.c_str());
-          sprintf(ifname2,"%s.index.new",mStartUpCache_filename.c_str());
-
-          //time_t startTime = time(0);
-          FILE *file1 = fopen(fname1,"w");
-          FILE *file2 = fopen(ifname1,"w");
-
-          long long total = 0;
-          //std::cout << "REQUESTS  " << requestCounters.size() << "\n";
-          for (auto it = values.rbegin(); it != values.rend()  &&  !mShutdownRequested  &&  total < mStartUpCache_maxSize; ++it)
-          {
-            for (auto v = it->second.begin(); v != it->second.end(); ++v)
-            {
-              uint fileId = ((*v) >> 32) & 0xFFFFFFFF;
-              uint messageIndex = (*v) & 0xFFFFFFFF;
-
-              GRID::GridFile_sptr gridFile = getGridFile(fileId);
-              if (gridFile  &&  !mShutdownRequested)
-              {
-                GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
-                if (message  &&  (total + message->getMessageSize()) < mStartUpCache_maxSize)
-                {
-                  char *p = message->getMemoryPtr();
-
-                  StartUpCacheIndexRec rec;
-                  rec.producerId = message->getProducerId();
-                  rec.generationId = message->getGenerationId();
-                  rec.fileId = fileId;
-                  rec.messageIndex = messageIndex;
-                  rec.filePosition = ftell(file1);
-                  rec.messageSize = message->getMessageSize();
-
-                  fwrite(&rec,sizeof(rec),1,file2);
-                  fwrite(p,rec.messageSize,1,file1);
-
-                  total = total + rec.messageSize;
-                }
-              }
-            }
-
-            //std::cout << " * " << it->first << " : " << it->second.size() << " = " << total << "\n";
-          }
-          fclose(file1);
-          fclose(file2);
-
           if (!mShutdownRequested)
-          {
-            rename(fname1,fname2);
-            rename(ifname1,ifname2);
-          }
-
-          // time_t endTime = time(0);
-
-          //printf("WRITE TIME %u\n",endTime-startTime);
+            sleep(1);
         }
-        catch (...)
+
+        if (mShutdownRequested)
+          return;
+
+        // Load list of filenames that needs to be cached (i.e they are not yet cached)
+
+        std::map<uint,std::string> filenames;
+        mGridFileManager.getFilesToBeCached(filenames);
+
+        // Copy files to cache
+
+        cacheFiles(filenames);
+
+        // Load list of filenames that should be in the cache now.
+
+        std::map<uint,std::string> cachedFilenames;
+        mGridFileManager.getFilesInCache(cachedFilenames);
+
+        // Inform the content server about the files that are currently in the cache. The content
+        // server does not switch its search structure before the required files are in the cache.
+
+        std::set<uint> fileIdList;
+        for (auto it = cachedFilenames.begin(); it != cachedFilenames.end(); ++it)
+          fileIdList.insert(it->first);
+
+        mContentServer->updateCachedFiles(mServerSessionId,fileIdList);
+
+
+        // Remove old files from the cache. We should let the server run for
+        // awhile before we start to remove files from the cache. This is because
+        // it might take awhile before server gets all necessary information related
+        // to the current files.
+
+        if (time(0) > (mStartTime + 600))
         {
-          Fmi::Exception exception(BCP,"Operation failed!",nullptr);
-          std::string st = exception.getStackTrace();
-          PRINT_DATA(mDebugLog,"%s",st.c_str());
+          removeOldCacheFiles(cachedFilenames);
         }
+      }
+      catch (...)
+      {
+        Fmi::Exception exception(BCP,"Cache processing failure!",nullptr);
+        exception.printError();
       }
     }
 
@@ -6559,6 +6562,8 @@ void ServiceImplementation::cacheProcessingThread()
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
+
+
 
 
 }
