@@ -50,11 +50,12 @@ GridFileManager::~GridFileManager()
 
 
 
-void GridFileManager::init(ContentServer::ServiceInterface* contentServer)
+void GridFileManager::init(T::SessionId serverSessionId,ContentServer::ServiceInterface* contentServer)
 {
   FUNCTION_TRACE
   try
   {
+    mServerSessionId = serverSessionId;
     mContentServer = contentServer;
   }
   catch (...)
@@ -248,7 +249,9 @@ void GridFileManager::deleteFilesByAccessTime(time_t accessTime)
       AutoReadLock lock(&mModificationLock);
       for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
       {
-        if (it->second->getAccessTime() < accessTime)
+        if (it->second->getAccessTime() < accessTime  &&
+            (it->second->getFlags() &  GRID::GridFile::Flags::LocalCacheExpected) == 0  &&
+            (it->second->getFlags() &  GRID::GridFile::Flags::LocalCacheReady) == 0)
           idList.emplace_back(it->first);
       }
     }
@@ -350,6 +353,65 @@ GRID::GridFile_sptr GridFileManager::getFileById(uint fileId)
       return it->second;
     }
     return nullptr;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void GridFileManager::getFilesToBeCached(std::map<uint,std::string>& filenames)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::GenerationInfoList generationInfoList;
+    mContentServer->getGenerationInfoList(mServerSessionId,generationInfoList);
+
+    std::set<uint> idList;
+    generationInfoList.getGenerationIdListByStatus(T::GenerationInfo::Status::Ready,idList);
+
+    time_t deletionTime = time(0) + 180;
+    AutoReadLock lock(&mModificationLock);
+
+    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
+    {
+      if (!it->second->isNetworkFile()  &&  (it->second->getFlags() &  GRID::GridFile::Flags::LocalCacheExpected)  &&
+          (it->second->getFlags() &  GRID::GridFile::Flags::LocalCacheReady) == 0 &&
+          (it->second->getDeletionTime() == 0 || it->second->getDeletionTime() > deletionTime))
+      {
+        if (idList.find(it->second->getGenerationId()) != idList.end())
+          filenames.insert(std::pair<uint,std::string>(it->second->getFileId(),it->second->getFileName()));
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void GridFileManager::getFilesInCache(std::map<uint,std::string>& filenames)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+
+    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
+    {
+      if (!it->second->isNetworkFile()  &&  (it->second->getFlags() &  GRID::GridFile::Flags::LocalCacheExpected)  &&  (it->second->getFlags() &  GRID::GridFile::Flags::LocalCacheReady))
+      {
+        filenames.insert(std::pair<uint,std::string>(it->second->getFileId(),it->second->getFileName()));
+      }
+    }
   }
   catch (...)
   {

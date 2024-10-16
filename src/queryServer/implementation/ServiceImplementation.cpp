@@ -23,6 +23,7 @@
 #include "../../functions/Function_change.h"
 #include "../../functions/Function_cos.h"
 #include "../../functions/Function_div.h"
+#include "../../functions/Function_diff.h"
 #include "../../functions/Function_hypotenuse.h"
 #include "../../functions/Function_inCount.h"
 #include "../../functions/Function_inPrcnt.h"
@@ -248,6 +249,7 @@ void ServiceImplementation::init(
     mFunctionCollection.addFunction("ATAN",new Functions::Function_atan());
     mFunctionCollection.addFunction("AVG",new Functions::Function_avg());
     mFunctionCollection.addFunction("CHANGE",new Functions::Function_change());
+    mFunctionCollection.addFunction("DIFF",new Functions::Function_diff());
     mFunctionCollection.addFunction("DIV",new Functions::Function_div());
     mFunctionCollection.addFunction("IN_COUNT",new Functions::Function_inCount());
     mFunctionCollection.addFunction("IN_PRCNT",new Functions::Function_inPrcnt());

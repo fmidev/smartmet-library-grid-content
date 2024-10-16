@@ -212,6 +212,8 @@ class ServiceInterface
 
      virtual int    getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList);
 
+     virtual int    updateCachedFiles(T::SessionId sessionId,std::set<uint>& fileIdList);
+
    protected:
 
      virtual int    _clear(T::SessionId sessionId);
@@ -362,6 +364,8 @@ class ServiceInterface
      virtual int    _getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash);
 
      virtual int    _getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList);
+
+     virtual int    _updateCachedFiles(T::SessionId sessionId,std::set<uint>& fileIdList);
 
      bool           mEnabled;
      Log            *mDebugLog;

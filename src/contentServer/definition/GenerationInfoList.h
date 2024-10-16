@@ -4,7 +4,7 @@
 
 #include <grid-files/common/ModificationLock.h>
 #include <vector>
-
+#include <set>
 
 namespace SmartMet
 {
@@ -33,6 +33,7 @@ class GenerationInfoList
     void                getAnalysisTimes(std::vector<std::string>& analysisTimes,bool reverseOrder);
     int                 getClosestIndex(uint comparisonMethod,GenerationInfo& generationInfo);
     int                 getClosestIndexNoLock(uint comparisonMethod,GenerationInfo& generationInfo);
+    void                getGenerationIdListByStatus(uchar generationStatus,std::set<uint>& idList);
     GenerationInfo*     getGenerationInfoById(uint generationId);
     bool                getGenerationInfoById(uint generationId,GenerationInfo& generationInfo);
     GenerationInfo*     getGenerationInfoByIndex(uint index);

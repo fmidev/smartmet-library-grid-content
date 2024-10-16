@@ -47,14 +47,16 @@ class ServiceImplementation : public ServiceInterface
      virtual void   startEventProcessing();
      virtual void   startCacheProcessing();
      virtual void   shutdown();
-
-     virtual void   setStartUpCache(bool enabled,bool saveDiskData,bool saveNetworkData,const char *filename,uint saveIntervalInMinutes,long long maxSizeInMegaBytes);
+     virtual void   setFileCache(bool enabled,const char *directory);
+     virtual void   cacheFiles(std::map<uint,std::string>& filenames);
      virtual void   setCleanup(time_t age,time_t checkInterval);
      virtual void   setDem(std::shared_ptr<Fmi::DEM> dem);
      virtual void   setLandCover(std::shared_ptr<Fmi::LandCover> landCover);
 
      virtual void   eventProcessingThread();
      virtual void   cacheProcessingThread();
+
+
 
   protected:
 
@@ -183,6 +185,7 @@ class ServiceImplementation : public ServiceInterface
      virtual void   processEvent(T::EventInfo& eventInfo,T::EventInfo *nextEventInfo);
      virtual void   processEvents();
      virtual void   readContentList(T::ContentInfoList& contentList);
+     virtual void   removeOldCacheFiles(std::map<uint,std::string>& cachedFilenames);
 
      ServiceInterface*    getDataServerByFileId(uint fileId);
      GRID::GridFile_sptr  getGridFile(uint fileId);
@@ -204,15 +207,9 @@ class ServiceImplementation : public ServiceInterface
      std::vector<uint>    mFileAdditionList;
      ThreadLock           mThreadLock;
      time_t               mContentChangeTime;
-     std::string          mStartUpCache_filename;
-     bool                 mStartUpCache_enabled;
-     bool                 mStartUpCache_saveDiskData;
-     bool                 mStartUpCache_saveNetworkData;
-     MapInfo_sptr         mStartUpCache_memoryMapInfo;
-     StartUpIndexMap      mStartUpCache_indexMap;
-     uint                 mStartUpCache_saveInterval;
-     time_t               mStartUpCache_saveTime;
-     long long            mStartUpCache_maxSize;
+     std::string          mFileCache_directory;
+     bool                 mFileCache_enabled;
+     time_t               mStartTime;
 
 
      ContentServer::ServiceInterface*   mContentServer;

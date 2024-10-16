@@ -4019,6 +4019,32 @@ int ServiceInterface::getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& 
 
 
 
+int ServiceInterface::updateCachedFiles(T::SessionId sessionId,std::set<uint>& fileIdList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
+      return _updateCachedFiles(sessionId,fileIdList);
+
+    unsigned long long timeStart = getTime();
+    int result = _updateCachedFiles(sessionId,fileIdList);;
+    unsigned long requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,fileIdList[%ld]);result %d;time %f;",__FUNCTION__,sessionId,fileIdList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
 
 int ServiceInterface::_clear(T::SessionId sessionId)
 {
@@ -5230,7 +5256,7 @@ int ServiceInterface::_getContentParamKeyListByGenerationGeometryAndLevelId(T::S
 
 int ServiceInterface::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
 {
-  throw Fmi::Exception(BCP,"Implementation required!");
+  return 0; // throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -5239,7 +5265,7 @@ int ServiceInterface::_getContentTimeListByGenerationId(T::SessionId sessionId,u
 
 int ServiceInterface::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
-  throw Fmi::Exception(BCP,"Implementation required!");
+  return 0; // throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
@@ -5312,6 +5338,15 @@ int ServiceInterface::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList&
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
+
+
+
+
+int ServiceInterface::_updateCachedFiles(T::SessionId sessionId,std::set<uint>& fileIdList)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
 
 
 

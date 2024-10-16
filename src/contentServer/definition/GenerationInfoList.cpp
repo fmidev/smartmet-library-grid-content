@@ -952,6 +952,33 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByIndexNoCheck(uint index)
 
 
 
+void GenerationInfoList::getGenerationIdListByStatus(uchar generationStatus,std::set<uint>& idList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
+    AutoReadLock lock(mModificationLockPtr);
+    for (uint t=0; t<mLength; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr  &&  info->mStatus == generationStatus && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
+      {
+        idList.insert(info->mGenerationId);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 GenerationInfo* GenerationInfoList::getGenerationInfoByName(const std::string& generationName)
 {
   FUNCTION_TRACE

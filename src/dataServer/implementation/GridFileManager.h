@@ -19,7 +19,7 @@ class GridFileManager
                         GridFileManager();
     virtual             ~GridFileManager();
 
-    void                init(ContentServer::ServiceInterface* contentServer);
+    void                init(T::SessionId serverSessionId,ContentServer::ServiceInterface* contentServer);
 
     void                addFile(GRID::GridFile *gridFile);
     void                clear();
@@ -35,6 +35,8 @@ class GridFileManager
     GRID::GridFile_sptr getFileById(uint fileId);
     GRID::GridFile_sptr getFileByIdNoMapping(uint fileId);
     std::size_t         getFileCount();
+    void                getFilesToBeCached(std::map<uint,std::string>& filenames);
+    void                getFilesInCache(std::map<uint,std::string>& filenames);
     void                getRequestCounters(GRID::RequestCounters& requestCounters,bool diskFiles,bool networkFiles);
     void                resetRequestCounters();
     void                print(std::ostream& stream,uint level,uint optionFlags);
@@ -50,6 +52,7 @@ class GridFileManager
     ModificationLock                             mModificationLock;
     std::unordered_map<uint,GRID::GridFile_sptr> mFileList;
     ContentServer::ServiceInterface*             mContentServer;
+    T::SessionId                                 mServerSessionId;
 };
 
 
