@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 24.9.3
+Version: 24.10.16
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -29,9 +29,9 @@ BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 24.8.7
-BuildRequires: smartmet-library-grid-files-devel >= 24.9.3
-BuildRequires: smartmet-library-macgyver-devel >= 24.8.7
-BuildRequires: smartmet-library-spine-devel >= 24.8.7
+BuildRequires: smartmet-library-grid-files-devel >= 24.10.16
+BuildRequires: smartmet-library-macgyver-devel >= 24.10.15
+BuildRequires: smartmet-library-spine-devel >= 24.10.15
 BuildRequires: postgresql15-devel
 Requires: hiredis-devel
 Requires: libcurl
@@ -40,9 +40,9 @@ Requires: omniORB
 Requires: gdal38
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 24.8.7
-Requires: smartmet-library-grid-files >= 24.9.3
-Requires: smartmet-library-macgyver >= 24.8.7
-Requires: smartmet-library-spine >= 24.8.7
+Requires: smartmet-library-grid-files >= 24.10.16
+Requires: smartmet-library-macgyver >= 24.10.15
+Requires: smartmet-library-spine >= 24.10.15
 
 Provides: %{SPECNAME}
 
@@ -76,10 +76,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 24.8.7
+Requires: smartmet-library-macgyver-devel >= 24.10.15
 Requires: smartmet-library-gis-devel >= 24.8.7
-Requires: smartmet-library-spine-devel >= 24.8.7
-Requires: smartmet-library-grid-files-devel >= 24.9.3
+Requires: smartmet-library-spine-devel >= 24.10.15
+Requires: smartmet-library-grid-files-devel >= 24.10.16
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -89,15 +89,15 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Oct 16 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.10.16-1.fmi
+- Added a possiblity to cache grid files locally. Startup-cache was removed.
+- Added and updated functions that are used in data requests
 * Tue Sep  3 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.9.3-1.fmi
-- Uusi versio due to smartmet-library-grid-files changes
-
+- New version due to smartmet-library-grid-files changes
 * Wed Aug  7 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.8.7-1.fmi
 - Update to gdal-3.8, geos-3.12, proj-94 and fmt-11
-
 * Fri Jul 12 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.12-1.fmi
 - Replace many boost library types with C++ standard library ones
-
 * Fri Jun 14 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.6.14-1.fmi
 - Repackaged with latest grid-files
 * Mon Jun  3 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.6.3-1.fmi
